@@ -1,0 +1,61 @@
+using System;
+using System.Collections.Generic;
+using FluentValidation;
+using NzbDrone.Core.Annotations;
+using NzbDrone.Core.Validation;
+
+namespace NzbDrone.Core.Notifications.Pushover
+{
+    public class PushoverSettingsValidator : AbstractValidator<PushoverSettings>
+    {
+        public PushoverSettingsValidator()
+        {
+            RuleFor(c => c.UserKey).NotEmpty();
+            RuleFor(c => c.Retry).GreaterThanOrEqualTo(30).LessThanOrEqualTo(86400).When(c => (PushoverPriority)c.Priority == PushoverPriority.Emergency);
+            RuleFor(c => c.Retry).GreaterThanOrEqualTo(0).LessThanOrEqualTo(86400).When(c => (PushoverPriority)c.Priority == PushoverPriority.Emergency);
+            RuleFor(c => c.Ttl).GreaterThanOrEqualTo(0);
+        }
+    }
+
+    public class PushoverSettings : NotificationSettingsBase<PushoverSettings>
+    {
+        private static readonly PushoverSettingsValidator Validator = new ();
+
+        public PushoverSettings()
+        {
+            Priority = 0;
+            Devices = Array.Empty<string>();
+        }
+
+        [FieldDefinition(0, Label = "ApiKey", Privacy = PrivacyLevel.ApiKey, HelpLink = "https://pushover.net/apps/clone/radarr")]
+        public string ApiKey { get; set; }
+
+        [FieldDefinition(1, Label = "NotificationsPushoverSettingsUserKey", Privacy = PrivacyLevel.UserName, HelpLink = "https://pushover.net/")]
+        public string UserKey { get; set; }
+
+        [FieldDefinition(2, Label = "NotificationsPushoverSettingsDevices", HelpText = "NotificationsPushoverSettingsDevicesHelpText", Type = FieldType.Tag, Placeholder = "device1")]
+        public IEnumerable<string> Devices { get; set; }
+
+        [FieldDefinition(3, Label = "Priority", Type = FieldType.Select, SelectOptions = typeof(PushoverPriority))]
+        public int Priority { get; set; }
+
+        [FieldDefinition(4, Label = "NotificationsPushoverSettingsRetry", Type = FieldType.Textbox, HelpText = "NotificationsPushoverSettingsRetryHelpText")]
+        public int Retry { get; set; }
+
+        [FieldDefinition(5, Label = "NotificationsPushoverSettingsExpire", Type = FieldType.Textbox, HelpText = "NotificationsPushoverSettingsExpireHelpText")]
+        public int Expire { get; set; }
+
+        [FieldDefinition(6, Label = "NotificationsPushoverSettingsTtl", Type = FieldType.Textbox, HelpText = "NotificationsPushoverSettingsTtlHelpText", Advanced = true)]
+        public int Ttl { get; set; }
+
+        [FieldDefinition(7, Label = "NotificationsPushoverSettingsSound", Type = FieldType.Textbox, HelpText = "NotificationsPushoverSettingsSoundHelpText", HelpLink = "https://pushover.net/api#sounds")]
+        public string Sound { get; set; }
+
+        public bool IsValid => !string.IsNullOrWhiteSpace(UserKey) && Priority >= -1 && Priority <= 2;
+
+        public override NzbDroneValidationResult Validate()
+        {
+            return new NzbDroneValidationResult(Validator.Validate(this));
+        }
+    }
+}
