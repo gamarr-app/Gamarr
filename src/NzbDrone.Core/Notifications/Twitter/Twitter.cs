@@ -1,0 +1,118 @@
+using System.Collections.Generic;
+using FluentValidation.Results;
+using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.Movies;
+using NzbDrone.Core.Validation;
+
+namespace NzbDrone.Core.Notifications.Twitter
+{
+    public class Twitter : NotificationBase<TwitterSettings>
+    {
+        private readonly ITwitterService _twitterService;
+
+        public Twitter(ITwitterService twitterService)
+        {
+            _twitterService = twitterService;
+        }
+
+        public override string Name => "Twitter";
+        public override string Link => "https://twitter.com/";
+
+        public override void OnGrab(GrabMessage message)
+        {
+            _twitterService.SendNotification($"[Radarr] Grabbed: {message.Message}", Settings);
+        }
+
+        public override void OnDownload(DownloadMessage message)
+        {
+            _twitterService.SendNotification($"[Radarr] Imported: {message.Message}", Settings);
+        }
+
+        public override void OnMovieAdded(Movie movie)
+        {
+            _twitterService.SendNotification($"[Radarr] Added: {movie.Title}", Settings);
+        }
+
+        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        {
+            _twitterService.SendNotification($"Movie File Deleted: {deleteMessage.Message}", Settings);
+        }
+
+        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        {
+            _twitterService.SendNotification($"Movie Deleted: {deleteMessage.Message}", Settings);
+        }
+
+        public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)
+        {
+            _twitterService.SendNotification($"Health Issue: {healthCheck.Message}", Settings);
+        }
+
+        public override void OnHealthRestored(HealthCheck.HealthCheck previousCheck)
+        {
+            _twitterService.SendNotification($"Health Issue Resolved: {previousCheck.Message}", Settings);
+        }
+
+        public override void OnApplicationUpdate(ApplicationUpdateMessage updateMessage)
+        {
+            _twitterService.SendNotification($"Application Updated: {updateMessage.Message}", Settings);
+        }
+
+        public override void OnManualInteractionRequired(ManualInteractionRequiredMessage message)
+        {
+            _twitterService.SendNotification($"Manual Interaction Required: {message.Message}", Settings);
+        }
+
+        public override object RequestAction(string action, IDictionary<string, string> query)
+        {
+            if (action == "startOAuth")
+            {
+                Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
+
+                if (query["callbackUrl"].IsNullOrWhiteSpace())
+                {
+                    throw new BadRequestException("QueryParam callbackUrl invalid.");
+                }
+
+                var oauthRedirectUrl = _twitterService.GetOAuthRedirect(Settings.ConsumerKey, Settings.ConsumerSecret, query["callbackUrl"]);
+                return new
+                {
+                    oauthUrl = oauthRedirectUrl
+                };
+            }
+            else if (action == "getOAuthToken")
+            {
+                Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
+
+                if (query["oauth_token"].IsNullOrWhiteSpace())
+                {
+                    throw new BadRequestException("QueryParam oauth_token invalid.");
+                }
+
+                if (query["oauth_verifier"].IsNullOrWhiteSpace())
+                {
+                    throw new BadRequestException("QueryParam oauth_verifier invalid.");
+                }
+
+                var oauthToken = _twitterService.GetOAuthToken(Settings.ConsumerKey, Settings.ConsumerSecret, query["oauth_token"], query["oauth_verifier"]);
+                return new
+                {
+                    accessToken = oauthToken.AccessToken,
+                    accessTokenSecret = oauthToken.AccessTokenSecret
+                };
+            }
+
+            return new { };
+        }
+
+        public override ValidationResult Test()
+        {
+            var failures = new List<ValidationFailure>();
+
+            failures.AddIfNotNull(_twitterService.Test(Settings));
+
+            return new ValidationResult(failures);
+        }
+    }
+}

@@ -1,0 +1,11 @@
+.legendIconItem {
+  margin-left: 6px;
+}
+
+.icon {
+  margin-right: 5px;
+
+  &:global(.fullColorEvents) {
+    filter: var(--calendarFullColorFilter)
+  }
+}

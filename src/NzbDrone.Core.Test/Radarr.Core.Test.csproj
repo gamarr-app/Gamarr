@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="NBuilder" Version="6.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NzbDrone.Test.Common\Radarr.Test.Common.csproj" />
+    <ProjectReference Include="..\NzbDrone.Core\Radarr.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Logo\1024.png">
+      <Link>Files\1024.png</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="IndexerTests\BroadcastheNetTests\" />
+    <Folder Include="IndexerTests\FanzubTests\" />
+    <Folder Include="IndexerTests\TorrentleechTests\" />
+  </ItemGroup>
+</Project>
