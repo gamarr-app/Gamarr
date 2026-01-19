@@ -71,6 +71,20 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("The.Witcher.3.Wild.Hunt.v4.04-PLAZA", "The Witcher 3 Wild Hunt")]
         [TestCase("Half-Life.2-RELOADED", "Half-Life 2")]
         [TestCase("Baldurs.Gate.3.v4.1.1.5009956-EMPRESS", "Baldurs Gate 3")]
+
+        // Date-based version formats (common for indie/early access games)
+        [TestCase("Hades II v2025.08.03", "Hades II")]
+        [TestCase("Vampire Survivors v1.10.103", "Vampire Survivors")]
+
+        // Parenthesized version formats
+        [TestCase("Hades II (v2025.06.18)", "Hades II")]
+        [TestCase("Stardew Valley (v1.6.8)", "Stardew Valley")]
+
+        // Russian tracker format with sequel indicator stripped
+        [TestCase("[DL] Hades II (2) [P] [RUS + ENG + 13 / ENG] (2025, TPS) (1.133066) [Portable]", "Hades II")]
+        [TestCase("[DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]", "The Witness")]
+        [TestCase("[CD] Half-Life 2 [P] [RUS + ENG / ENG] (2004, FPS) (1.0.1.0) [Tycoon]", "Half-Life 2")]
+        [TestCase("[DL] Elden Ring [P] [RUS + ENG + 12 / ENG] (2022, RPG) (1.16.0 + 6 DLC) [Portable]", "Elden Ring")]
         public void should_parse_game_title(string postTitle, string title)
         {
             Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Be(title);
