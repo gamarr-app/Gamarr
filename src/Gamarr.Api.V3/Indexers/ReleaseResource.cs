@@ -37,7 +37,17 @@ namespace Gamarr.Api.V3.Indexers
         public bool Approved { get; set; }
         public bool TemporarilyRejected { get; set; }
         public bool Rejected { get; set; }
+
+        /// <summary>
+        /// Primary identifier - Steam App ID
+        /// </summary>
+        public int SteamAppId { get; set; }
+
+        /// <summary>
+        /// Secondary identifier - IGDB ID
+        /// </summary>
         public int IgdbId { get; set; }
+
         public IEnumerable<string> Rejections { get; set; }
         public DateTime PublishDate { get; set; }
         public string CommentUrl { get; set; }
@@ -103,6 +113,7 @@ namespace Gamarr.Api.V3.Indexers
                 Approved = model.Approved,
                 TemporarilyRejected = model.TemporarilyRejected,
                 Rejected = model.Rejected,
+                SteamAppId = releaseInfo.SteamAppId,
                 IgdbId = releaseInfo.IgdbId,
                 Rejections = model.Rejections.Select(r => r.Message).ToList(),
                 PublishDate = releaseInfo.PublishDate,
@@ -156,6 +167,7 @@ namespace Gamarr.Api.V3.Indexers
             model.IndexerId = resource.IndexerId;
             model.Indexer = resource.Indexer;
             model.DownloadProtocol = resource.Protocol;
+            model.SteamAppId = resource.SteamAppId;
             model.IgdbId = resource.IgdbId;
             model.PublishDate = resource.PublishDate.ToUniversalTime();
 

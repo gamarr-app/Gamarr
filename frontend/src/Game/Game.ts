@@ -53,6 +53,9 @@ export interface GameAddOptions {
 }
 
 interface Game extends ModelBase {
+  /** Primary identifier - Steam App ID */
+  steamAppId: number;
+  /** Secondary identifier - IGDB ID */
   igdbId: number;
   sortTitle: string;
   overview: string;

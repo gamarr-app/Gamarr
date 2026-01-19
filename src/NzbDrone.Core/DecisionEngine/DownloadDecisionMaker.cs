@@ -80,7 +80,8 @@ namespace NzbDrone.Core.DecisionEngine
 
                     if (parsedGameInfo != null && !parsedGameInfo.PrimaryGameTitle.IsNullOrWhiteSpace())
                     {
-                        var remoteGame = _parsingService.Map(parsedGameInfo, report.IgdbId, searchCriteria);
+                        // Pass Steam App ID as primary, IGDB ID as secondary
+                        var remoteGame = _parsingService.Map(parsedGameInfo, report.SteamAppId, report.IgdbId, searchCriteria);
                         remoteGame.Release = report;
 
                         if (remoteGame.Game == null)

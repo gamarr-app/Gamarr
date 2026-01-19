@@ -62,7 +62,12 @@ namespace NzbDrone.Core.Indexers.Torznab
 
             if (torrentInfo != null)
             {
+                // Primary identifier - Steam App ID
+                torrentInfo.SteamAppId = GetSteamAppId(item);
+
+                // Secondary identifier - IGDB ID
                 torrentInfo.IgdbId = GetIgdbId(item);
+
                 torrentInfo.IndexerFlags = GetFlags(item);
             }
 
@@ -152,6 +157,31 @@ namespace NzbDrone.Core.Indexers.Torznab
             return url;
         }
 
+        /// <summary>
+        /// Get Steam App ID - primary identifier for games
+        /// </summary>
+        protected virtual int GetSteamAppId(XElement item)
+        {
+            // Try steam attribute first
+            var steamAppIdString = TryGetTorznabAttribute(item, "steamappid");
+
+            if (steamAppIdString.IsNullOrWhiteSpace())
+            {
+                // Also try steamid as some indexers might use that
+                steamAppIdString = TryGetTorznabAttribute(item, "steamid");
+            }
+
+            if (!steamAppIdString.IsNullOrWhiteSpace() && int.TryParse(steamAppIdString, out var steamAppId))
+            {
+                return steamAppId;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Get IGDB ID - secondary identifier for games
+        /// </summary>
         protected virtual int GetIgdbId(XElement item)
         {
             var igdbIdString = TryGetTorznabAttribute(item, "igdbid");

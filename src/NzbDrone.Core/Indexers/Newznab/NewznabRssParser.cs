@@ -91,7 +91,12 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             releaseInfo = base.ProcessItem(item, releaseInfo);
 
+            // Primary identifier - Steam App ID
+            releaseInfo.SteamAppId = GetSteamAppId(item);
+
+            // Secondary identifier - IGDB ID
             releaseInfo.IgdbId = GetIgdbId(item);
+
             releaseInfo.IndexerFlags = GetFlags(item);
 
             return releaseInfo;
@@ -173,6 +178,31 @@ namespace NzbDrone.Core.Indexers.Newznab
             return url;
         }
 
+        /// <summary>
+        /// Get Steam App ID - primary identifier for games
+        /// </summary>
+        protected virtual int GetSteamAppId(XElement item)
+        {
+            // Try steam attribute first
+            var steamAppIdString = TryGetNewznabAttribute(item, "steamappid");
+
+            if (steamAppIdString.IsNullOrWhiteSpace())
+            {
+                // Also try steamid as some indexers might use that
+                steamAppIdString = TryGetNewznabAttribute(item, "steamid");
+            }
+
+            if (!steamAppIdString.IsNullOrWhiteSpace() && int.TryParse(steamAppIdString, out var steamAppId))
+            {
+                return steamAppId;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Get IGDB ID - secondary identifier for games
+        /// </summary>
         protected virtual int GetIgdbId(XElement item)
         {
             var igdbIdString = TryGetNewznabAttribute(item, "igdbid");

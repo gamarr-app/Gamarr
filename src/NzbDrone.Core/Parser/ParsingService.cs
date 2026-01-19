@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Parser
     public interface IParsingService
     {
         Game GetGame(string title);
-        RemoteGame Map(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria = null);
+        RemoteGame Map(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, SearchCriteriaBase searchCriteria = null);
         RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId);
         ParsedGameInfo ParseMinimalPathGameInfo(string path);
     }
@@ -77,9 +77,9 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public RemoteGame Map(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria = null)
+        public RemoteGame Map(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, SearchCriteriaBase searchCriteria = null)
         {
-            return Map(parsedGameInfo, igdbId, null, searchCriteria);
+            return Map(parsedGameInfo, steamAppId, igdbId, null, searchCriteria);
         }
 
         public RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId)
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Parser
             };
         }
 
-        private RemoteGame Map(ParsedGameInfo parsedGameInfo, int igdbId, Game game, SearchCriteriaBase searchCriteria)
+        private RemoteGame Map(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, Game game, SearchCriteriaBase searchCriteria)
         {
             var remoteGame = new RemoteGame
             {
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Parser
 
             if (game == null)
             {
-                var gameMatch = FindGame(parsedGameInfo, igdbId, searchCriteria);
+                var gameMatch = FindGame(parsedGameInfo, steamAppId, igdbId, searchCriteria);
 
                 if (gameMatch != null)
                 {
@@ -124,11 +124,18 @@ namespace NzbDrone.Core.Parser
             return remoteGame;
         }
 
-        private FindGameResult FindGame(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria)
+        private FindGameResult FindGame(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, SearchCriteriaBase searchCriteria)
         {
             FindGameResult result = null;
 
-            if (igdbId > 0)
+            // Primary identifier - Steam App ID (try first)
+            if (steamAppId > 0)
+            {
+                result = TryGetGameBySteamAppId(parsedGameInfo, steamAppId);
+            }
+
+            // Secondary identifier - IGDB ID (fallback)
+            if (result == null && igdbId > 0)
             {
                 result = TryGetGameByIgdbId(parsedGameInfo, igdbId);
             }
@@ -137,7 +144,7 @@ namespace NzbDrone.Core.Parser
             {
                 if (searchCriteria != null)
                 {
-                    result = TryGetGameBySearchCriteria(parsedGameInfo, igdbId, searchCriteria);
+                    result = TryGetGameBySearchCriteria(parsedGameInfo, steamAppId, igdbId, searchCriteria);
                 }
                 else
                 {
@@ -153,6 +160,25 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
+        /// <summary>
+        /// Try to find game by Steam App ID - primary identifier
+        /// </summary>
+        private FindGameResult TryGetGameBySteamAppId(ParsedGameInfo parsedGameInfo, int steamAppId)
+        {
+            var game = _gameService.FindBySteamAppId(steamAppId);
+
+            // Should fix practically all problems, where indexer is shite at adding correct IDs to games.
+            if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
+            {
+                return new FindGameResult(game, GameMatchType.Id);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Try to find game by IGDB ID - secondary identifier
+        /// </summary>
         private FindGameResult TryGetGameByIgdbId(ParsedGameInfo parsedGameInfo, int igdbId)
         {
             var game = _gameService.FindByIgdbId(igdbId);
@@ -191,7 +217,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        private FindGameResult TryGetGameBySearchCriteria(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria)
+        private FindGameResult TryGetGameBySearchCriteria(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, SearchCriteriaBase searchCriteria)
         {
             Game possibleGame = null;
 
@@ -222,6 +248,13 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
+            // Primary identifier - Steam App ID
+            if (steamAppId > 0 && steamAppId == searchCriteria.Game.SteamAppId)
+            {
+                return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
+            }
+
+            // Secondary identifier - IGDB ID
             if (igdbId > 0 && igdbId == searchCriteria.Game.IgdbId)
             {
                 return new FindGameResult(searchCriteria.Game, GameMatchType.Id);

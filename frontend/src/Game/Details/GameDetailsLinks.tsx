@@ -6,38 +6,42 @@ import { kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './GameDetailsLinks.css';
 
-type GameDetailsLinksProps = Pick<Game, 'igdbId' | 'youTubeTrailerId'>;
+type GameDetailsLinksProps = Pick<Game, 'steamAppId' | 'igdbId' | 'youTubeTrailerId'>;
 
 function GameDetailsLinks(props: GameDetailsLinksProps) {
-  const { igdbId, youTubeTrailerId } = props;
+  const { steamAppId, igdbId, youTubeTrailerId } = props;
 
   return (
     <div className={styles.links}>
-      <Link
-        className={styles.link}
-        to={`https://www.igdb.com/games/${igdbId}`}
-      >
-        <Label
-          className={styles.linkLabel}
-          kind={kinds.INFO}
-          size={sizes.LARGE}
+      {steamAppId > 0 ? (
+        <Link
+          className={styles.link}
+          to={`https://store.steampowered.com/app/${steamAppId}`}
         >
-          IGDB
-        </Label>
-      </Link>
+          <Label
+            className={styles.linkLabel}
+            kind={kinds.INFO}
+            size={sizes.LARGE}
+          >
+            Steam
+          </Label>
+        </Link>
+      ) : null}
 
-      <Link
-        className={styles.link}
-        to={`https://store.steampowered.com/search/?term=${igdbId}`}
-      >
-        <Label
-          className={styles.linkLabel}
-          kind={kinds.INFO}
-          size={sizes.LARGE}
+      {igdbId > 0 ? (
+        <Link
+          className={styles.link}
+          to={`https://www.igdb.com/games/${igdbId}`}
         >
-          Steam
-        </Label>
-      </Link>
+          <Label
+            className={styles.linkLabel}
+            kind={kinds.INFO}
+            size={sizes.LARGE}
+          >
+            IGDB
+          </Label>
+        </Link>
+      ) : null}
 
       {youTubeTrailerId ? (
         <Link

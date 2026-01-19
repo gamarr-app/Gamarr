@@ -512,6 +512,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
   const {
     id,
+    steamAppId,
     igdbId,
     title,
     originalTitle,
@@ -732,6 +733,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       anchor={<Icon name={icons.EXTERNAL_LINK} size={20} />}
                       tooltip={
                         <GameDetailsLinks
+                          steamAppId={steamAppId}
                           igdbId={igdbId}
                           youTubeTrailerId={youTubeTrailerId}
                         />
