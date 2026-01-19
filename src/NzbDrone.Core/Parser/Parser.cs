@@ -298,6 +298,12 @@ namespace NzbDrone.Core.Parser
                                 result.Quality = QualityParser.ParseQuality(title);
                                 Logger.Debug("Quality parsed: {0}", result.Quality);
 
+                                result.GameVersion = QualityParser.ParseGameVersion(title);
+                                if (result.GameVersion.HasValue)
+                                {
+                                    Logger.Debug("Game version parsed: {0}", result.GameVersion);
+                                }
+
                                 result.Platform = PlatformParser.ParsePlatform(title);
                                 result.PlatformString = PlatformParser.ParsePlatformString(title);
                                 if (result.Platform != Games.PlatformFamily.Unknown)

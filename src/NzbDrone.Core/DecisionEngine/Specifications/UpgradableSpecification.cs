@@ -14,6 +14,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         bool QualityCutoffNotMet(QualityProfile profile, QualityModel currentQuality, QualityModel newQuality = null);
         bool CutoffNotMet(QualityProfile profile, QualityModel currentQuality, List<CustomFormat> currentFormats, QualityModel newQuality = null);
         bool IsRevisionUpgrade(QualityModel currentQuality, QualityModel newQuality);
+        bool IsVersionUpgrade(GameVersion currentVersion, GameVersion newVersion);
         bool IsUpgradeAllowed(QualityProfile qualityProfile, QualityModel currentQuality, List<CustomFormat> currentCustomFormats, QualityModel newQuality, List<CustomFormat> newCustomFormats);
     }
 
@@ -175,6 +176,32 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             if (currentQuality.Quality == newQuality.Quality && compare > 0)
             {
                 _logger.Debug("New quality is a better revision for existing quality. Existing: {0}. New: {1}", currentQuality, newQuality);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsVersionUpgrade(GameVersion currentVersion, GameVersion newVersion)
+        {
+            // If new version is null or has no value, it's not an upgrade
+            if (newVersion == null || !newVersion.HasValue)
+            {
+                return false;
+            }
+
+            // If current version is null or has no value, any version is an upgrade
+            if (currentVersion == null || !currentVersion.HasValue)
+            {
+                _logger.Debug("Current file has no version, new version {0} is an upgrade", newVersion);
+                return true;
+            }
+
+            var compare = newVersion.CompareTo(currentVersion);
+
+            if (compare > 0)
+            {
+                _logger.Debug("New version {0} is newer than existing version {1}", newVersion, currentVersion);
                 return true;
             }
 

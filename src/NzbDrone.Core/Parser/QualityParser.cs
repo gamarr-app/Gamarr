@@ -76,6 +76,62 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex RealRegex = new (@"\b(?<real>REAL|PROPER[._-]?FIX)\b",
             RegexOptions.Compiled);
 
+        // More comprehensive version regex for game releases
+        private static readonly Regex GameVersionRegex = new (@"[._\-\s]v?(?<version>\d+(?:\.\d+){1,3})[._\-\s]|[._\-\s](?:BUILD|B)[._\-]?(?<build>\d+)|[._\-\s](?:Update|Patch)[._\-\s]?(?<update>\d+(?:\.\d+)*)?",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Parse game version from release title
+        /// </summary>
+        public static GameVersion ParseGameVersion(string name)
+        {
+            if (name.IsNullOrWhiteSpace())
+            {
+                return new GameVersion();
+            }
+
+            var match = GameVersionRegex.Match(name);
+            if (!match.Success)
+            {
+                return new GameVersion();
+            }
+
+            // Try version group first (v1.0.1, 1.2.3)
+            if (match.Groups["version"].Success)
+            {
+                var versionString = match.Groups["version"].Value;
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            // Try build number
+            if (match.Groups["build"].Success)
+            {
+                var buildString = "Build " + match.Groups["build"].Value;
+                if (GameVersion.TryParse(buildString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            // Try update number
+            if (match.Groups["update"].Success)
+            {
+                var updateString = match.Groups["update"].Value;
+                if (!string.IsNullOrEmpty(updateString) && GameVersion.TryParse(updateString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            return new GameVersion();
+        }
+
         public static QualityModel ParseQuality(string name)
         {
             Logger.Debug("Trying to parse quality for '{0}'", name);

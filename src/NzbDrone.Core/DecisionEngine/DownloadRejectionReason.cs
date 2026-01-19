@@ -59,6 +59,7 @@ public enum DownloadRejectionReason
     MinimumSeeders,
     DiskHigherPreference,
     DiskHigherRevision,
+    DiskHigherVersion,
     DiskCutoffMet,
     DiskCustomFormatCutoffMet,
     DiskCustomFormatScore,

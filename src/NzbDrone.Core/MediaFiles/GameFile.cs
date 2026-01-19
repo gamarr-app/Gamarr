@@ -26,6 +26,7 @@ namespace NzbDrone.Core.MediaFiles
         public string Edition { get; set; }
         public Game Game { get; set; }
         public List<Language> Languages { get; set; }
+        public Qualities.GameVersion GameVersion { get; set; }
 
         public override string ToString()
         {
