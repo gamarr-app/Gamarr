@@ -66,8 +66,12 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex DLCRegex = new (@"\b(?<dlc>(?:INCL(?:UDES?)?[\s._-]?)?(?:ALL[\s._-]?)?DLC[sS]?|DLC[\s._-]?(?:PACK|UNLOCKER)|COMPLETE[\s._-]?(?:EDITION|PACK)|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        // DLC-only releases (requires base game)
-        private static readonly Regex DlcOnlyRegex = new (@"\b(?<dlconly>DLC[\s._-]?ONLY|(?:^|[\s._-])DLC(?:[\s._-]|$)|ADDON[\s._-]?ONLY|EXPANSION[\s._-]?ONLY)\b",
+        // DLC-only releases (requires base game) - standalone "DLC" but NOT "All DLC", "DLC Bundle", "Includes DLC"
+        private static readonly Regex DlcOnlyRegex = new (@"\b(?<dlconly>DLC[\s._-]?ONLY|ADDON[\s._-]?ONLY|EXPANSION[\s._-]?ONLY)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // Standalone DLC (not part of "All DLC", "DLC Bundle", etc.)
+        private static readonly Regex StandaloneDlcRegex = new (@"(?<!ALL[\s._-])(?<!INCLUDES[\s._-])(?<!WITH[\s._-])[\s._-]DLC(?:[\s._-]|$)(?!BUNDLE|PACK|UNLOCKER|S[\s._-])",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Season pass / DLC bundle
@@ -190,14 +194,14 @@ namespace NzbDrone.Core.Parser
                 return ReleaseContentType.UpdateOnly;
             }
 
-            // Check for DLC-only releases
-            if (DlcOnlyRegex.IsMatch(normalizedName))
+            // Check for complete/GOTY editions (base game + all DLC) - before DLC-only
+            if (CompleteEditionRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected DLC-only release: {0}", name);
-                return ReleaseContentType.DlcOnly;
+                Logger.Trace("Detected complete edition with all DLC: {0}", name);
+                return ReleaseContentType.BaseGameWithAllDlc;
             }
 
-            // Check for season pass / DLC bundle
+            // Check for season pass / DLC bundle - before DLC-only
             if (SeasonPassRegex.IsMatch(normalizedName))
             {
                 Logger.Trace("Detected season pass/DLC bundle: {0}", name);
@@ -211,11 +215,18 @@ namespace NzbDrone.Core.Parser
                 return ReleaseContentType.Expansion;
             }
 
-            // Check for complete/GOTY editions (base game + all DLC)
-            if (CompleteEditionRegex.IsMatch(normalizedName))
+            // Check for DLC-only releases (explicit "DLC Only", "Addon Only", etc.)
+            if (DlcOnlyRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected complete edition with all DLC: {0}", name);
-                return ReleaseContentType.BaseGameWithAllDlc;
+                Logger.Trace("Detected DLC-only release: {0}", name);
+                return ReleaseContentType.DlcOnly;
+            }
+
+            // Check for standalone DLC (just "DLC" but not part of "All DLC", "DLC Bundle", etc.)
+            if (StandaloneDlcRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected standalone DLC release: {0}", name);
+                return ReleaseContentType.DlcOnly;
             }
 
             // Default to unknown - could be base game only or undetected
@@ -258,26 +269,8 @@ namespace NzbDrone.Core.Parser
                 return result;
             }
 
-            // Check for scene releases (with or without crack) - must be before repack/update checks
-            // Scene group takes precedence over update/language pack indicators
-            if (SceneGroupRegex.IsMatch(normalizedName))
-            {
-                result.SourceDetectionSource = QualityDetectionSource.Name;
-
-                if (CrackedRegex.IsMatch(normalizedName))
-                {
-                    result.Quality = Quality.SceneCracked;
-                }
-                else
-                {
-                    result.Quality = Quality.Scene;
-                }
-
-                return result;
-            }
-
-            // Check for update/patch only releases (after scene group check)
-            // Must contain "Update" or "Patch" as standalone word (not as part of game title)
+            // Check for update/patch only releases BEFORE scene groups
+            // Update releases should be marked as UpdateOnly even if they have a scene group
             if (UpdateOnlyRegex.IsMatch(normalizedName))
             {
                 // Check for indicators that this is an update-only release
@@ -295,7 +288,8 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
-            // Check for repack releases
+            // Check for repack releases BEFORE scene groups
+            // (releases can have both scene group and repack, e.g., "EMPRESS DODI-Repack")
             if (RepackRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
@@ -313,11 +307,28 @@ namespace NzbDrone.Core.Parser
                 return result;
             }
 
-            // Check for portable releases
+            // Check for portable releases BEFORE scene groups
             if (PortableRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Portable;
+                return result;
+            }
+
+            // Check for scene releases (with or without crack)
+            if (SceneGroupRegex.IsMatch(normalizedName))
+            {
+                result.SourceDetectionSource = QualityDetectionSource.Name;
+
+                if (CrackedRegex.IsMatch(normalizedName))
+                {
+                    result.Quality = Quality.SceneCracked;
+                }
+                else
+                {
+                    result.Quality = Quality.Scene;
+                }
+
                 return result;
             }
 
