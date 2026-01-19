@@ -66,6 +66,44 @@ function MetadataOptions(props) {
                 {...settings.certificationCountry}
               />
             </FormGroup>
+
+            <FormGroup>
+              <FormLabel>IGDB Client ID</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.TEXT}
+                name="igdbClientId"
+                onChange={onInputChange}
+                helpText="Client ID from IGDB/Twitch Developer Portal. Enables better cover art for DLC and expansions."
+                helpTextWarning="Get credentials at https://api-docs.igdb.com/"
+                {...settings.igdbClientId}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>IGDB Client Secret</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.PASSWORD}
+                name="igdbClientSecret"
+                onChange={onInputChange}
+                helpText="Client Secret from IGDB/Twitch Developer Portal"
+                {...settings.igdbClientSecret}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>RAWG API Key</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.PASSWORD}
+                name="rawgApiKey"
+                onChange={onInputChange}
+                helpText="API key from RAWG.io. Provides additional game metadata and cover art."
+                helpTextWarning="Get a free key at https://rawg.io/apidocs"
+                {...settings.rawgApiKey}
+              />
+            </FormGroup>
           </Form>
       }
     </FieldSet>
