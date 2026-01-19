@@ -31,6 +31,13 @@ module.exports = (env) => {
       children: false
     },
 
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename]
+      }
+    },
+
     watchOptions: {
       ignored: /node_modules/
     },

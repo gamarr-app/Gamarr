@@ -87,6 +87,35 @@ Build()
     ProgressEnd 'Build'
 }
 
+# Fast incremental build for development - skips clean, builds single platform
+BuildDev()
+{
+    ProgressStart 'Build (Dev)'
+
+    slnFile=src/Gamarr.sln
+
+    if [ $os = "windows" ]; then
+        platform=Windows
+        defaultRid="win-x64"
+    else
+        platform=Posix
+        defaultRid="linux-x64"
+    fi
+
+    # Use specified RID or default to current platform
+    rid=${RID:-$defaultRid}
+
+    # Incremental build - no clean, Debug config, single platform
+    dotnet build $slnFile -c Debug -p:Platform=$platform --no-incremental=false
+
+    # Publish only if needed (first time or explicit request)
+    if [ ! -d "$outputFolder/net8.0/$rid/publish" ] || [ "$PUBLISH" = "YES" ]; then
+        dotnet publish src/NzbDrone.Console/Gamarr.Console.csproj -c Debug -r $rid --no-self-contained --no-build -o "$outputFolder/net8.0/$rid/publish"
+    fi
+
+    ProgressEnd 'Build (Dev)'
+}
+
 YarnInstall()
 {
     ProgressStart 'yarn install'
@@ -99,6 +128,13 @@ RunWebpack()
     ProgressStart 'Running webpack'
     yarn run build --env production
     ProgressEnd 'Running webpack'
+}
+
+RunWebpackDev()
+{
+    ProgressStart 'Running webpack (dev)'
+    yarn run build
+    ProgressEnd 'Running webpack (dev)'
 }
 
 PackageFiles()
@@ -354,6 +390,13 @@ case $key in
         LINT=YES
         shift # past argument
         ;;
+    --dev)
+        # Fast development mode: incremental build, single platform, no lint
+        DEV=YES
+        BACKEND=YES
+        FRONTEND=YES
+        shift # past argument
+        ;;
     *)    # unknown option
         POSITIONAL+=("$1") # save it in an array for later
         shift # past argument
@@ -369,25 +412,31 @@ fi
 
 if [ "$BACKEND" = "YES" ];
 then
-    UpdateVersionNumber
-    if [ "$ENABLE_EXTRA_PLATFORMS" = "YES" ];
+    if [ "$DEV" = "YES" ];
     then
-        EnableExtraPlatforms
-    fi
-    Build
-    if [[ -z "$RID" || -z "$FRAMEWORK" ]];
-    then
-        PackageTests "net8.0" "win-x64"
-        PackageTests "net8.0" "win-x86"
-        PackageTests "net8.0" "linux-x64"
-        PackageTests "net8.0" "linux-musl-x64"
-        PackageTests "net8.0" "osx-x64"
+        # Fast incremental build for development
+        BuildDev
+    else
+        UpdateVersionNumber
         if [ "$ENABLE_EXTRA_PLATFORMS" = "YES" ];
         then
-            PackageTests "net8.0" "freebsd-x64"
+            EnableExtraPlatforms
         fi
-    else
-        PackageTests "$FRAMEWORK" "$RID"
+        Build
+        if [[ -z "$RID" || -z "$FRAMEWORK" ]];
+        then
+            PackageTests "net8.0" "win-x64"
+            PackageTests "net8.0" "win-x86"
+            PackageTests "net8.0" "linux-x64"
+            PackageTests "net8.0" "linux-musl-x64"
+            PackageTests "net8.0" "osx-x64"
+            if [ "$ENABLE_EXTRA_PLATFORMS" = "YES" ];
+            then
+                PackageTests "net8.0" "freebsd-x64"
+            fi
+        else
+            PackageTests "$FRAMEWORK" "$RID"
+        fi
     fi
 fi
 
@@ -403,7 +452,12 @@ fi
 
 if [ "$FRONTEND" = "YES" ];
 then
-    RunWebpack
+    if [ "$DEV" = "YES" ];
+    then
+        RunWebpackDev
+    else
+        RunWebpack
+    fi
 fi
 
 if [ "$PACKAGES" = "YES" ];
