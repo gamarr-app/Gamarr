@@ -616,11 +616,18 @@ namespace NzbDrone.Core.Notifications.Discord
             // Use IGDB (Internet Game Database) as the primary metadata source for games
             var links = new List<string>
             {
-                $"[IGDB](https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId})",
-                $"[Trakt](https://trakt.tv/search/igdb/{game.GameMetadata.Value.IgdbId}?id_type=game)"
+                $"[IGDB](https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId})"
             };
 
-            // IMDb links removed - IMDb is a movie database, not applicable for games
+            if (game.GameMetadata.Value.SteamId > 0)
+            {
+                links.Add($"[Steam](https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId})");
+            }
+
+            if (game.GameMetadata.Value.RawgId > 0)
+            {
+                links.Add($"[RAWG](https://rawg.io/games/{game.GameMetadata.Value.RawgId})");
+            }
 
             if (game.GameMetadata.Value.YouTubeTrailerId.IsNotNullOrWhiteSpace())
             {

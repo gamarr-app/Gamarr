@@ -137,12 +137,14 @@ namespace NzbDrone.Core.Notifications.Telegram
                     links.Add(new TelegramLink("IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
                 }
 
-                // IMDb links deprecated - IMDb is a movie database, not applicable for games
-                // if (linkType == MetadataLinkType.Imdb) { /* Deprecated - no-op */ }
-
-                if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
+                if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamId > 0)
                 {
-                    links.Add(new TelegramLink("Trakt", $"https://trakt.tv/search/igdb/{game.IgdbId}?id_type=game"));
+                    links.Add(new TelegramLink("Steam", $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId}"));
+                }
+
+                if (linkType == MetadataLinkType.Rawg && game.GameMetadata?.Value?.RawgId > 0)
+                {
+                    links.Add(new TelegramLink("RAWG", $"https://rawg.io/games/{game.GameMetadata.Value.RawgId}"));
                 }
             }
 
