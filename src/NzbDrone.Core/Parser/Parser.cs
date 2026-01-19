@@ -27,6 +27,13 @@ namespace NzbDrone.Core.Parser
             // Game release with version: GameName.v1.2.3-GROUP (must be at beginning to avoid year-like numbers in title being parsed as years)
             new Regex(@"^(?<title>(?![(\[]).+?)[._]v(?<version>\d+(?:\.\d+)*)[._-](?<releasegroup>[A-Za-z0-9]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Game release with date-based version: "Hades II v2025.08.03" or "Game Name v2025.06.18"
+            // Must be before year patterns to avoid v2025 being parsed as year
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+v(?<year>\d{4})\.(?<version>\d{2}\.\d{2})$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Game release with parenthesized version: "Hades II (v2025.06.18)" or "Game (v1.2.3)"
+            new Regex(@"^(?<title>(?![(\[]).+?)\s*\(v(?<version>\d+(?:\.\d+)+)\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Game releases without year - match title up to known release group at END of string (must be before year patterns to keep years in game titles)
             // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, etc.
             // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
@@ -35,7 +42,8 @@ namespace NzbDrone.Core.Parser
             // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
             // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
             // Example: [CD] Half-Life 2 [P] [RUS + ENG / ENG] (2004, FPS) (1.0.1.0) [Tycoon]
-            new Regex(@"^\[(?:DL|UL|SP|CD|DVD|P|L)\]\s*(?<title>[^\[\]]+?)\s*(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Example: [DL] Hades II (2) [P] [RUS + ENG + 13 / ENG] (2025, TPS) - the (2) is a sequel indicator to strip
+            new Regex(@"^\[(?:DL|UL|SP|CD|DVD|P|L)\]\s*(?<title>[^\[\]]+?)\s*(?:\(\d+\)\s*)?(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Anime [Subgroup] and Year
             new Regex(@"^(?:\[(?<subgroup>.+?)\][-_. ]?)(?<title>(?![(\[]).+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|x|\d+|\]|\W\d+)))+.*?(?<hash>\[\w{8}\])?(?:$|\.)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
