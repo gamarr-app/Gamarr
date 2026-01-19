@@ -11,7 +11,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(0)]
         public void missing_should_be_empty()
         {
-            EnsureNoGame(680, "Pulp Fiction");
+            EnsureNoGame(620, "Portal 2");
 
             var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
@@ -22,7 +22,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void missing_should_have_monitored_items()
         {
-            EnsureGame(680, "Pulp Fiction", true);
+            EnsureGame(620, "Portal 2", true);
 
             var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
@@ -33,18 +33,18 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void missing_should_have_series()
         {
-            EnsureGame(680, "Pulp Fiction", true);
+            EnsureGame(620, "Portal 2", true);
 
             var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
-            result.Records.First().Title.Should().Be("Pulp Fiction");
+            result.Records.First().Title.Should().Be("Portal 2");
         }
 
         [Test]
         [Order(1)]
         public void missing_should_not_have_unmonitored_items()
         {
-            EnsureGame(680, "Pulp Fiction", false);
+            EnsureGame(620, "Portal 2", false);
 
             var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void missing_should_have_unmonitored_items()
         {
-            EnsureGame(680, "Pulp Fiction", false);
+            EnsureGame(620, "Portal 2", false);
 
             var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc", "monitored", false);
 

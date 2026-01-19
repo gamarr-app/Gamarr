@@ -13,7 +13,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             WaitForCompletion(() => QualityProfiles.All().Count > 0);
 
-            foreach (var title in new[] { "The Dark Knight", "Pulp Fiction" })
+            foreach (var title in new[] { "Elden Ring", "Portal 2" })
             {
                 var newGame = Games.Lookup(title).First();
 
