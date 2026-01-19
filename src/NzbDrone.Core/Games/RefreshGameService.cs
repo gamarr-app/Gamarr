@@ -81,9 +81,25 @@ namespace NzbDrone.Core.Games
 
             try
             {
-                var tuple = _gameInfo.GetGameInfo(game.IgdbId);
-                gameInfo = tuple.Item1;
-                credits = tuple.Item2;
+                // Use SteamAppId if IgdbId is not available (Steam-only games)
+                if (game.IgdbId <= 0 && gameMetadata.SteamAppId > 0)
+                {
+                    var tuple = _gameInfo.GetGameInfoBySteamAppId(gameMetadata.SteamAppId);
+                    gameInfo = tuple.Item1;
+                    credits = tuple.Item2;
+
+                    if (gameInfo == null)
+                    {
+                        _logger.Warn("Could not refresh Steam game {0} (SteamAppId: {1})", game.Title, gameMetadata.SteamAppId);
+                        return game;
+                    }
+                }
+                else
+                {
+                    var tuple = _gameInfo.GetGameInfo(game.IgdbId);
+                    gameInfo = tuple.Item1;
+                    credits = tuple.Item2;
+                }
             }
             catch (GameNotFoundException)
             {
