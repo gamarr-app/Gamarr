@@ -109,11 +109,24 @@ namespace NzbDrone.Core.Games
         {
             var game = new Game();
 
-            // If we have a SteamAppId but no IgdbId, use the metadata from the search result directly
-            if (newGame.IgdbId <= 0 && newGame.GameMetadata?.Value?.SteamAppId > 0)
+            // Get steamAppId from either the game directly or from its metadata
+            var steamAppId = newGame.SteamAppId > 0 ? newGame.SteamAppId : newGame.GameMetadata?.Value?.SteamAppId ?? 0;
+
+            // If we have a SteamAppId but no IgdbId, fetch full metadata from Steam
+            if (newGame.IgdbId <= 0 && steamAppId > 0)
             {
-                _logger.Debug("Adding Steam game without IGDB ID. SteamAppId: {0}", newGame.GameMetadata.Value.SteamAppId);
-                game.GameMetadata = newGame.GameMetadata.Value;
+                _logger.Debug("Adding Steam game without IGDB ID. SteamAppId: {0}", steamAppId);
+                var metadata = _gameInfo.GetGameBySteamAppId(steamAppId);
+
+                if (metadata == null)
+                {
+                    throw new ValidationException(new List<ValidationFailure>
+                    {
+                        new ValidationFailure("SteamAppId", $"A game with Steam App ID {steamAppId} was not found.", steamAppId)
+                    });
+                }
+
+                game.GameMetadata = metadata;
                 game.ApplyChanges(newGame);
                 return game;
             }
