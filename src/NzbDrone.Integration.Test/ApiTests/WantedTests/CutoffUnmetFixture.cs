@@ -13,7 +13,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_have_monitored_items()
         {
             EnsureQualityProfileCutoff(1, Quality.Uplay, true);
-            var game = EnsureGame(680, "Pulp Fiction", true);
+            var game = EnsureGame(620, "Portal 2", true);
             EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
@@ -26,7 +26,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_not_have_unmonitored_items()
         {
             EnsureQualityProfileCutoff(1, Quality.Uplay, true);
-            var game = EnsureGame(680, "Pulp Fiction", false);
+            var game = EnsureGame(620, "Portal 2", false);
             EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
@@ -39,12 +39,12 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_have_series()
         {
             EnsureQualityProfileCutoff(1, Quality.Uplay, true);
-            var game = EnsureGame(680, "Pulp Fiction", true);
+            var game = EnsureGame(620, "Portal 2", true);
             EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
-            result.Records.First().Title.Should().Be("Pulp Fiction");
+            result.Records.First().Title.Should().Be("Portal 2");
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_have_unmonitored_items()
         {
             EnsureQualityProfileCutoff(1, Quality.Uplay, true);
-            var game = EnsureGame(680, "Pulp Fiction", false);
+            var game = EnsureGame(620, "Portal 2", false);
             EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc", "monitored", false);
