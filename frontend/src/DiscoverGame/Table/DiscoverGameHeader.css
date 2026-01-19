@@ -33,9 +33,7 @@
 }
 
 .igdbRating,
-.imdbRating,
-.rottenTomatoesRating,
-.traktRating,
+.metacriticRating,
 .runtime,
 .year {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
