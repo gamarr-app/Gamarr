@@ -47,7 +47,11 @@ namespace NzbDrone.Core.Indexers.Torznab
         {
             get
             {
-                yield return GetDefinition("Jackett", GetSettings("http://localhost:9117/api/v2.0/indexers/YOURINDEXER/results/torznab/"));
+                // Game categories: 1000=Console, 4000=PC
+                var gameCategories = new[] { 1000, 4000 };
+
+                yield return GetDefinition("Prowlarr", GetSettings("http://localhost:9696/1/api", categories: gameCategories));
+                yield return GetDefinition("Jackett", GetSettings("http://localhost:9117/api/v2.0/indexers/YOURINDEXER/results/torznab/", categories: gameCategories));
             }
         }
 
