@@ -26,8 +26,6 @@ class FileEditModalContent extends Component {
       qualityId,
       languageIds,
       indexerFlags,
-      proper,
-      real,
       edition,
       releaseGroup
     } = props;
@@ -36,8 +34,6 @@ class FileEditModalContent extends Component {
       qualityId,
       languageIds,
       indexerFlags,
-      proper,
-      real,
       edition,
       releaseGroup
     };
@@ -76,8 +72,6 @@ class FileEditModalContent extends Component {
       qualityId,
       languageIds,
       indexerFlags,
-      proper,
-      real,
       edition,
       releaseGroup
     } = this.state;
@@ -127,28 +121,6 @@ class FileEditModalContent extends Component {
                     value={qualityId}
                     values={qualityOptions}
                     onChange={this.onQualityChange}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>{translate('Proper')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="proper"
-                    value={proper}
-                    onChange={this.onInputChange}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>{translate('Real')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="real"
-                    value={real}
-                    onChange={this.onInputChange}
                   />
                 </FormGroup>
 
@@ -219,8 +191,6 @@ class FileEditModalContent extends Component {
 
 FileEditModalContent.propTypes = {
   qualityId: PropTypes.number.isRequired,
-  proper: PropTypes.bool.isRequired,
-  real: PropTypes.bool.isRequired,
   relativePath: PropTypes.string.isRequired,
   edition: PropTypes.string.isRequired,
   releaseGroup: PropTypes.string.isRequired,

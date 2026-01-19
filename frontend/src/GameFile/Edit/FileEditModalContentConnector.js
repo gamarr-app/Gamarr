@@ -25,8 +25,6 @@ function createMapStateToProps() {
         isPopulated: qualityProfiles.isSchemaPopulated && languages.isPopulated,
         error: qualityProfiles.error || languages.error,
         qualityId: quality ? quality.quality.id : 0,
-        real: quality ? quality.revision.real > 0 : false,
-        proper: quality ? quality.revision.version > 1 : false,
         qualities: getQualities(qualityProfiles.schema.items),
         languageIds: gameFile.languages ? gameFile.languages.map((l) => l.id) : [],
         languages: filteredLanguages,
@@ -61,8 +59,6 @@ class FileEditModalContentConnector extends Component {
   onSaveInputs = ( payload ) => {
     const {
       qualityId,
-      real,
-      proper,
       languageIds,
       edition,
       releaseGroup,
@@ -82,8 +78,8 @@ class FileEditModalContentConnector extends Component {
     });
 
     const revision = {
-      version: proper ? 2 : 1,
-      real: real ? 1 : 0
+      version: 1,
+      real: 0
     };
 
     this.props.dispatchUpdateGameFiles({
@@ -126,11 +122,9 @@ FileEditModalContentConnector.propTypes = {
   languageIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   indexerFlags: PropTypes.number.isRequired,
   qualityId: PropTypes.number.isRequired,
-  real: PropTypes.bool.isRequired,
   edition: PropTypes.string.isRequired,
   releaseGroup: PropTypes.string.isRequired,
   relativePath: PropTypes.string.isRequired,
-  proper: PropTypes.bool.isRequired,
   dispatchFetchQualityProfileSchema: PropTypes.func.isRequired,
   dispatchUpdateGameFiles: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired
