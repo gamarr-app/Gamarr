@@ -79,6 +79,7 @@ namespace Gamarr.Api.V3.Games
         public string ImdbId { get; set; }
 
         public int IgdbId { get; set; }
+        public int SteamAppId { get; set; }
         public string TitleSlug { get; set; }
         public string RootFolderPath { get; set; }
         public string Folder { get; set; }
@@ -126,6 +127,7 @@ namespace Gamarr.Api.V3.Games
             {
                 Id = model.Id,
                 IgdbId = model.IgdbId,
+                SteamAppId = model.GameMetadata.Value.SteamAppId,
                 Title = translatedTitle,
                 OriginalTitle = model.GameMetadata.Value.OriginalTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
@@ -191,6 +193,7 @@ namespace Gamarr.Api.V3.Games
                 GameMetadata = new GameMetadata
                 {
                     IgdbId = resource.IgdbId,
+                    SteamAppId = resource.SteamAppId,
                     Title = resource.Title,
                     Genres = resource.Genres,
                     Images = resource.Images,

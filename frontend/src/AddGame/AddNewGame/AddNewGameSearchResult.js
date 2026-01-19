@@ -57,6 +57,7 @@ class AddNewGameSearchResult extends Component {
   render() {
     const {
       igdbId,
+      steamAppId,
       imdbId,
       youTubeTrailerId,
       title,
@@ -194,15 +195,19 @@ class AddNewGameSearchResult extends Component {
             </div>
 
             <div>
-              <Label size={sizes.LARGE}>
-                <IgdbRating
-                  ratings={ratings}
-                  iconSize={13}
-                />
-              </Label>
+              {
+                ratings.igdb?.value ?
+                  <Label size={sizes.LARGE}>
+                    <IgdbRating
+                      ratings={ratings}
+                      iconSize={13}
+                    />
+                  </Label> :
+                  null
+              }
 
               {
-                ratings.metacritic ?
+                ratings.metacritic?.value ?
                   <Label size={sizes.LARGE}>
                     <MetacriticRating
                       ratings={ratings}
@@ -301,6 +306,7 @@ class AddNewGameSearchResult extends Component {
         <AddNewGameModal
           isOpen={isNewAddGameModalOpen && !isExistingGame}
           igdbId={igdbId}
+          steamAppId={steamAppId}
           title={title}
           year={year}
           overview={overview}
@@ -315,6 +321,7 @@ class AddNewGameSearchResult extends Component {
 
 AddNewGameSearchResult.propTypes = {
   igdbId: PropTypes.number.isRequired,
+  steamAppId: PropTypes.number,
   imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,

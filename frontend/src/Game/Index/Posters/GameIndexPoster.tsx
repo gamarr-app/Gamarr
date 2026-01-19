@@ -318,13 +318,13 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         </div>
       ) : null}
 
-      {showIgdbRating && !!ratings.igdb ? (
+      {showIgdbRating && !!ratings.igdb?.value ? (
         <div className={styles.title}>
           <IgdbRating ratings={ratings} iconSize={12} />
         </div>
       ) : null}
 
-      {showMetacriticRating && !!ratings.metacritic ? (
+      {showMetacriticRating && !!ratings.metacritic?.value ? (
         <div className={styles.title}>
           <MetacriticRating ratings={ratings} iconSize={12} />
         </div>

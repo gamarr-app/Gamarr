@@ -56,6 +56,7 @@ class AddNewGameModalContentConnector extends Component {
   onAddGamePress = () => {
     const {
       igdbId,
+      steamAppId,
       rootFolderPath,
       monitor,
       qualityProfileId,
@@ -66,6 +67,7 @@ class AddNewGameModalContentConnector extends Component {
 
     this.props.addGame({
       igdbId,
+      steamAppId,
       rootFolderPath: rootFolderPath.value,
       monitor: monitor.value,
       qualityProfileId: qualityProfileId.value,
@@ -91,6 +93,7 @@ class AddNewGameModalContentConnector extends Component {
 
 AddNewGameModalContentConnector.propTypes = {
   igdbId: PropTypes.number.isRequired,
+  steamAppId: PropTypes.number,
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,

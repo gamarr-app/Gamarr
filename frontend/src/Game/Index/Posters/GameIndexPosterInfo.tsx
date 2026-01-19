@@ -215,7 +215,7 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     );
   }
 
-  if (!showIgdbRating && sortKey === 'igdbRating' && !!ratings.igdb) {
+  if (!showIgdbRating && sortKey === 'igdbRating' && !!ratings.igdb?.value) {
     return (
       <div className={styles.info}>
         <IgdbRating ratings={ratings} iconSize={12} />
@@ -226,7 +226,7 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
   if (
     !showMetacriticRating &&
     sortKey === 'metacriticRating' &&
-    !!ratings.metacritic
+    !!ratings.metacritic?.value
   ) {
     return (
       <div className={styles.info}>

@@ -109,7 +109,7 @@ function DiscoverGamePosterInfo(props) {
     );
   }
 
-  if (!showIgdbRating && sortKey === 'igdbRating' && !!ratings.igdb) {
+  if (!showIgdbRating && sortKey === 'igdbRating' && !!ratings.igdb?.value) {
     return (
       <div className={styles.info}>
         <IgdbRating ratings={ratings} iconSize={12} />
@@ -117,7 +117,7 @@ function DiscoverGamePosterInfo(props) {
     );
   }
 
-  if (!showMetacriticRating && sortKey === 'metacriticRating' && !!ratings.metacritic) {
+  if (!showMetacriticRating && sortKey === 'metacriticRating' && !!ratings.metacritic?.value) {
     return (
       <div className={styles.info}>
         <MetacriticRating ratings={ratings} iconSize={12} />

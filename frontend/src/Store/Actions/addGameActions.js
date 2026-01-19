@@ -116,8 +116,18 @@ export const actionHandlers = handleThunks({
     dispatch(set({ section, isAdding: true }));
 
     const igdbId = payload.igdbId;
+    const steamAppId = payload.steamAppId;
     const items = getState().addGame.items;
-    const newGame = getNewGame(_.cloneDeep(_.find(items, { igdbId })), payload);
+
+    // Find by igdbId if available, otherwise by steamAppId
+    let foundGame;
+    if (igdbId > 0) {
+      foundGame = _.find(items, { igdbId });
+    } else if (steamAppId > 0) {
+      foundGame = _.find(items, { steamAppId });
+    }
+
+    const newGame = getNewGame(_.cloneDeep(foundGame), payload);
     newGame.id = 0;
 
     const promise = createAjaxRequest({

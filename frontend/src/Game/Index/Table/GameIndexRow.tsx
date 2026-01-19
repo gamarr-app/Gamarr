@@ -374,7 +374,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'igdbRating') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.igdb ? <IgdbRating ratings={ratings} /> : null}
+              {ratings.igdb?.value ? <IgdbRating ratings={ratings} /> : null}
             </VirtualTableRowCell>
           );
         }
@@ -382,7 +382,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'metacriticRating') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.metacritic ? (
+              {ratings.metacritic?.value ? (
                 <MetacriticRating ratings={ratings} />
               ) : null}
             </VirtualTableRowCell>
