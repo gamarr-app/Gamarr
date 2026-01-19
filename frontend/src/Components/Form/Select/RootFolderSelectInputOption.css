@@ -18,7 +18,7 @@
   max-width: 500px;
 }
 
-.movieFolder {
+.gameFolder {
   @add-mixin truncate;
 
   color: var(--disabledColor);

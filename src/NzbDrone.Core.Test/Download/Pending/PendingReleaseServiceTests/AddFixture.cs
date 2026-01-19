@@ -7,7 +7,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download.Pending;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -19,17 +19,17 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
     public class AddFixture : CoreTest<PendingReleaseService>
     {
         private DownloadDecision _temporarilyRejected;
-        private Movie _movie;
+        private Game _game;
         private QualityProfile _profile;
         private ReleaseInfo _release;
-        private ParsedMovieInfo _parsedMovieInfo;
-        private RemoteMovie _remoteMovie;
+        private ParsedGameInfo _parsedGameInfo;
+        private RemoteGame _remoteGame;
         private List<PendingRelease> _heldReleases;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                                      .Build();
 
             _profile = new QualityProfile
@@ -44,19 +44,19 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                                    },
             };
 
-            _movie.QualityProfile = _profile;
+            _game.QualityProfile = _profile;
 
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
-            _parsedMovieInfo = Builder<ParsedMovieInfo>.CreateNew().Build();
-            _parsedMovieInfo.Quality = new QualityModel(Quality.HDTV720p);
+            _parsedGameInfo = Builder<ParsedGameInfo>.CreateNew().Build();
+            _parsedGameInfo.Quality = new QualityModel(Quality.HDTV720p);
 
-            _remoteMovie = new RemoteMovie();
-            _remoteMovie.Movie = _movie;
-            _remoteMovie.ParsedMovieInfo = _parsedMovieInfo;
-            _remoteMovie.Release = _release;
+            _remoteGame = new RemoteGame();
+            _remoteGame.Game = _game;
+            _remoteGame.ParsedGameInfo = _parsedGameInfo;
+            _remoteGame.Release = _release;
 
-            _temporarilyRejected = new DownloadDecision(_remoteMovie, new DownloadRejection(DownloadRejectionReason.MinimumAgeDelay, "Temp Rejected", RejectionType.Temporary));
+            _temporarilyRejected = new DownloadDecision(_remoteGame, new DownloadRejection(DownloadRejectionReason.MinimumAgeDelay, "Temp Rejected", RejectionType.Temporary));
 
             _heldReleases = new List<PendingRelease>();
 
@@ -65,15 +65,15 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                   .Returns(_heldReleases);
 
             Mocker.GetMock<IPendingReleaseRepository>()
-                  .Setup(s => s.AllByMovieId(It.IsAny<int>()))
-                  .Returns<int>(i => _heldReleases.Where(v => v.MovieId == i).ToList());
+                  .Setup(s => s.AllByGameId(It.IsAny<int>()))
+                  .Returns<int>(i => _heldReleases.Where(v => v.GameId == i).ToList());
 
-            Mocker.GetMock<IMovieService>()
-                  .Setup(s => s.GetMovie(It.IsAny<int>()))
-                  .Returns(_movie);
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetGame(It.IsAny<int>()))
+                  .Returns(_game);
 
             Mocker.GetMock<IPrioritizeDownloadDecision>()
-                  .Setup(s => s.PrioritizeDecisionsForMovies(It.IsAny<List<DownloadDecision>>()))
+                  .Setup(s => s.PrioritizeDecisionsForGames(It.IsAny<List<DownloadDecision>>()))
                   .Returns((List<DownloadDecision> d) => d);
         }
 
@@ -85,11 +85,11 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             var heldReleases = Builder<PendingRelease>.CreateListOfSize(1)
                                                    .All()
-                                                   .With(h => h.MovieId = _movie.Id)
+                                                   .With(h => h.GameId = _game.Id)
                                                    .With(h => h.Title = title)
                                                    .With(h => h.Release = release)
                                                    .With(h => h.Reason = reason)
-                                                   .With(h => h.ParsedMovieInfo = _parsedMovieInfo)
+                                                   .With(h => h.ParsedGameInfo = _parsedGameInfo)
                                                    .Build();
 
             _heldReleases.AddRange(heldReleases);

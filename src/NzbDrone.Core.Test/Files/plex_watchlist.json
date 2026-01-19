@@ -8,7 +8,7 @@
     "size": 3,
     "Metadata": [
       {
-        "type": "movie",
+        "type": "game",
         "title": "Arrival",
         "year": 2016,
         "Guid": [
@@ -18,7 +18,7 @@
         ]
       },
       {
-        "type": "movie",
+        "type": "game",
         "title": "The Last Witch Hunter",
         "year": 2015,
         "Guid": [
@@ -26,18 +26,18 @@
             "id": "imdb://tt1618442"
           },
           {
-            "id": "tmdb://274854"
+            "id": "igdb://274854"
           }
         ]
       },
       {
-        "type": "movie",
+        "type": "game",
         "title": "Avengers: Endgame",
         "year": 2019,
         "Guid": []
       },
       {
-        "type": "movie",
+        "type": "game",
         "title": "Avengers",
         "year": 2005
       }

@@ -4,9 +4,9 @@ import createClientSideCollectionSelector from './createClientSideCollectionSele
 
 function createUnoptimizedSelector(uiSection) {
   return createSelector(
-    createClientSideCollectionSelector('movieCollections', uiSection),
-    (movies) => {
-      const items = movies.items.map((s) => {
+    createClientSideCollectionSelector('gameCollections', uiSection),
+    (games) => {
+      const items = games.items.map((s) => {
         const {
           id,
           sortTitle
@@ -19,26 +19,26 @@ function createUnoptimizedSelector(uiSection) {
       });
 
       return {
-        ...movies,
+        ...games,
         items
       };
     }
   );
 }
 
-function movieListEqual(a, b) {
+function gameListEqual(a, b) {
   return hasDifferentItemsOrOrder(a, b);
 }
 
-const createMovieEqualSelector = createSelectorCreator(
+const createGameEqualSelector = createSelectorCreator(
   defaultMemoize,
-  movieListEqual
+  gameListEqual
 );
 
 function createCollectionClientSideCollectionItemsSelector(uiSection) {
-  return createMovieEqualSelector(
+  return createGameEqualSelector(
     createUnoptimizedSelector(uiSection),
-    (movies) => movies
+    (games) => games
   );
 }
 

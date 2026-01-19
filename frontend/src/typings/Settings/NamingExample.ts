@@ -1,4 +1,4 @@
 export default interface NamingExample {
-  movieExample: string;
-  movieFolderExample: string;
+  gameExample: string;
+  gameFolderExample: string;
 }

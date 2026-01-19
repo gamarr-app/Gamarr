@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             releaseInfo = base.ProcessItem(item, releaseInfo);
 
-            releaseInfo.TmdbId = GetTmdbId(item);
+            releaseInfo.IgdbId = GetIgdbId(item);
             releaseInfo.ImdbId = GetImdbId(item);
             releaseInfo.IndexerFlags = GetFlags(item);
 
@@ -175,13 +175,13 @@ namespace NzbDrone.Core.Indexers.Newznab
             return url;
         }
 
-        protected virtual int GetTmdbId(XElement item)
+        protected virtual int GetIgdbId(XElement item)
         {
-            var tmdbIdString = TryGetNewznabAttribute(item, "tmdbid");
+            var igdbIdString = TryGetNewznabAttribute(item, "igdbid");
 
-            if (!tmdbIdString.IsNullOrWhiteSpace() && int.TryParse(tmdbIdString, out var tmdbId))
+            if (!igdbIdString.IsNullOrWhiteSpace() && int.TryParse(igdbIdString, out var igdbId))
             {
-                return tmdbId;
+                return igdbId;
             }
 
             return 0;

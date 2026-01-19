@@ -4,54 +4,54 @@ using System.Net;
 using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.MediaCover;
 
 namespace NzbDrone.Core.ImportLists.TMDb
 {
     public class TMDbParser : IParseImportListResponse
     {
-        public virtual IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(importResponse))
             {
-                return movies;
+                return games;
             }
 
-            var jsonResponse = JsonConvert.DeserializeObject<MovieSearchResource>(importResponse.Content);
+            var jsonResponse = JsonConvert.DeserializeObject<GameSearchResource>(importResponse.Content);
 
-            // no movies were return
+            // no games were return
             if (jsonResponse == null)
             {
-                return movies;
+                return games;
             }
 
-            return jsonResponse.Results.SelectList(MapListMovie);
+            return jsonResponse.Results.SelectList(MapListGame);
         }
 
-        protected ImportListMovie MapListMovie(MovieResultResource movieResult)
+        protected ImportListGame MapListGame(GameResultResource gameResult)
         {
-            var movie =  new ImportListMovie
+            var game =  new ImportListGame
             {
-                TmdbId = movieResult.Id,
-                Title = movieResult.Title,
+                IgdbId = gameResult.Id,
+                Title = gameResult.Title,
             };
 
-            if (movieResult.ReleaseDate.IsNotNullOrWhiteSpace() && DateTime.TryParse(movieResult.ReleaseDate, out var releaseDate))
+            if (gameResult.ReleaseDate.IsNotNullOrWhiteSpace() && DateTime.TryParse(gameResult.ReleaseDate, out var releaseDate))
             {
-                movie.Year = releaseDate.Year;
+                game.Year = releaseDate.Year;
             }
 
-            return movie;
+            return game;
         }
 
         private MediaCover.MediaCover MapPosterImage(string path)
         {
             if (path.IsNotNullOrWhiteSpace())
             {
-                return new MediaCover.MediaCover(MediaCoverTypes.Poster, $"https://image.tmdb.org/t/p/original{path}");
+                return new MediaCover.MediaCover(MediaCoverTypes.Poster, $"https://image.igdb.org/t/p/original{path}");
             }
 
             return null;

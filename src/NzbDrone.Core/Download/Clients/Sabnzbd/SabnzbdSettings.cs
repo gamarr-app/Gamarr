@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                                     .WithMessage("Password is required when API key is not configured")
                                     .When(c => string.IsNullOrWhiteSpace(c.ApiKey));
 
-            RuleFor(c => c.MovieCategory).NotEmpty()
+            RuleFor(c => c.GameCategory).NotEmpty()
                                       .WithMessage("A category is recommended")
                                       .AsWarning();
         }
@@ -39,9 +39,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         {
             Host = "localhost";
             Port = 8080;
-            MovieCategory = "movies";
-            RecentMoviePriority = (int)SabnzbdPriority.Default;
-            OlderMoviePriority = (int)SabnzbdPriority.Default;
+            GameCategory = "games";
+            RecentGamePriority = (int)SabnzbdPriority.Default;
+            OlderGamePriority = (int)SabnzbdPriority.Default;
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -69,13 +69,13 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         public string Password { get; set; }
 
         [FieldDefinition(7, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategoryHelpText")]
-        public string MovieCategory { get; set; }
+        public string GameCategory { get; set; }
 
-        [FieldDefinition(8, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(SabnzbdPriority), HelpText = "DownloadClientSettingsRecentPriorityMovieHelpText")]
-        public int RecentMoviePriority { get; set; }
+        [FieldDefinition(8, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(SabnzbdPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
+        public int RecentGamePriority { get; set; }
 
-        [FieldDefinition(9, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(SabnzbdPriority), HelpText = "DownloadClientSettingsOlderPriorityMovieHelpText")]
-        public int OlderMoviePriority { get; set; }
+        [FieldDefinition(9, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(SabnzbdPriority), HelpText = "DownloadClientSettingsOlderPriorityGameHelpText")]
+        public int OlderGamePriority { get; set; }
 
         public override NzbDroneValidationResult Validate()
         {

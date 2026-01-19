@@ -12,14 +12,14 @@ namespace NzbDrone.Core.ImportLists.TMDb.User
 {
     public class TMDbUserImport : TMDbImportListBase<TMDbUserSettings>
     {
-        public TMDbUserImport(IRadarrCloudRequestBuilder requestBuilder,
+        public TMDbUserImport(IGamarrCloudRequestBuilder requestBuilder,
                                  IHttpClient httpClient,
                                  IImportListStatusService importListStatusService,
                                  IConfigService configService,
                                  IParsingService parsingService,
-                                 ISearchForNewMovie searchForNewMovie,
+                                 ISearchForNewGame searchForNewGame,
                                  Logger logger)
-        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewMovie, logger)
+        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewGame, logger)
         {
         }
 

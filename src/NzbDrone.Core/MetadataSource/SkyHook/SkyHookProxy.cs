@@ -14,52 +14,52 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.SkyHook.Resource;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.AlternativeTitles;
-using NzbDrone.Core.Movies.Collections;
-using NzbDrone.Core.Movies.Credits;
-using NzbDrone.Core.Movies.Translations;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.AlternativeTitles;
+using NzbDrone.Core.Games.Collections;
+using NzbDrone.Core.Games.Credits;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.MetadataSource.SkyHook
 {
-    public class SkyHookProxy : IProvideMovieInfo, ISearchForNewMovie
+    public class SkyHookProxy : IProvideGameInfo, ISearchForNewGame
     {
         private readonly IHttpClient _httpClient;
         private readonly Logger _logger;
 
-        private readonly IHttpRequestBuilderFactory _radarrMetadata;
+        private readonly IHttpRequestBuilderFactory _gamarrMetadata;
         private readonly IConfigService _configService;
-        private readonly IMovieService _movieService;
-        private readonly IMovieMetadataService _movieMetadataService;
-        private readonly IMovieTranslationService _movieTranslationService;
+        private readonly IGameService _gameService;
+        private readonly IGameMetadataService _gameMetadataService;
+        private readonly IGameTranslationService _gameTranslationService;
 
         public SkyHookProxy(IHttpClient httpClient,
-            IRadarrCloudRequestBuilder requestBuilder,
+            IGamarrCloudRequestBuilder requestBuilder,
             IConfigService configService,
-            IMovieService movieService,
-            IMovieMetadataService movieMetadataService,
-            IMovieTranslationService movieTranslationService,
+            IGameService gameService,
+            IGameMetadataService gameMetadataService,
+            IGameTranslationService gameTranslationService,
             Logger logger)
         {
             _httpClient = httpClient;
-            _radarrMetadata = requestBuilder.RadarrMetadata;
+            _gamarrMetadata = requestBuilder.GamarrMetadata;
             _configService = configService;
-            _movieService = movieService;
-            _movieMetadataService = movieMetadataService;
-            _movieTranslationService = movieTranslationService;
+            _gameService = gameService;
+            _gameMetadataService = gameMetadataService;
+            _gameTranslationService = gameTranslationService;
 
             _logger = logger;
         }
 
-        public HashSet<int> GetChangedMovies(DateTime startTime)
+        public HashSet<int> GetChangedGames(DateTime startTime)
         {
             // Round down to the hour to ensure we cover gap and don't kill cache every call
             var cacheAdjustedStart = startTime.AddMinutes(-15);
             var startDate = cacheAdjustedStart.Date.AddHours(cacheAdjustedStart.Hour).ToString("s");
 
-            var request = _radarrMetadata.Create()
-                .SetSegment("route", "movie/changed")
+            var request = _gamarrMetadata.Create()
+                .SetSegment("route", "game/changed")
                 .AddQueryParam("since", startDate)
                 .Build();
 
@@ -71,51 +71,51 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             return new HashSet<int>(response.Resource);
         }
 
-        public List<MovieMetadata> GetTrendingMovies()
+        public List<GameMetadata> GetTrendingGames()
         {
-            var request = _radarrMetadata.Create()
-                .SetSegment("route", "list/tmdb/trending")
+            var request = _gamarrMetadata.Create()
+                .SetSegment("route", "list/igdb/trending")
                 .Build();
 
             request.AllowAutoRedirect = true;
             request.SuppressHttpError = true;
 
-            var response = _httpClient.Get<List<MovieResource>>(request);
+            var response = _httpClient.Get<List<GameResource>>(request);
 
-            return response.Resource.DistinctBy(x => x.TmdbId).Select(MapMovie).ToList();
+            return response.Resource.DistinctBy(x => x.IgdbId).Select(MapGame).ToList();
         }
 
-        public List<MovieMetadata> GetPopularMovies()
+        public List<GameMetadata> GetPopularGames()
         {
-            var request = _radarrMetadata.Create()
-                .SetSegment("route", "list/tmdb/popular")
+            var request = _gamarrMetadata.Create()
+                .SetSegment("route", "list/igdb/popular")
                 .Build();
 
             request.AllowAutoRedirect = true;
             request.SuppressHttpError = true;
 
-            var response = _httpClient.Get<List<MovieResource>>(request);
+            var response = _httpClient.Get<List<GameResource>>(request);
 
-            return response.Resource.DistinctBy(x => x.TmdbId).Select(MapMovie).ToList();
+            return response.Resource.DistinctBy(x => x.IgdbId).Select(MapGame).ToList();
         }
 
-        public Tuple<MovieMetadata, List<Credit>> GetMovieInfo(int tmdbId)
+        public Tuple<GameMetadata, List<Credit>> GetGameInfo(int igdbId)
         {
-            var httpRequest = _radarrMetadata.Create()
-                                             .SetSegment("route", "movie")
-                                             .Resource(tmdbId.ToString())
+            var httpRequest = _gamarrMetadata.Create()
+                                             .SetSegment("route", "game")
+                                             .Resource(igdbId.ToString())
                                              .Build();
 
             httpRequest.AllowAutoRedirect = true;
             httpRequest.SuppressHttpError = true;
 
-            var httpResponse = _httpClient.Get<MovieResource>(httpRequest);
+            var httpResponse = _httpClient.Get<GameResource>(httpRequest);
 
             if (httpResponse.HasHttpError)
             {
                 if (httpResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    throw new MovieNotFoundException(tmdbId);
+                    throw new GameNotFoundException(igdbId);
                 }
                 else
                 {
@@ -127,16 +127,16 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             credits.AddRange(httpResponse.Resource.Credits.Cast.Select(MapCast));
             credits.AddRange(httpResponse.Resource.Credits.Crew.Select(MapCrew));
 
-            var movie = MapMovie(httpResponse.Resource);
+            var game = MapGame(httpResponse.Resource);
 
-            return new Tuple<MovieMetadata, List<Credit>>(movie, credits.ToList());
+            return new Tuple<GameMetadata, List<Credit>>(game, credits.ToList());
         }
 
-        public MovieCollection GetCollectionInfo(int tmdbId)
+        public GameCollection GetCollectionInfo(int igdbId)
         {
-            var httpRequest = _radarrMetadata.Create()
-                                             .SetSegment("route", "movie/collection")
-                                             .Resource(tmdbId.ToString())
+            var httpRequest = _gamarrMetadata.Create()
+                                             .SetSegment("route", "game/collection")
+                                             .Resource(igdbId.ToString())
                                              .Build();
 
             httpRequest.AllowAutoRedirect = true;
@@ -148,7 +148,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             {
                 if (httpResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    throw new MovieNotFoundException(tmdbId);
+                    throw new GameNotFoundException(igdbId);
                 }
                 else
                 {
@@ -161,33 +161,33 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             return collection;
         }
 
-        public List<MovieMetadata> GetBulkMovieInfo(List<int> tmdbIds)
+        public List<GameMetadata> GetBulkGameInfo(List<int> igdbIds)
         {
-            var httpRequest = _radarrMetadata.Create()
-                                             .SetSegment("route", "movie/bulk")
+            var httpRequest = _gamarrMetadata.Create()
+                                             .SetSegment("route", "game/bulk")
                                              .Build();
 
             httpRequest.Headers.ContentType = "application/json";
 
-            httpRequest.SetContent(tmdbIds.ToJson());
-            httpRequest.ContentSummary = tmdbIds.ToJson(Formatting.None);
+            httpRequest.SetContent(igdbIds.ToJson());
+            httpRequest.ContentSummary = igdbIds.ToJson(Formatting.None);
 
             httpRequest.AllowAutoRedirect = true;
             httpRequest.SuppressHttpError = true;
 
-            var httpResponse = _httpClient.Post<List<MovieResource>>(httpRequest);
+            var httpResponse = _httpClient.Post<List<GameResource>>(httpRequest);
 
             if (httpResponse.HasHttpError || httpResponse.Resource.Count == 0)
             {
                 throw new HttpException(httpRequest, httpResponse);
             }
 
-            var movies = httpResponse.Resource.Select(MapMovie).ToList();
+            var games = httpResponse.Resource.Select(MapGame).ToList();
 
-            return movies;
+            return games;
         }
 
-        public MovieMetadata GetMovieByImdbId(string imdbId)
+        public GameMetadata GetGameByImdbId(string imdbId)
         {
             imdbId = Parser.Parser.NormalizeImdbId(imdbId);
 
@@ -196,21 +196,21 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 return null;
             }
 
-            var httpRequest = _radarrMetadata.Create()
-                                             .SetSegment("route", "movie/imdb")
+            var httpRequest = _gamarrMetadata.Create()
+                                             .SetSegment("route", "game/imdb")
                                              .Resource(imdbId.ToString())
                                              .Build();
 
             httpRequest.AllowAutoRedirect = true;
             httpRequest.SuppressHttpError = true;
 
-            var httpResponse = _httpClient.Get<List<MovieResource>>(httpRequest);
+            var httpResponse = _httpClient.Get<List<GameResource>>(httpRequest);
 
             if (httpResponse.HasHttpError)
             {
                 if (httpResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    throw new MovieNotFoundException(imdbId);
+                    throw new GameNotFoundException(imdbId);
                 }
                 else
                 {
@@ -218,111 +218,111 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 }
             }
 
-            var movie = httpResponse.Resource.SelectList(MapMovie).FirstOrDefault();
+            var game = httpResponse.Resource.SelectList(MapGame).FirstOrDefault();
 
-            return movie;
+            return game;
         }
 
-        public MovieMetadata MapMovie(MovieResource resource)
+        public GameMetadata MapGame(GameResource resource)
         {
-            var movie = new MovieMetadata();
+            var game = new GameMetadata();
             var altTitles = new List<AlternativeTitle>();
 
-            movie.TmdbId = resource.TmdbId;
-            movie.ImdbId = resource.ImdbId;
-            movie.Title = resource.Title;
-            movie.OriginalTitle = resource.OriginalTitle;
-            movie.CleanTitle = resource.Title.CleanMovieTitle();
-            movie.SortTitle = MovieTitleNormalizer.Normalize(resource.Title, resource.TmdbId);
-            movie.CleanOriginalTitle = resource.OriginalTitle.CleanMovieTitle();
-            movie.Overview = resource.Overview;
+            game.IgdbId = resource.IgdbId;
+            game.ImdbId = resource.ImdbId;
+            game.Title = resource.Title;
+            game.OriginalTitle = resource.OriginalTitle;
+            game.CleanTitle = resource.Title.CleanGameTitle();
+            game.SortTitle = GameTitleNormalizer.Normalize(resource.Title, resource.IgdbId);
+            game.CleanOriginalTitle = resource.OriginalTitle.CleanGameTitle();
+            game.Overview = resource.Overview;
 
-            movie.AlternativeTitles.AddRange(resource.AlternativeTitles.Select(MapAlternativeTitle));
+            game.AlternativeTitles.AddRange(resource.AlternativeTitles.Select(MapAlternativeTitle));
 
-            movie.Translations.AddRange(resource.Translations.Select(MapTranslation));
+            game.Translations.AddRange(resource.Translations.Select(MapTranslation));
 
-            movie.OriginalLanguage = IsoLanguages.Find(resource.OriginalLanguage.ToLower())?.Language ?? Language.English;
+            game.OriginalLanguage = IsoLanguages.Find(resource.OriginalLanguage.ToLower())?.Language ?? Language.English;
 
-            movie.Website = resource.Homepage;
-            movie.InCinemas = resource.InCinema;
-            movie.PhysicalRelease = resource.PhysicalRelease;
-            movie.DigitalRelease = resource.DigitalRelease;
+            game.Website = resource.Homepage;
+            game.InDevelopment = resource.InCinema;
+            game.PhysicalRelease = resource.PhysicalRelease;
+            game.DigitalRelease = resource.DigitalRelease;
 
-            movie.Year = resource.Year;
+            game.Year = resource.Year;
 
-            // If the premier differs from the TMDB year, use it as a secondary year.
-            if (resource.Premier.HasValue && resource.Premier?.Year != movie.Year)
+            // If the premier differs from the IGDB year, use it as a secondary year.
+            if (resource.Premier.HasValue && resource.Premier?.Year != game.Year)
             {
-                movie.SecondaryYear = resource.Premier?.Year;
+                game.SecondaryYear = resource.Premier?.Year;
             }
 
             if (resource.Runtime != null)
             {
-                movie.Runtime = resource.Runtime.Value;
+                game.Runtime = resource.Runtime.Value;
             }
 
             if (resource.Popularity != null)
             {
-                movie.Popularity = resource.Popularity.Value;
+                game.Popularity = resource.Popularity.Value;
             }
 
             var certificationCountry = _configService.CertificationCountry.ToString();
 
-            movie.Certification = resource.Certifications.FirstOrDefault(m => m.Country == certificationCountry)?.Certification;
-            movie.Ratings = MapRatings(resource.MovieRatings) ?? new Ratings();
+            game.Certification = resource.Certifications.FirstOrDefault(m => m.Country == certificationCountry)?.Certification;
+            game.Ratings = MapRatings(resource.GameRatings) ?? new Ratings();
 
-            movie.TmdbId = resource.TmdbId;
-            movie.Genres = resource.Genres ?? new List<string>();
-            movie.Keywords = resource.Keywords ?? new List<string>();
-            movie.Images = resource.Images.Select(MapImage).ToList();
+            game.IgdbId = resource.IgdbId;
+            game.Genres = resource.Genres ?? new List<string>();
+            game.Keywords = resource.Keywords ?? new List<string>();
+            game.Images = resource.Images.Select(MapImage).ToList();
 
-            movie.Recommendations = resource.Recommendations?.Select(r => r.TmdbId).ToList() ?? new List<int>();
+            game.Recommendations = resource.Recommendations?.Select(r => r.IgdbId).ToList() ?? new List<int>();
 
             // Workaround due to metadata change until cache cleans up
-            if (movie.Ratings.Tmdb == null)
+            if (game.Ratings.Igdb == null)
             {
-                var tmdbRating = resource.Ratings.FirstOrDefault();
-                movie.Ratings.Tmdb = new RatingChild
+                var igdbRating = resource.Ratings.FirstOrDefault();
+                game.Ratings.Igdb = new RatingChild
                 {
-                    Votes = tmdbRating.Count,
-                    Value = tmdbRating.Value
+                    Votes = igdbRating.Count,
+                    Value = igdbRating.Value
                 };
             }
 
             var now = DateTime.UtcNow;
 
-            movie.Status = MovieStatusType.Announced;
+            game.Status = GameStatusType.Announced;
 
             if (resource.InCinema.HasValue && now > resource.InCinema)
             {
-                movie.Status = MovieStatusType.InCinemas;
+                game.Status = GameStatusType.InDevelopment;
 
                 if (!resource.PhysicalRelease.HasValue && !resource.DigitalRelease.HasValue && now > resource.InCinema.Value.AddDays(90))
                 {
-                    movie.Status = MovieStatusType.Released;
+                    game.Status = GameStatusType.Released;
                 }
             }
 
             if (resource.PhysicalRelease.HasValue && now >= resource.PhysicalRelease)
             {
-                movie.Status = MovieStatusType.Released;
+                game.Status = GameStatusType.Released;
             }
 
             if (resource.DigitalRelease.HasValue && now >= resource.DigitalRelease)
             {
-                movie.Status = MovieStatusType.Released;
+                game.Status = GameStatusType.Released;
             }
 
-            movie.YouTubeTrailerId = resource.YoutubeTrailerId;
-            movie.Studio = resource.Studio;
+            game.YouTubeTrailerId = resource.YoutubeTrailerId;
+            game.Studio = resource.Studio;
 
             if (resource.Collection != null)
             {
-                movie.CollectionTmdbId = resource.Collection.TmdbId;
-                movie.CollectionTitle = resource.Collection.Name;
+                game.CollectionIgdbId = resource.Collection.IgdbId;
+                game.CollectionTitle = resource.Collection.Name;
             }
 
-            return movie;
+            return game;
         }
 
         private string StripTrailingTheFromTitle(string title)
@@ -339,70 +339,70 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             return title;
         }
 
-        public MovieMetadata MapMovieToTmdbMovie(MovieMetadata movie)
+        public GameMetadata MapGameToIgdbGame(GameMetadata game)
         {
             try
             {
-                var newMovie = movie;
+                var newGame = game;
 
-                if (movie.TmdbId > 0)
+                if (game.IgdbId > 0)
                 {
-                    newMovie = _movieMetadataService.FindByTmdbId(movie.TmdbId);
+                    newGame = _gameMetadataService.FindByIgdbId(game.IgdbId);
 
-                    if (newMovie != null)
+                    if (newGame != null)
                     {
-                        return newMovie;
+                        return newGame;
                     }
 
-                    newMovie = GetMovieInfo(movie.TmdbId).Item1;
+                    newGame = GetGameInfo(game.IgdbId).Item1;
                 }
-                else if (movie.ImdbId.IsNotNullOrWhiteSpace())
+                else if (game.ImdbId.IsNotNullOrWhiteSpace())
                 {
-                    newMovie = _movieMetadataService.FindByImdbId(Parser.Parser.NormalizeImdbId(movie.ImdbId));
+                    newGame = _gameMetadataService.FindByImdbId(Parser.Parser.NormalizeImdbId(game.ImdbId));
 
-                    if (newMovie != null)
+                    if (newGame != null)
                     {
-                        return newMovie;
+                        return newGame;
                     }
 
-                    newMovie = GetMovieByImdbId(movie.ImdbId);
+                    newGame = GetGameByImdbId(game.ImdbId);
                 }
                 else
                 {
                     var yearStr = "";
-                    if (movie.Year > 1900)
+                    if (game.Year > 1900)
                     {
-                        yearStr = $" {movie.Year}";
+                        yearStr = $" {game.Year}";
                     }
 
-                    var newMovieObject = SearchForNewMovie(movie.Title + yearStr).FirstOrDefault();
+                    var newGameObject = SearchForNewGame(game.Title + yearStr).FirstOrDefault();
 
-                    if (newMovieObject == null)
+                    if (newGameObject == null)
                     {
-                        newMovie = null;
+                        newGame = null;
                     }
                     else
                     {
-                        newMovie = newMovieObject.MovieMetadata;
+                        newGame = newGameObject.GameMetadata;
                     }
                 }
 
-                if (newMovie == null)
+                if (newGame == null)
                 {
-                    _logger.Warn("Couldn't map movie {0} to a movie on The Movie DB. It will not be added :(", movie.Title);
+                    _logger.Warn("Couldn't map game {0} to a game on The Game DB. It will not be added :(", game.Title);
                     return null;
                 }
 
-                return newMovie;
+                return newGame;
             }
             catch (Exception ex)
             {
-                _logger.Warn(ex, "Couldn't map movie {0} to a movie on The Movie DB. It will not be added :(", movie.Title);
+                _logger.Warn(ex, "Couldn't map game {0} to a game on The Game DB. It will not be added :(", game.Title);
                 return null;
             }
         }
 
-        public List<Movie> SearchForNewMovie(string title)
+        public List<Game> SearchForNewGame(string title)
         {
             try
             {
@@ -414,11 +414,11 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 }
                 else
                 {
-                    match = new Regex(@"\bthemoviedb\.org/movie/(\d+)\b", RegexOptions.IgnoreCase).Match(title);
+                    match = new Regex(@"\bthegamedb\.org/game/(\d+)\b", RegexOptions.IgnoreCase).Match(title);
 
                     if (match.Success)
                     {
-                        title = "tmdb:" + match.Groups[1].Value;
+                        title = "igdb:" + match.Groups[1].Value;
                     }
                 }
 
@@ -428,14 +428,14 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                 var parserTitle = lowerTitle;
 
-                var parserResult = Parser.Parser.ParseMovieTitle(title, true);
+                var parserResult = Parser.Parser.ParseGameTitle(title, true);
 
                 var yearTerm = "";
 
-                if (parserResult != null && parserResult.PrimaryMovieTitle != title)
+                if (parserResult != null && parserResult.PrimaryGameTitle != title)
                 {
                     // Parser found something interesting!
-                    parserTitle = parserResult.PrimaryMovieTitle.ToLower().Replace(".", " "); // TODO Update so not every period gets replaced (e.g. R.I.P.D.)
+                    parserTitle = parserResult.PrimaryGameTitle.ToLower().Replace(".", " "); // TODO Update so not every period gets replaced (e.g. R.I.P.D.)
                     if (parserResult.Year > 1800)
                     {
                         yearTerm = parserResult.Year.ToString();
@@ -445,25 +445,25 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                     {
                         try
                         {
-                            var movieLookup = GetMovieByImdbId(parserResult.ImdbId);
-                            return movieLookup == null ? new List<Movie>() : new List<Movie> { _movieService.FindByTmdbId(movieLookup.TmdbId) ?? new Movie { MovieMetadata = movieLookup } };
+                            var gameLookup = GetGameByImdbId(parserResult.ImdbId);
+                            return gameLookup == null ? new List<Game>() : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
                         }
                         catch (Exception)
                         {
-                            return new List<Movie>();
+                            return new List<Game>();
                         }
                     }
 
-                    if (parserResult.TmdbId > 0)
+                    if (parserResult.IgdbId > 0)
                     {
                         try
                         {
-                            var movieLookup = GetMovieInfo(parserResult.TmdbId).Item1;
-                            return movieLookup == null ? new List<Movie>() : new List<Movie> { _movieService.FindByTmdbId(movieLookup.TmdbId) ?? new Movie { MovieMetadata = movieLookup } };
+                            var gameLookup = GetGameInfo(parserResult.IgdbId).Item1;
+                            return gameLookup == null ? new List<Game>() : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
                         }
                         catch (Exception)
                         {
-                            return new List<Movie>();
+                            return new List<Game>();
                         }
                     }
                 }
@@ -478,39 +478,39 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                     if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace))
                     {
-                        return new List<Movie>();
+                        return new List<Game>();
                     }
 
                     try
                     {
-                        var movieLookup = GetMovieByImdbId(imdbid);
-                        return movieLookup == null ? new List<Movie>() : new List<Movie> { _movieService.FindByTmdbId(movieLookup.TmdbId) ?? new Movie { MovieMetadata = movieLookup } };
+                        var gameLookup = GetGameByImdbId(imdbid);
+                        return gameLookup == null ? new List<Game>() : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
                     }
-                    catch (MovieNotFoundException)
+                    catch (GameNotFoundException)
                     {
-                        return new List<Movie>();
+                        return new List<Game>();
                     }
                 }
 
-                if (lowerTitle.StartsWith("tmdb:") || lowerTitle.StartsWith("tmdbid:"))
+                if (lowerTitle.StartsWith("igdb:") || lowerTitle.StartsWith("igdbid:"))
                 {
                     var slug = lowerTitle.Split(':')[1].Trim();
 
-                    var tmdbid = -1;
+                    var igdbid = -1;
 
-                    if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace) || !int.TryParse(slug, out tmdbid))
+                    if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace) || !int.TryParse(slug, out igdbid))
                     {
-                        return new List<Movie>();
+                        return new List<Game>();
                     }
 
                     try
                     {
-                        var movieLookup = GetMovieInfo(tmdbid).Item1;
-                        return movieLookup == null ? new List<Movie>() : new List<Movie> { _movieService.FindByTmdbId(movieLookup.TmdbId) ?? new Movie { MovieMetadata = movieLookup } };
+                        var gameLookup = GetGameInfo(igdbid).Item1;
+                        return gameLookup == null ? new List<Game>() : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
                     }
-                    catch (MovieNotFoundException)
+                    catch (GameNotFoundException)
                     {
-                        return new List<Movie>();
+                        return new List<Game>();
                     }
                 }
 
@@ -518,7 +518,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                 var firstChar = searchTerm.First();
 
-                var request = _radarrMetadata.Create()
+                var request = _gamarrMetadata.Create()
                     .SetSegment("route", "search")
                     .AddQueryParam("q", searchTerm)
                     .AddQueryParam("year", yearTerm)
@@ -527,54 +527,54 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 request.AllowAutoRedirect = true;
                 request.SuppressHttpError = true;
 
-                var httpResponse = _httpClient.Get<List<MovieResource>>(request);
+                var httpResponse = _httpClient.Get<List<GameResource>>(request);
 
                 return httpResponse.Resource.SelectList(MapSearchResult);
             }
             catch (HttpException ex)
             {
                 _logger.Warn(ex);
-                throw new SkyHookException("Search for '{0}' failed. Unable to communicate with RadarrAPI. {1}", ex, title, ex.Message);
+                throw new SkyHookException("Search for '{0}' failed. Unable to communicate with GamarrAPI. {1}", ex, title, ex.Message);
             }
             catch (WebException ex)
             {
                 _logger.Warn(ex);
-                throw new SkyHookException("Search for '{0}' failed. Unable to communicate with RadarrAPI. {1}", ex, title, ex.Message);
+                throw new SkyHookException("Search for '{0}' failed. Unable to communicate with GamarrAPI. {1}", ex, title, ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.Warn(ex);
-                throw new SkyHookException("Search for '{0}' failed. Invalid response received from RadarrAPI. {1}", ex, title, ex.Message);
+                throw new SkyHookException("Search for '{0}' failed. Invalid response received from GamarrAPI. {1}", ex, title, ex.Message);
             }
         }
 
-        private Movie MapSearchResult(MovieResource result)
+        private Game MapSearchResult(GameResource result)
         {
-            var movie = _movieService.FindByTmdbId(result.TmdbId);
+            var game = _gameService.FindByIgdbId(result.IgdbId);
 
-            if (movie == null)
+            if (game == null)
             {
-                movie = new Movie { MovieMetadata = MapMovie(result) };
+                game = new Game { GameMetadata = MapGame(result) };
             }
             else
             {
-                movie.MovieMetadata.Value.Translations = _movieTranslationService.GetAllTranslationsForMovieMetadata(movie.MovieMetadataId);
+                game.GameMetadata.Value.Translations = _gameTranslationService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
             }
 
-            return movie;
+            return game;
         }
 
-        private MovieCollection MapCollection(CollectionResource arg)
+        private GameCollection MapCollection(CollectionResource arg)
         {
-            var collection = new MovieCollection
+            var collection = new GameCollection
             {
-                TmdbId = arg.TmdbId,
+                IgdbId = arg.IgdbId,
                 Title = arg.Name,
                 Overview = arg.Overview,
-                CleanTitle = arg.Name.CleanMovieTitle(),
+                CleanTitle = arg.Name.CleanGameTitle(),
                 SortTitle = Parser.Parser.NormalizeTitle(arg.Name),
                 Images = arg.Images?.Select(MapImage).ToList() ?? new List<MediaCover.MediaCover>(),
-                Movies = arg.Parts?.Select(x => MapMovie(x)).ToList() ?? new List<MovieMetadata>()
+                Games = arg.Parts?.Select(x => MapGame(x)).ToList() ?? new List<GameMetadata>()
             };
 
             return collection;
@@ -587,8 +587,8 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 Name = arg.Name,
                 Character = arg.Character,
                 Order = arg.Order,
-                CreditTmdbId = arg.CreditId,
-                PersonTmdbId = arg.TmdbId,
+                CreditIgdbId = arg.CreditId,
+                PersonIgdbId = arg.IgdbId,
                 Type = CreditType.Cast,
                 Images = arg.Images.Select(MapImage).ToList()
             };
@@ -604,8 +604,8 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 Department = arg.Department,
                 Job = arg.Job,
                 Order = arg.Order,
-                CreditTmdbId = arg.CreditId,
-                PersonTmdbId = arg.TmdbId,
+                CreditIgdbId = arg.CreditId,
+                PersonIgdbId = arg.IgdbId,
                 Type = CreditType.Crew,
                 Images = arg.Images.Select(MapImage).ToList()
             };
@@ -618,20 +618,20 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             var newAlternativeTitle = new AlternativeTitle
             {
                 Title = arg.Title,
-                SourceType = SourceType.Tmdb,
-                CleanTitle = arg.Title.CleanMovieTitle()
+                SourceType = SourceType.Igdb,
+                CleanTitle = arg.Title.CleanGameTitle()
             };
 
             return newAlternativeTitle;
         }
 
-        private static MovieTranslation MapTranslation(TranslationResource arg)
+        private static GameTranslation MapTranslation(TranslationResource arg)
         {
-            var newAlternativeTitle = new MovieTranslation
+            var newAlternativeTitle = new GameTranslation
             {
                 Title = arg.Title,
                 Overview = arg.Overview,
-                CleanTitle = arg.Title.CleanMovieTitle(),
+                CleanTitle = arg.Title.CleanGameTitle(),
                 Language = IsoLanguages.Find(arg.Language.ToLower())?.Language
             };
 
@@ -647,13 +647,13 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
             var mappedRatings = new Ratings();
 
-            if (ratings.Tmdb != null)
+            if (ratings.Igdb != null)
             {
-                mappedRatings.Tmdb = new RatingChild
+                mappedRatings.Igdb = new RatingChild
                 {
-                    Type = (RatingType)Enum.Parse(typeof(RatingType), ratings.Tmdb.Type),
-                    Value = ratings.Tmdb.Value,
-                    Votes = ratings.Tmdb.Count
+                    Type = (RatingType)Enum.Parse(typeof(RatingType), ratings.Igdb.Type),
+                    Value = ratings.Igdb.Value,
+                    Votes = ratings.Igdb.Count
                 };
             }
 

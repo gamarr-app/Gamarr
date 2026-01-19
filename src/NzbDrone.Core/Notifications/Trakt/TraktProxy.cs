@@ -12,8 +12,8 @@ namespace NzbDrone.Core.Notifications.Trakt
         string GetUserName(string accessToken);
         HttpRequest GetOAuthRequest(string callbackUrl);
         TraktAuthRefreshResource RefreshAuthToken(string refreshToken);
-        void AddToCollection(TraktCollectMoviesResource payload, string accessToken);
-        void RemoveFromCollection(TraktCollectMoviesResource payload, string accessToken);
+        void AddToCollection(TraktCollectGamesResource payload, string accessToken);
+        void RemoveFromCollection(TraktCollectGamesResource payload, string accessToken);
         HttpRequest BuildRequest(string resource, HttpMethod method, string accessToken);
         HttpRequest BuildRequest(HttpRequest request, string accessToken);
     }
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Notifications.Trakt
             _httpClient = httpClient;
         }
 
-        public void AddToCollection(TraktCollectMoviesResource payload, string accessToken)
+        public void AddToCollection(TraktCollectGamesResource payload, string accessToken)
         {
             var request = BuildRequest("sync/collection", HttpMethod.Post, accessToken);
 
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Notifications.Trakt
             MakeRequest(request);
         }
 
-        public void RemoveFromCollection(TraktCollectMoviesResource payload, string accessToken)
+        public void RemoveFromCollection(TraktCollectGamesResource payload, string accessToken)
         {
             var request = BuildRequest("sync/collection/remove", HttpMethod.Post, accessToken);
 

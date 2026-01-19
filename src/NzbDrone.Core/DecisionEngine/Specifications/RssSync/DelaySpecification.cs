@@ -32,7 +32,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Temporary;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria != null && searchCriteria.UserInvokedSearch)
             {
@@ -40,8 +40,8 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return DownloadSpecDecision.Accept();
             }
 
-            var profile = subject.Movie.QualityProfile;
-            var delayProfile = _delayProfileService.BestForTags(subject.Movie.Tags);
+            var profile = subject.Game.QualityProfile;
+            var delayProfile = _delayProfileService.BestForTags(subject.Game.Tags);
             var delay = delayProfile.GetProtocolDelay(subject.Release.DownloadProtocol);
             var isPreferredProtocol = subject.Release.DownloadProtocol == delayProfile.PreferredProtocol;
 
@@ -55,20 +55,20 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
             var qualityComparer = new QualityModelComparer(profile);
 
-            var file = subject.Movie.MovieFile;
+            var file = subject.Game.GameFile;
 
-            if (isPreferredProtocol && (subject.Movie.MovieFileId != 0 && file != null))
+            if (isPreferredProtocol && (subject.Game.GameFileId != 0 && file != null))
             {
                 var customFormats = _formatService.ParseCustomFormat(file);
                 var upgradeableRejectReason = _qualityUpgradableSpecification.IsUpgradable(profile,
                     file.Quality,
                     customFormats,
-                    subject.ParsedMovieInfo.Quality,
+                    subject.ParsedGameInfo.Quality,
                     subject.CustomFormats);
 
                 if (upgradeableRejectReason == UpgradeableRejectReason.None)
                 {
-                    var revisionUpgrade = _qualityUpgradableSpecification.IsRevisionUpgrade(subject.Movie.MovieFile.Quality, subject.ParsedMovieInfo.Quality);
+                    var revisionUpgrade = _qualityUpgradableSpecification.IsRevisionUpgrade(subject.Game.GameFile.Quality, subject.ParsedGameInfo.Quality);
 
                     if (revisionUpgrade)
                     {
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             if (delayProfile.BypassIfHighestQuality)
             {
                 var bestQualityInProfile = profile.LastAllowedQuality();
-                var isBestInProfile = qualityComparer.Compare(subject.ParsedMovieInfo.Quality.Quality, bestQualityInProfile) >= 0;
+                var isBestInProfile = qualityComparer.Compare(subject.ParsedGameInfo.Quality.Quality, bestQualityInProfile) >= 0;
 
                 if (isBestInProfile && isPreferredProtocol)
                 {
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 }
             }
 
-            var oldest = _pendingReleaseService.OldestPendingRelease(subject.Movie.Id);
+            var oldest = _pendingReleaseService.OldestPendingRelease(subject.Game.Id);
 
             if (oldest != null && oldest.Release.AgeMinutes > delay)
             {

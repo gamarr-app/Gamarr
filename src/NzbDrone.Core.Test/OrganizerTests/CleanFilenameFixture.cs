@@ -20,9 +20,9 @@ namespace NzbDrone.Core.Test.OrganizerTests
             FileNameBuilder.CleanFileName(name).Should().Be(expectedName);
         }
 
-        [TestCase(" The Movie Title", "The Movie Title")]
-        [TestCase("The Movie Title ", "The Movie Title")]
-        [TestCase(" The Movie Title ", "The Movie Title")]
+        [TestCase(" The Game Title", "The Game Title")]
+        [TestCase("The Game Title ", "The Game Title")]
+        [TestCase(" The Game Title ", "The Game Title")]
         public void should_remove_spaces_from_start_and_end(string name, string expectedName)
         {
             FileNameBuilder.CleanFileName(name).Should().Be(expectedName);

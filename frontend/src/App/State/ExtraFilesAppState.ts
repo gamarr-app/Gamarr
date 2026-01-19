@@ -1,5 +1,5 @@
 import AppSectionState from 'App/State/AppSectionState';
-import { ExtraFile } from 'MovieFile/ExtraFile';
+import { ExtraFile } from 'GameFile/ExtraFile';
 
 type ExtraFilesAppState = AppSectionState<ExtraFile>;
 

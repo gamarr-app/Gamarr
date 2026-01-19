@@ -6,7 +6,7 @@ using NzbDrone.Core.Extras.Others;
 using NzbDrone.Core.Housekeeping.Housekeepers;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
@@ -16,10 +16,10 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
     public class CleanupOrphanedExtraFilesFixture : DbTest<CleanupOrphanedExtraFiles, OtherExtraFile>
     {
         [Test]
-        public void should_delete_extra_files_that_dont_have_a_coresponding_movie()
+        public void should_delete_extra_files_that_dont_have_a_coresponding_game()
         {
             var extraFile = Builder<OtherExtraFile>.CreateNew()
-                                                    .With(m => m.MovieFileId = 0)
+                                                    .With(m => m.GameFileId = 0)
                                                     .BuildNew();
 
             Db.Insert(extraFile);
@@ -28,16 +28,16 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         }
 
         [Test]
-        public void should_not_delete_extra_files_that_have_a_coresponding_movie()
+        public void should_not_delete_extra_files_that_have_a_coresponding_game()
         {
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                       .BuildNew();
 
-            Db.Insert(movie);
+            Db.Insert(game);
 
             var extraFile = Builder<OtherExtraFile>.CreateNew()
-                                                    .With(m => m.MovieId = movie.Id)
-                                                    .With(m => m.MovieFileId = 0)
+                                                    .With(m => m.GameId = game.Id)
+                                                    .With(m => m.GameFileId = 0)
                                                     .BuildNew();
 
             Db.Insert(extraFile);
@@ -46,16 +46,16 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         }
 
         [Test]
-        public void should_delete_extra_files_that_dont_have_a_coresponding_movie_file()
+        public void should_delete_extra_files_that_dont_have_a_coresponding_game_file()
         {
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                       .BuildNew();
 
-            Db.Insert(movie);
+            Db.Insert(game);
 
             var extraFile = Builder<OtherExtraFile>.CreateNew()
-                                                    .With(m => m.MovieId = movie.Id)
-                                                    .With(m => m.MovieFileId = 10)
+                                                    .With(m => m.GameId = game.Id)
+                                                    .With(m => m.GameFileId = 10)
                                                     .BuildNew();
 
             Db.Insert(extraFile);
@@ -64,22 +64,22 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         }
 
         [Test]
-        public void should_not_delete_extra_files_that_have_a_coresponding_movie_file()
+        public void should_not_delete_extra_files_that_have_a_coresponding_game_file()
         {
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                       .BuildNew();
 
-            var movieFile = Builder<MovieFile>.CreateNew()
+            var gameFile = Builder<GameFile>.CreateNew()
                                                   .With(h => h.Quality = new QualityModel())
                                                   .With(h => h.Languages = new List<Language>())
                                                   .BuildNew();
 
-            Db.Insert(movie);
-            Db.Insert(movieFile);
+            Db.Insert(game);
+            Db.Insert(gameFile);
 
             var extraFile = Builder<OtherExtraFile>.CreateNew()
-                                                    .With(m => m.MovieId = movie.Id)
-                                                    .With(m => m.MovieFileId = movieFile.Id)
+                                                    .With(m => m.GameId = game.Id)
+                                                    .With(m => m.GameFileId = gameFile.Id)
                                                     .BuildNew();
 
             Db.Insert(extraFile);

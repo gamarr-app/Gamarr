@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Notifications.Gotify
         {
             Priority = 5;
             MetadataLinks = Enumerable.Empty<int>();
-            PreferredMetadataLink = (int)MetadataLinkType.Tmdb;
+            PreferredMetadataLink = (int)MetadataLinkType.Igdb;
         }
 
         [FieldDefinition(0, Label = "NotificationsGotifySettingsServer", HelpText = "NotificationsGotifySettingsServerHelpText")]
@@ -61,10 +61,10 @@ namespace NzbDrone.Core.Notifications.Gotify
         [FieldDefinition(2, Label = "Priority", Type = FieldType.Select, SelectOptions = typeof(GotifyPriority), HelpText = "NotificationsGotifySettingsPriorityHelpText")]
         public int Priority { get; set; }
 
-        [FieldDefinition(3, Label = "NotificationsGotifySettingIncludeMoviePoster", Type = FieldType.Checkbox, HelpText = "NotificationsGotifySettingIncludeMoviePosterHelpText")]
-        public bool IncludeMoviePoster { get; set; }
+        [FieldDefinition(3, Label = "NotificationsGotifySettingIncludeGamePoster", Type = FieldType.Checkbox, HelpText = "NotificationsGotifySettingIncludeGamePosterHelpText")]
+        public bool IncludeGamePoster { get; set; }
 
-        [FieldDefinition(4, Label = "NotificationsGotifySettingsMetadataLinks", Type = FieldType.Select, SelectOptions = typeof(MetadataLinkType), HelpText = "NotificationsGotifySettingsMetadataLinksMovieHelpText")]
+        [FieldDefinition(4, Label = "NotificationsGotifySettingsMetadataLinks", Type = FieldType.Select, SelectOptions = typeof(MetadataLinkType), HelpText = "NotificationsGotifySettingsMetadataLinksGameHelpText")]
         public IEnumerable<int> MetadataLinks { get; set; }
 
         [FieldDefinition(5, Label = "NotificationsGotifySettingsPreferredMetadataLink", Type = FieldType.Select, SelectOptions = typeof(MetadataLinkType), HelpText = "NotificationsGotifySettingsPreferredMetadataLinkHelpText")]

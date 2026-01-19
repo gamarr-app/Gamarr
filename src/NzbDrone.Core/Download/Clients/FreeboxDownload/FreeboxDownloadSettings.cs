@@ -74,10 +74,10 @@ namespace NzbDrone.Core.Download.Clients.FreeboxDownload
         [FieldDefinition(7, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategorySubFolderHelpText")]
         public string Category { get; set; }
 
-        [FieldDefinition(8, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(FreeboxDownloadPriority), HelpText = "DownloadClientSettingsRecentPriorityMovieHelpText")]
+        [FieldDefinition(8, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(FreeboxDownloadPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
         public int RecentPriority { get; set; }
 
-        [FieldDefinition(9, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(FreeboxDownloadPriority), HelpText = "DownloadClientSettingsOlderPriorityMovieHelpText")]
+        [FieldDefinition(9, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(FreeboxDownloadPriority), HelpText = "DownloadClientSettingsOlderPriorityGameHelpText")]
         public int OlderPriority { get; set; }
 
         [FieldDefinition(10, Label = "DownloadClientSettingsAddPaused", Type = FieldType.Checkbox)]

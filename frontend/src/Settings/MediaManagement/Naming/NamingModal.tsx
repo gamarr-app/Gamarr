@@ -68,69 +68,69 @@ const caseOptions: { key: TokenCase; value: string }[] = [
 const fileNameTokens = [
   {
     token:
-      '{Movie Title} ({Release Year}) - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
+      '{Game Title} ({Release Year}) - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
     example:
-      'The Movie - Title (2010) - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
+      'The Game - Title (2010) - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
   },
   {
     token:
-      '{Movie CleanTitle} {Release Year} - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
+      '{Game CleanTitle} {Release Year} - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
     example:
-      'The Movie Title 2010 - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
+      'The Game Title 2010 - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
   },
   {
     token:
-      '{Movie.CleanTitle}{.Release.Year}{.Edition.Tags}{.Custom.Formats}{.Quality.Full}{-Release Group}',
+      '{Game.CleanTitle}{.Release.Year}{.Edition.Tags}{.Custom.Formats}{.Quality.Full}{-Release Group}',
     example:
-      'The.Movie.Title.2010.Ultimate.Extended.Edition.Surround.Sound.x264.Bluray-1080p.Proper-EVOLVE',
+      'The.Game.Title.2010.Ultimate.Extended.Edition.Surround.Sound.x264.Bluray-1080p.Proper-EVOLVE',
   },
 ];
 
-const movieTokens = [
-  { token: '{Movie Title}', example: "Movie's Title", footNotes: '1' },
-  { token: '{Movie Title:DE}', example: 'Titel des Films', footNotes: '1' },
-  { token: '{Movie CleanTitle}', example: 'Movies Title', footNotes: '1' },
+const gameTokens = [
+  { token: '{Game Title}', example: "Game's Title", footNotes: '1' },
+  { token: '{Game Title:DE}', example: 'Titel des Films', footNotes: '1' },
+  { token: '{Game CleanTitle}', example: 'Games Title', footNotes: '1' },
   {
-    token: '{Movie CleanTitle:DE}',
+    token: '{Game CleanTitle:DE}',
     example: 'Titel des Films',
     footNotes: '1',
   },
-  { token: '{Movie TitleThe}', example: "Movie's Title, The", footNotes: '1' },
+  { token: '{Game TitleThe}', example: "Game's Title, The", footNotes: '1' },
   {
-    token: '{Movie CleanTitleThe}',
-    example: 'Movies Title, The',
+    token: '{Game CleanTitleThe}',
+    example: 'Games Title, The',
     footNotes: '1',
   },
-  { token: '{Movie OriginalTitle}', example: 'Τίτλος ταινίας', footNotes: '1' },
+  { token: '{Game OriginalTitle}', example: 'Τίτλος ταινίας', footNotes: '1' },
   {
-    token: '{Movie CleanOriginalTitle}',
+    token: '{Game CleanOriginalTitle}',
     example: 'Τίτλος ταινίας',
     footNotes: '1',
   },
-  { token: '{Movie TitleFirstCharacter}', example: 'M' },
-  { token: '{Movie TitleFirstCharacter:DE}', example: 'T' },
+  { token: '{Game TitleFirstCharacter}', example: 'M' },
+  { token: '{Game TitleFirstCharacter:DE}', example: 'T' },
   {
-    token: '{Movie Collection}',
-    example: 'The Movie Collection',
+    token: '{Game Collection}',
+    example: 'The Game Collection',
     footNotes: '1',
   },
   {
-    token: '{Movie CollectionThe}',
-    example: "Movie's Collection, The",
+    token: '{Game CollectionThe}',
+    example: "Game's Collection, The",
     footNotes: '1',
   },
   {
-    token: '{Movie CleanCollectionThe}',
-    example: 'Movies Collection, The',
+    token: '{Game CleanCollectionThe}',
+    example: 'Games Collection, The',
     footNotes: '1',
   },
-  { token: '{Movie Certification}', example: 'R' },
+  { token: '{Game Certification}', example: 'R' },
   { token: '{Release Year}', example: '2009' },
 ];
 
-const movieIdTokens = [
+const gameIdTokens = [
   { token: '{ImdbId}', example: 'tt12345' },
-  { token: '{TmdbId}', example: '123456' },
+  { token: '{IgdbId}', example: '123456' },
 ];
 
 const qualityTokens = [
@@ -177,15 +177,15 @@ const customFormatTokens = [
 ];
 
 const originalTokens = [
-  { token: '{Original Title}', example: 'Movie.Title.HDTV.x264-EVOLVE' },
-  { token: '{Original Filename}', example: 'movie title hdtv.x264-Evolve' },
+  { token: '{Original Title}', example: 'Game.Title.HDTV.x264-EVOLVE' },
+  { token: '{Original Filename}', example: 'game title hdtv.x264-Evolve' },
 ];
 
 interface NamingModalProps {
   isOpen: boolean;
-  name: keyof Pick<NamingConfig, 'standardMovieFormat' | 'movieFolderFormat'>;
+  name: keyof Pick<NamingConfig, 'standardGameFormat' | 'gameFolderFormat'>;
   value: string;
-  movie?: boolean;
+  game?: boolean;
   additional?: boolean;
   onInputChange: ({ name, value }: { name: string; value: string }) => void;
   onModalClose: () => void;
@@ -196,7 +196,7 @@ function NamingModal(props: NamingModalProps) {
     isOpen,
     name,
     value,
-    movie = false,
+    game = false,
     additional = false,
     onInputChange,
     onModalClose,
@@ -262,7 +262,7 @@ function NamingModal(props: NamingModalProps) {
     <Modal isOpen={isOpen} onModalClose={onModalClose}>
       <ModalContent onModalClose={onModalClose}>
         <ModalHeader>
-          {movie ? translate('FileNameTokens') : translate('FolderNameTokens')}
+          {game ? translate('FileNameTokens') : translate('FolderNameTokens')}
         </ModalHeader>
 
         <ModalBody>
@@ -284,7 +284,7 @@ function NamingModal(props: NamingModalProps) {
             />
           </div>
 
-          {movie ? (
+          {game ? (
             <FieldSet legend={translate('FileNames')}>
               <div className={styles.groups}>
                 {fileNameTokens.map(({ token, example }) => (
@@ -303,9 +303,9 @@ function NamingModal(props: NamingModalProps) {
             </FieldSet>
           ) : null}
 
-          <FieldSet legend={translate('Movie')}>
+          <FieldSet legend={translate('Game')}>
             <div className={styles.groups}>
-              {movieTokens.map(({ token, example, footNotes }) => {
+              {gameTokens.map(({ token, example, footNotes }) => {
                 return (
                   <NamingOption
                     key={token}
@@ -322,13 +322,13 @@ function NamingModal(props: NamingModalProps) {
 
             <div className={styles.footNote}>
               <sup className={styles.identifier}>1</sup>
-              <InlineMarkdown data={translate('MovieFootNote')} />
+              <InlineMarkdown data={translate('GameFootNote')} />
             </div>
           </FieldSet>
 
-          <FieldSet legend={translate('MovieID')}>
+          <FieldSet legend={translate('GameID')}>
             <div className={styles.groups}>
-              {movieIdTokens.map(({ token, example }) => {
+              {gameIdTokens.map(({ token, example }) => {
                 return (
                   <NamingOption
                     key={token}

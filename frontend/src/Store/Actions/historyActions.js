@@ -37,8 +37,8 @@ export const defaultState = {
       isModifiable: false
     },
     {
-      name: 'movieMetadata.sortTitle',
-      label: () => translate('Movie'),
+      name: 'gameMetadata.sortTitle',
+      label: () => translate('Game'),
       isSortable: true,
       isVisible: true
     },
@@ -187,10 +187,10 @@ export const defaultState = {
       valueType: filterBuilderValueTypes.HISTORY_EVENT_TYPE
     },
     {
-      name: 'movieIds',
-      label: () => translate('Movie'),
+      name: 'gameIds',
+      label: () => translate('Game'),
       type: filterBuilderTypes.EQUAL,
-      valueType: filterBuilderValueTypes.MOVIE
+      valueType: filterBuilderValueTypes.GAME
     },
     {
       name: 'quality',

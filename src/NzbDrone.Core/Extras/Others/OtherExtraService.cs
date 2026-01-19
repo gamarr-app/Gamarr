@@ -8,7 +8,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Extras.Others
@@ -36,38 +36,38 @@ namespace NzbDrone.Core.Extras.Others
 
         public override int Order => 2;
 
-        public override IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Movie movie)
+        public override IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Game game)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieScan(Movie movie, List<MovieFile> movieFiles)
+        public override IEnumerable<ExtraFile> CreateAfterGameScan(Game game, List<GameFile> gameFiles)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieImport(Movie movie, MovieFile movieFile)
+        public override IEnumerable<ExtraFile> CreateAfterGameImport(Game game, GameFile gameFile)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieFolder(Movie movie, string movieFolder)
+        public override IEnumerable<ExtraFile> CreateAfterGameFolder(Game game, string gameFolder)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Movie movie, List<MovieFile> movieFiles)
+        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Game game, List<GameFile> gameFiles)
         {
-            var extraFiles = _otherExtraFileService.GetFilesByMovie(movie.Id);
+            var extraFiles = _otherExtraFileService.GetFilesByGame(game.Id);
             var movedFiles = new List<OtherExtraFile>();
 
-            foreach (var movieFile in movieFiles)
+            foreach (var gameFile in gameFiles)
             {
-                var extraFilesForMovieFile = extraFiles.Where(m => m.MovieFileId == movieFile.Id).ToList();
+                var extraFilesForGameFile = extraFiles.Where(m => m.GameFileId == gameFile.Id).ToList();
 
-                foreach (var extraFile in extraFilesForMovieFile)
+                foreach (var extraFile in extraFilesForGameFile)
                 {
-                    movedFiles.AddIfNotNull(MoveFile(movie, movieFile, extraFile));
+                    movedFiles.AddIfNotNull(MoveFile(game, gameFile, extraFile));
                 }
             }
 
@@ -76,16 +76,16 @@ namespace NzbDrone.Core.Extras.Others
             return movedFiles;
         }
 
-        public override bool CanImportFile(LocalMovie localMovie, MovieFile movieFile, string path, string extension, bool readOnly)
+        public override bool CanImportFile(LocalGame localGame, GameFile gameFile, string path, string extension, bool readOnly)
         {
             return true;
         }
 
-        public override IEnumerable<ExtraFile> ImportFiles(LocalMovie localMovie, MovieFile movieFile, List<string> files, bool isReadOnly)
+        public override IEnumerable<ExtraFile> ImportFiles(LocalGame localGame, GameFile gameFile, List<string> files, bool isReadOnly)
         {
             var importedFiles = new List<ExtraFile>();
-            var filteredFiles = files.Where(f => CanImportFile(localMovie, movieFile, f, Path.GetExtension(f), isReadOnly)).ToList();
-            var sourcePath = localMovie.Path;
+            var filteredFiles = files.Where(f => CanImportFile(localGame, gameFile, f, Path.GetExtension(f), isReadOnly)).ToList();
+            var sourcePath = localGame.Path;
             var sourceFolder = _diskProvider.GetParentFolder(sourcePath);
             var sourceFileName = Path.GetFileNameWithoutExtension(sourcePath);
             var matchingFiles = new List<string>();
@@ -113,16 +113,16 @@ namespace NzbDrone.Core.Extras.Others
                         continue;
                     }
 
-                    // Movie match
-                    var fileMovieInfo = Parser.Parser.ParseMoviePath(file) ?? new ParsedMovieInfo();
+                    // Game match
+                    var fileGameInfo = Parser.Parser.ParseGamePath(file) ?? new ParsedGameInfo();
 
-                    if (fileMovieInfo.MovieTitle == null)
+                    if (fileGameInfo.GameTitle == null)
                     {
                         continue;
                     }
 
-                    if (fileMovieInfo.MovieTitle == localMovie.FileMovieInfo.MovieTitle &&
-                        fileMovieInfo.Year.Equals(localMovie.FileMovieInfo.Year))
+                    if (fileGameInfo.GameTitle == localGame.FileGameInfo.GameTitle &&
+                        fileGameInfo.Year.Equals(localGame.FileGameInfo.Year))
                     {
                         matchingFiles.Add(file);
                     }
@@ -137,7 +137,7 @@ namespace NzbDrone.Core.Extras.Others
             {
                 try
                 {
-                    var extraFile = ImportFile(localMovie.Movie, movieFile, file, isReadOnly, Path.GetExtension(file), null);
+                    var extraFile = ImportFile(localGame.Game, gameFile, file, isReadOnly, Path.GetExtension(file), null);
                     _mediaFileAttributeService.SetFilePermissions(file);
                     _otherExtraFileService.Upsert(extraFile);
                     importedFiles.Add(extraFile);

@@ -3,15 +3,15 @@ import { Redirect, Route } from 'react-router-dom';
 import Blocklist from 'Activity/Blocklist/Blocklist';
 import History from 'Activity/History/History';
 import Queue from 'Activity/Queue/Queue';
-import AddNewMovieConnector from 'AddMovie/AddNewMovie/AddNewMovieConnector';
-import ImportMovies from 'AddMovie/ImportMovie/ImportMovies';
+import AddNewGameConnector from 'AddGame/AddNewGame/AddNewGameConnector';
+import ImportGames from 'AddGame/ImportGame/ImportGames';
 import CalendarPage from 'Calendar/CalendarPage';
 import CollectionConnector from 'Collection/CollectionConnector';
 import NotFound from 'Components/NotFound';
 import Switch from 'Components/Router/Switch';
-import DiscoverMovieConnector from 'DiscoverMovie/DiscoverMovieConnector';
-import MovieDetailsPage from 'Movie/Details/MovieDetailsPage';
-import MovieIndex from 'Movie/Index/MovieIndex';
+import DiscoverGameConnector from 'DiscoverGame/DiscoverGameConnector';
+import GameDetailsPage from 'Game/Details/GameDetailsPage';
+import GameIndex from 'Game/Index/GameIndex';
 import CustomFormatSettingsPage from 'Settings/CustomFormats/CustomFormatSettingsPage';
 import DownloadClientSettingsConnector from 'Settings/DownloadClients/DownloadClientSettingsConnector';
 import GeneralSettingsConnector from 'Settings/General/GeneralSettingsConnector';
@@ -43,12 +43,12 @@ function AppRoutes() {
   return (
     <Switch>
       {/*
-        Movies
+        Games
       */}
 
-      <Route exact={true} path="/" component={MovieIndex} />
+      <Route exact={true} path="/" component={GameIndex} />
 
-      {window.Radarr.urlBase && (
+      {window.Gamarr.urlBase && (
         <Route
           exact={true}
           path="/"
@@ -59,15 +59,15 @@ function AppRoutes() {
         />
       )}
 
-      <Route path="/add/new" component={AddNewMovieConnector} />
+      <Route path="/add/new" component={AddNewGameConnector} />
 
       <Route path="/collections" component={CollectionConnector} />
 
-      <Route path="/add/import" component={ImportMovies} />
+      <Route path="/add/import" component={ImportGames} />
 
-      <Route path="/add/discover" component={DiscoverMovieConnector} />
+      <Route path="/add/discover" component={DiscoverGameConnector} />
 
-      <Route path="/movie/:titleSlug" component={MovieDetailsPage} />
+      <Route path="/game/:titleSlug" component={GameDetailsPage} />
 
       {/*
         Calendar

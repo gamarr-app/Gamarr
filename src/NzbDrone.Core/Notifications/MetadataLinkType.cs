@@ -5,7 +5,7 @@ namespace NzbDrone.Core.Notifications
     public enum MetadataLinkType
     {
         [FieldOption(Label = "TMDb")]
-        Tmdb = 0,
+        Igdb = 0,
 
         [FieldOption(Label = "IMDb")]
         Imdb = 1,

@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Datastore.Migration
             using (var getSeriesCmd = conn.CreateCommand())
             {
                 getSeriesCmd.Transaction = tran;
-                getSeriesCmd.CommandText = @"DROP INDEX ""IX_Movies_ImdbId""";
+                getSeriesCmd.CommandText = @"DROP INDEX ""IX_Games_ImdbId""";
 
                 getSeriesCmd.ExecuteNonQuery();
             }

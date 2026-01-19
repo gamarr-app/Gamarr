@@ -3,7 +3,7 @@ using System.Net;
 using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 
 namespace NzbDrone.Core.ImportLists.StevenLu
 {
@@ -11,35 +11,35 @@ namespace NzbDrone.Core.ImportLists.StevenLu
     {
         private ImportListResponse _importResponse;
 
-        public IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
             _importResponse = importResponse;
 
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(_importResponse))
             {
-                return movies;
+                return games;
             }
 
             var jsonResponse = JsonConvert.DeserializeObject<List<StevenLuResponse>>(_importResponse.Content);
 
-            // no movies were return
+            // no games were return
             if (jsonResponse == null)
             {
-                return movies;
+                return games;
             }
 
             foreach (var item in jsonResponse)
             {
-                movies.AddIfNotNull(new ImportListMovie()
+                games.AddIfNotNull(new ImportListGame()
                 {
                     Title = item.title,
                     ImdbId = item.imdb_id,
                 });
             }
 
-            return movies;
+            return games;
         }
 
         protected virtual bool PreProcess(ImportListResponse importListResponse)

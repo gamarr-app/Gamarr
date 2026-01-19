@@ -9,7 +9,7 @@ using NzbDrone.Common.Cache;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 
 namespace NzbDrone.Core.RootFolders
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.RootFolders
     {
         private readonly IRootFolderRepository _rootFolderRepository;
         private readonly IDiskProvider _diskProvider;
-        private readonly IMovieRepository _movieRepository;
+        private readonly IGameRepository _gameRepository;
         private readonly IConfigService _configService;
         private readonly INamingConfigService _namingConfigService;
         private readonly Logger _logger;
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.RootFolders
 
         public RootFolderService(IRootFolderRepository rootFolderRepository,
                                  IDiskProvider diskProvider,
-                                 IMovieRepository movieRepository,
+                                 IGameRepository gameRepository,
                                  IConfigService configService,
                                  INamingConfigService namingConfigService,
                                  ICacheManager cacheManager,
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.RootFolders
         {
             _rootFolderRepository = rootFolderRepository;
             _diskProvider = diskProvider;
-            _movieRepository = movieRepository;
+            _gameRepository = gameRepository;
             _configService = configService;
             _namingConfigService = namingConfigService;
             _logger = logger;
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.RootFolders
         {
             var rootFolders = _rootFolderRepository.All().ToList();
 
-            var moviePaths = _movieRepository.AllMoviePaths();
+            var gamePaths = _gameRepository.AllGamePaths();
 
             rootFolders.ForEach(folder =>
             {
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.RootFolders
                 {
                     if (folder.Path.IsPathValid(PathValidationType.CurrentOs))
                     {
-                        GetDetails(folder, moviePaths, true);
+                        GetDetails(folder, gamePaths, true);
                     }
                 }
 
@@ -126,9 +126,9 @@ namespace NzbDrone.Core.RootFolders
 
             _rootFolderRepository.Insert(rootFolder);
 
-            var moviePaths = _movieRepository.AllMoviePaths();
+            var gamePaths = _gameRepository.AllGamePaths();
 
-            GetDetails(rootFolder, moviePaths, true);
+            GetDetails(rootFolder, gamePaths, true);
             _cache.Clear();
 
             return rootFolder;
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.RootFolders
             _cache.Clear();
         }
 
-        private List<UnmappedFolder> GetUnmappedFolders(string path, Dictionary<int, string> moviePaths)
+        private List<UnmappedFolder> GetUnmappedFolders(string path, Dictionary<int, string> gamePaths)
         {
             _logger.Debug("Generating list of unmapped folders");
 
@@ -157,18 +157,18 @@ namespace NzbDrone.Core.RootFolders
                 return results;
             }
 
-            var subFolderDepth = _namingConfigService.GetConfig().MovieFolderFormat.Count(f => f == Path.DirectorySeparatorChar);
-            var possibleMovieFolders = _diskProvider.GetDirectories(path).ToList();
+            var subFolderDepth = _namingConfigService.GetConfig().GameFolderFormat.Count(f => f == Path.DirectorySeparatorChar);
+            var possibleGameFolders = _diskProvider.GetDirectories(path).ToList();
 
             if (subFolderDepth > 0)
             {
                 for (var i = 0; i < subFolderDepth; i++)
                 {
-                    possibleMovieFolders = possibleMovieFolders.SelectMany(_diskProvider.GetDirectories).ToList();
+                    possibleGameFolders = possibleGameFolders.SelectMany(_diskProvider.GetDirectories).ToList();
                 }
             }
 
-            var unmappedFolders = possibleMovieFolders.Except(moviePaths.Select(s => s.Value), PathEqualityComparer.Instance).ToList();
+            var unmappedFolders = possibleGameFolders.Except(gamePaths.Select(s => s.Value), PathEqualityComparer.Instance).ToList();
 
             var recycleBinPath = _configService.RecycleBin;
 
@@ -200,9 +200,9 @@ namespace NzbDrone.Core.RootFolders
         public RootFolder Get(int id, bool timeout)
         {
             var rootFolder = _rootFolderRepository.Get(id);
-            var moviePaths = _movieRepository.AllMoviePaths();
+            var gamePaths = _gameRepository.AllGamePaths();
 
-            GetDetails(rootFolder, moviePaths, timeout);
+            GetDetails(rootFolder, gamePaths, timeout);
 
             return rootFolder;
         }
@@ -212,7 +212,7 @@ namespace NzbDrone.Core.RootFolders
             return _cache.Get(path, () => GetBestRootFolderPathInternal(path, rootFolders), TimeSpan.FromDays(1));
         }
 
-        private void GetDetails(RootFolder rootFolder, Dictionary<int, string> moviePaths, bool timeout)
+        private void GetDetails(RootFolder rootFolder, Dictionary<int, string> gamePaths, bool timeout)
         {
             Task.Run(() =>
             {
@@ -221,7 +221,7 @@ namespace NzbDrone.Core.RootFolders
                     rootFolder.Accessible = true;
                     rootFolder.FreeSpace = _diskProvider.GetAvailableSpace(rootFolder.Path);
                     rootFolder.TotalSpace = _diskProvider.GetTotalSize(rootFolder.Path);
-                    rootFolder.UnmappedFolders = GetUnmappedFolders(rootFolder.Path, moviePaths);
+                    rootFolder.UnmappedFolders = GetUnmappedFolders(rootFolder.Path, gamePaths);
                 }
             }).Wait(timeout ? 5000 : -1);
         }

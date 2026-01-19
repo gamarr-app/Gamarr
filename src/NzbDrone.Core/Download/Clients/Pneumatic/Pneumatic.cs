@@ -35,13 +35,13 @@ namespace NzbDrone.Core.Download.Clients.Pneumatic
 
         public override DownloadProtocol Protocol => DownloadProtocol.Usenet;
 
-        public override async Task<string> Download(RemoteMovie remoteMovie, IIndexer indexer)
+        public override async Task<string> Download(RemoteGame remoteGame, IIndexer indexer)
         {
-            var url = remoteMovie.Release.DownloadUrl;
-            var title = remoteMovie.Release.Title;
+            var url = remoteGame.Release.DownloadUrl;
+            var title = remoteGame.Release.Title;
 
-            // We don't have full seasons in movies.
-            // if (remoteMovie.ParsedEpisodeInfo.FullSeason)
+            // We don't have full seasons in games.
+            // if (remoteGame.ParsedEpisodeInfo.FullSeason)
             // {
             //    throw new NotSupportedException("Full season releases are not supported with Pneumatic.");
             // }

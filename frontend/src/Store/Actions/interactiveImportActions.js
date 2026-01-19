@@ -42,10 +42,10 @@ export const defaultState = {
       return naturalExpansion(relativePath.toLowerCase());
     },
 
-    movie: function(item, direction) {
-      const movie = item.movie;
+    game: function(item, direction) {
+      const game = item.game;
 
-      return movie ? movie.sortTitle : '';
+      return game ? game.sortTitle : '';
     },
 
     quality: function(item, direction) {
@@ -164,7 +164,7 @@ export const actionHandlers = handleThunks({
       return {
         id,
         path: item.path,
-        movieId: item.movie ? item.movie.id : undefined,
+        gameId: item.game ? item.game.id : undefined,
         quality: item.quality,
         languages: item.languages,
         releaseGroup: item.releaseGroup,

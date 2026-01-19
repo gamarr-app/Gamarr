@@ -71,61 +71,61 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
 
         [Test]
-        public async Task Download_with_MovieDirectory_should_force_directory()
+        public async Task Download_with_GameDirectory_should_force_directory()
         {
-            GivenMovieDirectory();
+            GivenGameDirectory();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
             Mocker.GetMock<ITransmissionProxy>()
-                  .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/radarr", It.IsAny<TransmissionSettings>()), Times.Once());
+                  .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/gamarr", It.IsAny<TransmissionSettings>()), Times.Once());
         }
 
         [Test]
         public async Task Download_with_category_should_force_directory()
         {
-            GivenMovieCategory();
+            GivenGameCategory();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
             Mocker.GetMock<ITransmissionProxy>()
-                  .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/transmission/radarr", It.IsAny<TransmissionSettings>()), Times.Once());
+                  .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/transmission/gamarr", It.IsAny<TransmissionSettings>()), Times.Once());
         }
 
         [Test]
         public async Task Download_with_category_should_not_have_double_slashes()
         {
-            GivenMovieCategory();
+            GivenGameCategory();
             GivenSuccessfulDownload();
 
             _transmissionConfigItems["download-dir"] += "/";
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
             Mocker.GetMock<ITransmissionProxy>()
-                  .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/transmission/radarr", It.IsAny<TransmissionSettings>()), Times.Once());
+                  .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/transmission/gamarr", It.IsAny<TransmissionSettings>()), Times.Once());
         }
 
         [Test]
@@ -133,9 +133,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -148,10 +148,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
-            remoteMovie.Release.DownloadUrl = magnetUrl;
+            var remoteGame = CreateRemoteGame();
+            remoteGame.Release.DownloadUrl = magnetUrl;
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().Be(expectedHash);
         }
@@ -220,9 +220,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         [Test]
         public void should_exclude_items_not_in_category()
         {
-            GivenMovieCategory();
+            GivenGameCategory();
 
-            _downloading.DownloadDir = @"C:/Downloads/Finished/transmission/radarr";
+            _downloading.DownloadDir = @"C:/Downloads/Finished/transmission/gamarr";
 
             GivenTorrents(new List<TransmissionTorrent>
                 {
@@ -239,9 +239,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         [Test]
         public void should_exclude_items_not_in_TvDirectory()
         {
-            GivenMovieDirectory();
+            GivenGameDirectory();
 
-            _downloading.DownloadDir = @"C:/Downloads/Finished/radarr/subdir";
+            _downloading.DownloadDir = @"C:/Downloads/Finished/gamarr/subdir";
 
             GivenTorrents(new List<TransmissionTorrent>
                 {

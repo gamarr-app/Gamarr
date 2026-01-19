@@ -9,7 +9,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
@@ -55,8 +55,8 @@ namespace NzbDrone.Core.Test.RootFolderTests
         [TestCase("//server//folder")]
         public void should_be_able_to_add_root_dir(string path)
         {
-            Mocker.GetMock<IMovieRepository>()
-                  .Setup(s => s.AllMoviePaths())
+            Mocker.GetMock<IGameRepository>()
+                  .Setup(s => s.AllGamePaths())
                   .Returns(new Dictionary<int, string>());
 
             var root = new RootFolder { Path = path.AsOsAgnostic() };
@@ -148,8 +148,8 @@ namespace NzbDrone.Core.Test.RootFolderTests
                   .Setup(s => s.Get(It.IsAny<int>()))
                   .Returns(rootFolder);
 
-            Mocker.GetMock<IMovieRepository>()
-                  .Setup(s => s.AllMoviePaths())
+            Mocker.GetMock<IGameRepository>()
+                  .Setup(s => s.AllGamePaths())
                   .Returns(new Dictionary<int, string>());
 
             Mocker.GetMock<IDiskProvider>()
@@ -198,8 +198,8 @@ namespace NzbDrone.Core.Test.RootFolderTests
                 .Setup(s => s.Get(It.IsAny<int>()))
                 .Returns(rootFolder);
 
-            Mocker.GetMock<IMovieRepository>()
-                .Setup(s => s.AllMoviePaths())
+            Mocker.GetMock<IGameRepository>()
+                .Setup(s => s.AllGamePaths())
                 .Returns(new Dictionary<int, string>());
 
             Mocker.GetMock<IDiskProvider>()
@@ -250,8 +250,8 @@ namespace NzbDrone.Core.Test.RootFolderTests
                 .Setup(s => s.Get(It.IsAny<int>()))
                 .Returns(rootFolder);
 
-            Mocker.GetMock<IMovieRepository>()
-                .Setup(s => s.AllMoviePaths())
+            Mocker.GetMock<IGameRepository>()
+                .Setup(s => s.AllGamePaths())
                 .Returns(new Dictionary<int, string>());
 
             Mocker.GetMock<IDiskProvider>()
@@ -267,9 +267,9 @@ namespace NzbDrone.Core.Test.RootFolderTests
         [Test]
         public void should_get_unmapped_folders_inside_letter_subfolder()
         {
-            _namingConfig.MovieFolderFormat = "{Movie TitleFirstCharacter}\\{Movie Title}".AsOsAgnostic();
+            _namingConfig.GameFolderFormat = "{Game TitleFirstCharacter}\\{Game Title}".AsOsAgnostic();
 
-            var rootFolderPath = @"C:\Test\Movies".AsOsAgnostic();
+            var rootFolderPath = @"C:\Test\Games".AsOsAgnostic();
             var rootFolder = Builder<RootFolder>.CreateNew()
                 .With(r => r.Path = rootFolderPath)
                 .Build();
@@ -278,9 +278,9 @@ namespace NzbDrone.Core.Test.RootFolderTests
 
             var subFolders = new[]
             {
-                "Movie1",
-                "Movie2",
-                "Movie3",
+                "Game1",
+                "Game2",
+                "Game3",
             };
 
             var folders = subFolders.Select(f => Path.Combine(subFolderPath, f)).ToArray();
@@ -289,8 +289,8 @@ namespace NzbDrone.Core.Test.RootFolderTests
                 .Setup(s => s.Get(It.IsAny<int>()))
                 .Returns(rootFolder);
 
-            Mocker.GetMock<IMovieRepository>()
-                .Setup(s => s.AllMoviePaths())
+            Mocker.GetMock<IGameRepository>()
+                .Setup(s => s.AllGamePaths())
                 .Returns(new Dictionary<int, string>());
 
             Mocker.GetMock<IDiskProvider>()

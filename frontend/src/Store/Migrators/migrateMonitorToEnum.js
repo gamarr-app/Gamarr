@@ -1,26 +1,26 @@
 import _ from 'lodash';
 
 export default function migrateMonitorToEnum(persistedState) {
-  const addMovie = _.get(persistedState, 'addMovie.defaults.monitor');
-  const discoverMovie = _.get(persistedState, 'discoverMovie.defaults.monitor');
+  const addGame = _.get(persistedState, 'addGame.defaults.monitor');
+  const discoverGame = _.get(persistedState, 'discoverGame.defaults.monitor');
 
-  if (addMovie) {
-    if (addMovie === 'true') {
-      persistedState.addMovie.defaults.monitor = 'movieOnly';
+  if (addGame) {
+    if (addGame === 'true') {
+      persistedState.addGame.defaults.monitor = 'gameOnly';
     }
 
-    if (addMovie === 'false') {
-      persistedState.addMovie.defaults.monitor = 'none';
+    if (addGame === 'false') {
+      persistedState.addGame.defaults.monitor = 'none';
     }
   }
 
-  if (discoverMovie) {
-    if (discoverMovie === 'true') {
-      persistedState.discoverMovie.defaults.monitor = 'movieOnly';
+  if (discoverGame) {
+    if (discoverGame === 'true') {
+      persistedState.discoverGame.defaults.monitor = 'gameOnly';
     }
 
-    if (discoverMovie === 'false') {
-      persistedState.discoverMovie.defaults.monitor = 'none';
+    if (discoverGame === 'false') {
+      persistedState.discoverGame.defaults.monitor = 'none';
     }
   }
 }

@@ -4,7 +4,7 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Core.Validation.Paths;
 using NzbDrone.Test.Common;
@@ -13,12 +13,12 @@ namespace NzbDrone.Core.Test.ValidationTests
 {
     public class SystemFolderValidatorFixture : CoreTest<SystemFolderValidator>
     {
-        private TestValidator<Movie> _validator;
+        private TestValidator<Game> _validator;
 
         [SetUp]
         public void Setup()
         {
-            _validator = new TestValidator<Movie>
+            _validator = new TestValidator<Game>
                             {
                                 v => v.RuleFor(s => s.Path).SetValidator(Subject)
                             };
@@ -29,11 +29,11 @@ namespace NzbDrone.Core.Test.ValidationTests
         {
             WindowsOnly();
 
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                         .With(s => s.Path = Environment.GetFolderPath(Environment.SpecialFolder.Windows))
                                         .Build();
 
-            _validator.Validate(movie).IsValid.Should().BeFalse();
+            _validator.Validate(game).IsValid.Should().BeFalse();
         }
 
         [Test]
@@ -41,11 +41,11 @@ namespace NzbDrone.Core.Test.ValidationTests
         {
             WindowsOnly();
 
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                         .With(s => s.Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Test"))
                                         .Build();
 
-            _validator.Validate(movie).IsValid.Should().BeFalse();
+            _validator.Validate(game).IsValid.Should().BeFalse();
         }
 
         [Test]
@@ -54,11 +54,11 @@ namespace NzbDrone.Core.Test.ValidationTests
             PosixOnly();
 
             var bin = OsInfo.IsOsx ? "/System" : "/bin";
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                         .With(s => s.Path = bin)
                                         .Build();
 
-            _validator.Validate(movie).IsValid.Should().BeFalse();
+            _validator.Validate(game).IsValid.Should().BeFalse();
         }
 
         [Test]
@@ -67,11 +67,11 @@ namespace NzbDrone.Core.Test.ValidationTests
             PosixOnly();
 
             var bin = OsInfo.IsOsx ? "/System" : "/bin";
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                 .With(s => s.Path = Path.Combine(bin, "test"))
                 .Build();
 
-            _validator.Validate(movie).IsValid.Should().BeFalse();
+            _validator.Validate(game).IsValid.Should().BeFalse();
         }
     }
 }

@@ -8,17 +8,17 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 
 namespace NzbDrone.Core.Extras.Files
 {
     public interface IExtraFileService<TExtraFile>
         where TExtraFile : ExtraFile, new()
     {
-        List<TExtraFile> GetFilesByMovie(int movieId);
-        List<TExtraFile> GetFilesByMovieFile(int movieFileId);
-        TExtraFile FindByPath(int movieId, string path);
+        List<TExtraFile> GetFilesByGame(int gameId);
+        List<TExtraFile> GetFilesByGameFile(int gameFileId);
+        TExtraFile FindByPath(int gameId, string path);
         void Upsert(TExtraFile extraFile);
         void Upsert(List<TExtraFile> extraFiles);
         void Delete(int id);
@@ -26,42 +26,42 @@ namespace NzbDrone.Core.Extras.Files
     }
 
     public abstract class ExtraFileService<TExtraFile> : IExtraFileService<TExtraFile>,
-                                                         IHandleAsync<MovieFileDeletedEvent>,
-                                                         IHandleAsync<MoviesDeletedEvent>
+                                                         IHandleAsync<GameFileDeletedEvent>,
+                                                         IHandleAsync<GamesDeletedEvent>
         where TExtraFile : ExtraFile, new()
     {
         private readonly IExtraFileRepository<TExtraFile> _repository;
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly Logger _logger;
 
         public ExtraFileService(IExtraFileRepository<TExtraFile> repository,
-                                IMovieService movieService,
+                                IGameService gameService,
                                 IDiskProvider diskProvider,
                                 IRecycleBinProvider recycleBinProvider,
                                 Logger logger)
         {
             _repository = repository;
-            _movieService = movieService;
+            _gameService = gameService;
             _diskProvider = diskProvider;
             _recycleBinProvider = recycleBinProvider;
             _logger = logger;
         }
 
-        public List<TExtraFile> GetFilesByMovie(int movieId)
+        public List<TExtraFile> GetFilesByGame(int gameId)
         {
-            return _repository.GetFilesByMovie(movieId);
+            return _repository.GetFilesByGame(gameId);
         }
 
-        public List<TExtraFile> GetFilesByMovieFile(int movieFileId)
+        public List<TExtraFile> GetFilesByGameFile(int gameFileId)
         {
-            return _repository.GetFilesByMovieFile(movieFileId);
+            return _repository.GetFilesByGameFile(gameFileId);
         }
 
-        public TExtraFile FindByPath(int movieId, string path)
+        public TExtraFile FindByPath(int gameId, string path)
         {
-            return _repository.FindByPath(movieId, path);
+            return _repository.FindByPath(gameId, path);
         }
 
         public void Upsert(TExtraFile extraFile)
@@ -95,38 +95,38 @@ namespace NzbDrone.Core.Extras.Files
             _repository.DeleteMany(ids);
         }
 
-        public void HandleAsync(MoviesDeletedEvent message)
+        public void HandleAsync(GamesDeletedEvent message)
         {
-            _repository.DeleteForMovies(message.Movies.Select(m => m.Id).ToList());
+            _repository.DeleteForGames(message.Games.Select(m => m.Id).ToList());
         }
 
-        public void HandleAsync(MovieFileDeletedEvent message)
+        public void HandleAsync(GameFileDeletedEvent message)
         {
-            var movieFile = message.MovieFile;
+            var gameFile = message.GameFile;
 
             if (message.Reason == DeleteMediaFileReason.NoLinkedEpisodes)
             {
-                _logger.Debug("Removing movie file from DB as part of cleanup routine, not deleting extra files from disk.");
+                _logger.Debug("Removing game file from DB as part of cleanup routine, not deleting extra files from disk.");
             }
             else
             {
-                var movie = _movieService.GetMovie(message.MovieFile.MovieId);
+                var game = _gameService.GetGame(message.GameFile.GameId);
 
-                foreach (var extra in _repository.GetFilesByMovieFile(movieFile.Id))
+                foreach (var extra in _repository.GetFilesByGameFile(gameFile.Id))
                 {
-                    var path = Path.Combine(movie.Path, extra.RelativePath);
+                    var path = Path.Combine(game.Path, extra.RelativePath);
 
                     if (_diskProvider.FileExists(path))
                     {
                         // Send to the recycling bin so they can be recovered if necessary
-                        var subfolder = _diskProvider.GetParentFolder(movie.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
+                        var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
                         _recycleBinProvider.DeleteFile(path, subfolder);
                     }
                 }
             }
 
-            _logger.Debug("Deleting Extra from database for movie file: {0}", movieFile);
-            _repository.DeleteForMovieFile(movieFile.Id);
+            _logger.Debug("Deleting Extra from database for game file: {0}", gameFile);
+            _repository.DeleteForGameFile(gameFile.Id);
         }
     }
 }

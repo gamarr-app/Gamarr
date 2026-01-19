@@ -10,7 +10,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Metadata;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Housekeeping.Housekeepers;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
@@ -20,25 +20,25 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
     public class DeleteBadMediaCoversFixture : CoreTest<DeleteBadMediaCovers>
     {
         private List<MetadataFile> _metadata;
-        private Dictionary<int, string> _movies;
+        private Dictionary<int, string> _games;
 
         [SetUp]
         public void Setup()
         {
-            _movies = new Dictionary<int, string>
+            _games = new Dictionary<int, string>
             {
-                { 1, "C:\\Movie\\".AsOsAgnostic() }
+                { 1, "C:\\Game\\".AsOsAgnostic() }
             };
 
             _metadata = Builder<MetadataFile>.CreateListOfSize(1)
                .Build().ToList();
 
-            Mocker.GetMock<IMovieService>()
-                .Setup(c => c.AllMoviePaths())
-                .Returns(_movies);
+            Mocker.GetMock<IGameService>()
+                .Setup(c => c.AllGamePaths())
+                .Returns(_games);
 
             Mocker.GetMock<IMetadataFileService>()
-                .Setup(c => c.GetFilesByMovie(_movies.First().Key))
+                .Setup(c => c.GetFilesByGame(_games.First().Key))
                 .Returns(_metadata);
 
             Mocker.GetMock<IConfigService>().SetupGet(c => c.CleanupMetadataImages).Returns(true);
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_not_process_non_image_files()
         {
             _metadata.First().RelativePath = "extrafiles\\file.xml".AsOsAgnostic();
-            _metadata.First().Type = MetadataType.MovieMetadata;
+            _metadata.First().Type = MetadataType.GameMetadata;
 
             Subject.Clean();
 
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             Subject.Clean();
 
             Mocker.GetMock<IConfigService>().VerifySet(c => c.CleanupMetadataImages = true, Times.Never());
-            Mocker.GetMock<IMovieService>().Verify(c => c.AllMoviePaths(), Times.Never());
+            Mocker.GetMock<IGameService>().Verify(c => c.AllGamePaths(), Times.Never());
 
             AssertImageWasNotRemoved();
         }
@@ -91,10 +91,10 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_delete_html_images()
         {
-            var imagePath = "C:\\Movie\\image.jpg".AsOsAgnostic();
+            var imagePath = "C:\\Game\\image.jpg".AsOsAgnostic();
             _metadata.First().LastUpdated = new DateTime(2014, 12, 29);
             _metadata.First().RelativePath = "image.jpg".AsOsAgnostic();
-            _metadata.First().Type = MetadataType.MovieImage;
+            _metadata.First().Type = MetadataType.GameImage;
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.OpenReadStream(imagePath))
@@ -109,9 +109,9 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_delete_empty_images()
         {
-            var imagePath = "C:\\Movie\\image.jpg".AsOsAgnostic();
+            var imagePath = "C:\\Game\\image.jpg".AsOsAgnostic();
             _metadata.First().LastUpdated = new DateTime(2014, 12, 29);
-            _metadata.First().Type = MetadataType.MovieImage;
+            _metadata.First().Type = MetadataType.GameImage;
             _metadata.First().RelativePath = "image.jpg".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_not_delete_non_html_files()
         {
-            var imagePath = "C:\\Movie\\image.jpg".AsOsAgnostic();
+            var imagePath = "C:\\Game\\image.jpg".AsOsAgnostic();
             _metadata.First().LastUpdated = new DateTime(2014, 12, 29);
             _metadata.First().RelativePath = "image.jpg".AsOsAgnostic();
 

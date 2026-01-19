@@ -14,16 +14,16 @@ namespace NzbDrone.Core.ImportLists.Trakt.Popular
             _traktProxy = traktProxy;
         }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequest());
+            pageableRequests.Add(GetGamesRequest());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequest()
+        private IEnumerable<ImportListRequest> GetGamesRequest()
         {
             var link = string.Empty;
 
@@ -32,44 +32,44 @@ namespace NzbDrone.Core.ImportLists.Trakt.Popular
             switch (Settings.TraktListType)
             {
                 case (int)TraktPopularListType.Trending:
-                    link += "movies/trending";
+                    link += "games/trending";
                     break;
                 case (int)TraktPopularListType.Popular:
-                    link += "movies/popular";
+                    link += "games/popular";
                     break;
                 case (int)TraktPopularListType.Anticipated:
-                    link += "movies/anticipated";
+                    link += "games/anticipated";
                     break;
                 case (int)TraktPopularListType.BoxOffice:
-                    link += "movies/boxoffice";
+                    link += "games/boxoffice";
                     break;
                 case (int)TraktPopularListType.TopWatchedByWeek:
-                    link += "movies/watched/weekly";
+                    link += "games/watched/weekly";
                     break;
                 case (int)TraktPopularListType.TopWatchedByMonth:
-                    link += "movies/watched/monthly";
+                    link += "games/watched/monthly";
                     break;
 #pragma warning disable CS0612
                 case (int)TraktPopularListType.TopWatchedByYear:
 #pragma warning restore CS0612
-                    link += "movies/watched/yearly";
+                    link += "games/watched/yearly";
                     break;
                 case (int)TraktPopularListType.TopWatchedByAllTime:
-                    link += "movies/watched/all";
+                    link += "games/watched/all";
                     break;
                 case (int)TraktPopularListType.RecommendedByWeek:
-                    link += "movies/recommended/weekly";
+                    link += "games/recommended/weekly";
                     break;
                 case (int)TraktPopularListType.RecommendedByMonth:
-                    link += "movies/recommended/monthly";
+                    link += "games/recommended/monthly";
                     break;
 #pragma warning disable CS0612
                 case (int)TraktPopularListType.RecommendedByYear:
 #pragma warning restore CS0612
-                    link += "movies/recommended/yearly";
+                    link += "games/recommended/yearly";
                     break;
                 case (int)TraktPopularListType.RecommendedByAllTime:
-                    link += "movies/recommended/all";
+                    link += "games/recommended/all";
                     break;
             }
 

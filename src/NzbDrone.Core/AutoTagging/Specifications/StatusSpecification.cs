@@ -1,7 +1,7 @@
 using System;
 using FluentValidation;
 using NzbDrone.Core.Annotations;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -12,7 +12,7 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         {
             RuleFor(c => c.Status).Custom((statusType, context) =>
             {
-                if (!Enum.IsDefined(typeof(MovieStatusType), statusType))
+                if (!Enum.IsDefined(typeof(GameStatusType), statusType))
                 {
                     context.AddFailure($"Invalid status type condition value: {statusType}");
                 }
@@ -27,12 +27,12 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         public override int Order => 1;
         public override string ImplementationName => "Status";
 
-        [FieldDefinition(1, Label = "AutoTaggingSpecificationStatus", Type = FieldType.Select, SelectOptions = typeof(MovieStatusType))]
+        [FieldDefinition(1, Label = "AutoTaggingSpecificationStatus", Type = FieldType.Select, SelectOptions = typeof(GameStatusType))]
         public int Status { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return movie?.MovieMetadata?.Value?.Status == (MovieStatusType)Status;
+            return game?.GameMetadata?.Value?.Status == (GameStatusType)Status;
         }
 
         public override NzbDroneValidationResult Validate()

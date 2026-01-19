@@ -51,9 +51,9 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OnUpgrade = true,
                     OnRename = true,
                     OnHealthIssue = true,
-                    OnMovieDelete = true,
-                    OnMovieFileDelete = true,
-                    OnMovieFileDeleteForUpgrade = true,
+                    OnGameDelete = true,
+                    OnGameFileDelete = true,
+                    OnGameFileDeleteForUpgrade = true,
                     IncludeHealthWarnings = true
                 });
             });

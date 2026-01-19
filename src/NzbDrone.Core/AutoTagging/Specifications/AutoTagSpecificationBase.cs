@@ -1,4 +1,4 @@
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -19,9 +19,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
 
         public abstract NzbDroneValidationResult Validate();
 
-        public bool IsSatisfiedBy(Movie movie)
+        public bool IsSatisfiedBy(Game game)
         {
-            var match = IsSatisfiedByWithoutNegate(movie);
+            var match = IsSatisfiedByWithoutNegate(game);
 
             if (Negate)
             {
@@ -31,6 +31,6 @@ namespace NzbDrone.Core.AutoTagging.Specifications
             return match;
         }
 
-        protected abstract bool IsSatisfiedByWithoutNegate(Movie movie);
+        protected abstract bool IsSatisfiedByWithoutNegate(Game game);
     }
 }

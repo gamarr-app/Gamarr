@@ -13,7 +13,7 @@ using NzbDrone.Core.HealthCheck;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Tags;
 using NzbDrone.Core.ThingiProvider;
@@ -50,212 +50,212 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override string Name => _localizationService.GetLocalizedString("NotificationsCustomScriptSettingsName");
 
-        public override string Link => "https://wiki.servarr.com/radarr/settings#connections";
+        public override string Link => "https://wiki.servarr.com/gamarr/settings#connections";
 
         public override ProviderMessage Message => new ProviderMessage(_localizationService.GetLocalizedString("NotificationsCustomScriptSettingsProviderMessage", new Dictionary<string, object> { { "eventTypeTest", "Test" } }), ProviderMessageType.Warning);
 
         public override void OnGrab(GrabMessage message)
         {
-            var movie = message.Movie;
-            var remoteMovie = message.RemoteMovie;
+            var game = message.Game;
+            var remoteGame = message.RemoteGame;
             var quality = message.Quality;
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "Grab");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Movie_Id", movie.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie.MovieMetadata.Value.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie.MovieMetadata.Value.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie.MovieMetadata.Value.OriginalLanguage).ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie.MovieMetadata.Value.Genres));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_In_Cinemas_Date", movie.MovieMetadata.Value.InCinemas.ToString() ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_Physical_Release_Date", movie.MovieMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_Overview", movie.MovieMetadata.Value.Overview);
-            environmentVariables.Add("Radarr_Release_Title", remoteMovie.Release.Title);
-            environmentVariables.Add("Radarr_Release_Indexer", remoteMovie.Release.Indexer ?? string.Empty);
-            environmentVariables.Add("Radarr_Release_Size", remoteMovie.Release.Size.ToString());
-            environmentVariables.Add("Radarr_Release_ReleaseGroup", remoteMovie.ParsedMovieInfo.ReleaseGroup ?? string.Empty);
-            environmentVariables.Add("Radarr_Release_Quality", quality.Quality.Name);
-            environmentVariables.Add("Radarr_Release_QualityVersion", quality.Revision.Version.ToString());
-            environmentVariables.Add("Radarr_IndexerFlags", remoteMovie.Release.IndexerFlags.ToString());
-            environmentVariables.Add("Radarr_Download_Client", message.DownloadClientName ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Client_Type", message.DownloadClientType ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Id", message.DownloadId ?? string.Empty);
-            environmentVariables.Add("Radarr_Release_CustomFormat", string.Join("|", remoteMovie.CustomFormats));
-            environmentVariables.Add("Radarr_Release_CustomFormatScore", remoteMovie.CustomFormatScore.ToString());
+            environmentVariables.Add("Gamarr_EventType", "Grab");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Game_Id", game.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game.GameMetadata.Value.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game.GameMetadata.Value.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
+            environmentVariables.Add("Gamarr_Release_Title", remoteGame.Release.Title);
+            environmentVariables.Add("Gamarr_Release_Indexer", remoteGame.Release.Indexer ?? string.Empty);
+            environmentVariables.Add("Gamarr_Release_Size", remoteGame.Release.Size.ToString());
+            environmentVariables.Add("Gamarr_Release_ReleaseGroup", remoteGame.ParsedGameInfo.ReleaseGroup ?? string.Empty);
+            environmentVariables.Add("Gamarr_Release_Quality", quality.Quality.Name);
+            environmentVariables.Add("Gamarr_Release_QualityVersion", quality.Revision.Version.ToString());
+            environmentVariables.Add("Gamarr_IndexerFlags", remoteGame.Release.IndexerFlags.ToString());
+            environmentVariables.Add("Gamarr_Download_Client", message.DownloadClientName ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Client_Type", message.DownloadClientType ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Id", message.DownloadId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Release_CustomFormat", string.Join("|", remoteGame.CustomFormats));
+            environmentVariables.Add("Gamarr_Release_CustomFormatScore", remoteGame.CustomFormatScore.ToString());
 
             ExecuteScript(environmentVariables);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
-            var movie = message.Movie;
-            var movieFile = message.MovieFile;
+            var game = message.Game;
+            var gameFile = message.GameFile;
             var sourcePath = message.SourcePath;
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "Download");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_IsUpgrade", message.OldMovieFiles.Any().ToString());
-            environmentVariables.Add("Radarr_Movie_Id", movie.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie.MovieMetadata.Value.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie.MovieMetadata.Value.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie.MovieMetadata.Value.OriginalLanguage).ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie.MovieMetadata.Value.Genres));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_Path", movie.Path);
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_In_Cinemas_Date", movie.MovieMetadata.Value.InCinemas.ToString() ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_Physical_Release_Date", movie.MovieMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_Overview", movie.MovieMetadata.Value.Overview);
-            environmentVariables.Add("Radarr_MovieFile_Id", movieFile.Id.ToString());
-            environmentVariables.Add("Radarr_MovieFile_RelativePath", movieFile.RelativePath);
-            environmentVariables.Add("Radarr_MovieFile_Path", Path.Combine(movie.Path, movieFile.RelativePath));
-            environmentVariables.Add("Radarr_MovieFile_Quality", movieFile.Quality.Quality.Name);
-            environmentVariables.Add("Radarr_MovieFile_QualityVersion", movieFile.Quality.Revision.Version.ToString());
-            environmentVariables.Add("Radarr_MovieFile_ReleaseGroup", movieFile.ReleaseGroup ?? string.Empty);
-            environmentVariables.Add("Radarr_MovieFile_SceneName", movieFile.SceneName ?? string.Empty);
-            environmentVariables.Add("Radarr_MovieFile_SourcePath", sourcePath);
-            environmentVariables.Add("Radarr_MovieFile_SourceFolder", Path.GetDirectoryName(sourcePath));
-            environmentVariables.Add("Radarr_Download_Client", message.DownloadClientInfo?.Name ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Client_Type", message.DownloadClientInfo?.Type ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Id", message.DownloadId ?? string.Empty);
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_AudioChannels", MediaInfoFormatter.FormatAudioChannels(movieFile.MediaInfo).ToString());
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_AudioCodec", MediaInfoFormatter.FormatAudioCodec(movieFile.MediaInfo, null));
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_AudioLanguages", movieFile.MediaInfo.AudioLanguages.Distinct().ConcatToString(" / "));
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_Languages", movieFile.MediaInfo.AudioLanguages.ConcatToString(" / "));
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_Height", movieFile.MediaInfo.Height.ToString());
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_Width", movieFile.MediaInfo.Width.ToString());
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_Subtitles", movieFile.MediaInfo.Subtitles.ConcatToString(" / "));
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_VideoCodec", MediaInfoFormatter.FormatVideoCodec(movieFile.MediaInfo, null));
-            environmentVariables.Add("Radarr_MovieFile_MediaInfo_VideoDynamicRangeType", MediaInfoFormatter.FormatVideoDynamicRangeType(movieFile.MediaInfo));
-            environmentVariables.Add("Radarr_MovieFile_CustomFormat", string.Join("|", message.MovieInfo.CustomFormats));
-            environmentVariables.Add("Radarr_MovieFile_CustomFormatScore", message.MovieInfo.CustomFormatScore.ToString());
-            environmentVariables.Add("Radarr_Release_Indexer", message.Release?.Indexer);
-            environmentVariables.Add("Radarr_Release_Size", message.Release?.Size.ToString());
-            environmentVariables.Add("Radarr_Release_Title", message.Release?.Title);
+            environmentVariables.Add("Gamarr_EventType", "Download");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_IsUpgrade", message.OldGameFiles.Any().ToString());
+            environmentVariables.Add("Gamarr_Game_Id", game.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game.GameMetadata.Value.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game.GameMetadata.Value.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_Path", game.Path);
+            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
+            environmentVariables.Add("Gamarr_GameFile_Id", gameFile.Id.ToString());
+            environmentVariables.Add("Gamarr_GameFile_RelativePath", gameFile.RelativePath);
+            environmentVariables.Add("Gamarr_GameFile_Path", Path.Combine(game.Path, gameFile.RelativePath));
+            environmentVariables.Add("Gamarr_GameFile_Quality", gameFile.Quality.Quality.Name);
+            environmentVariables.Add("Gamarr_GameFile_QualityVersion", gameFile.Quality.Revision.Version.ToString());
+            environmentVariables.Add("Gamarr_GameFile_ReleaseGroup", gameFile.ReleaseGroup ?? string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_SceneName", gameFile.SceneName ?? string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_SourcePath", sourcePath);
+            environmentVariables.Add("Gamarr_GameFile_SourceFolder", Path.GetDirectoryName(sourcePath));
+            environmentVariables.Add("Gamarr_Download_Client", message.DownloadClientInfo?.Name ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Client_Type", message.DownloadClientInfo?.Type ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Id", message.DownloadId ?? string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioChannels", MediaInfoFormatter.FormatAudioChannels(gameFile.MediaInfo).ToString());
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioCodec", MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, null));
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioLanguages", gameFile.MediaInfo.AudioLanguages.Distinct().ConcatToString(" / "));
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Languages", gameFile.MediaInfo.AudioLanguages.ConcatToString(" / "));
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Height", gameFile.MediaInfo.Height.ToString());
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Width", gameFile.MediaInfo.Width.ToString());
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Subtitles", gameFile.MediaInfo.Subtitles.ConcatToString(" / "));
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoCodec", MediaInfoFormatter.FormatVideoCodec(gameFile.MediaInfo, null));
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoDynamicRangeType", MediaInfoFormatter.FormatVideoDynamicRangeType(gameFile.MediaInfo));
+            environmentVariables.Add("Gamarr_GameFile_CustomFormat", string.Join("|", message.GameInfo.CustomFormats));
+            environmentVariables.Add("Gamarr_GameFile_CustomFormatScore", message.GameInfo.CustomFormatScore.ToString());
+            environmentVariables.Add("Gamarr_Release_Indexer", message.Release?.Indexer);
+            environmentVariables.Add("Gamarr_Release_Size", message.Release?.Size.ToString());
+            environmentVariables.Add("Gamarr_Release_Title", message.Release?.Title);
 
-            if (message.OldMovieFiles.Any())
+            if (message.OldGameFiles.Any())
             {
-                environmentVariables.Add("Radarr_DeletedRelativePaths", string.Join("|", message.OldMovieFiles.Select(e => e.MovieFile.RelativePath)));
-                environmentVariables.Add("Radarr_DeletedPaths", string.Join("|", message.OldMovieFiles.Select(e => Path.Combine(movie.Path, e.MovieFile.RelativePath))));
-                environmentVariables.Add("Radarr_DeletedDateAdded", string.Join("|", message.OldMovieFiles.Select(e => e.MovieFile.DateAdded)));
-                environmentVariables.Add("Radarr_DeletedRecycleBinPaths", string.Join("|", message.OldMovieFiles.Select(e => e.RecycleBinPath ?? string.Empty)));
+                environmentVariables.Add("Gamarr_DeletedRelativePaths", string.Join("|", message.OldGameFiles.Select(e => e.GameFile.RelativePath)));
+                environmentVariables.Add("Gamarr_DeletedPaths", string.Join("|", message.OldGameFiles.Select(e => Path.Combine(game.Path, e.GameFile.RelativePath))));
+                environmentVariables.Add("Gamarr_DeletedDateAdded", string.Join("|", message.OldGameFiles.Select(e => e.GameFile.DateAdded)));
+                environmentVariables.Add("Gamarr_DeletedRecycleBinPaths", string.Join("|", message.OldGameFiles.Select(e => e.RecycleBinPath ?? string.Empty)));
             }
 
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+        public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
         {
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "Rename");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Movie_Id", movie.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie.MovieMetadata.Value.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie.MovieMetadata.Value.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie.MovieMetadata.Value.OriginalLanguage).ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie.MovieMetadata.Value.Genres));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_Path", movie.Path);
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_In_Cinemas_Date", movie.MovieMetadata.Value.InCinemas.ToString() ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_Physical_Release_Date", movie.MovieMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
-            environmentVariables.Add("Radarr_MovieFile_Ids", string.Join(",", renamedFiles.Select(e => e.MovieFile.Id)));
-            environmentVariables.Add("Radarr_MovieFile_RelativePaths", string.Join("|", renamedFiles.Select(e => e.MovieFile.RelativePath)));
-            environmentVariables.Add("Radarr_MovieFile_Paths", string.Join("|", renamedFiles.Select(e => Path.Combine(movie.Path, e.MovieFile.RelativePath))));
-            environmentVariables.Add("Radarr_MovieFile_PreviousRelativePaths", string.Join("|", renamedFiles.Select(e => e.PreviousRelativePath)));
-            environmentVariables.Add("Radarr_MovieFile_PreviousPaths", string.Join("|", renamedFiles.Select(e => e.PreviousPath)));
+            environmentVariables.Add("Gamarr_EventType", "Rename");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Game_Id", game.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game.GameMetadata.Value.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game.GameMetadata.Value.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_Path", game.Path);
+            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_Ids", string.Join(",", renamedFiles.Select(e => e.GameFile.Id)));
+            environmentVariables.Add("Gamarr_GameFile_RelativePaths", string.Join("|", renamedFiles.Select(e => e.GameFile.RelativePath)));
+            environmentVariables.Add("Gamarr_GameFile_Paths", string.Join("|", renamedFiles.Select(e => Path.Combine(game.Path, e.GameFile.RelativePath))));
+            environmentVariables.Add("Gamarr_GameFile_PreviousRelativePaths", string.Join("|", renamedFiles.Select(e => e.PreviousRelativePath)));
+            environmentVariables.Add("Gamarr_GameFile_PreviousPaths", string.Join("|", renamedFiles.Select(e => e.PreviousPath)));
 
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "MovieAdded");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Movie_Id", movie.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie.MovieMetadata.Value.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie.MovieMetadata.Value.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie.MovieMetadata.Value.OriginalLanguage).ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie.MovieMetadata.Value.Genres));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_Path", movie.Path);
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_AddMethod", movie.AddOptions.AddMethod.ToString());
+            environmentVariables.Add("Gamarr_EventType", "GameAdded");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Game_Id", game.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game.GameMetadata.Value.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game.GameMetadata.Value.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_Path", game.Path);
+            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_AddMethod", game.AddOptions.AddMethod.ToString());
 
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            var movie = deleteMessage.Movie;
-            var movieFile = deleteMessage.MovieFile;
+            var game = deleteMessage.Game;
+            var gameFile = deleteMessage.GameFile;
 
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "MovieFileDelete");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_MovieFile_DeleteReason", deleteMessage.Reason.ToString());
-            environmentVariables.Add("Radarr_Movie_Id", movie.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie.MovieMetadata.Value.OriginalLanguage).ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie.MovieMetadata.Value.Genres));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_Path", movie.Path);
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_Overview", movie.MovieMetadata.Value.Overview);
-            environmentVariables.Add("Radarr_MovieFile_Id", movieFile.Id.ToString());
-            environmentVariables.Add("Radarr_MovieFile_RelativePath", movieFile.RelativePath);
-            environmentVariables.Add("Radarr_MovieFile_Path", Path.Combine(movie.Path, movieFile.RelativePath));
-            environmentVariables.Add("Radarr_MovieFile_Size", movieFile.Size.ToString());
-            environmentVariables.Add("Radarr_MovieFile_Quality", movieFile.Quality.Quality.Name);
-            environmentVariables.Add("Radarr_MovieFile_QualityVersion", movieFile.Quality.Revision.Version.ToString());
-            environmentVariables.Add("Radarr_MovieFile_ReleaseGroup", movieFile.ReleaseGroup ?? string.Empty);
-            environmentVariables.Add("Radarr_MovieFile_SceneName", movieFile.SceneName ?? string.Empty);
+            environmentVariables.Add("Gamarr_EventType", "GameFileDelete");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_GameFile_DeleteReason", deleteMessage.Reason.ToString());
+            environmentVariables.Add("Gamarr_Game_Id", game.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_Path", game.Path);
+            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
+            environmentVariables.Add("Gamarr_GameFile_Id", gameFile.Id.ToString());
+            environmentVariables.Add("Gamarr_GameFile_RelativePath", gameFile.RelativePath);
+            environmentVariables.Add("Gamarr_GameFile_Path", Path.Combine(game.Path, gameFile.RelativePath));
+            environmentVariables.Add("Gamarr_GameFile_Size", gameFile.Size.ToString());
+            environmentVariables.Add("Gamarr_GameFile_Quality", gameFile.Quality.Quality.Name);
+            environmentVariables.Add("Gamarr_GameFile_QualityVersion", gameFile.Quality.Revision.Version.ToString());
+            environmentVariables.Add("Gamarr_GameFile_ReleaseGroup", gameFile.ReleaseGroup ?? string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_SceneName", gameFile.SceneName ?? string.Empty);
 
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            var movie = deleteMessage.Movie;
+            var game = deleteMessage.Game;
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "MovieDelete");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Movie_Id", movie.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie.MovieMetadata.Value.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie.MovieMetadata.Value.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie.MovieMetadata.Value.OriginalLanguage).ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie.MovieMetadata.Value.Genres));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_Path", movie.Path);
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_DeletedFiles", deleteMessage.DeletedFiles.ToString());
-            environmentVariables.Add("Radarr_Movie_Overview", movie.MovieMetadata.Value.Overview);
+            environmentVariables.Add("Gamarr_EventType", "GameDelete");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Game_Id", game.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game.GameMetadata.Value.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game.GameMetadata.Value.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_Path", game.Path);
+            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_DeletedFiles", deleteMessage.DeletedFiles.ToString());
+            environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
 
-            if (deleteMessage.DeletedFiles && movie.MovieFile != null)
+            if (deleteMessage.DeletedFiles && game.GameFile != null)
             {
-                environmentVariables.Add("Radarr_Movie_Folder_Size", movie.MovieFile.Size.ToString());
+                environmentVariables.Add("Gamarr_Game_Folder_Size", game.GameFile.Size.ToString());
             }
 
             ExecuteScript(environmentVariables);
@@ -265,13 +265,13 @@ namespace NzbDrone.Core.Notifications.CustomScript
         {
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "HealthIssue");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Health_Issue_Level", Enum.GetName(typeof(HealthCheckResult), healthCheck.Type));
-            environmentVariables.Add("Radarr_Health_Issue_Message", healthCheck.Message);
-            environmentVariables.Add("Radarr_Health_Issue_Type", healthCheck.Source.Name);
-            environmentVariables.Add("Radarr_Health_Issue_Wiki", healthCheck.WikiUrl.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_EventType", "HealthIssue");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Health_Issue_Level", Enum.GetName(typeof(HealthCheckResult), healthCheck.Type));
+            environmentVariables.Add("Gamarr_Health_Issue_Message", healthCheck.Message);
+            environmentVariables.Add("Gamarr_Health_Issue_Type", healthCheck.Source.Name);
+            environmentVariables.Add("Gamarr_Health_Issue_Wiki", healthCheck.WikiUrl.ToString() ?? string.Empty);
 
             ExecuteScript(environmentVariables);
         }
@@ -280,13 +280,13 @@ namespace NzbDrone.Core.Notifications.CustomScript
         {
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "HealthRestored");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Health_Restored_Level", Enum.GetName(typeof(HealthCheckResult), previousCheck.Type));
-            environmentVariables.Add("Radarr_Health_Restored_Message", previousCheck.Message);
-            environmentVariables.Add("Radarr_Health_Restored_Type", previousCheck.Source.Name);
-            environmentVariables.Add("Radarr_Health_Restored_Wiki", previousCheck.WikiUrl.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_EventType", "HealthRestored");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Health_Restored_Level", Enum.GetName(typeof(HealthCheckResult), previousCheck.Type));
+            environmentVariables.Add("Gamarr_Health_Restored_Message", previousCheck.Message);
+            environmentVariables.Add("Gamarr_Health_Restored_Type", previousCheck.Source.Name);
+            environmentVariables.Add("Gamarr_Health_Restored_Wiki", previousCheck.WikiUrl.ToString() ?? string.Empty);
 
             ExecuteScript(environmentVariables);
         }
@@ -295,39 +295,39 @@ namespace NzbDrone.Core.Notifications.CustomScript
         {
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "ApplicationUpdate");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Update_Message", updateMessage.Message);
-            environmentVariables.Add("Radarr_Update_NewVersion", updateMessage.NewVersion.ToString());
-            environmentVariables.Add("Radarr_Update_PreviousVersion", updateMessage.PreviousVersion.ToString());
+            environmentVariables.Add("Gamarr_EventType", "ApplicationUpdate");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Update_Message", updateMessage.Message);
+            environmentVariables.Add("Gamarr_Update_NewVersion", updateMessage.NewVersion.ToString());
+            environmentVariables.Add("Gamarr_Update_PreviousVersion", updateMessage.PreviousVersion.ToString());
 
             ExecuteScript(environmentVariables);
         }
 
         public override void OnManualInteractionRequired(ManualInteractionRequiredMessage message)
         {
-            var movie = message.Movie;
+            var game = message.Game;
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Radarr_EventType", "ManualInteractionRequired");
-            environmentVariables.Add("Radarr_InstanceName", _configFileProvider.InstanceName);
-            environmentVariables.Add("Radarr_ApplicationUrl", _configService.ApplicationUrl);
-            environmentVariables.Add("Radarr_Movie_Id", movie?.Id.ToString());
-            environmentVariables.Add("Radarr_Movie_Title", movie?.MovieMetadata.Value.Title);
-            environmentVariables.Add("Radarr_Movie_Year", movie?.MovieMetadata.Value.Year.ToString());
-            environmentVariables.Add("Radarr_Movie_OriginalLanguage", IsoLanguages.Get(movie?.MovieMetadata.Value.OriginalLanguage)?.ThreeLetterCode);
-            environmentVariables.Add("Radarr_Movie_Genres", string.Join("|", movie?.MovieMetadata.Value.Genres ?? new List<string>()));
-            environmentVariables.Add("Radarr_Movie_Tags", string.Join("|", GetTagLabels(movie)));
-            environmentVariables.Add("Radarr_Movie_Path", movie?.Path);
-            environmentVariables.Add("Radarr_Movie_ImdbId", movie?.MovieMetadata.Value.ImdbId ?? string.Empty);
-            environmentVariables.Add("Radarr_Movie_TmdbId", movie?.MovieMetadata.Value.TmdbId.ToString());
-            environmentVariables.Add("Radarr_Movie_Overview", movie?.MovieMetadata.Value.Overview);
-            environmentVariables.Add("Radarr_Download_Client", message.DownloadClientInfo?.Name ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Client_Type", message.DownloadClientInfo?.Type ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Id", message.DownloadId ?? string.Empty);
-            environmentVariables.Add("Radarr_Download_Size", message.TrackedDownload.DownloadItem.TotalSize.ToString());
-            environmentVariables.Add("Radarr_Download_Title", message.TrackedDownload.DownloadItem.Title);
+            environmentVariables.Add("Gamarr_EventType", "ManualInteractionRequired");
+            environmentVariables.Add("Gamarr_InstanceName", _configFileProvider.InstanceName);
+            environmentVariables.Add("Gamarr_ApplicationUrl", _configService.ApplicationUrl);
+            environmentVariables.Add("Gamarr_Game_Id", game?.Id.ToString());
+            environmentVariables.Add("Gamarr_Game_Title", game?.GameMetadata.Value.Title);
+            environmentVariables.Add("Gamarr_Game_Year", game?.GameMetadata.Value.Year.ToString());
+            environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game?.GameMetadata.Value.OriginalLanguage)?.ThreeLetterCode);
+            environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game?.GameMetadata.Value.Genres ?? new List<string>()));
+            environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
+            environmentVariables.Add("Gamarr_Game_Path", game?.Path);
+            environmentVariables.Add("Gamarr_Game_ImdbId", game?.GameMetadata.Value.ImdbId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_IgdbId", game?.GameMetadata.Value.IgdbId.ToString());
+            environmentVariables.Add("Gamarr_Game_Overview", game?.GameMetadata.Value.Overview);
+            environmentVariables.Add("Gamarr_Download_Client", message.DownloadClientInfo?.Name ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Client_Type", message.DownloadClientInfo?.Type ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Id", message.DownloadId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Size", message.TrackedDownload.DownloadItem.TotalSize.ToString());
+            environmentVariables.Add("Gamarr_Download_Title", message.TrackedDownload.DownloadItem.Title);
 
             ExecuteScript(environmentVariables);
         }
@@ -347,9 +347,9 @@ namespace NzbDrone.Core.Notifications.CustomScript
                 {
                     var environmentVariables = new StringDictionary
                     {
-                        { "Radarr_EventType", "Test" },
-                        { "Radarr_InstanceName", _configFileProvider.InstanceName },
-                        { "Radarr_ApplicationUrl", _configService.ApplicationUrl }
+                        { "Gamarr_EventType", "Test" },
+                        { "Gamarr_InstanceName", _configFileProvider.InstanceName },
+                        { "Gamarr_ApplicationUrl", _configService.ApplicationUrl }
                     };
 
                     var processOutput = ExecuteScript(environmentVariables);
@@ -386,14 +386,14 @@ namespace NzbDrone.Core.Notifications.CustomScript
             return possibleParent.IsParentPath(path);
         }
 
-        private List<string> GetTagLabels(Movie movie)
+        private List<string> GetTagLabels(Game game)
         {
-            if (movie == null)
+            if (game == null)
             {
                 return new List<string>();
             }
 
-            return _tagRepository.GetTags(movie.Tags)
+            return _tagRepository.GetTags(game.Tags)
                 .Select(t => t.Label)
                 .Where(l => l.IsNotNullOrWhiteSpace())
                 .OrderBy(l => l)

@@ -5,46 +5,46 @@ using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.MediaFiles
 {
-    public interface IMediaFileRepository : IBasicRepository<MovieFile>
+    public interface IMediaFileRepository : IBasicRepository<GameFile>
     {
-        List<MovieFile> GetFilesByMovie(int movieId);
-        List<MovieFile> GetFilesByMovies(IEnumerable<int> movieIds);
-        List<MovieFile> GetFilesWithoutMediaInfo();
-        void DeleteForMovies(List<int> movieIds);
+        List<GameFile> GetFilesByGame(int gameId);
+        List<GameFile> GetFilesByGames(IEnumerable<int> gameIds);
+        List<GameFile> GetFilesWithoutMediaInfo();
+        void DeleteForGames(List<int> gameIds);
 
-        List<MovieFile> GetFilesWithRelativePath(int movieId, string relativePath);
+        List<GameFile> GetFilesWithRelativePath(int gameId, string relativePath);
     }
 
-    public class MediaFileRepository : BasicRepository<MovieFile>, IMediaFileRepository
+    public class MediaFileRepository : BasicRepository<GameFile>, IMediaFileRepository
     {
         public MediaFileRepository(IMainDatabase database, IEventAggregator eventAggregator)
             : base(database, eventAggregator)
         {
         }
 
-        public List<MovieFile> GetFilesByMovie(int movieId)
+        public List<GameFile> GetFilesByGame(int gameId)
         {
-            return Query(x => x.MovieId == movieId);
+            return Query(x => x.GameId == gameId);
         }
 
-        public List<MovieFile> GetFilesByMovies(IEnumerable<int> movieIds)
+        public List<GameFile> GetFilesByGames(IEnumerable<int> gameIds)
         {
-            return Query(x => movieIds.Contains(x.MovieId));
+            return Query(x => gameIds.Contains(x.GameId));
         }
 
-        public List<MovieFile> GetFilesWithoutMediaInfo()
+        public List<GameFile> GetFilesWithoutMediaInfo()
         {
             return Query(x => x.MediaInfo == null);
         }
 
-        public void DeleteForMovies(List<int> movieIds)
+        public void DeleteForGames(List<int> gameIds)
         {
-            Delete(x => movieIds.Contains(x.MovieId));
+            Delete(x => gameIds.Contains(x.GameId));
         }
 
-        public List<MovieFile> GetFilesWithRelativePath(int movieId, string relativePath)
+        public List<GameFile> GetFilesWithRelativePath(int gameId, string relativePath)
         {
-            return Query(c => c.MovieId == movieId && c.RelativePath == relativePath);
+            return Query(c => c.GameId == gameId && c.RelativePath == relativePath);
         }
     }
 }

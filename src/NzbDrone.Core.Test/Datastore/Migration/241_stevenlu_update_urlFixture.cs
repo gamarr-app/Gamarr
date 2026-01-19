@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Name = "StevenLu List",
                     QualityProfileId = 1,
                     MinimumAvailability = 1,
-                    RootFolderPath = "/movies",
+                    RootFolderPath = "/games",
                     Monitor = 0,
                     SearchOnAdd = true,
                     Tags = "[]",
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     ConfigContract = "StevenLuSettings",
                     Settings = new StevenLuSettings241
                     {
-                        Link = "https://s3.amazonaws.com/popular-movies/movies.json"
+                        Link = "https://s3.amazonaws.com/popular-games/games.json"
                     }.ToJson()
                 });
             });
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             var items = db.Query<ImportListDefinition241>("SELECT \"Id\", \"Settings\" FROM \"ImportLists\"");
 
             items.Should().HaveCount(1);
-            items.First().Settings.Link.Should().Be("https://popular-movies-data.stevenlu.com/movies.json");
+            items.First().Settings.Link.Should().Be("https://popular-games-data.stevenlu.com/games.json");
         }
     }
 

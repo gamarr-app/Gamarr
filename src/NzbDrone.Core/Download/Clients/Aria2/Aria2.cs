@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             _proxy = proxy;
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             var gid = _proxy.AddMagnet(Settings, magnetLink);
 
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             var gid = _proxy.AddTorrent(Settings, fileContent);
 

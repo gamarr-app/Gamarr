@@ -31,6 +31,6 @@
     padding: 0 1px;
     border: 1px solid var(--borderColor);
     background-color: var(--modalCloseButtonHoverColor);
-    color: var(--movieBackgroundColor);
+    color: var(--gameBackgroundColor);
   }
 }

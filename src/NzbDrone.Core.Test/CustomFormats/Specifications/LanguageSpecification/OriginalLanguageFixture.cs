@@ -6,7 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -22,14 +22,14 @@ namespace NzbDrone.Core.Test.CustomFormats.Specifications.LanguageSpecification
         {
             _input = new CustomFormatInput
             {
-                MovieInfo = Builder<ParsedMovieInfo>.CreateNew().Build(),
-                Movie = Builder<Movie>.CreateNew().With(m => m.MovieMetadata.Value.OriginalLanguage = Language.English).Build(),
+                GameInfo = Builder<ParsedGameInfo>.CreateNew().Build(),
+                Game = Builder<Game>.CreateNew().With(m => m.GameMetadata.Value.OriginalLanguage = Language.English).Build(),
                 Size = 100.Megabytes(),
                 Languages = new List<Language>
                 {
                     Language.French
                 },
-                Filename = "Movie.Title.2024"
+                Filename = "Game.Title.2024"
             };
         }
 

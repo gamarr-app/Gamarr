@@ -2,7 +2,7 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class QualityAllowedByProfileSpecificationFixture : CoreTest<QualityAllowedByProfileSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         public static object[] AllowedTestCases =
         {
@@ -33,14 +33,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [SetUp]
         public void Setup()
         {
-            var fakeSeries = Builder<Movie>.CreateNew()
+            var fakeSeries = Builder<Game>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Bluray1080p.Id })
                          .Build();
 
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
-                Movie = fakeSeries,
-                ParsedMovieInfo = new ParsedMovieInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                Game = fakeSeries,
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
             };
         }
 
@@ -48,20 +48,20 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [TestCaseSource("AllowedTestCases")]
         public void should_allow_if_quality_is_defined_in_profile(Quality qualityType)
         {
-            _remoteMovie.ParsedMovieInfo.Quality.Quality = qualityType;
-            _remoteMovie.Movie.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.DVD, Quality.HDTV720p, Quality.Bluray1080p);
+            _remoteGame.ParsedGameInfo.Quality.Quality = qualityType;
+            _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.DVD, Quality.HDTV720p, Quality.Bluray1080p);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         [TestCaseSource("DeniedTestCases")]
         public void should_not_allow_if_quality_is_not_defined_in_profile(Quality qualityType)
         {
-            _remoteMovie.ParsedMovieInfo.Quality.Quality = qualityType;
-            _remoteMovie.Movie.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.DVD, Quality.HDTV720p, Quality.Bluray1080p);
+            _remoteGame.ParsedGameInfo.Quality.Quality = qualityType;
+            _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.DVD, Quality.HDTV720p, Quality.Bluray1080p);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
     }
 }

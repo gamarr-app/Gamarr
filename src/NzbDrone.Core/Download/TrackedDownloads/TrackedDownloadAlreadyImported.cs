@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 {
     public interface ITrackedDownloadAlreadyImported
     {
-        bool IsImported(TrackedDownload trackedDownload, List<MovieHistory> historyItems);
+        bool IsImported(TrackedDownload trackedDownload, List<GameHistory> historyItems);
     }
 
     public class TrackedDownloadAlreadyImported : ITrackedDownloadAlreadyImported
@@ -20,9 +20,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             _logger = logger;
         }
 
-        public bool IsImported(TrackedDownload trackedDownload, List<MovieHistory> historyItems)
+        public bool IsImported(TrackedDownload trackedDownload, List<GameHistory> historyItems)
         {
-            _logger.Trace("Checking if all movies for '{0}' have been imported", trackedDownload.DownloadItem.Title);
+            _logger.Trace("Checking if all games for '{0}' have been imported", trackedDownload.DownloadItem.Title);
 
             if (historyItems.Empty())
             {
@@ -30,21 +30,21 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 return false;
             }
 
-            var movie = trackedDownload.RemoteMovie.Movie;
+            var game = trackedDownload.RemoteGame.Game;
 
-            var lastHistoryItem = historyItems.FirstOrDefault(h => h.MovieId == movie.Id);
+            var lastHistoryItem = historyItems.FirstOrDefault(h => h.GameId == game.Id);
 
             if (lastHistoryItem == null)
             {
-                _logger.Trace("No history for movie: {0}", movie.ToString());
+                _logger.Trace("No history for game: {0}", game.ToString());
                 return false;
             }
 
-            var allMoviesImportedInHistory = lastHistoryItem.EventType == MovieHistoryEventType.DownloadFolderImported;
-            _logger.Trace("Last event for movie: {0} is: {1}", movie, lastHistoryItem.EventType);
+            var allGamesImportedInHistory = lastHistoryItem.EventType == GameHistoryEventType.DownloadFolderImported;
+            _logger.Trace("Last event for game: {0} is: {1}", game, lastHistoryItem.EventType);
 
-            _logger.Trace("All movies for '{0}' have been imported: {1}", trackedDownload.DownloadItem.Title, allMoviesImportedInHistory);
-            return allMoviesImportedInHistory;
+            _logger.Trace("All games for '{0}' have been imported: {1}", trackedDownload.DownloadItem.Title, allGamesImportedInHistory);
+            return allGamesImportedInHistory;
         }
     }
 }

@@ -4,16 +4,16 @@ import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
-import MovieSearchCell from 'Movie/MovieSearchCell';
-import MovieStatus from 'Movie/MovieStatus';
-import MovieTitleLink from 'Movie/MovieTitleLink';
-import MovieFileLanguages from 'MovieFile/MovieFileLanguages';
+import GameSearchCell from 'Game/GameSearchCell';
+import GameStatus from 'Game/GameStatus';
+import GameTitleLink from 'Game/GameTitleLink';
+import GameFileLanguages from 'GameFile/GameFileLanguages';
 import { SelectStateInputProps } from 'typings/props';
 import styles from './CutoffUnmetRow.css';
 
 interface CutoffUnmetRowProps {
   id: number;
-  movieFileId?: number;
+  gameFileId?: number;
   inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
@@ -28,7 +28,7 @@ interface CutoffUnmetRowProps {
 
 function CutoffUnmetRow({
   id,
-  movieFileId,
+  gameFileId,
   inCinemas,
   digitalRelease,
   physicalRelease,
@@ -40,7 +40,7 @@ function CutoffUnmetRow({
   columns,
   onSelectedChange,
 }: CutoffUnmetRowProps) {
-  if (!movieFileId) {
+  if (!gameFileId) {
     return null;
   }
 
@@ -59,19 +59,19 @@ function CutoffUnmetRow({
           return null;
         }
 
-        if (name === 'movieMetadata.sortTitle') {
+        if (name === 'gameMetadata.sortTitle') {
           return (
             <TableRowCell key={name}>
-              <MovieTitleLink titleSlug={titleSlug} title={title} />
+              <GameTitleLink titleSlug={titleSlug} title={title} />
             </TableRowCell>
           );
         }
 
-        if (name === 'movieMetadata.year') {
+        if (name === 'gameMetadata.year') {
           return <TableRowCell key={name}>{year}</TableRowCell>;
         }
 
-        if (name === 'movieMetadata.inCinemas') {
+        if (name === 'gameMetadata.inCinemas') {
           return (
             <RelativeDateCell
               key={name}
@@ -81,7 +81,7 @@ function CutoffUnmetRow({
           );
         }
 
-        if (name === 'movieMetadata.digitalRelease') {
+        if (name === 'gameMetadata.digitalRelease') {
           return (
             <RelativeDateCell
               key={name}
@@ -91,7 +91,7 @@ function CutoffUnmetRow({
           );
         }
 
-        if (name === 'movieMetadata.physicalRelease') {
+        if (name === 'gameMetadata.physicalRelease') {
           return (
             <RelativeDateCell
               key={name}
@@ -104,12 +104,12 @@ function CutoffUnmetRow({
         if (name === 'languages') {
           return (
             <TableRowCell key={name} className={styles.languages}>
-              <MovieFileLanguages movieFileId={movieFileId} />
+              <GameFileLanguages gameFileId={gameFileId} />
             </TableRowCell>
           );
         }
 
-        if (name === 'movies.lastSearchTime') {
+        if (name === 'games.lastSearchTime') {
           return (
             <RelativeDateCell
               key={name}
@@ -122,10 +122,10 @@ function CutoffUnmetRow({
         if (name === 'status') {
           return (
             <TableRowCell key={name} className={styles.status}>
-              <MovieStatus
-                movieId={id}
-                movieFileId={movieFileId}
-                movieEntity="wanted.cutoffUnmet"
+              <GameStatus
+                gameId={id}
+                gameFileId={gameFileId}
+                gameEntity="wanted.cutoffUnmet"
               />
             </TableRowCell>
           );
@@ -133,10 +133,10 @@ function CutoffUnmetRow({
 
         if (name === 'actions') {
           return (
-            <MovieSearchCell
+            <GameSearchCell
               key={name}
-              movieId={id}
-              movieEntity="wanted.cutoffUnmet"
+              gameId={id}
+              gameEntity="wanted.cutoffUnmet"
             />
           );
         }

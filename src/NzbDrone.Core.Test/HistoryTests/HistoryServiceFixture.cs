@@ -9,7 +9,7 @@ using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -69,15 +69,15 @@ namespace NzbDrone.Core.Test.HistoryTests
         [Test]
         public void should_use_file_name_for_source_title_if_scene_name_is_null()
         {
-            var movie = Builder<Movie>.CreateNew().Build();
-            var movieFile = Builder<MovieFile>.CreateNew()
+            var game = Builder<Game>.CreateNew().Build();
+            var gameFile = Builder<GameFile>.CreateNew()
                                                   .With(f => f.SceneName = null)
                                                   .Build();
 
-            var localMovie = new LocalMovie()
+            var localGame = new LocalGame()
             {
-                Movie = movie,
-                Path = @"C:\Test\Unsorted\Movie.2011.mkv"
+                Game = game,
+                Path = @"C:\Test\Unsorted\Game.2011.mkv"
             };
 
             var downloadClientItem = new DownloadClientItem
@@ -91,10 +91,10 @@ namespace NzbDrone.Core.Test.HistoryTests
                 DownloadId = "abcd"
             };
 
-            Subject.Handle(new MovieFileImportedEvent(localMovie, movieFile, new List<DeletedMovieFile>(), true, downloadClientItem));
+            Subject.Handle(new GameFileImportedEvent(localGame, gameFile, new List<DeletedGameFile>(), true, downloadClientItem));
 
             Mocker.GetMock<IHistoryRepository>()
-                .Verify(v => v.Insert(It.Is<MovieHistory>(h => h.SourceTitle == Path.GetFileNameWithoutExtension(localMovie.Path))));
+                .Verify(v => v.Insert(It.Is<GameHistory>(h => h.SourceTitle == Path.GetFileNameWithoutExtension(localGame.Path))));
         }
     }
 }

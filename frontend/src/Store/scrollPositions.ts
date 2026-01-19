@@ -1,7 +1,7 @@
 const scrollPositions: Record<string, number> = {
-  movieIndex: 0,
-  discoverMovie: 0,
-  movieCollections: 0,
+  gameIndex: 0,
+  discoverGame: 0,
+  gameCollections: 0,
 };
 
 export default scrollPositions;

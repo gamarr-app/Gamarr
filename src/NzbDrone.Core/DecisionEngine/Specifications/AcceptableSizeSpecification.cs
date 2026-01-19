@@ -20,11 +20,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
             _logger.Debug("Beginning size check for: {0}", subject);
 
-            var quality = subject.ParsedMovieInfo.Quality.Quality;
+            var quality = subject.ParsedGameInfo.Quality.Quality;
 
             if (subject.Release.Size == 0)
             {
@@ -34,10 +34,10 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             var qualityDefinition = _qualityDefinitionService.Get(quality);
 
-            if (subject.Movie.MovieMetadata.Value.Runtime == 0)
+            if (subject.Game.GameMetadata.Value.Runtime == 0)
             {
-                _logger.Warn("{0} has no runtime information using median movie runtime of 110 minutes.", subject.Movie);
-                subject.Movie.MovieMetadata.Value.Runtime = 110;
+                _logger.Warn("{0} has no runtime information using median game runtime of 110 minutes.", subject.Game);
+                subject.Game.GameMetadata.Value.Runtime = 110;
             }
 
             if (qualityDefinition.MinSize.HasValue)
@@ -45,12 +45,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 var minSize = qualityDefinition.MinSize.Value.Megabytes();
 
                 // Multiply maxSize by Series.Runtime
-                minSize = minSize * subject.Movie.MovieMetadata.Value.Runtime;
+                minSize = minSize * subject.Game.GameMetadata.Value.Runtime;
 
                 // If the parsed size is smaller than minSize we don't want it
                 if (subject.Release.Size < minSize)
                 {
-                    var runtimeMessage = subject.Movie.Title;
+                    var runtimeMessage = subject.Game.Title;
 
                     _logger.Debug("Item: {0}, Size: {1} is smaller than minimum allowed size ({2} bytes for {3}), rejecting.", subject, subject.Release.Size, minSize, runtimeMessage);
                     return DownloadSpecDecision.Reject(DownloadRejectionReason.BelowMinimumSize, "{0} is smaller than minimum allowed {1} (for {2})", subject.Release.Size.SizeSuffix(), minSize.SizeSuffix(), runtimeMessage);
@@ -61,23 +61,23 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             {
                 _logger.Debug("Max size is unlimited, skipping check");
             }
-            else if (subject.Movie.MovieMetadata.Value.Runtime == 0)
+            else if (subject.Game.GameMetadata.Value.Runtime == 0)
             {
-                _logger.Debug("Movie runtime is 0, unable to validate size until it is available, rejecting");
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.UnknownRuntime, "Movie runtime is 0, unable to validate size until it is available");
+                _logger.Debug("Game runtime is 0, unable to validate size until it is available, rejecting");
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.UnknownRuntime, "Game runtime is 0, unable to validate size until it is available");
             }
             else
             {
                 var maxSize = qualityDefinition.MaxSize.Value.Megabytes();
 
                 // Multiply maxSize by Series.Runtime
-                maxSize = maxSize * subject.Movie.MovieMetadata.Value.Runtime;
+                maxSize = maxSize * subject.Game.GameMetadata.Value.Runtime;
 
                 // If the parsed size is greater than maxSize we don't want it
                 if (subject.Release.Size > maxSize)
                 {
-                    _logger.Debug("Item: {0}, Size: {1} is greater than maximum allowed size ({2} for {3}), rejecting", subject, subject.Release.Size, maxSize, subject.Movie.Title);
-                    return DownloadSpecDecision.Reject(DownloadRejectionReason.AboveMaximumSize, "{0} is larger than maximum allowed {1} (for {2})", subject.Release.Size.SizeSuffix(), maxSize.SizeSuffix(), subject.Movie.Title);
+                    _logger.Debug("Item: {0}, Size: {1} is greater than maximum allowed size ({2} for {3}), rejecting", subject, subject.Release.Size, maxSize, subject.Game.Title);
+                    return DownloadSpecDecision.Reject(DownloadRejectionReason.AboveMaximumSize, "{0} is larger than maximum allowed {1} (for {2})", subject.Release.Size.SizeSuffix(), maxSize.SizeSuffix(), subject.Game.Title);
                 }
             }
 

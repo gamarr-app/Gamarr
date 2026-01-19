@@ -9,7 +9,7 @@ using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Http.CloudFlare;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Indexers.Exceptions;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.ThingiProvider;
@@ -43,12 +43,12 @@ namespace NzbDrone.Core.ImportLists
 
         public override ImportListFetchResult Fetch()
         {
-            return FetchMovies(g => g.GetMovies());
+            return FetchGames(g => g.GetGames());
         }
 
-        protected virtual ImportListFetchResult FetchMovies(Func<IImportListRequestGenerator, ImportListPageableRequestChain> pageableRequestChainSelector, bool isRecent = false)
+        protected virtual ImportListFetchResult FetchGames(Func<IImportListRequestGenerator, ImportListPageableRequestChain> pageableRequestChainSelector, bool isRecent = false)
         {
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
             var url = string.Empty;
 
             var anyFailure = true;
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.ImportLists
 
                     foreach (var pageableRequest in pageableRequests)
                     {
-                        var pagedMovies = new List<ImportListMovie>();
+                        var pagedGames = new List<ImportListGame>();
 
                         foreach (var request in pageableRequest)
                         {
@@ -74,9 +74,9 @@ namespace NzbDrone.Core.ImportLists
 
                             var page = FetchPage(request, parser);
 
-                            pagedMovies.AddRange(page);
+                            pagedGames.AddRange(page);
 
-                            if (pagedMovies.Count >= MaxNumResultsPerQuery)
+                            if (pagedGames.Count >= MaxNumResultsPerQuery)
                             {
                                 break;
                             }
@@ -87,10 +87,10 @@ namespace NzbDrone.Core.ImportLists
                             }
                         }
 
-                        movies.AddRange(pagedMovies.Where(IsValidItem));
+                        games.AddRange(pagedGames.Where(IsValidItem));
                     }
 
-                    if (movies.Any())
+                    if (games.Any())
                     {
                         break;
                     }
@@ -162,12 +162,12 @@ namespace NzbDrone.Core.ImportLists
                 _logger.Error(ex, "An error occurred while processing feed. {0}", url);
             }
 
-            return new ImportListFetchResult { Movies = CleanupListItems(movies), AnyFailure = anyFailure };
+            return new ImportListFetchResult { Games = CleanupListItems(games), AnyFailure = anyFailure };
         }
 
-        protected virtual bool IsValidItem(ImportListMovie listItem)
+        protected virtual bool IsValidItem(ImportListGame listItem)
         {
-            if (listItem.Title.IsNullOrWhiteSpace() && listItem.ImdbId.IsNullOrWhiteSpace() && listItem.TmdbId == 0)
+            if (listItem.Title.IsNullOrWhiteSpace() && listItem.ImdbId.IsNullOrWhiteSpace() && listItem.IgdbId == 0)
             {
                 return false;
             }
@@ -175,12 +175,12 @@ namespace NzbDrone.Core.ImportLists
             return true;
         }
 
-        protected virtual bool IsFullPage(IList<ImportListMovie> page)
+        protected virtual bool IsFullPage(IList<ImportListGame> page)
         {
             return PageSize != 0 && page.Count >= PageSize;
         }
 
-        protected virtual IList<ImportListMovie> FetchPage(ImportListRequest request, IParseImportListResponse parser)
+        protected virtual IList<ImportListGame> FetchPage(ImportListRequest request, IParseImportListResponse parser)
         {
             var response = FetchImportListResponse(request);
 
@@ -212,7 +212,7 @@ namespace NzbDrone.Core.ImportLists
             {
                 var parser = GetParser();
                 var generator = GetRequestGenerator();
-                var pageableRequests = generator.GetMovies();
+                var pageableRequests = generator.GetGames();
 
                 var allTiers = pageableRequests.GetAllTiers();
                 if (!allTiers.Any())

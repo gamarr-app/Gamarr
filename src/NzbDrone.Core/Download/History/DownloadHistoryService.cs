@@ -4,7 +4,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games.Events;
 
 namespace NzbDrone.Core.Download.History
 {
@@ -16,12 +16,12 @@ namespace NzbDrone.Core.Download.History
     }
 
     public class DownloadHistoryService : IDownloadHistoryService,
-                                          IHandle<MovieGrabbedEvent>,
-                                          IHandle<MovieFileImportedEvent>,
+                                          IHandle<GameGrabbedEvent>,
+                                          IHandle<GameFileImportedEvent>,
                                           IHandle<DownloadCompletedEvent>,
                                           IHandle<DownloadFailedEvent>,
                                           IHandle<DownloadIgnoredEvent>,
-                                          IHandle<MoviesDeletedEvent>
+                                          IHandle<GamesDeletedEvent>
     {
         private readonly IDownloadHistoryRepository _repository;
         private readonly IHistoryService _historyService;
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Download.History
                               .FirstOrDefault(d => d.EventType == DownloadHistoryEventType.DownloadGrabbed);
         }
 
-        public void Handle(MovieGrabbedEvent message)
+        public void Handle(GameGrabbedEvent message)
         {
             // Don't store grabbed events for clients that don't download IDs
             if (message.DownloadId.IsNullOrWhiteSpace())
@@ -102,25 +102,25 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadGrabbed,
-                MovieId = message.Movie.Movie.Id,
+                GameId = message.Game.Game.Id,
                 DownloadId = message.DownloadId,
-                SourceTitle = message.Movie.Release.Title,
+                SourceTitle = message.Game.Release.Title,
                 Date = DateTime.UtcNow,
-                Protocol = message.Movie.Release.DownloadProtocol,
-                IndexerId = message.Movie.Release.IndexerId,
+                Protocol = message.Game.Release.DownloadProtocol,
+                IndexerId = message.Game.Release.IndexerId,
                 DownloadClientId = message.DownloadClientId,
-                Release = message.Movie.Release
+                Release = message.Game.Release
             };
 
-            history.Data.Add("Indexer", message.Movie.Release.Indexer);
+            history.Data.Add("Indexer", message.Game.Release.Indexer);
             history.Data.Add("DownloadClient", message.DownloadClient);
             history.Data.Add("DownloadClientName", message.DownloadClientName);
 
-            history.Data.Add("CustomFormatScore", message.Movie.CustomFormatScore.ToString());
+            history.Data.Add("CustomFormatScore", message.Game.CustomFormatScore.ToString());
             _repository.Insert(history);
         }
 
-        public void Handle(MovieFileImportedEvent message)
+        public void Handle(GameFileImportedEvent message)
         {
             if (!message.NewDownload)
             {
@@ -144,9 +144,9 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.FileImported,
-                MovieId = message.ImportedMovie.MovieId,
+                GameId = message.ImportedGame.GameId,
                 DownloadId = downloadId,
-                SourceTitle = message.MovieInfo.Path,
+                SourceTitle = message.GameInfo.Path,
                 Date = DateTime.UtcNow,
                 Protocol = message.DownloadClientInfo.Protocol,
                 DownloadClientId = message.DownloadClientInfo.Id
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadImported,
-                MovieId = message.MovieId,
+                GameId = message.GameId,
                 DownloadId = downloadItem.DownloadId,
                 SourceTitle = downloadItem.Title,
                 Date = DateTime.UtcNow,
@@ -190,7 +190,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadFailed,
-                MovieId = message.MovieId,
+                GameId = message.GameId,
                 DownloadId = message.DownloadId,
                 SourceTitle = message.SourceTitle,
                 Date = DateTime.UtcNow,
@@ -209,7 +209,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadIgnored,
-                MovieId = message.MovieId,
+                GameId = message.GameId,
                 DownloadId = message.DownloadId,
                 SourceTitle = message.SourceTitle,
                 Date = DateTime.UtcNow,
@@ -223,9 +223,9 @@ namespace NzbDrone.Core.Download.History
             _repository.Insert(history);
         }
 
-        public void Handle(MoviesDeletedEvent message)
+        public void Handle(GamesDeletedEvent message)
         {
-            _repository.DeleteByMovieIds(message.Movies.Select(m => m.Id).ToList());
+            _repository.DeleteByGameIds(message.Games.Select(m => m.Id).ToList());
         }
     }
 }

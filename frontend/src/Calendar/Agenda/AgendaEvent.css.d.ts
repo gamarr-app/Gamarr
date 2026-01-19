@@ -9,7 +9,7 @@ interface CssExports {
   'genres': string;
   'missingMonitored': string;
   'missingUnmonitored': string;
-  'movieTitle': string;
+  'gameTitle': string;
   'overlay': string;
   'queue': string;
   'releaseIcon': string;

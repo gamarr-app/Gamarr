@@ -5,7 +5,7 @@ using NzbDrone.Common.Crypto;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Queue
@@ -44,22 +44,22 @@ namespace NzbDrone.Core.Queue
 
         private IEnumerable<Queue> MapQueue(TrackedDownload trackedDownload)
         {
-            if (trackedDownload.RemoteMovie != null && trackedDownload.RemoteMovie.Movie != null)
+            if (trackedDownload.RemoteGame != null && trackedDownload.RemoteGame.Game != null)
             {
-                yield return MapMovie(trackedDownload, trackedDownload.RemoteMovie.Movie);
+                yield return MapGame(trackedDownload, trackedDownload.RemoteGame.Game);
             }
             else
             {
-                yield return MapMovie(trackedDownload, null);
+                yield return MapGame(trackedDownload, null);
             }
         }
 
-        private Queue MapMovie(TrackedDownload trackedDownload, Movie movie)
+        private Queue MapGame(TrackedDownload trackedDownload, Game game)
         {
             var queue = new Queue
             {
-                Languages = trackedDownload.RemoteMovie?.Languages ?? new List<Language> { Language.Unknown },
-                Quality = trackedDownload.RemoteMovie?.ParsedMovieInfo.Quality ?? new QualityModel(Quality.Unknown),
+                Languages = trackedDownload.RemoteGame?.Languages ?? new List<Language> { Language.Unknown },
+                Quality = trackedDownload.RemoteGame?.ParsedGameInfo.Quality ?? new QualityModel(Quality.Unknown),
                 Title = trackedDownload.DownloadItem.Title,
                 Size = trackedDownload.DownloadItem.TotalSize,
                 SizeLeft = trackedDownload.DownloadItem.RemainingSize,
@@ -69,10 +69,10 @@ namespace NzbDrone.Core.Queue
                 TrackedDownloadState = trackedDownload.State,
                 StatusMessages = trackedDownload.StatusMessages.ToList(),
                 ErrorMessage = trackedDownload.DownloadItem.Message,
-                RemoteMovie = trackedDownload.RemoteMovie,
+                RemoteGame = trackedDownload.RemoteGame,
                 DownloadId = trackedDownload.DownloadItem.DownloadId,
                 Protocol = trackedDownload.Protocol,
-                Movie = movie,
+                Game = game,
                 DownloadClient = trackedDownload.DownloadItem.DownloadClientInfo.Name,
                 Indexer = trackedDownload.Indexer,
                 OutputPath = trackedDownload.DownloadItem.OutputPath.ToString(),

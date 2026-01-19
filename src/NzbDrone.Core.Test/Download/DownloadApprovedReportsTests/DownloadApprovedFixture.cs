@@ -11,7 +11,7 @@ using NzbDrone.Core.Download.Clients;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Indexers;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -27,99 +27,99 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public void SetUp()
         {
             Mocker.GetMock<IPrioritizeDownloadDecision>()
-                .Setup(v => v.PrioritizeDecisionsForMovies(It.IsAny<List<DownloadDecision>>()))
+                .Setup(v => v.PrioritizeDecisionsForGames(It.IsAny<List<DownloadDecision>>()))
                 .Returns<List<DownloadDecision>>(v => v);
         }
 
-        private Movie GetMovie(int id)
+        private Game GetGame(int id)
         {
-            return Builder<Movie>.CreateNew()
+            return Builder<Game>.CreateNew()
                             .With(e => e.Id = id)
                                  .With(m => m.Tags = new HashSet<int>())
 
                             .Build();
         }
 
-        private RemoteMovie GetRemoteMovie(QualityModel quality, Movie movie = null, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet)
+        private RemoteGame GetRemoteGame(QualityModel quality, Game game = null, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet)
         {
-            if (movie == null)
+            if (game == null)
             {
-                movie = GetMovie(1);
+                game = GetGame(1);
             }
 
-            movie.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() };
+            game.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() };
 
-            var remoteMovie = new RemoteMovie()
+            var remoteGame = new RemoteGame()
             {
-                ParsedMovieInfo = new ParsedMovieInfo()
+                ParsedGameInfo = new ParsedGameInfo()
                 {
                     Quality = quality,
                     Year = 1998,
-                    MovieTitles = new List<string> { "A Movie" },
+                    GameTitles = new List<string> { "A Game" },
                 },
-                Movie = movie,
+                Game = game,
 
                 Release = new ReleaseInfo()
                 {
                     PublishDate = DateTime.UtcNow,
-                    Title = "A.Movie.1998",
+                    Title = "A.Game.1998",
                     Size = 200,
                     DownloadProtocol = downloadProtocol
                 }
             };
 
-            return remoteMovie;
+            return remoteGame;
         }
 
         [Test]
-        public async Task should_download_report_if_movie_was_not_already_downloaded()
+        public async Task should_download_report_if_game_was_not_already_downloaded()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
+            decisions.Add(new DownloadDecision(remoteGame));
 
             await Subject.ProcessDecisions(decisions);
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteMovie>(), null), Times.Once());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteGame>(), null), Times.Once());
         }
 
         [Test]
-        public async Task should_only_download_movie_once()
+        public async Task should_only_download_game_once()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
-            decisions.Add(new DownloadDecision(remoteMovie));
+            decisions.Add(new DownloadDecision(remoteGame));
+            decisions.Add(new DownloadDecision(remoteGame));
 
             await Subject.ProcessDecisions(decisions);
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteMovie>(), null), Times.Once());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteGame>(), null), Times.Once());
         }
 
         [Test]
-        public async Task should_not_download_if_any_movie_was_already_downloaded()
+        public async Task should_not_download_if_any_game_was_already_downloaded()
         {
-            var remoteMovie1 = GetRemoteMovie(
+            var remoteGame1 = GetRemoteGame(
                                                     new QualityModel(Quality.HDTV720p));
 
-            var remoteMovie2 = GetRemoteMovie(
+            var remoteGame2 = GetRemoteGame(
                                                     new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie1));
-            decisions.Add(new DownloadDecision(remoteMovie2));
+            decisions.Add(new DownloadDecision(remoteGame1));
+            decisions.Add(new DownloadDecision(remoteGame2));
 
             await Subject.ProcessDecisions(decisions);
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteMovie>(), null), Times.Once());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteGame>(), null), Times.Once());
         }
 
         [Test]
         public async Task should_return_downloaded_reports()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
+            decisions.Add(new DownloadDecision(remoteGame));
 
             var result = await Subject.ProcessDecisions(decisions);
 
@@ -129,13 +129,13 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_return_all_downloaded_reports()
         {
-            var remoteMovie1 = GetRemoteMovie(new QualityModel(Quality.HDTV720p), GetMovie(1));
+            var remoteGame1 = GetRemoteGame(new QualityModel(Quality.HDTV720p), GetGame(1));
 
-            var remoteMovie2 = GetRemoteMovie(new QualityModel(Quality.HDTV720p), GetMovie(2));
+            var remoteGame2 = GetRemoteGame(new QualityModel(Quality.HDTV720p), GetGame(2));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie1));
-            decisions.Add(new DownloadDecision(remoteMovie2));
+            decisions.Add(new DownloadDecision(remoteGame1));
+            decisions.Add(new DownloadDecision(remoteGame2));
 
             var result = await Subject.ProcessDecisions(decisions);
 
@@ -145,22 +145,22 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_only_return_downloaded_reports()
         {
-            var remoteMovie1 = GetRemoteMovie(
+            var remoteGame1 = GetRemoteGame(
                                                     new QualityModel(Quality.HDTV720p),
-                                                    GetMovie(1));
+                                                    GetGame(1));
 
-            var remoteMovie2 = GetRemoteMovie(
+            var remoteGame2 = GetRemoteGame(
                                                     new QualityModel(Quality.HDTV720p),
-                                                    GetMovie(2));
+                                                    GetGame(2));
 
-            var remoteMovie3 = GetRemoteMovie(
+            var remoteGame3 = GetRemoteGame(
                                                     new QualityModel(Quality.HDTV720p),
-                                                    GetMovie(2));
+                                                    GetGame(2));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie1));
-            decisions.Add(new DownloadDecision(remoteMovie2));
-            decisions.Add(new DownloadDecision(remoteMovie3));
+            decisions.Add(new DownloadDecision(remoteGame1));
+            decisions.Add(new DownloadDecision(remoteGame2));
+            decisions.Add(new DownloadDecision(remoteGame3));
 
             var result = await Subject.ProcessDecisions(decisions);
 
@@ -170,12 +170,12 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_downloaded_list_when_download_fails()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
+            decisions.Add(new DownloadDecision(remoteGame));
 
-            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.IsAny<RemoteMovie>(), null)).Throws(new Exception());
+            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.IsAny<RemoteGame>(), null)).Throws(new Exception());
 
             var result = await Subject.ProcessDecisions(decisions);
 
@@ -188,9 +188,9 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public void should_return_an_empty_list_when_none_are_appproved()
         {
             var decisions = new List<DownloadDecision>();
-            RemoteMovie remoteMovie = null;
-            decisions.Add(new DownloadDecision(remoteMovie, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!")));
-            decisions.Add(new DownloadDecision(remoteMovie, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!")));
+            RemoteGame remoteGame = null;
+            decisions.Add(new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!")));
+            decisions.Add(new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!")));
 
             Subject.GetQualifiedReports(decisions).Should().BeEmpty();
         }
@@ -198,23 +198,23 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_grab_if_pending()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
+            decisions.Add(new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
 
             await Subject.ProcessDecisions(decisions);
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteMovie>(), null), Times.Never());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteGame>(), null), Times.Never());
         }
 
         [Test]
-        public async Task should_not_add_to_pending_if_movie_was_grabbed()
+        public async Task should_not_add_to_pending_if_game_was_grabbed()
         {
-            var removeMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var removeGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(removeMovie));
-            decisions.Add(new DownloadDecision(removeMovie, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
+            decisions.Add(new DownloadDecision(removeGame));
+            decisions.Add(new DownloadDecision(removeGame, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
 
             await Subject.ProcessDecisions(decisions);
             Mocker.GetMock<IPendingReleaseService>().Verify(v => v.AddMany(It.IsAny<List<Tuple<DownloadDecision, PendingReleaseReason>>>()), Times.Never());
@@ -223,7 +223,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_pending_even_if_already_added_to_pending()
         {
-            var remoteEpisode = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteEpisode = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteEpisode, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
@@ -236,48 +236,48 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_failed_if_already_failed_for_that_protocol()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
-            decisions.Add(new DownloadDecision(remoteMovie));
+            decisions.Add(new DownloadDecision(remoteGame));
+            decisions.Add(new DownloadDecision(remoteGame));
 
-            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.IsAny<RemoteMovie>(), null))
+            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.IsAny<RemoteGame>(), null))
                   .Throws(new DownloadClientUnavailableException("Download client failed"));
 
             await Subject.ProcessDecisions(decisions);
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteMovie>(), null), Times.Once());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.IsAny<RemoteGame>(), null), Times.Once());
         }
 
         [Test]
         public async Task should_not_add_to_failed_if_failed_for_a_different_protocol()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p), null, DownloadProtocol.Usenet);
-            var remoteMovie2 = GetRemoteMovie(new QualityModel(Quality.HDTV720p), null, DownloadProtocol.Torrent);
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p), null, DownloadProtocol.Usenet);
+            var remoteGame2 = GetRemoteGame(new QualityModel(Quality.HDTV720p), null, DownloadProtocol.Torrent);
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
-            decisions.Add(new DownloadDecision(remoteMovie2));
+            decisions.Add(new DownloadDecision(remoteGame));
+            decisions.Add(new DownloadDecision(remoteGame2));
 
-            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.Is<RemoteMovie>(r => r.Release.DownloadProtocol == DownloadProtocol.Usenet), null))
+            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.Is<RemoteGame>(r => r.Release.DownloadProtocol == DownloadProtocol.Usenet), null))
                   .Throws(new DownloadClientUnavailableException("Download client failed"));
 
             await Subject.ProcessDecisions(decisions);
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.Is<RemoteMovie>(r => r.Release.DownloadProtocol == DownloadProtocol.Usenet), null), Times.Once());
-            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.Is<RemoteMovie>(r => r.Release.DownloadProtocol == DownloadProtocol.Torrent), null), Times.Once());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.Is<RemoteGame>(r => r.Release.DownloadProtocol == DownloadProtocol.Usenet), null), Times.Once());
+            Mocker.GetMock<IDownloadService>().Verify(v => v.DownloadReport(It.Is<RemoteGame>(r => r.Release.DownloadProtocol == DownloadProtocol.Torrent), null), Times.Once());
         }
 
         [Test]
         public async Task should_add_to_rejected_if_release_unavailable_on_indexer()
         {
-            var remoteMovie = GetRemoteMovie(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
 
             var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteMovie));
+            decisions.Add(new DownloadDecision(remoteGame));
 
             Mocker.GetMock<IDownloadService>()
-                  .Setup(s => s.DownloadReport(It.IsAny<RemoteMovie>(), null))
-                  .Throws(new ReleaseUnavailableException(remoteMovie.Release, "That 404 Error is not just a Quirk"));
+                  .Setup(s => s.DownloadReport(It.IsAny<RemoteGame>(), null))
+                  .Throws(new ReleaseUnavailableException(remoteGame.Release, "That 404 Error is not just a Quirk"));
 
             var result = await Subject.ProcessDecisions(decisions);
 

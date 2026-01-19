@@ -6,14 +6,14 @@ namespace NzbDrone.Core.Download
 {
     public class ManualInteractionRequiredEvent : IEvent
     {
-        public RemoteMovie RemoteMovie { get; private set; }
+        public RemoteGame RemoteGame { get; private set; }
         public TrackedDownload TrackedDownload { get; private set; }
         public GrabbedReleaseInfo Release { get; private set; }
 
         public ManualInteractionRequiredEvent(TrackedDownload trackedDownload, GrabbedReleaseInfo release)
         {
             TrackedDownload = trackedDownload;
-            RemoteMovie = trackedDownload.RemoteMovie;
+            RemoteGame = trackedDownload.RemoteGame;
             Release = release;
         }
     }

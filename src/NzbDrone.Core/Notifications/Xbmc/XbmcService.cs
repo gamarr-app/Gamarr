@@ -4,14 +4,14 @@ using System.Linq;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Core.Localization;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Xbmc
 {
     public interface IXbmcService
     {
         void Notify(XbmcSettings settings, string title, string message);
-        void Update(XbmcSettings settings, Movie movie);
+        void Update(XbmcSettings settings, Game game);
         void Clean(XbmcSettings settings);
         ValidationFailure Test(XbmcSettings settings, string message);
     }
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
             _proxy.Notify(settings, title, message);
         }
 
-        public void Update(XbmcSettings settings, Movie movie)
+        public void Update(XbmcSettings settings, Game game)
         {
             if (CheckIfVideoPlayerOpen(settings))
             {
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
                 return;
             }
 
-            UpdateLibrary(settings, movie);
+            UpdateLibrary(settings, game);
         }
 
         public void Clean(XbmcSettings settings)
@@ -58,45 +58,45 @@ namespace NzbDrone.Core.Notifications.Xbmc
             _proxy.CleanLibrary(settings);
         }
 
-        public string GetMoviePath(XbmcSettings settings, Movie movie)
+        public string GetGamePath(XbmcSettings settings, Game game)
         {
-            var allMovies = _proxy.GetMovies(settings);
+            var allGames = _proxy.GetGames(settings);
 
-            if (!allMovies.Any())
+            if (!allGames.Any())
             {
-                _logger.Debug("No Movies returned from Kodi");
+                _logger.Debug("No Games returned from Kodi");
                 return null;
             }
 
-            var matchingMovies = allMovies.FirstOrDefault(s =>
+            var matchingGames = allGames.FirstOrDefault(s =>
             {
-                return s.ImdbNumber == movie.ImdbId;
+                return s.ImdbNumber == game.ImdbId;
             });
 
-            if (matchingMovies != null)
+            if (matchingGames != null)
             {
-                return matchingMovies.File;
+                return matchingGames.File;
             }
 
             return null;
         }
 
-        private void UpdateLibrary(XbmcSettings settings, Movie movie)
+        private void UpdateLibrary(XbmcSettings settings, Game game)
         {
             try
             {
-                var moviePath = GetMoviePath(settings, movie);
+                var gamePath = GetGamePath(settings, game);
 
-                if (moviePath != null)
+                if (gamePath != null)
                 {
-                    _logger.Debug("Updating movie {0} (Kodi path: {1}) on Kodi host: {2}", movie, moviePath, settings.Address);
+                    _logger.Debug("Updating game {0} (Kodi path: {1}) on Kodi host: {2}", game, gamePath, settings.Address);
                 }
                 else
                 {
-                    _logger.Debug("Movie {0} doesn't exist on Kodi host: {1}, Updating Entire Library", movie, settings.Address);
+                    _logger.Debug("Game {0} doesn't exist on Kodi host: {1}, Updating Entire Library", game, settings.Address);
                 }
 
-                var response = _proxy.UpdateLibrary(settings, moviePath);
+                var response = _proxy.UpdateLibrary(settings, gamePath);
 
                 if (!response.Equals("OK", StringComparison.InvariantCultureIgnoreCase))
                 {

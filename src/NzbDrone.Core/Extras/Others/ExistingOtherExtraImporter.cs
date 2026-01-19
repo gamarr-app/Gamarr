@@ -4,7 +4,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Files;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.Extras.Others
@@ -27,12 +27,12 @@ namespace NzbDrone.Core.Extras.Others
 
         public override int Order => 2;
 
-        public override IEnumerable<ExtraFile> ProcessFiles(Movie movie, List<string> filesOnDisk, List<string> importedFiles, string fileNameBeforeRename)
+        public override IEnumerable<ExtraFile> ProcessFiles(Game game, List<string> filesOnDisk, List<string> importedFiles, string fileNameBeforeRename)
         {
-            _logger.Debug("Looking for existing extra files in {0}", movie.Path);
+            _logger.Debug("Looking for existing extra files in {0}", game.Path);
 
             var extraFiles = new List<OtherExtraFile>();
-            var filterResult = FilterAndClean(movie, filesOnDisk, importedFiles, fileNameBeforeRename is not null);
+            var filterResult = FilterAndClean(game, filesOnDisk, importedFiles, fileNameBeforeRename is not null);
 
             foreach (var possibleExtraFile in filterResult.FilesOnDisk)
             {
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Extras.Others
                     continue;
                 }
 
-                var minimalInfo = _parsingService.ParseMinimalPathMovieInfo(possibleExtraFile);
+                var minimalInfo = _parsingService.ParseMinimalPathGameInfo(possibleExtraFile);
 
                 if (minimalInfo == null)
                 {
@@ -54,9 +54,9 @@ namespace NzbDrone.Core.Extras.Others
 
                 var extraFile = new OtherExtraFile
                 {
-                    MovieId = movie.Id,
-                    MovieFileId = movie.MovieFileId,
-                    RelativePath = movie.Path.GetRelativePath(possibleExtraFile),
+                    GameId = game.Id,
+                    GameFileId = game.GameFileId,
+                    RelativePath = game.Path.GetRelativePath(possibleExtraFile),
                     Extension = extension
                 };
 

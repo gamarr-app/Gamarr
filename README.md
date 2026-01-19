@@ -1,70 +1,70 @@
-# Radarr
+# Gamarr
 
-[![Build Status](https://dev.azure.com/Radarr/Radarr/_apis/build/status/Radarr.Radarr?branchName=develop)](https://dev.azure.com/Radarr/Radarr/_build/latest?definitionId=1&branchName=develop)
-[![Translation status](https://translate.servarr.com/widget/servarr/radarr/svg-badge.svg)](https://translate.servarr.com/engage/servarr/?utm_source=widget)
-[![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/radarr.svg)](https://wiki.servarr.com/radarr/installation/docker)
-![Github Downloads](https://img.shields.io/github/downloads/Radarr/Radarr/total.svg)
-[![Backers on Open Collective](https://opencollective.com/Radarr/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/Radarr/sponsors/badge.svg)](#sponsors)
-[![Mega Sponsors on Open Collective](https://opencollective.com/Radarr/megasponsors/badge.svg)](#mega-sponsors)
+[![Build Status](https://dev.azure.com/Gamarr/Gamarr/_apis/build/status/Gamarr.Gamarr?branchName=develop)](https://dev.azure.com/Gamarr/Gamarr/_build/latest?definitionId=1&branchName=develop)
+[![Translation status](https://translate.servarr.com/widget/servarr/gamarr/svg-badge.svg)](https://translate.servarr.com/engage/servarr/?utm_source=widget)
+[![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/gamarr.svg)](https://wiki.servarr.com/gamarr/installation/docker)
+![Github Downloads](https://img.shields.io/github/downloads/Gamarr/Gamarr/total.svg)
+[![Backers on Open Collective](https://opencollective.com/Gamarr/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/Gamarr/sponsors/badge.svg)](#sponsors)
+[![Mega Sponsors on Open Collective](https://opencollective.com/Gamarr/megasponsors/badge.svg)](#mega-sponsors)
 
-Radarr is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available.
-Note that only one type of a given movie is supported. If you want both a 4k version and 1080p version of a given movie you will need multiple instances.
+Gamarr is a game collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new games and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available.
+Note that only one type of a given game is supported. If you want both a 4k version and 1080p version of a given game you will need multiple instances.
 
 ## Major Features Include
 
-* Adding new movies with lots of information, such as trailers, ratings, etc.
+* Adding new games with lots of information, such as trailers, ratings, etc.
 * Support for major platforms: Windows, Linux, macOS, Raspberry Pi, etc.
-* Can watch for better quality of the movies you have and do an automatic upgrade. _eg. from DVD to Blu-Ray_
+* Can watch for better quality of the games you have and do an automatic upgrade. _eg. from DVD to Blu-Ray_
 * Automatic failed download handling will try another release if one fails
 * Manual search so you can pick any release or to see why a release was not downloaded automatically
 * Full integration with SABnzbd and NZBGet
 * Automatically searching for releases as well as RSS Sync
-* Automatically importing downloaded movies
+* Automatically importing downloaded games
 * Recognizing Special Editions, Director's Cut, etc.
 * Identifying releases with hardcoded subs
-* Identifying releases with AKA movie names
+* Identifying releases with AKA game names
 * SABnzbd, NZBGet, QBittorrent, Deluge, rTorrent, Transmission, uTorrent, and other download clients are supported and integrated
 * Full integration with Kodi and Plex (notifications, library updates)
 * Importing Metadata such as trailers or subtitles
 * Adding metadata such as posters and information for Kodi and others to use
-* Advanced customization for profiles, such that Radarr will always download the copy you want
+* Advanced customization for profiles, such that Gamarr will always download the copy you want
 * A beautiful UI
 
 ## Support
 
-[![Wiki](https://img.shields.io/badge/servarr-wiki-181717.svg?maxAge=60)](https://wiki.servarr.com/radarr)
-[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://radarr.video/discord)
+[![Wiki](https://img.shields.io/badge/servarr-wiki-181717.svg?maxAge=60)](https://wiki.servarr.com/gamarr)
+[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://gamarr.video/discord)
 
 Note: GitHub Issues are for Bugs and Feature Requests Only
 
-[![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Radarr/Radarr/issues)
+[![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Gamarr/Gamarr/issues)
 
 ## Contributors & Developers
 
-[API Documentation](https://radarr.video/docs/api/)
+[API Documentation](https://gamarr.video/docs/api/)
 
 This project exists thanks to all the people who contribute.
 - [Contribute (GitHub)](CONTRIBUTING.md)
-- [Contribution (Wiki Article)](https://wiki.servarr.com/radarr/contributing)
+- [Contribution (Wiki Article)](https://wiki.servarr.com/gamarr/contributing)
 
-[![Contributors List](https://opencollective.com/Radarr/contributors.svg?width=890&button=false)](https://github.com/Radarr/Radarr/graphs/contributors)
+[![Contributors List](https://opencollective.com/Gamarr/contributors.svg?width=890&button=false)](https://github.com/Gamarr/Gamarr/graphs/contributors)
 
 ## Backers
 
-Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/Radarr#backer)
+Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/Gamarr#backer)
 
-[![Backers List](https://opencollective.com/Radarr/backers.svg?width=890)](https://opencollective.com/Radarr#backer)
+[![Backers List](https://opencollective.com/Gamarr/backers.svg?width=890)](https://opencollective.com/Gamarr#backer)
 
 ## Sponsors
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/Radarr#sponsor)
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/Gamarr#sponsor)
 
-[![Sponsors List](https://opencollective.com/Radarr/sponsors.svg?width=890)](https://opencollective.com/Radarr#sponsor)
+[![Sponsors List](https://opencollective.com/Gamarr/sponsors.svg?width=890)](https://opencollective.com/Gamarr#sponsor)
 
 ## Mega Sponsors
 
-[![Mega Sponsors List](https://opencollective.com/Radarr/tiers/mega-sponsor.svg?width=890)](https://opencollective.com/Radarr#mega-sponsor)
+[![Mega Sponsors List](https://opencollective.com/Gamarr/tiers/mega-sponsor.svg?width=890)](https://opencollective.com/Gamarr#mega-sponsor)
 
 ## JetBrains
 

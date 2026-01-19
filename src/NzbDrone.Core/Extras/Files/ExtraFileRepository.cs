@@ -8,11 +8,11 @@ namespace NzbDrone.Core.Extras.Files
     public interface IExtraFileRepository<TExtraFile> : IBasicRepository<TExtraFile>
         where TExtraFile : ExtraFile, new()
     {
-        void DeleteForMovies(List<int> movieIds);
-        void DeleteForMovieFile(int movieFileId);
-        List<TExtraFile> GetFilesByMovie(int movieId);
-        List<TExtraFile> GetFilesByMovieFile(int movieFileId);
-        TExtraFile FindByPath(int movieId, string path);
+        void DeleteForGames(List<int> gameIds);
+        void DeleteForGameFile(int gameFileId);
+        List<TExtraFile> GetFilesByGame(int gameId);
+        List<TExtraFile> GetFilesByGameFile(int gameFileId);
+        TExtraFile FindByPath(int gameId, string path);
     }
 
     public class ExtraFileRepository<TExtraFile> : BasicRepository<TExtraFile>, IExtraFileRepository<TExtraFile>
@@ -23,29 +23,29 @@ namespace NzbDrone.Core.Extras.Files
         {
         }
 
-        public void DeleteForMovies(List<int> movieIds)
+        public void DeleteForGames(List<int> gameIds)
         {
-            Delete(x => movieIds.Contains(x.MovieId));
+            Delete(x => gameIds.Contains(x.GameId));
         }
 
-        public void DeleteForMovieFile(int movieFileId)
+        public void DeleteForGameFile(int gameFileId)
         {
-            Delete(x => x.MovieFileId == movieFileId);
+            Delete(x => x.GameFileId == gameFileId);
         }
 
-        public List<TExtraFile> GetFilesByMovie(int movieId)
+        public List<TExtraFile> GetFilesByGame(int gameId)
         {
-            return Query(x => x.MovieId == movieId);
+            return Query(x => x.GameId == gameId);
         }
 
-        public List<TExtraFile> GetFilesByMovieFile(int movieFileId)
+        public List<TExtraFile> GetFilesByGameFile(int gameFileId)
         {
-            return Query(x => x.MovieFileId == movieFileId);
+            return Query(x => x.GameFileId == gameFileId);
         }
 
-        public TExtraFile FindByPath(int movieId, string path)
+        public TExtraFile FindByPath(int gameId, string path)
         {
-            return Query(c => c.MovieId == movieId && c.RelativePath == path).SingleOrDefault();
+            return Query(c => c.GameId == gameId && c.RelativePath == path).SingleOrDefault();
         }
     }
 }

@@ -43,7 +43,7 @@ namespace NzbDrone.Common.EnvironmentInfo
             }
             catch (UnauthorizedAccessException)
             {
-                throw new RadarrStartupException("Cannot create AppFolder, Access to the path {0} is denied", _appFolderInfo.AppDataFolder);
+                throw new GamarrStartupException("Cannot create AppFolder, Access to the path {0} is denied", _appFolderInfo.AppDataFolder);
             }
 
             if (OsInfo.IsWindows)
@@ -53,7 +53,7 @@ namespace NzbDrone.Common.EnvironmentInfo
 
             if (!_diskProvider.FolderWritable(_appFolderInfo.AppDataFolder))
             {
-                throw new RadarrStartupException("AppFolder {0} is not writable", _appFolderInfo.AppDataFolder);
+                throw new GamarrStartupException("AppFolder {0} is not writable", _appFolderInfo.AppDataFolder);
             }
 
             InitializeMonoApplicationData();
@@ -77,7 +77,7 @@ namespace NzbDrone.Common.EnvironmentInfo
             {
                 if (OsInfo.IsOsx)
                 {
-                    var userAppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify), ".config", "Radarr");
+                    var userAppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify), ".config", "Gamarr");
 
                     if (_diskProvider.FolderExists(userAppDataFolder) && !_diskProvider.FileExists(_appFolderInfo.GetConfigPath()))
                     {
@@ -104,7 +104,7 @@ namespace NzbDrone.Common.EnvironmentInfo
                     RemovePidFile();
                 }
 
-                // Exit if a radarr.db already exists
+                // Exit if a gamarr.db already exists
                 if (_diskProvider.FileExists(_appFolderInfo.GetDatabase()))
                 {
                     return;
@@ -122,7 +122,7 @@ namespace NzbDrone.Common.EnvironmentInfo
             catch (Exception ex)
             {
                 _logger.Debug(ex, ex.Message);
-                throw new RadarrStartupException(ex, "Unable to migrate DB from nzbdrone.db to {0}. Migrate manually", _appFolderInfo.GetDatabase());
+                throw new GamarrStartupException(ex, "Unable to migrate DB from nzbdrone.db to {0}. Migrate manually", _appFolderInfo.GetDatabase());
             }
         }
 
@@ -201,7 +201,7 @@ namespace NzbDrone.Common.EnvironmentInfo
         {
             if (OsInfo.IsNotWindows && _diskProvider.FolderExists(_appFolderInfo.AppDataFolder))
             {
-                _diskProvider.DeleteFile(Path.Combine(_appFolderInfo.AppDataFolder, "radarr.pid"));
+                _diskProvider.DeleteFile(Path.Combine(_appFolderInfo.AppDataFolder, "gamarr.pid"));
             }
         }
     }

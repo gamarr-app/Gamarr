@@ -20,18 +20,18 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 4,
                     ShouldMonitor = true,
                     Name = "IMDB List",
-                    Implementation = "RadarrLists",
-                    Settings = new RadarrListSettings169
+                    Implementation = "GamarrLists",
+                    Settings = new GamarrListSettings169
                     {
-                        APIURL = "https://api.radarr.video/v2",
+                        APIURL = "https://api.gamarr.video/v2",
                         Path = "/imdb/list?listId=ls000199717",
                     }.ToJson(),
-                    ConfigContract = "RadarrSettings"
+                    ConfigContract = "GamarrSettings"
                 });
             });
 
@@ -42,11 +42,11 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         }
 
         [Test]
-        public void should_change_min_avail_from_predb_on_movie()
+        public void should_change_min_avail_from_predb_on_game()
         {
             var db = WithMigrationTestDb(c =>
             {
-                c.Insert.IntoTable("Movies").Row(new
+                c.Insert.IntoTable("Games").Row(new
                 {
                     Monitored = true,
                     Title = "Title",
@@ -59,16 +59,16 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Runtime = 90,
                     OriginalLanguage = 1,
                     ProfileId = 1,
-                    MovieFileId = 0,
-                    Path = string.Format("/Movies/{0}", "Title"),
+                    GameFileId = 0,
+                    Path = string.Format("/Games/{0}", "Title"),
                     TitleSlug = 123456,
-                    TmdbId = 132456,
+                    IgdbId = 132456,
                     Added = DateTime.UtcNow,
                     LastInfoSync = DateTime.UtcNow,
                 });
             });
 
-            var items = db.Query<Movie201>("SELECT \"Id\", \"MinimumAvailability\" FROM \"Movies\"");
+            var items = db.Query<Game201>("SELECT \"Id\", \"MinimumAvailability\" FROM \"Games\"");
 
             items.Should().HaveCount(1);
             items.First().MinimumAvailability.Should().Be(3);
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         public int MinimumAvailability { get; set; }
     }
 
-    public class Movie201
+    public class Game201
     {
         public int Id { get; set; }
         public int MinimumAvailability { get; set; }

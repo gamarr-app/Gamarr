@@ -103,19 +103,19 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             var caps = Subject.GetCapabilities(_settings);
 
             caps.TextSearchEngine.Should().Be("sphinx");
-            caps.MovieTextSearchEngine.Should().Be("sphinx");
+            caps.GameTextSearchEngine.Should().Be("sphinx");
         }
 
         [Test]
         public void should_use_specified_searchengine()
         {
             GivenCapsResponse(_caps.Replace("<search ", "<search searchEngine=\"raw\" ")
-                                   .Replace("<movie-search ", "<movie-search searchEngine=\"raw2\" "));
+                                   .Replace("<game-search ", "<game-search searchEngine=\"raw2\" "));
 
             var caps = Subject.GetCapabilities(_settings);
 
             caps.TextSearchEngine.Should().Be("raw");
-            caps.MovieTextSearchEngine.Should().Be("raw2");
+            caps.GameTextSearchEngine.Should().Be("raw2");
         }
     }
 }

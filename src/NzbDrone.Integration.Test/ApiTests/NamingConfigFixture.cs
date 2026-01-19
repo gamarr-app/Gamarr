@@ -20,31 +20,31 @@ namespace NzbDrone.Integration.Test.ApiTests
             NamingConfig.Get(config.Id).Id.Should().Be(config.Id);
         }
 
-        [TestCase("{Movie Title} {Release Year}")]
-        [TestCase("{Movie Title} {(Release Year)}")]
-        [TestCase("{Movie Title} {[Release Year]}")]
-        [TestCase("{Movie Title} {{Release Year}}")]
-        [TestCase("{Movie Title}{ Release Year }")]
-        [TestCase("{Movie-Title}{-Release-Year-}")]
-        [TestCase("{Movie_Title}{_Release_Year_}")]
-        [TestCase("{Movie.Title}{.Release.Year.}")]
-        public void should_be_able_to_update(string standardMovieFormat)
+        [TestCase("{Game Title} {Release Year}")]
+        [TestCase("{Game Title} {(Release Year)}")]
+        [TestCase("{Game Title} {[Release Year]}")]
+        [TestCase("{Game Title} {{Release Year}}")]
+        [TestCase("{Game Title}{ Release Year }")]
+        [TestCase("{Game-Title}{-Release-Year-}")]
+        [TestCase("{Game_Title}{_Release_Year_}")]
+        [TestCase("{Game.Title}{.Release.Year.}")]
+        public void should_be_able_to_update(string standardGameFormat)
         {
             var config = NamingConfig.GetSingle();
-            config.RenameMovies = false;
-            config.StandardMovieFormat = standardMovieFormat;
+            config.RenameGames = false;
+            config.StandardGameFormat = standardGameFormat;
 
             var result = NamingConfig.Put(config);
-            result.RenameMovies.Should().BeFalse();
-            result.StandardMovieFormat.Should().Be(config.StandardMovieFormat);
+            result.RenameGames.Should().BeFalse();
+            result.StandardGameFormat.Should().Be(config.StandardGameFormat);
         }
 
         [Test]
         public void should_get_bad_request_if_standard_format_is_empty()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameMovies = true;
-            config.StandardMovieFormat = "";
+            config.RenameGames = true;
+            config.StandardGameFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -54,8 +54,8 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_get_bad_request_if_standard_format_doesnt_contain_title()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameMovies = true;
-            config.StandardMovieFormat = "{quality}";
+            config.RenameGames = true;
+            config.StandardGameFormat = "{quality}";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -65,8 +65,8 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_not_require_format_when_rename_episodes_is_false()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameMovies = false;
-            config.StandardMovieFormat = "";
+            config.RenameGames = false;
+            config.StandardGameFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -76,19 +76,19 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_require_format_when_rename_episodes_is_true()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameMovies = true;
-            config.StandardMovieFormat = "";
+            config.RenameGames = true;
+            config.StandardGameFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
         }
 
         [Test]
-        public void should_get_bad_request_if_movie_folder_format_does_not_contain_movie_title()
+        public void should_get_bad_request_if_game_folder_format_does_not_contain_game_title()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameMovies = true;
-            config.MovieFolderFormat = "This and That";
+            config.RenameGames = true;
+            config.GameFolderFormat = "This and That";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();

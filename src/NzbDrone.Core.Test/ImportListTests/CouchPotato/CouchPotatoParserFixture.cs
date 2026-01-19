@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.ImportList.CouchPotato
         [Test]
         public void should_parse_json_of_couchpotato()
         {
-            var json = ReadAllText("Files/couchpotato_movie_list.json");
+            var json = ReadAllText("Files/couchpotato_game_list.json");
 
             var result = Subject.ParseResponse(CreateResponse("http://my.indexer.com/api?q=My+Favourite+Show", json));
 

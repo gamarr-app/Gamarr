@@ -29,9 +29,9 @@ function Message({ id, hideAfter, name, message, type }: MessageProps) {
         return icons.HEALTH;
       case 'Housekeeping':
         return icons.HOUSEKEEPING;
-      case 'MoviesSearch':
+      case 'GamesSearch':
         return icons.SEARCH;
-      case 'RefreshMovie':
+      case 'RefreshGame':
         return icons.REFRESH;
       case 'RssSync':
         return icons.RSS;

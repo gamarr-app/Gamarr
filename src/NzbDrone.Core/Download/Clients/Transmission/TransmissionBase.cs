@@ -48,26 +48,26 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             {
                 var outputPath = new OsPath(torrent.DownloadDir);
 
-                if (Settings.MovieCategory.IsNotNullOrWhiteSpace() && SupportsLabels && torrent.Labels is { Count: > 0 })
+                if (Settings.GameCategory.IsNotNullOrWhiteSpace() && SupportsLabels && torrent.Labels is { Count: > 0 })
                 {
-                    if (!torrent.Labels.Contains(Settings.MovieCategory, StringComparer.InvariantCultureIgnoreCase))
+                    if (!torrent.Labels.Contains(Settings.GameCategory, StringComparer.InvariantCultureIgnoreCase))
                     {
                         continue;
                     }
                 }
                 else
                 {
-                    if (Settings.MovieDirectory.IsNotNullOrWhiteSpace())
+                    if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
                     {
-                        if (!new OsPath(Settings.MovieDirectory).Contains(outputPath))
+                        if (!new OsPath(Settings.GameDirectory).Contains(outputPath))
                         {
                             continue;
                         }
                     }
-                    else if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+                    else if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                     {
                         var directories = outputPath.FullPath.Split('\\', '/');
-                        if (!directories.Contains(Settings.MovieCategory))
+                        if (!directories.Contains(Settings.GameCategory))
                         {
                             continue;
                         }
@@ -79,9 +79,9 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 var item = new DownloadClientItem
                 {
                     DownloadId = torrent.HashString.ToUpper(),
-                    Category = Settings.MovieCategory,
+                    Category = Settings.GameCategory,
                     Title = torrent.Name,
-                    DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() && SupportsLabels),
+                    DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.GameImportedCategory.IsNotNullOrWhiteSpace() && SupportsLabels),
                     OutputPath = GetOutputPath(outputPath, torrent),
                     TotalSize = torrent.TotalSize,
                     RemainingSize = torrent.LeftUntilDone,
@@ -191,18 +191,18 @@ namespace NzbDrone.Core.Download.Clients.Transmission
         {
             string destDir;
 
-            if (Settings.MovieDirectory.IsNotNullOrWhiteSpace())
+            if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
             {
-                destDir = Settings.MovieDirectory;
+                destDir = Settings.GameDirectory;
             }
             else
             {
                 var config = _proxy.GetConfig(Settings);
                 destDir = config.DownloadDir;
 
-                if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+                if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                 {
-                    destDir = $"{destDir}/{Settings.MovieCategory}";
+                    destDir = $"{destDir}/{Settings.GameCategory}";
                 }
             }
 
@@ -213,15 +213,15 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             };
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             _proxy.AddTorrentFromUrl(magnetLink, GetDownloadDirectory(), Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteMovie.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteGame.SeedConfiguration, Settings);
 
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentMoviePriority == (int)TransmissionPriority.First) ||
-                (!isRecentMovie && Settings.OlderMoviePriority == (int)TransmissionPriority.First))
+            if ((isRecentGame && Settings.RecentGamePriority == (int)TransmissionPriority.First) ||
+                (!isRecentGame && Settings.OlderGamePriority == (int)TransmissionPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -229,15 +229,15 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             _proxy.AddTorrentFromData(fileContent, GetDownloadDirectory(), Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteMovie.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteGame.SeedConfiguration, Settings);
 
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentMoviePriority == (int)TransmissionPriority.First) ||
-                (!isRecentMovie && Settings.OlderMoviePriority == (int)TransmissionPriority.First))
+            if ((isRecentGame && Settings.RecentGamePriority == (int)TransmissionPriority.First) ||
+                (!isRecentGame && Settings.OlderGamePriority == (int)TransmissionPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -263,12 +263,12 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
         protected string GetDownloadDirectory()
         {
-            if (Settings.MovieDirectory.IsNotNullOrWhiteSpace())
+            if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
             {
-                return Settings.MovieDirectory;
+                return Settings.GameDirectory;
             }
 
-            if (!Settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (!Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
                 return null;
             }
@@ -276,7 +276,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             var config = _proxy.GetConfig(Settings);
             var destDir = config.DownloadDir;
 
-            return $"{destDir.TrimEnd('/')}/{Settings.MovieCategory}";
+            return $"{destDir.TrimEnd('/')}/{Settings.GameCategory}";
         }
 
         protected ValidationFailure TestConnection()

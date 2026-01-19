@@ -25,7 +25,7 @@ namespace NzbDrone.Core.CustomFormats
 
         protected override bool IsSatisfiedByWithoutNegate(CustomFormatInput input)
         {
-            return (input.MovieInfo?.Quality?.Quality?.Resolution ?? (int)Resolution.Unknown) == Value;
+            return (input.GameInfo?.Quality?.Quality?.Resolution ?? (int)Resolution.Unknown) == Value;
         }
 
         public override NzbDroneValidationResult Validate()

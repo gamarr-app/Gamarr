@@ -6,7 +6,7 @@ import { createSelector } from 'reselect';
 import { setAppValue, setVersion } from 'Store/Actions/appActions';
 import { removeItem, update, updateItem } from 'Store/Actions/baseActions';
 import { fetchCommands, finishCommand, updateCommand } from 'Store/Actions/commandActions';
-import { fetchMovies } from 'Store/Actions/movieActions';
+import { fetchGames } from 'Store/Actions/gameActions';
 import { fetchQueue, fetchQueueDetails } from 'Store/Actions/queueActions';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import { fetchQualityDefinitions } from 'Store/Actions/settingsActions';
@@ -51,7 +51,7 @@ const mapDispatchToProps = {
   dispatchFetchQueue: fetchQueue,
   dispatchFetchQueueDetails: fetchQueueDetails,
   dispatchFetchRootFolders: fetchRootFolders,
-  dispatchFetchMovies: fetchMovies,
+  dispatchFetchGames: fetchGames,
   dispatchFetchTags: fetchTags,
   dispatchFetchTagDetails: fetchTagDetails
 };
@@ -61,7 +61,7 @@ function Logger(minimumLogLevel) {
 }
 
 Logger.prototype.cleanse = function(message) {
-  const apikey = new RegExp(`access_token=${encodeURIComponent(window.Radarr.apiKey)}`, 'g');
+  const apikey = new RegExp(`access_token=${encodeURIComponent(window.Gamarr.apiKey)}`, 'g');
   return message.replace(apikey, 'access_token=(removed)');
 };
 
@@ -101,11 +101,11 @@ class SignalRConnector extends Component {
   componentDidMount() {
     console.log('[signalR] starting');
 
-    const url = `${window.Radarr.urlBase}/signalr/messages`;
+    const url = `${window.Gamarr.urlBase}/signalr/messages`;
 
     this.connection = new signalR.HubConnectionBuilder()
       .configureLogging(new Logger(signalR.LogLevel.Information))
-      .withUrl(`${url}?access_token=${encodeURIComponent(window.Radarr.apiKey)}`)
+      .withUrl(`${url}?access_token=${encodeURIComponent(window.Gamarr.apiKey)}`)
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
           if (retryContext.elapsedMilliseconds > 180000) {
@@ -177,18 +177,18 @@ class SignalRConnector extends Component {
     }
   };
 
-  handleMoviefile = (body) => {
-    const section = 'movieFiles';
+  handleGamefile = (body) => {
+    const section = 'gameFiles';
 
     if (body.action === 'updated') {
       this.props.dispatchUpdateItem({ section, ...body.resource });
 
       // Repopulate the page to handle recently imported file
-      repopulatePage('movieFileUpdated');
+      repopulatePage('gameFileUpdated');
     } else if (body.action === 'deleted') {
       this.props.dispatchRemoveItem({ section, id: body.resource.id });
 
-      repopulatePage('movieFileDeleted');
+      repopulatePage('gameFileDeleted');
     }
   };
 
@@ -244,14 +244,14 @@ class SignalRConnector extends Component {
     }
   };
 
-  handleMovie = (body) => {
+  handleGame = (body) => {
     const action = body.action;
-    const section = 'movies';
+    const section = 'games';
 
     if (action === 'updated') {
       this.props.dispatchUpdateItem({ section, ...body.resource });
 
-      repopulatePage('movieUpdated');
+      repopulatePage('gameUpdated');
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({ section, id: body.resource.id });
     }
@@ -259,7 +259,7 @@ class SignalRConnector extends Component {
 
   handleCollection = (body) => {
     const action = body.action;
-    const section = 'movieCollections';
+    const section = 'gameCollections';
 
     console.log(body);
 
@@ -364,7 +364,7 @@ class SignalRConnector extends Component {
 
     const {
       dispatchFetchCommands,
-      dispatchFetchMovies,
+      dispatchFetchGames,
       dispatchSetAppValue
     } = this.props;
 
@@ -377,7 +377,7 @@ class SignalRConnector extends Component {
 
     // Repopulate the page (if a repopulator is set) to ensure things
     // are in sync after reconnecting.
-    dispatchFetchMovies();
+    dispatchFetchGames();
     dispatchFetchCommands();
     repopulatePage();
   };
@@ -417,7 +417,7 @@ SignalRConnector.propTypes = {
   dispatchFetchQueue: PropTypes.func.isRequired,
   dispatchFetchQueueDetails: PropTypes.func.isRequired,
   dispatchFetchRootFolders: PropTypes.func.isRequired,
-  dispatchFetchMovies: PropTypes.func.isRequired,
+  dispatchFetchGames: PropTypes.func.isRequired,
   dispatchFetchTags: PropTypes.func.isRequired,
   dispatchFetchTagDetails: PropTypes.func.isRequired
 };

@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NBuilder" Version="6.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NzbDrone.Core\Gamarr.Core.csproj" />
+    <ProjectReference Include="..\NzbDrone.Test.Common\Gamarr.Test.Common.csproj" />
+    <ProjectReference Include="..\Gamarr.Api.V3\Gamarr.Api.V3.csproj" />
+    <ProjectReference Include="..\Gamarr.Http\Gamarr.Http.csproj" />
+  </ItemGroup>
+</Project>

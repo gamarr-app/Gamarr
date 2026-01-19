@@ -60,10 +60,10 @@ class Notification extends Component {
       onDownload,
       onUpgrade,
       onRename,
-      onMovieAdded,
-      onMovieDelete,
-      onMovieFileDelete,
-      onMovieFileDeleteForUpgrade,
+      onGameAdded,
+      onGameDelete,
+      onGameFileDelete,
+      onGameFileDeleteForUpgrade,
       onHealthIssue,
       onHealthRestored,
       onApplicationUpdate,
@@ -72,10 +72,10 @@ class Notification extends Component {
       supportsOnDownload,
       supportsOnUpgrade,
       supportsOnRename,
-      supportsOnMovieAdded,
-      supportsOnMovieDelete,
-      supportsOnMovieFileDelete,
-      supportsOnMovieFileDeleteForUpgrade,
+      supportsOnGameAdded,
+      supportsOnGameDelete,
+      supportsOnGameFileDelete,
+      supportsOnGameFileDeleteForUpgrade,
       supportsOnHealthIssue,
       supportsOnHealthRestored,
       supportsOnApplicationUpdate,
@@ -127,9 +127,9 @@ class Notification extends Component {
         }
 
         {
-          supportsOnMovieAdded && onMovieAdded ?
+          supportsOnGameAdded && onGameAdded ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnMovieAdded')}
+              {translate('OnGameAdded')}
             </Label> :
             null
         }
@@ -159,25 +159,25 @@ class Notification extends Component {
         }
 
         {
-          supportsOnMovieDelete && onMovieDelete ?
+          supportsOnGameDelete && onGameDelete ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnMovieDelete')}
+              {translate('OnGameDelete')}
             </Label> :
             null
         }
 
         {
-          supportsOnMovieFileDelete && onMovieFileDelete ?
+          supportsOnGameFileDelete && onGameFileDelete ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnMovieFileDelete')}
+              {translate('OnGameFileDelete')}
             </Label> :
             null
         }
 
         {
-          supportsOnMovieFileDeleteForUpgrade && onMovieFileDelete && onMovieFileDeleteForUpgrade ?
+          supportsOnGameFileDeleteForUpgrade && onGameFileDelete && onGameFileDeleteForUpgrade ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnMovieFileDeleteForUpgrade')}
+              {translate('OnGameFileDeleteForUpgrade')}
             </Label> :
             null
         }
@@ -191,7 +191,7 @@ class Notification extends Component {
         }
 
         {
-          !onGrab && !onDownload && !onRename && !onHealthIssue && !onHealthRestored && !onApplicationUpdate && !onMovieAdded && !onMovieDelete && !onMovieFileDelete && !onManualInteractionRequired ?
+          !onGrab && !onDownload && !onRename && !onHealthIssue && !onHealthRestored && !onApplicationUpdate && !onGameAdded && !onGameDelete && !onGameFileDelete && !onManualInteractionRequired ?
             <Label
               kind={kinds.DISABLED}
               outline={true}
@@ -234,22 +234,22 @@ Notification.propTypes = {
   onDownload: PropTypes.bool.isRequired,
   onUpgrade: PropTypes.bool.isRequired,
   onRename: PropTypes.bool.isRequired,
-  onMovieAdded: PropTypes.bool.isRequired,
-  onMovieDelete: PropTypes.bool.isRequired,
-  onMovieFileDelete: PropTypes.bool.isRequired,
-  onMovieFileDeleteForUpgrade: PropTypes.bool.isRequired,
+  onGameAdded: PropTypes.bool.isRequired,
+  onGameDelete: PropTypes.bool.isRequired,
+  onGameFileDelete: PropTypes.bool.isRequired,
+  onGameFileDeleteForUpgrade: PropTypes.bool.isRequired,
   onHealthIssue: PropTypes.bool.isRequired,
   onHealthRestored: PropTypes.bool.isRequired,
   onApplicationUpdate: PropTypes.bool.isRequired,
   onManualInteractionRequired: PropTypes.bool.isRequired,
   supportsOnGrab: PropTypes.bool.isRequired,
   supportsOnDownload: PropTypes.bool.isRequired,
-  supportsOnMovieDelete: PropTypes.bool.isRequired,
-  supportsOnMovieFileDelete: PropTypes.bool.isRequired,
-  supportsOnMovieFileDeleteForUpgrade: PropTypes.bool.isRequired,
+  supportsOnGameDelete: PropTypes.bool.isRequired,
+  supportsOnGameFileDelete: PropTypes.bool.isRequired,
+  supportsOnGameFileDeleteForUpgrade: PropTypes.bool.isRequired,
   supportsOnUpgrade: PropTypes.bool.isRequired,
   supportsOnRename: PropTypes.bool.isRequired,
-  supportsOnMovieAdded: PropTypes.bool.isRequired,
+  supportsOnGameAdded: PropTypes.bool.isRequired,
   supportsOnHealthIssue: PropTypes.bool.isRequired,
   supportsOnHealthRestored: PropTypes.bool.isRequired,
   supportsOnApplicationUpdate: PropTypes.bool.isRequired,

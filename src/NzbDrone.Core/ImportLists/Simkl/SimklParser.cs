@@ -3,7 +3,7 @@ using System.Net;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 
 namespace NzbDrone.Core.ImportLists.Simkl
 {
@@ -15,15 +15,15 @@ namespace NzbDrone.Core.ImportLists.Simkl
         {
         }
 
-        public virtual IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
             _importResponse = importResponse;
 
-            var movie = new List<ImportListMovie>();
+            var game = new List<ImportListGame>();
 
             if (!PreProcess(_importResponse))
             {
-                return movie;
+                return game;
             }
 
             var jsonResponse = STJson.Deserialize<SimklResponse>(_importResponse.Content);
@@ -31,20 +31,20 @@ namespace NzbDrone.Core.ImportLists.Simkl
             // no shows were return
             if (jsonResponse == null)
             {
-                return movie;
+                return game;
             }
 
-            foreach (var show in jsonResponse.Movies)
+            foreach (var show in jsonResponse.Games)
             {
-                movie.AddIfNotNull(new ImportListMovie()
+                game.AddIfNotNull(new ImportListGame()
                 {
-                    Title = show.Movie.Title,
-                    TmdbId = int.TryParse(show.Movie.Ids.Tmdb, out var tmdbId) ? tmdbId : 0,
-                    ImdbId = show.Movie.Ids.Imdb
+                    Title = show.Game.Title,
+                    IgdbId = int.TryParse(show.Game.Ids.Igdb, out var igdbId) ? igdbId : 0,
+                    ImdbId = show.Game.Ids.Imdb
                 });
             }
 
-            return movie;
+            return game;
         }
 
         protected virtual bool PreProcess(ImportListResponse netImportResponse)

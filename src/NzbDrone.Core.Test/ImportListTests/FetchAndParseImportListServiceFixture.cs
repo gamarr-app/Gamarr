@@ -6,9 +6,9 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.ImportLists;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.ImportListTests
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.ImportListTests
     {
         private List<IImportList> _importLists;
         private List<ImportListStatus> _blockedLists;
-        private List<ImportListMovie> _listMovies;
+        private List<ImportListGame> _listGames;
 
         [SetUp]
         public void Setup()
@@ -34,12 +34,12 @@ namespace NzbDrone.Core.Test.ImportListTests
                   .Setup(v => v.GetBlockedProviders())
                   .Returns(_blockedLists);
 
-            _listMovies = Builder<ImportListMovie>.CreateListOfSize(5)
+            _listGames = Builder<ImportListGame>.CreateListOfSize(5)
                 .Build().ToList();
 
-            Mocker.GetMock<ISearchForNewMovie>()
-                .Setup(v => v.MapMovieToTmdbMovie(It.IsAny<MovieMetadata>()))
-                .Returns<MovieMetadata>(m => new MovieMetadata { TmdbId = m.TmdbId });
+            Mocker.GetMock<ISearchForNewGame>()
+                .Setup(v => v.MapGameToIgdbGame(It.IsAny<GameMetadata>()))
+                .Returns<GameMetadata>(m => new GameMetadata { IgdbId = m.IgdbId });
         }
 
         private void GivenList(int id, bool enabled, bool enabledAuto, ImportListFetchResult fetchResult)
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.ImportListTests
             GivenList(1, true, true, fetchResult1);
             GivenBlockedList(1);
 
-            var fetchResult2 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = true };
+            var fetchResult2 = new ImportListFetchResult { Games = _listGames, AnyFailure = true };
             GivenList(2, true, true, fetchResult2);
 
             var listResult = Subject.Fetch();
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         [Test]
         public void should_return_failure_if_single_list_fails()
         {
-            var fetchResult = new ImportListFetchResult { Movies = _listMovies, AnyFailure = true };
+            var fetchResult = new ImportListFetchResult { Games = _listGames, AnyFailure = true };
             GivenList(1, true, true, fetchResult);
 
             var listResult = Subject.Fetch();
@@ -105,9 +105,9 @@ namespace NzbDrone.Core.Test.ImportListTests
         [Test]
         public void should_return_failure_if_any_list_fails()
         {
-            var fetchResult1 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = true };
+            var fetchResult1 = new ImportListFetchResult { Games = _listGames, AnyFailure = true };
             GivenList(1, true, true, fetchResult1);
-            var fetchResult2 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = false };
+            var fetchResult2 = new ImportListFetchResult { Games = _listGames, AnyFailure = false };
             GivenList(2, true, true, fetchResult2);
 
             var listResult = Subject.Fetch();
@@ -122,68 +122,68 @@ namespace NzbDrone.Core.Test.ImportListTests
             Mocker.GetMock<IImportListStatusService>()
                   .Verify(v => v.GetBlockedProviders(), Times.Never());
 
-            listResult.Movies.Count.Should().Be(0);
+            listResult.Games.Count.Should().Be(0);
             listResult.AnyFailure.Should().BeFalse();
         }
 
         [Test]
-        public void should_store_movies_if_list_doesnt_fail()
+        public void should_store_games_if_list_doesnt_fail()
         {
             var listId = 1;
-            var fetchResult = new ImportListFetchResult { Movies = _listMovies, AnyFailure = false };
+            var fetchResult = new ImportListFetchResult { Games = _listGames, AnyFailure = false };
             GivenList(listId, true, true, fetchResult);
 
             var listResult = Subject.Fetch();
             listResult.AnyFailure.Should().BeFalse();
 
-            Mocker.GetMock<IImportListMovieService>()
-                .Verify(v => v.SyncMoviesForList(It.IsAny<List<ImportListMovie>>(), listId), Times.Once());
+            Mocker.GetMock<IImportListGameService>()
+                .Verify(v => v.SyncGamesForList(It.IsAny<List<ImportListGame>>(), listId), Times.Once());
         }
 
         [Test]
-        public void should_not_store_movies_if_list_fails()
+        public void should_not_store_games_if_list_fails()
         {
             var listId = 1;
-            var fetchResult = new ImportListFetchResult { Movies = _listMovies, AnyFailure = true };
+            var fetchResult = new ImportListFetchResult { Games = _listGames, AnyFailure = true };
             GivenList(listId, true, true, fetchResult);
 
             var listResult = Subject.Fetch();
             listResult.AnyFailure.Should().BeTrue();
 
-            Mocker.GetMock<IImportListMovieService>()
-                .Verify(v => v.SyncMoviesForList(It.IsAny<List<ImportListMovie>>(), listId), Times.Never());
+            Mocker.GetMock<IImportListGameService>()
+                .Verify(v => v.SyncGamesForList(It.IsAny<List<ImportListGame>>(), listId), Times.Never());
         }
 
         [Test]
-        public void should_only_store_movies_for_lists_that_dont_fail()
+        public void should_only_store_games_for_lists_that_dont_fail()
         {
             var passedListId = 1;
-            var fetchResult1 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = false };
+            var fetchResult1 = new ImportListFetchResult { Games = _listGames, AnyFailure = false };
             GivenList(passedListId, true, true, fetchResult1);
             var failedListId = 2;
-            var fetchResult2 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = true };
+            var fetchResult2 = new ImportListFetchResult { Games = _listGames, AnyFailure = true };
             GivenList(failedListId, true, true, fetchResult2);
 
             var listResult = Subject.Fetch();
             listResult.AnyFailure.Should().BeTrue();
 
-            Mocker.GetMock<IImportListMovieService>()
-                .Verify(v => v.SyncMoviesForList(It.IsAny<List<ImportListMovie>>(), passedListId), Times.Once());
+            Mocker.GetMock<IImportListGameService>()
+                .Verify(v => v.SyncGamesForList(It.IsAny<List<ImportListGame>>(), passedListId), Times.Once());
         }
 
         [Test]
         public void should_return_all_results_for_all_lists()
         {
             var passedListId = 1;
-            var fetchResult1 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = false };
+            var fetchResult1 = new ImportListFetchResult { Games = _listGames, AnyFailure = false };
             GivenList(passedListId, true, true, fetchResult1);
             var failedListId = 2;
-            var fetchResult2 = new ImportListFetchResult { Movies = _listMovies, AnyFailure = false };
+            var fetchResult2 = new ImportListFetchResult { Games = _listGames, AnyFailure = false };
             GivenList(failedListId, true, true, fetchResult2);
 
             var listResult = Subject.Fetch();
             listResult.AnyFailure.Should().BeFalse();
-            listResult.Movies.Count.Should().Be(5);
+            listResult.Games.Count.Should().Be(5);
         }
     }
 }

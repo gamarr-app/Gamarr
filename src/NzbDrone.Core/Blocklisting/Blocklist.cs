@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -11,8 +11,8 @@ namespace NzbDrone.Core.Blocklisting
 {
     public class Blocklist : ModelBase
     {
-        public int MovieId { get; set; }
-        public Movie Movie { get; set; }
+        public int GameId { get; set; }
+        public Game Game { get; set; }
         public string SourceTitle { get; set; }
         public QualityModel Quality { get; set; }
         public DateTime Date { get; set; }

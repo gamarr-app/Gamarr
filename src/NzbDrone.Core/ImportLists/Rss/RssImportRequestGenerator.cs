@@ -8,16 +8,16 @@ namespace NzbDrone.Core.ImportLists.Rss
     {
         public RssImportBaseSettings<TSettings> Settings { get; set; }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequest());
+            pageableRequests.Add(GetGamesRequest());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequest()
+        private IEnumerable<ImportListRequest> GetGamesRequest()
         {
             yield return new ImportListRequest(Settings.Url, HttpAccept.Rss);
         }

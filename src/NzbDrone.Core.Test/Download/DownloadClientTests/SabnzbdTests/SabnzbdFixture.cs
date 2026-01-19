@@ -37,8 +37,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                 ApiKey = "5c770e3197e4fe763423ee7c392c25d1",
                 Username = "admin",
                 Password = "pass",
-                MovieCategory = "movie",
-                RecentMoviePriority = (int)SabnzbdPriority.High
+                GameCategory = "game",
+                RecentGamePriority = (int)SabnzbdPriority.High
             };
             _queued = new SabnzbdQueue
             {
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Sizeleft = 10,
                             Timeleft = TimeSpan.FromSeconds(10),
-                            Category = "movie",
+                            Category = "game",
                             Id = "sabnzbd_nzb12345",
                             Title = "Droned.1998.1080p.WEB-DL-DRONE"
                         }
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                         {
                             Status = SabnzbdDownloadStatus.Failed,
                             Size = 1000,
-                            Category = "movie",
+                            Category = "game",
                             Id = "sabnzbd_nzb12345",
                             Title = "Droned.1998.1080p.WEB-DL-DRONE"
                         }
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                         {
                             Status = SabnzbdDownloadStatus.Completed,
                             Size = 1000,
-                            Category = "movie",
+                            Category = "game",
                             Id = "sabnzbd_nzb12345",
                             Title = "Droned.1998.1080p.WEB-DL-DRONE",
                             Storage = "/remote/mount/vv/Droned.1998.1080p.WEB-DL-DRONE"
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                 },
                 Categories = new List<SabnzbdCategory>
                         {
-                            new SabnzbdCategory  { Name = "movie", Dir = "vv" }
+                            new SabnzbdCategory  { Name = "game", Dir = "vv" }
                         }
             };
 
@@ -304,10 +304,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
-            remoteMovie.Release.Title = title;
+            var remoteGame = CreateRemoteGame();
+            remoteGame.Release.Title = title;
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<ISabnzbdProxy>()
                 .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), filename, It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SabnzbdSettings>()), Times.Once());
@@ -318,9 +318,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -360,14 +360,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                     .Setup(s => s.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()))
                     .Returns(new SabnzbdAddResponse());
 
-            var remoteMovie = CreateRemoteMovie();
-            /*remoteMovie.Episodes = Builder<Episode>.CreateListOfSize(1)
+            var remoteGame = CreateRemoteGame();
+            /*remoteGame.Episodes = Builder<Episode>.CreateListOfSize(1)
                                                       .All()
                                                       .With(e => e.AirDate = DateTime.Today.ToString(Episode.AIR_DATE_FORMAT))
                                                       .Build()
                                                       .ToList();*/
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<ISabnzbdProxy>()
                   .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()), Times.Once());
@@ -596,7 +596,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
             _config.Sorters = Builder<SabnzbdSorter>.CreateListOfSize(1)
                 .All()
                 .With(s => s.is_active = true)
-                .With(s => s.sort_cats = new List<string> { "movie-custom" })
+                .With(s => s.sort_cats = new List<string> { "game-custom" })
                 .Build()
                 .ToList();
 
@@ -613,7 +613,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
             _config.Sorters = Builder<SabnzbdSorter>.CreateListOfSize(1)
                 .All()
                 .With(s => s.is_active = true)
-                .With(s => s.sort_cats = new List<string> { "movie" })
+                .With(s => s.sort_cats = new List<string> { "game" })
                 .Build()
                 .ToList();
 
@@ -670,7 +670,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         public void should_test_failed_if_tv_sorting_contains_category()
         {
             _config.Misc.enable_tv_sorting = true;
-            _config.Misc.tv_categories = new[] { "movie" };
+            _config.Misc.tv_categories = new[] { "game" };
 
             var result = new NzbDroneValidationResult(Subject.Test());
 
@@ -680,7 +680,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_test_failed_if_tv_sorting_default_category()
         {
-            Subject.Definition.Settings.As<SabnzbdSettings>().MovieCategory = null;
+            Subject.Definition.Settings.As<SabnzbdSettings>().GameCategory = null;
 
             _config.Misc.enable_tv_sorting = true;
             _config.Misc.tv_categories = new[] { "Default" };

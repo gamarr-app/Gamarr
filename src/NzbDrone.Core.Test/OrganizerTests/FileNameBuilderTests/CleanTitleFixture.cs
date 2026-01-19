@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -15,22 +15,22 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class CleanTitleFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _series;
-        private MovieFile _episodeFile;
+        private Game _series;
+        private GameFile _episodeFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _series = Builder<Movie>
+            _series = Builder<Game>
                 .CreateNew()
                 .With(s => s.Title = "South Park")
                 .Build();
 
-            _episodeFile = new MovieFile { Quality = new QualityModel(), ReleaseGroup = "SonarrTest" };
+            _episodeFile = new GameFile { Quality = new QualityModel(), ReleaseGroup = "SonarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameMovies = true;
+            _namingConfig.RenameGames = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_get_expected_title_back(string title, string expected)
         {
             _series.Title = title;
-            _namingConfig.StandardMovieFormat = "{Movie CleanTitle}";
+            _namingConfig.StandardGameFormat = "{Game CleanTitle}";
 
             Subject.BuildFileName(_series, _episodeFile)
                    .Should().Be(expected);

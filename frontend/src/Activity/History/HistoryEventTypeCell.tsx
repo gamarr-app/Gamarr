@@ -6,7 +6,7 @@ import {
   GrabbedHistoryData,
   HistoryData,
   HistoryEventType,
-  MovieFileDeletedHistory,
+  GameFileDeletedHistory,
 } from 'typings/History';
 import translate from 'Utilities/String/translate';
 import styles from './HistoryEventTypeCell.css';
@@ -15,17 +15,17 @@ function getIconName(eventType: HistoryEventType, data: HistoryData) {
   switch (eventType) {
     case 'grabbed':
       return icons.DOWNLOADING;
-    case 'movieFolderImported':
+    case 'gameFolderImported':
       return icons.DRIVE;
     case 'downloadFolderImported':
       return icons.DOWNLOADED;
     case 'downloadFailed':
       return icons.DOWNLOADING;
-    case 'movieFileDeleted':
-      return (data as MovieFileDeletedHistory).reason === 'MissingFromDisk'
+    case 'gameFileDeleted':
+      return (data as GameFileDeletedHistory).reason === 'MissingFromDisk'
         ? icons.FILE_MISSING
         : icons.DELETE;
-    case 'movieFileRenamed':
+    case 'gameFileRenamed':
       return icons.ORGANIZE;
     case 'downloadIgnored':
       return icons.IGNORE;
@@ -46,24 +46,24 @@ function getIconKind(eventType: HistoryEventType) {
 function getTooltip(eventType: HistoryEventType, data: HistoryData) {
   switch (eventType) {
     case 'grabbed':
-      return translate('MovieGrabbedTooltip', {
+      return translate('GameGrabbedTooltip', {
         indexer: (data as GrabbedHistoryData).indexer,
         downloadClient: (data as GrabbedHistoryData).downloadClient,
       });
-    case 'movieFolderImported':
-      return translate('MovieFolderImportedTooltip');
+    case 'gameFolderImported':
+      return translate('GameFolderImportedTooltip');
     case 'downloadFolderImported':
-      return translate('MovieImportedTooltip');
+      return translate('GameImportedTooltip');
     case 'downloadFailed':
-      return translate('DownloadFailedMovieTooltip');
-    case 'movieFileDeleted':
-      return (data as MovieFileDeletedHistory).reason === 'MissingFromDisk'
-        ? translate('MovieFileMissingTooltip')
-        : translate('MovieFileDeletedTooltip');
-    case 'movieFileRenamed':
-      return translate('MovieFileRenamedTooltip');
+      return translate('DownloadFailedGameTooltip');
+    case 'gameFileDeleted':
+      return (data as GameFileDeletedHistory).reason === 'MissingFromDisk'
+        ? translate('GameFileMissingTooltip')
+        : translate('GameFileDeletedTooltip');
+    case 'gameFileRenamed':
+      return translate('GameFileRenamedTooltip');
     case 'downloadIgnored':
-      return translate('DownloadIgnoredMovieTooltip');
+      return translate('DownloadIgnoredGameTooltip');
     default:
       return translate('UnknownEventTooltip');
   }

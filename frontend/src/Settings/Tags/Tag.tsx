@@ -25,7 +25,7 @@ function Tag({ id, label }: TagProps) {
     indexerIds = [],
     downloadClientIds = [],
     autoTagIds = [],
-    movieIds = [],
+    gameIds = [],
   } = useSelector(createTagDetailsSelector(id)) ?? {};
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteTagModalOpen, setIsDeleteTagModalOpen] = useState(false);
@@ -38,7 +38,7 @@ function Tag({ id, label }: TagProps) {
     indexerIds.length ||
     downloadClientIds.length ||
     autoTagIds.length ||
-    movieIds.length
+    gameIds.length
   );
 
   const handleShowDetailsPress = useCallback(() => {
@@ -73,9 +73,9 @@ function Tag({ id, label }: TagProps) {
       {isTagUsed ? (
         <div>
           <TagInUse
-            label={translate('Movie')}
-            labelPlural={translate('Movies')}
-            count={movieIds.length}
+            label={translate('Game')}
+            labelPlural={translate('Games')}
+            count={gameIds.length}
           />
 
           <TagInUse
@@ -126,7 +126,7 @@ function Tag({ id, label }: TagProps) {
       <TagDetailsModal
         label={label}
         isTagUsed={isTagUsed}
-        movieIds={movieIds}
+        gameIds={gameIds}
         delayProfileIds={delayProfileIds}
         importListIds={importListIds}
         notificationIds={notificationIds}

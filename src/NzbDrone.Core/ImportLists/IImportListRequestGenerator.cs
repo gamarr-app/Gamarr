@@ -2,6 +2,6 @@
 {
     public interface IImportListRequestGenerator
     {
-        ImportListPageableRequestChain GetMovies();
+        ImportListPageableRequestChain GetGames();
     }
 }

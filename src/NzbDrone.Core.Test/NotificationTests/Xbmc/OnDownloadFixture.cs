@@ -4,7 +4,7 @@ using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Notifications.Xbmc;
 using NzbDrone.Core.Test.Framework;
@@ -19,16 +19,16 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
         [SetUp]
         public void Setup()
         {
-            var movie = Builder<Movie>.CreateNew()
+            var game = Builder<Game>.CreateNew()
                                         .Build();
 
-            var movieFile = Builder<MovieFile>.CreateNew()
+            var gameFile = Builder<GameFile>.CreateNew()
                                                    .Build();
 
             _downloadMessage = Builder<DownloadMessage>.CreateNew()
-                                                       .With(d => d.Movie = movie)
-                                                       .With(d => d.MovieFile = movieFile)
-                                                       .With(d => d.OldMovieFiles = new List<DeletedMovieFile>())
+                                                       .With(d => d.Game = game)
+                                                       .With(d => d.GameFile = gameFile)
+                                                       .With(d => d.OldGameFiles = new List<DeletedGameFile>())
                                                        .Build();
 
             Subject.Definition = new NotificationDefinition();
@@ -41,10 +41,10 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
 
         private void GivenOldFiles()
         {
-            _downloadMessage.OldMovieFiles = Builder<DeletedMovieFile>
+            _downloadMessage.OldGameFiles = Builder<DeletedGameFile>
                 .CreateListOfSize(1)
                 .All()
-                .WithFactory(() => new DeletedMovieFile(Builder<MovieFile>.CreateNew().Build(), null))
+                .WithFactory(() => new DeletedGameFile(Builder<GameFile>.CreateNew().Build(), null))
                 .Build()
                 .ToList();
 
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
         }
 
         [Test]
-        public void should_not_clean_if_no_movie_was_replaced()
+        public void should_not_clean_if_no_game_was_replaced()
         {
             Subject.OnDownload(_downloadMessage);
             Subject.ProcessQueue();
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
         }
 
         [Test]
-        public void should_clean_if_movie_was_replaced()
+        public void should_clean_if_game_was_replaced()
         {
             GivenOldFiles();
             Subject.OnDownload(_downloadMessage);

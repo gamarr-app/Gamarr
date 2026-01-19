@@ -19,6 +19,6 @@ namespace NzbDrone.Core.Notifications.Trakt.Resource
         [JsonProperty(PropertyName = "collected_count")]
         public long? CollectedCount { get; set; }
 
-        public TraktMovieResource Movie { get; set; }
+        public TraktGameResource Game { get; set; }
     }
 }

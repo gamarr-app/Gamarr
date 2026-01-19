@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class CustomFormatAllowedByProfileSpecificationFixture : CoreTest<CustomFormatAllowedbyProfileSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         private CustomFormat _format1;
         private CustomFormat _format2;
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _format2 = new CustomFormat("Cool Format");
             _format2.Id = 2;
 
-            var fakeSeries = Builder<Movie>.CreateNew()
+            var fakeSeries = Builder<Game>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
                     Cutoff = Quality.Bluray1080p.Id,
@@ -40,10 +40,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 })
                 .Build();
 
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
-                Movie = fakeSeries,
-                ParsedMovieInfo = new ParsedMovieInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                Game = fakeSeries,
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
             };
 
             CustomFormatsTestHelpers.GivenCustomFormats(_format1, _format2);
@@ -52,65 +52,65 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_allow_if_format_score_greater_than_min()
         {
-            _remoteMovie.CustomFormats = new List<CustomFormat> { _format1 };
-            _remoteMovie.Movie.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
-            _remoteMovie.CustomFormatScore = _remoteMovie.Movie.QualityProfile.CalculateCustomFormatScore(_remoteMovie.CustomFormats);
+            _remoteGame.CustomFormats = new List<CustomFormat> { _format1 };
+            _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
+            _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_deny_if_format_score_not_greater_than_min()
         {
-            _remoteMovie.CustomFormats = new List<CustomFormat> { _format2 };
-            _remoteMovie.Movie.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
-            _remoteMovie.CustomFormatScore = _remoteMovie.Movie.QualityProfile.CalculateCustomFormatScore(_remoteMovie.CustomFormats);
+            _remoteGame.CustomFormats = new List<CustomFormat> { _format2 };
+            _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
+            _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Console.WriteLine(_remoteMovie.CustomFormatScore);
-            Console.WriteLine(_remoteMovie.Movie.QualityProfile.MinFormatScore);
+            Console.WriteLine(_remoteGame.CustomFormatScore);
+            Console.WriteLine(_remoteGame.Game.QualityProfile.MinFormatScore);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_deny_if_format_score_not_greater_than_min_2()
         {
-            _remoteMovie.CustomFormats = new List<CustomFormat> { _format2, _format1 };
-            _remoteMovie.Movie.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
-            _remoteMovie.CustomFormatScore = _remoteMovie.Movie.QualityProfile.CalculateCustomFormatScore(_remoteMovie.CustomFormats);
+            _remoteGame.CustomFormats = new List<CustomFormat> { _format2, _format1 };
+            _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
+            _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_allow_if_all_format_is_defined_in_profile()
         {
-            _remoteMovie.CustomFormats = new List<CustomFormat> { _format2, _format1 };
-            _remoteMovie.Movie.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
-            _remoteMovie.CustomFormatScore = _remoteMovie.Movie.QualityProfile.CalculateCustomFormatScore(_remoteMovie.CustomFormats);
+            _remoteGame.CustomFormats = new List<CustomFormat> { _format2, _format1 };
+            _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
+            _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_deny_if_no_format_was_parsed_and_min_score_positive()
         {
-            _remoteMovie.CustomFormats = new List<CustomFormat> { };
-            _remoteMovie.Movie.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
-            _remoteMovie.CustomFormatScore = _remoteMovie.Movie.QualityProfile.CalculateCustomFormatScore(_remoteMovie.CustomFormats);
+            _remoteGame.CustomFormats = new List<CustomFormat> { };
+            _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
+            _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_allow_if_no_format_was_parsed_min_score_is_zero()
         {
-            _remoteMovie.CustomFormats = new List<CustomFormat> { };
-            _remoteMovie.Movie.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
-            _remoteMovie.Movie.QualityProfile.MinFormatScore = 0;
-            _remoteMovie.CustomFormatScore = _remoteMovie.Movie.QualityProfile.CalculateCustomFormatScore(_remoteMovie.CustomFormats);
+            _remoteGame.CustomFormats = new List<CustomFormat> { };
+            _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
+            _remoteGame.Game.QualityProfile.MinFormatScore = 0;
+            _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
     }
 }

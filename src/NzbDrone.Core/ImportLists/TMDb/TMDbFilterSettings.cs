@@ -66,25 +66,25 @@ namespace NzbDrone.Core.ImportLists.TMDb
             ExcludeCompanyIds = "";
         }
 
-        [FieldDefinition(1, Label = "Minimum Vote Average", HelpText = "Filter movies by votes (0.0-10.0)")]
+        [FieldDefinition(1, Label = "Minimum Vote Average", HelpText = "Filter games by votes (0.0-10.0)")]
         public string MinVoteAverage { get; set; }
 
-        [FieldDefinition(2, Label = "Minimum Number of Votes", HelpText = "Filter movies by number of votes")]
+        [FieldDefinition(2, Label = "Minimum Number of Votes", HelpText = "Filter games by number of votes")]
         public string MinVotes { get; set; }
 
-        [FieldDefinition(3, Label = "Certification", HelpText = "Filter movies by a single certification (NR,G,PG,PG-13,R,NC-17)")]
+        [FieldDefinition(3, Label = "Certification", HelpText = "Filter games by a single certification (NR,G,PG,PG-13,R,NC-17)")]
         public string Certification { get; set; }
 
-        [FieldDefinition(4, Label = "Include Genre Ids", HelpText = "Filter movies by TMDb Genre Ids (Comma Separated)")]
+        [FieldDefinition(4, Label = "Include Genre Ids", HelpText = "Filter games by TMDb Genre Ids (Comma Separated)")]
         public string IncludeGenreIds { get; set; }
 
-        [FieldDefinition(5, Label = "Exclude Genre Ids", HelpText = "Filter movies by TMDb Genre Ids (Comma Separated)")]
+        [FieldDefinition(5, Label = "Exclude Genre Ids", HelpText = "Filter games by TMDb Genre Ids (Comma Separated)")]
         public string ExcludeGenreIds { get; set; }
 
-        [FieldDefinition(6, Label = "Include Company Ids", HelpText = "Filter movies by TMDb Company Ids (Comma Separated)")]
+        [FieldDefinition(6, Label = "Include Company Ids", HelpText = "Filter games by TMDb Company Ids (Comma Separated)")]
         public string IncludeCompanyIds { get; set; }
 
-        [FieldDefinition(7, Label = "Exclude Company Ids", HelpText = "Filter movies by TMDb Company Ids (Comma Separated)")]
+        [FieldDefinition(7, Label = "Exclude Company Ids", HelpText = "Filter games by TMDb Company Ids (Comma Separated)")]
         public string ExcludeCompanyIds { get; set; }
 
         [FieldDefinition(8, Label = "Original Language", Type = FieldType.Select, SelectOptions = typeof(TMDbLanguageCodes), HelpText = "Filter by Language")]

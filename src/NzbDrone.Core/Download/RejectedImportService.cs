@@ -2,7 +2,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Indexers;
-using NzbDrone.Core.MediaFiles.MovieImport;
+using NzbDrone.Core.MediaFiles.GameImport;
 
 namespace NzbDrone.Core.Download;
 
@@ -24,12 +24,12 @@ public class RejectedImportService : IRejectedImportService
 
     public bool Process(TrackedDownload trackedDownload, ImportResult importResult)
     {
-        if (importResult.Result != ImportResultType.Rejected || trackedDownload.RemoteMovie?.Release == null)
+        if (importResult.Result != ImportResultType.Rejected || trackedDownload.RemoteGame?.Release == null)
         {
             return false;
         }
 
-        var indexerSettings = _cachedIndexerSettingsProvider.GetSettings(trackedDownload.RemoteMovie.Release.IndexerId);
+        var indexerSettings = _cachedIndexerSettingsProvider.GetSettings(trackedDownload.RemoteGame.Release.IndexerId);
         var rejectionReason = importResult.ImportDecision.Rejections.FirstOrDefault()?.Reason;
 
         if (indexerSettings == null)

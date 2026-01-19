@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Execute.Sql("UPDATE \"MovieMetadata\" SET \"Images\" = REPLACE(\"Images\", '\"url\"', '\"remoteUrl\"')");
+            Execute.Sql("UPDATE \"GameMetadata\" SET \"Images\" = REPLACE(\"Images\", '\"url\"', '\"remoteUrl\"')");
             Execute.Sql("UPDATE \"Credits\" SET \"Images\" = REPLACE(\"Images\", '\"url\"', '\"remoteUrl\"')");
             Execute.Sql("UPDATE \"Collections\" SET \"Images\" = REPLACE(\"Images\", '\"url\"', '\"remoteUrl\"')");
         }

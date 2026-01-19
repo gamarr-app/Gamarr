@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 
 function App({ store, history }: AppProps) {
   return (
-    <DocumentTitle title={window.Radarr.instanceName}>
+    <DocumentTitle title={window.Gamarr.instanceName}>
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <ConnectedRouter history={history}>

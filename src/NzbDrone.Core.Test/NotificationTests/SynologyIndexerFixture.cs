@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Notifications.Synology;
 using NzbDrone.Core.Test.Framework;
@@ -13,35 +13,35 @@ namespace NzbDrone.Core.Test.NotificationTests
     [TestFixture]
     public class SynologyIndexerFixture : CoreTest<SynologyIndexer>
     {
-        private Movie _movie;
+        private Game _game;
         private DownloadMessage _upgrade;
 
         [SetUp]
         public void SetUp()
         {
-            _movie = new Movie
+            _game = new Game
             {
                 Path = @"C:\Test\".AsOsAgnostic()
             };
 
             _upgrade = new DownloadMessage
             {
-                Movie = _movie,
+                Game = _game,
 
-                MovieFile = new MovieFile
+                GameFile = new GameFile
                 {
-                    RelativePath = "moviefile1.mkv"
+                    RelativePath = "gamefile1.mkv"
                 },
 
-                OldMovieFiles = new List<DeletedMovieFile>
+                OldGameFiles = new List<DeletedGameFile>
                 {
-                    new DeletedMovieFile(new MovieFile
+                    new DeletedGameFile(new GameFile
                     {
-                        RelativePath = "oldmoviefile1.mkv"
+                        RelativePath = "oldgamefile1.mkv"
                     }, null),
-                    new DeletedMovieFile(new MovieFile
+                    new DeletedGameFile(new GameFile
                     {
-                        RelativePath = "oldmoviefile2.mkv"
+                        RelativePath = "oldgamefile2.mkv"
                     }, null)
                 }
             };
@@ -60,37 +60,37 @@ namespace NzbDrone.Core.Test.NotificationTests
         {
             (Subject.Definition.Settings as SynologyIndexerSettings).UpdateLibrary = false;
 
-            Subject.OnMovieRename(_movie, new List<RenamedMovieFile>());
+            Subject.OnGameRename(_game, new List<RenamedGameFile>());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                  .Verify(v => v.UpdateFolder(_movie.Path), Times.Never());
+                  .Verify(v => v.UpdateFolder(_game.Path), Times.Never());
         }
 
         [Test]
-        public void should_remove_old_movie_on_upgrade()
+        public void should_remove_old_game_on_upgrade()
         {
             Subject.OnDownload(_upgrade);
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                  .Verify(v => v.DeleteFile(@"C:\Test\oldmoviefile1.mkv".AsOsAgnostic()), Times.Once());
+                  .Verify(v => v.DeleteFile(@"C:\Test\oldgamefile1.mkv".AsOsAgnostic()), Times.Once());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                  .Verify(v => v.DeleteFile(@"C:\Test\oldmoviefile2.mkv".AsOsAgnostic()), Times.Once());
+                  .Verify(v => v.DeleteFile(@"C:\Test\oldgamefile2.mkv".AsOsAgnostic()), Times.Once());
         }
 
         [Test]
-        public void should_add_new_movie_on_upgrade()
+        public void should_add_new_game_on_upgrade()
         {
             Subject.OnDownload(_upgrade);
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                  .Verify(v => v.AddFile(@"C:\Test\moviefile1.mkv".AsOsAgnostic()), Times.Once());
+                  .Verify(v => v.AddFile(@"C:\Test\gamefile1.mkv".AsOsAgnostic()), Times.Once());
         }
 
         [Test]
-        public void should_update_entire_movie_folder_on_rename()
+        public void should_update_entire_game_folder_on_rename()
         {
-            Subject.OnMovieRename(_movie, new List<RenamedMovieFile>());
+            Subject.OnGameRename(_game, new List<RenamedGameFile>());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
                   .Verify(v => v.UpdateFolder(@"C:\Test\".AsOsAgnostic()), Times.Once());

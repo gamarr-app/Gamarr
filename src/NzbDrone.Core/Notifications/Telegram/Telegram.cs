@@ -3,7 +3,7 @@ using System.Linq;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Telegram
 {
@@ -25,9 +25,9 @@ namespace NzbDrone.Core.Notifications.Telegram
 
         public override void OnGrab(GrabMessage grabMessage)
         {
-            var title = Settings.IncludeAppNameInTitle ? MOVIE_GRABBED_TITLE_BRANDED : MOVIE_GRABBED_TITLE;
+            var title = Settings.IncludeAppNameInTitle ? GAME_GRABBED_TITLE_BRANDED : GAME_GRABBED_TITLE;
             title = Settings.IncludeInstanceNameInTitle ? $"{title} - {InstanceName}" : title;
-            var links = GetLinks(grabMessage.Movie);
+            var links = GetLinks(grabMessage.Game);
 
             _proxy.SendNotification(title, grabMessage.Message, links, Settings);
         }
@@ -35,44 +35,44 @@ namespace NzbDrone.Core.Notifications.Telegram
         public override void OnDownload(DownloadMessage message)
         {
             string title;
-            if (message.OldMovieFiles.Any())
+            if (message.OldGameFiles.Any())
             {
-                title = Settings.IncludeAppNameInTitle ? MOVIE_UPGRADED_TITLE_BRANDED : MOVIE_UPGRADED_TITLE;
+                title = Settings.IncludeAppNameInTitle ? GAME_UPGRADED_TITLE_BRANDED : GAME_UPGRADED_TITLE;
             }
             else
             {
-                title = Settings.IncludeAppNameInTitle ? MOVIE_DOWNLOADED_TITLE_BRANDED : MOVIE_DOWNLOADED_TITLE;
+                title = Settings.IncludeAppNameInTitle ? GAME_DOWNLOADED_TITLE_BRANDED : GAME_DOWNLOADED_TITLE;
             }
 
             title = Settings.IncludeInstanceNameInTitle ? $"{title} - {InstanceName}" : title;
-            var links = GetLinks(message.Movie);
+            var links = GetLinks(message.Game);
 
             _proxy.SendNotification(title, message.Message, links, Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            var title = Settings.IncludeAppNameInTitle ? MOVIE_ADDED_TITLE_BRANDED : MOVIE_ADDED_TITLE;
+            var title = Settings.IncludeAppNameInTitle ? GAME_ADDED_TITLE_BRANDED : GAME_ADDED_TITLE;
             title = Settings.IncludeInstanceNameInTitle ? $"{title} - {InstanceName}" : title;
-            var links = GetLinks(movie);
+            var links = GetLinks(game);
 
-            _proxy.SendNotification(title, $"{movie.Title} added to library", links, Settings);
+            _proxy.SendNotification(title, $"{game.Title} added to library", links, Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            var title = Settings.IncludeAppNameInTitle ? MOVIE_FILE_DELETED_TITLE_BRANDED : MOVIE_FILE_DELETED_TITLE;
+            var title = Settings.IncludeAppNameInTitle ? GAME_FILE_DELETED_TITLE_BRANDED : GAME_FILE_DELETED_TITLE;
             title = Settings.IncludeInstanceNameInTitle ? $"{title} - {InstanceName}" : title;
-            var links = GetLinks(deleteMessage.Movie);
+            var links = GetLinks(deleteMessage.Game);
 
             _proxy.SendNotification(title, deleteMessage.Message, links, Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            var title = Settings.IncludeAppNameInTitle ? MOVIE_DELETED_TITLE_BRANDED : MOVIE_DELETED_TITLE;
+            var title = Settings.IncludeAppNameInTitle ? GAME_DELETED_TITLE_BRANDED : GAME_DELETED_TITLE;
             title = Settings.IncludeInstanceNameInTitle ? $"{title} - {InstanceName}" : title;
-            var links = GetLinks(deleteMessage.Movie);
+            var links = GetLinks(deleteMessage.Game);
 
             _proxy.SendNotification(title, deleteMessage.Message, links, Settings);
         }
@@ -118,11 +118,11 @@ namespace NzbDrone.Core.Notifications.Telegram
             return new ValidationResult(failures);
         }
 
-        private List<TelegramLink> GetLinks(Movie movie)
+        private List<TelegramLink> GetLinks(Game game)
         {
             var links = new List<TelegramLink>();
 
-            if (movie == null)
+            if (game == null)
             {
                 return links;
             }
@@ -131,19 +131,19 @@ namespace NzbDrone.Core.Notifications.Telegram
             {
                 var linkType = (MetadataLinkType)link;
 
-                if (linkType == MetadataLinkType.Tmdb && movie.TmdbId > 0)
+                if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
                 {
-                    links.Add(new TelegramLink("TMDb", $"https://www.themoviedb.org/movie/{movie.TmdbId}"));
+                    links.Add(new TelegramLink("TMDb", $"https://www.thegamedb.org/game/{game.IgdbId}"));
                 }
 
-                if (linkType == MetadataLinkType.Imdb && movie.ImdbId.IsNotNullOrWhiteSpace())
+                if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
                 {
-                    links.Add(new TelegramLink("IMDb", $"https://www.imdb.com/title/{movie.ImdbId}"));
+                    links.Add(new TelegramLink("IMDb", $"https://www.imdb.com/title/{game.ImdbId}"));
                 }
 
-                if (linkType == MetadataLinkType.Trakt && movie.TmdbId > 0)
+                if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
                 {
-                    links.Add(new TelegramLink("Trakt", $"https://trakt.tv/search/tmdb/{movie.TmdbId}?id_type=movie"));
+                    links.Add(new TelegramLink("Trakt", $"https://trakt.tv/search/igdb/{game.IgdbId}?id_type=game"));
                 }
             }
 

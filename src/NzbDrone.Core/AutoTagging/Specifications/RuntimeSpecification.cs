@@ -1,6 +1,6 @@
 using FluentValidation;
 using NzbDrone.Core.Annotations;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -30,11 +30,11 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         [FieldDefinition(2, Label = "AutoTaggingSpecificationMaximumRuntime", Type = FieldType.Number, Unit = "minutes")]
         public int Max { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return movie?.MovieMetadata?.Value?.Runtime != null &&
-                   movie.MovieMetadata.Value.Runtime >= Min &&
-                   movie.MovieMetadata.Value.Runtime <= Max;
+            return game?.GameMetadata?.Value?.Runtime != null &&
+                   game.GameMetadata.Value.Runtime >= Min &&
+                   game.GameMetadata.Value.Runtime <= Max;
         }
 
         public override NzbDroneValidationResult Validate()

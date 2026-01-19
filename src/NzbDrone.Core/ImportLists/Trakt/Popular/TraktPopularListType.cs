@@ -5,42 +5,42 @@ namespace NzbDrone.Core.ImportLists.Trakt.Popular
 {
     public enum TraktPopularListType
     {
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTrendingMovies")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTrendingGames")]
         Trending = 0,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypePopularMovies")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypePopularGames")]
         Popular = 1,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopAnticipatedMovies")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopAnticipatedGames")]
         Anticipated = 2,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopBoxOfficeMovies")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopBoxOfficeGames")]
         BoxOffice = 3,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedMoviesByWeek")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedGamesByWeek")]
         TopWatchedByWeek = 4,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedMoviesByMonth")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedGamesByMonth")]
         TopWatchedByMonth = 5,
 
         [Obsolete]
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedMoviesByYear")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedGamesByYear")]
         TopWatchedByYear = 6,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedMoviesOfAllTime")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeTopWatchedGamesOfAllTime")]
         TopWatchedByAllTime = 7,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedMoviesByWeek")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedGamesByWeek")]
         RecommendedByWeek = 8,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedMoviesByMonth")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedGamesByMonth")]
         RecommendedByMonth = 9,
 
         [Obsolete]
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedMoviesByYear")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedGamesByYear")]
         RecommendedByYear = 10,
 
-        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedMoviesOfAllTime")]
+        [FieldOption(Label = "ImportListsTraktSettingsPopularListTypeRecommendedGamesOfAllTime")]
         RecommendedByAllTime = 11
     }
 }

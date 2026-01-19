@@ -1,4 +1,4 @@
-﻿using Radarr.Api.V3.Queue;
+﻿using Gamarr.Api.V3.Queue;
 using RestSharp;
 
 namespace NzbDrone.Integration.Test.Client

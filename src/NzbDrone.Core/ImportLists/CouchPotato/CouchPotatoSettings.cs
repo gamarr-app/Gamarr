@@ -38,7 +38,7 @@ namespace NzbDrone.Core.ImportLists.CouchPotato
         [FieldDefinition(3, Label = "CouchPotato API Key", Privacy = PrivacyLevel.ApiKey, HelpText = "CouchPotato API Key. This can found within Settings > General")]
         public string ApiKey { get; set; }
 
-        [FieldDefinition(4, Label = "Only Wanted", HelpText = "Only add wanted movies.", Type = FieldType.Checkbox)]
+        [FieldDefinition(4, Label = "Only Wanted", HelpText = "Only add wanted games.", Type = FieldType.Checkbox)]
         public bool OnlyActive { get; set; }
 
         public override NzbDroneValidationResult Validate()

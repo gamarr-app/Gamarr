@@ -14,31 +14,31 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 
         public void Clean()
         {
-            DeleteOrphanedByMovie();
-            DeleteOrphanedByMovieFile();
+            DeleteOrphanedByGame();
+            DeleteOrphanedByGameFile();
         }
 
-        private void DeleteOrphanedByMovie()
+        private void DeleteOrphanedByGame()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""SubtitleFiles""
                              WHERE ""Id"" IN (
                              SELECT ""SubtitleFiles"".""Id"" FROM ""SubtitleFiles""
-                             LEFT OUTER JOIN ""Movies""
-                             ON ""SubtitleFiles"".""MovieId"" = ""Movies"".""Id""
-                             WHERE ""Movies"".""Id"" IS NULL)");
+                             LEFT OUTER JOIN ""Games""
+                             ON ""SubtitleFiles"".""GameId"" = ""Games"".""Id""
+                             WHERE ""Games"".""Id"" IS NULL)");
         }
 
-        private void DeleteOrphanedByMovieFile()
+        private void DeleteOrphanedByGameFile()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""SubtitleFiles""
                              WHERE ""Id"" IN (
                              SELECT ""SubtitleFiles"".""Id"" FROM ""SubtitleFiles""
-                             LEFT OUTER JOIN ""MovieFiles""
-                             ON ""SubtitleFiles"".""MovieFileId"" = ""MovieFiles"".""Id""
-                             WHERE ""SubtitleFiles"".""MovieFileId"" > 0
-                             AND ""MovieFiles"".""Id"" IS NULL)");
+                             LEFT OUTER JOIN ""GameFiles""
+                             ON ""SubtitleFiles"".""GameFileId"" = ""GameFiles"".""Id""
+                             WHERE ""SubtitleFiles"".""GameFileId"" > 0
+                             AND ""GameFiles"".""Id"" IS NULL)");
         }
     }
 }

@@ -20,19 +20,19 @@ namespace NzbDrone.Core.Indexers.FileList
             return pageableRequests;
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            if (searchCriteria.Movie.MovieMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
+            if (searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
             {
-                pageableRequests.Add(GetRequest("search-torrents", $"&type=imdb&query={searchCriteria.Movie.MovieMetadata.Value.ImdbId}"));
+                pageableRequests.Add(GetRequest("search-torrents", $"&type=imdb&query={searchCriteria.Game.GameMetadata.Value.ImdbId}"));
             }
-            else if (searchCriteria.Movie.Year > 0)
+            else if (searchCriteria.Game.Year > 0)
             {
                 foreach (var queryTitle in searchCriteria.CleanSceneTitles)
                 {
-                    var titleYearSearchQuery = $"{queryTitle}+{searchCriteria.Movie.Year}";
+                    var titleYearSearchQuery = $"{queryTitle}+{searchCriteria.Game.Year}";
                     pageableRequests.Add(GetRequest("search-torrents", $"&type=name&query={titleYearSearchQuery.Trim()}"));
                 }
             }

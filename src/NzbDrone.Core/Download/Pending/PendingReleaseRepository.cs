@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Download.Pending
 {
     public interface IPendingReleaseRepository : IBasicRepository<PendingRelease>
     {
-        void DeleteByMovieIds(List<int> movieIds);
-        List<PendingRelease> AllByMovieId(int movieId);
+        void DeleteByGameIds(List<int> gameIds);
+        List<PendingRelease> AllByGameId(int gameId);
         List<PendingRelease> WithoutFallback();
     }
 
@@ -19,20 +19,20 @@ namespace NzbDrone.Core.Download.Pending
         {
         }
 
-        public void DeleteByMovieIds(List<int> movieIds)
+        public void DeleteByGameIds(List<int> gameIds)
         {
-            Delete(x => movieIds.Contains(x.MovieId));
+            Delete(x => gameIds.Contains(x.GameId));
         }
 
-        public List<PendingRelease> AllByMovieId(int movieId)
+        public List<PendingRelease> AllByGameId(int gameId)
         {
-            return Query(x => x.MovieId == movieId);
+            return Query(x => x.GameId == gameId);
         }
 
         public List<PendingRelease> WithoutFallback()
         {
             var builder = new SqlBuilder(_database.DatabaseType)
-                .InnerJoin<PendingRelease, Movie>((p, m) => p.MovieId == m.Id)
+                .InnerJoin<PendingRelease, Game>((p, m) => p.GameId == m.Id)
                 .Where<PendingRelease>(p => p.Reason != PendingReleaseReason.Fallback);
 
             return Query(builder);

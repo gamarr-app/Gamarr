@@ -6,7 +6,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Xbmc
 {
@@ -27,40 +27,40 @@ namespace NzbDrone.Core.Notifications.Xbmc
 
         public override void OnGrab(GrabMessage grabMessage)
         {
-            const string header = "Radarr - Grabbed";
+            const string header = "Gamarr - Grabbed";
 
             Notify(Settings, header, grabMessage.Message);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
-            const string header = "Radarr - Downloaded";
+            const string header = "Gamarr - Downloaded";
 
             Notify(Settings, header, message.Message);
-            UpdateAndClean(message.Movie, message.OldMovieFiles.Any());
+            UpdateAndClean(message.Game, message.OldGameFiles.Any());
         }
 
-        public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+        public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
         {
-            UpdateAndClean(movie);
+            UpdateAndClean(game);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            const string header = "Radarr - Deleted";
+            const string header = "Gamarr - Deleted";
 
             Notify(Settings, header, deleteMessage.Message);
-            UpdateAndClean(deleteMessage.Movie, true);
+            UpdateAndClean(deleteMessage.Game, true);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
             if (deleteMessage.DeletedFiles)
             {
-                const string header = "Radarr - Deleted";
+                const string header = "Gamarr - Deleted";
 
                 Notify(Settings, header, deleteMessage.Message);
-                UpdateAndClean(deleteMessage.Movie, true);
+                UpdateAndClean(deleteMessage.Game, true);
             }
         }
 
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
         {
             _updateQueue.ProcessQueue(Settings.Host, (items) =>
             {
-                _logger.Debug("Performing library update for {0} movies", items.Count);
+                _logger.Debug("Performing library update for {0} games", items.Count);
 
                 items.ForEach(item =>
                 {
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
                     {
                         if (Settings.UpdateLibrary)
                         {
-                            _xbmcService.Update(Settings, item.Movie);
+                            _xbmcService.Update(Settings, item.Game);
                         }
 
                         if (item.Info.Contains(true) && Settings.CleanLibrary)
@@ -140,12 +140,12 @@ namespace NzbDrone.Core.Notifications.Xbmc
             }
         }
 
-        private void UpdateAndClean(Movie movie, bool clean = true)
+        private void UpdateAndClean(Game game, bool clean = true)
         {
             if (Settings.UpdateLibrary || Settings.CleanLibrary)
             {
-                _logger.Debug("Scheduling library update for movie {0} {1}", movie.Id, movie.Title);
-                _updateQueue.Add(Settings.Host, movie, clean);
+                _logger.Debug("Scheduling library update for game {0} {1}", game.Id, game.Title);
+                _updateQueue.Add(Settings.Host, game, clean);
             }
         }
     }

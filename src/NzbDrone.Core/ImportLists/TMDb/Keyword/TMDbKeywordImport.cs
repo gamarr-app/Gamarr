@@ -9,14 +9,14 @@ namespace NzbDrone.Core.ImportLists.TMDb.Keyword
 {
     public class TMDbKeywordImport : TMDbImportListBase<TMDbKeywordSettings>
     {
-        public TMDbKeywordImport(IRadarrCloudRequestBuilder requestBuilder,
+        public TMDbKeywordImport(IGamarrCloudRequestBuilder requestBuilder,
                                  IHttpClient httpClient,
                                  IImportListStatusService importListStatusService,
                                  IConfigService configService,
                                  IParsingService parsingService,
-                                 ISearchForNewMovie searchForNewMovie,
+                                 ISearchForNewGame searchForNewGame,
                                  Logger logger)
-        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewMovie, logger)
+        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewGame, logger)
         {
         }
 

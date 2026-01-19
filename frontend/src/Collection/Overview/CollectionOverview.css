@@ -37,11 +37,11 @@ $hoverScale: 1.05;
   flex-wrap: wrap;
 }
 
-.moviesContainer {
+.gamesContainer {
   margin-bottom: 5px;
 }
 
-.movie {
+.game {
   padding: 7px;
 }
 

@@ -10,7 +10,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
 {
@@ -28,25 +28,25 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
 
         public override string Name => "WDTV";
 
-        public override string GetFilenameAfterMove(Movie movie, MovieFile movieFile, MetadataFile metadataFile)
+        public override string GetFilenameAfterMove(Game game, GameFile gameFile, MetadataFile metadataFile)
         {
-            var movieFilePath = Path.Combine(movie.Path, movieFile.RelativePath);
+            var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
 
-            if (metadataFile.Type == MetadataType.MovieImage)
+            if (metadataFile.Type == MetadataType.GameImage)
             {
-                return GetMovieFileImageFilename(movieFilePath);
+                return GetGameFileImageFilename(gameFilePath);
             }
 
-            if (metadataFile.Type == MetadataType.MovieMetadata)
+            if (metadataFile.Type == MetadataType.GameMetadata)
             {
-                return GetMovieFileMetadataFilename(movieFilePath);
+                return GetGameFileMetadataFilename(gameFilePath);
             }
 
-            _logger.Debug("Unknown movie file metadata: {0}", metadataFile.RelativePath);
-            return Path.Combine(movie.Path, metadataFile.RelativePath);
+            _logger.Debug("Unknown game file metadata: {0}", metadataFile.RelativePath);
+            return Path.Combine(game.Path, metadataFile.RelativePath);
         }
 
-        public override MetadataFile FindMetadataFile(Movie movie, string path)
+        public override MetadataFile FindMetadataFile(Game game, string path)
         {
             var filename = Path.GetFileName(path);
 
@@ -57,28 +57,28 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
 
             var metadata = new MetadataFile
             {
-                MovieId = movie.Id,
+                GameId = game.Id,
                 Consumer = GetType().Name,
-                RelativePath = movie.Path.GetRelativePath(path)
+                RelativePath = game.Path.GetRelativePath(path)
             };
 
             if (Path.GetFileName(filename).Equals("folder.jpg", StringComparison.InvariantCultureIgnoreCase))
             {
-                metadata.Type = MetadataType.MovieImage;
+                metadata.Type = MetadataType.GameImage;
                 return metadata;
             }
 
-            var parseResult = Parser.Parser.ParseMovieTitle(filename);
+            var parseResult = Parser.Parser.ParseGameTitle(filename);
 
             if (parseResult != null)
             {
                 switch (Path.GetExtension(filename).ToLowerInvariant())
                 {
                     case ".xml":
-                        metadata.Type = MetadataType.MovieMetadata;
+                        metadata.Type = MetadataType.GameMetadata;
                         return metadata;
                     case ".metathumb":
-                        metadata.Type = MetadataType.MovieImage;
+                        metadata.Type = MetadataType.GameImage;
                         return metadata;
                 }
             }
@@ -86,14 +86,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
             return null;
         }
 
-        public override MetadataFileResult MovieMetadata(Movie movie, MovieFile movieFile)
+        public override MetadataFileResult GameMetadata(Game game, GameFile gameFile)
         {
-            if (!Settings.MovieMetadata)
+            if (!Settings.GameMetadata)
             {
                 return null;
             }
 
-            _logger.Debug("Generating Movie File Metadata for: {0}", Path.Combine(movie.Path, movieFile.RelativePath));
+            _logger.Debug("Generating Game File Metadata for: {0}", Path.Combine(game.Path, gameFile.RelativePath));
 
             var xmlResult = string.Empty;
 
@@ -107,10 +107,10 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
                 var doc = new XDocument();
 
                 var details = new XElement("details");
-                details.Add(new XElement("id", movie.Id));
-                details.Add(new XElement("title", movie.Title));
-                details.Add(new XElement("genre", string.Join(" / ", movie.MovieMetadata.Value.Genres)));
-                details.Add(new XElement("overview", movie.MovieMetadata.Value.Overview));
+                details.Add(new XElement("id", game.Id));
+                details.Add(new XElement("title", game.Title));
+                details.Add(new XElement("genre", string.Join(" / ", game.GameMetadata.Value.Genres)));
+                details.Add(new XElement("overview", game.GameMetadata.Value.Overview));
 
                 doc.Add(details);
                 doc.Save(xw);
@@ -119,27 +119,27 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
                 xmlResult += Environment.NewLine;
             }
 
-            var filename = GetMovieFileMetadataFilename(movieFile.RelativePath);
+            var filename = GetGameFileMetadataFilename(gameFile.RelativePath);
 
             return new MetadataFileResult(filename, xmlResult.Trim(Environment.NewLine.ToCharArray()));
         }
 
-        public override List<ImageFileResult> MovieImages(Movie movie)
+        public override List<ImageFileResult> GameImages(Game game)
         {
-            if (!Settings.MovieImages)
+            if (!Settings.GameImages)
             {
                 return new List<ImageFileResult>();
             }
 
             // Because we only support one image, attempt to get the Poster type, then if that fails grab the first
-            var image = movie.MovieMetadata.Value.Images.SingleOrDefault(c => c.CoverType == MediaCoverTypes.Poster) ?? movie.MovieMetadata.Value.Images.FirstOrDefault();
+            var image = game.GameMetadata.Value.Images.SingleOrDefault(c => c.CoverType == MediaCoverTypes.Poster) ?? game.GameMetadata.Value.Images.FirstOrDefault();
             if (image == null)
             {
-                _logger.Trace("Failed to find suitable Movie image for movie {0}.", movie.Title);
+                _logger.Trace("Failed to find suitable Game image for game {0}.", game.Title);
                 return new List<ImageFileResult>();
             }
 
-            var source = _mediaCoverService.GetCoverPath(movie.Id, image.CoverType);
+            var source = _mediaCoverService.GetCoverPath(game.Id, image.CoverType);
             var destination = "folder" + Path.GetExtension(source);
 
             return new List<ImageFileResult>
@@ -148,14 +148,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Wdtv
                    };
         }
 
-        private string GetMovieFileMetadataFilename(string movieFilePath)
+        private string GetGameFileMetadataFilename(string gameFilePath)
         {
-            return Path.ChangeExtension(movieFilePath, "xml");
+            return Path.ChangeExtension(gameFilePath, "xml");
         }
 
-        private string GetMovieFileImageFilename(string movieFilePath)
+        private string GetGameFileImageFilename(string gameFilePath)
         {
-            return Path.ChangeExtension(movieFilePath, "metathumb");
+            return Path.ChangeExtension(gameFilePath, "metathumb");
         }
     }
 }

@@ -18,13 +18,13 @@ namespace NzbDrone.Core.Indexers.Nyaa
             return pageableRequests;
         }
 
-        public IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
             foreach (var queryTitle in searchCriteria.SceneTitles)
             {
-                pageableRequests.Add(GetPagedRequests(PrepareQuery($"{queryTitle} {searchCriteria.Movie.Year}")));
+                pageableRequests.Add(GetPagedRequests(PrepareQuery($"{queryTitle} {searchCriteria.Game.Year}")));
             }
 
             return pageableRequests;

@@ -2,8 +2,8 @@ import ModelBase from 'App/ModelBase';
 import AppSectionState from 'App/State/AppSectionState';
 
 export interface OrganizePreviewModel extends ModelBase {
-  movieId: number;
-  movieFileId: number;
+  gameId: number;
+  gameFileId: number;
   existingPath: string;
   newPath: string;
 }

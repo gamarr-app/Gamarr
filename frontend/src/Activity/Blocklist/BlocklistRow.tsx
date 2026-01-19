@@ -7,11 +7,11 @@ import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
 import { icons, kinds } from 'Helpers/Props';
-import MovieFormats from 'Movie/MovieFormats';
-import MovieLanguages from 'Movie/MovieLanguages';
-import MovieQuality from 'Movie/MovieQuality';
-import MovieTitleLink from 'Movie/MovieTitleLink';
-import useMovie from 'Movie/useMovie';
+import GameFormats from 'Game/GameFormats';
+import GameLanguages from 'Game/GameLanguages';
+import GameQuality from 'Game/GameQuality';
+import GameTitleLink from 'Game/GameTitleLink';
+import useGame from 'Game/useGame';
 import { removeBlocklistItem } from 'Store/Actions/blocklistActions';
 import Blocklist from 'typings/Blocklist';
 import { SelectStateInputProps } from 'typings/props';
@@ -28,7 +28,7 @@ interface BlocklistRowProps extends Blocklist {
 function BlocklistRow(props: BlocklistRowProps) {
   const {
     id,
-    movieId,
+    gameId,
     sourceTitle,
     languages,
     quality,
@@ -42,7 +42,7 @@ function BlocklistRow(props: BlocklistRowProps) {
     onSelectedChange,
   } = props;
 
-  const movie = useMovie(movieId);
+  const game = useGame(gameId);
   const dispatch = useDispatch();
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -58,7 +58,7 @@ function BlocklistRow(props: BlocklistRowProps) {
     dispatch(removeBlocklistItem({ id }));
   }, [id, dispatch]);
 
-  if (!movie) {
+  if (!game) {
     return null;
   }
 
@@ -77,10 +77,10 @@ function BlocklistRow(props: BlocklistRowProps) {
           return null;
         }
 
-        if (name === 'movieMetadata.sortTitle') {
+        if (name === 'gameMetadata.sortTitle') {
           return (
             <TableRowCell key={name}>
-              <MovieTitleLink titleSlug={movie.titleSlug} title={movie.title} />
+              <GameTitleLink titleSlug={game.titleSlug} title={game.title} />
             </TableRowCell>
           );
         }
@@ -92,7 +92,7 @@ function BlocklistRow(props: BlocklistRowProps) {
         if (name === 'languages') {
           return (
             <TableRowCell key={name} className={styles.languages}>
-              <MovieLanguages languages={languages} />
+              <GameLanguages languages={languages} />
             </TableRowCell>
           );
         }
@@ -100,7 +100,7 @@ function BlocklistRow(props: BlocklistRowProps) {
         if (name === 'quality') {
           return (
             <TableRowCell key={name} className={styles.quality}>
-              <MovieQuality quality={quality} />
+              <GameQuality quality={quality} />
             </TableRowCell>
           );
         }
@@ -108,7 +108,7 @@ function BlocklistRow(props: BlocklistRowProps) {
         if (name === 'customFormats') {
           return (
             <TableRowCell key={name}>
-              <MovieFormats formats={customFormats} />
+              <GameFormats formats={customFormats} />
             </TableRowCell>
           );
         }

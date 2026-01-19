@@ -6,9 +6,9 @@ type ColonReplacementFormat =
   | 'smart';
 
 export default interface NamingConfig {
-  renameMovies: boolean;
+  renameGames: boolean;
   replaceIllegalCharacters: boolean;
   colonReplacementFormat: ColonReplacementFormat;
-  standardMovieFormat: string;
-  movieFolderFormat: string;
+  standardGameFormat: string;
+  gameFolderFormat: string;
 }

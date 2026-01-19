@@ -11,16 +11,16 @@ import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import { align, icons, kinds, sortDirections } from 'Helpers/Props';
-import styles from 'Movie/Index/MovieIndex.css';
+import styles from 'Game/Index/GameIndex.css';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
 import CollectionFooter from './CollectionFooter';
-import MovieCollectionFilterMenu from './Menus/MovieCollectionFilterMenu';
-import MovieCollectionSortMenu from './Menus/MovieCollectionSortMenu';
-import NoMovieCollections from './NoMovieCollections';
+import GameCollectionFilterMenu from './Menus/GameCollectionFilterMenu';
+import GameCollectionSortMenu from './Menus/GameCollectionSortMenu';
+import NoGameCollections from './NoGameCollections';
 import CollectionOverviewsConnector from './Overview/CollectionOverviewsConnector';
 import CollectionOverviewOptionsModal from './Overview/Options/CollectionOverviewOptionsModal';
 
@@ -189,8 +189,8 @@ class Collection extends Component {
     this.onSelectAllChange({ value: !this.state.allSelected });
   };
 
-  onRefreshMovieCollectionsPress = () => {
-    this.props.onRefreshMovieCollectionsPress();
+  onRefreshGameCollectionsPress = () => {
+    this.props.onRefreshGameCollectionsPress();
   };
 
   onSelectedChange = ({ id, value, shiftKey = false }) => {
@@ -241,7 +241,7 @@ class Collection extends Component {
       allUnselected
     } = this.state;
 
-    const selectedMovieIds = this.getSelectedIds();
+    const selectedGameIds = this.getSelectedIds();
 
     const ViewComponent = getViewComponent(view);
     const isLoaded = !!(!error && isPopulated && items.length && this.scrollerRef.current);
@@ -256,7 +256,7 @@ class Collection extends Component {
               iconName={icons.REFRESH}
               isSpinning={isRefreshingCollections}
               isDisabled={hasNoCollection}
-              onPress={this.onRefreshMovieCollectionsPress}
+              onPress={this.onRefreshGameCollectionsPress}
             />
             <PageToolbarButton
               label={allSelected ? translate('UnselectAll') : translate('SelectAll')}
@@ -285,14 +285,14 @@ class Collection extends Component {
                 <PageToolbarSeparator />
             }
 
-            <MovieCollectionSortMenu
+            <GameCollectionSortMenu
               sortKey={sortKey}
               sortDirection={sortDirection}
               isDisabled={hasNoCollection}
               onSortSelect={onSortSelect}
             />
 
-            <MovieCollectionFilterMenu
+            <GameCollectionFilterMenu
               selectedFilterKey={selectedFilterKey}
               filters={filters}
               customFilters={customFilters}
@@ -344,7 +344,7 @@ class Collection extends Component {
 
             {
               !error && isPopulated && !items.length &&
-                <NoMovieCollections totalItems={totalItems} />
+                <NoGameCollections totalItems={totalItems} />
             }
           </PageContentBody>
 
@@ -360,7 +360,7 @@ class Collection extends Component {
         {
           isLoaded &&
             <CollectionFooter
-              selectedIds={selectedMovieIds}
+              selectedIds={selectedGameIds}
               isSaving={isSaving}
               isAdding={isAdding}
               onUpdateSelectedPress={this.onUpdateSelectedPress}
@@ -397,7 +397,7 @@ Collection.propTypes = {
   onFilterSelect: PropTypes.func.isRequired,
   onScroll: PropTypes.func.isRequired,
   onUpdateSelectedPress: PropTypes.func.isRequired,
-  onRefreshMovieCollectionsPress: PropTypes.func.isRequired
+  onRefreshGameCollectionsPress: PropTypes.func.isRequired
 };
 
 export default Collection;

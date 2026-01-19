@@ -5,7 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Datastore.Migration;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Profiles;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -39,29 +39,29 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             m.Insert.IntoTable("Profiles").Row(profile);
         }
 
-        private void AddMovie(fix_invalid_profile_references m, string movieTitle, int tmdbId, int profileId)
+        private void AddGame(fix_invalid_profile_references m, string gameTitle, int igdbId, int profileId)
         {
-            var movie = new
+            var game = new
             {
-                Id = tmdbId,
+                Id = igdbId,
                 Monitored = true,
-                Title = movieTitle,
-                CleanTitle = movieTitle,
-                Status = (int)MovieStatusType.Announced,
-                MinimumAvailability = (int)MovieStatusType.Announced,
+                Title = gameTitle,
+                CleanTitle = gameTitle,
+                Status = (int)GameStatusType.Announced,
+                MinimumAvailability = (int)GameStatusType.Announced,
                 Images = new[] { new { CoverType = "Poster" } }.ToJson(),
                 Recommendations = new[] { 1 }.ToJson(),
                 HasPreDBEntry = false,
                 Runtime = 90,
                 OriginalLanguage = 1,
                 ProfileId = profileId,
-                MovieFileId = 1,
-                Path = string.Format("/Movies/{0}", movieTitle),
-                TitleSlug = movieTitle,
-                TmdbId = tmdbId
+                GameFileId = 1,
+                Path = string.Format("/Games/{0}", gameTitle),
+                TitleSlug = gameTitle,
+                IgdbId = igdbId
             };
 
-            m.Insert.IntoTable("Movies").Row(movie);
+            m.Insert.IntoTable("Games").Row(game);
         }
 
         private void AddCustomFormat(fix_invalid_profile_references c, int id, string name)
@@ -77,16 +77,16 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         }
 
         [Test]
-        public void should_add_default_profiles_if_none_exist_but_movies_exist()
+        public void should_add_default_profiles_if_none_exist_but_games_exist()
         {
             var profileId = 18;
 
             var db = WithMigrationTestDb(c =>
             {
-                AddMovie(c, "movie", 123456, profileId);
+                AddGame(c, "game", 123456, profileId);
             });
 
-            var items = db.Query<Movie179>("SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var items = db.Query<Game179>("SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
             var profiles = db.Query<Profile179>("SELECT \"Id\" FROM \"Profiles\"");
 
             items.Should().HaveCount(1);
@@ -102,10 +102,10 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             var db = WithMigrationTestDb(c =>
             {
                 AddDefaultProfile(c, "My Custom Profile", profileId);
-                AddMovie(c, "movie", 123456, 17);
+                AddGame(c, "game", 123456, 17);
             });
 
-            var items = db.Query<Movie179>("SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var items = db.Query<Game179>("SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
             var profiles = db.Query<Profile179>("SELECT \"Id\" FROM \"Profiles\"");
 
             items.Should().HaveCount(1);
@@ -122,10 +122,10 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             var db = WithMigrationTestDb(c =>
             {
                 AddCustomFormat(c, formatId, "SomeFormat");
-                AddMovie(c, "movie", 123456, profileId);
+                AddGame(c, "game", 123456, profileId);
             });
 
-            var items = db.Query<Movie179>("SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var items = db.Query<Game179>("SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
             var profiles = db.Query<Profile179>("SELECT \"Id\", \"FormatItems\" FROM \"Profiles\"");
 
             items.Should().HaveCount(1);
@@ -136,34 +136,34 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         }
 
         [Test]
-        public void should_not_change_movies_with_valid_profile()
+        public void should_not_change_games_with_valid_profile()
         {
             var profileId = 2;
 
             var db = WithMigrationTestDb(c =>
             {
                 AddDefaultProfile(c, "My Custom Profile", profileId);
-                AddMovie(c, "movie", 123456, profileId);
+                AddGame(c, "game", 123456, profileId);
             });
 
-            var items = db.Query<Movie179>("SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var items = db.Query<Game179>("SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
 
             items.Should().HaveCount(1);
             items.First().ProfileId.Should().Be(profileId);
         }
 
         [Test]
-        public void should_change_movies_with_bad_profile_id()
+        public void should_change_games_with_bad_profile_id()
         {
             var profileId = 2;
 
             var db = WithMigrationTestDb(c =>
             {
                 AddDefaultProfile(c, "My Custom Profile", profileId);
-                AddMovie(c, "movie", 123456, 1);
+                AddGame(c, "game", 123456, 1);
             });
 
-            var items = db.Query<Movie179>("SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var items = db.Query<Game179>("SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
 
             items.Should().HaveCount(1);
             items.First().ProfileId.Should().Be(profileId);
@@ -179,25 +179,25 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             {
                 AddDefaultProfile(c, "My Custom Profile", commonProfileId);
                 AddDefaultProfile(c, "My Custom Profile 2", otherProfileId);
-                AddMovie(c, "movie1", 123451, 1);
-                AddMovie(c, "movie2", 123452, 1);
-                AddMovie(c, "movie3", 123453, 1);
-                AddMovie(c, "movie4", 123454, 1);
-                AddMovie(c, "movie5", 123455, commonProfileId);
-                AddMovie(c, "movie6", 123456, commonProfileId);
-                AddMovie(c, "movie7", 123457, commonProfileId);
-                AddMovie(c, "movie8", 123458, otherProfileId);
-                AddMovie(c, "movie9", 123459, otherProfileId);
+                AddGame(c, "game1", 123451, 1);
+                AddGame(c, "game2", 123452, 1);
+                AddGame(c, "game3", 123453, 1);
+                AddGame(c, "game4", 123454, 1);
+                AddGame(c, "game5", 123455, commonProfileId);
+                AddGame(c, "game6", 123456, commonProfileId);
+                AddGame(c, "game7", 123457, commonProfileId);
+                AddGame(c, "game8", 123458, otherProfileId);
+                AddGame(c, "game9", 123459, otherProfileId);
             });
 
-            var items = db.Query<Movie179>("SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var items = db.Query<Game179>("SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
 
             items.Should().HaveCount(9);
             items.Where(x => x.ProfileId == commonProfileId).Should().HaveCount(7);
         }
     }
 
-    public class Movie179
+    public class Game179
     {
         public int Id { get; set; }
         public int ProfileId { get; set; }

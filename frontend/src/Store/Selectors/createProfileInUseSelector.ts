@@ -1,27 +1,27 @@
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import ImportList from 'typings/ImportList';
-import MovieCollection from 'typings/MovieCollection';
-import createAllMoviesSelector from './createAllMoviesSelector';
+import GameCollection from 'typings/GameCollection';
+import createAllGamesSelector from './createAllGamesSelector';
 
 function createProfileInUseSelector(profileProp: string) {
   return createSelector(
     (_: AppState, { id }: { id: number }) => id,
-    createAllMoviesSelector(),
+    createAllGamesSelector(),
     (state: AppState) => state.settings.importLists.items,
-    (state: AppState) => state.movieCollections.items,
-    (id, movies, lists, collections) => {
+    (state: AppState) => state.gameCollections.items,
+    (id, games, lists, collections) => {
       if (!id) {
         return false;
       }
 
       return (
-        movies.some((m) => m[profileProp as keyof Movie] === id) ||
+        games.some((m) => m[profileProp as keyof Game] === id) ||
         lists.some((list) => list[profileProp as keyof ImportList] === id) ||
         collections.some(
           (collection) =>
-            collection[profileProp as keyof MovieCollection] === id
+            collection[profileProp as keyof GameCollection] === id
         )
       );
     }

@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Configuration
 {
     public enum ConfigKey
     {
-        DownloadedMoviesFolder
+        DownloadedGamesFolder
     }
 
     public class ConfigService : IConfigService
@@ -79,10 +79,10 @@ namespace NzbDrone.Core.Configuration
             return _repository.Get(key.ToLower()) != null;
         }
 
-        public bool AutoUnmonitorPreviouslyDownloadedMovies
+        public bool AutoUnmonitorPreviouslyDownloadedGames
         {
-            get { return GetValueBoolean("AutoUnmonitorPreviouslyDownloadedMovies"); }
-            set { SetValue("AutoUnmonitorPreviouslyDownloadedMovies", value); }
+            get { return GetValueBoolean("AutoUnmonitorPreviouslyDownloadedGames"); }
+            set { SetValue("AutoUnmonitorPreviouslyDownloadedGames", value); }
         }
 
         public int Retention
@@ -197,11 +197,11 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("AutoRedownloadFailedFromInteractiveSearch", value); }
         }
 
-        public bool CreateEmptyMovieFolders
+        public bool CreateEmptyGameFolders
         {
-            get { return GetValueBoolean("CreateEmptyMovieFolders", false); }
+            get { return GetValueBoolean("CreateEmptyGameFolders", false); }
 
-            set { SetValue("CreateEmptyMovieFolders", value); }
+            set { SetValue("CreateEmptyGameFolders", value); }
         }
 
         public bool DeleteEmptyFolders
@@ -344,11 +344,11 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("CalendarWeekColumnHeader", value); }
         }
 
-        public MovieRuntimeFormatType MovieRuntimeFormat
+        public GameRuntimeFormatType GameRuntimeFormat
         {
-            get { return GetValueEnum("MovieRuntimeFormat", MovieRuntimeFormatType.HoursMinutes); }
+            get { return GetValueEnum("GameRuntimeFormat", GameRuntimeFormatType.HoursMinutes); }
 
-            set { SetValue("MovieRuntimeFormat", value); }
+            set { SetValue("GameRuntimeFormat", value); }
         }
 
         public string ShortDateFormat
@@ -386,11 +386,11 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("EnableColorImpairedMode", value); }
         }
 
-        public int MovieInfoLanguage
+        public int GameInfoLanguage
         {
-            get { return GetValueInt("MovieInfoLanguage", (int)Language.English); }
+            get { return GetValueInt("GameInfoLanguage", (int)Language.English); }
 
-            set { SetValue("MovieInfoLanguage", value); }
+            set { SetValue("GameInfoLanguage", value); }
         }
 
         public int UILanguage

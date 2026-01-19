@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Download.Clients.Flood
             _downloadSeedConfigProvider = downloadSeedConfigProvider;
         }
 
-        private static IEnumerable<string> HandleTags(RemoteMovie remoteMovie, FloodSettings settings)
+        private static IEnumerable<string> HandleTags(RemoteGame remoteGame, FloodSettings settings)
         {
             var result = new HashSet<string>();
 
@@ -55,25 +55,25 @@ namespace NzbDrone.Core.Download.Clients.Flood
                     switch (additionalTag)
                     {
                         case (int)AdditionalTags.Collection:
-                            result.Add(remoteMovie.Movie.MovieMetadata.Value.CollectionTitle);
+                            result.Add(remoteGame.Game.GameMetadata.Value.CollectionTitle);
                             break;
                         case (int)AdditionalTags.Quality:
-                            result.Add(remoteMovie.ParsedMovieInfo.Quality.Quality.ToString());
+                            result.Add(remoteGame.ParsedGameInfo.Quality.Quality.ToString());
                             break;
                         case (int)AdditionalTags.Languages:
-                            result.UnionWith(remoteMovie.Languages.ConvertAll(language => language.ToString()));
+                            result.UnionWith(remoteGame.Languages.ConvertAll(language => language.ToString()));
                             break;
                         case (int)AdditionalTags.ReleaseGroup:
-                            result.Add(remoteMovie.ParsedMovieInfo.ReleaseGroup);
+                            result.Add(remoteGame.ParsedGameInfo.ReleaseGroup);
                             break;
                         case (int)AdditionalTags.Year:
-                            result.Add(remoteMovie.Movie.Year.ToString());
+                            result.Add(remoteGame.Game.Year.ToString());
                             break;
                         case (int)AdditionalTags.Indexer:
-                            result.Add(remoteMovie.Release.Indexer);
+                            result.Add(remoteGame.Release.Indexer);
                             break;
                         case (int)AdditionalTags.Studio:
-                            result.Add(remoteMovie.Movie.MovieMetadata.Value.Studio);
+                            result.Add(remoteGame.Game.GameMetadata.Value.Studio);
                             break;
                         default:
                             throw new DownloadClientException("Unexpected additional tag ID");
@@ -87,16 +87,16 @@ namespace NzbDrone.Core.Download.Clients.Flood
         public override string Name => "Flood";
         public override ProviderMessage Message => new ProviderMessage(_localizationService.GetLocalizedString("DownloadClientFloodSettingsRemovalInfo"), ProviderMessageType.Info);
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
-            _proxy.AddTorrentByFile(Convert.ToBase64String(fileContent), HandleTags(remoteMovie, Settings), Settings);
+            _proxy.AddTorrentByFile(Convert.ToBase64String(fileContent), HandleTags(remoteGame, Settings), Settings);
 
             return hash;
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
-            _proxy.AddTorrentByUrl(magnetLink, HandleTags(remoteMovie, Settings), Settings);
+            _proxy.AddTorrentByUrl(magnetLink, HandleTags(remoteGame, Settings), Settings);
 
             return hash;
         }

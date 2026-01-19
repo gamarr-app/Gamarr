@@ -7,7 +7,7 @@ export default interface UiSettings {
   firstDayOfWeek: number;
   enableColorImpairedMode: boolean;
   calendarWeekColumnHeader: string;
-  movieRuntimeFormat: string;
-  movieInfoLanguage: number;
+  gameRuntimeFormat: string;
+  gameInfoLanguage: number;
   uiLanguage: number;
 }

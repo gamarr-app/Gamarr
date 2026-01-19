@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             return finalPath;
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             var hashedSerialNumber = _serialNumberProvider.GetSerialNumber(Settings);
 
@@ -173,7 +173,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
             if (item != null)
             {
-                _logger.Debug("{0} added correctly", remoteMovie);
+                _logger.Debug("{0} added correctly", remoteGame);
                 return CreateDownloadId(item.Id, hashedSerialNumber);
             }
 
@@ -182,7 +182,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             throw new DownloadClientException("Failed to add magnet task to Download Station");
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             var hashedSerialNumber = _serialNumberProvider.GetSerialNumber(Settings);
 
@@ -194,7 +194,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
             if (item != null)
             {
-                _logger.Debug("{0} added correctly", remoteMovie);
+                _logger.Debug("{0} added correctly", remoteGame);
                 return CreateDownloadId(item.Id, hashedSerialNumber);
             }
 

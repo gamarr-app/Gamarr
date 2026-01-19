@@ -31,12 +31,12 @@ import InteractiveImport, {
   InteractiveImportCommandOptions,
 } from 'InteractiveImport/InteractiveImport';
 import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
-import SelectMovieModal from 'InteractiveImport/Movie/SelectMovieModal';
+import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
 import Language from 'Language/Language';
-import Movie from 'Movie/Movie';
-import { MovieFile } from 'MovieFile/MovieFile';
+import Game from 'Game/Game';
+import { GameFile } from 'GameFile/GameFile';
 import { QualityModel } from 'Quality/Quality';
 import { executeCommand } from 'Store/Actions/commandActions';
 import {
@@ -48,9 +48,9 @@ import {
   updateInteractiveImportItems,
 } from 'Store/Actions/interactiveImportActions';
 import {
-  deleteMovieFiles,
-  updateMovieFiles,
-} from 'Store/Actions/movieFileActions';
+  deleteGameFiles,
+  updateGameFiles,
+} from 'Store/Actions/gameFileActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import { SortCallback } from 'typings/callbacks';
 import { CheckInputChanged } from 'typings/inputs';
@@ -62,7 +62,7 @@ import styles from './InteractiveImportModalContent.css';
 
 type SelectType =
   | 'select'
-  | 'movie'
+  | 'game'
   | 'releaseGroup'
   | 'quality'
   | 'language'
@@ -81,8 +81,8 @@ const COLUMNS = [
     isVisible: true,
   },
   {
-    name: 'movie',
-    label: () => translate('Movie'),
+    name: 'game',
+    label: () => translate('Game'),
     isSortable: true,
     isVisible: true,
   },
@@ -155,26 +155,26 @@ const importModeOptions: SelectInputOption[] = [
   },
 ];
 
-function isSameMovieFile(
+function isSameGameFile(
   file: InteractiveImport,
   originalFile?: InteractiveImport
 ) {
-  const { movie } = file;
+  const { game } = file;
 
   if (!originalFile) {
     return false;
   }
 
-  if (!originalFile.movie || movie?.id !== originalFile.movie.id) {
+  if (!originalFile.game || game?.id !== originalFile.game.id) {
     return false;
   }
 
   return true;
 }
 
-const movieFilesInfoSelector = createSelector(
-  (state: AppState) => state.movieFiles.isDeleting,
-  (state: AppState) => state.movieFiles.deleteError,
+const gameFilesInfoSelector = createSelector(
+  (state: AppState) => state.gameFiles.isDeleting,
+  (state: AppState) => state.gameFiles.deleteError,
   (isDeleting, deleteError) => {
     return {
       isDeleting,
@@ -192,9 +192,9 @@ const importModeSelector = createSelector(
 
 export interface InteractiveImportModalContentProps {
   downloadId?: string;
-  movieId?: number;
-  showMovie?: boolean;
-  allowMovieChange?: boolean;
+  gameId?: number;
+  showGame?: boolean;
+  allowGameChange?: boolean;
   showDelete?: boolean;
   showImportMode?: boolean;
   showFilterExistingFiles?: boolean;
@@ -213,9 +213,9 @@ function InteractiveImportModalContent(
 ) {
   const {
     downloadId,
-    movieId,
-    allowMovieChange = true,
-    showMovie = true,
+    gameId,
+    allowGameChange = true,
+    showGame = true,
     showFilterExistingFiles = false,
     showDelete = false,
     showImportMode = true,
@@ -239,11 +239,11 @@ function InteractiveImportModalContent(
     createClientSideCollectionSelector('interactiveImport')
   );
 
-  const { isDeleting, deleteError } = useSelector(movieFilesInfoSelector);
+  const { isDeleting, deleteError } = useSelector(gameFilesInfoSelector);
   const importMode = useSelector(importModeSelector);
 
   const [invalidRowsSelected, setInvalidRowsSelected] = useState<number[]>([]);
-  const [withoutMovieFileIdRowsSelected, setWithoutMovieFileIdRowsSelected] =
+  const [withoutGameFileIdRowsSelected, setWithoutGameFileIdRowsSelected] =
     useState<number[]>([]);
   const [selectModalOpen, setSelectModalOpen] = useState<SelectType | null>(
     null
@@ -261,11 +261,11 @@ function InteractiveImportModalContent(
   const columns: Column[] = useMemo(() => {
     const result: Column[] = cloneDeep(COLUMNS);
 
-    if (!showMovie) {
-      const movieColumn = result.find((c) => c.name === 'movie');
+    if (!showGame) {
+      const gameColumn = result.find((c) => c.name === 'game');
 
-      if (movieColumn) {
-        movieColumn.isVisible = false;
+      if (gameColumn) {
+        gameColumn.isVisible = false;
       }
     }
 
@@ -280,7 +280,7 @@ function InteractiveImportModalContent(
     }
 
     return result;
-  }, [showMovie, items]);
+  }, [showGame, items]);
 
   const selectedIds: number[] = useMemo(() => {
     return getSelectedIds(selectedState);
@@ -311,15 +311,15 @@ function InteractiveImportModalContent(
       },
     ];
 
-    if (allowMovieChange) {
+    if (allowGameChange) {
       options.splice(1, 0, {
-        key: 'movie',
-        value: translate('SelectMovie'),
+        key: 'game',
+        value: translate('SelectGame'),
       });
     }
 
     return options;
-  }, [allowMovieChange]);
+  }, [allowGameChange]);
 
   useEffect(
     () => {
@@ -338,7 +338,7 @@ function InteractiveImportModalContent(
       dispatch(
         fetchInteractiveImportItems({
           downloadId,
-          movieId,
+          gameId,
           folder,
           filterExistingFiles,
         })
@@ -367,7 +367,7 @@ function InteractiveImportModalContent(
   );
 
   const onSelectedChange = useCallback<OnSelectedChangeCallback>(
-    ({ id, value, hasMovieFileId, shiftKey = false }) => {
+    ({ id, value, hasGameFileId, shiftKey = false }) => {
       setSelectState({
         type: 'toggleSelected',
         items,
@@ -376,17 +376,17 @@ function InteractiveImportModalContent(
         shiftKey,
       });
 
-      setWithoutMovieFileIdRowsSelected(
-        hasMovieFileId || !value
-          ? without(withoutMovieFileIdRowsSelected, id as number)
-          : [...withoutMovieFileIdRowsSelected, id as number]
+      setWithoutGameFileIdRowsSelected(
+        hasGameFileId || !value
+          ? without(withoutGameFileIdRowsSelected, id as number)
+          : [...withoutGameFileIdRowsSelected, id as number]
       );
     },
     [
       items,
-      withoutMovieFileIdRowsSelected,
+      withoutGameFileIdRowsSelected,
       setSelectState,
-      setWithoutMovieFileIdRowsSelected,
+      setWithoutGameFileIdRowsSelected,
     ]
   );
 
@@ -408,15 +408,15 @@ function InteractiveImportModalContent(
   const onConfirmDelete = useCallback(() => {
     setIsConfirmDeleteModalOpen(false);
 
-    const movieFileIds = items.reduce((acc: number[], item) => {
-      if (selectedIds.indexOf(item.id) > -1 && item.movieFileId) {
-        acc.push(item.movieFileId);
+    const gameFileIds = items.reduce((acc: number[], item) => {
+      if (selectedIds.indexOf(item.id) > -1 && item.gameFileId) {
+        acc.push(item.gameFileId);
       }
 
       return acc;
     }, []);
 
-    dispatch(deleteMovieFiles({ movieFileIds }));
+    dispatch(deleteGameFiles({ gameFileIds }));
   }, [items, selectedIds, setIsConfirmDeleteModalOpen, dispatch]);
 
   const onConfirmDeleteModalClose = useCallback(() => {
@@ -426,7 +426,7 @@ function InteractiveImportModalContent(
   const onImportSelectedPress = useCallback(() => {
     const finalImportMode = downloadId || !showImportMode ? 'auto' : importMode;
 
-    const existingFiles: Partial<MovieFile>[] = [];
+    const existingFiles: Partial<GameFile>[] = [];
     const files: InteractiveImportCommandOptions[] = [];
 
     if (finalImportMode === 'chooseImportMode') {
@@ -442,17 +442,17 @@ function InteractiveImportModalContent(
 
       if (isSelected) {
         const {
-          movie,
+          game,
           releaseGroup,
           quality,
           languages,
           indexerFlags,
-          movieFileId,
+          gameFileId,
         } = item;
 
-        if (!movie) {
+        if (!game) {
           setInteractiveImportErrorMessage(
-            translate('InteractiveImportNoMovie')
+            translate('InteractiveImportNoGame')
           );
           return;
         }
@@ -473,12 +473,12 @@ function InteractiveImportModalContent(
 
         setInteractiveImportErrorMessage(null);
 
-        if (movieFileId) {
+        if (gameFileId) {
           const originalItem = originalItems.find((i) => i.id === item.id);
 
-          if (isSameMovieFile(item, originalItem)) {
+          if (isSameGameFile(item, originalItem)) {
             existingFiles.push({
-              id: movieFileId,
+              id: gameFileId,
               releaseGroup,
               quality,
               languages,
@@ -492,13 +492,13 @@ function InteractiveImportModalContent(
         files.push({
           path: item.path,
           folderName: item.folderName,
-          movieId: movie.id,
+          gameId: game.id,
           releaseGroup,
           quality,
           languages,
           indexerFlags,
           downloadId,
-          movieFileId,
+          gameFileId,
         });
       }
     });
@@ -507,7 +507,7 @@ function InteractiveImportModalContent(
 
     if (existingFiles.length) {
       dispatch(
-        updateMovieFiles({
+        updateGameFiles({
           files: existingFiles,
         })
       );
@@ -557,13 +557,13 @@ function InteractiveImportModalContent(
       dispatch(
         fetchInteractiveImportItems({
           downloadId,
-          movieId,
+          gameId,
           folder,
           filterExistingFiles: filter,
         })
       );
     },
-    [downloadId, movieId, folder, setFilterExistingFiles, dispatch]
+    [downloadId, gameId, folder, setFilterExistingFiles, dispatch]
   );
 
   const onImportModeChange = useCallback<
@@ -588,12 +588,12 @@ function InteractiveImportModalContent(
     setSelectModalOpen(null);
   }, [setSelectModalOpen]);
 
-  const onMovieSelect = useCallback(
-    (movie: Movie) => {
+  const onGameSelect = useCallback(
+    (game: Game) => {
       dispatch(
         updateInteractiveImportItems({
           ids: selectedIds,
-          movie,
+          game,
         })
       );
 
@@ -737,7 +737,7 @@ function InteractiveImportModalContent(
                     key={item.id}
                     isSelected={selectedState[item.id]}
                     {...item}
-                    allowMovieChange={allowMovieChange}
+                    allowGameChange={allowGameChange}
                     columns={columns}
                     modalTitle={modalTitle}
                     onSelectedChange={onSelectedChange}
@@ -762,7 +762,7 @@ function InteractiveImportModalContent(
               kind={kinds.DANGER}
               isSpinning={isDeleting}
               isDisabled={
-                !selectedIds.length || !!withoutMovieFileIdRowsSelected.length
+                !selectedIds.length || !!withoutGameFileIdRowsSelected.length
               }
               onPress={onDeleteSelectedPress}
             >
@@ -809,10 +809,10 @@ function InteractiveImportModalContent(
         </div>
       </ModalFooter>
 
-      <SelectMovieModal
-        isOpen={selectModalOpen === 'movie'}
+      <SelectGameModal
+        isOpen={selectModalOpen === 'game'}
         modalTitle={modalTitle}
-        onMovieSelect={onMovieSelect}
+        onGameSelect={onGameSelect}
         onModalClose={onSelectModalClose}
       />
 
@@ -853,8 +853,8 @@ function InteractiveImportModalContent(
       <ConfirmModal
         isOpen={isConfirmDeleteModalOpen}
         kind={kinds.DANGER}
-        title={translate('DeleteSelectedMovieFiles')}
-        message={translate('DeleteSelectedMovieFilesHelpText')}
+        title={translate('DeleteSelectedGameFiles')}
+        message={translate('DeleteSelectedGameFilesHelpText')}
         confirmLabel={translate('Delete')}
         onConfirm={onConfirmDelete}
         onCancel={onConfirmDeleteModalClose}

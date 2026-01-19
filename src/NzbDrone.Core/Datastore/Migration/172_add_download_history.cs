@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Datastore.Migration
         {
             Create.TableForModel("DownloadHistory")
                   .WithColumn("EventType").AsInt32().NotNullable()
-                  .WithColumn("MovieId").AsInt32().NotNullable()
+                  .WithColumn("GameId").AsInt32().NotNullable()
                   .WithColumn("DownloadId").AsString().NotNullable()
                   .WithColumn("SourceTitle").AsString().NotNullable()
                   .WithColumn("Date").AsDateTime().NotNullable()
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Datastore.Migration
                   .WithColumn("Data").AsString().Nullable();
 
             Create.Index().OnTable("DownloadHistory").OnColumn("EventType");
-            Create.Index().OnTable("DownloadHistory").OnColumn("MovieId");
+            Create.Index().OnTable("DownloadHistory").OnColumn("GameId");
             Create.Index().OnTable("DownloadHistory").OnColumn("DownloadId");
 
             IfDatabase("sqlite").Execute.WithConnection(InitialImportedDownloadHistory);
@@ -33,10 +33,10 @@ namespace NzbDrone.Core.Datastore.Migration
 
         private static readonly Dictionary<int, int> EventTypeMap = new Dictionary<int, int>()
         {
-            { 1, 1 }, // MovieHistoryType.Grabbed -> DownloadHistoryType.Grabbed
-            { 3, 2 }, // MovieHistoryType.DownloadFolderImported -> DownloadHistoryType.DownloadImported
-            { 4, 3 }, // MovieHistoryType.DownloadFailed -> DownloadHistoryType.DownloadFailed
-            { 9, 4 } // MovieHistoryType.DownloadIgnored -> DownloadHistoryType.DownloadIgnored
+            { 1, 1 }, // GameHistoryType.Grabbed -> DownloadHistoryType.Grabbed
+            { 3, 2 }, // GameHistoryType.DownloadFolderImported -> DownloadHistoryType.DownloadImported
+            { 4, 3 }, // GameHistoryType.DownloadFailed -> DownloadHistoryType.DownloadFailed
+            { 9, 4 } // GameHistoryType.DownloadIgnored -> DownloadHistoryType.DownloadIgnored
         };
 
         private void InitialImportedDownloadHistory(IDbConnection conn, IDbTransaction tran)
@@ -44,13 +44,13 @@ namespace NzbDrone.Core.Datastore.Migration
             using (var cmd = conn.CreateCommand())
             {
                 cmd.Transaction = tran;
-                cmd.CommandText = "SELECT \"MovieId\", \"DownloadId\", \"EventType\", \"SourceTitle\", \"Date\", \"Data\" FROM \"History\" WHERE \"DownloadId\" IS NOT NULL AND \"EventType\" IN (1, 3, 4, 9) GROUP BY \"EventType\", \"DownloadId\"";
+                cmd.CommandText = "SELECT \"GameId\", \"DownloadId\", \"EventType\", \"SourceTitle\", \"Date\", \"Data\" FROM \"History\" WHERE \"DownloadId\" IS NOT NULL AND \"EventType\" IN (1, 3, 4, 9) GROUP BY \"EventType\", \"DownloadId\"";
 
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        var movieId = reader.GetInt32(0);
+                        var gameId = reader.GetInt32(0);
                         var downloadId = reader.GetString(1);
                         var eventType = reader.GetInt32(2);
                         var sourceTitle = reader.GetString(3);
@@ -77,15 +77,15 @@ namespace NzbDrone.Core.Datastore.Migration
                             updateCmd.Transaction = tran;
                             if (conn.GetType().FullName ==  "Npgsql.NpgsqlConnection")
                             {
-                                updateCmd.CommandText = @"INSERT INTO ""DownloadHistory"" (""EventType"", ""MovieId"", ""DownloadId"", ""SourceTitle"", ""Date"", ""Protocol"", ""Data"") VALUES ($1, $2, $3, $4, $5, $6, $7)";
+                                updateCmd.CommandText = @"INSERT INTO ""DownloadHistory"" (""EventType"", ""GameId"", ""DownloadId"", ""SourceTitle"", ""Date"", ""Protocol"", ""Data"") VALUES ($1, $2, $3, $4, $5, $6, $7)";
                             }
                             else
                             {
-                                updateCmd.CommandText = @"INSERT INTO ""DownloadHistory"" (""EventType"", ""MovieId"", ""DownloadId"", ""SourceTitle"", ""Date"", ""Protocol"", ""Data"") VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                updateCmd.CommandText = @"INSERT INTO ""DownloadHistory"" (""EventType"", ""GameId"", ""DownloadId"", ""SourceTitle"", ""Date"", ""Protocol"", ""Data"") VALUES (?, ?, ?, ?, ?, ?, ?)";
                             }
 
                             updateCmd.AddParameter(downloadHistoryEventType);
-                            updateCmd.AddParameter(movieId);
+                            updateCmd.AddParameter(gameId);
                             updateCmd.AddParameter(downloadId);
                             updateCmd.AddParameter(sourceTitle);
                             updateCmd.AddParameter(date);

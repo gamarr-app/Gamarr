@@ -23,7 +23,7 @@ namespace NzbDrone.Core.ImportLists.TMDb.User
             ListType = (int)TMDbUserListType.Watchlist;
         }
 
-        public string OAuthUrl => "https://www.themoviedb.org/auth/access";
+        public string OAuthUrl => "https://www.thegamedb.org/auth/access";
 
         [FieldDefinition(0, Label = "Account Id", Type = FieldType.Textbox, Hidden = HiddenType.Hidden)]
         public string AccountId { get; set; }
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.ImportLists.TMDb.User
         [FieldDefinition(1, Label = "List Type", Type = FieldType.Select, SelectOptions = typeof(TMDbUserListType), HelpText = "Type of list your seeking to import from")]
         public int ListType { get; set; }
 
-        [FieldDefinition(99, Label = "Authenticate with TMDB", Type = FieldType.OAuth)]
+        [FieldDefinition(99, Label = "Authenticate with IGDB", Type = FieldType.OAuth)]
         public string SignIn { get; set; }
 
         public override NzbDroneValidationResult Validate()

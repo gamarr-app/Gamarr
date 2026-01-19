@@ -13,7 +13,7 @@ import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { align, icons } from 'Helpers/Props';
-import NoMovie from 'Movie/NoMovie';
+import NoGame from 'Game/NoGame';
 import {
   searchMissing,
   setCalendarDaysCount,
@@ -23,7 +23,7 @@ import { executeCommand } from 'Store/Actions/commandActions';
 import { createCustomFiltersSelector } from 'Store/Selectors/createClientSideCollectionSelector';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
-import createMovieCountSelector from 'Store/Selectors/createMovieCountSelector';
+import createGameCountSelector from 'Store/Selectors/createGameCountSelector';
 import { isCommandExecuting } from 'Utilities/Command';
 import isBefore from 'Utilities/Date/isBefore';
 import translate from 'Utilities/String/translate';
@@ -36,27 +36,27 @@ import styles from './CalendarPage.css';
 
 const MINIMUM_DAY_WIDTH = 120;
 
-function createMissingMovieIdsSelector() {
+function createMissingGameIdsSelector() {
   return createSelector(
     (state: AppState) => state.calendar.start,
     (state: AppState) => state.calendar.end,
     (state: AppState) => state.calendar.items,
     (state: AppState) => state.queue.details.items,
-    (start, end, movies, queueDetails) => {
-      return movies.reduce<number[]>((acc, movie) => {
-        const { inCinemas } = movie;
+    (start, end, games, queueDetails) => {
+      return games.reduce<number[]>((acc, game) => {
+        const { inCinemas } = game;
 
         if (
-          !movie.movieFileId &&
+          !game.gameFileId &&
           inCinemas &&
           moment(inCinemas).isAfter(start) &&
           moment(inCinemas).isBefore(end) &&
           isBefore(inCinemas) &&
           !queueDetails.some(
-            (details) => !!details.movie && details.movie.id === movie.id
+            (details) => !!details.game && details.game.id === game.id
           )
         ) {
-          acc.push(movie.id);
+          acc.push(game.id);
         }
 
         return acc;
@@ -89,20 +89,20 @@ function CalendarPage() {
   const { selectedFilterKey, filters } = useSelector(
     (state: AppState) => state.calendar
   );
-  const missingMovieIds = useSelector(createMissingMovieIdsSelector());
+  const missingGameIds = useSelector(createMissingGameIdsSelector());
   const isSearchingForMissing = useSelector(createIsSearchingSelector());
   const isRssSyncExecuting = useSelector(
     createCommandExecutingSelector(commandNames.RSS_SYNC)
   );
   const customFilters = useSelector(createCustomFiltersSelector('calendar'));
-  const hasMovies = !!useSelector(createMovieCountSelector());
+  const hasGames = !!useSelector(createGameCountSelector());
 
   const [pageContentRef, { width }] = useMeasure();
   const [isCalendarLinkModalOpen, setIsCalendarLinkModalOpen] = useState(false);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
 
   const isMeasured = width > 0;
-  const PageComponent = hasMovies ? Calendar : NoMovie;
+  const PageComponent = hasGames ? Calendar : NoGame;
 
   const handleGetCalendarLinkPress = useCallback(() => {
     setIsCalendarLinkModalOpen(true);
@@ -129,8 +129,8 @@ function CalendarPage() {
   }, [dispatch]);
 
   const handleSearchMissingPress = useCallback(() => {
-    dispatch(searchMissing({ movieIds: missingMovieIds }));
-  }, [missingMovieIds, dispatch]);
+    dispatch(searchMissing({ gameIds: missingGameIds }));
+  }, [missingGameIds, dispatch]);
 
   const handleFilterSelect = useCallback(
     (key: string | number) => {
@@ -174,7 +174,7 @@ function CalendarPage() {
           <PageToolbarButton
             label={translate('SearchForMissing')}
             iconName={icons.SEARCH}
-            isDisabled={!missingMovieIds.length}
+            isDisabled={!missingGameIds.length}
             isSpinning={isSearchingForMissing}
             onPress={handleSearchMissingPress}
           />
@@ -189,7 +189,7 @@ function CalendarPage() {
 
           <FilterMenu
             alignMenu={align.RIGHT}
-            isDisabled={!hasMovies}
+            isDisabled={!hasGames}
             selectedFilterKey={selectedFilterKey}
             filters={filters}
             customFilters={customFilters}
@@ -205,7 +205,7 @@ function CalendarPage() {
         innerClassName={styles.calendarInnerPageBody}
       >
         {isMeasured ? <PageComponent totalItems={0} /> : <div />}
-        {hasMovies && <Legend />}
+        {hasGames && <Legend />}
       </PageContentBody>
 
       <CalendarLinkModal

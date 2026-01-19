@@ -1,29 +1,29 @@
 import ModelBase from 'App/ModelBase';
 import { AppSectionItemState } from 'App/State/AppSectionState';
 import Language from 'Language/Language';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import { QualityModel } from 'Quality/Quality';
 import CustomFormat from 'typings/CustomFormat';
 
-export interface ParsedMovieInfo {
+export interface ParsedGameInfo {
   releaseTitle: string;
   originalTitle: string;
-  movieTitle: string;
-  movieTitles: string[];
+  gameTitle: string;
+  gameTitles: string[];
   year: number;
   quality: QualityModel;
   languages: Language[];
   releaseHash: string;
   releaseGroup?: string;
   edition?: string;
-  tmdbId?: number;
+  igdbId?: number;
   imdbId?: string;
 }
 
 export interface ParseModel extends ModelBase {
   title: string;
-  parsedMovieInfo: ParsedMovieInfo;
-  movie?: Movie;
+  parsedGameInfo: ParsedGameInfo;
+  game?: Game;
   languages?: Language[];
   customFormats?: CustomFormat[];
   customFormatScore?: number;

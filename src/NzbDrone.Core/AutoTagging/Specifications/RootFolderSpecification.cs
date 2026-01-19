@@ -1,7 +1,7 @@
 using FluentValidation;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Annotations;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 using NzbDrone.Core.Validation.Paths;
 
@@ -25,9 +25,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         [FieldDefinition(1, Label = "AutoTaggingSpecificationRootFolder", Type = FieldType.RootFolder)]
         public string Value { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return movie.RootFolderPath.PathEquals(Value);
+            return game.RootFolderPath.PathEquals(Value);
         }
 
         public override NzbDroneValidationResult Validate()

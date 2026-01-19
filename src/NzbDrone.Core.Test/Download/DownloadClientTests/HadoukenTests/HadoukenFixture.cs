@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
                 DownloadedBytes = 0,
                 Progress = 0.0,
                 SavePath = "somepath",
-                Label = "radarr"
+                Label = "gamarr"
             };
 
             _downloading = new HadoukenTorrent
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
                 DownloadedBytes = 100,
                 Progress = 10.0,
                 SavePath = "somepath",
-                Label = "radarr"
+                Label = "gamarr"
             };
 
             _failed = new HadoukenTorrent
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
                 DownloadedBytes = 100,
                 Progress = 10.0,
                 SavePath = "somepath",
-                Label = "radarr"
+                Label = "gamarr"
             };
 
             _completed = new HadoukenTorrent
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
                 DownloadedBytes = 1000,
                 Progress = 100.0,
                 SavePath = "somepath",
-                Label = "radarr"
+                Label = "gamarr"
             };
 
             Mocker.GetMock<ITorrentFileInfoReader>()
@@ -201,9 +201,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -239,7 +239,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
                 DownloadedBytes = 1000,
                 Progress = 100.0,
                 SavePath = "somepath",
-                Label = "radarr"
+                Label = "gamarr"
             };
 
             var torrents = new HadoukenTorrent[] { torrent };
@@ -266,7 +266,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
                 DownloadedBytes = 1000,
                 Progress = 100.0,
                 SavePath = "somepath",
-                Label = "radarr-other"
+                Label = "gamarr-other"
             };
 
             var torrents = new HadoukenTorrent[] { torrent };
@@ -280,14 +280,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
         [Test]
         public async Task Download_from_magnet_link_should_return_hash_uppercase()
         {
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            remoteMovie.Release.DownloadUrl = "magnet:?xt=urn:btih:a45129e59d8750f9da982f53552b1e4f0457ee9f";
+            remoteGame.Release.DownloadUrl = "magnet:?xt=urn:btih:a45129e59d8750f9da982f53552b1e4f0457ee9f";
 
             Mocker.GetMock<IHadoukenProxy>()
                .Setup(v => v.AddTorrentUri(It.IsAny<HadoukenSettings>(), It.IsAny<string>()));
 
-            var result = await Subject.Download(remoteMovie, CreateIndexer());
+            var result = await Subject.Download(remoteGame, CreateIndexer());
 
             Assert.IsFalse(result.Any(c => char.IsLower(c)));
         }
@@ -295,13 +295,13 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
         [Test]
         public async Task Download_from_torrent_file_should_return_hash_uppercase()
         {
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
             Mocker.GetMock<IHadoukenProxy>()
                .Setup(v => v.AddTorrentFile(It.IsAny<HadoukenSettings>(), It.IsAny<byte[]>()))
                .Returns("hash");
 
-            var result = await Subject.Download(remoteMovie, CreateIndexer());
+            var result = await Subject.Download(remoteGame, CreateIndexer());
 
             Assert.IsFalse(result.Any(c => char.IsLower(c)));
         }

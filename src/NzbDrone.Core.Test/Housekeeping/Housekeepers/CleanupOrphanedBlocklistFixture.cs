@@ -5,7 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.Housekeeping.Housekeepers;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         public void should_delete_orphaned_blocklist_items()
         {
             var blocklist = Builder<Blocklist>.CreateNew()
-                                              .With(h => h.MovieId = default)
+                                              .With(h => h.GameId = default)
                                               .With(h => h.Quality = new QualityModel())
                                               .With(h => h.Languages = new List<Language>())
                                               .BuildNew();
@@ -31,15 +31,15 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_blocklist_items()
         {
-            var movie = Builder<Movie>.CreateNew().BuildNew();
+            var game = Builder<Game>.CreateNew().BuildNew();
 
-            Db.Insert(movie);
+            Db.Insert(game);
 
             var blocklist = Builder<Blocklist>.CreateNew()
-                                              .With(h => h.MovieId = default)
+                                              .With(h => h.GameId = default)
                                               .With(h => h.Quality = new QualityModel())
                                               .With(h => h.Languages = new List<Language>())
-                                              .With(b => b.MovieId = movie.Id)
+                                              .With(b => b.GameId = game.Id)
                                               .BuildNew();
 
             Db.Insert(blocklist);

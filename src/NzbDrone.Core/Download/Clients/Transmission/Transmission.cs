@@ -41,8 +41,8 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             }
 
             // set post-import category
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MovieImportedCategory != Settings.MovieCategory)
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.GameImportedCategory != Settings.GameCategory)
             {
                 var hash = downloadClientItem.DownloadId.ToLowerInvariant();
                 var torrent = _proxy.GetTorrents(new[] { hash }, Settings).FirstOrDefault();
@@ -56,18 +56,18 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 try
                 {
                     var labels = torrent.Labels.ToHashSet(StringComparer.InvariantCultureIgnoreCase);
-                    labels.Add(Settings.MovieImportedCategory);
+                    labels.Add(Settings.GameImportedCategory);
 
-                    if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+                    if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                     {
-                        labels.Remove(Settings.MovieCategory);
+                        labels.Remove(Settings.GameCategory);
                     }
 
                     _proxy.SetTorrentLabels(hash, labels, Settings);
                 }
                 catch (DownloadClientException ex)
                 {
-                    _logger.Warn(ex, "Failed to set post-import torrent label \"{0}\" for {1} in Transmission.", Settings.MovieImportedCategory, downloadClientItem.Title);
+                    _logger.Warn(ex, "Failed to set post-import torrent label \"{0}\" for {1} in Transmission.", Settings.GameImportedCategory, downloadClientItem.Title);
                 }
             }
         }

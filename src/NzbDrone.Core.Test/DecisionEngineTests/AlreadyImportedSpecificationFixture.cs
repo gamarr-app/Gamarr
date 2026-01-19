@@ -8,7 +8,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -18,42 +18,42 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class AlreadyImportedSpecificationFixture : CoreTest<AlreadyImportedSpecification>
     {
-        private const int FIRST_MOVIE_ID = 1;
-        private const string TITLE = "Movie.Title.2018.720p.HDTV.x264-Radarr";
+        private const int FIRST_GAME_ID = 1;
+        private const string TITLE = "Game.Title.2018.720p.HDTV.x264-Gamarr";
 
-        private Movie _movie;
+        private Game _game;
         private QualityModel _hdtv720p;
         private QualityModel _hdtv1080p;
-        private RemoteMovie _remoteMovie;
-        private List<MovieHistory> _history;
+        private RemoteGame _remoteGame;
+        private List<GameHistory> _history;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew()
-                                    .With(m => m.Id = FIRST_MOVIE_ID)
-                                    .With(m => m.MovieFileId = 1)
+            _game = Builder<Game>.CreateNew()
+                                    .With(m => m.Id = FIRST_GAME_ID)
+                                    .With(m => m.GameFileId = 1)
                                     .Build();
 
             _hdtv720p = new QualityModel(Quality.HDTV720p, new Revision(version: 1));
             _hdtv1080p = new QualityModel(Quality.HDTV1080p, new Revision(version: 1));
 
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
-                Movie = _movie,
-                ParsedMovieInfo = new ParsedMovieInfo { Quality = _hdtv720p },
+                Game = _game,
+                ParsedGameInfo = new ParsedGameInfo { Quality = _hdtv720p },
                 Release = Builder<ReleaseInfo>.CreateNew()
                                               .Build()
             };
 
-            _history = new List<MovieHistory>();
+            _history = new List<GameHistory>();
 
             Mocker.GetMock<IConfigService>()
                   .SetupGet(s => s.EnableCompletedDownloadHandling)
                   .Returns(true);
 
             Mocker.GetMock<IHistoryService>()
-                  .Setup(s => s.GetByMovieId(It.IsAny<int>(), null))
+                  .Setup(s => s.GetByGameId(It.IsAny<int>(), null))
                   .Returns(_history);
         }
 
@@ -64,9 +64,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Returns(false);
         }
 
-        private void GivenHistoryItem(string downloadId, string sourceTitle, QualityModel quality, MovieHistoryEventType eventType)
+        private void GivenHistoryItem(string downloadId, string sourceTitle, QualityModel quality, GameHistoryEventType eventType)
         {
-            _history.Add(new MovieHistory
+            _history.Add(new GameHistory
                          {
                              DownloadId = downloadId,
                              SourceTitle = sourceTitle,
@@ -81,29 +81,29 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenCdhDisabled();
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
-        public void should_be_accepted_if_movie_does_not_have_a_file()
+        public void should_be_accepted_if_game_does_not_have_a_file()
         {
-            _remoteMovie.Movie.MovieFileId = 0;
+            _remoteGame.Game.GameFileId = 0;
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
-        public void should_be_accepted_if_movie_does_not_have_grabbed_event()
+        public void should_be_accepted_if_game_does_not_have_grabbed_event()
         {
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
-        public void should_be_accepted_if_movie_does_not_have_imported_event()
+        public void should_be_accepted_if_game_does_not_have_imported_event()
         {
-            GivenHistoryItem(Guid.NewGuid().ToString().ToUpper(), TITLE, _hdtv720p, MovieHistoryEventType.Grabbed);
+            GivenHistoryItem(Guid.NewGuid().ToString().ToUpper(), TITLE, _hdtv720p, GameHistoryEventType.Grabbed);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -111,10 +111,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _hdtv720p, MovieHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _hdtv720p, MovieHistoryEventType.DownloadFolderImported);
+            GivenHistoryItem(downloadId, TITLE, _hdtv720p, GameHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _hdtv720p, GameHistoryEventType.DownloadFolderImported);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -122,15 +122,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _hdtv720p, MovieHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, MovieHistoryEventType.DownloadFolderImported);
+            GivenHistoryItem(downloadId, TITLE, _hdtv720p, GameHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, GameHistoryEventType.DownloadFolderImported);
 
-            _remoteMovie.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteGame.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = null)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -138,15 +138,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(null, TITLE, _hdtv720p, MovieHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, MovieHistoryEventType.DownloadFolderImported);
+            GivenHistoryItem(null, TITLE, _hdtv720p, GameHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, GameHistoryEventType.DownloadFolderImported);
 
-            _remoteMovie.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteGame.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = downloadId)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -154,15 +154,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _hdtv720p, MovieHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, MovieHistoryEventType.DownloadFolderImported);
+            GivenHistoryItem(downloadId, TITLE, _hdtv720p, GameHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, GameHistoryEventType.DownloadFolderImported);
 
-            _remoteMovie.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteGame.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = downloadId)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -170,15 +170,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _hdtv720p, MovieHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, MovieHistoryEventType.DownloadFolderImported);
+            GivenHistoryItem(downloadId, TITLE, _hdtv720p, GameHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _hdtv1080p, GameHistoryEventType.DownloadFolderImported);
 
-            _remoteMovie.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteGame.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = downloadId)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
     }
 }

@@ -7,7 +7,7 @@ using NzbDrone.Core.Download.Aggregation.Aggregators;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.TorrentRss;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -16,31 +16,31 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
     [TestFixture]
     public class AggregateLanguagesFixture : CoreTest<AggregateLanguages>
     {
-        private RemoteMovie _remoteMovie;
-        private Movie _movie;
+        private RemoteGame _remoteGame;
+        private Game _game;
         private string _simpleReleaseTitle = "Series.Title.S01E01.xyz-RlsGroup";
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew()
-                       .With(m => m.MovieMetadata = new MovieMetadata
+            _game = Builder<Game>.CreateNew()
+                       .With(m => m.GameMetadata = new GameMetadata
                        {
-                           Title = "Some Movie",
+                           Title = "Some Game",
                            OriginalLanguage = Language.English
                        })
                        .Build();
 
-            _remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                 .With(l => l.ParsedMovieInfo = null)
-                                                 .With(l => l.Movie = _movie)
+            _remoteGame = Builder<RemoteGame>.CreateNew()
+                                                 .With(l => l.ParsedGameInfo = null)
+                                                 .With(l => l.Game = _game)
                                                  .With(l => l.Release = new ReleaseInfo())
                                                  .Build();
         }
 
-        private ParsedMovieInfo GetParsedMovieInfo(List<Language> languages, string releaseTitle, string releaseTokens = "")
+        private ParsedGameInfo GetParsedGameInfo(List<Language> languages, string releaseTitle, string releaseTokens = "")
         {
-            return new ParsedMovieInfo
+            return new ParsedGameInfo
                    {
                        Languages = languages,
                        ReleaseTitle = releaseTitle,
@@ -51,17 +51,17 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
         [Test]
         public void should_return_existing_language_if_episode_title_does_not_have_language()
         {
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.Original }, _simpleReleaseTitle);
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.Original }, _simpleReleaseTitle);
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().Contain(_movie.MovieMetadata.Value.OriginalLanguage);
+            Subject.Aggregate(_remoteGame).Languages.Should().Contain(_game.GameMetadata.Value.OriginalLanguage);
         }
 
         [Test]
         public void should_return_parsed_language()
         {
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.French }, _simpleReleaseTitle);
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.French }, _simpleReleaseTitle);
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().Equal(_remoteMovie.ParsedMovieInfo.Languages);
+            Subject.Aggregate(_remoteGame).Languages.Should().Equal(_remoteGame.ParsedGameInfo.Languages);
         }
 
         [Test]
@@ -77,11 +77,11 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.Find(1))
                 .Returns(indexerDefinition);
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 1;
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.IndexerId = 1;
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(1), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -111,12 +111,12 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.All())
                 .Returns(new List<IndexerDefinition>() { indexerDefinition1, indexerDefinition2 });
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 1;
-            _remoteMovie.Release.Indexer = "MyIndexer2";
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.IndexerId = 1;
+            _remoteGame.Release.Indexer = "MyIndexer2";
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> {  _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> {  _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(1), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -136,11 +136,11 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.FindByName("MyIndexer (Prowlarr)"))
                 .Returns(indexerDefinition);
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.Indexer = "MyIndexer (Prowlarr)";
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.Indexer = "MyIndexer (Prowlarr)";
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> {  _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> {  _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.FindByName("MyIndexer (Prowlarr)"), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -158,11 +158,11 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.Find(1))
                 .Returns(indexerDefinition);
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.Unknown }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 1;
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.Unknown }, releaseTitle);
+            _remoteGame.Release.IndexerId = 1;
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(1), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
         [Test]
         public void should_return_multi_languages_when_release_as_specified_language_and_indexer_has_multi_languages_configuration()
         {
-            var releaseTitle = "Some.Movie.2024.MULTi.VFF.VFQ.1080p.BluRay.DTS.HDMA.x264-RlsGroup";
+            var releaseTitle = "Some.Game.2024.MULTi.VFF.VFQ.1080p.BluRay.DTS.HDMA.x264-RlsGroup";
             var indexerDefinition = new IndexerDefinition
             {
                 Id = 1,
@@ -180,11 +180,11 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.Find(1))
                 .Returns(indexerDefinition);
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.French }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 1;
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.French }, releaseTitle);
+            _remoteGame.Release.IndexerId = 1;
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(1), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -192,7 +192,7 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
         [Test]
         public void should_return_multi_languages_when_release_as_other_language_and_indexer_has_multi_languages_configuration()
         {
-            var releaseTitle = "Some.Movie.2024.MULTi.GERMAN.1080p.BluRay.DTS.HDMA.x264-RlsGroup";
+            var releaseTitle = "Some.Game.2024.MULTi.GERMAN.1080p.BluRay.DTS.HDMA.x264-RlsGroup";
             var indexerDefinition = new IndexerDefinition
             {
                 Id = 1,
@@ -202,11 +202,11 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.Find(1))
                 .Returns(indexerDefinition);
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.German }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 1;
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.German }, releaseTitle);
+            _remoteGame.Release.IndexerId = 1;
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage, Language.French, Language.German });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage, Language.French, Language.German });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(1), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -224,11 +224,11 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.Find(1))
                 .Returns(indexerDefinition);
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 1;
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.IndexerId = 1;
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(1), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
@@ -238,10 +238,10 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
         {
             var releaseTitle = "Series.Title.S01E01.MULTi.1080p.WEB.H265-RlsGroup";
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> {  _movie.MovieMetadata.Value.OriginalLanguage });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> {  _game.GameMetadata.Value.OriginalLanguage });
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
 
@@ -251,10 +251,10 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
             var releaseTitle = "Series.Title.S01E01.Jimmy.The.Greek.xyz-RlsGroup";
             var releaseTokens = ".Jimmy.The.Greek.xyz-RlsGroup";
 
-            _remoteMovie.Movie.Title = "Jimmy The Greek";
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.Greek }, releaseTitle, releaseTokens);
+            _remoteGame.Game.Title = "Jimmy The Greek";
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.Greek }, releaseTitle, releaseTokens);
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().Equal(_movie.MovieMetadata.Value.OriginalLanguage);
+            Subject.Aggregate(_remoteGame).Languages.Should().Equal(_game.GameMetadata.Value.OriginalLanguage);
         }
 
         [Test]
@@ -263,10 +263,10 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
             var releaseTitle = "Series.Title.S01E01.Jimmy.The.Greek.French.xyz-RlsGroup";
             var releaseTokens = ".Jimmy.The.Greek.French.xyz-RlsGroup";
 
-            _remoteMovie.Movie.Title = "Jimmy The Greek";
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.Greek, Language.French }, releaseTitle, releaseTokens);
+            _remoteGame.Game.Title = "Jimmy The Greek";
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.Greek, Language.French }, releaseTitle, releaseTokens);
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().Equal(Language.French);
+            Subject.Aggregate(_remoteGame).Languages.Should().Equal(Language.French);
         }
 
         [Test]
@@ -275,10 +275,10 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
             var releaseTitle = "Series.Title.S01E01.xyz-RlsGroup";
             var releaseTokens = ".xyz-RlsGroup";
 
-            _remoteMovie.Movie.Title = "Jimmy The Greek";
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.Greek }, releaseTitle, releaseTokens);
+            _remoteGame.Game.Title = "Jimmy The Greek";
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.Greek }, releaseTitle, releaseTokens);
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().Equal(Language.Greek);
+            Subject.Aggregate(_remoteGame).Languages.Should().Equal(Language.Greek);
         }
 
         [Test]
@@ -287,10 +287,10 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
             var releaseTitle = "Series.Title.S01E01.Jimmy.The.Greek.Greek.xyz-RlsGroup";
             var releaseTokens = ".Jimmy.The.Greek.Greek.xyz-RlsGroup";
 
-            _remoteMovie.Movie.Title = "Jimmy The Greek";
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { Language.Greek }, releaseTitle, releaseTokens);
+            _remoteGame.Game.Title = "Jimmy The Greek";
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { Language.Greek }, releaseTitle, releaseTokens);
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().Equal(Language.Greek);
+            Subject.Aggregate(_remoteGame).Languages.Should().Equal(Language.Greek);
         }
 
         [Test]
@@ -322,12 +322,12 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.All())
                 .Returns(new List<IndexerDefinition>() { indexerDefinition1, indexerDefinition2 });
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 10;
-            _remoteMovie.Release.Indexer = "MyIndexer1";
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.IndexerId = 10;
+            _remoteGame.Release.Indexer = "MyIndexer1";
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(10), Times.Once());
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.FindByName("MyIndexer1"), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
@@ -362,12 +362,12 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
                 .Setup(v => v.All())
                 .Returns(new List<IndexerDefinition>() { indexerDefinition1, indexerDefinition2 });
 
-            _remoteMovie.ParsedMovieInfo = GetParsedMovieInfo(new List<Language> { }, releaseTitle);
-            _remoteMovie.Release.IndexerId = 0;
-            _remoteMovie.Release.Indexer = "MyIndexer1";
-            _remoteMovie.Release.Title = releaseTitle;
+            _remoteGame.ParsedGameInfo = GetParsedGameInfo(new List<Language> { }, releaseTitle);
+            _remoteGame.Release.IndexerId = 0;
+            _remoteGame.Release.Indexer = "MyIndexer1";
+            _remoteGame.Release.Title = releaseTitle;
 
-            Subject.Aggregate(_remoteMovie).Languages.Should().BeEquivalentTo(new List<Language> { _movie.MovieMetadata.Value.OriginalLanguage, Language.French });
+            Subject.Aggregate(_remoteGame).Languages.Should().BeEquivalentTo(new List<Language> { _game.GameMetadata.Value.OriginalLanguage, Language.French });
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.Find(10), Times.Never());
             Mocker.GetMock<IIndexerFactory>().Verify(c => c.FindByName("MyIndexer1"), Times.Once());
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();

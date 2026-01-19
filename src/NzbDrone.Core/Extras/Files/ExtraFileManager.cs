@@ -7,7 +7,7 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Extras.Files
@@ -15,13 +15,13 @@ namespace NzbDrone.Core.Extras.Files
     public interface IManageExtraFiles
     {
         int Order { get; }
-        IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Movie movie);
-        IEnumerable<ExtraFile> CreateAfterMovieScan(Movie movie, List<MovieFile> movieFiles);
-        IEnumerable<ExtraFile> CreateAfterMovieImport(Movie movie, MovieFile movieFile);
-        IEnumerable<ExtraFile> CreateAfterMovieFolder(Movie movie, string movieFolder);
-        IEnumerable<ExtraFile> MoveFilesAfterRename(Movie movie, List<MovieFile> movieFiles);
-        bool CanImportFile(LocalMovie localMovie, MovieFile movieFile, string path, string extension, bool readOnly);
-        IEnumerable<ExtraFile> ImportFiles(LocalMovie localMovie, MovieFile movieFile, List<string> files, bool isReadOnly);
+        IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Game game);
+        IEnumerable<ExtraFile> CreateAfterGameScan(Game game, List<GameFile> gameFiles);
+        IEnumerable<ExtraFile> CreateAfterGameImport(Game game, GameFile gameFile);
+        IEnumerable<ExtraFile> CreateAfterGameFolder(Game game, string gameFolder);
+        IEnumerable<ExtraFile> MoveFilesAfterRename(Game game, List<GameFile> gameFiles);
+        bool CanImportFile(LocalGame localGame, GameFile gameFile, string path, string extension, bool readOnly);
+        IEnumerable<ExtraFile> ImportFiles(LocalGame localGame, GameFile gameFile, List<string> files, bool isReadOnly);
     }
 
     public abstract class ExtraFileManager<TExtraFile> : IManageExtraFiles
@@ -44,19 +44,19 @@ namespace NzbDrone.Core.Extras.Files
         }
 
         public abstract int Order { get; }
-        public abstract IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Movie movie);
-        public abstract IEnumerable<ExtraFile> CreateAfterMovieScan(Movie movie, List<MovieFile> movieFiles);
-        public abstract IEnumerable<ExtraFile> CreateAfterMovieImport(Movie movie, MovieFile movieFile);
-        public abstract IEnumerable<ExtraFile> CreateAfterMovieFolder(Movie movie, string movieFolder);
-        public abstract IEnumerable<ExtraFile> MoveFilesAfterRename(Movie movie, List<MovieFile> movieFiles);
-        public abstract bool CanImportFile(LocalMovie localMovie, MovieFile movieFile, string path, string extension, bool readOnly);
-        public abstract IEnumerable<ExtraFile> ImportFiles(LocalMovie localMovie, MovieFile movieFile, List<string> files, bool isReadOnly);
+        public abstract IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Game game);
+        public abstract IEnumerable<ExtraFile> CreateAfterGameScan(Game game, List<GameFile> gameFiles);
+        public abstract IEnumerable<ExtraFile> CreateAfterGameImport(Game game, GameFile gameFile);
+        public abstract IEnumerable<ExtraFile> CreateAfterGameFolder(Game game, string gameFolder);
+        public abstract IEnumerable<ExtraFile> MoveFilesAfterRename(Game game, List<GameFile> gameFiles);
+        public abstract bool CanImportFile(LocalGame localGame, GameFile gameFile, string path, string extension, bool readOnly);
+        public abstract IEnumerable<ExtraFile> ImportFiles(LocalGame localGame, GameFile gameFile, List<string> files, bool isReadOnly);
 
-        protected TExtraFile ImportFile(Movie movie, MovieFile movieFile, string path, bool readOnly, string extension, string fileNameSuffix = null)
+        protected TExtraFile ImportFile(Game game, GameFile gameFile, string path, bool readOnly, string extension, string fileNameSuffix = null)
         {
-            var movieFilePath = Path.Combine(movie.Path, movieFile.RelativePath);
-            var newFolder = Path.GetDirectoryName(movieFilePath);
-            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(movieFile.RelativePath));
+            var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
+            var newFolder = Path.GetDirectoryName(gameFilePath);
+            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(gameFile.RelativePath));
 
             if (fileNameSuffix.IsNotNullOrWhiteSpace())
             {
@@ -67,9 +67,9 @@ namespace NzbDrone.Core.Extras.Files
 
             var newFileName = Path.Combine(newFolder, filenameBuilder.ToString());
 
-            if (newFileName == movieFilePath)
+            if (newFileName == gameFilePath)
             {
-                _logger.Debug("Extra file {0} not imported, due to naming interference with movie file", path);
+                _logger.Debug("Extra file {0} not imported, due to naming interference with game file", path);
                 return null;
             }
 
@@ -84,19 +84,19 @@ namespace NzbDrone.Core.Extras.Files
 
             return new TExtraFile
             {
-                MovieId = movie.Id,
-                MovieFileId = movieFile.Id,
-                RelativePath = movie.Path.GetRelativePath(newFileName),
+                GameId = game.Id,
+                GameFileId = gameFile.Id,
+                RelativePath = game.Path.GetRelativePath(newFileName),
                 Extension = extension
             };
         }
 
-        protected TExtraFile MoveFile(Movie movie, MovieFile movieFile, TExtraFile extraFile, string fileNameSuffix = null)
+        protected TExtraFile MoveFile(Game game, GameFile gameFile, TExtraFile extraFile, string fileNameSuffix = null)
         {
             _logger.Trace("Renaming extra file: {0}", extraFile);
 
-            var newFolder = Path.GetDirectoryName(Path.Combine(movie.Path, movieFile.RelativePath));
-            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(movieFile.RelativePath));
+            var newFolder = Path.GetDirectoryName(Path.Combine(game.Path, gameFile.RelativePath));
+            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(gameFile.RelativePath));
 
             if (fileNameSuffix.IsNotNullOrWhiteSpace())
             {
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Extras.Files
 
             filenameBuilder.Append(extraFile.Extension);
 
-            var existingFileName = Path.Combine(movie.Path, extraFile.RelativePath);
+            var existingFileName = Path.Combine(game.Path, extraFile.RelativePath);
             var newFileName = Path.Combine(newFolder, filenameBuilder.ToString());
 
             if (newFileName.PathNotEquals(existingFileName))
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Extras.Files
                     _logger.Trace("Renaming extra file: {0} to {1}", extraFile, newFileName);
 
                     _diskProvider.MoveFile(existingFileName, newFileName);
-                    extraFile.RelativePath = movie.Path.GetRelativePath(newFileName);
+                    extraFile.RelativePath = game.Path.GetRelativePath(newFileName);
 
                     _logger.Trace("Renamed extra file from: {0}", extraFile);
 

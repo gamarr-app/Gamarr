@@ -39,23 +39,23 @@ namespace NzbDrone.Core.Download.Clients.Deluge
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // set post-import category
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MovieImportedCategory != Settings.MovieCategory)
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.GameImportedCategory != Settings.GameCategory)
             {
                 try
                 {
-                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MovieImportedCategory, Settings);
+                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.GameImportedCategory, Settings);
                 }
                 catch (DownloadClientUnavailableException)
                 {
                     _logger.Warn("Failed to set torrent post-import label \"{0}\" for {1} in Deluge. Does the label exist?",
-                        Settings.MovieImportedCategory,
+                        Settings.GameImportedCategory,
                         downloadClientItem.Title);
                 }
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             var actualHash = _proxy.AddTorrentFromMagnet(magnetLink, Settings);
 
@@ -64,17 +64,17 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 throw new DownloadClientException("Deluge failed to add magnet " + magnetLink);
             }
 
-            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteMovie.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteGame.SeedConfiguration, Settings);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(actualHash, Settings.MovieCategory, Settings);
+                _proxy.SetTorrentLabel(actualHash, Settings.GameCategory, Settings);
             }
 
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentMoviePriority == (int)DelugePriority.First) ||
-                (!isRecentMovie && Settings.OlderMoviePriority == (int)DelugePriority.First))
+            if ((isRecentGame && Settings.RecentGamePriority == (int)DelugePriority.First) ||
+                (!isRecentGame && Settings.OlderGamePriority == (int)DelugePriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(actualHash, Settings);
             }
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             return actualHash.ToUpper();
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             var actualHash = _proxy.AddTorrentFromFile(filename, fileContent, Settings);
 
@@ -91,17 +91,17 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 throw new DownloadClientException("Deluge failed to add torrent " + filename);
             }
 
-            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteMovie.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteGame.SeedConfiguration, Settings);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(actualHash, Settings.MovieCategory, Settings);
+                _proxy.SetTorrentLabel(actualHash, Settings.GameCategory, Settings);
             }
 
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentMoviePriority == (int)DelugePriority.First) ||
-                (!isRecentMovie && Settings.OlderMoviePriority == (int)DelugePriority.First))
+            if ((isRecentGame && Settings.RecentGamePriority == (int)DelugePriority.First) ||
+                (!isRecentGame && Settings.OlderGamePriority == (int)DelugePriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(actualHash, Settings);
             }
@@ -115,9 +115,9 @@ namespace NzbDrone.Core.Download.Clients.Deluge
         {
             IEnumerable<DelugeTorrent> torrents;
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                torrents = _proxy.GetTorrentsByLabel(Settings.MovieCategory, Settings);
+                torrents = _proxy.GetTorrentsByLabel(Settings.GameCategory, Settings);
             }
             else
             {
@@ -140,9 +140,9 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 var item = new DownloadClientItem();
                 item.DownloadId = torrent.Hash.ToUpper();
                 item.Title = torrent.Name;
-                item.Category = Settings.MovieCategory;
+                item.Category = Settings.GameCategory;
 
-                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MovieImportedCategory.IsNotNullOrWhiteSpace());
+                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.GameImportedCategory.IsNotNullOrWhiteSpace());
 
                 var outputPath = _remotePathMappingService.RemapRemoteToLocal(Settings.Host, new OsPath(torrent.DownloadPath));
                 item.OutputPath = outputPath + torrent.Name;
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 }
 
                 // Here we detect if Deluge is managing the torrent and whether the seed criteria has been met.
-                // This allows Radarr to delete the torrent as appropriate.
+                // This allows Gamarr to delete the torrent as appropriate.
                 item.CanMoveFiles = item.CanBeRemoved =
                     item.DownloadClientInfo.RemoveCompletedDownloads &&
                     torrent.IsAutoManaged &&
@@ -324,7 +324,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
         private ValidationFailure TestCategory()
         {
-            if (Settings.MovieCategory.IsNullOrWhiteSpace() && Settings.MovieImportedCategory.IsNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNullOrWhiteSpace() && Settings.GameImportedCategory.IsNullOrWhiteSpace())
             {
                 return null;
             }
@@ -333,7 +333,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
             if (!methods.Any(m => m.StartsWith("label.")))
             {
-                return new NzbDroneValidationFailure("MovieCategory", _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginInactive"))
+                return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginInactive"))
                 {
                     DetailedDescription = _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginInactiveDetail", new Dictionary<string, object> { { "clientName", Name } })
                 };
@@ -341,28 +341,28 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
             var labels = _proxy.GetAvailableLabels(Settings);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.MovieCategory))
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.GameCategory))
             {
-                _proxy.AddLabel(Settings.MovieCategory, Settings);
+                _proxy.AddLabel(Settings.GameCategory, Settings);
                 labels = _proxy.GetAvailableLabels(Settings);
 
-                if (!labels.Contains(Settings.MovieCategory))
+                if (!labels.Contains(Settings.GameCategory))
                 {
-                    return new NzbDroneValidationFailure("MovieCategory", _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginFailure"))
+                    return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginFailure"))
                     {
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginFailureDetail", new Dictionary<string, object> { { "clientName", Name } })
                     };
                 }
             }
 
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.MovieImportedCategory))
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.GameImportedCategory))
             {
-                _proxy.AddLabel(Settings.MovieImportedCategory, Settings);
+                _proxy.AddLabel(Settings.GameImportedCategory, Settings);
                 labels = _proxy.GetAvailableLabels(Settings);
 
-                if (!labels.Contains(Settings.MovieImportedCategory))
+                if (!labels.Contains(Settings.GameImportedCategory))
                 {
-                    return new NzbDroneValidationFailure("MovieImportedCategory", _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginFailure"))
+                    return new NzbDroneValidationFailure("GameImportedCategory", _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginFailure"))
                     {
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientDelugeValidationLabelPluginFailureDetail", new Dictionary<string, object> { { "clientName", Name } })
                     };

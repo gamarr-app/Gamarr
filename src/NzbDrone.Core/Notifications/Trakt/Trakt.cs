@@ -8,7 +8,7 @@ using NzbDrone.Common.Http;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications.Trakt.Resource;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Validation;
@@ -36,19 +36,19 @@ namespace NzbDrone.Core.Notifications.Trakt
         public override void OnDownload(DownloadMessage message)
         {
             RefreshTokenIfNecessary();
-            AddMovieToCollection(Settings, message.Movie, message.MovieFile);
+            AddGameToCollection(Settings, message.Game, message.GameFile);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
             RefreshTokenIfNecessary();
-            RemoveMovieFromCollection(Settings, deleteMessage.Movie);
+            RemoveGameFromCollection(Settings, deleteMessage.Game);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
             RefreshTokenIfNecessary();
-            RemoveMovieFromCollection(Settings, deleteMessage.Movie);
+            RemoveGameFromCollection(Settings, deleteMessage.Game);
         }
 
         public override ValidationResult Test()
@@ -149,55 +149,55 @@ namespace NzbDrone.Core.Notifications.Trakt
             }
         }
 
-        private void AddMovieToCollection(TraktSettings settings, Movie movie, MovieFile movieFile)
+        private void AddGameToCollection(TraktSettings settings, Game game, GameFile gameFile)
         {
-            var payload = new TraktCollectMoviesResource
+            var payload = new TraktCollectGamesResource
             {
-                Movies = new List<TraktCollectMovie>()
+                Games = new List<TraktCollectGame>()
             };
 
-            var traktResolution = MapResolution(movieFile.Quality.Quality.Resolution, movieFile.MediaInfo?.ScanType);
-            var hdr = MapHdr(movieFile);
-            var mediaType = MapMediaType(movieFile.Quality.Quality.Source);
-            var audio = MapAudio(movieFile);
-            var audioChannels = MapAudioChannels(movieFile);
+            var traktResolution = MapResolution(gameFile.Quality.Quality.Resolution, gameFile.MediaInfo?.ScanType);
+            var hdr = MapHdr(gameFile);
+            var mediaType = MapMediaType(gameFile.Quality.Quality.Source);
+            var audio = MapAudio(gameFile);
+            var audioChannels = MapAudioChannels(gameFile);
 
-            payload.Movies.Add(new TraktCollectMovie
+            payload.Games.Add(new TraktCollectGame
             {
-                Title = movie.Title,
-                Year = movie.Year,
+                Title = game.Title,
+                Year = game.Year,
                 CollectedAt = DateTime.Now,
                 Resolution = traktResolution,
                 Hdr = hdr,
                 MediaType = mediaType,
                 AudioChannels = audioChannels,
                 Audio = audio,
-                Is3D = movieFile.MediaInfo?.VideoMultiViewCount > 1,
-                Ids = new TraktMovieIdsResource
+                Is3D = gameFile.MediaInfo?.VideoMultiViewCount > 1,
+                Ids = new TraktGameIdsResource
                 {
-                    Tmdb = movie.MovieMetadata.Value.TmdbId,
-                    Imdb = movie.MovieMetadata.Value.ImdbId ?? "",
+                    Igdb = game.GameMetadata.Value.IgdbId,
+                    Imdb = game.GameMetadata.Value.ImdbId ?? "",
                 }
             });
 
             _proxy.AddToCollection(payload, settings.AccessToken);
         }
 
-        private void RemoveMovieFromCollection(TraktSettings settings, Movie movie)
+        private void RemoveGameFromCollection(TraktSettings settings, Game game)
         {
-            var payload = new TraktCollectMoviesResource
+            var payload = new TraktCollectGamesResource
             {
-                Movies = new List<TraktCollectMovie>()
+                Games = new List<TraktCollectGame>()
             };
 
-            payload.Movies.Add(new TraktCollectMovie
+            payload.Games.Add(new TraktCollectGame
             {
-                Title = movie.Title,
-                Year = movie.Year,
-                Ids = new TraktMovieIdsResource
+                Title = game.Title,
+                Year = game.Year,
+                Ids = new TraktGameIdsResource
                 {
-                    Tmdb = movie.MovieMetadata.Value.TmdbId,
-                    Imdb = movie.MovieMetadata.Value.ImdbId ?? "",
+                    Igdb = game.GameMetadata.Value.IgdbId,
+                    Imdb = game.GameMetadata.Value.ImdbId ?? "",
                 }
             });
 
@@ -236,9 +236,9 @@ namespace NzbDrone.Core.Notifications.Trakt
             return traktResolution;
         }
 
-        private string MapHdr(MovieFile movieFile)
+        private string MapHdr(GameFile gameFile)
         {
-            var traktHdr = movieFile.MediaInfo?.VideoHdrFormat switch
+            var traktHdr = gameFile.MediaInfo?.VideoHdrFormat switch
             {
                 HdrFormat.DolbyVision or HdrFormat.DolbyVisionSdr => "dolby_vision",
                 HdrFormat.Hdr10 or HdrFormat.DolbyVisionHdr10 => "hdr10",
@@ -250,9 +250,9 @@ namespace NzbDrone.Core.Notifications.Trakt
             return traktHdr;
         }
 
-        private string MapAudio(MovieFile movieFile)
+        private string MapAudio(GameFile gameFile)
         {
-            var audioCodec = movieFile.MediaInfo != null ? MediaInfoFormatter.FormatAudioCodec(movieFile.MediaInfo, movieFile.SceneName) : string.Empty;
+            var audioCodec = gameFile.MediaInfo != null ? MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, gameFile.SceneName) : string.Empty;
 
             var traktAudioFormat = audioCodec switch
             {
@@ -280,9 +280,9 @@ namespace NzbDrone.Core.Notifications.Trakt
             return traktAudioFormat;
         }
 
-        private string MapAudioChannels(MovieFile movieFile)
+        private string MapAudioChannels(GameFile gameFile)
         {
-            var audioChannels = movieFile.MediaInfo != null ? MediaInfoFormatter.FormatAudioChannels(movieFile.MediaInfo).ToString("0.0") : string.Empty;
+            var audioChannels = gameFile.MediaInfo != null ? MediaInfoFormatter.FormatAudioChannels(gameFile.MediaInfo).ToString("0.0") : string.Empty;
 
             if (audioChannels == "0.0")
             {

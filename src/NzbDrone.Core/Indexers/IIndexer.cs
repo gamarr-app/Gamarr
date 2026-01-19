@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Indexers
         DownloadProtocol Protocol { get; }
 
         Task<IList<ReleaseInfo>> FetchRecent();
-        Task<IList<ReleaseInfo>> Fetch(MovieSearchCriteria searchCriteria);
+        Task<IList<ReleaseInfo>> Fetch(GameSearchCriteria searchCriteria);
         HttpRequest GetDownloadRequest(string link);
     }
 }

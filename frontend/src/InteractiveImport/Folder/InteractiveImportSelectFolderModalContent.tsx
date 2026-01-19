@@ -99,7 +99,7 @@ function InteractiveImportSelectFolderModalContent(
 
     dispatch(
       executeCommand({
-        name: commandNames.DOWNLOADED_MOVIES_SCAN,
+        name: commandNames.DOWNLOADED_GAMES_SCAN,
         path: folder,
       })
     );

@@ -1,8 +1,8 @@
 import React from 'react';
 import { ParseModel } from 'App/State/ParseAppState';
 import FieldSet from 'Components/FieldSet';
-import MovieFormats from 'Movie/MovieFormats';
-import MovieTitleLink from 'Movie/MovieTitleLink';
+import GameFormats from 'Game/GameFormats';
+import GameTitleLink from 'Game/GameTitleLink';
 import translate from 'Utilities/String/translate';
 import ParseResultItem from './ParseResultItem';
 import styles from './ParseResult.css';
@@ -17,24 +17,24 @@ function ParseResult(props: ParseResultProps) {
     customFormats,
     customFormatScore,
     languages,
-    parsedMovieInfo,
-    movie,
+    parsedGameInfo,
+    game,
   } = item;
 
   const {
     releaseTitle,
-    movieTitle,
-    movieTitles,
+    gameTitle,
+    gameTitles,
     year,
     edition,
     releaseGroup,
     releaseHash,
     quality,
-    tmdbId,
+    igdbId,
     imdbId,
-  } = parsedMovieInfo;
+  } = parsedGameInfo;
 
-  const finalLanguages = languages ?? parsedMovieInfo.languages;
+  const finalLanguages = languages ?? parsedGameInfo.languages;
 
   return (
     <div>
@@ -44,7 +44,7 @@ function ParseResult(props: ParseResultProps) {
           data={releaseTitle}
         />
 
-        <ParseResultItem title={translate('MovieTitle')} data={movieTitle} />
+        <ParseResultItem title={translate('GameTitle')} data={gameTitle} />
 
         <ParseResultItem
           title={translate('Year')}
@@ -58,7 +58,7 @@ function ParseResult(props: ParseResultProps) {
 
         <ParseResultItem
           title={translate('AllTitles')}
-          data={movieTitles?.length > 0 ? movieTitles.join(', ') : '-'}
+          data={gameTitles?.length > 0 ? gameTitles.join(', ') : '-'}
         />
 
         <ParseResultItem
@@ -71,8 +71,8 @@ function ParseResult(props: ParseResultProps) {
           data={releaseHash ? releaseHash : '-'}
         />
 
-        {tmdbId ? (
-          <ParseResultItem title={translate('TMDBId')} data={tmdbId} />
+        {igdbId ? (
+          <ParseResultItem title={translate('IGDBId')} data={igdbId} />
         ) : null}
 
         {imdbId ? (
@@ -127,13 +127,13 @@ function ParseResult(props: ParseResultProps) {
 
       <FieldSet legend={translate('Details')}>
         <ParseResultItem
-          title={translate('MatchedToMovie')}
+          title={translate('MatchedToGame')}
           data={
-            movie ? (
-              <MovieTitleLink
-                titleSlug={movie.titleSlug}
-                title={movie.title}
-                year={movie.year}
+            game ? (
+              <GameTitleLink
+                titleSlug={game.titleSlug}
+                title={game.title}
+                year={game.year}
               />
             ) : (
               '-'
@@ -141,10 +141,10 @@ function ParseResult(props: ParseResultProps) {
           }
         />
 
-        {movie && movie.originalLanguage ? (
+        {game && game.originalLanguage ? (
           <ParseResultItem
             title={translate('OriginalLanguage')}
-            data={movie.originalLanguage.name}
+            data={game.originalLanguage.name}
           />
         ) : null}
 
@@ -152,7 +152,7 @@ function ParseResult(props: ParseResultProps) {
           title={translate('CustomFormats')}
           data={
             customFormats?.length ? (
-              <MovieFormats formats={customFormats} />
+              <GameFormats formats={customFormats} />
             ) : (
               '-'
             )

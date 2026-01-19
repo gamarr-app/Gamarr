@@ -1,6 +1,6 @@
 using FluentValidation;
 using NzbDrone.Core.Annotations;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -29,9 +29,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         [FieldDefinition(2, Label = "AutoTaggingSpecificationMaximumYear", Type = FieldType.Number)]
         public int Max { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return movie.Year >= Min && movie.Year <= Max;
+            return game.Year >= Min && game.Year <= Max;
         }
 
         public override NzbDroneValidationResult Validate()

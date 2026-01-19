@@ -3,7 +3,7 @@ namespace NzbDrone.Core.ImportLists
     public enum ImportListType
     {
         Program,
-        TMDB,
+        IGDB,
         Trakt,
         Plex,
         Simkl,

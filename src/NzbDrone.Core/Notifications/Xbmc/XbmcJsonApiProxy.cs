@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
         string UpdateLibrary(XbmcSettings settings, string path);
         void CleanLibrary(XbmcSettings settings);
         List<ActivePlayer> GetActivePlayers(XbmcSettings settings);
-        List<XbmcMovie> GetMovies(XbmcSettings settings);
+        List<XbmcGame> GetGames(XbmcSettings settings);
     }
 
     public class XbmcJsonApiProxy : IXbmcJsonApiProxy
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
 
         public void Notify(XbmcSettings settings, string title, string message)
         {
-            ProcessRequest(settings, "GUI.ShowNotification", title, message, "https://raw.github.com/Radarr/Radarr/develop/Logo/64.png", settings.DisplayTime * 1000);
+            ProcessRequest(settings, "GUI.ShowNotification", title, message, "https://raw.github.com/Gamarr/Gamarr/develop/Logo/64.png", settings.DisplayTime * 1000);
         }
 
         public string UpdateLibrary(XbmcSettings settings, string path)
@@ -66,11 +66,11 @@ namespace NzbDrone.Core.Notifications.Xbmc
             return Json.Deserialize<ActivePlayersResult>(response).Result;
         }
 
-        public List<XbmcMovie> GetMovies(XbmcSettings settings)
+        public List<XbmcGame> GetGames(XbmcSettings settings)
         {
-            var response = ProcessRequest(settings, "VideoLibrary.GetMovies", new List<string> { "file", "imdbnumber" });
+            var response = ProcessRequest(settings, "VideoLibrary.GetGames", new List<string> { "file", "imdbnumber" });
 
-            return Json.Deserialize<MovieResponse>(response).Result.Movies;
+            return Json.Deserialize<GameResponse>(response).Result.Games;
         }
 
         private string ProcessRequest(XbmcSettings settings, string method, params object[] parameters)

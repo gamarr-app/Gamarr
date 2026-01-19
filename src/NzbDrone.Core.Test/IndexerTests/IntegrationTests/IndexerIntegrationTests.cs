@@ -15,14 +15,14 @@ namespace NzbDrone.Core.Test.IndexerTests.IntegrationTests
     [Ignore("Nyaa is down!")]
     public class IndexerIntegrationTests : CoreTest
     {
-        private MovieSearchCriteria _singleSearchCriteria;
+        private GameSearchCriteria _singleSearchCriteria;
 
         [SetUp]
         public void SetUp()
         {
             UseRealHttp();
 
-            _singleSearchCriteria = new MovieSearchCriteria()
+            _singleSearchCriteria = new GameSearchCriteria()
             {
                 SceneTitles = new List<string> { "Person of Interest" },
             };

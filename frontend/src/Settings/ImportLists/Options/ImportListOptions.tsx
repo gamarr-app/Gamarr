@@ -36,19 +36,19 @@ const cleanLibraryLevelOptions: EnhancedSelectInputValue<string>[] = [
   {
     key: 'keepAndUnmonitor',
     get value() {
-      return translate('KeepAndUnmonitorMovie');
+      return translate('KeepAndUnmonitorGame');
     },
   },
   {
     key: 'removeAndKeep',
     get value() {
-      return translate('RemoveMovieAndKeepFiles');
+      return translate('RemoveGameAndKeepFiles');
     },
   },
   {
     key: 'removeAndDelete',
     get value() {
-      return translate('RemoveMovieAndDeleteFiles');
+      return translate('RemoveGameAndDeleteFiles');
     },
   },
 ];

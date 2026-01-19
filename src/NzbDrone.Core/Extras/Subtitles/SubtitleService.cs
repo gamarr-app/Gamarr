@@ -10,8 +10,8 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MovieImport;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.MediaFiles.GameImport;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -43,38 +43,38 @@ namespace NzbDrone.Core.Extras.Subtitles
 
         public override int Order => 1;
 
-        public override IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Movie movie)
+        public override IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Game game)
         {
             return Enumerable.Empty<SubtitleFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieScan(Movie movie, List<MovieFile> movieFiles)
+        public override IEnumerable<ExtraFile> CreateAfterGameScan(Game game, List<GameFile> gameFiles)
         {
             return Enumerable.Empty<SubtitleFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieImport(Movie movie, MovieFile movieFile)
+        public override IEnumerable<ExtraFile> CreateAfterGameImport(Game game, GameFile gameFile)
         {
             return Enumerable.Empty<SubtitleFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieFolder(Movie movie, string movieFolder)
+        public override IEnumerable<ExtraFile> CreateAfterGameFolder(Game game, string gameFolder)
         {
             return Enumerable.Empty<SubtitleFile>();
         }
 
-        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Movie movie, List<MovieFile> movieFiles)
+        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Game game, List<GameFile> gameFiles)
         {
-            var subtitleFiles = _subtitleFileService.GetFilesByMovie(movie.Id);
+            var subtitleFiles = _subtitleFileService.GetFilesByGame(game.Id);
 
             var movedFiles = new List<SubtitleFile>();
 
-            foreach (var movieFile in movieFiles)
+            foreach (var gameFile in gameFiles)
             {
-                var groupedExtraFilesForMovieFile = subtitleFiles.Where(m => m.MovieFileId == movieFile.Id)
+                var groupedExtraFilesForGameFile = subtitleFiles.Where(m => m.GameFileId == gameFile.Id)
                                                             .GroupBy(s => s.AggregateString).ToList();
 
-                foreach (var group in groupedExtraFilesForMovieFile)
+                foreach (var group in groupedExtraFilesForGameFile)
                 {
                     var multipleCopies = group.Count() > 1;
                     var orderedGroup = group.OrderBy(s => -s.Copy).ToList();
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Extras.Subtitles
 
                         var suffix = GetSuffix(subtitleFile.Language, subtitleFile.Copy, subtitleFile.LanguageTags, multipleCopies, subtitleFile.Title);
 
-                        movedFiles.AddIfNotNull(MoveFile(movie, movieFile, subtitleFile, suffix));
+                        movedFiles.AddIfNotNull(MoveFile(game, gameFile, subtitleFile, suffix));
 
                         copy++;
                     }
@@ -101,18 +101,18 @@ namespace NzbDrone.Core.Extras.Subtitles
             return movedFiles;
         }
 
-        public override bool CanImportFile(LocalMovie localEpisode, MovieFile movieFile, string path, string extension, bool readOnly)
+        public override bool CanImportFile(LocalGame localEpisode, GameFile gameFile, string path, string extension, bool readOnly)
         {
             return SubtitleFileExtensions.Extensions.Contains(extension.ToLowerInvariant());
         }
 
-        public override IEnumerable<ExtraFile> ImportFiles(LocalMovie localMovie, MovieFile movieFile, List<string> files, bool isReadOnly)
+        public override IEnumerable<ExtraFile> ImportFiles(LocalGame localGame, GameFile gameFile, List<string> files, bool isReadOnly)
         {
             var importedFiles = new List<SubtitleFile>();
 
-            var filteredFiles = files.Where(f => CanImportFile(localMovie, movieFile, f, Path.GetExtension(f), isReadOnly)).ToList();
+            var filteredFiles = files.Where(f => CanImportFile(localGame, gameFile, f, Path.GetExtension(f), isReadOnly)).ToList();
 
-            var sourcePath = localMovie.Path;
+            var sourcePath = localGame.Path;
             var sourceFolder = _diskProvider.GetParentFolder(sourcePath);
             var sourceFileName = Path.GetFileNameWithoutExtension(sourcePath);
 
@@ -129,16 +129,16 @@ namespace NzbDrone.Core.Extras.Subtitles
                         continue;
                     }
 
-                    // Movie match
-                    var fileMovieInfo = Parser.Parser.ParseMoviePath(file) ?? new ParsedMovieInfo();
+                    // Game match
+                    var fileGameInfo = Parser.Parser.ParseGamePath(file) ?? new ParsedGameInfo();
 
-                    if (fileMovieInfo.MovieTitle == null)
+                    if (fileGameInfo.GameTitle == null)
                     {
                         continue;
                     }
 
-                    if (fileMovieInfo.MovieTitle == localMovie.FileMovieInfo.MovieTitle &&
-                        fileMovieInfo.Year.Equals(localMovie.FileMovieInfo.Year))
+                    if (fileGameInfo.GameTitle == localGame.FileGameInfo.GameTitle &&
+                        fileGameInfo.Year.Equals(localGame.FileGameInfo.Year))
                     {
                         matchingFiles.Add(file);
                     }
@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                 // Filter out samples
                 videoFiles = videoFiles.Where(file =>
                 {
-                    var sample = _detectSample.IsSample(localMovie.Movie.MovieMetadata, file);
+                    var sample = _detectSample.IsSample(localGame.Game.GameMetadata, file);
 
                     if (sample == DetectSampleResult.Sample)
                     {
@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                 {
                     matchingFiles.AddRange(filteredFiles);
 
-                    _logger.Warn("Imported any available subtitle file for movie: {0}", localMovie);
+                    _logger.Warn("Imported any available subtitle file for game: {0}", localGame);
                 }
             }
 
@@ -214,7 +214,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                     var suffix = GetSuffix(language, copy, file.LanguageTags, groupCount > 1);
                     try
                     {
-                        var subtitleFile = ImportFile(localMovie.Movie, movieFile, path, isReadOnly, extension, suffix);
+                        var subtitleFile = ImportFile(localGame.Game, gameFile, path, isReadOnly, extension, suffix);
                         subtitleFile.Language = language;
                         subtitleFile.LanguageTags = file.LanguageTags;
 

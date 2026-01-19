@@ -13,12 +13,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class RetentionSpecificationFixture : CoreTest<RetentionSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         [SetUp]
         public void Setup()
         {
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
                 Release = new ReleaseInfo() { DownloadProtocol = DownloadProtocol.Usenet }
             };
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithAge(int days)
         {
-            _remoteMovie.Release.PublishDate = DateTime.UtcNow.AddDays(-days);
+            _remoteGame.Release.PublishDate = DateTime.UtcNow.AddDays(-days);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithRetention(0);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithRetention(1000);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithRetention(100);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithRetention(10);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -76,18 +76,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithRetention(0);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_when_release_is_not_usenet()
         {
-            _remoteMovie.Release.DownloadProtocol = DownloadProtocol.Torrent;
+            _remoteGame.Release.DownloadProtocol = DownloadProtocol.Torrent;
 
             WithRetention(10);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
     }
 }

@@ -11,8 +11,8 @@ interface CssExports {
   'info': string;
   'labelsContainer': string;
   'monitorToggleButton': string;
-  'movie': string;
-  'moviesContainer': string;
+  'game': string;
+  'gamesContainer': string;
   'navigationButtons': string;
   'overview': string;
   'path': string;

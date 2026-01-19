@@ -23,19 +23,19 @@ namespace NzbDrone.Core.Download
 
         public bool IgnoreDownload(TrackedDownload trackedDownload)
         {
-            var movie = trackedDownload.RemoteMovie.Movie;
+            var game = trackedDownload.RemoteGame.Game;
 
-            if (movie == null)
+            if (game == null)
             {
-                _logger.Warn("Unable to ignore download for unknown movie");
+                _logger.Warn("Unable to ignore download for unknown game");
                 return false;
             }
 
             var downloadIgnoredEvent = new DownloadIgnoredEvent
             {
-                MovieId = movie.Id,
-                Languages = trackedDownload.RemoteMovie.Languages,
-                Quality = trackedDownload.RemoteMovie.ParsedMovieInfo.Quality,
+                GameId = game.Id,
+                Languages = trackedDownload.RemoteGame.Languages,
+                Quality = trackedDownload.RemoteGame.ParsedGameInfo.Quality,
                 SourceTitle = trackedDownload.DownloadItem.Title,
                 DownloadClientInfo = trackedDownload.DownloadItem.DownloadClientInfo,
                 DownloadId = trackedDownload.DownloadItem.DownloadId,

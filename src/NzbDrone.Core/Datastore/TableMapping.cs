@@ -20,18 +20,18 @@ using NzbDrone.Core.Extras.Subtitles;
 using NzbDrone.Core.History;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.ImportLists.ImportExclusions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Instrumentation;
 using NzbDrone.Core.Jobs;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Commands;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.AlternativeTitles;
-using NzbDrone.Core.Movies.Collections;
-using NzbDrone.Core.Movies.Credits;
-using NzbDrone.Core.Movies.Translations;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.AlternativeTitles;
+using NzbDrone.Core.Games.Collections;
+using NzbDrone.Core.Games.Credits;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser.Model;
@@ -91,10 +91,10 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(i => i.SupportsOnDownload)
                   .Ignore(i => i.SupportsOnUpgrade)
                   .Ignore(i => i.SupportsOnRename)
-                  .Ignore(i => i.SupportsOnMovieAdded)
-                  .Ignore(i => i.SupportsOnMovieDelete)
-                  .Ignore(i => i.SupportsOnMovieFileDelete)
-                  .Ignore(i => i.SupportsOnMovieFileDeleteForUpgrade)
+                  .Ignore(i => i.SupportsOnGameAdded)
+                  .Ignore(i => i.SupportsOnGameDelete)
+                  .Ignore(i => i.SupportsOnGameFileDelete)
+                  .Ignore(i => i.SupportsOnGameFileDeleteForUpgrade)
                   .Ignore(i => i.SupportsOnHealthIssue)
                   .Ignore(i => i.SupportsOnHealthRestored)
                   .Ignore(i => i.SupportsOnApplicationUpdate)
@@ -108,29 +108,29 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(x => x.ImplementationName)
                   .Ignore(d => d.Protocol);
 
-            Mapper.Entity<MovieHistory>("History").RegisterModel();
+            Mapper.Entity<GameHistory>("History").RegisterModel();
 
-            Mapper.Entity<MovieFile>("MovieFiles").RegisterModel()
+            Mapper.Entity<GameFile>("GameFiles").RegisterModel()
                   .Ignore(f => f.Path);
 
-            Mapper.Entity<Movie>("Movies").RegisterModel()
+            Mapper.Entity<Game>("Games").RegisterModel()
                   .Ignore(s => s.RootFolderPath)
                   .Ignore(s => s.Title)
                   .Ignore(s => s.Year)
-                  .Ignore(s => s.TmdbId)
+                  .Ignore(s => s.IgdbId)
                   .Ignore(s => s.ImdbId)
-                  .HasOne(a => a.MovieMetadata, a => a.MovieMetadataId);
+                  .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
-            Mapper.Entity<ImportListMovie>("ImportListMovies").RegisterModel()
+            Mapper.Entity<ImportListGame>("ImportListGames").RegisterModel()
                   .Ignore(s => s.Title)
                   .Ignore(s => s.Year)
-                  .Ignore(s => s.TmdbId)
+                  .Ignore(s => s.IgdbId)
                   .Ignore(s => s.ImdbId)
-                  .HasOne(a => a.MovieMetadata, a => a.MovieMetadataId);
+                  .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<AlternativeTitle>("AlternativeTitles").RegisterModel();
 
-            Mapper.Entity<MovieTranslation>("MovieTranslations").RegisterModel();
+            Mapper.Entity<GameTranslation>("GameTranslations").RegisterModel();
 
             Mapper.Entity<Credit>("Credits").RegisterModel();
 
@@ -151,7 +151,7 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<OtherExtraFile>("ExtraFiles").RegisterModel();
 
             Mapper.Entity<PendingRelease>("PendingReleases").RegisterModel()
-                  .Ignore(e => e.RemoteMovie);
+                  .Ignore(e => e.RemoteGame);
 
             Mapper.Entity<RemotePathMapping>("RemotePathMappings").RegisterModel();
             Mapper.Entity<Tag>("Tags").RegisterModel();
@@ -173,10 +173,10 @@ namespace NzbDrone.Core.Datastore
 
             Mapper.Entity<UpdateHistory>("UpdateHistory").RegisterModel();
 
-            Mapper.Entity<MovieMetadata>("MovieMetadata").RegisterModel()
+            Mapper.Entity<GameMetadata>("GameMetadata").RegisterModel()
                 .Ignore(s => s.Translations);
 
-            Mapper.Entity<MovieCollection>("Collections").RegisterModel();
+            Mapper.Entity<GameCollection>("Collections").RegisterModel();
 
             Mapper.Entity<AutoTagging.AutoTag>("AutoTagging").RegisterModel();
         }
@@ -202,11 +202,11 @@ namespace NzbDrone.Core.Datastore
             SqlMapper.AddTypeHandler(new DapperLanguageIntConverter());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<List<Language>>(new LanguageIntConverter()));
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<List<string>>());
-            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedMovieInfo>(new QualityIntConverter(), new LanguageIntConverter()));
+            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedGameInfo>(new QualityIntConverter(), new LanguageIntConverter()));
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ReleaseInfo>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<PendingReleaseAdditionalInfo>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<Ratings>());
-            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<List<MovieTranslation>>());
+            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<List<GameTranslation>>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<HashSet<int>>());
             SqlMapper.AddTypeHandler(new OsPathConverter());
             SqlMapper.RemoveTypeMap(typeof(Guid));

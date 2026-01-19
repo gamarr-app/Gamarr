@@ -34,7 +34,7 @@ function CalendarOptionsModalContent({
   const dispatch = useDispatch();
 
   const {
-    showMovieInformation,
+    showGameInformation,
     showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
@@ -91,13 +91,13 @@ function CalendarOptionsModalContent({
         <FieldSet legend={translate('Local')}>
           <Form>
             <FormGroup>
-              <FormLabel>{translate('ShowMovieInformation')}</FormLabel>
+              <FormLabel>{translate('ShowGameInformation')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.CHECK}
-                name="showMovieInformation"
-                value={showMovieInformation}
-                helpText={translate('ShowMovieInformationHelpText')}
+                name="showGameInformation"
+                value={showGameInformation}
+                helpText={translate('ShowGameInformationHelpText')}
                 onChange={handleOptionInputChange}
               />
             </FormGroup>

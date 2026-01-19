@@ -15,16 +15,16 @@ namespace NzbDrone.Core.ImportLists.TMDb.User
 
         public int MaxPages { get; set; }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequests());
+            pageableRequests.Add(GetGamesRequests());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequests()
+        private IEnumerable<ImportListRequest> GetGamesRequests()
         {
             var requestBuilder = RequestBuilder.Create()
                 .SetHeader("Authorization", $"Bearer {Settings.AccessToken}")
@@ -35,16 +35,16 @@ namespace NzbDrone.Core.ImportLists.TMDb.User
             switch (Settings.ListType)
             {
                 case (int)TMDbUserListType.Watchlist:
-                    requestBuilder.SetSegment("secondaryRoute", "/movie/watchlist");
+                    requestBuilder.SetSegment("secondaryRoute", "/game/watchlist");
                     break;
                 case (int)TMDbUserListType.Recommendations:
-                    requestBuilder.SetSegment("secondaryRoute", "/movie/recommendations");
+                    requestBuilder.SetSegment("secondaryRoute", "/game/recommendations");
                     break;
                 case (int)TMDbUserListType.Rated:
-                    requestBuilder.SetSegment("secondaryRoute", "/movie/rated");
+                    requestBuilder.SetSegment("secondaryRoute", "/game/rated");
                     break;
                 case (int)TMDbUserListType.Favorite:
-                    requestBuilder.SetSegment("secondaryRoute", "/movie/favorites");
+                    requestBuilder.SetSegment("secondaryRoute", "/game/favorites");
                     break;
             }
 
@@ -54,7 +54,7 @@ namespace NzbDrone.Core.ImportLists.TMDb.User
 
             Logger.Trace("TMDb User {0}: Getting total pages", (TMDbUserListType)Settings.ListType);
 
-            var jsonResponse = JsonConvert.DeserializeObject<MovieSearchResource>(HttpClient.Execute(requestBuilder.Build()).Content);
+            var jsonResponse = JsonConvert.DeserializeObject<GameSearchResource>(HttpClient.Execute(requestBuilder.Build()).Content);
 
             MaxPages = jsonResponse.TotalPages;
 

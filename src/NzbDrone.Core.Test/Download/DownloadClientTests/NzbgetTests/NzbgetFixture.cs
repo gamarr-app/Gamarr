@@ -34,15 +34,15 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MovieCategory = "movie",
-                RecentMoviePriority = (int)NzbgetPriority.High
+                GameCategory = "game",
+                RecentGamePriority = (int)NzbgetPriority.High
             };
 
             _queued = new NzbgetQueueItem
             {
                 FileSizeLo = 1000,
                 RemainingSizeLo = 10,
-                Category = "movie",
+                Category = "game",
                 NzbName = "Droned.1998.1080p.WEB-DL-DRONE",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } }
             };
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             _failed = new NzbgetHistoryItem
             {
                 FileSizeLo = 1000,
-                Category = "movie",
+                Category = "game",
                 Name = "Droned.1998.1080p.WEB-DL-DRONE",
                 DestDir = "somedirectory",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             _completed = new NzbgetHistoryItem
             {
                 FileSizeLo = 1000,
-                Category = "movie",
+                Category = "game",
                 Name = "Droned.1998.1080p.WEB-DL-DRONE",
                 DestDir = "/remote/mount/tv/Droned.1998.1080p.WEB-DL-DRONE",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
@@ -95,8 +95,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 .Returns("14.0");
 
             _configItems = new Dictionary<string, string>();
-            _configItems.Add("Category1.Name", "movie");
-            _configItems.Add("Category1.DestDir", @"/remote/mount/movie");
+            _configItems.Add("Category1.Name", "game");
+            _configItems.Add("Category1.DestDir", @"/remote/mount/game");
 
             Mocker.GetMock<INzbgetProxy>()
                 .Setup(v => v.GetConfig(It.IsAny<NzbgetSettings>()))
@@ -344,9 +344,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -356,9 +356,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             GivenFailedDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            Assert.ThrowsAsync<DownloadClientRejectedReleaseException>(async () => await Subject.Download(remoteMovie, CreateIndexer()));
+            Assert.ThrowsAsync<DownloadClientRejectedReleaseException>(async () => await Subject.Download(remoteGame, CreateIndexer()));
         }
 
         [Test]
@@ -381,7 +381,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
 
             result.IsLocalhost.Should().BeTrue();
             result.OutputRootFolders.Should().NotBeNull();
-            result.OutputRootFolders.First().Should().Be(@"/remote/mount/movie");
+            result.OutputRootFolders.First().Should().Be(@"/remote/mount/game");
         }
 
         [Test]

@@ -1,6 +1,6 @@
 using FluentMigrator;
 using NzbDrone.Core.Datastore.Migration.Framework;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Datastore.Migration
 {
@@ -11,12 +11,12 @@ namespace NzbDrone.Core.Datastore.Migration
         {
             if (!Schema.Table("NetImport").Column("MinimumAvailability").Exists())
             {
-                Alter.Table("NetImport").AddColumn("MinimumAvailability").AsInt32().WithDefaultValue((int)MovieStatusType.Released);
+                Alter.Table("NetImport").AddColumn("MinimumAvailability").AsInt32().WithDefaultValue((int)GameStatusType.Released);
             }
 
-            if (!Schema.Table("Movies").Column("MinimumAvailability").Exists())
+            if (!Schema.Table("Games").Column("MinimumAvailability").Exists())
             {
-                Alter.Table("Movies").AddColumn("MinimumAvailability").AsInt32().WithDefaultValue((int)MovieStatusType.Released);
+                Alter.Table("Games").AddColumn("MinimumAvailability").AsInt32().WithDefaultValue((int)GameStatusType.Released);
             }
         }
     }

@@ -5,7 +5,7 @@ namespace NzbDrone.Core.MediaFiles.Commands
 {
     public class RenameFilesCommand : Command
     {
-        public int MovieId { get; set; }
+        public int GameId { get; set; }
         public List<int> Files { get; set; }
 
         public override bool SendUpdatesToClient => true;
@@ -15,9 +15,9 @@ namespace NzbDrone.Core.MediaFiles.Commands
         {
         }
 
-        public RenameFilesCommand(int movieId, List<int> files)
+        public RenameFilesCommand(int gameId, List<int> files)
         {
-            MovieId = movieId;
+            GameId = gameId;
             Files = files;
         }
     }

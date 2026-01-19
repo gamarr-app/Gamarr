@@ -4,128 +4,128 @@ using System.Linq;
 using NzbDrone.Common;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 
 namespace NzbDrone.Core.MediaFiles
 {
     public interface IMediaFileService
     {
-        MovieFile Add(MovieFile movieFile);
-        void Update(MovieFile movieFile);
-        void Update(List<MovieFile> movieFile);
-        void Delete(MovieFile movieFile, DeleteMediaFileReason reason);
-        List<MovieFile> GetFilesByMovie(int movieId);
-        List<MovieFile> GetFilesByMovies(IEnumerable<int> movieIds);
-        List<MovieFile> GetFilesWithoutMediaInfo();
-        List<string> FilterExistingFiles(List<string> files, Movie movie);
-        MovieFile GetMovie(int id);
-        List<MovieFile> GetMovies(IEnumerable<int> ids);
-        List<MovieFile> GetFilesWithRelativePath(int movieIds, string relativePath);
+        GameFile Add(GameFile gameFile);
+        void Update(GameFile gameFile);
+        void Update(List<GameFile> gameFile);
+        void Delete(GameFile gameFile, DeleteMediaFileReason reason);
+        List<GameFile> GetFilesByGame(int gameId);
+        List<GameFile> GetFilesByGames(IEnumerable<int> gameIds);
+        List<GameFile> GetFilesWithoutMediaInfo();
+        List<string> FilterExistingFiles(List<string> files, Game game);
+        GameFile GetGame(int id);
+        List<GameFile> GetGames(IEnumerable<int> ids);
+        List<GameFile> GetFilesWithRelativePath(int gameIds, string relativePath);
     }
 
-    public class MediaFileService : IMediaFileService, IHandleAsync<MoviesDeletedEvent>
+    public class MediaFileService : IMediaFileService, IHandleAsync<GamesDeletedEvent>
     {
         private readonly IMediaFileRepository _mediaFileRepository;
-        private readonly IMovieRepository _movieRepository;
+        private readonly IGameRepository _gameRepository;
         private readonly IEventAggregator _eventAggregator;
 
         public MediaFileService(IMediaFileRepository mediaFileRepository,
-                                IMovieRepository movieRepository,
+                                IGameRepository gameRepository,
                                 IEventAggregator eventAggregator)
         {
             _mediaFileRepository = mediaFileRepository;
-            _movieRepository = movieRepository;
+            _gameRepository = gameRepository;
             _eventAggregator = eventAggregator;
         }
 
-        public MovieFile Add(MovieFile movieFile)
+        public GameFile Add(GameFile gameFile)
         {
-            var addedFile = _mediaFileRepository.Insert(movieFile);
-            if (addedFile.Movie == null)
+            var addedFile = _mediaFileRepository.Insert(gameFile);
+            if (addedFile.Game == null)
             {
-                addedFile.Movie = _movieRepository.Get(movieFile.MovieId);
+                addedFile.Game = _gameRepository.Get(gameFile.GameId);
             }
 
-            _eventAggregator.PublishEvent(new MovieFileAddedEvent(addedFile));
+            _eventAggregator.PublishEvent(new GameFileAddedEvent(addedFile));
 
             return addedFile;
         }
 
-        public void Update(MovieFile movieFile)
+        public void Update(GameFile gameFile)
         {
-            _mediaFileRepository.Update(movieFile);
+            _mediaFileRepository.Update(gameFile);
         }
 
-        public void Update(List<MovieFile> movieFiles)
+        public void Update(List<GameFile> gameFiles)
         {
-            _mediaFileRepository.UpdateMany(movieFiles);
+            _mediaFileRepository.UpdateMany(gameFiles);
         }
 
-        public void Delete(MovieFile movieFile, DeleteMediaFileReason reason)
+        public void Delete(GameFile gameFile, DeleteMediaFileReason reason)
         {
-            // Little hack so we have the movie attached for the event consumers
-            if (movieFile.Movie == null)
+            // Little hack so we have the game attached for the event consumers
+            if (gameFile.Game == null)
             {
-                movieFile.Movie = _movieRepository.Get(movieFile.MovieId);
+                gameFile.Game = _gameRepository.Get(gameFile.GameId);
             }
 
-            movieFile.Path = Path.Combine(movieFile.Movie.Path, movieFile.RelativePath);
+            gameFile.Path = Path.Combine(gameFile.Game.Path, gameFile.RelativePath);
 
-            _mediaFileRepository.Delete(movieFile);
-            _eventAggregator.PublishEvent(new MovieFileDeletedEvent(movieFile, reason));
+            _mediaFileRepository.Delete(gameFile);
+            _eventAggregator.PublishEvent(new GameFileDeletedEvent(gameFile, reason));
         }
 
-        public List<MovieFile> GetFilesByMovie(int movieId)
+        public List<GameFile> GetFilesByGame(int gameId)
         {
-            return _mediaFileRepository.GetFilesByMovie(movieId);
+            return _mediaFileRepository.GetFilesByGame(gameId);
         }
 
-        public List<MovieFile> GetFilesByMovies(IEnumerable<int> movieIds)
+        public List<GameFile> GetFilesByGames(IEnumerable<int> gameIds)
         {
-            return _mediaFileRepository.GetFilesByMovies(movieIds);
+            return _mediaFileRepository.GetFilesByGames(gameIds);
         }
 
-        public List<MovieFile> GetFilesWithoutMediaInfo()
+        public List<GameFile> GetFilesWithoutMediaInfo()
         {
             return _mediaFileRepository.GetFilesWithoutMediaInfo();
         }
 
-        public List<string> FilterExistingFiles(List<string> files, Movie movie)
+        public List<string> FilterExistingFiles(List<string> files, Game game)
         {
-            var movieFiles = GetFilesByMovie(movie.Id).Select(f => Path.Combine(movie.Path, f.RelativePath)).ToList();
+            var gameFiles = GetFilesByGame(game.Id).Select(f => Path.Combine(game.Path, f.RelativePath)).ToList();
 
-            if (!movieFiles.Any())
+            if (!gameFiles.Any())
             {
                 return files;
             }
 
-            return files.Except(movieFiles, PathEqualityComparer.Instance).ToList();
+            return files.Except(gameFiles, PathEqualityComparer.Instance).ToList();
         }
 
-        public List<MovieFile> GetMovies(IEnumerable<int> ids)
+        public List<GameFile> GetGames(IEnumerable<int> ids)
         {
             return _mediaFileRepository.Get(ids).ToList();
         }
 
-        public MovieFile GetMovie(int id)
+        public GameFile GetGame(int id)
         {
             return _mediaFileRepository.Get(id);
         }
 
-        public List<MovieFile> GetFilesWithRelativePath(int movieId, string relativePath)
+        public List<GameFile> GetFilesWithRelativePath(int gameId, string relativePath)
         {
-            return _mediaFileRepository.GetFilesWithRelativePath(movieId, relativePath);
+            return _mediaFileRepository.GetFilesWithRelativePath(gameId, relativePath);
         }
 
-        public void HandleAsync(MoviesDeletedEvent message)
+        public void HandleAsync(GamesDeletedEvent message)
         {
-            _mediaFileRepository.DeleteForMovies(message.Movies.Select(m => m.Id).ToList());
+            _mediaFileRepository.DeleteForGames(message.Games.Select(m => m.Id).ToList());
         }
 
-        public static List<string> FilterExistingFiles(List<string> files, List<MovieFile> movieFiles, Movie movie)
+        public static List<string> FilterExistingFiles(List<string> files, List<GameFile> gameFiles, Game game)
         {
-            var seriesFilePaths = movieFiles.Select(f => Path.Combine(movie.Path, f.RelativePath)).ToList();
+            var seriesFilePaths = gameFiles.Select(f => Path.Combine(game.Path, f.RelativePath)).ToList();
 
             if (!seriesFilePaths.Any())
             {

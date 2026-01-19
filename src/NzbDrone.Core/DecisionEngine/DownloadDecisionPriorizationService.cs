@@ -8,7 +8,7 @@ namespace NzbDrone.Core.DecisionEngine
 {
     public interface IPrioritizeDownloadDecision
     {
-        List<DownloadDecision> PrioritizeDecisionsForMovies(List<DownloadDecision> decisions);
+        List<DownloadDecision> PrioritizeDecisionsForGames(List<DownloadDecision> decisions);
     }
 
     public class DownloadDecisionPriorizationService : IPrioritizeDownloadDecision
@@ -24,15 +24,15 @@ namespace NzbDrone.Core.DecisionEngine
             _qualityDefinitionService = qualityDefinitionService;
         }
 
-        public List<DownloadDecision> PrioritizeDecisionsForMovies(List<DownloadDecision> decisions)
+        public List<DownloadDecision> PrioritizeDecisionsForGames(List<DownloadDecision> decisions)
         {
-            return decisions.Where(c => c.RemoteMovie.Movie != null)
-                            .GroupBy(c => c.RemoteMovie.Movie.Id, (movieId, downloadDecisions) =>
+            return decisions.Where(c => c.RemoteGame.Game != null)
+                            .GroupBy(c => c.RemoteGame.Game.Id, (gameId, downloadDecisions) =>
                             {
                                 return downloadDecisions.OrderByDescending(decision => decision, new DownloadDecisionComparer(_configService, _delayProfileService, _qualityDefinitionService));
                             })
                             .SelectMany(c => c)
-                            .Union(decisions.Where(c => c.RemoteMovie.Movie == null))
+                            .Union(decisions.Where(c => c.RemoteGame.Game == null))
                             .ToList();
         }
     }

@@ -1,0 +1,19 @@
+.info {
+  background-color: var(--gameBackgroundColor);
+  text-align: center;
+  font-size: $smallFontSize;
+}
+
+.title {
+  @add-mixin truncate;
+
+  composes: info;
+}
+
+.tags {
+  composes: tags from '~./GameIndexPoster.css';
+}
+
+.tagsList {
+  composes: tagsList from '~./GameIndexPoster.css';
+}

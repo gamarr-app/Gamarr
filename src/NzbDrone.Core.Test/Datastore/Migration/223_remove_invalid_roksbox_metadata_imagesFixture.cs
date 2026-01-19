@@ -18,24 +18,24 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             {
                 c.Insert.IntoTable("MetadataFiles").Row(new
                 {
-                    MovieId = 1,
+                    GameId = 1,
                     Consumer = "RoksboxMetadata",
                     Type = 5,
-                    RelativePath = @"metadata\Movie Title (2023).jpg",
+                    RelativePath = @"metadata\Game Title (2023).jpg",
                     LastUpdated = "2023-01-21 00:00:00.000",
                     Added = "2023-01-21 00:00:00.000",
-                    MovieFileId = 1,
+                    GameFileId = 1,
                     Extension = ".jpg"
                 });
 
                 c.Insert.IntoTable("MetadataFiles").Row(new
                 {
-                    MovieId = 1,
+                    GameId = 1,
                     Consumer = "RoksboxMetadata",
                     Type = 5,
-                    RelativePath = @"Movie Title (2023).jpg",
+                    RelativePath = @"Game Title (2023).jpg",
                     LastUpdated = "2023-01-21 00:00:00.000",
-                    MovieFileId = 1,
+                    GameFileId = 1,
                     Added = "2023-01-21 00:00:00.000",
                     Extension = ".jpg"
                 });
@@ -51,8 +51,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     public class MetadataFile223
     {
         public int Id { get; set; }
-        public int MovieId { get; set; }
-        public int? MovieFileId { get; set; }
+        public int GameId { get; set; }
+        public int? GameFileId { get; set; }
         public string RelativePath { get; set; }
         public DateTime Added { get; set; }
         public DateTime LastUpdated { get; set; }

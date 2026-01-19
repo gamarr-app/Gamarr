@@ -15,17 +15,17 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Execute.WithConnection(FixMovies);
+            Execute.WithConnection(FixGames);
         }
 
-        private void FixMovies(IDbConnection conn, IDbTransaction tran)
+        private void FixGames(IDbConnection conn, IDbTransaction tran)
         {
             var profiles = GetProfileIds(conn);
-            var movieRows = conn.Query<ProfileEntity179>($"SELECT \"Id\", \"ProfileId\" FROM \"Movies\"");
+            var gameRows = conn.Query<ProfileEntity179>($"SELECT \"Id\", \"ProfileId\" FROM \"Games\"");
             var listRows = conn.Query<ProfileEntity179>($"SELECT \"Id\", \"ProfileId\" FROM \"NetImport\"");
 
-            // Only process if there are lists or movies existing in the DB
-            if (movieRows.Any() || listRows.Any())
+            // Only process if there are lists or games existing in the DB
+            if (gameRows.Any() || listRows.Any())
             {
                 // If there are no Profiles lets add the defaults
                 if (!profiles.Any())
@@ -36,10 +36,10 @@ namespace NzbDrone.Core.Datastore.Migration
 
                 var mostCommonProfileId = 0;
 
-                // If we have some movies, lets determine the most common profile used and use it for the bad entries
-                if (movieRows.Any())
+                // If we have some games, lets determine the most common profile used and use it for the bad entries
+                if (gameRows.Any())
                 {
-                    mostCommonProfileId = movieRows.Select(x => x.ProfileId)
+                    mostCommonProfileId = gameRows.Select(x => x.ProfileId)
                                             .Where(x => profiles.Contains(x))
                                             .GroupBy(p => p)
                                             .OrderByDescending(g => g.Count())
@@ -47,14 +47,14 @@ namespace NzbDrone.Core.Datastore.Migration
                                             .FirstOrDefault();
                 }
 
-                // If all the movie profiles are bad or there are no movies, just use the first profile for bad movies and lists
+                // If all the game profiles are bad or there are no games, just use the first profile for bad games and lists
                 if (mostCommonProfileId == 0)
                 {
                     mostCommonProfileId = profiles.First();
                 }
 
-                // Correct any Movies that reference profiles that are null
-                var sql = $"UPDATE \"Movies\" SET \"ProfileId\" = {mostCommonProfileId} WHERE \"Id\" IN(SELECT \"Movies\".\"Id\" FROM \"Movies\" LEFT OUTER JOIN \"Profiles\" ON \"Movies\".\"ProfileId\" = \"Profiles\".\"Id\" WHERE \"Profiles\".\"Id\" IS NULL)";
+                // Correct any Games that reference profiles that are null
+                var sql = $"UPDATE \"Games\" SET \"ProfileId\" = {mostCommonProfileId} WHERE \"Id\" IN(SELECT \"Games\".\"Id\" FROM \"Games\" LEFT OUTER JOIN \"Profiles\" ON \"Games\".\"ProfileId\" = \"Profiles\".\"Id\" WHERE \"Profiles\".\"Id\" IS NULL)";
                 conn.Execute(sql, transaction: tran);
 
                 // Correct any Lists that reference profiles that are null

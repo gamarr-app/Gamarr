@@ -33,12 +33,12 @@ namespace NzbDrone.Core.Datastore.Migration
             Alter.Table("IndexerStatus").AlterColumn("CookiesExpirationDate").AsDateTimeOffset().Nullable();
             Alter.Table("MetadataFiles").AlterColumn("LastUpdated").AsDateTimeOffset().NotNullable();
             Alter.Table("MetadataFiles").AlterColumn("Added").AsDateTimeOffset().Nullable();
-            Alter.Table("MovieFiles").AlterColumn("DateAdded").AsDateTimeOffset().NotNullable();
-            Alter.Table("MovieMetadata").AlterColumn("DigitalRelease").AsDateTimeOffset().Nullable();
-            Alter.Table("MovieMetadata").AlterColumn("InCinemas").AsDateTimeOffset().Nullable();
-            Alter.Table("MovieMetadata").AlterColumn("LastInfoSync").AsDateTimeOffset().Nullable();
-            Alter.Table("MovieMetadata").AlterColumn("PhysicalRelease").AsDateTimeOffset().Nullable();
-            Alter.Table("Movies").AlterColumn("Added").AsDateTimeOffset().Nullable();
+            Alter.Table("GameFiles").AlterColumn("DateAdded").AsDateTimeOffset().NotNullable();
+            Alter.Table("GameMetadata").AlterColumn("DigitalRelease").AsDateTimeOffset().Nullable();
+            Alter.Table("GameMetadata").AlterColumn("InDevelopment").AsDateTimeOffset().Nullable();
+            Alter.Table("GameMetadata").AlterColumn("LastInfoSync").AsDateTimeOffset().Nullable();
+            Alter.Table("GameMetadata").AlterColumn("PhysicalRelease").AsDateTimeOffset().Nullable();
+            Alter.Table("Games").AlterColumn("Added").AsDateTimeOffset().Nullable();
             Alter.Table("PendingReleases").AlterColumn("Added").AsDateTimeOffset().NotNullable();
             Alter.Table("ScheduledTasks").AlterColumn("LastExecution").AsDateTimeOffset().NotNullable();
             Alter.Table("ScheduledTasks").AlterColumn("LastStartTime").AsDateTimeOffset().Nullable();

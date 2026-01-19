@@ -10,7 +10,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
 {
@@ -30,25 +30,25 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
         // private static List<string> ValidCertification = new List<string> { "G", "NC-17", "PG", "PG-13", "R", "UR", "UNRATED", "NR", "TV-Y", "TV-Y7", "TV-Y7-FV", "TV-G", "TV-PG", "TV-14", "TV-MA" };
         public override string Name => "Roksbox";
 
-        public override string GetFilenameAfterMove(Movie movie, MovieFile movieFile, MetadataFile metadataFile)
+        public override string GetFilenameAfterMove(Game game, GameFile gameFile, MetadataFile metadataFile)
         {
-            var movieFilePath = Path.Combine(movie.Path, movieFile.RelativePath);
+            var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
 
-            if (metadataFile.Type == MetadataType.MovieImage)
+            if (metadataFile.Type == MetadataType.GameImage)
             {
-                return GetMovieFileImageFilename(movieFilePath);
+                return GetGameFileImageFilename(gameFilePath);
             }
 
-            if (metadataFile.Type == MetadataType.MovieMetadata)
+            if (metadataFile.Type == MetadataType.GameMetadata)
             {
-                return GetMovieFileMetadataFilename(movieFilePath);
+                return GetGameFileMetadataFilename(gameFilePath);
             }
 
-            _logger.Debug("Unknown movie file metadata: {0}", metadataFile.RelativePath);
-            return Path.Combine(movie.Path, metadataFile.RelativePath);
+            _logger.Debug("Unknown game file metadata: {0}", metadataFile.RelativePath);
+            return Path.Combine(game.Path, metadataFile.RelativePath);
         }
 
-        public override MetadataFile FindMetadataFile(Movie movie, string path)
+        public override MetadataFile FindMetadataFile(Game game, string path)
         {
             var filename = Path.GetFileName(path);
 
@@ -61,12 +61,12 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
 
             var metadata = new MetadataFile
             {
-                MovieId = movie.Id,
+                GameId = game.Id,
                 Consumer = GetType().Name,
-                RelativePath = movie.Path.GetRelativePath(path)
+                RelativePath = game.Path.GetRelativePath(path)
             };
 
-            var parseResult = Parser.Parser.ParseMovieTitle(filename);
+            var parseResult = Parser.Parser.ParseGameTitle(filename);
 
             if (parseResult != null)
             {
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
 
                 if (extension == ".xml")
                 {
-                    metadata.Type = MetadataType.MovieMetadata;
+                    metadata.Type = MetadataType.GameMetadata;
                     return metadata;
                 }
 
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
                     if (Path.GetFileNameWithoutExtension(filename).Equals(parentdir.Name, StringComparison.InvariantCultureIgnoreCase) &&
                         !path.GetParentName().Equals("metadata", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        metadata.Type = MetadataType.MovieImage;
+                        metadata.Type = MetadataType.GameImage;
                         return metadata;
                     }
                 }
@@ -92,14 +92,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
             return null;
         }
 
-        public override MetadataFileResult MovieMetadata(Movie movie, MovieFile movieFile)
+        public override MetadataFileResult GameMetadata(Game game, GameFile gameFile)
         {
-            if (!Settings.MovieMetadata)
+            if (!Settings.GameMetadata)
             {
                 return null;
             }
 
-            _logger.Debug("Generating Movie File Metadata for: {0}", movieFile.RelativePath);
+            _logger.Debug("Generating Game File Metadata for: {0}", gameFile.RelativePath);
 
             var xmlResult = string.Empty;
 
@@ -113,11 +113,11 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
                 var doc = new XDocument();
 
                 var details = new XElement("video");
-                details.Add(new XElement("title", movie.Title));
+                details.Add(new XElement("title", game.Title));
 
-                details.Add(new XElement("genre", string.Join(" / ", movie.MovieMetadata.Value.Genres)));
-                details.Add(new XElement("description", movie.MovieMetadata.Value.Overview));
-                details.Add(new XElement("length", movie.MovieMetadata.Value.Runtime));
+                details.Add(new XElement("genre", string.Join(" / ", game.GameMetadata.Value.Genres)));
+                details.Add(new XElement("description", game.GameMetadata.Value.Overview));
+                details.Add(new XElement("length", game.GameMetadata.Value.Runtime));
 
                 doc.Add(details);
                 doc.Save(xw);
@@ -126,37 +126,37 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Roksbox
                 xmlResult += Environment.NewLine;
             }
 
-            return new MetadataFileResult(GetMovieFileMetadataFilename(movieFile.RelativePath), xmlResult.Trim(Environment.NewLine.ToCharArray()));
+            return new MetadataFileResult(GetGameFileMetadataFilename(gameFile.RelativePath), xmlResult.Trim(Environment.NewLine.ToCharArray()));
         }
 
-        public override List<ImageFileResult> MovieImages(Movie movie)
+        public override List<ImageFileResult> GameImages(Game game)
         {
-            if (!Settings.MovieImages)
+            if (!Settings.GameImages)
             {
                 return new List<ImageFileResult>();
             }
 
-            var image = movie.MovieMetadata.Value.Images.SingleOrDefault(c => c.CoverType == MediaCoverTypes.Poster) ?? movie.MovieMetadata.Value.Images.FirstOrDefault();
+            var image = game.GameMetadata.Value.Images.SingleOrDefault(c => c.CoverType == MediaCoverTypes.Poster) ?? game.GameMetadata.Value.Images.FirstOrDefault();
             if (image == null)
             {
-                _logger.Trace("Failed to find suitable Movie image for movie {0}.", movie.Title);
+                _logger.Trace("Failed to find suitable Game image for game {0}.", game.Title);
                 return new List<ImageFileResult>();
             }
 
-            var source = _mediaCoverService.GetCoverPath(movie.Id, image.CoverType);
-            var destination = Path.GetFileName(movie.Path) + Path.GetExtension(source);
+            var source = _mediaCoverService.GetCoverPath(game.Id, image.CoverType);
+            var destination = Path.GetFileName(game.Path) + Path.GetExtension(source);
 
             return new List<ImageFileResult> { new ImageFileResult(destination, source) };
         }
 
-        private string GetMovieFileMetadataFilename(string movieFilePath)
+        private string GetGameFileMetadataFilename(string gameFilePath)
         {
-            return Path.ChangeExtension(movieFilePath, "xml");
+            return Path.ChangeExtension(gameFilePath, "xml");
         }
 
-        private string GetMovieFileImageFilename(string movieFilePath)
+        private string GetGameFileImageFilename(string gameFilePath)
         {
-            return Path.ChangeExtension(movieFilePath, "jpg");
+            return Path.ChangeExtension(gameFilePath, "jpg");
         }
     }
 }

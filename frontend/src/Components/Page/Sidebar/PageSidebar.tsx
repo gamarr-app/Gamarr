@@ -45,10 +45,10 @@ interface SidebarItem {
 
 const LINKS: SidebarItem[] = [
   {
-    iconName: icons.MOVIE_CONTINUING,
-    title: () => translate('Movies'),
+    iconName: icons.GAME_CONTINUING,
+    title: () => translate('Games'),
     to: '/',
-    alias: '/movies',
+    alias: '/games',
     children: [
       {
         title: () => translate('AddNew'),
@@ -239,7 +239,7 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
     height: `${window.innerHeight - HEADER_HEIGHT}px`,
   });
 
-  const urlBase = window.Radarr.urlBase;
+  const urlBase = window.Gamarr.urlBase;
   const pathname = urlBase
     ? location.pathname.substr(urlBase.length) || '/'
     : location.pathname;

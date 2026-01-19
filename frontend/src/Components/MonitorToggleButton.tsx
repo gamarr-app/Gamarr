@@ -29,7 +29,7 @@ function MonitorToggleButton(props: MonitorToggleButtonProps) {
 
   const title = useMemo(() => {
     if (isDisabled) {
-      return 'Cannot toggle monitored state when movie is unmonitored';
+      return 'Cannot toggle monitored state when game is unmonitored';
     }
 
     if (monitored) {

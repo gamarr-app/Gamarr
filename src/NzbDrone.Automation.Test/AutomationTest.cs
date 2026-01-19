@@ -54,7 +54,7 @@ namespace NzbDrone.Automation.Test
             var page = new PageBase(driver);
             page.WaitForNoSpinner();
 
-            driver.ExecuteScript("window.Radarr.NameViews = true;");
+            driver.ExecuteScript("window.Gamarr.NameViews = true;");
 
             GetPageErrors().Should().BeEmpty();
         }

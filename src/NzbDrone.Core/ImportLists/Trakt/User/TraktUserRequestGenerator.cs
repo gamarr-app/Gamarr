@@ -16,16 +16,16 @@ namespace NzbDrone.Core.ImportLists.Trakt.User
             _settings = settings;
         }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequest());
+            pageableRequests.Add(GetGamesRequest());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequest()
+        private IEnumerable<ImportListRequest> GetGamesRequest()
         {
             var requestBuilder = new HttpRequestBuilder(_settings.Link.Trim());
 
@@ -41,14 +41,14 @@ namespace NzbDrone.Core.ImportLists.Trakt.User
                     };
 
                     requestBuilder
-                        .Resource("/users/{userName}/watchlist/movies/{sorting}")
+                        .Resource("/users/{userName}/watchlist/games/{sorting}")
                         .SetSegment("sorting", watchSorting);
                     break;
                 case (int)TraktUserListType.UserWatchedList:
-                    requestBuilder.Resource("/users/{userName}/watched/movies");
+                    requestBuilder.Resource("/users/{userName}/watched/games");
                     break;
                 case (int)TraktUserListType.UserCollectionList:
-                    requestBuilder.Resource("/users/{userName}/collection/movies");
+                    requestBuilder.Resource("/users/{userName}/collection/games");
                     break;
             }
 

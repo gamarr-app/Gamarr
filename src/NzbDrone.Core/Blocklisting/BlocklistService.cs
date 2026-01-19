@@ -7,18 +7,18 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Blocklisting
 {
     public interface IBlocklistService
     {
-        bool Blocklisted(int movieId, ReleaseInfo release);
-        bool BlocklistedTorrentHash(int movieId, string hash);
+        bool Blocklisted(int gameId, ReleaseInfo release);
+        bool BlocklistedTorrentHash(int gameId, string hash);
         PagingSpec<Blocklist> Paged(PagingSpec<Blocklist> pagingSpec);
-        List<Blocklist> GetByMovieId(int movieId);
-        void Block(RemoteMovie remoteMovie, string message);
+        List<Blocklist> GetByGameId(int gameId);
+        void Block(RemoteGame remoteGame, string message);
         void Delete(int id);
         void Delete(List<int> ids);
     }
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Blocklisting
 
                                     IExecute<ClearBlocklistCommand>,
                                     IHandle<DownloadFailedEvent>,
-                                    IHandleAsync<MoviesDeletedEvent>
+                                    IHandleAsync<GamesDeletedEvent>
     {
         private readonly IBlocklistRepository _blocklistRepository;
 
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Blocklisting
             _blocklistRepository = blocklistRepository;
         }
 
-        public bool Blocklisted(int movieId, ReleaseInfo release)
+        public bool Blocklisted(int gameId, ReleaseInfo release)
         {
             if (release.DownloadProtocol == DownloadProtocol.Torrent)
             {
@@ -47,24 +47,24 @@ namespace NzbDrone.Core.Blocklisting
 
                 if (torrentInfo.InfoHash.IsNotNullOrWhiteSpace())
                 {
-                    var blocklistedByTorrentInfohash = _blocklistRepository.BlocklistedByTorrentInfoHash(movieId, torrentInfo.InfoHash);
+                    var blocklistedByTorrentInfohash = _blocklistRepository.BlocklistedByTorrentInfoHash(gameId, torrentInfo.InfoHash);
 
                     return blocklistedByTorrentInfohash.Any(b => SameTorrent(b, torrentInfo));
                 }
 
-                return _blocklistRepository.BlocklistedByTitle(movieId, release.Title)
+                return _blocklistRepository.BlocklistedByTitle(gameId, release.Title)
                     .Where(b => b.Protocol == DownloadProtocol.Torrent)
                     .Any(b => SameTorrent(b, torrentInfo));
             }
 
-            return _blocklistRepository.BlocklistedByTitle(movieId, release.Title)
+            return _blocklistRepository.BlocklistedByTitle(gameId, release.Title)
                 .Where(b => b.Protocol == DownloadProtocol.Usenet)
                 .Any(b => SameNzb(b, release));
         }
 
-        public bool BlocklistedTorrentHash(int movieId, string hash)
+        public bool BlocklistedTorrentHash(int gameId, string hash)
         {
-            return _blocklistRepository.BlocklistedByTorrentInfoHash(movieId, hash).Any(b =>
+            return _blocklistRepository.BlocklistedByTorrentInfoHash(gameId, hash).Any(b =>
                 b.TorrentInfoHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase));
         }
 
@@ -73,28 +73,28 @@ namespace NzbDrone.Core.Blocklisting
             return _blocklistRepository.GetPaged(pagingSpec);
         }
 
-        public List<Blocklist> GetByMovieId(int movieId)
+        public List<Blocklist> GetByGameId(int gameId)
         {
-            return _blocklistRepository.BlocklistedByMovie(movieId);
+            return _blocklistRepository.BlocklistedByGame(gameId);
         }
 
-        public void Block(RemoteMovie remoteMovie, string message)
+        public void Block(RemoteGame remoteGame, string message)
         {
             var blocklist = new Blocklist
                             {
-                                MovieId = remoteMovie.Movie.Id,
-                                SourceTitle =  remoteMovie.Release.Title,
-                                Quality = remoteMovie.ParsedMovieInfo.Quality,
+                                GameId = remoteGame.Game.Id,
+                                SourceTitle =  remoteGame.Release.Title,
+                                Quality = remoteGame.ParsedGameInfo.Quality,
                                 Date = DateTime.UtcNow,
-                                PublishedDate = remoteMovie.Release.PublishDate,
-                                Size = remoteMovie.Release.Size,
-                                Indexer = remoteMovie.Release.Indexer,
-                                Protocol = remoteMovie.Release.DownloadProtocol,
+                                PublishedDate = remoteGame.Release.PublishDate,
+                                Size = remoteGame.Release.Size,
+                                Indexer = remoteGame.Release.Indexer,
+                                Protocol = remoteGame.Release.DownloadProtocol,
                                 Message = message,
-                                Languages = remoteMovie.ParsedMovieInfo.Languages
+                                Languages = remoteGame.ParsedGameInfo.Languages
                             };
 
-            if (remoteMovie.Release is TorrentInfo torrentRelease)
+            if (remoteGame.Release is TorrentInfo torrentRelease)
             {
                 blocklist.TorrentInfoHash = torrentRelease.InfoHash;
             }
@@ -181,7 +181,7 @@ namespace NzbDrone.Core.Blocklisting
         {
             var blocklist = new Blocklist
             {
-                MovieId = message.MovieId,
+                GameId = message.GameId,
                 SourceTitle = message.SourceTitle,
                 Quality = message.Quality,
                 Date = DateTime.UtcNow,
@@ -204,9 +204,9 @@ namespace NzbDrone.Core.Blocklisting
             _blocklistRepository.Insert(blocklist);
         }
 
-        public void HandleAsync(MoviesDeletedEvent message)
+        public void HandleAsync(GamesDeletedEvent message)
         {
-            _blocklistRepository.DeleteForMovies(message.Movies.Select(m => m.Id).ToList());
+            _blocklistRepository.DeleteForGames(message.Games.Select(m => m.Id).ToList());
         }
     }
 }

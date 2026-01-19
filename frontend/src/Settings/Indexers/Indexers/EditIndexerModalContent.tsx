@@ -252,7 +252,7 @@ function EditIndexerModalContent({
               <FormInputGroup
                 type={inputTypes.TAG}
                 name="tags"
-                helpText={translate('IndexerTagMovieHelpText')}
+                helpText={translate('IndexerTagGameHelpText')}
                 {...tags}
                 onChange={handleInputChange}
               />

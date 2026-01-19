@@ -6,7 +6,7 @@ let hasWarned = false;
 
 function checkActivationWarning() {
   if (!hasWarned) {
-    console.log('Activated RadarrApi console helpers.');
+    console.log('Activated GamarrApi console helpers.');
     console.warn('Be warned: There will be no further confirmation checks.');
     hasWarned = true;
   }
@@ -81,7 +81,7 @@ class ResourceApi {
 
 class ConsoleApi {
   constructor() {
-    this.movie = new ResourceApi(this, '/movie');
+    this.game = new ResourceApi(this, '/game');
   }
 
   resource(url) {
@@ -115,6 +115,6 @@ class ConsoleApi {
   }
 }
 
-window.RadarrApi = new ConsoleApi();
+window.GamarrApi = new ConsoleApi();
 
 export default ConsoleApi;

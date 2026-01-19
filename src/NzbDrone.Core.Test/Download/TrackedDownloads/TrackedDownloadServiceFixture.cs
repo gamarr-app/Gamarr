@@ -9,8 +9,8 @@ using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.TorrentRss;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -29,13 +29,13 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             Mocker.GetMock<IHistoryService>()
                 .Setup(s => s.FindByDownloadId(It.Is<string>(sr => sr == "35238")))
-                .Returns(new List<MovieHistory>()
+                .Returns(new List<GameHistory>()
                 {
-                    new MovieHistory()
+                    new GameHistory()
                     {
                         DownloadId = "35238",
                         SourceTitle = "TV Series S01",
-                        MovieId = 3,
+                        GameId = 3,
                     }
                 });
         }
@@ -45,20 +45,20 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             GivenDownloadHistory();
 
-            var remoteMovie = new RemoteMovie
+            var remoteGame = new RemoteGame
             {
-                Movie = new Movie() { Id = 3 },
+                Game = new Game() { Id = 3 },
 
-                ParsedMovieInfo = new ParsedMovieInfo()
+                ParsedGameInfo = new ParsedGameInfo()
                 {
-                    MovieTitles = new List<string> { "A Movie" },
+                    GameTitles = new List<string> { "A Game" },
                     Year = 1998
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedMovieInfo>(i => i.PrimaryMovieTitle == "A Movie"), It.IsAny<string>(), It.IsAny<int>(), null))
-                  .Returns(remoteMovie);
+                  .Setup(s => s.Map(It.Is<ParsedGameInfo>(i => i.PrimaryGameTitle == "A Game"), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Returns(remoteGame);
 
             var client = new DownloadClientDefinition()
             {
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "A Movie 1998",
+                Title = "A Game 1998",
                 DownloadId = "35238",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -81,25 +81,25 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             var trackedDownload = Subject.TrackDownload(client, item);
 
             trackedDownload.Should().NotBeNull();
-            trackedDownload.RemoteMovie.Should().NotBeNull();
-            trackedDownload.RemoteMovie.Movie.Should().NotBeNull();
-            trackedDownload.RemoteMovie.Movie.Id.Should().Be(3);
+            trackedDownload.RemoteGame.Should().NotBeNull();
+            trackedDownload.RemoteGame.Game.Should().NotBeNull();
+            trackedDownload.RemoteGame.Game.Id.Should().Be(3);
         }
 
         [Test]
         public void should_set_indexer()
         {
-            var episodeHistory = new MovieHistory()
+            var episodeHistory = new GameHistory()
             {
                 DownloadId = "35238",
                 SourceTitle = "TV Series S01",
-                MovieId = 3,
-                EventType = MovieHistoryEventType.Grabbed,
+                GameId = 3,
+                EventType = GameHistoryEventType.Grabbed,
             };
             episodeHistory.Data.Add("indexer", "MyIndexer (Prowlarr)");
             Mocker.GetMock<IHistoryService>()
                 .Setup(s => s.FindByDownloadId(It.Is<string>(sr => sr == "35238")))
-                .Returns(new List<MovieHistory>()
+                .Returns(new List<GameHistory>()
                 {
                     episodeHistory
                 });
@@ -117,18 +117,18 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                 .Setup(v => v.All())
                 .Returns(new List<IndexerDefinition>() { indexerDefinition });
 
-            var remoteEpisode = new RemoteMovie
+            var remoteEpisode = new RemoteGame
             {
-                Movie = new Movie() { Id = 3 },
-                ParsedMovieInfo = new ParsedMovieInfo()
+                Game = new Game() { Id = 3 },
+                ParsedGameInfo = new ParsedGameInfo()
                 {
-                    MovieTitles = new List<string> { "A Movie" },
+                    GameTitles = new List<string> { "A Game" },
                     Year = 1998
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.IsAny<ParsedMovieInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
                 .Returns(remoteEpisode);
 
             var client = new DownloadClientDefinition()
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "A Movie 1998",
+                Title = "A Game 1998",
                 DownloadId = "35238",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -152,34 +152,34 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             var trackedDownload = Subject.TrackDownload(client, item);
 
             trackedDownload.Should().NotBeNull();
-            trackedDownload.RemoteMovie.Should().NotBeNull();
-            trackedDownload.RemoteMovie.Release.Should().NotBeNull();
-            trackedDownload.RemoteMovie.Release.Indexer.Should().Be("MyIndexer (Prowlarr)");
+            trackedDownload.RemoteGame.Should().NotBeNull();
+            trackedDownload.RemoteGame.Release.Should().NotBeNull();
+            trackedDownload.RemoteGame.Release.Indexer.Should().Be("MyIndexer (Prowlarr)");
         }
 
         [Test]
-        public void should_unmap_tracked_download_if_movie_deleted()
+        public void should_unmap_tracked_download_if_game_deleted()
         {
             GivenDownloadHistory();
 
-            var remoteMovie = new RemoteMovie
+            var remoteGame = new RemoteGame
             {
-                Movie = new Movie() { Id = 3 },
+                Game = new Game() { Id = 3 },
 
-                ParsedMovieInfo = new ParsedMovieInfo()
+                ParsedGameInfo = new ParsedGameInfo()
                 {
-                    MovieTitles = { "A Movie" },
+                    GameTitles = { "A Game" },
                     Year = 1998
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedMovieInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
-                  .Returns(remoteMovie);
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Returns(remoteGame);
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.IsAny<string>()))
-                  .Returns(new List<MovieHistory>());
+                  .Returns(new List<GameHistory>());
 
             var client = new DownloadClientDefinition()
             {
@@ -189,7 +189,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "A Movie 1998",
+                Title = "A Game 1998",
                 DownloadId = "12345",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -204,39 +204,39 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedMovieInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
-                  .Returns(default(RemoteMovie));
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Returns(default(RemoteGame));
 
-            Subject.Handle(new MoviesDeletedEvent(new List<Movie> { remoteMovie.Movie }, false, false));
+            Subject.Handle(new GamesDeletedEvent(new List<Game> { remoteGame.Game }, false, false));
 
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
-            trackedDownloads.First().RemoteMovie.Should().BeNull();
+            trackedDownloads.First().RemoteGame.Should().BeNull();
         }
 
         [Test]
-        public void should_not_throw_when_processing_deleted_movie()
+        public void should_not_throw_when_processing_deleted_game()
         {
             GivenDownloadHistory();
 
-            var remoteMovie = new RemoteMovie
+            var remoteGame = new RemoteGame
             {
-                Movie = new Movie() { Id = 3 },
+                Game = new Game() { Id = 3 },
 
-                ParsedMovieInfo = new ParsedMovieInfo()
+                ParsedGameInfo = new ParsedGameInfo()
                 {
-                    MovieTitles = { "A Movie" },
+                    GameTitles = { "A Game" },
                     Year = 1998
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedMovieInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
-                  .Returns(default(RemoteMovie));
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Returns(default(RemoteGame));
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.IsAny<string>()))
-                  .Returns(new List<MovieHistory>());
+                  .Returns(new List<GameHistory>());
 
             var client = new DownloadClientDefinition()
             {
@@ -246,7 +246,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "A Movie 1998",
+                Title = "A Game 1998",
                 DownloadId = "12345",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -261,14 +261,14 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedMovieInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
-                  .Returns(default(RemoteMovie));
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Returns(default(RemoteGame));
 
-            Subject.Handle(new MoviesDeletedEvent(new List<Movie> { remoteMovie.Movie }, false, false));
+            Subject.Handle(new GamesDeletedEvent(new List<Game> { remoteGame.Game }, false, false));
 
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
-            trackedDownloads.First().RemoteMovie.Should().BeNull();
+            trackedDownloads.First().RemoteGame.Should().BeNull();
         }
     }
 }

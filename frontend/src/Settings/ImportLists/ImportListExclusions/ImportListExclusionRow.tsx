@@ -20,7 +20,7 @@ interface ImportListExclusionRowProps extends ImportListExclusion {
 }
 
 function ImportListExclusionRow(props: ImportListExclusionRowProps) {
-  const { id, tmdbId, movieTitle, movieYear, isSelected, onSelectedChange } =
+  const { id, igdbId, gameTitle, gameYear, isSelected, onSelectedChange } =
     props;
 
   const dispatch = useDispatch();
@@ -49,9 +49,9 @@ function ImportListExclusionRow(props: ImportListExclusionRowProps) {
         onSelectedChange={onSelectedChange}
       />
 
-      <TableRowCell>{tmdbId}</TableRowCell>
-      <TableRowCell>{movieTitle}</TableRowCell>
-      <TableRowCell>{movieYear}</TableRowCell>
+      <TableRowCell>{igdbId}</TableRowCell>
+      <TableRowCell>{gameTitle}</TableRowCell>
+      <TableRowCell>{gameYear}</TableRowCell>
 
       <TableRowCell className={styles.actions}>
         <IconButton

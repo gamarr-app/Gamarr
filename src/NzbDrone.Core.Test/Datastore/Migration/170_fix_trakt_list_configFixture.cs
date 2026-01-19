@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     public class fix_trakt_list_configFixture : MigrationTest<fix_trakt_list_config>
     {
         [Test]
-        public void should_change_implementation_contract_on_radarr_lists()
+        public void should_change_implementation_contract_on_gamarr_lists()
         {
             var db = WithMigrationTestDb(c =>
             {
@@ -21,26 +21,26 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 1,
                     ShouldMonitor = true,
                     Name = "IMDB List",
-                    Implementation = "RadarrLists",
-                    Settings = new RadarrListSettings169
+                    Implementation = "GamarrLists",
+                    Settings = new GamarrListSettings169
                     {
-                        APIURL = "https://api.radarr.video/v2",
+                        APIURL = "https://api.gamarr.video/v2",
                         Path = "/imdb/list?listId=ls000199717",
                     }.ToJson(),
-                    ConfigContract = "RadarrSettings"
+                    ConfigContract = "GamarrSettings"
                 });
             });
 
             var items = db.Query<ListDefinition169>("SELECT * FROM \"NetImport\"");
 
             items.Should().HaveCount(1);
-            items.First().Implementation.Should().Be("RadarrListImport");
-            items.First().ConfigContract.Should().Be("RadarrListSettings");
+            items.First().Implementation.Should().Be("GamarrListImport");
+            items.First().ConfigContract.Should().Be("GamarrListSettings");
             items.First().Settings.Count.Should().Be(2);
             items.First().Settings.First.Should().NotBeEmpty();
         }
@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 1,
                     ShouldMonitor = true,
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 1,
                     ShouldMonitor = true,
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 1,
                     ShouldMonitor = true,
@@ -177,7 +177,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         public List<int> Tags { get; set; }
     }
 
-    public class RadarrListSettings169
+    public class GamarrListSettings169
     {
         public string APIURL { get; set; }
         public string Path { get; set; }

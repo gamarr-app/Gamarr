@@ -5,8 +5,8 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Integration.Test.Client;
-using Radarr.Api.V3.Queue;
-using Radarr.Http;
+using Gamarr.Api.V3.Queue;
+using Gamarr.Http;
 
 namespace NzbDrone.Integration.Test.ApiTests
 {
@@ -16,7 +16,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         private PagingResource<QueueResource> GetFirstPage()
         {
             var request = Queue.BuildRequest();
-            request.AddParameter("includeUnknownMovieItems", true);
+            request.AddParameter("includeUnknownGameItems", true);
 
             return Queue.Get<PagingResource<QueueResource>>(request);
         }
@@ -61,7 +61,7 @@ namespace NzbDrone.Integration.Test.ApiTests
             var client = EnsureDownloadClient();
             var directory = client.Fields.First(v => v.Name == "watchFolder").Value as string;
 
-            File.WriteAllText(Path.Combine(directory, "Movie.Title.2024.mkv"), "Test Download");
+            File.WriteAllText(Path.Combine(directory, "Game.Title.2024.mkv"), "Test Download");
             RefreshQueue();
 
             var queue = GetFirstPage();

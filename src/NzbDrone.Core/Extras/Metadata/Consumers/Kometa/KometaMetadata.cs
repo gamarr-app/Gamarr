@@ -5,14 +5,14 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.Extras.Metadata.Consumers.Kometa
 {
     public class KometaMetadata : MetadataBase<KometaMetadataSettings>
     {
-        private static readonly Regex MovieImagesRegex = new (@"^(?:poster|background)\.(?:png|jpe?g)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex GameImagesRegex = new (@"^(?:poster|background)\.(?:png|jpe?g)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private readonly ILocalizationService _localizationService;
 
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Kometa
             _localizationService = localizationService;
         }
 
-        public override MetadataFile FindMetadataFile(Movie movie, string path)
+        public override MetadataFile FindMetadataFile(Game game, string path)
         {
             var filename = Path.GetFileName(path);
 
@@ -36,26 +36,26 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Kometa
 
             var metadata = new MetadataFile
             {
-                MovieId = movie.Id,
+                GameId = game.Id,
                 Consumer = GetType().Name,
-                RelativePath = movie.Path.GetRelativePath(path)
+                RelativePath = game.Path.GetRelativePath(path)
             };
 
-            if (MovieImagesRegex.IsMatch(filename))
+            if (GameImagesRegex.IsMatch(filename))
             {
-                metadata.Type = MetadataType.MovieImage;
+                metadata.Type = MetadataType.GameImage;
                 return metadata;
             }
 
             return null;
         }
 
-        public override MetadataFileResult MovieMetadata(Movie movie, MovieFile movieFile)
+        public override MetadataFileResult GameMetadata(Game game, GameFile gameFile)
         {
             return null;
         }
 
-        public override List<ImageFileResult> MovieImages(Movie movie)
+        public override List<ImageFileResult> GameImages(Game game)
         {
             return new List<ImageFileResult>();
         }

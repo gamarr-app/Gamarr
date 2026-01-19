@@ -22,14 +22,14 @@ import usePrevious from 'Helpers/Hooks/usePrevious';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { align, icons, kinds } from 'Helpers/Props';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import { executeCommand } from 'Store/Actions/commandActions';
 import {
   clearQueueDetails,
   fetchQueueDetails,
 } from 'Store/Actions/queueActions';
 import {
-  batchToggleMissingMovies,
+  batchToggleMissingGames,
   clearMissing,
   fetchMissing,
   gotoMissingPage,
@@ -79,11 +79,11 @@ function Missing() {
     totalRecords = 0,
   } = useSelector((state: AppState) => state.wanted.missing);
 
-  const isSearchingForAllMovies = useSelector(
-    createCommandExecutingSelector(commandNames.MISSING_MOVIES_SEARCH)
+  const isSearchingForAllGames = useSelector(
+    createCommandExecutingSelector(commandNames.MISSING_GAMES_SEARCH)
   );
-  const isSearchingForSelectedMovies = useSelector(
-    createCommandExecutingSelector(commandNames.MOVIE_SEARCH)
+  const isSearchingForSelectedGames = useSelector(
+    createCommandExecutingSelector(commandNames.GAME_SEARCH)
   );
 
   const [selectState, setSelectState] = useSelectState();
@@ -117,8 +117,8 @@ function Missing() {
 
   const itemsSelected = !!selectedIds.length;
   const isShowingMonitored = getMonitoredValue(filters, selectedFilterKey);
-  const isSearchingForMovies =
-    isSearchingForAllMovies || isSearchingForSelectedMovies;
+  const isSearchingForGames =
+    isSearchingForAllGames || isSearchingForSelectedGames;
 
   const previousItems = usePrevious(items);
 
@@ -145,8 +145,8 @@ function Missing() {
   const handleSearchSelectedPress = useCallback(() => {
     dispatch(
       executeCommand({
-        name: commandNames.MOVIE_SEARCH,
-        movieIds: selectedIds,
+        name: commandNames.GAME_SEARCH,
+        gameIds: selectedIds,
         commandFinished: () => {
           dispatch(fetchMissing());
         },
@@ -165,7 +165,7 @@ function Missing() {
   const handleSearchAllMissingConfirmed = useCallback(() => {
     dispatch(
       executeCommand({
-        name: commandNames.MISSING_MOVIES_SEARCH,
+        name: commandNames.MISSING_GAMES_SEARCH,
         commandFinished: () => {
           dispatch(fetchMissing());
         },
@@ -177,8 +177,8 @@ function Missing() {
 
   const handleToggleSelectedPress = useCallback(() => {
     dispatch(
-      batchToggleMissingMovies({
-        movieIds: selectedIds,
+      batchToggleMissingGames({
+        gameIds: selectedIds,
         monitored: !isShowingMonitored,
       })
     );
@@ -236,9 +236,9 @@ function Missing() {
     };
 
     registerPagePopulator(repopulate, [
-      'movieUpdated',
-      'movieFileUpdated',
-      'movieFileDeleted',
+      'gameUpdated',
+      'gameFileUpdated',
+      'gameFileDeleted',
     ]);
 
     return () => {
@@ -248,10 +248,10 @@ function Missing() {
 
   useEffect(() => {
     if (!previousItems || hasDifferentItems(items, previousItems)) {
-      const movieIds = selectUniqueIds<Movie, number>(items, 'id');
+      const gameIds = selectUniqueIds<Game, number>(items, 'id');
 
-      if (movieIds.length) {
-        dispatch(fetchQueueDetails({ movieIds }));
+      if (gameIds.length) {
+        dispatch(fetchQueueDetails({ gameIds }));
       }
     }
   }, [items, previousItems, dispatch]);
@@ -267,8 +267,8 @@ function Missing() {
                 : translate('SearchAll')
             }
             iconName={icons.SEARCH}
-            isDisabled={isSearchingForMovies}
-            isSpinning={isSearchingForMovies}
+            isDisabled={isSearchingForGames}
+            isSpinning={isSearchingForGames}
             onPress={
               itemsSelected ? handleSearchSelectedPress : handleSearchAllPress
             }
@@ -374,11 +374,11 @@ function Missing() {
             <ConfirmModal
               isOpen={isConfirmSearchAllModalOpen}
               kind={kinds.DANGER}
-              title={translate('SearchForAllMissingMovies')}
+              title={translate('SearchForAllMissingGames')}
               message={
                 <div>
                   <div>
-                    {translate('SearchForAllMissingMoviesConfirmationCount', {
+                    {translate('SearchForAllMissingGamesConfirmationCount', {
                       totalRecords,
                     })}
                   </div>

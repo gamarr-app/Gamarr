@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { CommandBody } from 'Commands/Command';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
-import createMultiMoviesSelector from 'Store/Selectors/createMultiMoviesSelector';
+import createMultiGamesSelector from 'Store/Selectors/createMultiGamesSelector';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import styles from './QueuedTaskRowNameCell.css';
@@ -33,21 +33,21 @@ export default function QueuedTaskRowNameCell(
   props: QueuedTaskRowNameCellProps
 ) {
   const { commandName, body, clientUserAgent } = props;
-  const movieIds = [...(body.movieIds ?? [])];
+  const gameIds = [...(body.gameIds ?? [])];
 
-  if (body.movieId) {
-    movieIds.push(body.movieId);
+  if (body.gameId) {
+    gameIds.push(body.gameId);
   }
 
-  const movies = useSelector(createMultiMoviesSelector(movieIds));
-  const sortedMovies = movies.sort(sortByProp('sortTitle'));
+  const games = useSelector(createMultiGamesSelector(gameIds));
+  const sortedGames = games.sort(sortByProp('sortTitle'));
 
   return (
     <TableRowCell>
       <span className={styles.commandName}>
         {commandName}
-        {sortedMovies.length ? (
-          <span> - {formatTitles(sortedMovies.map((m) => m.title))}</span>
+        {sortedGames.length ? (
+          <span> - {formatTitles(sortedGames.map((m) => m.title))}</span>
         ) : null}
       </span>
 

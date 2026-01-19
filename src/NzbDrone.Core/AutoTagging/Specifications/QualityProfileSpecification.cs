@@ -1,6 +1,6 @@
 using FluentValidation;
 using NzbDrone.Core.Annotations;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -23,9 +23,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         [FieldDefinition(1, Label = "AutoTaggingSpecificationQualityProfile", Type = FieldType.QualityProfile)]
         public int Value { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return Value == movie.QualityProfileId;
+            return Value == game.QualityProfileId;
         }
 
         public override NzbDroneValidationResult Validate()

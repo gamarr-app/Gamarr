@@ -11,9 +11,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(0)]
         public void missing_should_be_empty()
         {
-            EnsureNoMovie(680, "Pulp Fiction");
+            EnsureNoGame(680, "Pulp Fiction");
 
-            var result = WantedMissing.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.Should().BeEmpty();
         }
@@ -22,9 +22,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void missing_should_have_monitored_items()
         {
-            EnsureMovie(680, "Pulp Fiction", true);
+            EnsureGame(680, "Pulp Fiction", true);
 
-            var result = WantedMissing.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.Should().NotBeEmpty();
         }
@@ -33,9 +33,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void missing_should_have_series()
         {
-            EnsureMovie(680, "Pulp Fiction", true);
+            EnsureGame(680, "Pulp Fiction", true);
 
-            var result = WantedMissing.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.First().Title.Should().Be("Pulp Fiction");
         }
@@ -44,9 +44,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void missing_should_not_have_unmonitored_items()
         {
-            EnsureMovie(680, "Pulp Fiction", false);
+            EnsureGame(680, "Pulp Fiction", false);
 
-            var result = WantedMissing.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.Should().BeEmpty();
         }
@@ -55,9 +55,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void missing_should_have_unmonitored_items()
         {
-            EnsureMovie(680, "Pulp Fiction", false);
+            EnsureGame(680, "Pulp Fiction", false);
 
-            var result = WantedMissing.GetPaged(0, 15, "movieMetadata.year", "desc", "monitored", false);
+            var result = WantedMissing.GetPaged(0, 15, "gameMetadata.year", "desc", "monitored", false);
 
             result.Records.Should().NotBeEmpty();
         }

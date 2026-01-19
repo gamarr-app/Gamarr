@@ -1,4 +1,4 @@
-import { MovieMonitor } from 'Movie/Movie';
+import { GameMonitor } from 'Game/Game';
 import Provider from './Provider';
 
 interface ImportList extends Provider {
@@ -8,7 +8,7 @@ interface ImportList extends Provider {
   qualityProfileId: number;
   minimumAvailability: string;
   rootFolderPath: string;
-  monitor: MovieMonitor;
+  monitor: GameMonitor;
   searchOnAdd: boolean;
   listType: string;
   listOrder: number;

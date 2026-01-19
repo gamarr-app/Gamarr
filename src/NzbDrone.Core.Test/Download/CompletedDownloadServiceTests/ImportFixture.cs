@@ -8,9 +8,9 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MovieImport;
+using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -32,12 +32,12 @@ namespace NzbDrone.Core.Test.Download
                                                     .With(h => h.Title = "Drone.1998")
                                                     .Build();
 
-            var remoteMovie = BuildRemoteMovie();
+            var remoteGame = BuildRemoteGame();
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
                     .With(c => c.State = TrackedDownloadState.Downloading)
                     .With(c => c.DownloadItem = completed)
-                    .With(c => c.RemoteMovie = remoteMovie)
+                    .With(c => c.RemoteGame = remoteGame)
                     .Build();
 
             Mocker.GetMock<IDownloadClient>()
@@ -50,26 +50,26 @@ namespace NzbDrone.Core.Test.Download
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.MostRecentForDownloadId(_trackedDownload.DownloadItem.DownloadId))
-                  .Returns(new MovieHistory());
+                  .Returns(new GameHistory());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie("Drone.1998"))
-                  .Returns(remoteMovie.Movie);
+                  .Setup(s => s.GetGame("Drone.1998"))
+                  .Returns(remoteGame.Game);
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.IsAny<string>()))
-                  .Returns(new List<MovieHistory>());
+                  .Returns(new List<GameHistory>());
 
             Mocker.GetMock<IProvideImportItemService>()
                   .Setup(s => s.ProvideImportItem(It.IsAny<DownloadClientItem>(), It.IsAny<DownloadClientItem>()))
                   .Returns<DownloadClientItem, DownloadClientItem>((i, p) => i);
         }
 
-        private RemoteMovie BuildRemoteMovie()
+        private RemoteGame BuildRemoteGame()
         {
-            return new RemoteMovie
+            return new RemoteGame
             {
-                Movie = new Movie()
+                Game = new Game()
             };
         }
 
@@ -79,38 +79,38 @@ namespace NzbDrone.Core.Test.Download
             _trackedDownload.DownloadItem.Title = "Droned Pilot"; // Set a badly named download
             Mocker.GetMock<IHistoryService>()
                .Setup(s => s.MostRecentForDownloadId(It.Is<string>(i => i == "1234")))
-               .Returns(new MovieHistory() { SourceTitle = "Droned 1998" });
+               .Returns(new GameHistory() { SourceTitle = "Droned 1998" });
 
             Mocker.GetMock<IParsingService>()
-               .Setup(s => s.GetMovie(It.IsAny<string>()))
-               .Returns((Movie)null);
+               .Setup(s => s.GetGame(It.IsAny<string>()))
+               .Returns((Game)null);
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.GetMovie("Droned 1998"))
-                .Returns(BuildRemoteMovie().Movie);
+                .Setup(s => s.GetGame("Droned 1998"))
+                .Returns(BuildRemoteGame().Game);
         }
 
         private void GivenSeriesMatch()
         {
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie(It.IsAny<string>()))
-                  .Returns(_trackedDownload.RemoteMovie.Movie);
+                  .Setup(s => s.GetGame(It.IsAny<string>()))
+                  .Returns(_trackedDownload.RemoteGame.Game);
         }
 
         [Test]
         public void should_not_mark_as_imported_if_all_files_were_rejected()
         {
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+            Mocker.GetMock<IDownloadedGameImportService>()
+                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalMovie { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
+                                       new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalMovie { Path = @"C:\TestPath\Droned.1999.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
+                                       new LocalGame { Path = @"C:\TestPath\Droned.1999.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -122,22 +122,22 @@ namespace NzbDrone.Core.Test.Download
         }
 
         [Test]
-        public void should_not_mark_as_imported_if_no_movies_were_parsed()
+        public void should_not_mark_as_imported_if_no_games_were_parsed()
         {
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+            Mocker.GetMock<IDownloadedGameImportService>()
+                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalMovie { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
+                                       new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalMovie { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
+                                       new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
                            });
 
-            _trackedDownload.RemoteMovie.Movie = new Movie();
+            _trackedDownload.RemoteGame.Game = new Game();
 
             Subject.Import(_trackedDownload);
 
@@ -147,12 +147,12 @@ namespace NzbDrone.Core.Test.Download
         [Test]
         public void should_not_mark_as_imported_if_all_files_were_skipped()
         {
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+            Mocker.GetMock<IDownloadedGameImportService>()
+                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision(new LocalMovie { Path = @"C:\TestPath\Droned.1998.mkv" }), "Test Failure"),
-                               new ImportResult(new ImportDecision(new LocalMovie { Path = @"C:\TestPath\Droned.1998.mkv" }), "Test Failure")
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }), "Test Failure"),
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }), "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -161,18 +161,18 @@ namespace NzbDrone.Core.Test.Download
         }
 
         [Test]
-        public void should_mark_as_imported_if_all_movies_were_imported_but_extra_files_were_not()
+        public void should_mark_as_imported_if_all_games_were_imported_but_extra_files_were_not()
         {
             GivenSeriesMatch();
 
-            _trackedDownload.RemoteMovie.Movie = new Movie();
+            _trackedDownload.RemoteGame.Game = new Game();
 
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+            Mocker.GetMock<IDownloadedGameImportService>()
+                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                {
-                               new ImportResult(new ImportDecision(new LocalMovie { Path = @"C:\TestPath\Droned.S01E01.mkv", Movie = _trackedDownload.RemoteMovie.Movie })),
-                               new ImportResult(new ImportDecision(new LocalMovie { Path = @"C:\TestPath\Droned.S01E01.mkv" }), "Test Failure")
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv", Game = _trackedDownload.RemoteGame.Game })),
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv" }), "Test Failure")
                });
 
             Subject.Import(_trackedDownload);
@@ -181,20 +181,20 @@ namespace NzbDrone.Core.Test.Download
         }
 
         [Test]
-        public void should_mark_as_imported_if_the_download_can_be_tracked_using_the_source_movieid()
+        public void should_mark_as_imported_if_the_download_can_be_tracked_using_the_source_gameid()
         {
             GivenABadlyNamedDownload();
 
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+            Mocker.GetMock<IDownloadedGameImportService>()
+                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                {
-                               new ImportResult(new ImportDecision(new LocalMovie { Path = @"C:\TestPath\Droned.S01E01.mkv", Movie = _trackedDownload.RemoteMovie.Movie }))
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv", Game = _trackedDownload.RemoteGame.Game }))
                });
 
-            Mocker.GetMock<IMovieService>()
-                  .Setup(v => v.GetMovie(It.IsAny<int>()))
-                  .Returns(BuildRemoteMovie().Movie);
+            Mocker.GetMock<IGameService>()
+                  .Setup(v => v.GetGame(It.IsAny<int>()))
+                  .Returns(BuildRemoteGame().Game);
 
             Subject.Import(_trackedDownload);
 
@@ -211,8 +211,8 @@ namespace NzbDrone.Core.Test.Download
 
         private void AssertImported()
         {
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                .Verify(v => v.ProcessPath(_trackedDownload.DownloadItem.OutputPath.FullPath, ImportMode.Auto, _trackedDownload.RemoteMovie.Movie, _trackedDownload.DownloadItem), Times.Once());
+            Mocker.GetMock<IDownloadedGameImportService>()
+                .Verify(v => v.ProcessPath(_trackedDownload.DownloadItem.OutputPath.FullPath, ImportMode.Auto, _trackedDownload.RemoteGame.Game, _trackedDownload.DownloadItem), Times.Once());
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(v => v.PublishEvent(It.IsAny<DownloadCompletedEvent>()), Times.Once());

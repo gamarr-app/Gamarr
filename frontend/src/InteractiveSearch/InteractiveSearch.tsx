@@ -12,8 +12,8 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import { align, icons, kinds, sortDirections } from 'Helpers/Props';
 import { SortDirection } from 'Helpers/Props/sortDirections';
-import { fetchMovieBlocklist } from 'Store/Actions/movieBlocklistActions';
-import { fetchMovieHistory } from 'Store/Actions/movieHistoryActions';
+import { fetchGameBlocklist } from 'Store/Actions/gameBlocklistActions';
+import { fetchGameHistory } from 'Store/Actions/gameHistoryActions';
 import {
   fetchReleases,
   grabRelease,
@@ -171,11 +171,11 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
       if (!isFetching && !isPopulated) {
         dispatch(fetchReleases(searchPayload));
 
-        const { movieId } = searchPayload;
+        const { gameId } = searchPayload;
 
-        if (movieId) {
-          dispatch(fetchMovieBlocklist({ movieId }));
-          dispatch(fetchMovieHistory({ movieId }));
+        if (gameId) {
+          dispatch(fetchGameBlocklist({ gameId }));
+          dispatch(fetchGameHistory({ gameId }));
         }
       }
     },
@@ -195,7 +195,7 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
           customFilters={customFilters}
           buttonComponent={PageMenuButton}
           filterModalConnectorComponent={InteractiveSearchFilterModal}
-          filterModalConnectorComponentProps={{ type: 'movies' }}
+          filterModalConnectorComponentProps={{ type: 'games' }}
           onFilterSelect={handleFilterSelect}
         />
       </div>
@@ -212,7 +212,7 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
               })}
             </>
           ) : (
-            translate('MovieSearchResultsLoadError')
+            translate('GameSearchResultsLoadError')
           )}
         </Alert>
       ) : null}

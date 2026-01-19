@@ -13,10 +13,10 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_have_monitored_items()
         {
             EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
-            var movie = EnsureMovie(680, "Pulp Fiction", true);
-            EnsureMovieFile(movie, Quality.SDTV);
+            var game = EnsureGame(680, "Pulp Fiction", true);
+            EnsureGameFile(game, Quality.SDTV);
 
-            var result = WantedCutoffUnmet.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.Should().NotBeEmpty();
         }
@@ -26,10 +26,10 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_not_have_unmonitored_items()
         {
             EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
-            var movie = EnsureMovie(680, "Pulp Fiction", false);
-            EnsureMovieFile(movie, Quality.SDTV);
+            var game = EnsureGame(680, "Pulp Fiction", false);
+            EnsureGameFile(game, Quality.SDTV);
 
-            var result = WantedCutoffUnmet.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.Should().BeEmpty();
         }
@@ -39,10 +39,10 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_have_series()
         {
             EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
-            var movie = EnsureMovie(680, "Pulp Fiction", true);
-            EnsureMovieFile(movie, Quality.SDTV);
+            var game = EnsureGame(680, "Pulp Fiction", true);
+            EnsureGameFile(game, Quality.SDTV);
 
-            var result = WantedCutoffUnmet.GetPaged(0, 15, "movieMetadata.year", "desc");
+            var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
             result.Records.First().Title.Should().Be("Pulp Fiction");
         }
@@ -52,10 +52,10 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         public void cutoff_should_have_unmonitored_items()
         {
             EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
-            var movie = EnsureMovie(680, "Pulp Fiction", false);
-            EnsureMovieFile(movie, Quality.SDTV);
+            var game = EnsureGame(680, "Pulp Fiction", false);
+            EnsureGameFile(game, Quality.SDTV);
 
-            var result = WantedCutoffUnmet.GetPaged(0, 15, "movieMetadata.year", "desc", "monitored", false);
+            var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc", "monitored", false);
 
             result.Records.Should().NotBeEmpty();
         }

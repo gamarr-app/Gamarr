@@ -1,7 +1,7 @@
 using FluentValidation;
 using NzbDrone.Core.Annotations;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -24,9 +24,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         [FieldDefinition(1, Label = "AutoTaggingSpecificationOriginalLanguage", Type = FieldType.Select, SelectOptions = typeof(OriginalLanguageFieldConverter))]
         public int Value { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return Value == movie?.MovieMetadata?.Value?.OriginalLanguage?.Id;
+            return Value == game?.GameMetadata?.Value?.OriginalLanguage?.Id;
         }
 
         public override NzbDroneValidationResult Validate()

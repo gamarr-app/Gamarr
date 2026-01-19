@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Notifications.Trakt.Resource;
 
 namespace NzbDrone.Core.ImportLists.Trakt.Popular
@@ -16,46 +16,46 @@ namespace NzbDrone.Core.ImportLists.Trakt.Popular
             _settings = settings;
         }
 
-        public override IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public override IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
             _importResponse = importResponse;
 
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(_importResponse))
             {
-                return movies;
+                return games;
             }
 
-            var jsonResponse = new List<TraktMovieResource>();
+            var jsonResponse = new List<TraktGameResource>();
 
             if (_settings.TraktListType == (int)TraktPopularListType.Popular)
             {
-                jsonResponse = STJson.Deserialize<List<TraktMovieResource>>(_importResponse.Content);
+                jsonResponse = STJson.Deserialize<List<TraktGameResource>>(_importResponse.Content);
             }
             else
             {
-                jsonResponse = STJson.Deserialize<List<TraktListResource>>(_importResponse.Content).SelectList(c => c.Movie);
+                jsonResponse = STJson.Deserialize<List<TraktListResource>>(_importResponse.Content).SelectList(c => c.Game);
             }
 
-            // no movies were return
+            // no games were return
             if (jsonResponse == null)
             {
-                return movies;
+                return games;
             }
 
-            foreach (var movie in jsonResponse)
+            foreach (var game in jsonResponse)
             {
-                movies.AddIfNotNull(new ImportListMovie()
+                games.AddIfNotNull(new ImportListGame()
                 {
-                    Title = movie.Title,
-                    ImdbId = movie.Ids.Imdb,
-                    TmdbId = movie.Ids.Tmdb,
-                    Year = movie.Year ?? 0
+                    Title = game.Title,
+                    ImdbId = game.Ids.Imdb,
+                    IgdbId = game.Ids.Igdb,
+                    Year = game.Year ?? 0
                 });
             }
 
-            return movies;
+            return games;
         }
     }
 }

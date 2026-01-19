@@ -8,8 +8,8 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Translations;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 
@@ -17,47 +17,47 @@ namespace NzbDrone.Core.IndexerSearch
 {
     public interface ISearchForReleases
     {
-        Task<List<DownloadDecision>> MovieSearch(int movieId, bool userInvokedSearch, bool interactiveSearch);
-        Task<List<DownloadDecision>> MovieSearch(Movie movie, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> GameSearch(int gameId, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> GameSearch(Game game, bool userInvokedSearch, bool interactiveSearch);
     }
 
     public class ReleaseSearchService : ISearchForReleases
     {
         private readonly IIndexerFactory _indexerFactory;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
-        private readonly IMovieService _movieService;
-        private readonly IMovieTranslationService _movieTranslationService;
+        private readonly IGameService _gameService;
+        private readonly IGameTranslationService _gameTranslationService;
         private readonly IQualityProfileService _qualityProfileService;
         private readonly Logger _logger;
 
         public ReleaseSearchService(IIndexerFactory indexerFactory,
                                 IMakeDownloadDecision makeDownloadDecision,
-                                IMovieService movieService,
-                                IMovieTranslationService movieTranslationService,
+                                IGameService gameService,
+                                IGameTranslationService gameTranslationService,
                                 IQualityProfileService qualityProfileService,
                                 Logger logger)
         {
             _indexerFactory = indexerFactory;
             _makeDownloadDecision = makeDownloadDecision;
-            _movieService = movieService;
-            _movieTranslationService = movieTranslationService;
+            _gameService = gameService;
+            _gameTranslationService = gameTranslationService;
             _qualityProfileService = qualityProfileService;
             _logger = logger;
         }
 
-        public async Task<List<DownloadDecision>> MovieSearch(int movieId, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> GameSearch(int gameId, bool userInvokedSearch, bool interactiveSearch)
         {
-            var movie = _movieService.GetMovie(movieId);
-            movie.MovieMetadata.Value.Translations = _movieTranslationService.GetAllTranslationsForMovieMetadata(movie.MovieMetadataId);
+            var game = _gameService.GetGame(gameId);
+            game.GameMetadata.Value.Translations = _gameTranslationService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
 
-            return await MovieSearch(movie, userInvokedSearch, interactiveSearch);
+            return await GameSearch(game, userInvokedSearch, interactiveSearch);
         }
 
-        public async Task<List<DownloadDecision>> MovieSearch(Movie movie, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> GameSearch(Game game, bool userInvokedSearch, bool interactiveSearch)
         {
             var downloadDecisions = new List<DownloadDecision>();
 
-            var searchSpec = Get<MovieSearchCriteria>(movie, userInvokedSearch, interactiveSearch);
+            var searchSpec = Get<GameSearchCriteria>(game, userInvokedSearch, interactiveSearch);
 
             var decisions = await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
             downloadDecisions.AddRange(decisions);
@@ -65,23 +65,23 @@ namespace NzbDrone.Core.IndexerSearch
             return DeDupeDecisions(downloadDecisions);
         }
 
-        private TSpec Get<TSpec>(Movie movie, bool userInvokedSearch, bool interactiveSearch)
+        private TSpec Get<TSpec>(Game game, bool userInvokedSearch, bool interactiveSearch)
             where TSpec : SearchCriteriaBase, new()
         {
             var spec = new TSpec
             {
-                Movie = movie,
+                Game = game,
                 UserInvokedSearch = userInvokedSearch,
                 InteractiveSearch = interactiveSearch
             };
 
-            var wantedLanguages = _qualityProfileService.GetAcceptableLanguages(movie.QualityProfileId);
-            var translations = _movieTranslationService.GetAllTranslationsForMovieMetadata(movie.MovieMetadataId);
+            var wantedLanguages = _qualityProfileService.GetAcceptableLanguages(game.QualityProfileId);
+            var translations = _gameTranslationService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
 
             var queryTranslations = new List<string>
             {
-                movie.MovieMetadata.Value.Title,
-                movie.MovieMetadata.Value.OriginalTitle
+                game.GameMetadata.Value.Title,
+                game.GameMetadata.Value.OriginalTitle
             };
 
             // Add Translation of wanted languages to search query
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.IndexerSearch
                 _indexerFactory.AutomaticSearchEnabled();
 
             // Filter indexers to untagged indexers and indexers with intersecting tags
-            indexers = indexers.Where(i => i.Definition.Tags.Empty() || i.Definition.Tags.Intersect(criteriaBase.Movie.Tags).Any()).ToList();
+            indexers = indexers.Where(i => i.Definition.Tags.Empty() || i.Definition.Tags.Intersect(criteriaBase.Game.Tags).Any()).ToList();
 
             _logger.ProgressInfo("Searching indexers for {0}. {1} active indexers", criteriaBase, indexers.Count);
 
@@ -114,14 +114,14 @@ namespace NzbDrone.Core.IndexerSearch
 
             _logger.ProgressDebug("Total of {0} reports were found for {1} from {2} indexers", reports.Count, criteriaBase, indexers.Count);
 
-            // Update the last search time for movie if at least 1 indexer was searched.
+            // Update the last search time for game if at least 1 indexer was searched.
             if (indexers.Any())
             {
                 var lastSearchTime = DateTime.UtcNow;
                 _logger.Debug("Setting last search time to: {0}", lastSearchTime);
 
-                criteriaBase.Movie.LastSearchTime = lastSearchTime;
-                _movieService.UpdateLastSearchTime(criteriaBase.Movie);
+                criteriaBase.Game.LastSearchTime = lastSearchTime;
+                _gameService.UpdateLastSearchTime(criteriaBase.Game);
             }
 
             return _makeDownloadDecision.GetSearchDecision(reports, criteriaBase).ToList();
@@ -144,8 +144,8 @@ namespace NzbDrone.Core.IndexerSearch
         private List<DownloadDecision> DeDupeDecisions(List<DownloadDecision> decisions)
         {
             // De-dupe reports by guid so duplicate results aren't returned. Pick the one with the least rejections and higher indexer priority.
-            return decisions.GroupBy(d => d.RemoteMovie.Release.Guid)
-                .Select(d => d.OrderBy(v => v.Rejections.Count()).ThenBy(v => v.RemoteMovie?.Release?.IndexerPriority ?? IndexerDefinition.DefaultPriority).First())
+            return decisions.GroupBy(d => d.RemoteGame.Release.Guid)
+                .Select(d => d.OrderBy(v => v.Rejections.Count()).ThenBy(v => v.RemoteGame?.Release?.IndexerPriority ?? IndexerDefinition.DefaultPriority).First())
                 .ToList();
         }
     }

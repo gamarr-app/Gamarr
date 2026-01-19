@@ -5,7 +5,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Tags;
 using NzbDrone.Core.Validation;
 
@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             _proxy = proxy;
         }
 
-        public override string Link => "https://wiki.servarr.com/radarr/settings#connect";
+        public override string Link => "https://wiki.servarr.com/gamarr/settings#connect";
 
         public override void OnGrab(GrabMessage message)
         {
@@ -33,24 +33,24 @@ namespace NzbDrone.Core.Notifications.Webhook
             _proxy.SendWebhook(BuildOnDownloadPayload(message), Settings);
         }
 
-        public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+        public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
         {
-            _proxy.SendWebhook(BuildOnRenamePayload(movie, renamedFiles), Settings);
+            _proxy.SendWebhook(BuildOnRenamePayload(game, renamedFiles), Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            _proxy.SendWebhook(BuildOnMovieAdded(movie), Settings);
+            _proxy.SendWebhook(BuildOnGameAdded(game), Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            _proxy.SendWebhook(BuildOnMovieFileDelete(deleteMessage), Settings);
+            _proxy.SendWebhook(BuildOnGameFileDelete(deleteMessage), Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            _proxy.SendWebhook(BuildOnMovieDelete(deleteMessage), Settings);
+            _proxy.SendWebhook(BuildOnGameDelete(deleteMessage), Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

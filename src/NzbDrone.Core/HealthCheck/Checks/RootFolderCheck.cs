@@ -4,33 +4,33 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles.Events;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.HealthCheck.Checks
 {
-    [CheckOn(typeof(MoviesDeletedEvent))]
-    [CheckOn(typeof(MovieMovedEvent))]
-    [CheckOn(typeof(MoviesImportedEvent), CheckOnCondition.FailedOnly)]
-    [CheckOn(typeof(MovieImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
+    [CheckOn(typeof(GamesDeletedEvent))]
+    [CheckOn(typeof(GameMovedEvent))]
+    [CheckOn(typeof(GamesImportedEvent), CheckOnCondition.FailedOnly)]
+    [CheckOn(typeof(GameImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class RootFolderCheck : HealthCheckBase
     {
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderService _rootFolderService;
 
-        public RootFolderCheck(IMovieService movieService, IDiskProvider diskProvider, IRootFolderService rootFolderService, ILocalizationService localizationService)
+        public RootFolderCheck(IGameService gameService, IDiskProvider diskProvider, IRootFolderService rootFolderService, ILocalizationService localizationService)
             : base(localizationService)
         {
-            _movieService = movieService;
+            _gameService = gameService;
             _diskProvider = diskProvider;
             _rootFolderService = rootFolderService;
         }
 
         public override HealthCheck Check()
         {
-            var rootFolders = _movieService.AllMoviePaths()
+            var rootFolders = _gameService.AllGamePaths()
                 .Select(s => _rootFolderService.GetBestRootFolderPath(s.Value))
                 .Distinct();
 

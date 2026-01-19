@@ -127,24 +127,24 @@ namespace NzbDrone.Core.Download.Clients.FreeboxDownload
             return queueItems;
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             return _proxy.AddTaskFromUrl(magnetLink,
                                          GetDownloadDirectory().EncodeBase64(),
                                          ToBePaused(),
-                                         ToBeQueuedFirst(remoteMovie),
-                                         GetSeedRatio(remoteMovie),
+                                         ToBeQueuedFirst(remoteGame),
+                                         GetSeedRatio(remoteGame),
                                          Settings);
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             return _proxy.AddTaskFromFile(filename,
                                           fileContent,
                                           GetDownloadDirectory().EncodeBase64(),
                                           ToBePaused(),
-                                          ToBeQueuedFirst(remoteMovie),
-                                          GetSeedRatio(remoteMovie),
+                                          ToBeQueuedFirst(remoteGame),
+                                          GetSeedRatio(remoteGame),
                                           Settings);
         }
 
@@ -208,12 +208,12 @@ namespace NzbDrone.Core.Download.Clients.FreeboxDownload
             return Settings.AddPaused;
         }
 
-        private bool ToBeQueuedFirst(RemoteMovie remoteMovie)
+        private bool ToBeQueuedFirst(RemoteGame remoteGame)
         {
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentPriority == (int)FreeboxDownloadPriority.First) ||
-                (!isRecentMovie && Settings.OlderPriority == (int)FreeboxDownloadPriority.First))
+            if ((isRecentGame && Settings.RecentPriority == (int)FreeboxDownloadPriority.First) ||
+                (!isRecentGame && Settings.OlderPriority == (int)FreeboxDownloadPriority.First))
             {
                 return true;
             }
@@ -221,14 +221,14 @@ namespace NzbDrone.Core.Download.Clients.FreeboxDownload
             return false;
         }
 
-        private double? GetSeedRatio(RemoteMovie remoteMovie)
+        private double? GetSeedRatio(RemoteGame remoteGame)
         {
-            if (remoteMovie.SeedConfiguration == null || remoteMovie.SeedConfiguration.Ratio == null)
+            if (remoteGame.SeedConfiguration == null || remoteGame.SeedConfiguration.Ratio == null)
             {
                 return null;
             }
 
-            return remoteMovie.SeedConfiguration.Ratio.Value * 100;
+            return remoteGame.SeedConfiguration.Ratio.Value * 100;
         }
     }
 }

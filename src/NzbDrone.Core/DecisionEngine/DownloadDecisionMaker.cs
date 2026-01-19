@@ -27,14 +27,14 @@ namespace NzbDrone.Core.DecisionEngine
         private readonly IParsingService _parsingService;
         private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _formatCalculator;
-        private readonly IRemoteMovieAggregationService _aggregationService;
+        private readonly IRemoteGameAggregationService _aggregationService;
         private readonly Logger _logger;
 
         public DownloadDecisionMaker(IEnumerable<IDownloadDecisionEngineSpecification> specifications,
                                      IParsingService parsingService,
                                      IConfigService configService,
                                      ICustomFormatCalculationService formatCalculator,
-                                     IRemoteMovieAggregationService aggregationService,
+                                     IRemoteGameAggregationService aggregationService,
                                      Logger logger)
         {
             _specifications = specifications;
@@ -76,52 +76,52 @@ namespace NzbDrone.Core.DecisionEngine
 
                 try
                 {
-                    var parsedMovieInfo = Parser.Parser.ParseMovieTitle(report.Title);
+                    var parsedGameInfo = Parser.Parser.ParseGameTitle(report.Title);
 
-                    if (parsedMovieInfo != null && !parsedMovieInfo.PrimaryMovieTitle.IsNullOrWhiteSpace())
+                    if (parsedGameInfo != null && !parsedGameInfo.PrimaryGameTitle.IsNullOrWhiteSpace())
                     {
-                        var remoteMovie = _parsingService.Map(parsedMovieInfo, report.ImdbId.ToString(), report.TmdbId, searchCriteria);
-                        remoteMovie.Release = report;
+                        var remoteGame = _parsingService.Map(parsedGameInfo, report.ImdbId.ToString(), report.IgdbId, searchCriteria);
+                        remoteGame.Release = report;
 
-                        if (remoteMovie.Movie == null)
+                        if (remoteGame.Game == null)
                         {
-                            decision = new DownloadDecision(remoteMovie, new DownloadRejection(DownloadRejectionReason.UnknownMovie, pushedRelease ? "Unknown Movie. Unable to match to existing movie in Library using release title." : "Unknown Movie. Unable to match to correct movie using release title."));
+                            decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.UnknownGame, pushedRelease ? "Unknown Game. Unable to match to existing game in Library using release title." : "Unknown Game. Unable to match to correct game using release title."));
                         }
                         else
                         {
-                            _aggregationService.Augment(remoteMovie);
+                            _aggregationService.Augment(remoteGame);
 
-                            remoteMovie.CustomFormats = _formatCalculator.ParseCustomFormat(remoteMovie, remoteMovie.Release.Size);
-                            remoteMovie.CustomFormatScore = remoteMovie?.Movie?.QualityProfile?.CalculateCustomFormatScore(remoteMovie.CustomFormats) ?? 0;
+                            remoteGame.CustomFormats = _formatCalculator.ParseCustomFormat(remoteGame, remoteGame.Release.Size);
+                            remoteGame.CustomFormatScore = remoteGame?.Game?.QualityProfile?.CalculateCustomFormatScore(remoteGame.CustomFormats) ?? 0;
 
-                            _logger.Trace("Custom Format Score of '{0}' [{1}] calculated for '{2}'", remoteMovie.CustomFormatScore, remoteMovie.CustomFormats?.ConcatToString(), report.Title);
+                            _logger.Trace("Custom Format Score of '{0}' [{1}] calculated for '{2}'", remoteGame.CustomFormatScore, remoteGame.CustomFormats?.ConcatToString(), report.Title);
 
-                            remoteMovie.DownloadAllowed = remoteMovie.Movie != null;
-                            decision = GetDecisionForReport(remoteMovie, searchCriteria);
+                            remoteGame.DownloadAllowed = remoteGame.Game != null;
+                            decision = GetDecisionForReport(remoteGame, searchCriteria);
                         }
                     }
 
                     if (searchCriteria != null)
                     {
-                        if (parsedMovieInfo == null)
+                        if (parsedGameInfo == null)
                         {
-                            parsedMovieInfo = new ParsedMovieInfo
+                            parsedGameInfo = new ParsedGameInfo
                             {
                                 Languages = LanguageParser.ParseLanguages(report.Title),
                                 Quality = QualityParser.ParseQuality(report.Title)
                             };
                         }
 
-                        if (parsedMovieInfo.PrimaryMovieTitle.IsNullOrWhiteSpace())
+                        if (parsedGameInfo.PrimaryGameTitle.IsNullOrWhiteSpace())
                         {
-                            var remoteMovie = new RemoteMovie
+                            var remoteGame = new RemoteGame
                             {
                                 Release = report,
-                                ParsedMovieInfo = parsedMovieInfo,
-                                Languages = parsedMovieInfo.Languages
+                                ParsedGameInfo = parsedGameInfo,
+                                Languages = parsedGameInfo.Languages
                             };
 
-                            decision = new DownloadDecision(remoteMovie, new DownloadRejection(DownloadRejectionReason.UnableToParse, "Unable to parse release"));
+                            decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.UnableToParse, "Unable to parse release"));
                         }
                     }
                 }
@@ -129,8 +129,8 @@ namespace NzbDrone.Core.DecisionEngine
                 {
                     _logger.Error(e, "Couldn't process release.");
 
-                    var remoteMovie = new RemoteMovie { Release = report };
-                    decision = new DownloadDecision(remoteMovie, new DownloadRejection(DownloadRejectionReason.Error, "Unexpected error processing release"));
+                    var remoteGame = new RemoteGame { Release = report };
+                    decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Error, "Unexpected error processing release"));
                 }
 
                 reportNumber++;
@@ -155,7 +155,7 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                     }
 
-                    decision.RemoteMovie.ReleaseSource = source;
+                    decision.RemoteGame.ReleaseSource = source;
 
                     if (decision.Rejections.Any())
                     {
@@ -171,13 +171,13 @@ namespace NzbDrone.Core.DecisionEngine
             }
         }
 
-        private DownloadDecision GetDecisionForReport(RemoteMovie remoteMovie, SearchCriteriaBase searchCriteria = null)
+        private DownloadDecision GetDecisionForReport(RemoteGame remoteGame, SearchCriteriaBase searchCriteria = null)
         {
             var reasons = Array.Empty<DownloadRejection>();
 
             foreach (var specifications in _specifications.GroupBy(v => v.Priority).OrderBy(v => v.Key))
             {
-                reasons = specifications.Select(c => EvaluateSpec(c, remoteMovie, searchCriteria))
+                reasons = specifications.Select(c => EvaluateSpec(c, remoteGame, searchCriteria))
                                         .Where(c => c != null)
                                         .ToArray();
 
@@ -187,14 +187,14 @@ namespace NzbDrone.Core.DecisionEngine
                 }
             }
 
-            return new DownloadDecision(remoteMovie, reasons.ToArray());
+            return new DownloadDecision(remoteGame, reasons.ToArray());
         }
 
-        private DownloadRejection EvaluateSpec(IDownloadDecisionEngineSpecification spec, RemoteMovie remoteMovie, SearchCriteriaBase searchCriteriaBase = null)
+        private DownloadRejection EvaluateSpec(IDownloadDecisionEngineSpecification spec, RemoteGame remoteGame, SearchCriteriaBase searchCriteriaBase = null)
         {
             try
             {
-                var result = spec.IsSatisfiedBy(remoteMovie, searchCriteriaBase);
+                var result = spec.IsSatisfiedBy(remoteGame, searchCriteriaBase);
 
                 if (!result.Accepted)
                 {
@@ -203,13 +203,13 @@ namespace NzbDrone.Core.DecisionEngine
             }
             catch (NotImplementedException)
             {
-                _logger.Trace("Spec " + spec.GetType().Name + " does not care about movies.");
+                _logger.Trace("Spec " + spec.GetType().Name + " does not care about games.");
             }
             catch (Exception e)
             {
-                e.Data.Add("report", remoteMovie.Release.ToJson());
-                e.Data.Add("parsed", remoteMovie.ParsedMovieInfo.ToJson());
-                _logger.Error(e, "Couldn't evaluate decision on {0}, with spec: {1}", remoteMovie.Release.Title, spec.GetType().Name);
+                e.Data.Add("report", remoteGame.Release.ToJson());
+                e.Data.Add("parsed", remoteGame.ParsedGameInfo.ToJson());
+                _logger.Error(e, "Couldn't evaluate decision on {0}, with spec: {1}", remoteGame.Release.Title, spec.GetType().Name);
                 return new DownloadRejection(DownloadRejectionReason.DecisionError, $"{spec.GetType().Name}: {e.Message}");
             }
 

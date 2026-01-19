@@ -69,7 +69,7 @@ function AddImportListModalContent({
         {isSchemaPopulated && !schemaError ? (
           <div>
             <Alert kind={kinds.INFO}>
-              <div>{translate('SupportedListsMovie')}</div>
+              <div>{translate('SupportedListsGame')}</div>
               <div>{translate('SupportedListsMoreInfo')}</div>
             </Alert>
             {Object.keys(listGroups).map((key) => {

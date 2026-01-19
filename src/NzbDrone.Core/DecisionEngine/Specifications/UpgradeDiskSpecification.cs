@@ -24,11 +24,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var qualityProfile = subject.Movie.QualityProfile;
+            var qualityProfile = subject.Game.QualityProfile;
 
-            var file = subject.Movie.MovieFile;
+            var file = subject.Game.GameFile;
 
             if (file == null)
             {
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return DownloadSpecDecision.Accept();
             }
 
-            file.Movie = subject.Movie;
+            file.Game = subject.Game;
 
             var customFormats = _formatService.ParseCustomFormat(file);
 
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             if (!_upgradableSpecification.CutoffNotMet(qualityProfile,
                     file.Quality,
                     _formatService.ParseCustomFormat(file),
-                    subject.ParsedMovieInfo.Quality))
+                    subject.ParsedGameInfo.Quality))
             {
                 _logger.Debug("Cutoff already met, rejecting.");
 
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             var upgradeableRejectReason = _upgradableSpecification.IsUpgradable(qualityProfile,
                 file.Quality,
                 customFormats,
-                subject.ParsedMovieInfo.Quality,
+                subject.ParsedGameInfo.Quality,
                 subject.CustomFormats);
 
             switch (upgradeableRejectReason)

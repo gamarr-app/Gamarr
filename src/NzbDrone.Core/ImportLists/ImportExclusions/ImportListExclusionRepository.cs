@@ -8,9 +8,9 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 {
     public interface IImportListExclusionRepository : IBasicRepository<ImportListExclusion>
     {
-        bool IsMovieExcluded(int tmdbid);
-        ImportListExclusion FindByTmdbid(int tmdbid);
-        List<int> AllExcludedTmdbIds();
+        bool IsGameExcluded(int igdbid);
+        ImportListExclusion FindByIgdbid(int igdbid);
+        List<int> AllExcludedIgdbIds();
     }
 
     public class ImportListListExclusionRepository : BasicRepository<ImportListExclusion>, IImportListExclusionRepository
@@ -20,21 +20,21 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
         {
         }
 
-        public bool IsMovieExcluded(int tmdbid)
+        public bool IsGameExcluded(int igdbid)
         {
-            return Query(x => x.TmdbId == tmdbid).Any();
+            return Query(x => x.IgdbId == igdbid).Any();
         }
 
-        public ImportListExclusion FindByTmdbid(int tmdbid)
+        public ImportListExclusion FindByIgdbid(int igdbid)
         {
-            return Query(x => x.TmdbId == tmdbid).SingleOrDefault();
+            return Query(x => x.IgdbId == igdbid).SingleOrDefault();
         }
 
-        public List<int> AllExcludedTmdbIds()
+        public List<int> AllExcludedIgdbIds()
         {
             using var conn = _database.OpenConnection();
 
-            return conn.Query<int>("SELECT \"TmdbId\" FROM \"ImportExclusions\"").ToList();
+            return conn.Query<int>("SELECT \"IgdbId\" FROM \"ImportExclusions\"").ToList();
         }
     }
 }

@@ -12,8 +12,8 @@ export interface CommandBody {
   lastStartTime: string;
   trigger: string;
   suppressMessages: boolean;
-  movieId?: number;
-  movieIds?: number[];
+  gameId?: number;
+  gameIds?: number[];
 }
 
 interface Command extends ModelBase {

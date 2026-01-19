@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.AutoTagging;
 using NzbDrone.Core.AutoTagging.Specifications;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.AutoTagging
@@ -13,14 +13,14 @@ namespace NzbDrone.Core.Test.AutoTagging
     [TestFixture]
     public class AutoTaggingServiceFixture : CoreTest<AutoTaggingService>
     {
-        private Movie _movie;
+        private Game _game;
         private AutoTag _tag;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew()
-                .With(m => m.MovieMetadata = new MovieMetadata
+            _game = Builder<Game>.CreateNew()
+                .With(m => m.GameMetadata = new GameMetadata
                 {
                     Genres = new List<string> { "Comedy" }
                 })
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.AutoTagging
         {
             GivenAutoTags(new List<AutoTag>());
 
-            var result = Subject.GetTagChanges(_movie);
+            var result = Subject.GetTagChanges(_game);
 
             result.TagsToAdd.Should().BeEmpty();
             result.TagsToRemove.Should().BeEmpty();
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.AutoTagging
         {
             GivenAutoTags(new List<AutoTag> { _tag });
 
-            var result = Subject.GetTagChanges(_movie);
+            var result = Subject.GetTagChanges(_game);
 
             result.TagsToAdd.Should().HaveCount(1);
             result.TagsToAdd.Should().Contain(1);
@@ -78,12 +78,12 @@ namespace NzbDrone.Core.Test.AutoTagging
         [Test]
         public void should_not_have_tags_to_remove_if_series_has_matching_tag_but_remove_is_false()
         {
-            _movie.Tags = new HashSet<int> { 1 };
-            _movie.MovieMetadata.Value.Genres = new List<string> { "NotComedy" };
+            _game.Tags = new HashSet<int> { 1 };
+            _game.GameMetadata.Value.Genres = new List<string> { "NotComedy" };
 
             GivenAutoTags(new List<AutoTag> { _tag });
 
-            var result = Subject.GetTagChanges(_movie);
+            var result = Subject.GetTagChanges(_game);
 
             result.TagsToAdd.Should().BeEmpty();
             result.TagsToRemove.Should().BeEmpty();
@@ -92,14 +92,14 @@ namespace NzbDrone.Core.Test.AutoTagging
         [Test]
         public void should_have_tags_to_remove_if_series_has_matching_tag_and_remove_is_true()
         {
-            _movie.Tags = new HashSet<int> { 1 };
-            _movie.MovieMetadata.Value.Genres = new List<string> { "NotComedy" };
+            _game.Tags = new HashSet<int> { 1 };
+            _game.GameMetadata.Value.Genres = new List<string> { "NotComedy" };
 
             _tag.RemoveTagsAutomatically = true;
 
             GivenAutoTags(new List<AutoTag> { _tag });
 
-            var result = Subject.GetTagChanges(_movie);
+            var result = Subject.GetTagChanges(_game);
 
             result.TagsToAdd.Should().BeEmpty();
             result.TagsToRemove.Should().HaveCount(1);
@@ -109,13 +109,13 @@ namespace NzbDrone.Core.Test.AutoTagging
         [Test]
         public void should_match_if_specification_is_negated()
         {
-            _movie.MovieMetadata.Value.Genres = new List<string> { "NotComedy" };
+            _game.GameMetadata.Value.Genres = new List<string> { "NotComedy" };
 
             _tag.Specifications.First().Negate = true;
 
             GivenAutoTags(new List<AutoTag> { _tag });
 
-            var result = Subject.GetTagChanges(_movie);
+            var result = Subject.GetTagChanges(_game);
 
             result.TagsToAdd.Should().HaveCount(1);
             result.TagsToAdd.Should().Contain(1);

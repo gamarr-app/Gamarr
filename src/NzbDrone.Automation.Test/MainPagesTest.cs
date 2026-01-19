@@ -18,15 +18,15 @@ namespace NzbDrone.Automation.Test
         }
 
         [Test]
-        public void movie_page()
+        public void game_page()
         {
-            _page.MovieNavIcon.Click();
+            _page.GameNavIcon.Click();
             _page.WaitForNoSpinner();
 
             var imageName = MethodBase.GetCurrentMethod().Name;
             TakeScreenshot(imageName);
 
-            _page.Find(By.CssSelector("div[class*='MovieIndex']")).Should().NotBeNull();
+            _page.Find(By.CssSelector("div[class*='GameIndex']")).Should().NotBeNull();
         }
 
         [Test]
@@ -78,9 +78,9 @@ namespace NzbDrone.Automation.Test
         }
 
         [Test]
-        public void add_movie_page()
+        public void add_game_page()
         {
-            _page.MovieNavIcon.Click();
+            _page.GameNavIcon.Click();
             _page.WaitForNoSpinner();
             _page.Find(By.LinkText("Add New")).Click();
             _page.WaitForNoSpinner();
@@ -88,7 +88,7 @@ namespace NzbDrone.Automation.Test
             var imageName = MethodBase.GetCurrentMethod().Name;
             TakeScreenshot(imageName);
 
-            _page.Find(By.CssSelector("input[class*='AddNewMovie-searchInput']")).Should().NotBeNull();
+            _page.Find(By.CssSelector("input[class*='AddNewGame-searchInput']")).Should().NotBeNull();
         }
     }
 }

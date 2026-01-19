@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Core.Localization;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Mailgun
 {
@@ -25,31 +25,31 @@ namespace NzbDrone.Core.Notifications.Mailgun
 
         public override void OnGrab(GrabMessage grabMessage)
         {
-            _proxy.SendNotification(MOVIE_GRABBED_TITLE, grabMessage.Message, Settings);
+            _proxy.SendNotification(GAME_GRABBED_TITLE, grabMessage.Message, Settings);
         }
 
         public override void OnDownload(DownloadMessage downloadMessage)
         {
-            _proxy.SendNotification(downloadMessage.OldMovieFiles.Count > 0 ? MOVIE_UPGRADED_TITLE : MOVIE_DOWNLOADED_TITLE, downloadMessage.Message, Settings);
+            _proxy.SendNotification(downloadMessage.OldGameFiles.Count > 0 ? GAME_UPGRADED_TITLE : GAME_DOWNLOADED_TITLE, downloadMessage.Message, Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            _proxy.SendNotification(MOVIE_ADDED_TITLE, $"{movie.Title} added to library", Settings);
+            _proxy.SendNotification(GAME_ADDED_TITLE, $"{game.Title} added to library", Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
             var body = $"{deleteMessage.Message} deleted.";
 
-            _proxy.SendNotification(MOVIE_FILE_DELETED_TITLE, body, Settings);
+            _proxy.SendNotification(GAME_FILE_DELETED_TITLE, body, Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
             var body = $"{deleteMessage.Message}";
 
-            _proxy.SendNotification(MOVIE_DELETED_TITLE, body, Settings);
+            _proxy.SendNotification(GAME_DELETED_TITLE, body, Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheckMessage)
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Notifications.Mailgun
             try
             {
                 const string title = "Test Notification";
-                const string body = "This is a test message from Radarr, though Mailgun.";
+                const string body = "This is a test message from Gamarr, though Mailgun.";
 
                 _proxy.SendNotification(title, body, Settings);
                 _logger.Info("Successfully sent email though Mailgun.");

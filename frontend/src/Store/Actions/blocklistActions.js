@@ -32,8 +32,8 @@ export const defaultState = {
 
   columns: [
     {
-      name: 'movieMetadata.sortTitle',
-      label: () => translate('MovieTitle'),
+      name: 'gameMetadata.sortTitle',
+      label: () => translate('GameTitle'),
       isSortable: true,
       isVisible: true
     },
@@ -93,10 +93,10 @@ export const defaultState = {
 
   filterBuilderProps: [
     {
-      name: 'movieIds',
-      label: () => translate('Movie'),
+      name: 'gameIds',
+      label: () => translate('Game'),
       type: filterBuilderTypes.EQUAL,
-      valueType: filterBuilderValueTypes.MOVIE
+      valueType: filterBuilderValueTypes.GAME
     },
     {
       name: 'protocols',

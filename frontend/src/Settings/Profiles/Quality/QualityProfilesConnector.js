@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { fetchMovieCollections } from 'Store/Actions/movieCollectionActions';
+import { fetchGameCollections } from 'Store/Actions/gameCollectionActions';
 import { cloneQualityProfile, deleteQualityProfile, fetchQualityProfiles } from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
 import sortByProp from 'Utilities/Array/sortByProp';
@@ -19,7 +19,7 @@ const mapDispatchToProps = {
   dispatchFetchQualityProfiles: fetchQualityProfiles,
   dispatchDeleteQualityProfile: deleteQualityProfile,
   dispatchCloneQualityProfile: cloneQualityProfile,
-  dispatchFetchMovieCollections: fetchMovieCollections
+  dispatchFetchGameCollections: fetchGameCollections
 };
 
 class QualityProfilesConnector extends Component {
@@ -29,7 +29,7 @@ class QualityProfilesConnector extends Component {
 
   componentDidMount() {
     this.props.dispatchFetchQualityProfiles();
-    this.props.dispatchFetchMovieCollections();
+    this.props.dispatchFetchGameCollections();
   }
 
   //
@@ -61,7 +61,7 @@ QualityProfilesConnector.propTypes = {
   dispatchFetchQualityProfiles: PropTypes.func.isRequired,
   dispatchDeleteQualityProfile: PropTypes.func.isRequired,
   dispatchCloneQualityProfile: PropTypes.func.isRequired,
-  dispatchFetchMovieCollections: PropTypes.func.isRequired
+  dispatchFetchGameCollections: PropTypes.func.isRequired
 };
 
 export default connect(createMapStateToProps, mapDispatchToProps)(QualityProfilesConnector);

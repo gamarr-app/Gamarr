@@ -204,7 +204,7 @@ function CollectionFooter({
 
       <div className={styles.inputContainer}>
         <CollectionFooterLabel
-          label={translate('MonitorMovies')}
+          label={translate('MonitorGames')}
           isSaving={isSaving && monitor !== NO_CHANGE}
         />
 
@@ -272,7 +272,7 @@ function CollectionFooter({
 
       <div className={styles.inputContainer}>
         <CollectionFooterLabel
-          label={translate('SearchMoviesOnAdd')}
+          label={translate('SearchGamesOnAdd')}
           isSaving={isSaving && searchOnAdd !== NO_CHANGE}
         />
 

@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             RuleFor(c => c.Host).ValidHost();
             RuleFor(c => c.Port).InclusiveBetween(1, 65535);
             RuleFor(c => c.UrlBase).ValidUrlBase().When(c => c.UrlBase.IsNotNullOrWhiteSpace());
-            RuleFor(c => c.MovieCategory).NotEmpty();
+            RuleFor(c => c.GameCategory).NotEmpty();
         }
     }
 
@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
         {
             Host = "localhost";
             Port = 8080;
-            MovieCategory = "radarr";
+            GameCategory = "gamarr";
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -49,16 +49,16 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
         public string Password { get; set; }
 
         [FieldDefinition(6, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategoryHelpText")]
-        public string MovieCategory { get; set; }
+        public string GameCategory { get; set; }
 
         [FieldDefinition(7, Label = "PostImportCategory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
-        public string MovieImportedCategory { get; set; }
+        public string GameImportedCategory { get; set; }
 
-        [FieldDefinition(8, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(UTorrentPriority), HelpText = "DownloadClientSettingsRecentPriorityMovieHelpText")]
-        public int RecentMoviePriority { get; set; }
+        [FieldDefinition(8, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(UTorrentPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
+        public int RecentGamePriority { get; set; }
 
-        [FieldDefinition(9, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(UTorrentPriority), HelpText = "DownloadClientSettingsOlderPriorityMovieHelpText")]
-        public int OlderMoviePriority { get; set; }
+        [FieldDefinition(9, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(UTorrentPriority), HelpText = "DownloadClientSettingsOlderPriorityGameHelpText")]
+        public int OlderGamePriority { get; set; }
 
         [FieldDefinition(10, Label = "DownloadClientSettingsInitialState", Type = FieldType.Select, SelectOptions = typeof(UTorrentState), HelpText = "DownloadClientSettingsInitialStateHelpText")]
         [FieldToken(TokenField.HelpText, "DownloadClientSettingsInitialState", "clientName", "uTorrent")]

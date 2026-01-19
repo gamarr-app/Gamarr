@@ -141,13 +141,13 @@ namespace NzbDrone.Core.Indexers.Newznab
                     return null;
                 }
 
-                if (capabilities.SupportedMovieSearchParameters != null &&
-                    new[] { "q", "tmdbid", "imdbid" }.Any(v => capabilities.SupportedMovieSearchParameters.Contains(v)))
+                if (capabilities.SupportedGameSearchParameters != null &&
+                    new[] { "q", "igdbid", "imdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
                 {
                     return null;
                 }
 
-                return new ValidationFailure(string.Empty, "This indexer does not support searching for movies :(. Tell your indexer staff to enable this or force add the indexer by disabling search, adding the indexer and then enabling it again.");
+                return new ValidationFailure(string.Empty, "This indexer does not support searching for games :(. Tell your indexer staff to enable this or force add the indexer by disabling search, adding the indexer and then enabling it again.");
             }
             catch (Exception ex)
             {

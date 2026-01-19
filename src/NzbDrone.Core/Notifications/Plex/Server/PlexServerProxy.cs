@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 {
     public interface IPlexServerProxy
     {
-        List<PlexSection> GetMovieSections(PlexServerSettings settings);
+        List<PlexSection> GetGameSections(PlexServerSettings settings);
         string Version(PlexServerSettings settings);
         void Update(int sectionId, string path, PlexServerSettings settings);
     }
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             _logger = logger;
         }
 
-        public List<PlexSection> GetMovieSections(PlexServerSettings settings)
+        public List<PlexSection> GetGameSections(PlexServerSettings settings)
         {
             var request = BuildRequest("library/sections", HttpMethod.Get, settings);
             var response = ProcessRequest(request);
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             {
                 return Json.Deserialize<PlexMediaContainerLegacy>(response)
                     .Sections
-                    .Where(d => d.Type == "movie")
+                    .Where(d => d.Type == "game")
                     .Select(s => new PlexSection
                     {
                         Id = s.Id,
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             return Json.Deserialize<PlexResponse<PlexSectionsContainer>>(response)
                        .MediaContainer
                        .Sections
-                       .Where(d => d.Type == "movie")
+                       .Where(d => d.Type == "game")
                        .ToList();
         }
 

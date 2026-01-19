@@ -32,13 +32,13 @@ namespace NzbDrone.Core.Datastore.Migration
         protected override void MainDbUpgrade()
         {
             Execute.WithConnection(FixTraktConfig);
-            Execute.WithConnection(RenameRadarrListType);
+            Execute.WithConnection(RenameGamarrListType);
             Execute.Sql("DELETE FROM \"Config\" WHERE \"Key\" IN ('TraktAuthToken', 'TraktRefreshToken', 'TraktTokenExpiry', 'NewTraktAuthToken', 'NewTraktRefreshToken', 'NewTraktTokenExpiry')");
         }
 
-        private void RenameRadarrListType(IDbConnection conn, IDbTransaction tran)
+        private void RenameGamarrListType(IDbConnection conn, IDbTransaction tran)
         {
-            var rows = conn.Query<ProviderDefinition169>($"SELECT \"Id\", \"Implementation\", \"ConfigContract\", \"Settings\" FROM \"NetImport\" WHERE \"Implementation\" = 'RadarrLists'");
+            var rows = conn.Query<ProviderDefinition169>($"SELECT \"Id\", \"Implementation\", \"ConfigContract\", \"Settings\" FROM \"NetImport\" WHERE \"Implementation\" = 'GamarrLists'");
 
             var corrected = new List<ProviderDefinition169>();
 
@@ -47,8 +47,8 @@ namespace NzbDrone.Core.Datastore.Migration
                 corrected.Add(new ProviderDefinition169
                 {
                     Id = row.Id,
-                    Implementation = "RadarrListImport",
-                    ConfigContract = "RadarrListSettings"
+                    Implementation = "GamarrListImport",
+                    ConfigContract = "GamarrListSettings"
                 });
             }
 

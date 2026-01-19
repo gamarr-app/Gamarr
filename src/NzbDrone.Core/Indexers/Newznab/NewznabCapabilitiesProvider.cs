@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             {
                 ex.WithData(response, 128 * 1024);
                 _logger.Trace("Unexpected Response content ({0} bytes): {1}", response.ResponseData.Length, response.Content);
-                _logger.Error(ex, "Failed to determine newznab api capabilities for {0}, using the defaults instead till Radarr restarts", indexerSettings.BaseUrl);
+                _logger.Error(ex, "Failed to determine newznab api capabilities for {0}, using the defaults instead till Gamarr restarts", indexerSettings.BaseUrl);
             }
 
             return capabilities;
@@ -136,20 +136,20 @@ namespace NzbDrone.Core.Indexers.Newznab
                     capabilities.TextSearchEngine = xmlBasicSearch.Attribute("searchEngine")?.Value ?? capabilities.TextSearchEngine;
                 }
 
-                var xmlMovieSearch = xmlSearching.Element("movie-search");
-                if (xmlMovieSearch == null || xmlMovieSearch.Attribute("available").Value != "yes")
+                var xmlGameSearch = xmlSearching.Element("game-search");
+                if (xmlGameSearch == null || xmlGameSearch.Attribute("available").Value != "yes")
                 {
-                    capabilities.SupportedMovieSearchParameters = null;
+                    capabilities.SupportedGameSearchParameters = null;
                 }
                 else
                 {
-                    if (xmlMovieSearch.Attribute("supportedParams") != null)
+                    if (xmlGameSearch.Attribute("supportedParams") != null)
                     {
-                        capabilities.SupportedMovieSearchParameters = xmlMovieSearch.Attribute("supportedParams").Value.Split(',');
+                        capabilities.SupportedGameSearchParameters = xmlGameSearch.Attribute("supportedParams").Value.Split(',');
                         capabilities.SupportsAggregateIdSearch = true;
                     }
 
-                    capabilities.MovieTextSearchEngine = xmlMovieSearch.Attribute("searchEngine")?.Value ?? capabilities.MovieTextSearchEngine;
+                    capabilities.GameTextSearchEngine = xmlGameSearch.Attribute("searchEngine")?.Value ?? capabilities.GameTextSearchEngine;
                 }
             }
 

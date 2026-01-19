@@ -11,8 +11,8 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             RuleFor(c => c.Host).ValidHost();
             RuleFor(c => c.Port).InclusiveBetween(1, 65535);
 
-            RuleFor(c => c.MovieCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
-            RuleFor(c => c.MovieImportedCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
+            RuleFor(c => c.GameCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
+            RuleFor(c => c.GameImportedCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
         }
     }
 
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             Host = "localhost";
             Port = 8112;
             Password = "deluge";
-            MovieCategory = "radarr";
+            GameCategory = "gamarr";
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -46,16 +46,16 @@ namespace NzbDrone.Core.Download.Clients.Deluge
         public string Password { get; set; }
 
         [FieldDefinition(5, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategoryHelpText")]
-        public string MovieCategory { get; set; }
+        public string GameCategory { get; set; }
 
         [FieldDefinition(6, Label = "PostImportCategory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
-        public string MovieImportedCategory { get; set; }
+        public string GameImportedCategory { get; set; }
 
-        [FieldDefinition(7, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(DelugePriority), HelpText = "DownloadClientSettingsRecentPriorityMovieHelpText")]
-        public int RecentMoviePriority { get; set; }
+        [FieldDefinition(7, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(DelugePriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
+        public int RecentGamePriority { get; set; }
 
-        [FieldDefinition(8, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(DelugePriority), HelpText = "DownloadClientSettingsOlderPriorityMovieHelpText")]
-        public int OlderMoviePriority { get; set; }
+        [FieldDefinition(8, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(DelugePriority), HelpText = "DownloadClientSettingsOlderPriorityGameHelpText")]
+        public int OlderGamePriority { get; set; }
 
         [FieldDefinition(9, Label = "DownloadClientSettingsAddPaused", Type = FieldType.Checkbox)]
         public bool AddPaused { get; set; }

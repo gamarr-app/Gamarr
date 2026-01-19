@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -15,22 +15,22 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class CleanCollectionTheFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
+        private Game _game;
+        private GameFile _gameFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>
+            _game = Builder<Game>
                     .CreateNew()
-                    .With(e => e.Title = "Movie Title")
+                    .With(e => e.Title = "Game Title")
                     .Build();
 
-            _movieFile = new MovieFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "RadarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameMovies = true;
+            _namingConfig.RenameGames = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -45,11 +45,11 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [TestCase("The Badger's Collection", "Badgers Collection, The")]
-        [TestCase("@ The Movies Collection", "@ The Movies Collection")] // This doesn't seem right; see: FileNameBuilder.ScenifyRemoveChars, looks like it has the "at sign" in the regex
+        [TestCase("@ The Games Collection", "@ The Games Collection")] // This doesn't seem right; see: FileNameBuilder.ScenifyRemoveChars, looks like it has the "at sign" in the regex
         [TestCase("A Stupid/Idiotic Collection", "Stupid Idiotic Collection, A")]
         [TestCase("An Astounding & Amazing Collection", "Astounding and Amazing Collection, An")]
         [TestCase("The Amazing Animal-Hero's Collection (2001)", "Amazing Animal-Heros Collection, The 2001")]
-        [TestCase("A Different Movië (AU)", "Different Movie, A AU")]
+        [TestCase("A Different Movië (AU)", "Different Game, A AU")]
         [TestCase("The Repairër (ZH) (2015)", "Repairer, The ZH 2015")]
         [TestCase("The Eighth Sensë 2 (Thai)", "Eighth Sense 2, The Thai")]
         [TestCase("The Astonishing Jæg (Latin America)", "Astonishing Jaeg, The Latin America")]
@@ -58,10 +58,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase(null, "")]
         public void should_get_expected_title_back(string collection, string expected)
         {
-            SetCollectionName(_movie, collection);
-            _namingConfig.StandardMovieFormat = "{Movie CleanCollectionThe}";
+            SetCollectionName(_game, collection);
+            _namingConfig.StandardGameFormat = "{Game CleanCollectionThe}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(expected);
         }
 
@@ -71,21 +71,21 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("3%")]
         public void should_not_change_title(string collection)
         {
-            SetCollectionName(_movie, collection);
-            _namingConfig.StandardMovieFormat = "{Movie CleanCollectionThe}";
+            SetCollectionName(_game, collection);
+            _namingConfig.StandardGameFormat = "{Game CleanCollectionThe}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(collection);
         }
 
-        private void SetCollectionName(Movie movie, string collectionName)
+        private void SetCollectionName(Game game, string collectionName)
         {
-            var metadata = new MovieMetadata()
+            var metadata = new GameMetadata()
             {
                 CollectionTitle = collectionName,
             };
-            movie.MovieMetadata = new Core.Datastore.LazyLoaded<MovieMetadata>(metadata);
-            movie.MovieMetadata.Value.CollectionTitle = collectionName;
+            game.GameMetadata = new Core.Datastore.LazyLoaded<GameMetadata>(metadata);
+            game.GameMetadata.Value.CollectionTitle = collectionName;
         }
     }
 }

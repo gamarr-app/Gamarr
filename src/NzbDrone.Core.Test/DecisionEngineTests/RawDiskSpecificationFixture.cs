@@ -11,16 +11,16 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class RawDiskSpecificationFixture : CoreTest<RawDiskSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         [SetUp]
         public void Setup()
         {
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
                 Release = new ReleaseInfo
                 {
-                    Title = "Movie.title.1998",
+                    Title = "Game.title.1998",
                     DownloadProtocol = DownloadProtocol.Torrent
                 }
             };
@@ -28,48 +28,48 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithContainer(string container)
         {
-            _remoteMovie.Release.Container = container;
+            _remoteGame.Release.Container = container;
         }
 
         [Test]
         public void should_return_true_if_no_container_specified()
         {
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_if_mkv()
         {
             WithContainer("MKV");
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_false_if_vob()
         {
             WithContainer("VOB");
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_if_iso()
         {
             WithContainer("ISO");
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_if_m2ts()
         {
             WithContainer("M2TS");
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_compare_case_insensitive()
         {
             WithContainer("vob");
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [TestCase("Series Title S02 Disc 1 1080i Blu-ray DTS-HD MA 2.0 AVC-TrollHD")]
@@ -83,16 +83,16 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [TestCase("Series.of.Desire.2000.S1_D01.NTSC.DVD5")]
         public void should_return_false_if_matches_disc_format(string title)
         {
-            _remoteMovie.Release.Title = title;
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            _remoteGame.Release.Title = title;
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [TestCase("Series Title EP50 USLT NTSC DVDRemux DD2.0")]
         [TestCase("Series.Title.S01.NTSC.DVDRip.DD2.0.x264-PLAiD")]
         public void should_return_true_if_dvdrip(string title)
         {
-            _remoteMovie.Release.Title = title;
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            _remoteGame.Release.Title = title;
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
     }
 }

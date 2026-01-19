@@ -3,21 +3,21 @@ import AppSectionState, {
   PagedAppSectionState,
   TableAppSectionState,
 } from 'App/State/AppSectionState';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 
-interface WantedMovie extends Movie {
+interface WantedGame extends Game {
   isSaving?: boolean;
 }
 
 interface WantedCutoffUnmetAppState
-  extends AppSectionState<WantedMovie>,
-    AppSectionFilterState<WantedMovie>,
+  extends AppSectionState<WantedGame>,
+    AppSectionFilterState<WantedGame>,
     PagedAppSectionState,
     TableAppSectionState {}
 
 interface WantedMissingAppState
-  extends AppSectionState<WantedMovie>,
-    AppSectionFilterState<WantedMovie>,
+  extends AppSectionState<WantedGame>,
+    AppSectionFilterState<WantedGame>,
     PagedAppSectionState,
     TableAppSectionState {}
 

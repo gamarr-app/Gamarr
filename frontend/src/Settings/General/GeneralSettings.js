@@ -187,7 +187,7 @@ class GeneralSettings extends Component {
         <ConfirmModal
           isOpen={this.state.isRestartRequiredModalOpen}
           kind={kinds.DANGER}
-          title={translate('RestartRadarr')}
+          title={translate('RestartGamarr')}
           message={`${translate('RestartRequiredToApplyChanges')} ${isWindowsService ? translate('RestartRequiredWindowsService') : ''}`}
           cancelLabel={translate('RestartLater')}
           confirmLabel={translate('RestartNow')}

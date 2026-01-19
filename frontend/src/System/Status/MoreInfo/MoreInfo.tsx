@@ -14,13 +14,13 @@ function MoreInfo() {
           {translate('HomePage')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://radarr.video/">radarr.video</Link>
+          <Link to="https://gamarr.video/">gamarr.video</Link>
         </DescriptionListItemDescription>
 
         <DescriptionListItemTitle>{translate('Wiki')}</DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://wiki.servarr.com/radarr">
-            wiki.servarr.com/radarr
+          <Link to="https://wiki.servarr.com/gamarr">
+            wiki.servarr.com/gamarr
           </Link>
         </DescriptionListItemDescription>
 
@@ -28,22 +28,22 @@ function MoreInfo() {
           {translate('Reddit')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://www.reddit.com/r/Radarr/">/r/Radarr</Link>
+          <Link to="https://www.reddit.com/r/Gamarr/">/r/Gamarr</Link>
         </DescriptionListItemDescription>
 
         <DescriptionListItemTitle>
           {translate('Discord')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://radarr.video/discord">radarr.video/discord</Link>
+          <Link to="https://gamarr.video/discord">gamarr.video/discord</Link>
         </DescriptionListItemDescription>
 
         <DescriptionListItemTitle>
           {translate('Source')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://github.com/Radarr/Radarr/">
-            github.com/Radarr/Radarr
+          <Link to="https://github.com/Gamarr/Gamarr/">
+            github.com/Gamarr/Gamarr
           </Link>
         </DescriptionListItemDescription>
 
@@ -51,8 +51,8 @@ function MoreInfo() {
           {translate('FeatureRequests')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://github.com/Radarr/Radarr/issues">
-            github.com/Radarr/Radarr/issues
+          <Link to="https://github.com/Gamarr/Gamarr/issues">
+            github.com/Gamarr/Gamarr/issues
           </Link>
         </DescriptionListItemDescription>
       </DescriptionList>

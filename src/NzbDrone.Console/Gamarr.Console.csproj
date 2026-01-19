@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+
+    <ApplicationIcon>..\NzbDrone.Host\Gamarr.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(RuntimeIdentifier.StartsWith('win'))">
+    <AssemblyName>Gamarr</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NzbDrone.Host\Gamarr.Host.csproj" />
+  </ItemGroup>
+</Project>

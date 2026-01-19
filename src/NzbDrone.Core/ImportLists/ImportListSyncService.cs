@@ -5,9 +5,9 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists.ImportExclusions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Messaging.Commands;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.ImportLists
 {
@@ -16,27 +16,27 @@ namespace NzbDrone.Core.ImportLists
         private readonly Logger _logger;
         private readonly IImportListFactory _importListFactory;
         private readonly IFetchAndParseImportList _listFetcherAndParser;
-        private readonly IMovieService _movieService;
-        private readonly IAddMovieService _addMovieService;
+        private readonly IGameService _gameService;
+        private readonly IAddGameService _addGameService;
         private readonly IConfigService _configService;
         private readonly IImportListExclusionService _listExclusionService;
-        private readonly IImportListMovieService _listMovieService;
+        private readonly IImportListGameService _listGameService;
 
         public ImportListSyncService(IImportListFactory importListFactory,
                                       IFetchAndParseImportList listFetcherAndParser,
-                                      IMovieService movieService,
-                                      IAddMovieService addMovieService,
+                                      IGameService gameService,
+                                      IAddGameService addGameService,
                                       IConfigService configService,
                                       IImportListExclusionService listExclusionService,
-                                      IImportListMovieService listMovieService,
+                                      IImportListGameService listGameService,
                                       Logger logger)
         {
             _importListFactory = importListFactory;
             _listFetcherAndParser = listFetcherAndParser;
-            _movieService = movieService;
-            _addMovieService = addMovieService;
+            _gameService = gameService;
+            _addGameService = addGameService;
             _listExclusionService = listExclusionService;
-            _listMovieService = listMovieService;
+            _listGameService = listGameService;
             _logger = logger;
             _configService = configService;
         }
@@ -74,50 +74,50 @@ namespace NzbDrone.Core.ImportLists
             ProcessListItems(listItemsResult);
         }
 
-        private void ProcessMovieReport(ImportListDefinition importList, ImportListMovie report, List<ImportListExclusion> listExclusions, List<int> dbMovies, List<Movie> moviesToAdd)
+        private void ProcessGameReport(ImportListDefinition importList, ImportListGame report, List<ImportListExclusion> listExclusions, List<int> dbGames, List<Game> gamesToAdd)
         {
-            if (report.TmdbId == 0 || !importList.EnableAuto)
+            if (report.IgdbId == 0 || !importList.EnableAuto)
             {
                 return;
             }
 
-            // Check to see if movie in DB
-            if (dbMovies.Contains(report.TmdbId))
+            // Check to see if game in DB
+            if (dbGames.Contains(report.IgdbId))
             {
-                _logger.Debug("{0} [{1}] Rejected, Movie Exists in DB", report.TmdbId, report.Title);
+                _logger.Debug("{0} [{1}] Rejected, Game Exists in DB", report.IgdbId, report.Title);
                 return;
             }
 
-            // Check to see if movie excluded
-            var excludedMovie = listExclusions.SingleOrDefault(s => s.TmdbId == report.TmdbId);
+            // Check to see if game excluded
+            var excludedGame = listExclusions.SingleOrDefault(s => s.IgdbId == report.IgdbId);
 
-            if (excludedMovie != null)
+            if (excludedGame != null)
             {
-                _logger.Debug("{0} [{1}] Rejected due to list exclusion", report.TmdbId, report.Title);
+                _logger.Debug("{0} [{1}] Rejected due to list exclusion", report.IgdbId, report.Title);
                 return;
             }
 
             // Append Artist if not already in DB or already on add list
-            if (moviesToAdd.All(s => s.TmdbId != report.TmdbId))
+            if (gamesToAdd.All(s => s.IgdbId != report.IgdbId))
             {
                 var monitorType = importList.Monitor;
 
-                moviesToAdd.Add(new Movie
+                gamesToAdd.Add(new Game
                 {
                     Monitored = monitorType != MonitorTypes.None,
                     RootFolderPath = importList.RootFolderPath,
                     QualityProfileId = importList.QualityProfileId,
                     MinimumAvailability = importList.MinimumAvailability,
                     Tags = importList.Tags,
-                    TmdbId = report.TmdbId,
+                    IgdbId = report.IgdbId,
                     Title = report.Title,
                     Year = report.Year,
                     ImdbId = report.ImdbId,
-                    AddOptions = new AddMovieOptions
+                    AddOptions = new AddGameOptions
                     {
-                        SearchForMovie = monitorType != MonitorTypes.None && importList.SearchOnAdd,
+                        SearchForGame = monitorType != MonitorTypes.None && importList.SearchOnAdd,
                         Monitor = monitorType,
-                        AddMethod = AddMovieMethod.List
+                        AddMethod = AddGameMethod.List
                     }
                 });
             }
@@ -125,11 +125,11 @@ namespace NzbDrone.Core.ImportLists
 
         private void ProcessListItems(ImportListFetchResult listFetchResult)
         {
-            listFetchResult.Movies = listFetchResult.Movies.DistinctBy(x =>
+            listFetchResult.Games = listFetchResult.Games.DistinctBy(x =>
             {
-                if (x.TmdbId != 0)
+                if (x.IgdbId != 0)
                 {
-                    return x.TmdbId.ToString();
+                    return x.IgdbId.ToString();
                 }
 
                 if (x.ImdbId.IsNotNullOrWhiteSpace())
@@ -140,31 +140,31 @@ namespace NzbDrone.Core.ImportLists
                 return x.Title;
             }).ToList();
 
-            var listedMovies = listFetchResult.Movies.ToList();
+            var listedGames = listFetchResult.Games.ToList();
 
             var importExclusions = _listExclusionService.All();
-            var dbMovies = _movieService.AllMovieTmdbIds();
-            var moviesToAdd = new List<Movie>();
+            var dbGames = _gameService.AllGameIgdbIds();
+            var gamesToAdd = new List<Game>();
 
-            var groupedMovies = listedMovies.GroupBy(x => x.ListId);
+            var groupedGames = listedGames.GroupBy(x => x.ListId);
 
-            foreach (var list in groupedMovies)
+            foreach (var list in groupedGames)
             {
                 var importList = _importListFactory.Get(list.Key);
 
-                foreach (var movie in list)
+                foreach (var game in list)
                 {
-                    if (movie.TmdbId != 0)
+                    if (game.IgdbId != 0)
                     {
-                        ProcessMovieReport(importList, movie, importExclusions, dbMovies, moviesToAdd);
+                        ProcessGameReport(importList, game, importExclusions, dbGames, gamesToAdd);
                     }
                 }
             }
 
-            if (moviesToAdd.Any())
+            if (gamesToAdd.Any())
             {
-                _logger.ProgressInfo("Adding {0} movies from your auto enabled lists to library", moviesToAdd.Count);
-                _addMovieService.AddMovies(moviesToAdd, true);
+                _logger.ProgressInfo("Adding {0} games from your auto enabled lists to library", gamesToAdd.Count);
+                _addGameService.AddGames(gamesToAdd, true);
             }
         }
 
@@ -187,44 +187,44 @@ namespace NzbDrone.Core.ImportLists
                 return;
             }
 
-            var listMovies = _listMovieService.GetAllListMovies();
+            var listGames = _listGameService.GetAllListGames();
 
-            // TODO use AllMovieTmdbIds here?
-            var moviesInLibrary = _movieService.GetAllMovies();
+            // TODO use AllGameIgdbIds here?
+            var gamesInLibrary = _gameService.GetAllGames();
 
-            var moviesToUpdate = new List<Movie>();
+            var gamesToUpdate = new List<Game>();
 
-            foreach (var movie in moviesInLibrary)
+            foreach (var game in gamesInLibrary)
             {
-                var movieExists = listMovies.Any(c =>
-                    c.TmdbId == movie.TmdbId ||
-                    (c.ImdbId.IsNotNullOrWhiteSpace() && movie.ImdbId.IsNotNullOrWhiteSpace() && c.ImdbId == movie.ImdbId));
+                var gameExists = listGames.Any(c =>
+                    c.IgdbId == game.IgdbId ||
+                    (c.ImdbId.IsNotNullOrWhiteSpace() && game.ImdbId.IsNotNullOrWhiteSpace() && c.ImdbId == game.ImdbId));
 
-                if (!movieExists)
+                if (!gameExists)
                 {
                     switch (_configService.ListSyncLevel)
                     {
                         case "logOnly":
-                            _logger.Info("{0} was in your library, but not found in your lists --> You might want to unmonitor or remove it", movie);
+                            _logger.Info("{0} was in your library, but not found in your lists --> You might want to unmonitor or remove it", game);
                             break;
                         case "keepAndUnmonitor":
-                            _logger.Info("{0} was in your library, but not found in your lists --> Keeping in library but Unmonitoring it", movie);
-                            movie.Monitored = false;
-                            moviesToUpdate.Add(movie);
+                            _logger.Info("{0} was in your library, but not found in your lists --> Keeping in library but Unmonitoring it", game);
+                            game.Monitored = false;
+                            gamesToUpdate.Add(game);
                             break;
                         case "removeAndKeep":
-                            _logger.Info("{0} was in your library, but not found in your lists --> Removing from library (keeping files)", movie);
-                            _movieService.DeleteMovie(movie.Id, false);
+                            _logger.Info("{0} was in your library, but not found in your lists --> Removing from library (keeping files)", game);
+                            _gameService.DeleteGame(game.Id, false);
                             break;
                         case "removeAndDelete":
-                            _logger.Info("{0} was in your library, but not found in your lists --> Removing from library and deleting files", movie);
-                            _movieService.DeleteMovie(movie.Id, true);
+                            _logger.Info("{0} was in your library, but not found in your lists --> Removing from library and deleting files", game);
+                            _gameService.DeleteGame(game.Id, true);
                             break;
                     }
                 }
             }
 
-            _movieService.UpdateMovie(moviesToUpdate, true);
+            _gameService.UpdateGame(gamesToUpdate, true);
         }
     }
 }

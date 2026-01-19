@@ -10,7 +10,7 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Download.Aggregation.Aggregators
 {
-    public class AggregateLanguages : IAggregateRemoteMovie
+    public class AggregateLanguages : IAggregateRemoteGame
     {
         private readonly IIndexerFactory _indexerFactory;
         private readonly Logger _logger;
@@ -22,23 +22,23 @@ namespace NzbDrone.Core.Download.Aggregation.Aggregators
             _logger = logger;
         }
 
-        public RemoteMovie Aggregate(RemoteMovie remoteMovie)
+        public RemoteGame Aggregate(RemoteGame remoteGame)
         {
-            var parsedMovieInfo = remoteMovie.ParsedMovieInfo;
-            var releaseInfo = remoteMovie.Release;
-            var languages = parsedMovieInfo.Languages;
-            var movie = remoteMovie.Movie;
-            var releaseTokens = parsedMovieInfo.SimpleReleaseTitle ?? parsedMovieInfo.ReleaseTitle;
-            var normalizedReleaseTokens = Parser.Parser.NormalizeMovieTitle(releaseTokens);
+            var parsedGameInfo = remoteGame.ParsedGameInfo;
+            var releaseInfo = remoteGame.Release;
+            var languages = parsedGameInfo.Languages;
+            var game = remoteGame.Game;
+            var releaseTokens = parsedGameInfo.SimpleReleaseTitle ?? parsedGameInfo.ReleaseTitle;
+            var normalizedReleaseTokens = Parser.Parser.NormalizeGameTitle(releaseTokens);
             var languagesToRemove = new List<Language>();
 
-            if (movie == null)
+            if (game == null)
             {
                 _logger.Debug("Unable to aggregate languages, using parsed values: {0}", string.Join(", ", languages.ToList()));
 
-                remoteMovie.Languages = releaseInfo != null && releaseInfo.Languages.Any() ? releaseInfo.Languages : languages;
+                remoteGame.Languages = releaseInfo != null && releaseInfo.Languages.Any() ? releaseInfo.Languages : languages;
 
-                return remoteMovie;
+                return remoteGame;
             }
 
             if (releaseInfo != null && releaseInfo.Languages.Any())
@@ -50,17 +50,17 @@ namespace NzbDrone.Core.Download.Aggregation.Aggregators
             }
             else
             {
-                var movieTitleLanguage = LanguageParser.ParseLanguages(movie.Title);
+                var gameTitleLanguage = LanguageParser.ParseLanguages(game.Title);
 
-                if (!movieTitleLanguage.Contains(Language.Unknown))
+                if (!gameTitleLanguage.Contains(Language.Unknown))
                 {
-                    var normalizedEpisodeTitle = Parser.Parser.NormalizeMovieTitle(movie.Title);
-                    var movieTitleIndex = normalizedReleaseTokens.IndexOf(normalizedEpisodeTitle, StringComparison.CurrentCultureIgnoreCase);
+                    var normalizedEpisodeTitle = Parser.Parser.NormalizeGameTitle(game.Title);
+                    var gameTitleIndex = normalizedReleaseTokens.IndexOf(normalizedEpisodeTitle, StringComparison.CurrentCultureIgnoreCase);
 
-                    if (movieTitleIndex >= 0)
+                    if (gameTitleIndex >= 0)
                     {
-                        releaseTokens = releaseTokens.Remove(movieTitleIndex, normalizedEpisodeTitle.Length);
-                        languagesToRemove.AddRange(movieTitleLanguage);
+                        releaseTokens = releaseTokens.Remove(gameTitleIndex, normalizedEpisodeTitle.Length);
+                        languagesToRemove.AddRange(gameTitleLanguage);
                     }
                 }
 
@@ -99,20 +99,20 @@ namespace NzbDrone.Core.Download.Aggregation.Aggregators
                 }
             }
 
-            // Use movie language as fallback if we couldn't parse a language
+            // Use game language as fallback if we couldn't parse a language
             if (languages.Count == 0 || (languages.Count == 1 && languages.First() == Language.Unknown))
             {
-                languages = new List<Language> { movie.MovieMetadata.Value.OriginalLanguage };
-                _logger.Debug("Language couldn't be parsed from release, fallback to movie original language: {0}", movie.MovieMetadata.Value.OriginalLanguage.Name);
+                languages = new List<Language> { game.GameMetadata.Value.OriginalLanguage };
+                _logger.Debug("Language couldn't be parsed from release, fallback to game original language: {0}", game.GameMetadata.Value.OriginalLanguage.Name);
             }
 
             if (languages.Contains(Language.Original))
             {
                 languages.Remove(Language.Original);
 
-                if (!languages.Contains(movie.MovieMetadata.Value.OriginalLanguage))
+                if (!languages.Contains(game.GameMetadata.Value.OriginalLanguage))
                 {
-                    languages.Add(movie.MovieMetadata.Value.OriginalLanguage);
+                    languages.Add(game.GameMetadata.Value.OriginalLanguage);
                 }
                 else
                 {
@@ -122,9 +122,9 @@ namespace NzbDrone.Core.Download.Aggregation.Aggregators
 
             _logger.Debug("Selected languages: {0}", string.Join(", ", languages.ToList()));
 
-            remoteMovie.Languages = languages;
+            remoteGame.Languages = languages;
 
-            return remoteMovie;
+            return remoteGame;
         }
     }
 }

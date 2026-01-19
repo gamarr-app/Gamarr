@@ -8,12 +8,12 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Create.Index().OnTable("Blocklist").OnColumn("MovieId");
+            Create.Index().OnTable("Blocklist").OnColumn("GameId");
             Create.Index().OnTable("Blocklist").OnColumn("Date");
 
             Create.Index()
                 .OnTable("History")
-                .OnColumn("MovieId").Ascending()
+                .OnColumn("GameId").Ascending()
                 .OnColumn("Date").Descending();
 
             Delete.Index().OnTable("History").OnColumn("DownloadId");
@@ -22,8 +22,8 @@ namespace NzbDrone.Core.Datastore.Migration
                 .OnColumn("DownloadId").Ascending()
                 .OnColumn("Date").Descending();
 
-            Create.Index().OnTable("Movies").OnColumn("MovieFileId");
-            Create.Index().OnTable("Movies").OnColumn("Path");
+            Create.Index().OnTable("Games").OnColumn("GameFileId");
+            Create.Index().OnTable("Games").OnColumn("Path");
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.Xml.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Indexers;
 
 namespace NzbDrone.Core.ImportLists.Rss.Plex
@@ -16,16 +16,16 @@ namespace NzbDrone.Core.ImportLists.Rss.Plex
             _logger = logger;
         }
 
-        protected override ImportListMovie ProcessItem(XElement item)
+        protected override ImportListGame ProcessItem(XElement item)
         {
             var category = item.TryGetValue("category");
 
-            if (category != "movie")
+            if (category != "game")
             {
                 return null;
             }
 
-            var info = new ImportListMovie
+            var info = new ImportListGame
             {
                 Title = item.TryGetValue("title", "Unknown")
             };
@@ -39,15 +39,15 @@ namespace NzbDrone.Core.ImportLists.Rss.Plex
                     info.ImdbId = Parser.Parser.ParseImdbId(guid.Replace("imdb://", ""));
                 }
 
-                if (int.TryParse(guid.Replace("tmdb://", ""), out var tmdbId))
+                if (int.TryParse(guid.Replace("igdb://", ""), out var igdbId))
                 {
-                    info.TmdbId = tmdbId;
+                    info.IgdbId = igdbId;
                 }
             }
 
-            if (info.ImdbId.IsNullOrWhiteSpace() && info.TmdbId == 0)
+            if (info.ImdbId.IsNullOrWhiteSpace() && info.IgdbId == 0)
             {
-                _logger.Warn("Each item in the RSS feed must have a guid element with a IMDB ID or TMDB ID: '{0}'", info.Title);
+                _logger.Warn("Each item in the RSS feed must have a guid element with a IMDB ID or IGDB ID: '{0}'", info.Title);
 
                 return null;
             }

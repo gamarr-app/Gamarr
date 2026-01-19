@@ -32,9 +32,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
             _proxy = proxy;
         }
 
-        protected override string AddFromNzbFile(RemoteMovie remoteMovie, string filename, byte[] fileContents)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContents)
         {
-            var priority = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie ? Settings.RecentMoviePriority : Settings.OlderMoviePriority;
+            var priority = remoteGame.Game.GameMetadata.Value.IsRecentGame ? Settings.RecentGamePriority : Settings.OlderGamePriority;
 
             var response = _proxy.DownloadNzb(fileContents, filename, priority, Settings);
 

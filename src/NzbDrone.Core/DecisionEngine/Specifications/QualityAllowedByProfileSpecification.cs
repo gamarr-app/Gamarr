@@ -16,18 +16,18 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            _logger.Debug("Checking if report meets quality requirements. {0}", subject.ParsedMovieInfo.Quality);
+            _logger.Debug("Checking if report meets quality requirements. {0}", subject.ParsedGameInfo.Quality);
 
-            var profile = subject.Movie.QualityProfile;
-            var qualityIndex = profile.GetIndex(subject.ParsedMovieInfo.Quality.Quality);
+            var profile = subject.Game.QualityProfile;
+            var qualityIndex = profile.GetIndex(subject.ParsedGameInfo.Quality.Quality);
             var qualityOrGroup = profile.Items[qualityIndex.Index];
 
             if (!qualityOrGroup.Allowed)
             {
-                _logger.Debug("Quality {0} rejected by Movie's quality profile", subject.ParsedMovieInfo.Quality);
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.QualityNotWanted, "{0} is not wanted in profile", subject.ParsedMovieInfo.Quality.Quality);
+                _logger.Debug("Quality {0} rejected by Game's quality profile", subject.ParsedGameInfo.Quality);
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.QualityNotWanted, "{0} is not wanted in profile", subject.ParsedGameInfo.Quality.Quality);
             }
 
             return DownloadSpecDecision.Accept();

@@ -5,7 +5,7 @@ using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications.Slack.Payloads;
 using NzbDrone.Core.Validation;
 
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Notifications.Slack
                 new ()
                 {
                     Fallback = message.Message,
-                    Title = message.Movie.Title,
+                    Title = message.Game.Title,
                     Text = message.Message,
                     Color = "warning"
                 }
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Notifications.Slack
                 new ()
                 {
                     Fallback = message.Message,
-                    Title = message.Movie.Title,
+                    Title = message.Game.Title,
                     Text = message.Message,
                     Color = "good"
                 }
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+        public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
         {
             var attachments = new List<Attachment>();
 
@@ -67,8 +67,8 @@ namespace NzbDrone.Core.Notifications.Slack
             {
                 attachments.Add(new Attachment
                 {
-                    Title = movie.Title,
-                    Text = renamedFile.PreviousRelativePath + " renamed to " + renamedFile.MovieFile.RelativePath,
+                    Title = game.Title,
+                    Text = renamedFile.PreviousRelativePath + " renamed to " + renamedFile.GameFile.RelativePath,
                 });
             }
 
@@ -77,34 +77,34 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
             var attachments = new List<Attachment>
             {
                 new ()
                 {
-                    Title = deleteMessage.Movie.Title,
-                    Text = Path.Combine(deleteMessage.Movie.Path, deleteMessage.MovieFile.RelativePath)
+                    Title = deleteMessage.Game.Title,
+                    Text = Path.Combine(deleteMessage.Game.Path, deleteMessage.GameFile.RelativePath)
                 }
             };
 
-            var payload = CreatePayload("Movie File Deleted", attachments);
+            var payload = CreatePayload("Game File Deleted", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
             var attachments = new List<Attachment>
             {
                 new ()
                 {
-                    Title = deleteMessage.Movie.Title,
+                    Title = deleteMessage.Game.Title,
                     Text = deleteMessage.DeletedFilesMessage
                 }
             };
 
-            var payload = CreatePayload("Movie Deleted", attachments);
+            var payload = CreatePayload("Game Deleted", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
@@ -190,7 +190,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             try
             {
-                var message = $"Test message from Radarr posted at {DateTime.Now}";
+                var message = $"Test message from Gamarr posted at {DateTime.Now}";
 
                 var payload = CreatePayload(message);
 

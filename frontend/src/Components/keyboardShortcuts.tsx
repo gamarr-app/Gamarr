@@ -42,7 +42,7 @@ export const shortcuts: Record<string, Shortcut> = {
     },
   },
 
-  MOVIE_SEARCH_INPUT: {
+  GAME_SEARCH_INPUT: {
     key: 's',
     get name() {
       return translate('KeyboardShortcutsFocusSearchBox');
@@ -59,28 +59,28 @@ export const shortcuts: Record<string, Shortcut> = {
   SCROLL_TOP: {
     key: 'mod+home',
     get name() {
-      return translate('KeyboardShortcutsMovieIndexScrollTop');
+      return translate('KeyboardShortcutsGameIndexScrollTop');
     },
   },
 
   SCROLL_BOTTOM: {
     key: 'mod+end',
     get name() {
-      return translate('KeyboardShortcutsMovieIndexScrollBottom');
+      return translate('KeyboardShortcutsGameIndexScrollBottom');
     },
   },
 
   DETAILS_NEXT: {
     key: '→',
     get name() {
-      return translate('KeyboardShortcutsMovieDetailsNextMovie');
+      return translate('KeyboardShortcutsGameDetailsNextGame');
     },
   },
 
   DETAILS_PREVIOUS: {
     key: '←',
     get name() {
-      return translate('KeyboardShortcutsMovieDetailsPreviousMovie');
+      return translate('KeyboardShortcutsGameDetailsPreviousGame');
     },
   },
 };

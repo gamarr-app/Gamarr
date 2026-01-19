@@ -4,7 +4,7 @@ using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Queue
 {
     public class Queue : ModelBase
     {
-        public Movie Movie { get; set; }
+        public Game Game { get; set; }
         public List<Language> Languages { get; set; }
         public QualityModel Quality { get; set; }
         public decimal Size { get; set; }
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Queue
         public TrackedDownloadState? TrackedDownloadState { get; set; }
         public List<TrackedDownloadStatusMessage> StatusMessages { get; set; }
         public string DownloadId { get; set; }
-        public RemoteMovie RemoteMovie { get; set; }
+        public RemoteGame RemoteGame { get; set; }
         public DownloadProtocol Protocol { get; set; }
         public string DownloadClient { get; set; }
         public bool DownloadClientHasPostImportCategory { get; set; }

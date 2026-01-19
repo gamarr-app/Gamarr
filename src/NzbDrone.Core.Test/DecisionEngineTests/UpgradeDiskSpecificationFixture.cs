@@ -9,7 +9,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles;
@@ -26,8 +26,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     {
         private UpgradeDiskSpecification _upgradeDisk;
 
-        private RemoteMovie _parseResultSingle;
-        private MovieFile _firstFile;
+        private RemoteGame _parseResultSingle;
+        private GameFile _firstFile;
 
         [SetUp]
         public void Setup()
@@ -37,9 +37,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _firstFile = new MovieFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _firstFile = new GameFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 2)), DateAdded = DateTime.Now };
 
-            var fakeMovie = Builder<Movie>.CreateNew()
+            var fakeGame = Builder<Game>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
                     UpgradeAllowed = true,
@@ -48,18 +48,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                     FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("None"),
                     MinFormatScore = 0,
                 })
-                .With(e => e.MovieFile = _firstFile)
+                .With(e => e.GameFile = _firstFile)
                 .Build();
 
-            _parseResultSingle = new RemoteMovie
+            _parseResultSingle = new RemoteGame
             {
-                Movie = fakeMovie,
-                ParsedMovieInfo = new ParsedMovieInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                Game = fakeGame,
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
                 CustomFormats = new List<CustomFormat>()
             };
 
             Mocker.GetMock<ICustomFormatCalculationService>()
-                .Setup(x => x.ParseCustomFormat(It.IsAny<MovieFile>()))
+                .Setup(x => x.ParseCustomFormat(It.IsAny<GameFile>()))
                 .Returns(new List<CustomFormat>());
         }
 
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             CustomFormatsTestHelpers.GivenCustomFormats();
             profile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems();
             profile.MinFormatScore = 0;
-            _parseResultSingle.Movie.QualityProfile = profile;
+            _parseResultSingle.Game.QualityProfile = profile;
 
             Console.WriteLine(profile.ToJson());
         }
@@ -80,13 +80,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void GivenNewQuality(QualityModel quality)
         {
-            _parseResultSingle.ParsedMovieInfo.Quality = quality;
+            _parseResultSingle.ParsedGameInfo.Quality = quality;
         }
 
         private void GivenOldCustomFormats(List<CustomFormat> formats)
         {
             Mocker.GetMock<ICustomFormatCalculationService>()
-                .Setup(x => x.ParseCustomFormat(It.IsAny<MovieFile>()))
+                .Setup(x => x.ParseCustomFormat(It.IsAny<GameFile>()))
                 .Returns(formats);
         }
 
@@ -101,14 +101,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_if_movie_has_no_existing_file()
+        public void should_return_true_if_game_has_no_existing_file()
         {
-            _parseResultSingle.Movie.MovieFile = null;
+            _parseResultSingle.Game.GameFile = null;
             _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
 
         [Test]
-        public void should_be_upgradable_if_only_movie_is_upgradable()
+        public void should_be_upgradable_if_only_game_is_upgradable()
         {
             WithFirstFileUpgradable();
             _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
@@ -118,11 +118,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_be_upgradable_if_qualities_are_the_same()
         {
             Mocker.GetMock<ICustomFormatCalculationService>()
-                .Setup(x => x.ParseCustomFormat(It.IsAny<MovieFile>()))
+                .Setup(x => x.ParseCustomFormat(It.IsAny<GameFile>()))
                 .Returns(new List<CustomFormat>());
 
             _firstFile.Quality = new QualityModel(Quality.WEBDL1080p);
-            _parseResultSingle.ParsedMovieInfo.Quality = new QualityModel(Quality.WEBDL1080p);
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.WEBDL1080p);
             _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -130,12 +130,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_be_upgradable_if_revision_downgrade_if_propers_are_preferred()
         {
             _firstFile.Quality = new QualityModel(Quality.WEBDL1080p, new Revision(2));
-            _parseResultSingle.ParsedMovieInfo.Quality = new QualityModel(Quality.WEBDL1080p);
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.WEBDL1080p);
             _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
         [Test]
-        public void should_return_false_if_current_movie_is_equal_to_cutoff()
+        public void should_return_false_if_current_game_is_equal_to_cutoff()
         {
             GivenProfile(new QualityProfile
             {
@@ -149,7 +149,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_false_if_current_movie_is_greater_than_cutoff()
+        public void should_return_false_if_current_game_is_greater_than_cutoff()
         {
             GivenProfile(new QualityProfile
             {
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_when_new_movie_is_proper_but_existing_is_not()
+        public void should_return_true_when_new_game_is_proper_but_existing_is_not()
         {
             GivenProfile(new QualityProfile
             {
@@ -321,7 +321,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 UpgradeAllowed = false
             });
 
-            _parseResultSingle.Movie.QualityProfile.FormatItems = new List<ProfileFormatItem>
+            _parseResultSingle.Game.QualityProfile.FormatItems = new List<ProfileFormatItem>
             {
                 new ProfileFormatItem
                 {
@@ -358,7 +358,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 UpgradeAllowed = false
             });
 
-            _parseResultSingle.Movie.QualityProfile.FormatItems = new List<ProfileFormatItem>
+            _parseResultSingle.Game.QualityProfile.FormatItems = new List<ProfileFormatItem>
             {
                 new ProfileFormatItem
                 {

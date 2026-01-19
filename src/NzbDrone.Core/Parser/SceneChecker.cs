@@ -21,12 +21,12 @@ namespace NzbDrone.Core.Parser
                 return null;
             }
 
-            var parsedTitle = Parser.ParseMovieTitle(title);
+            var parsedTitle = Parser.ParseGameTitle(title);
 
             if (parsedTitle == null ||
                 parsedTitle.ReleaseGroup == null ||
                 parsedTitle.Quality.Quality == Qualities.Quality.Unknown ||
-                string.IsNullOrWhiteSpace(parsedTitle.PrimaryMovieTitle) ||
+                string.IsNullOrWhiteSpace(parsedTitle.PrimaryGameTitle) ||
                 string.IsNullOrWhiteSpace(parsedTitle.ReleaseTitle))
             {
                 return null;

@@ -49,18 +49,18 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // Set post-import label
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MovieImportedCategory != Settings.MovieCategory)
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.GameImportedCategory != Settings.GameCategory)
             {
                 try
                 {
-                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MovieImportedCategory, Settings);
+                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.GameImportedCategory, Settings);
                 }
                 catch (Exception ex)
                 {
                     _logger.Warn(ex,
                         "Failed to set torrent post-import label \"{0}\" for {1} in rTorrent. Does the label exist?",
-                        Settings.MovieImportedCategory,
+                        Settings.GameImportedCategory,
                         downloadClientItem.Title);
                 }
             }
@@ -79,11 +79,11 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
-            var priority = (RTorrentPriority)(remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie ? Settings.RecentMoviePriority : Settings.OlderMoviePriority);
+            var priority = (RTorrentPriority)(remoteGame.Game.GameMetadata.Value.IsRecentGame ? Settings.RecentGamePriority : Settings.OlderGamePriority);
 
-            _proxy.AddTorrentFromUrl(magnetLink, Settings.MovieCategory, priority, Settings.MovieDirectory, Settings);
+            _proxy.AddTorrentFromUrl(magnetLink, Settings.GameCategory, priority, Settings.GameDirectory, Settings);
 
             var tries = 10;
             var retryDelay = 500;
@@ -99,11 +99,11 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
-            var priority = (RTorrentPriority)(remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie ? Settings.RecentMoviePriority : Settings.OlderMoviePriority);
+            var priority = (RTorrentPriority)(remoteGame.Game.GameMetadata.Value.IsRecentGame ? Settings.RecentGamePriority : Settings.OlderGamePriority);
 
-            _proxy.AddTorrentFromFile(filename, fileContent, Settings.MovieCategory, priority, Settings.MovieDirectory, Settings);
+            _proxy.AddTorrentFromFile(filename, fileContent, Settings.GameCategory, priority, Settings.GameDirectory, Settings);
 
             var tries = 10;
             var retryDelay = 500;
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             {
                 _logger.Debug("rTorrent didn't add the torrent within {0} seconds: {1}.", tries * retryDelay / 1000, filename);
 
-                throw new ReleaseDownloadException(remoteMovie.Release, "Downloading torrent failed");
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed");
             }
 
             return hash;
@@ -131,7 +131,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             foreach (var torrent in torrents)
             {
                 // Don't concern ourselves with categories other than specified
-                if (Settings.MovieCategory.IsNotNullOrWhiteSpace() && torrent.Category != Settings.MovieCategory)
+                if (Settings.GameCategory.IsNotNullOrWhiteSpace() && torrent.Category != Settings.GameCategory)
                 {
                     continue;
                 }
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
                 }
 
                 var item = new DownloadClientItem();
-                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MovieImportedCategory.IsNotNullOrWhiteSpace());
+                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.GameImportedCategory.IsNotNullOrWhiteSpace());
                 item.Title = torrent.Name;
                 item.DownloadId = torrent.Hash;
                 item.OutputPath = _remotePathMappingService.RemapRemoteToLocal(Settings.Host, new OsPath(torrent.Path));

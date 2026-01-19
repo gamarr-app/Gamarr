@@ -12,10 +12,10 @@ namespace NzbDrone.Core.Notifications
         public bool OnDownload { get; set; }
         public bool OnUpgrade { get; set; }
         public bool OnRename { get; set; }
-        public bool OnMovieAdded { get; set; }
-        public bool OnMovieDelete { get; set; }
-        public bool OnMovieFileDelete { get; set; }
-        public bool OnMovieFileDeleteForUpgrade { get; set; }
+        public bool OnGameAdded { get; set; }
+        public bool OnGameDelete { get; set; }
+        public bool OnGameFileDelete { get; set; }
+        public bool OnGameFileDeleteForUpgrade { get; set; }
         public bool OnHealthIssue { get; set; }
         public bool IncludeHealthWarnings { get; set; }
         public bool OnHealthRestored { get; set; }
@@ -35,16 +35,16 @@ namespace NzbDrone.Core.Notifications
         public bool SupportsOnRename { get; set; }
 
         [MemberwiseEqualityIgnore]
-        public bool SupportsOnMovieAdded { get; set; }
+        public bool SupportsOnGameAdded { get; set; }
 
         [MemberwiseEqualityIgnore]
-        public bool SupportsOnMovieDelete { get; set; }
+        public bool SupportsOnGameDelete { get; set; }
 
         [MemberwiseEqualityIgnore]
-        public bool SupportsOnMovieFileDelete { get; set; }
+        public bool SupportsOnGameFileDelete { get; set; }
 
         [MemberwiseEqualityIgnore]
-        public bool SupportsOnMovieFileDeleteForUpgrade { get; set; }
+        public bool SupportsOnGameFileDeleteForUpgrade { get; set; }
 
         [MemberwiseEqualityIgnore]
         public bool SupportsOnHealthIssue { get; set; }
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Notifications
         public bool SupportsOnManualInteractionRequired { get; set; }
 
         [MemberwiseEqualityIgnore]
-        public override bool Enable => OnGrab || OnDownload || (OnDownload && OnUpgrade) || OnRename || OnMovieAdded || OnMovieDelete || OnMovieFileDelete || (OnMovieFileDelete && OnMovieFileDeleteForUpgrade) || OnHealthIssue || OnHealthRestored || OnApplicationUpdate || OnManualInteractionRequired;
+        public override bool Enable => OnGrab || OnDownload || (OnDownload && OnUpgrade) || OnRename || OnGameAdded || OnGameDelete || OnGameFileDelete || (OnGameFileDelete && OnGameFileDeleteForUpgrade) || OnHealthIssue || OnHealthRestored || OnApplicationUpdate || OnManualInteractionRequired;
 
         public bool Equals(NotificationDefinition other)
         {

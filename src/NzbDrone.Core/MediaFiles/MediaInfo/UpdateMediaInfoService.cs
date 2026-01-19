@@ -6,17 +6,17 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.MediaFiles.MediaInfo
 {
     public interface IUpdateMediaInfo
     {
-        bool Update(MovieFile movieFile, Movie movie);
-        bool UpdateMediaInfo(MovieFile movieFile, Movie movie);
+        bool Update(GameFile gameFile, Game game);
+        bool UpdateMediaInfo(GameFile gameFile, Game game);
     }
 
-    public class UpdateMediaInfoService : IUpdateMediaInfo, IHandle<MovieScannedEvent>
+    public class UpdateMediaInfoService : IUpdateMediaInfo, IHandle<GameScannedEvent>
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IMediaFileService _mediaFileService;
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.MediaFiles.MediaInfo
             _logger = logger;
         }
 
-        public void Handle(MovieScannedEvent message)
+        public void Handle(GameScannedEvent message)
         {
             if (!_configService.EnableMediaInfo)
             {
@@ -45,18 +45,18 @@ namespace NzbDrone.Core.MediaFiles.MediaInfo
                 return;
             }
 
-            var allMediaFiles = _mediaFileService.GetFilesByMovie(message.Movie.Id);
+            var allMediaFiles = _mediaFileService.GetFilesByGame(message.Game.Id);
             var filteredMediaFiles = allMediaFiles.Where(c =>
                 c.MediaInfo == null ||
                 c.MediaInfo.SchemaRevision < VideoFileInfoReader.MINIMUM_MEDIA_INFO_SCHEMA_REVISION).ToList();
 
             foreach (var mediaFile in filteredMediaFiles)
             {
-                UpdateMediaInfo(mediaFile, message.Movie);
+                UpdateMediaInfo(mediaFile, message.Game);
             }
         }
 
-        public bool Update(MovieFile movieFile, Movie movie)
+        public bool Update(GameFile gameFile, Game game)
         {
             if (!_configService.EnableMediaInfo)
             {
@@ -64,12 +64,12 @@ namespace NzbDrone.Core.MediaFiles.MediaInfo
                 return false;
             }
 
-            return UpdateMediaInfo(movieFile, movie);
+            return UpdateMediaInfo(gameFile, game);
         }
 
-        public bool UpdateMediaInfo(MovieFile movieFile, Movie movie)
+        public bool UpdateMediaInfo(GameFile gameFile, Game game)
         {
-            var path = movieFile.Path.IsNotNullOrWhiteSpace() ? movieFile.Path : Path.Combine(movie.Path, movieFile.RelativePath);
+            var path = gameFile.Path.IsNotNullOrWhiteSpace() ? gameFile.Path : Path.Combine(game.Path, gameFile.RelativePath);
 
             if (!_diskProvider.FileExists(path))
             {
@@ -84,8 +84,8 @@ namespace NzbDrone.Core.MediaFiles.MediaInfo
                 return false;
             }
 
-            movieFile.MediaInfo = updatedMediaInfo;
-            _mediaFileService.Update(movieFile);
+            gameFile.MediaInfo = updatedMediaInfo;
+            _mediaFileService.Update(gameFile);
             _logger.Debug("Updated MediaInfo for '{0}'", path);
 
             return true;

@@ -8,8 +8,8 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MovieImport;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.MediaFiles.GameImport;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -31,12 +31,12 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                                                     .With(h => h.Title = "Drone.S01E01.HDTV")
                                                     .Build();
 
-            var remoteMovie = BuildRemoteMovie();
+            var remoteGame = BuildRemoteGame();
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
                     .With(c => c.State = TrackedDownloadState.Downloading)
                     .With(c => c.DownloadItem = completed)
-                    .With(c => c.RemoteMovie = remoteMovie)
+                    .With(c => c.RemoteGame = remoteGame)
                     .Build();
 
             Mocker.GetMock<IDownloadClient>()
@@ -53,18 +53,18 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(_trackedDownload.DownloadItem.DownloadId))
-                  .Returns(new List<MovieHistory>());
+                  .Returns(new List<GameHistory>());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie("Drone.S01E01.HDTV"))
-                  .Returns(remoteMovie.Movie);
+                  .Setup(s => s.GetGame("Drone.S01E01.HDTV"))
+                  .Returns(remoteGame.Game);
         }
 
-        private RemoteMovie BuildRemoteMovie()
+        private RemoteGame BuildRemoteGame()
         {
-            return new RemoteMovie
+            return new RemoteGame
             {
-                Movie = new Movie(),
+                Game = new Game(),
             };
         }
 
@@ -72,14 +72,14 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         {
             Mocker.GetMock<IHistoryService>()
                 .Setup(s => s.FindByDownloadId(_trackedDownload.DownloadItem.DownloadId))
-                .Returns(new List<MovieHistory>());
+                .Returns(new List<GameHistory>());
         }
 
-        private void GivenMovieMatch()
+        private void GivenGameMatch()
         {
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie(It.IsAny<string>()))
-                  .Returns(_trackedDownload.RemoteMovie.Movie);
+                  .Setup(s => s.GetGame(It.IsAny<string>()))
+                  .Returns(_trackedDownload.RemoteGame.Game);
         }
 
         private void GivenABadlyNamedDownload()
@@ -88,18 +88,18 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             _trackedDownload.DownloadItem.Title = "Droned Pilot"; // Set a badly named download
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.Is<string>(i => i == "1234")))
-                  .Returns(new List<MovieHistory>
+                  .Returns(new List<GameHistory>
                   {
-                      new MovieHistory() { SourceTitle = "Droned S01E01", EventType = MovieHistoryEventType.Grabbed }
+                      new GameHistory() { SourceTitle = "Droned S01E01", EventType = GameHistoryEventType.Grabbed }
                   });
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie(It.IsAny<string>()))
-                  .Returns((Movie)null);
+                  .Setup(s => s.GetGame(It.IsAny<string>()))
+                  .Returns((Game)null);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie("Droned S01E01"))
-                  .Returns(BuildRemoteMovie().Movie);
+                  .Setup(s => s.GetGame("Droned S01E01"))
+                  .Returns(BuildRemoteGame().Game);
         }
 
         [TestCase(DownloadItemStatus.Downloading)]
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         {
             _trackedDownload.DownloadItem.Category = "tv";
             GivenNoGrabbedHistory();
-            GivenMovieMatch();
+            GivenGameMatch();
 
             Subject.Check(_trackedDownload);
 
@@ -154,11 +154,11 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         {
             GivenABadlyNamedDownload();
 
-            Mocker.GetMock<IDownloadedMovieImportService>()
-                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+            Mocker.GetMock<IDownloadedGameImportService>()
+                  .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision(new LocalMovie { Path = @"C:\TestPath\Droned.S01E01.mkv" }))
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv" }))
                            });
 
             Subject.Check(_trackedDownload);
@@ -170,8 +170,8 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         public void should_not_process_when_there_is_a_title_mismatch()
         {
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie("Drone.S01E01.HDTV"))
-                  .Returns((Movie)null);
+                  .Setup(s => s.GetGame("Drone.S01E01.HDTV"))
+                  .Returns((Game)null);
 
             Subject.Check(_trackedDownload);
 

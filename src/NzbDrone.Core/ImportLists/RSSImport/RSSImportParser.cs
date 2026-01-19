@@ -10,7 +10,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.Exceptions;
 
@@ -31,15 +31,15 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             _logger = logger;
         }
 
-        public virtual IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
             _importResponse = importResponse;
 
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(importResponse))
             {
-                return movies;
+                return games;
             }
 
             var document = LoadXmlDocument(importResponse);
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.ImportLists.RSSImport
                 {
                     var reportInfo = ProcessItem(item);
 
-                    movies.AddIfNotNull(reportInfo);
+                    games.AddIfNotNull(reportInfo);
                 }
                 catch (Exception itemEx)
                 {
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.ImportLists.RSSImport
                 }
             }
 
-            return movies;
+            return games;
         }
 
         protected virtual XDocument LoadXmlDocument(ImportListResponse indexerResponse)
@@ -100,9 +100,9 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             }
         }
 
-        protected virtual ImportListMovie CreateNewMovie()
+        protected virtual ImportListGame CreateNewGame()
         {
-            return new ImportListMovie();
+            return new ImportListGame();
         }
 
         protected virtual bool PreProcess(ImportListResponse importListResponse)
@@ -121,9 +121,9 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             return true;
         }
 
-        protected ImportListMovie ProcessItem(XElement item)
+        protected ImportListGame ProcessItem(XElement item)
         {
-            var releaseInfo = CreateNewMovie();
+            var releaseInfo = CreateNewGame();
 
             releaseInfo = ProcessItem(item, releaseInfo);
 
@@ -131,22 +131,22 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             return PostProcess(item, releaseInfo);
         }
 
-        protected virtual ImportListMovie ProcessItem(XElement item, ImportListMovie releaseInfo)
+        protected virtual ImportListGame ProcessItem(XElement item, ImportListGame releaseInfo)
         {
             var title = GetTitle(item);
 
-            // Loosely allow movies (will work with IMDB)
+            // Loosely allow games (will work with IMDB)
             if (title.ContainsIgnoreCase("TV Series") || title.ContainsIgnoreCase("Mini-Series") || title.ContainsIgnoreCase("TV Episode"))
             {
                 return null;
             }
 
             releaseInfo.Title = title;
-            var result = Parser.Parser.ParseMovieTitle(title); // Depreciated anyways
+            var result = Parser.Parser.ParseGameTitle(title); // Depreciated anyways
 
             if (result != null)
             {
-                releaseInfo.Title = result.PrimaryMovieTitle;
+                releaseInfo.Title = result.PrimaryGameTitle;
                 releaseInfo.Year = result.Year;
                 releaseInfo.ImdbId = result.ImdbId;
             }
@@ -166,7 +166,7 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             return releaseInfo;
         }
 
-        protected virtual ImportListMovie PostProcess(XElement item, ImportListMovie releaseInfo)
+        protected virtual ImportListGame PostProcess(XElement item, ImportListGame releaseInfo)
         {
             return releaseInfo;
         }

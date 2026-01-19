@@ -15,11 +15,11 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
 
         public MediaBrowserMetadataSettings()
         {
-            MovieMetadata = true;
+            GameMetadata = true;
         }
 
-        [FieldDefinition(0, Label = "MetadataSettingsMovieMetadata", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata)]
-        public bool MovieMetadata { get; set; }
+        [FieldDefinition(0, Label = "MetadataSettingsGameMetadata", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata)]
+        public bool GameMetadata { get; set; }
 
         public bool IsValid => true;
 

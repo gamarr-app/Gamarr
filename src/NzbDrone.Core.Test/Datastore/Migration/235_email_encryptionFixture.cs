@@ -25,8 +25,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OnHealthIssue = true,
                     IncludeHealthWarnings = true,
                     OnRename = true,
-                    OnMovieDelete = false,
-                    Name = "Mail Radarr",
+                    OnGameDelete = false,
+                    Name = "Mail Gamarr",
                     Implementation = "Email",
                     Tags = "[]",
                     Settings = new EmailSettings234
@@ -61,8 +61,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OnHealthIssue = true,
                     IncludeHealthWarnings = true,
                     OnRename = true,
-                    OnMovieDelete = false,
-                    Name = "Mail Radarr",
+                    OnGameDelete = false,
+                    Name = "Mail Gamarr",
                     Implementation = "Email",
                     Tags = "[]",
                     Settings = new EmailSettings234
@@ -97,8 +97,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OnHealthIssue = true,
                     IncludeHealthWarnings = true,
                     OnRename = true,
-                    OnMovieDelete = false,
-                    Name = "Mail Radarr",
+                    OnGameDelete = false,
+                    Name = "Mail Gamarr",
                     Implementation = "Email",
                     Tags = "[]",
                     Settings = new { }.ToJson(),
@@ -126,13 +126,13 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         public bool OnDownload { get; set; }
         public bool OnUpgrade { get; set; }
         public bool OnRename { get; set; }
-        public bool OnMovieDelete { get; set; }
-        public bool OnMovieFileDelete { get; set; }
-        public bool OnMovieFileDeleteForUpgrade { get; set; }
+        public bool OnGameDelete { get; set; }
+        public bool OnGameFileDelete { get; set; }
+        public bool OnGameFileDeleteForUpgrade { get; set; }
         public bool OnHealthIssue { get; set; }
         public bool OnApplicationUpdate { get; set; }
         public bool OnManualInteractionRequired { get; set; }
-        public bool OnMovieAdded { get; set; }
+        public bool OnGameAdded { get; set; }
         public bool OnHealthRestored { get; set; }
         public bool IncludeHealthWarnings { get; set; }
         public List<int> Tags { get; set; }

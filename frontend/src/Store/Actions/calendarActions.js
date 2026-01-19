@@ -42,7 +42,7 @@ export const defaultState = {
   searchMissingCommandId: null,
 
   options: {
-    showMovieInformation: true,
+    showGameInformation: true,
     showCinemaRelease: true,
     showDigitalRelease: true,
     showPhysicalRelease: true,
@@ -97,7 +97,7 @@ export const persistState = [
   'calendar.view',
   'calendar.selectedFilterKey',
   'calendar.options',
-  'movieIndex.customFilters'
+  'gameIndex.customFilters'
 ];
 
 //
@@ -384,11 +384,11 @@ export const actionHandlers = handleThunks({
   },
 
   [SEARCH_MISSING]: function(getState, payload, dispatch) {
-    const { movieIds } = payload;
+    const { gameIds } = payload;
 
     const commandPayload = {
-      name: commandNames.MOVIE_SEARCH,
-      movieIds
+      name: commandNames.GAME_SEARCH,
+      gameIds
     };
 
     executeCommandHelper(commandPayload, dispatch).then((data) => {

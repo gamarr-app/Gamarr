@@ -1,16 +1,16 @@
 using NzbDrone.Common.Messaging;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.MediaCover
 {
     public class MediaCoversUpdatedEvent : IEvent
     {
-        public Movie Movie { get; set; }
+        public Game Game { get; set; }
         public bool Updated { get; set; }
 
-        public MediaCoversUpdatedEvent(Movie movie, bool updated)
+        public MediaCoversUpdatedEvent(Game game, bool updated)
         {
-            Movie = movie;
+            Game = game;
             Updated = updated;
         }
     }

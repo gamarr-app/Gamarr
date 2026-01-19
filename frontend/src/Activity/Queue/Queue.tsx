@@ -26,7 +26,7 @@ import usePaging from 'Components/Table/usePaging';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { align, icons, kinds } from 'Helpers/Props';
-import createMoviesFetchingSelector from 'Movie/createMoviesFetchingSelector';
+import createGamesFetchingSelector from 'Game/createGamesFetchingSelector';
 import { executeCommand } from 'Store/Actions/commandActions';
 import {
   clearQueue,
@@ -78,8 +78,8 @@ function Queue() {
   } = useSelector((state: AppState) => state.queue.paged);
 
   const { count } = useSelector(createQueueStatusSelector());
-  const { isMoviesFetching, isMoviesPopulated, moviesError } = useSelector(
-    createMoviesFetchingSelector()
+  const { isGamesFetching, isGamesPopulated, gamesError } = useSelector(
+    createGamesFetchingSelector()
   );
   const customFilters = useSelector(createCustomFiltersSelector('queue'));
 
@@ -107,11 +107,11 @@ function Queue() {
     useState(false);
 
   const isRefreshing =
-    isFetching || isMoviesFetching || isRefreshMonitoredDownloadsExecuting;
+    isFetching || isGamesFetching || isRefreshMonitoredDownloadsExecuting;
   const isAllPopulated =
     isPopulated &&
-    (isMoviesPopulated || !items.length || items.every((m) => !m.movieId));
-  const hasError = error || moviesError;
+    (isGamesPopulated || !items.length || items.every((m) => !m.gameId));
+  const hasError = error || gamesError;
   const selectedCount = selectedIds.length;
   const disableSelectedActions = selectedCount === 0;
 
@@ -268,7 +268,7 @@ function Queue() {
                   return (
                     <QueueRow
                       key={item.id}
-                      movieId={item.movieId}
+                      gameId={item.gameId}
                       isSelected={selectedState[item.id]}
                       columns={columns}
                       {...item}
@@ -372,7 +372,7 @@ function Queue() {
           selectedIds.every((id) => {
             const item = items.find((i) => i.id === id);
 
-            return !!(item && item.movieId);
+            return !!(item && item.gameId);
           })
         }
         isPending={

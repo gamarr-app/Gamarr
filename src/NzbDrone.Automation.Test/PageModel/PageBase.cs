@@ -49,7 +49,7 @@ namespace NzbDrone.Automation.Test.PageModel
             });
         }
 
-        public IWebElement MovieNavIcon => Find(By.LinkText("Movies"));
+        public IWebElement GameNavIcon => Find(By.LinkText("Games"));
 
         public IWebElement CalendarNavIcon => Find(By.LinkText("Calendar"));
 

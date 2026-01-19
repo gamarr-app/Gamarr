@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithoutRecycleBin();
 
-            var path = @"C:\Test\Movie\The Mask (1994)\The Mask.avi".AsOsAgnostic();
+            var path = @"C:\Test\Game\The Mask (1994)\The Mask.avi".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\Movie\The Mask (1994)\The Mask.avi".AsOsAgnostic();
+            var path = @"C:\Test\Game\The Mask (1994)\The Mask.avi".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\Movie\The Mask (1994)\The Mask.avi".AsOsAgnostic();
+            var path = @"C:\Test\Game\The Mask (1994)\The Mask.avi".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(v => v.FileExists(@"C:\Test\Recycle Bin\The Mask.avi".AsOsAgnostic()))
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WindowsOnly();
             WithRecycleBin();
-            var path = @"C:\Test\Movie\The Mask (1994)\The Mask.avi".AsOsAgnostic();
+            var path = @"C:\Test\Game\The Mask (1994)\The Mask.avi".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\Movie\The Mask (1994)\The Mask.avi".AsOsAgnostic();
+            var path = @"C:\Test\Game\The Mask (1994)\The Mask.avi".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path, "The Mask (1994)");
 

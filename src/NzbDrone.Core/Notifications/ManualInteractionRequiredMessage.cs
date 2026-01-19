@@ -1,6 +1,6 @@
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -9,8 +9,8 @@ namespace NzbDrone.Core.Notifications
     public class ManualInteractionRequiredMessage
     {
         public string Message { get; set; }
-        public Movie Movie { get; set; }
-        public RemoteMovie RemoteMovie { get; set; }
+        public Game Game { get; set; }
+        public RemoteGame RemoteGame { get; set; }
         public TrackedDownload TrackedDownload { get; set; }
         public QualityModel Quality { get; set; }
         public DownloadClientItemClientInfo DownloadClientInfo { get; set; }

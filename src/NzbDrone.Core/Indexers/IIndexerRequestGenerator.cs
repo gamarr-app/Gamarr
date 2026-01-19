@@ -7,7 +7,7 @@ namespace NzbDrone.Core.Indexers
     public interface IIndexerRequestGenerator
     {
         IndexerPageableRequestChain GetRecentRequests();
-        IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria);
+        IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria);
         Func<IDictionary<string, string>> GetCookies { get; set; }
         Action<IDictionary<string, string>, DateTime?> CookiesUpdater { get; set; }
     }

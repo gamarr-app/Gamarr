@@ -6,7 +6,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
@@ -16,26 +16,26 @@ namespace NzbDrone.Core.Test.Blocklisting
     public class BlocklistRepositoryFixture : DbTest<BlocklistRepository, Blocklist>
     {
         private Blocklist _blocklist;
-        private Movie _movie1;
-        private Movie _movie2;
+        private Game _game1;
+        private Game _game2;
 
         [SetUp]
         public void Setup()
         {
             _blocklist = new Blocklist
             {
-                MovieId = 1234,
+                GameId = 1234,
                 Quality = new QualityModel(),
                 Languages = new List<Language>(),
-                SourceTitle = "movie.title.1998",
+                SourceTitle = "game.title.1998",
                 Date = DateTime.UtcNow
             };
 
-            _movie1 = Builder<Movie>.CreateNew()
+            _game1 = Builder<Game>.CreateNew()
                          .With(s => s.Id = 7)
                          .Build();
 
-            _movie2 = Builder<Movie>.CreateNew()
+            _game2 = Builder<Game>.CreateNew()
                                      .With(s => s.Id = 8)
                                      .Build();
         }
@@ -48,11 +48,11 @@ namespace NzbDrone.Core.Test.Blocklisting
         }
 
         [Test]
-        public void should_should_have_movie_id()
+        public void should_should_have_game_id()
         {
             Subject.Insert(_blocklist);
 
-            Subject.All().First().MovieId.Should().Be(_blocklist.MovieId);
+            Subject.All().First().GameId.Should().Be(_blocklist.GameId);
         }
 
         [Test]
@@ -60,17 +60,17 @@ namespace NzbDrone.Core.Test.Blocklisting
         {
             Subject.Insert(_blocklist);
 
-            Subject.BlocklistedByTitle(_blocklist.MovieId, _blocklist.SourceTitle.ToUpperInvariant()).Should().HaveCount(1);
+            Subject.BlocklistedByTitle(_blocklist.GameId, _blocklist.SourceTitle.ToUpperInvariant()).Should().HaveCount(1);
         }
 
         [Test]
-        public void should_delete_blocklists_by_movieId()
+        public void should_delete_blocklists_by_gameId()
         {
             var blocklistItems = Builder<Blocklist>.CreateListOfSize(5)
                 .TheFirst(1)
-                .With(c => c.MovieId = _movie2.Id)
+                .With(c => c.GameId = _game2.Id)
                 .TheRest()
-                .With(c => c.MovieId = _movie1.Id)
+                .With(c => c.GameId = _game1.Id)
                 .All()
                 .With(c => c.Quality = new QualityModel())
                 .With(c => c.Languages = new List<Language>())
@@ -79,14 +79,14 @@ namespace NzbDrone.Core.Test.Blocklisting
 
             Db.InsertMany(blocklistItems);
 
-            Subject.DeleteForMovies(new List<int> { _movie1.Id });
+            Subject.DeleteForGames(new List<int> { _game1.Id });
 
             var blocklist = Subject.All();
-            var removedMovieBlocklists = blocklist.Where(b => b.MovieId == _movie1.Id);
-            var nonRemovedMovieBlocklists = blocklist.Where(b => b.MovieId == _movie2.Id);
+            var removedGameBlocklists = blocklist.Where(b => b.GameId == _game1.Id);
+            var nonRemovedGameBlocklists = blocklist.Where(b => b.GameId == _game2.Id);
 
-            removedMovieBlocklists.Should().HaveCount(0);
-            nonRemovedMovieBlocklists.Should().HaveCount(1);
+            removedGameBlocklists.Should().HaveCount(0);
+            nonRemovedGameBlocklists.Should().HaveCount(1);
         }
     }
 }

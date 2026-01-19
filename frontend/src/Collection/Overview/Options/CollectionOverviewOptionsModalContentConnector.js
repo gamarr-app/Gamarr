@@ -1,15 +1,15 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { setMovieCollectionsOption, setMovieCollectionsOverviewOption } from 'Store/Actions/movieCollectionActions';
+import { setGameCollectionsOption, setGameCollectionsOverviewOption } from 'Store/Actions/gameCollectionActions';
 import CollectionOverviewOptionsModalContent from './CollectionOverviewOptionsModalContent';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.movieCollections,
-    (movieCollections) => {
+    (state) => state.gameCollections,
+    (gameCollections) => {
       return {
-        ...movieCollections.options,
-        ...movieCollections.overviewOptions
+        ...gameCollections.options,
+        ...gameCollections.overviewOptions
       };
     }
   );
@@ -18,10 +18,10 @@ function createMapStateToProps() {
 function createMapDispatchToProps(dispatch, props) {
   return {
     onChangeOverviewOption(payload) {
-      dispatch(setMovieCollectionsOverviewOption(payload));
+      dispatch(setGameCollectionsOverviewOption(payload));
     },
     onChangeOption(payload) {
-      dispatch(setMovieCollectionsOption(payload));
+      dispatch(setGameCollectionsOption(payload));
     }
   };
 }

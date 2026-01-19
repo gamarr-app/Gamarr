@@ -3,7 +3,7 @@ using System.Linq;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.AutoTagging
@@ -16,7 +16,7 @@ namespace NzbDrone.Core.AutoTagging
         AutoTag GetById(int id);
         void Delete(int id);
         List<AutoTag> AllForTag(int tagId);
-        AutoTaggingChanges GetTagChanges(Movie movie);
+        AutoTaggingChanges GetTagChanges(Game game);
     }
 
     public class AutoTaggingService : IAutoTaggingService
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.AutoTagging
                 .ToList();
         }
 
-        public AutoTaggingChanges GetTagChanges(Movie movie)
+        public AutoTaggingChanges GetTagChanges(Game game)
         {
             var autoTags = All();
             var changes = new AutoTaggingChanges();
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.AutoTagging
             }
 
             // Set the root folder path on the series
-            movie.RootFolderPath = _rootFolderService.GetBestRootFolderPath(movie.Path);
+            game.RootFolderPath = _rootFolderService.GetBestRootFolderPath(game.Path);
 
             foreach (var autoTag in autoTags)
             {
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.AutoTagging
                     .GroupBy(t => t.GetType())
                     .Select(g => new SpecificationMatchesGroup
                     {
-                        Matches = g.ToDictionary(t => t, t => t.IsSatisfiedBy(movie))
+                        Matches = g.ToDictionary(t => t, t => t.IsSatisfiedBy(game))
                     })
                     .ToList();
 
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.AutoTagging
                 {
                     foreach (var tag in tags)
                     {
-                        if (!movie.Tags.Contains(tag))
+                        if (!game.Tags.Contains(tag))
                         {
                             changes.TagsToAdd.Add(tag);
                         }

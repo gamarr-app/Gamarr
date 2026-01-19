@@ -137,13 +137,13 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
                   .Callback(PrepareClientToReturnQueuedItem);
         }
 
-        protected override RemoteMovie CreateRemoteMovie()
+        protected override RemoteGame CreateRemoteGame()
         {
-            var movie = base.CreateRemoteMovie();
+            var game = base.CreateRemoteGame();
 
-            movie.Release.DownloadUrl = _downloadURL;
+            game.Release.DownloadUrl = _downloadURL;
 
-            return movie;
+            return game;
         }
 
         [Test]
@@ -152,9 +152,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
             GivenDestinationDirectory();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<IFreeboxDownloadProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), _encodedDestinationDirectory, It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<double?>(), It.IsAny<FreeboxDownloadSettings>()), Times.Once());
@@ -167,9 +167,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
             GivenCategory();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<IFreeboxDownloadProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), _encodedDefaultDestinationAndCategory, It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<double?>(), It.IsAny<FreeboxDownloadSettings>()), Times.Once());
@@ -181,9 +181,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
             GivenDownloadConfiguration();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<IFreeboxDownloadProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), _encodedDefaultDestination, It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<double?>(), It.IsAny<FreeboxDownloadSettings>()), Times.Once());
@@ -198,9 +198,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
             GivenDownloadConfiguration();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<IFreeboxDownloadProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), It.IsAny<string>(), toBePausedFlag, It.IsAny<bool>(), It.IsAny<double?>(), It.IsAny<FreeboxDownloadSettings>()), Times.Once());
@@ -222,11 +222,11 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
             GivenDownloadConfiguration();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            remoteMovie.Movie.MovieMetadata.Value.PhysicalRelease = DateTime.UtcNow.AddDays(-ageDay);
+            remoteGame.Game.GameMetadata.Value.PhysicalRelease = DateTime.UtcNow.AddDays(-ageDay);
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<IFreeboxDownloadProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), toBeQueuedFirstFlag, It.IsAny<double?>(), It.IsAny<FreeboxDownloadSettings>()), Times.Once());
@@ -239,12 +239,12 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
             GivenDownloadConfiguration();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            remoteMovie.SeedConfiguration = new TorrentSeedConfiguration();
-            remoteMovie.SeedConfiguration.Ratio = providerSeedRatio;
+            remoteGame.SeedConfiguration = new TorrentSeedConfiguration();
+            remoteGame.SeedConfiguration.Ratio = providerSeedRatio;
 
-            await Subject.Download(remoteMovie, CreateIndexer());
+            await Subject.Download(remoteGame, CreateIndexer());
 
             Mocker.GetMock<IFreeboxDownloadProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>(), expectedSeedRatio, It.IsAny<FreeboxDownloadSettings>()), Times.Once());

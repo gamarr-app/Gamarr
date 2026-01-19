@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Alter.Table("Movies").AddColumn("PhysicalRelease").AsDateTime().Nullable();
+            Alter.Table("Games").AddColumn("PhysicalRelease").AsDateTime().Nullable();
         }
     }
 }

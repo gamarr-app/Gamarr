@@ -8,10 +8,10 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Execute.Sql("UPDATE \"Movies\" SET \"Images\" = replace(\"Images\", \'\"coverType\": \"banner\"\', \'\"coverType\": \"fanart\"\')");
+            Execute.Sql("UPDATE \"Games\" SET \"Images\" = replace(\"Images\", \'\"coverType\": \"banner\"\', \'\"coverType\": \"fanart\"\')");
 
-            // Remove Link for images to specific MovieFiles, Images are now related to the Movie object only
-            Execute.Sql("UPDATE \"MetadataFiles\" SET \"MovieFileId\" = null WHERE \"Type\" = 2");
+            // Remove Link for images to specific GameFiles, Images are now related to the Game object only
+            Execute.Sql("UPDATE \"MetadataFiles\" SET \"GameFileId\" = null WHERE \"Type\" = 2");
         }
     }
 }

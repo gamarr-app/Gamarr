@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Download
 
             if (!availableProviders.Any())
             {
-                throw new DownloadClientUnavailableException("No download client was found without tags or a matching movie tag. Please check your settings.");
+                throw new DownloadClientUnavailableException("No download client was found without tags or a matching game tag. Please check your settings.");
             }
 
             if (indexerId > 0)

@@ -22,7 +22,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
     [CheckOn(typeof(ProviderUpdatedEvent<IDownloadClient>))]
     [CheckOn(typeof(ProviderDeletedEvent<IDownloadClient>))]
     [CheckOn(typeof(ModelEvent<RemotePathMapping>))]
-    [CheckOn(typeof(MovieImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
+    [CheckOn(typeof(GameImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class RemotePathMappingCheck : HealthCheckBase, IProvideHealthCheck
     {
         private readonly IDiskProvider _diskProvider;
@@ -184,14 +184,14 @@ namespace NzbDrone.Core.HealthCheck.Checks
                 return new HealthCheck(GetType());
             }
 
-            if (message is MovieImportFailedEvent failureMessage)
+            if (message is GameImportFailedEvent failureMessage)
             {
                 // if we can see the file exists but the import failed then likely a permissions issue
-                if (failureMessage.MovieInfo != null)
+                if (failureMessage.GameInfo != null)
                 {
-                    var moviePath = failureMessage.MovieInfo.Path;
+                    var gamePath = failureMessage.GameInfo.Path;
 
-                    if (_diskProvider.FileExists(moviePath))
+                    if (_diskProvider.FileExists(gamePath))
                     {
                         return new HealthCheck(GetType(),
                             HealthCheckResult.Error,
@@ -199,25 +199,25 @@ namespace NzbDrone.Core.HealthCheck.Checks
                                 "RemotePathMappingCheckDownloadPermissions",
                                 new Dictionary<string, object>
                                 {
-                                    { "path", moviePath }
+                                    { "path", gamePath }
                                 }),
                             "#permissions-error");
                     }
 
-                    // If the file doesn't exist but MovieInfo is not null then the message is coming from
-                    // ImportApprovedMovies and the file must have been removed part way through processing
+                    // If the file doesn't exist but GameInfo is not null then the message is coming from
+                    // ImportApprovedGames and the file must have been removed part way through processing
                     return new HealthCheck(GetType(),
                         HealthCheckResult.Error,
                         _localizationService.GetLocalizedString(
                             "RemotePathMappingCheckFileRemoved",
                             new Dictionary<string, object>
                             {
-                                { "path", moviePath }
+                                { "path", gamePath }
                             }),
                         "#remote-path-file-removed");
                 }
 
-                // If the previous case did not match then the failure occurred in DownloadedMovieImportService,
+                // If the previous case did not match then the failure occurred in DownloadedGameImportService,
                 // while trying to locate the files reported by the download client
                 // Only check clients not in failure status, those get another message
                 var client = _downloadClientProvider.GetDownloadClients(true).FirstOrDefault(x => x.Definition.Name == failureMessage.DownloadClientInfo.Name);

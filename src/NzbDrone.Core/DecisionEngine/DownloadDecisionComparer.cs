@@ -65,23 +65,23 @@ namespace NzbDrone.Core.DecisionEngine
 
         private int CompareIndexerPriority(DownloadDecision x, DownloadDecision y)
         {
-            return CompareByReverse(x.RemoteMovie.Release, y.RemoteMovie.Release, release => release.IndexerPriority);
+            return CompareByReverse(x.RemoteGame.Release, y.RemoteGame.Release, release => release.IndexerPriority);
         }
 
         private int CompareQuality(DownloadDecision x, DownloadDecision y)
         {
             if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotPrefer)
             {
-                return CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie => remoteMovie.Movie.QualityProfile.GetIndex(remoteMovie.ParsedMovieInfo.Quality.Quality));
+                return CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => remoteGame.Game.QualityProfile.GetIndex(remoteGame.ParsedGameInfo.Quality.Quality));
             }
 
-            return CompareAll(CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie => remoteMovie.Movie.QualityProfile.GetIndex(remoteMovie.ParsedMovieInfo.Quality.Quality)),
-                              CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie => remoteMovie.ParsedMovieInfo.Quality.Revision));
+            return CompareAll(CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => remoteGame.Game.QualityProfile.GetIndex(remoteGame.ParsedGameInfo.Quality.Quality)),
+                              CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => remoteGame.ParsedGameInfo.Quality.Revision));
         }
 
         private int CompareCustomFormatScore(DownloadDecision x, DownloadDecision y)
         {
-            return CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie => remoteMovie.CustomFormatScore);
+            return CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => remoteGame.CustomFormatScore);
         }
 
         private int CompareIndexerFlags(DownloadDecision x, DownloadDecision y)
@@ -91,15 +91,15 @@ namespace NzbDrone.Core.DecisionEngine
                 return 0;
             }
 
-            return CompareBy(x.RemoteMovie.Release, y.RemoteMovie.Release, release => ScoreFlags(release.IndexerFlags));
+            return CompareBy(x.RemoteGame.Release, y.RemoteGame.Release, release => ScoreFlags(release.IndexerFlags));
         }
 
         private int CompareProtocol(DownloadDecision x, DownloadDecision y)
         {
-            var result = CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie =>
+            var result = CompareBy(x.RemoteGame, y.RemoteGame, remoteGame =>
             {
-                var delayProfile = _delayProfileService.BestForTags(remoteMovie.Movie.Tags);
-                var downloadProtocol = remoteMovie.Release.DownloadProtocol;
+                var delayProfile = _delayProfileService.BestForTags(remoteGame.Game.Tags);
+                var downloadProtocol = remoteGame.Release.DownloadProtocol;
                 return downloadProtocol == delayProfile.PreferredProtocol;
             });
 
@@ -109,23 +109,23 @@ namespace NzbDrone.Core.DecisionEngine
         private int ComparePeersIfTorrent(DownloadDecision x, DownloadDecision y)
         {
             // Different protocols should get caught when checking the preferred protocol,
-            // since we're dealing with the same movie in our comparisons
-            if (x.RemoteMovie.Release.DownloadProtocol != DownloadProtocol.Torrent ||
-                y.RemoteMovie.Release.DownloadProtocol != DownloadProtocol.Torrent)
+            // since we're dealing with the same game in our comparisons
+            if (x.RemoteGame.Release.DownloadProtocol != DownloadProtocol.Torrent ||
+                y.RemoteGame.Release.DownloadProtocol != DownloadProtocol.Torrent)
             {
                 return 0;
             }
 
             return CompareAll(
-                CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie =>
+                CompareBy(x.RemoteGame, y.RemoteGame, remoteGame =>
                 {
-                    var seeders = TorrentInfo.GetSeeders(remoteMovie.Release);
+                    var seeders = TorrentInfo.GetSeeders(remoteGame.Release);
 
                     return seeders.HasValue && seeders.Value > 0 ? Math.Round(Math.Log10(seeders.Value)) : 0;
                 }),
-                CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie =>
+                CompareBy(x.RemoteGame, y.RemoteGame, remoteGame =>
                 {
-                    var peers = TorrentInfo.GetPeers(remoteMovie.Release);
+                    var peers = TorrentInfo.GetPeers(remoteGame.Release);
 
                     return peers.HasValue && peers.Value > 0 ? Math.Round(Math.Log10(peers.Value)) : 0;
                 }));
@@ -133,16 +133,16 @@ namespace NzbDrone.Core.DecisionEngine
 
         private int CompareAgeIfUsenet(DownloadDecision x, DownloadDecision y)
         {
-            if (x.RemoteMovie.Release.DownloadProtocol != DownloadProtocol.Usenet ||
-                y.RemoteMovie.Release.DownloadProtocol != DownloadProtocol.Usenet)
+            if (x.RemoteGame.Release.DownloadProtocol != DownloadProtocol.Usenet ||
+                y.RemoteGame.Release.DownloadProtocol != DownloadProtocol.Usenet)
             {
                 return 0;
             }
 
-            return CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie =>
+            return CompareBy(x.RemoteGame, y.RemoteGame, remoteGame =>
             {
-                var ageHours = remoteMovie.Release.AgeHours;
-                var age = remoteMovie.Release.Age;
+                var ageHours = remoteGame.Release.AgeHours;
+                var age = remoteGame.Release.Age;
 
                 if (ageHours < 1)
                 {
@@ -165,21 +165,21 @@ namespace NzbDrone.Core.DecisionEngine
 
         private int CompareSize(DownloadDecision x, DownloadDecision y)
         {
-            var sizeCompare =  CompareBy(x.RemoteMovie, y.RemoteMovie, remoteMovie =>
+            var sizeCompare =  CompareBy(x.RemoteGame, y.RemoteGame, remoteGame =>
             {
-                var preferredSize = _qualityDefinitionService.Get(remoteMovie.ParsedMovieInfo.Quality.Quality).PreferredSize;
+                var preferredSize = _qualityDefinitionService.Get(remoteGame.ParsedGameInfo.Quality.Quality).PreferredSize;
 
                 // If no value for preferred it means unlimited so fallback to sort largest is best
-                if (preferredSize.HasValue && remoteMovie.Movie.MovieMetadata.Value.Runtime > 0)
+                if (preferredSize.HasValue && remoteGame.Game.GameMetadata.Value.Runtime > 0)
                 {
-                    var preferredMovieSize = remoteMovie.Movie.MovieMetadata.Value.Runtime * preferredSize.Value.Megabytes();
+                    var preferredGameSize = remoteGame.Game.GameMetadata.Value.Runtime * preferredSize.Value.Megabytes();
 
                     // Calculate closest to the preferred size
-                    return Math.Abs((remoteMovie.Release.Size - preferredMovieSize).Round(200.Megabytes())) * (-1);
+                    return Math.Abs((remoteGame.Release.Size - preferredGameSize).Round(200.Megabytes())) * (-1);
                 }
                 else
                 {
-                    return remoteMovie.Release.Size.Round(200.Megabytes());
+                    return remoteGame.Release.Size.Round(200.Megabytes());
                 }
             });
 

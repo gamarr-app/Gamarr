@@ -3,7 +3,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Housekeeping.Housekeepers;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         public void should_delete_orphaned_pending_items()
         {
             var pendingRelease = Builder<PendingRelease>.CreateNew()
-                .With(h => h.ParsedMovieInfo = new ParsedMovieInfo())
+                .With(h => h.ParsedGameInfo = new ParsedGameInfo())
                 .With(h => h.Release = new ReleaseInfo())
                 .BuildNew();
 
@@ -28,13 +28,13 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_pending_items()
         {
-            var movie = Builder<Movie>.CreateNew().BuildNew();
+            var game = Builder<Game>.CreateNew().BuildNew();
 
-            Db.Insert(movie);
+            Db.Insert(game);
 
             var pendingRelease = Builder<PendingRelease>.CreateNew()
-                .With(h => h.MovieId = movie.Id)
-                .With(h => h.ParsedMovieInfo = new ParsedMovieInfo())
+                .With(h => h.GameId = game.Id)
+                .With(h => h.ParsedGameInfo = new ParsedGameInfo())
                 .With(h => h.Release = new ReleaseInfo())
                 .BuildNew();
 

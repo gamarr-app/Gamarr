@@ -6,8 +6,8 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.HealthCheck;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Update.History.Events;
@@ -15,13 +15,13 @@ using NzbDrone.Core.Update.History.Events;
 namespace NzbDrone.Core.Notifications
 {
     public class NotificationService
-        : IHandle<MovieRenamedEvent>,
-          IHandle<MovieGrabbedEvent>,
-          IHandle<MovieFileImportedEvent>,
-          IHandle<MoviesDeletedEvent>,
-          IHandle<MovieAddedEvent>,
-          IHandle<MoviesImportedEvent>,
-          IHandle<MovieFileDeletedEvent>,
+        : IHandle<GameRenamedEvent>,
+          IHandle<GameGrabbedEvent>,
+          IHandle<GameFileImportedEvent>,
+          IHandle<GamesDeletedEvent>,
+          IHandle<GameAddedEvent>,
+          IHandle<GamesImportedEvent>,
+          IHandle<GameFileDeletedEvent>,
           IHandle<HealthCheckFailedEvent>,
           IHandle<HealthCheckRestoredEvent>,
           IHandle<UpdateInstalledEvent>,
@@ -42,10 +42,10 @@ namespace NzbDrone.Core.Notifications
             _logger = logger;
         }
 
-        private string GetMessage(Movie movie, QualityModel quality)
+        private string GetMessage(Game game, QualityModel quality)
         {
             var qualityString = quality.Quality.ToString();
-            var imdbUrl = "https://www.imdb.com/title/" + movie.MovieMetadata.Value.ImdbId + "/";
+            var imdbUrl = "https://www.imdb.com/title/" + game.GameMetadata.Value.ImdbId + "/";
 
             if (quality.Revision.Version > 1)
             {
@@ -53,13 +53,13 @@ namespace NzbDrone.Core.Notifications
             }
 
             return string.Format("{0} ({1}) [{2}] {3}",
-                                    movie.Title,
-                                    movie.Year,
+                                    game.Title,
+                                    game.Year,
                                     qualityString,
                                     imdbUrl);
         }
 
-        private bool ShouldHandleMovie(ProviderDefinition definition, Movie movie)
+        private bool ShouldHandleGame(ProviderDefinition definition, Game game)
         {
             if (definition.Tags.Empty())
             {
@@ -67,14 +67,14 @@ namespace NzbDrone.Core.Notifications
                 return true;
             }
 
-            if (definition.Tags.Intersect(movie.Tags).Any())
+            if (definition.Tags.Intersect(game.Tags).Any())
             {
-                _logger.Debug("Notification and movie have one or more intersecting tags.");
+                _logger.Debug("Notification and game have one or more intersecting tags.");
                 return true;
             }
 
             // TODO: this message could be more clear
-            _logger.Debug("{0} does not have any intersecting tags with {1}. Notification will not be sent", definition.Name, movie.Title);
+            _logger.Debug("{0} does not have any intersecting tags with {1}. Notification will not be sent", definition.Name, game.Title);
             return false;
         }
 
@@ -93,14 +93,14 @@ namespace NzbDrone.Core.Notifications
             return false;
         }
 
-        public void Handle(MovieGrabbedEvent message)
+        public void Handle(GameGrabbedEvent message)
         {
             var grabMessage = new GrabMessage
             {
-                Message = GetMessage(message.Movie.Movie, message.Movie.ParsedMovieInfo.Quality),
-                Quality = message.Movie.ParsedMovieInfo.Quality,
-                Movie = message.Movie.Movie,
-                RemoteMovie = message.Movie,
+                Message = GetMessage(message.Game.Game, message.Game.ParsedGameInfo.Quality),
+                Quality = message.Game.ParsedGameInfo.Quality,
+                Game = message.Game.Game,
+                RemoteGame = message.Game,
                 DownloadClientType = message.DownloadClient,
                 DownloadClientName = message.DownloadClientName,
                 DownloadId = message.DownloadId
@@ -110,7 +110,7 @@ namespace NzbDrone.Core.Notifications
             {
                 try
                 {
-                    if (!ShouldHandleMovie(notification.Definition, message.Movie.Movie))
+                    if (!ShouldHandleGame(notification.Definition, message.Game.Game))
                     {
                         continue;
                     }
@@ -126,7 +126,7 @@ namespace NzbDrone.Core.Notifications
             }
         }
 
-        public void Handle(MovieFileImportedEvent message)
+        public void Handle(GameFileImportedEvent message)
         {
             if (!message.NewDownload)
             {
@@ -135,24 +135,24 @@ namespace NzbDrone.Core.Notifications
 
             var downloadMessage = new DownloadMessage
             {
-                Message = GetMessage(message.MovieInfo.Movie, message.MovieInfo.Quality),
-                MovieInfo = message.MovieInfo,
-                MovieFile = message.ImportedMovie,
-                Movie = message.MovieInfo.Movie,
-                OldMovieFiles = message.OldFiles,
-                SourcePath = message.MovieInfo.Path,
+                Message = GetMessage(message.GameInfo.Game, message.GameInfo.Quality),
+                GameInfo = message.GameInfo,
+                GameFile = message.ImportedGame,
+                Game = message.GameInfo.Game,
+                OldGameFiles = message.OldFiles,
+                SourcePath = message.GameInfo.Path,
                 DownloadClientInfo = message.DownloadClientInfo,
                 DownloadId = message.DownloadId,
-                Release = message.MovieInfo.Release
+                Release = message.GameInfo.Release
             };
 
             foreach (var notification in _notificationFactory.OnDownloadEnabled())
             {
                 try
                 {
-                    if (ShouldHandleMovie(notification.Definition, message.MovieInfo.Movie))
+                    if (ShouldHandleGame(notification.Definition, message.GameInfo.Game))
                     {
-                        if (downloadMessage.OldMovieFiles.Empty() || ((NotificationDefinition)notification.Definition).OnUpgrade)
+                        if (downloadMessage.OldGameFiles.Empty() || ((NotificationDefinition)notification.Definition).OnUpgrade)
                         {
                             notification.OnDownload(downloadMessage);
                             _notificationStatusService.RecordSuccess(notification.Definition.Id);
@@ -167,37 +167,37 @@ namespace NzbDrone.Core.Notifications
             }
         }
 
-        public void Handle(MovieAddedEvent message)
+        public void Handle(GameAddedEvent message)
         {
-            foreach (var notification in _notificationFactory.OnMovieAddedEnabled())
+            foreach (var notification in _notificationFactory.OnGameAddedEnabled())
             {
                 try
                 {
-                    if (ShouldHandleMovie(notification.Definition, message.Movie))
+                    if (ShouldHandleGame(notification.Definition, message.Game))
                     {
-                        notification.OnMovieAdded(message.Movie);
+                        notification.OnGameAdded(message.Game);
                         _notificationStatusService.RecordSuccess(notification.Definition.Id);
                     }
                 }
                 catch (Exception ex)
                 {
                     _notificationStatusService.RecordFailure(notification.Definition.Id);
-                    _logger.Warn(ex, "Unable to send OnMovieAdded notification to: " + notification.Definition.Name);
+                    _logger.Warn(ex, "Unable to send OnGameAdded notification to: " + notification.Definition.Name);
                 }
             }
         }
 
-        public void Handle(MoviesImportedEvent message)
+        public void Handle(GamesImportedEvent message)
         {
-            foreach (var notification in _notificationFactory.OnMovieAddedEnabled())
+            foreach (var notification in _notificationFactory.OnGameAddedEnabled())
             {
                 try
                 {
-                    foreach (var movie in message.Movies)
+                    foreach (var game in message.Games)
                     {
-                        if (ShouldHandleMovie(notification.Definition, movie))
+                        if (ShouldHandleGame(notification.Definition, game))
                         {
-                            notification.OnMovieAdded(movie);
+                            notification.OnGameAdded(game);
                             _notificationStatusService.RecordSuccess(notification.Definition.Id);
                         }
                     }
@@ -205,20 +205,20 @@ namespace NzbDrone.Core.Notifications
                 catch (Exception ex)
                 {
                     _notificationStatusService.RecordFailure(notification.Definition.Id);
-                    _logger.Warn(ex, "Unable to send OnMovieAdded notification to: " + notification.Definition.Name);
+                    _logger.Warn(ex, "Unable to send OnGameAdded notification to: " + notification.Definition.Name);
                 }
             }
         }
 
-        public void Handle(MovieRenamedEvent message)
+        public void Handle(GameRenamedEvent message)
         {
             foreach (var notification in _notificationFactory.OnRenameEnabled())
             {
                 try
                 {
-                    if (ShouldHandleMovie(notification.Definition, message.Movie))
+                    if (ShouldHandleGame(notification.Definition, message.Game))
                     {
-                        notification.OnMovieRename(message.Movie, message.RenamedFiles);
+                        notification.OnGameRename(message.Game, message.RenamedFiles);
                         _notificationStatusService.RecordSuccess(notification.Definition.Id);
                     }
                 }
@@ -233,7 +233,7 @@ namespace NzbDrone.Core.Notifications
         public void Handle(UpdateInstalledEvent message)
         {
             var updateMessage = new ApplicationUpdateMessage();
-            updateMessage.Message = $"Radarr updated from {message.PreviousVerison.ToString()} to {message.NewVersion.ToString()}";
+            updateMessage.Message = $"Gamarr updated from {message.PreviousVerison.ToString()} to {message.NewVersion.ToString()}";
             updateMessage.PreviousVersion = message.PreviousVerison;
             updateMessage.NewVersion = message.NewVersion;
 
@@ -254,12 +254,12 @@ namespace NzbDrone.Core.Notifications
 
         public void Handle(ManualInteractionRequiredEvent message)
         {
-            var movie = message.RemoteMovie?.Movie;
+            var game = message.RemoteGame?.Game;
             var mess = "";
 
-            if (movie != null)
+            if (game != null)
             {
-                mess = GetMessage(movie, message.RemoteMovie.ParsedMovieInfo.Quality);
+                mess = GetMessage(game, message.RemoteGame.ParsedGameInfo.Quality);
             }
 
             if (mess.IsNullOrWhiteSpace() && message.TrackedDownload.DownloadItem != null)
@@ -275,9 +275,9 @@ namespace NzbDrone.Core.Notifications
             var manualInteractionMessage = new ManualInteractionRequiredMessage
             {
                 Message = mess,
-                Movie = movie,
-                Quality = message.RemoteMovie?.ParsedMovieInfo.Quality,
-                RemoteMovie = message.RemoteMovie,
+                Game = game,
+                Quality = message.RemoteGame?.ParsedGameInfo.Quality,
+                RemoteGame = message.RemoteGame,
                 TrackedDownload = message.TrackedDownload,
                 DownloadClientInfo = message.TrackedDownload.DownloadItem?.DownloadClientInfo,
                 DownloadId = message.TrackedDownload.DownloadItem?.DownloadId,
@@ -288,7 +288,7 @@ namespace NzbDrone.Core.Notifications
             {
                 try
                 {
-                    if (!ShouldHandleMovie(notification.Definition, message.RemoteMovie.Movie))
+                    if (!ShouldHandleGame(notification.Definition, message.RemoteGame.Game))
                     {
                         continue;
                     }
@@ -304,23 +304,23 @@ namespace NzbDrone.Core.Notifications
             }
         }
 
-        public void Handle(MovieFileDeletedEvent message)
+        public void Handle(GameFileDeletedEvent message)
         {
-            var deleteMessage = new MovieFileDeleteMessage();
-            deleteMessage.Message = GetMessage(message.MovieFile.Movie, message.MovieFile.Quality);
-            deleteMessage.MovieFile = message.MovieFile;
-            deleteMessage.Movie = message.MovieFile.Movie;
+            var deleteMessage = new GameFileDeleteMessage();
+            deleteMessage.Message = GetMessage(message.GameFile.Game, message.GameFile.Quality);
+            deleteMessage.GameFile = message.GameFile;
+            deleteMessage.Game = message.GameFile.Game;
             deleteMessage.Reason = message.Reason;
 
-            foreach (var notification in _notificationFactory.OnMovieFileDeleteEnabled())
+            foreach (var notification in _notificationFactory.OnGameFileDeleteEnabled())
             {
                 try
                 {
-                    if (message.Reason != MediaFiles.DeleteMediaFileReason.Upgrade || ((NotificationDefinition)notification.Definition).OnMovieFileDeleteForUpgrade)
+                    if (message.Reason != MediaFiles.DeleteMediaFileReason.Upgrade || ((NotificationDefinition)notification.Definition).OnGameFileDeleteForUpgrade)
                     {
-                        if (ShouldHandleMovie(notification.Definition, message.MovieFile.Movie))
+                        if (ShouldHandleGame(notification.Definition, message.GameFile.Game))
                         {
-                            notification.OnMovieFileDelete(deleteMessage);
+                            notification.OnGameFileDelete(deleteMessage);
                             _notificationStatusService.RecordSuccess(notification.Definition.Id);
                         }
                     }
@@ -328,31 +328,31 @@ namespace NzbDrone.Core.Notifications
                 catch (Exception ex)
                 {
                     _notificationStatusService.RecordFailure(notification.Definition.Id);
-                    _logger.Warn(ex, "Unable to send OnMovieFileDelete notification to: " + notification.Definition.Name);
+                    _logger.Warn(ex, "Unable to send OnGameFileDelete notification to: " + notification.Definition.Name);
                 }
             }
         }
 
-        public void Handle(MoviesDeletedEvent message)
+        public void Handle(GamesDeletedEvent message)
         {
-            foreach (var movie in message.Movies)
+            foreach (var game in message.Games)
             {
-                var deleteMessage = new MovieDeleteMessage(movie, message.DeleteFiles);
+                var deleteMessage = new GameDeleteMessage(game, message.DeleteFiles);
 
-                foreach (var notification in _notificationFactory.OnMovieDeleteEnabled())
+                foreach (var notification in _notificationFactory.OnGameDeleteEnabled())
                 {
                     try
                     {
-                        if (ShouldHandleMovie(notification.Definition, deleteMessage.Movie))
+                        if (ShouldHandleGame(notification.Definition, deleteMessage.Game))
                         {
-                            notification.OnMovieDelete(deleteMessage);
+                            notification.OnGameDelete(deleteMessage);
                             _notificationStatusService.RecordSuccess(notification.Definition.Id);
                         }
                     }
                     catch (Exception ex)
                     {
                         _notificationStatusService.RecordFailure(notification.Definition.Id);
-                        _logger.Warn(ex, "Unable to send OnMovieDelete notification to: " + notification.Definition.Name);
+                        _logger.Warn(ex, "Unable to send OnGameDelete notification to: " + notification.Definition.Name);
                     }
                 }
             }

@@ -41,14 +41,14 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             ScanGracePeriod = TimeSpan.FromSeconds(30);
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             if (!Settings.SaveMagnetFiles)
             {
                 throw new NotSupportedException("Blackhole does not support magnet links.");
             }
 
-            var title = remoteMovie.Release.Title;
+            var title = remoteGame.Release.Title;
 
             title = FileNameBuilder.CleanFileName(title);
 
@@ -65,9 +65,9 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             return null;
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
-            var title = remoteMovie.Release.Title;
+            var title = remoteGame.Release.Title;
 
             title = FileNameBuilder.CleanFileName(title);
 
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
                 {
                     DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, false),
                     DownloadId = Definition.Name + "_" + item.DownloadId,
-                    Category = "radarr",
+                    Category = "gamarr",
                     Title = item.Title,
 
                     TotalSize = item.TotalSize,

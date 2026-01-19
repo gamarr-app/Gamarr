@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Indexers
             return pageableRequests;
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             return new IndexerPageableRequestChain();
         }

@@ -70,7 +70,7 @@ function CalendarLinkModalContent({
   );
 
   const { iCalHttpUrl, iCalWebCalUrl } = useMemo(() => {
-    let icalUrl = `${window.location.host}${window.Radarr.urlBase}/feed/v3/calendar/Radarr.ics?`;
+    let icalUrl = `${window.location.host}${window.Gamarr.urlBase}/feed/v3/calendar/Gamarr.ics?`;
 
     if (unmonitored) {
       icalUrl += 'unmonitored=true&';
@@ -90,7 +90,7 @@ function CalendarLinkModalContent({
       icalUrl += `tags=${tags.toString()}&`;
     }
 
-    icalUrl += `apikey=${encodeURIComponent(window.Radarr.apiKey)}`;
+    icalUrl += `apikey=${encodeURIComponent(window.Gamarr.apiKey)}`;
 
     return {
       iCalHttpUrl: `${window.location.protocol}//${icalUrl}`,
@@ -111,7 +111,7 @@ function CalendarLinkModalContent({
               type={inputTypes.CHECK}
               name="unmonitored"
               value={unmonitored}
-              helpText={translate('ICalIncludeUnmonitoredMoviesHelpText')}
+              helpText={translate('ICalIncludeUnmonitoredGamesHelpText')}
               onChange={handleInputChange}
             />
           </FormGroup>
@@ -136,7 +136,7 @@ function CalendarLinkModalContent({
               name="releaseTypes"
               value={releaseTypes}
               values={releaseTypeOptions}
-              helpText={translate('ICalReleaseTypesMoviesHelpText')}
+              helpText={translate('ICalReleaseTypesGamesHelpText')}
               onChange={handleInputChange}
             />
           </FormGroup>
@@ -145,10 +145,10 @@ function CalendarLinkModalContent({
             <FormLabel>{translate('Tags')}</FormLabel>
 
             <FormInputGroup
-              type={inputTypes.MOVIE_TAG}
+              type={inputTypes.GAME_TAG}
               name="tags"
               value={tags}
-              helpText={translate('ICalTagsMoviesHelpText')}
+              helpText={translate('ICalTagsGamesHelpText')}
               onChange={handleInputChange}
             />
           </FormGroup>

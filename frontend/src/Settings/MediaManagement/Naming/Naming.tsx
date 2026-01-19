@@ -44,8 +44,8 @@ function createNamingSelector() {
 }
 
 interface NamingModalOptions {
-  name: keyof Pick<NamingConfig, 'standardMovieFormat' | 'movieFolderFormat'>;
-  movie?: boolean;
+  name: keyof Pick<NamingConfig, 'standardGameFormat' | 'gameFolderFormat'>;
+  game?: boolean;
   additional?: boolean;
 }
 
@@ -97,21 +97,21 @@ function Naming() {
     setNamingModalOpen();
 
     setNamingModalOptions({
-      name: 'standardMovieFormat',
-      movie: true,
+      name: 'standardGameFormat',
+      game: true,
       additional: true,
     });
   }, [setNamingModalOpen, setNamingModalOptions]);
 
-  const onMovieFolderNamingModalOpenClick = useCallback(() => {
+  const onGameFolderNamingModalOpenClick = useCallback(() => {
     setNamingModalOpen();
 
     setNamingModalOptions({
-      name: 'movieFolderFormat',
+      name: 'gameFolderFormat',
     });
   }, [setNamingModalOpen, setNamingModalOptions]);
 
-  const renameMovies = hasSettings && settings.renameMovies.value;
+  const renameGames = hasSettings && settings.renameGames.value;
   const replaceIllegalCharacters =
     hasSettings && settings.replaceIllegalCharacters.value;
 
@@ -127,33 +127,33 @@ function Naming() {
     },
   ];
 
-  const standardMovieFormatHelpTexts = [];
-  const standardMovieFormatErrors = [];
-  const movieFolderFormatHelpTexts = [];
-  const movieFolderFormatErrors = [];
+  const standardGameFormatHelpTexts = [];
+  const standardGameFormatErrors = [];
+  const gameFolderFormatHelpTexts = [];
+  const gameFolderFormatErrors = [];
 
   if (examplesPopulated) {
-    if (examples.movieExample) {
-      standardMovieFormatHelpTexts.push(
-        `${translate('Movie')}: ${examples.movieExample}`
+    if (examples.gameExample) {
+      standardGameFormatHelpTexts.push(
+        `${translate('Game')}: ${examples.gameExample}`
       );
     } else {
-      standardMovieFormatErrors.push({
-        message: translate('MovieInvalidFormat'),
+      standardGameFormatErrors.push({
+        message: translate('GameInvalidFormat'),
       });
     }
 
-    if (examples.movieFolderExample) {
-      movieFolderFormatHelpTexts.push(
-        `${translate('Example')}: ${examples.movieFolderExample}`
+    if (examples.gameFolderExample) {
+      gameFolderFormatHelpTexts.push(
+        `${translate('Example')}: ${examples.gameFolderExample}`
       );
     } else {
-      movieFolderFormatErrors.push({ message: translate('InvalidFormat') });
+      gameFolderFormatErrors.push({ message: translate('InvalidFormat') });
     }
   }
 
   return (
-    <FieldSet legend={translate('MovieNaming')}>
+    <FieldSet legend={translate('GameNaming')}>
       {isFetching ? <LoadingIndicator /> : null}
 
       {!isFetching && error ? (
@@ -165,14 +165,14 @@ function Naming() {
       {hasSettings && !isFetching && !error ? (
         <Form>
           <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('RenameMovies')}</FormLabel>
+            <FormLabel>{translate('RenameGames')}</FormLabel>
 
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="renameMovies"
-              helpText={translate('RenameMoviesHelpText')}
+              name="renameGames"
+              helpText={translate('RenameGamesHelpText')}
               onChange={handleInputChange}
-              {...settings.renameMovies}
+              {...settings.renameGames}
             />
           </FormGroup>
 
@@ -203,25 +203,25 @@ function Naming() {
             </FormGroup>
           ) : null}
 
-          {renameMovies ? (
+          {renameGames ? (
             <FormGroup size={sizes.LARGE}>
-              <FormLabel>{translate('StandardMovieFormat')}</FormLabel>
+              <FormLabel>{translate('StandardGameFormat')}</FormLabel>
 
               <FormInputGroup
                 inputClassName={styles.namingInput}
                 type={inputTypes.TEXT}
-                name="standardMovieFormat"
+                name="standardGameFormat"
                 buttons={
                   <FormInputButton onPress={onStandardNamingModalOpenClick}>
                     ?
                   </FormInputButton>
                 }
                 onChange={handleInputChange}
-                {...settings.standardMovieFormat}
-                helpTexts={standardMovieFormatHelpTexts}
+                {...settings.standardGameFormat}
+                helpTexts={standardGameFormatHelpTexts}
                 errors={[
-                  ...standardMovieFormatErrors,
-                  ...settings.standardMovieFormat.errors,
+                  ...standardGameFormatErrors,
+                  ...settings.standardGameFormat.errors,
                 ]}
               />
             </FormGroup>
@@ -232,29 +232,29 @@ function Naming() {
             isAdvanced={true}
             size={sizes.MEDIUM}
           >
-            <FormLabel>{translate('MovieFolderFormat')}</FormLabel>
+            <FormLabel>{translate('GameFolderFormat')}</FormLabel>
 
             <FormInputGroup
               inputClassName={styles.namingInput}
               type={inputTypes.TEXT}
-              name="movieFolderFormat"
+              name="gameFolderFormat"
               buttons={
-                <FormInputButton onPress={onMovieFolderNamingModalOpenClick}>
+                <FormInputButton onPress={onGameFolderNamingModalOpenClick}>
                   ?
                 </FormInputButton>
               }
               onChange={handleInputChange}
-              {...settings.movieFolderFormat}
+              {...settings.gameFolderFormat}
               helpTexts={[
-                translate('MovieFolderFormatHelpText'),
-                ...movieFolderFormatHelpTexts,
+                translate('GameFolderFormatHelpText'),
+                ...gameFolderFormatHelpTexts,
               ]}
               helpTextWarning={translate(
-                'MovieFolderFormatHelpTextDeprecatedWarning'
+                'GameFolderFormatHelpTextDeprecatedWarning'
               )}
               errors={[
-                ...movieFolderFormatErrors,
-                ...settings.movieFolderFormat.errors,
+                ...gameFolderFormatErrors,
+                ...settings.gameFolderFormat.errors,
               ]}
             />
           </FormGroup>

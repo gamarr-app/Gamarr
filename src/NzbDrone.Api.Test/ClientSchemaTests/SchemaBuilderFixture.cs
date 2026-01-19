@@ -5,7 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Annotations;
 using NzbDrone.Core.Localization;
 using NzbDrone.Test.Common;
-using Radarr.Http.ClientSchema;
+using Gamarr.Http.ClientSchema;
 
 namespace NzbDrone.Api.Test.ClientSchemaTests
 {

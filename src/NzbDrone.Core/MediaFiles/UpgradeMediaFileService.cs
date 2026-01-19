@@ -2,48 +2,48 @@ using System.IO;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.MediaFiles.MovieImport;
+using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles
 {
     public interface IUpgradeMediaFiles
     {
-        MovieFileMoveResult UpgradeMovieFile(MovieFile movieFile, LocalMovie localMovie, bool copyOnly = false);
+        GameFileMoveResult UpgradeGameFile(GameFile gameFile, LocalGame localGame, bool copyOnly = false);
     }
 
     public class UpgradeMediaFileService : IUpgradeMediaFiles
     {
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly IMediaFileService _mediaFileService;
-        private readonly IMoveMovieFiles _movieFileMover;
+        private readonly IMoveGameFiles _gameFileMover;
         private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
         public UpgradeMediaFileService(IRecycleBinProvider recycleBinProvider,
                                        IMediaFileService mediaFileService,
-                                       IMoveMovieFiles movieFileMover,
+                                       IMoveGameFiles gameFileMover,
                                        IDiskProvider diskProvider,
                                        Logger logger)
         {
             _recycleBinProvider = recycleBinProvider;
             _mediaFileService = mediaFileService;
-            _movieFileMover = movieFileMover;
+            _gameFileMover = gameFileMover;
             _diskProvider = diskProvider;
             _logger = logger;
         }
 
-        public MovieFileMoveResult UpgradeMovieFile(MovieFile movieFile, LocalMovie localMovie, bool copyOnly = false)
+        public GameFileMoveResult UpgradeGameFile(GameFile gameFile, LocalGame localGame, bool copyOnly = false)
         {
-            _logger.Trace("Upgrading movie file.");
+            _logger.Trace("Upgrading game file.");
 
-            var moveFileResult = new MovieFileMoveResult();
+            var moveFileResult = new GameFileMoveResult();
 
-            var existingFile = localMovie.Movie.MovieFileId > 0 ? localMovie.Movie.MovieFile : null;
+            var existingFile = localGame.Game.GameFileId > 0 ? localGame.Game.GameFile : null;
 
-            var rootFolder = _diskProvider.GetParentFolder(localMovie.Movie.Path);
+            var rootFolder = _diskProvider.GetParentFolder(localGame.Game.Path);
 
-            // If there are existing movie files and the root folder is missing, throw, so the old file isn't left behind during the import process.
+            // If there are existing game files and the root folder is missing, throw, so the old file isn't left behind during the import process.
             if (existingFile != null && !_diskProvider.FolderExists(rootFolder))
             {
                 throw new RootFolderNotFoundException($"Root folder '{rootFolder}' was not found.");
@@ -51,33 +51,33 @@ namespace NzbDrone.Core.MediaFiles
 
             if (existingFile != null)
             {
-                var movieFilePath = Path.Combine(localMovie.Movie.Path, existingFile.RelativePath);
-                var subfolder = rootFolder.GetRelativePath(_diskProvider.GetParentFolder(movieFilePath));
+                var gameFilePath = Path.Combine(localGame.Game.Path, existingFile.RelativePath);
+                var subfolder = rootFolder.GetRelativePath(_diskProvider.GetParentFolder(gameFilePath));
                 string recycleBinPath = null;
 
-                if (_diskProvider.FileExists(movieFilePath))
+                if (_diskProvider.FileExists(gameFilePath))
                 {
-                    _logger.Debug("Removing existing movie file: {0}", existingFile);
-                    recycleBinPath = _recycleBinProvider.DeleteFile(movieFilePath, subfolder);
+                    _logger.Debug("Removing existing game file: {0}", existingFile);
+                    recycleBinPath = _recycleBinProvider.DeleteFile(gameFilePath, subfolder);
                 }
                 else
                 {
-                    _logger.Warn("Existing movie file missing from disk: {0}", movieFilePath);
+                    _logger.Warn("Existing game file missing from disk: {0}", gameFilePath);
                 }
 
-                moveFileResult.OldFiles.Add(new DeletedMovieFile(existingFile, recycleBinPath));
+                moveFileResult.OldFiles.Add(new DeletedGameFile(existingFile, recycleBinPath));
                 _mediaFileService.Delete(existingFile, DeleteMediaFileReason.Upgrade);
             }
 
-            localMovie.OldFiles = moveFileResult.OldFiles;
+            localGame.OldFiles = moveFileResult.OldFiles;
 
             if (copyOnly)
             {
-                moveFileResult.MovieFile = _movieFileMover.CopyMovieFile(movieFile, localMovie);
+                moveFileResult.GameFile = _gameFileMover.CopyGameFile(gameFile, localGame);
             }
             else
             {
-                moveFileResult.MovieFile = _movieFileMover.MoveMovieFile(movieFile, localMovie);
+                moveFileResult.GameFile = _gameFileMover.MoveGameFile(gameFile, localGame);
             }
 
             return moveFileResult;

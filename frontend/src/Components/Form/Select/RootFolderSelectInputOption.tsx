@@ -13,7 +13,7 @@ interface RootFolderSelectInputOptionProps
   value: string;
   freeSpace?: number;
   isMissing?: boolean;
-  movieFolder?: string;
+  gameFolder?: string;
   isMobile: boolean;
   isWindows?: boolean;
 }
@@ -23,7 +23,7 @@ function RootFolderSelectInputOption({
   value,
   freeSpace,
   isMissing,
-  movieFolder,
+  gameFolder,
   isMobile,
   isWindows,
   ...otherProps
@@ -38,10 +38,10 @@ function RootFolderSelectInputOption({
         <div className={styles.value}>
           {value}
 
-          {movieFolder && id !== 'addNew' ? (
-            <div className={styles.movieFolder}>
+          {gameFolder && id !== 'addNew' ? (
+            <div className={styles.gameFolder}>
               {slashCharacter}
-              {movieFolder}
+              {gameFolder}
             </div>
           ) : null}
         </div>

@@ -13,12 +13,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class MinimumAgeSpecificationFixture : CoreTest<MinimumAgeSpecification>
     {
-        private RemoteMovie _remoteEpisode;
+        private RemoteGame _remoteEpisode;
 
         [SetUp]
         public void Setup()
         {
-            _remoteEpisode = new RemoteMovie
+            _remoteEpisode = new RemoteGame
             {
                 Release = new ReleaseInfo() { DownloadProtocol = DownloadProtocol.Usenet }
             };

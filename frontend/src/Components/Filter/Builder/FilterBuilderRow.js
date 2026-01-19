@@ -12,7 +12,7 @@ import ImportListFilterBuilderRowValueConnector from './ImportListFilterBuilderR
 import IndexerFilterBuilderRowValueConnector from './IndexerFilterBuilderRowValueConnector';
 import LanguageFilterBuilderRowValue from './LanguageFilterBuilderRowValue';
 import MinimumAvailabilityFilterBuilderRowValue from './MinimumAvailabilityFilterBuilderRowValue';
-import MovieFilterBuilderRowValue from './MovieFilterBuilderRowValue';
+import GameFilterBuilderRowValue from './GameFilterBuilderRowValue';
 import ProtocolFilterBuilderRowValue from './ProtocolFilterBuilderRowValue';
 import QualityFilterBuilderRowValueConnector from './QualityFilterBuilderRowValueConnector';
 import QualityProfileFilterBuilderRowValue from './QualityProfileFilterBuilderRowValue';
@@ -84,8 +84,8 @@ function getRowValueConnector(selectedFilterBuilderProp) {
     case filterBuilderValueTypes.QUEUE_STATUS:
       return QueueStatusFilterBuilderRowValue;
 
-    case filterBuilderValueTypes.MOVIE:
-      return MovieFilterBuilderRowValue;
+    case filterBuilderValueTypes.GAME:
+      return GameFilterBuilderRowValue;
 
     case filterBuilderValueTypes.RELEASE_STATUS:
       return ReleaseStatusFilterBuilderRowValue;

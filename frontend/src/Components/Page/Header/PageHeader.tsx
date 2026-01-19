@@ -8,7 +8,7 @@ import { icons } from 'Helpers/Props';
 import { setIsSidebarVisible } from 'Store/Actions/appActions';
 import translate from 'Utilities/String/translate';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
-import MovieSearchInput from './MovieSearchInput';
+import GameSearchInput from './GameSearchInput';
 import PageHeaderActionsMenu from './PageHeaderActionsMenu';
 import styles from './PageHeader.css';
 
@@ -57,10 +57,10 @@ function PageHeader({ isSmallScreen }: PageHeaderProps) {
             className={isSmallScreen ? styles.logo : styles.logoFull}
             src={
               isSmallScreen
-                ? `${window.Radarr.urlBase}/Content/Images/logo.png`
-                : `${window.Radarr.urlBase}/Content/Images/logo-full.png`
+                ? `${window.Gamarr.urlBase}/Content/Images/logo.png`
+                : `${window.Gamarr.urlBase}/Content/Images/logo-full.png`
             }
-            alt="Radarr Logo"
+            alt="Gamarr Logo"
           />
         </Link>
       </div>
@@ -73,14 +73,14 @@ function PageHeader({ isSmallScreen }: PageHeaderProps) {
         />
       </div>
 
-      <MovieSearchInput />
+      <GameSearchInput />
 
       <div className={styles.right}>
         <IconButton
           className={styles.donate}
           name={icons.HEART}
           aria-label={translate('Donate')}
-          to="https://radarr.video/donate"
+          to="https://gamarr.video/donate"
           size={14}
           title={translate('Donate')}
         />
@@ -89,7 +89,7 @@ function PageHeader({ isSmallScreen }: PageHeaderProps) {
           className={styles.translate}
           title={translate('SuggestTranslationChange')}
           name={icons.TRANSLATE}
-          to="https://translate.servarr.com/projects/radarr/radarr/"
+          to="https://translate.servarr.com/projects/gamarr/gamarr/"
           size={24}
         />
 

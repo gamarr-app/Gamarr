@@ -16,10 +16,10 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
             RuleFor(c => c.UrlBase).ValidUrlBase();
 
-            RuleFor(c => c.MovieCategory).Matches(@"^\.?[-a-z]*$", RegexOptions.IgnoreCase).WithMessage("Allowed characters a-z and -");
+            RuleFor(c => c.GameCategory).Matches(@"^\.?[-a-z]*$", RegexOptions.IgnoreCase).WithMessage("Allowed characters a-z and -");
 
-            RuleFor(c => c.MovieCategory).Empty()
-                .When(c => c.MovieDirectory.IsNotNullOrWhiteSpace())
+            RuleFor(c => c.GameCategory).Empty()
+                .When(c => c.GameDirectory.IsNotNullOrWhiteSpace())
                 .WithMessage("Cannot use Category and Directory");
         }
     }
@@ -34,19 +34,19 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             Host = "localhost";
             Port = 9091;
             UrlBase = "/transmission/";
-            MovieCategory = "radarr";
+            GameCategory = "gamarr";
         }
 
         // TODO: Remove this in v6
         // This constructor is used when deserializing from JSON, it will set the
         // category to the deserialized value, defaulting to null.
         [JsonConstructor]
-        public TransmissionSettings(string movieCategory = null)
+        public TransmissionSettings(string gameCategory = null)
         {
             Host = "localhost";
             Port = 9091;
             UrlBase = "/transmission/";
-            MovieCategory = movieCategory;
+            GameCategory = gameCategory;
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -72,19 +72,19 @@ namespace NzbDrone.Core.Download.Clients.Transmission
         public string Password { get; set; }
 
         [FieldDefinition(6, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategorySubFolderHelpText")]
-        public string MovieCategory { get; set; }
+        public string GameCategory { get; set; }
 
         [FieldDefinition(7, Label = "PostImportCategory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
-        public string MovieImportedCategory { get; set; }
+        public string GameImportedCategory { get; set; }
 
         [FieldDefinition(8, Label = "Directory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientTransmissionSettingsDirectoryHelpText")]
-        public string MovieDirectory { get; set; }
+        public string GameDirectory { get; set; }
 
-        [FieldDefinition(9, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(TransmissionPriority), HelpText = "DownloadClientSettingsRecentPriorityMovieHelpText")]
-        public int RecentMoviePriority { get; set; }
+        [FieldDefinition(9, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(TransmissionPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
+        public int RecentGamePriority { get; set; }
 
-        [FieldDefinition(10, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(TransmissionPriority), HelpText = "DownloadClientSettingsOlderPriorityMovieHelpText")]
-        public int OlderMoviePriority { get; set; }
+        [FieldDefinition(10, Label = "DownloadClientSettingsOlderPriority", Type = FieldType.Select, SelectOptions = typeof(TransmissionPriority), HelpText = "DownloadClientSettingsOlderPriorityGameHelpText")]
+        public int OlderGamePriority { get; set; }
 
         [FieldDefinition(11, Label = "DownloadClientSettingsAddPaused", Type = FieldType.Checkbox)]
         public bool AddPaused { get; set; }

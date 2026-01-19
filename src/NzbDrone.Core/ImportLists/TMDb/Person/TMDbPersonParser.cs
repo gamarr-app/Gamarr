@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 
 namespace NzbDrone.Core.ImportLists.TMDb.Person
 {
@@ -14,57 +14,57 @@ namespace NzbDrone.Core.ImportLists.TMDb.Person
             _settings = settings;
         }
 
-        public override IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public override IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(importResponse))
             {
-                return movies;
+                return games;
             }
 
             var jsonResponse = JsonConvert.DeserializeObject<PersonCreditsResource>(importResponse.Content);
 
-            // no movies were return
+            // no games were return
             if (jsonResponse == null)
             {
-                return movies;
+                return games;
             }
 
             var crewTypes = GetCrewDepartments();
 
             if (_settings.PersonCast)
             {
-                foreach (var movie in jsonResponse.Cast)
+                foreach (var game in jsonResponse.Cast)
                 {
-                    // Movies with no Year Fix
-                    if (string.IsNullOrWhiteSpace(movie.ReleaseDate))
+                    // Games with no Year Fix
+                    if (string.IsNullOrWhiteSpace(game.ReleaseDate))
                     {
                         continue;
                     }
 
-                    movies.AddIfNotNull(new ImportListMovie { TmdbId = movie.Id });
+                    games.AddIfNotNull(new ImportListGame { IgdbId = game.Id });
                 }
             }
 
             if (crewTypes.Count > 0)
             {
-                foreach (var movie in jsonResponse.Crew)
+                foreach (var game in jsonResponse.Crew)
                 {
-                    // Movies with no Year Fix
-                    if (string.IsNullOrWhiteSpace(movie.ReleaseDate))
+                    // Games with no Year Fix
+                    if (string.IsNullOrWhiteSpace(game.ReleaseDate))
                     {
                         continue;
                     }
 
-                    if (crewTypes.Contains(movie.Department))
+                    if (crewTypes.Contains(game.Department))
                     {
-                        movies.AddIfNotNull(new ImportListMovie { TmdbId = movie.Id });
+                        games.AddIfNotNull(new ImportListGame { IgdbId = game.Id });
                     }
                 }
             }
 
-            return movies;
+            return games;
         }
 
         private List<string> GetCrewDepartments()

@@ -7,7 +7,7 @@ interface QueryOptions {
 }
 
 const absUrlRegex = /^(https?:)?\/\//i;
-const apiRoot = window.Radarr.apiRoot;
+const apiRoot = window.Gamarr.apiRoot;
 
 function isAbsolute(url: string) {
   return absUrlRegex.test(url);
@@ -32,7 +32,7 @@ function useApiQuery<T>(options: QueryOptions) {
       url: getUrl(url),
       headers: {
         ...headers,
-        'X-Api-Key': window.Radarr.apiKey,
+        'X-Api-Key': window.Gamarr.apiKey,
       },
     };
   }, [url, headers]);

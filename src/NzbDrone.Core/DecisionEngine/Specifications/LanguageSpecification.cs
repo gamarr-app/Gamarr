@@ -17,9 +17,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var wantedLanguage = subject.Movie.QualityProfile.Language;
+            var wantedLanguage = subject.Game.QualityProfile.Language;
 
             if (wantedLanguage == Language.Any)
             {
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return DownloadSpecDecision.Accept();
             }
 
-            var originalLanguage = subject.Movie.MovieMetadata.Value.OriginalLanguage;
+            var originalLanguage = subject.Game.GameMetadata.Value.OriginalLanguage;
 
             if (wantedLanguage == Language.Original)
             {
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return DownloadSpecDecision.Accept();
             }
 
-            _logger.Debug("Checking if report meets language requirements. {0}", subject.ParsedMovieInfo.Languages.ToExtendedString());
+            _logger.Debug("Checking if report meets language requirements. {0}", subject.ParsedGameInfo.Languages.ToExtendedString());
 
             if (!subject.Languages.Contains(wantedLanguage))
             {

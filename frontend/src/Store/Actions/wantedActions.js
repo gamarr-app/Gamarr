@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { filterTypes, sortDirections } from 'Helpers/Props';
-import createBatchToggleMovieMonitoredHandler from 'Store/Actions/Creators/createBatchToggleMovieMonitoredHandler';
+import createBatchToggleGameMonitoredHandler from 'Store/Actions/Creators/createBatchToggleGameMonitoredHandler';
 import { createThunk, handleThunks } from 'Store/thunks';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
 import translate from 'Utilities/String/translate';
@@ -22,44 +22,44 @@ export const defaultState = {
     isFetching: false,
     isPopulated: false,
     pageSize: 20,
-    sortKey: 'movieMetadata.sortTitle',
+    sortKey: 'gameMetadata.sortTitle',
     sortDirection: sortDirections.ASCENDING,
     error: null,
     items: [],
 
     columns: [
       {
-        name: 'movieMetadata.sortTitle',
-        label: () => translate('MovieTitle'),
+        name: 'gameMetadata.sortTitle',
+        label: () => translate('GameTitle'),
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'movieMetadata.year',
+        name: 'gameMetadata.year',
         label: () => translate('Year'),
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'movieMetadata.inCinemas',
-        label: () => translate('InCinemas'),
+        name: 'gameMetadata.inCinemas',
+        label: () => translate('InDevelopment'),
         isSortable: true,
         isVisible: false
       },
       {
-        name: 'movieMetadata.digitalRelease',
+        name: 'gameMetadata.digitalRelease',
         label: () => translate('DigitalRelease'),
         isSortable: true,
         isVisible: false
       },
       {
-        name: 'movieMetadata.physicalRelease',
+        name: 'gameMetadata.physicalRelease',
         label: () => translate('PhysicalRelease'),
         isSortable: true,
         isVisible: false
       },
       {
-        name: 'movies.lastSearchTime',
+        name: 'games.lastSearchTime',
         label: () => translate('LastSearched'),
         isSortable: true,
         isVisible: false
@@ -109,37 +109,37 @@ export const defaultState = {
     isFetching: false,
     isPopulated: false,
     pageSize: 20,
-    sortKey: 'movieMetadata.sortTitle',
+    sortKey: 'gameMetadata.sortTitle',
     sortDirection: sortDirections.ASCENDING,
     items: [],
 
     columns: [
       {
-        name: 'movieMetadata.sortTitle',
-        label: () => translate('MovieTitle'),
+        name: 'gameMetadata.sortTitle',
+        label: () => translate('GameTitle'),
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'movieMetadata.year',
+        name: 'gameMetadata.year',
         label: () => translate('Year'),
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'movieMetadata.inCinemas',
-        label: () => translate('InCinemas'),
+        name: 'gameMetadata.inCinemas',
+        label: () => translate('InDevelopment'),
         isSortable: true,
         isVisible: false
       },
       {
-        name: 'movieMetadata.digitalRelease',
+        name: 'gameMetadata.digitalRelease',
         label: () => translate('DigitalRelease'),
         isSortable: true,
         isVisible: false
       },
       {
-        name: 'movieMetadata.physicalRelease',
+        name: 'gameMetadata.physicalRelease',
         label: () => translate('PhysicalRelease'),
         isSortable: true,
         isVisible: false
@@ -150,7 +150,7 @@ export const defaultState = {
         isVisible: false
       },
       {
-        name: 'movies.lastSearchTime',
+        name: 'games.lastSearchTime',
         label: () => translate('LastSearched'),
         isSortable: true,
         isVisible: false
@@ -224,7 +224,7 @@ export const SET_MISSING_FILTER = 'wanted/missing/setMissingFilter';
 export const SET_MISSING_TABLE_OPTION = 'wanted/missing/setMissingTableOption';
 export const CLEAR_MISSING = 'wanted/missing/clearMissing';
 
-export const BATCH_TOGGLE_MISSING_MOVIES = 'wanted/missing/batchToggleMissingMovies';
+export const BATCH_TOGGLE_MISSING_GAMES = 'wanted/missing/batchToggleMissingGames';
 
 export const FETCH_CUTOFF_UNMET = 'wanted/cutoffUnmet/fetchCutoffUnmet';
 export const GOTO_FIRST_CUTOFF_UNMET_PAGE = 'wanted/cutoffUnmet/gotoCutoffUnmetFirstPage';
@@ -237,7 +237,7 @@ export const SET_CUTOFF_UNMET_FILTER = 'wanted/cutoffUnmet/setCutoffUnmetFilter'
 export const SET_CUTOFF_UNMET_TABLE_OPTION = 'wanted/cutoffUnmet/setCutoffUnmetTableOption';
 export const CLEAR_CUTOFF_UNMET = 'wanted/cutoffUnmet/clearCutoffUnmet';
 
-export const BATCH_TOGGLE_CUTOFF_UNMET_MOVIES = 'wanted/cutoffUnmet/batchToggleCutoffUnmetMovies';
+export const BATCH_TOGGLE_CUTOFF_UNMET_GAMES = 'wanted/cutoffUnmet/batchToggleCutoffUnmetGames';
 
 //
 // Action Creators
@@ -253,7 +253,7 @@ export const setMissingFilter = createThunk(SET_MISSING_FILTER);
 export const setMissingTableOption = createAction(SET_MISSING_TABLE_OPTION);
 export const clearMissing = createAction(CLEAR_MISSING);
 
-export const batchToggleMissingMovies = createThunk(BATCH_TOGGLE_MISSING_MOVIES);
+export const batchToggleMissingGames = createThunk(BATCH_TOGGLE_MISSING_GAMES);
 
 export const fetchCutoffUnmet = createThunk(FETCH_CUTOFF_UNMET);
 export const gotoCutoffUnmetFirstPage = createThunk(GOTO_FIRST_CUTOFF_UNMET_PAGE);
@@ -266,7 +266,7 @@ export const setCutoffUnmetFilter = createThunk(SET_CUTOFF_UNMET_FILTER);
 export const setCutoffUnmetTableOption = createAction(SET_CUTOFF_UNMET_TABLE_OPTION);
 export const clearCutoffUnmet = createAction(CLEAR_CUTOFF_UNMET);
 
-export const batchToggleCutoffUnmetMovies = createThunk(BATCH_TOGGLE_CUTOFF_UNMET_MOVIES);
+export const batchToggleCutoffUnmetGames = createThunk(BATCH_TOGGLE_CUTOFF_UNMET_GAMES);
 
 //
 // Action Handlers
@@ -289,7 +289,7 @@ export const actionHandlers = handleThunks({
     }
   ),
 
-  [BATCH_TOGGLE_MISSING_MOVIES]: createBatchToggleMovieMonitoredHandler('wanted.missing', fetchMissing),
+  [BATCH_TOGGLE_MISSING_GAMES]: createBatchToggleGameMonitoredHandler('wanted.missing', fetchMissing),
 
   ...createServerSideCollectionHandlers(
     'wanted.cutoffUnmet',
@@ -307,7 +307,7 @@ export const actionHandlers = handleThunks({
     }
   ),
 
-  [BATCH_TOGGLE_CUTOFF_UNMET_MOVIES]: createBatchToggleMovieMonitoredHandler('wanted.cutoffUnmet', fetchCutoffUnmet)
+  [BATCH_TOGGLE_CUTOFF_UNMET_GAMES]: createBatchToggleGameMonitoredHandler('wanted.cutoffUnmet', fetchCutoffUnmet)
 
 });
 

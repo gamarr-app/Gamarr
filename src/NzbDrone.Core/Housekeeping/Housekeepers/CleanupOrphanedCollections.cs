@@ -15,10 +15,10 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
         public void Clean()
         {
             using var mapper = _database.OpenConnection();
-            mapper.Execute(@"DELETE FROM ""Collections"" WHERE ""TmdbId"" IN (SELECT ""X"".""TmdbId"" FROM (SELECT ""Collections"".""TmdbId"", COUNT(""Movies"".""Id"") as ""MovieCount"" FROM ""Collections""
-                             LEFT OUTER JOIN ""MovieMetadata"" ON ""Collections"".""TmdbId"" = ""MovieMetadata"".""CollectionTmdbId""
-                             LEFT OUTER JOIN ""Movies"" ON ""Movies"".""MovieMetadataId"" = ""MovieMetadata"".""Id""
-                             GROUP BY ""Collections"".""Id"") AS ""X"" WHERE ""X"".""MovieCount"" = 0)");
+            mapper.Execute(@"DELETE FROM ""Collections"" WHERE ""IgdbId"" IN (SELECT ""X"".""IgdbId"" FROM (SELECT ""Collections"".""IgdbId"", COUNT(""Games"".""Id"") as ""GameCount"" FROM ""Collections""
+                             LEFT OUTER JOIN ""GameMetadata"" ON ""Collections"".""IgdbId"" = ""GameMetadata"".""CollectionIgdbId""
+                             LEFT OUTER JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id""
+                             GROUP BY ""Collections"".""Id"") AS ""X"" WHERE ""X"".""GameCount"" = 0)");
         }
     }
 }

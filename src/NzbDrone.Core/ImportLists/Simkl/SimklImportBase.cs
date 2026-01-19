@@ -53,7 +53,7 @@ namespace NzbDrone.Core.ImportLists.Simkl
                 return new ImportListFetchResult();
             }
 
-            return FetchMovies(g => g.GetMovies());
+            return FetchGames(g => g.GetGames());
         }
 
         public override IParseImportListResponse GetParser()
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.ImportLists.Simkl
 
                 if (response?.Resource != null)
                 {
-                    return response.Resource.Movies.All;
+                    return response.Resource.Games.All;
                 }
             }
             catch (HttpException)

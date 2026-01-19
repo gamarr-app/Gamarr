@@ -12,22 +12,22 @@ using NLog.Targets;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Processes;
-using NzbDrone.Core.Movies.Commands;
+using NzbDrone.Core.Games.Commands;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Integration.Test.Client;
 using NzbDrone.SignalR;
 using NzbDrone.Test.Common.Categories;
-using Radarr.Api.V3.AutoTagging;
-using Radarr.Api.V3.Blocklist;
-using Radarr.Api.V3.Config;
-using Radarr.Api.V3.DownloadClient;
-using Radarr.Api.V3.History;
-using Radarr.Api.V3.MovieFiles;
-using Radarr.Api.V3.Movies;
-using Radarr.Api.V3.Profiles.Quality;
-using Radarr.Api.V3.RootFolders;
-using Radarr.Api.V3.System.Tasks;
-using Radarr.Api.V3.Tags;
+using Gamarr.Api.V3.AutoTagging;
+using Gamarr.Api.V3.Blocklist;
+using Gamarr.Api.V3.Config;
+using Gamarr.Api.V3.DownloadClient;
+using Gamarr.Api.V3.History;
+using Gamarr.Api.V3.GameFiles;
+using Gamarr.Api.V3.Games;
+using Gamarr.Api.V3.Profiles.Quality;
+using Gamarr.Api.V3.RootFolders;
+using Gamarr.Api.V3.System.Tasks;
+using Gamarr.Api.V3.Tags;
 using RestSharp;
 
 namespace NzbDrone.Integration.Test
@@ -51,10 +51,10 @@ namespace NzbDrone.Integration.Test
         public ClientBase<QualityProfileResource> QualityProfiles;
         public ReleaseClient Releases;
         public ClientBase<RootFolderResource> RootFolders;
-        public MovieClient Movies;
+        public GameClient Games;
         public ClientBase<TagResource> Tags;
-        public ClientBase<MovieResource> WantedMissing;
-        public ClientBase<MovieResource> WantedCutoffUnmet;
+        public ClientBase<GameResource> WantedMissing;
+        public ClientBase<GameResource> WantedCutoffUnmet;
         public QueueClient Queue;
 
         private List<SignalRMessage> _signalRReceived;
@@ -75,7 +75,7 @@ namespace NzbDrone.Integration.Test
 
         public string TempDirectory { get; private set; }
 
-        public abstract string MovieRootFolder { get; }
+        public abstract string GameRootFolder { get; }
 
         protected abstract string RootUrl { get; }
 
@@ -115,10 +115,10 @@ namespace NzbDrone.Integration.Test
             QualityProfiles = new ClientBase<QualityProfileResource>(RestClient, ApiKey);
             Releases = new ReleaseClient(RestClient, ApiKey);
             RootFolders = new ClientBase<RootFolderResource>(RestClient, ApiKey);
-            Movies = new MovieClient(RestClient, ApiKey);
+            Games = new GameClient(RestClient, ApiKey);
             Tags = new ClientBase<TagResource>(RestClient, ApiKey);
-            WantedMissing = new ClientBase<MovieResource>(RestClient, ApiKey, "wanted/missing");
-            WantedCutoffUnmet = new ClientBase<MovieResource>(RestClient, ApiKey, "wanted/cutoff");
+            WantedMissing = new ClientBase<GameResource>(RestClient, ApiKey, "wanted/missing");
+            WantedCutoffUnmet = new ClientBase<GameResource>(RestClient, ApiKey, "wanted/cutoff");
             Queue = new QueueClient(RestClient, ApiKey);
         }
 
@@ -234,21 +234,21 @@ namespace NzbDrone.Integration.Test
             Assert.Fail("Timed on wait");
         }
 
-        public MovieResource EnsureMovie(int tmdbid, string movieTitle, bool? monitored = null)
+        public GameResource EnsureGame(int igdbid, string gameTitle, bool? monitored = null)
         {
-            var result = Movies.All().FirstOrDefault(v => v.TmdbId == tmdbid);
+            var result = Games.All().FirstOrDefault(v => v.IgdbId == igdbid);
 
             if (result == null)
             {
-                var lookup = Movies.Lookup("tmdb:" + tmdbid);
-                var movie = lookup.First();
-                movie.QualityProfileId = 1;
-                movie.Path = Path.Combine(MovieRootFolder, movie.Title);
-                movie.Monitored = true;
-                movie.AddOptions = new Core.Movies.AddMovieOptions();
-                Directory.CreateDirectory(movie.Path);
+                var lookup = Games.Lookup("igdb:" + igdbid);
+                var game = lookup.First();
+                game.QualityProfileId = 1;
+                game.Path = Path.Combine(GameRootFolder, game.Title);
+                game.Monitored = true;
+                game.AddOptions = new Core.Games.AddGameOptions();
+                Directory.CreateDirectory(game.Path);
 
-                result = Movies.Post(movie);
+                result = Games.Post(game);
                 Commands.WaitAll();
             }
 
@@ -263,7 +263,7 @@ namespace NzbDrone.Integration.Test
 
                 if (changed)
                 {
-                    Movies.Put(result);
+                    Games.Put(result);
                 }
             }
 
@@ -272,40 +272,40 @@ namespace NzbDrone.Integration.Test
             return result;
         }
 
-        public void EnsureNoMovie(int tmdbid, string movieTitle)
+        public void EnsureNoGame(int igdbid, string gameTitle)
         {
-            var result = Movies.All().FirstOrDefault(v => v.TmdbId == tmdbid);
+            var result = Games.All().FirstOrDefault(v => v.IgdbId == igdbid);
 
             if (result != null)
             {
-                Movies.Delete(result.Id);
+                Games.Delete(result.Id);
             }
         }
 
-        public MovieFileResource EnsureMovieFile(MovieResource movie, Quality quality)
+        public GameFileResource EnsureGameFile(GameResource game, Quality quality)
         {
-            var result = Movies.Get(movie.Id);
+            var result = Games.Get(game.Id);
 
-            if (result.MovieFile == null)
+            if (result.GameFile == null)
             {
-                var path = Path.Combine(MovieRootFolder, movie.Title, string.Format("{0} ({1}) - {2}.strm", movie.Title, movie.Year, quality.Name));
+                var path = Path.Combine(GameRootFolder, game.Title, string.Format("{0} ({1}) - {2}.strm", game.Title, game.Year, quality.Name));
 
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 
                 var sourcePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "ApiTests", "Files", "H264_sample.mp4");
 
                 // File.Copy(sourcePath, path);
-                File.WriteAllText(path, "Fake Movie");
+                File.WriteAllText(path, "Fake Game");
 
-                Commands.PostAndWait(new RefreshMovieCommand(new List<int> { movie.Id }));
+                Commands.PostAndWait(new RefreshGameCommand(new List<int> { game.Id }));
                 Commands.WaitAll();
 
-                result = Movies.Get(movie.Id);
+                result = Games.Get(game.Id);
 
-                result.MovieFile.Should().NotBeNull();
+                result.GameFile.Should().NotBeNull();
             }
 
-            return result.MovieFile;
+            return result.GameFile;
         }
 
         public QualityProfileResource EnsureQualityProfileCutoff(int profileId, Quality cutoff, bool upgradeAllowed)

@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Indexers
             return FetchReleases(g => g.GetRecentRequests(), true);
         }
 
-        public override Task<IList<ReleaseInfo>> Fetch(MovieSearchCriteria searchCriteria)
+        public override Task<IList<ReleaseInfo>> Fetch(GameSearchCriteria searchCriteria)
         {
             if (!SupportsSearch)
             {
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.Indexers
                 return cookies;
             };
 
-            var requests = searchCriteria == null ? generator.GetRecentRequests() : generator.GetSearchRequests(searchCriteria as MovieSearchCriteria);
+            var requests = searchCriteria == null ? generator.GetRecentRequests() : generator.GetSearchRequests(searchCriteria as GameSearchCriteria);
 
             generator.CookiesUpdater = (cookies, expiration) =>
             {
@@ -404,7 +404,7 @@ namespace NzbDrone.Core.Indexers
                     ex.Response.Content.Contains("not support the requested query"))
                 {
                     _logger.Warn(ex, "Indexer does not support the query");
-                    return new ValidationFailure(string.Empty, "Indexer does not support the current query. Check if the categories and or searching for movies are supported. Check the log for more details.");
+                    return new ValidationFailure(string.Empty, "Indexer does not support the current query. Check if the categories and or searching for games are supported. Check the log for more details.");
                 }
 
                 _logger.Warn(ex, "Unable to connect to indexer");

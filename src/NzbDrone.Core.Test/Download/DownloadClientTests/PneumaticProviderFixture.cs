@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         private string _pneumaticFolder;
         private string _strmFolder;
         private string _nzbPath;
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
         private IIndexer _indexer;
         private DownloadClientItem _downloadClientItem;
 
@@ -39,12 +39,12 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
             _nzbPath = Path.Combine(_pneumaticFolder, _title + ".nzb").AsOsAgnostic();
             _strmFolder = @"d:\unsorted tv\".AsOsAgnostic();
 
-            _remoteMovie = new RemoteMovie();
-            _remoteMovie.Release = new ReleaseInfo();
-            _remoteMovie.Release.Title = _title;
-            _remoteMovie.Release.DownloadUrl = _nzbUrl;
+            _remoteGame = new RemoteGame();
+            _remoteGame.Release = new ReleaseInfo();
+            _remoteGame.Release.Title = _title;
+            _remoteGame.Release.DownloadUrl = _nzbUrl;
 
-            _remoteMovie.ParsedMovieInfo = new ParsedMovieInfo();
+            _remoteGame.ParsedGameInfo = new ParsedGameInfo();
 
             _indexer = new TestIndexer(Mocker.Resolve<IHttpClient>(),
                 Mocker.Resolve<IIndexerStatusService>(),
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         [Test]
         public async Task should_download_file_if_it_doesnt_exist()
         {
-            await Subject.Download(_remoteMovie, _indexer);
+            await Subject.Download(_remoteGame, _indexer);
 
             Mocker.GetMock<IHttpClient>().Verify(c => c.DownloadFileAsync(_nzbUrl, _nzbPath), Times.Once());
         }
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         {
             WithFailedDownload();
 
-            Assert.ThrowsAsync<WebException>(async () => await Subject.Download(_remoteMovie, _indexer));
+            Assert.ThrowsAsync<WebException>(async () => await Subject.Download(_remoteGame, _indexer));
         }
 
         [Test]
@@ -96,9 +96,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         {
             var illegalTitle = "Saturday Night Live - S38E08 - Jeremy Renner/Maroon 5 [SDTV]";
             var expectedFilename = Path.Combine(_pneumaticFolder, "Saturday Night Live - S38E08 - Jeremy Renner+Maroon 5 [SDTV].nzb");
-            _remoteMovie.Release.Title = illegalTitle;
+            _remoteGame.Release.Title = illegalTitle;
 
-            await Subject.Download(_remoteMovie, _indexer);
+            await Subject.Download(_remoteGame, _indexer);
 
             Mocker.GetMock<IHttpClient>().Verify(c => c.DownloadFileAsync(It.IsAny<string>(), expectedFilename), Times.Once());
         }

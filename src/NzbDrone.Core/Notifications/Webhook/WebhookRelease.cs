@@ -13,18 +13,18 @@ namespace NzbDrone.Core.Notifications.Webhook
         {
         }
 
-        public WebhookRelease(QualityModel quality, RemoteMovie remoteMovie)
+        public WebhookRelease(QualityModel quality, RemoteGame remoteGame)
         {
             Quality = quality.Quality.Name;
             QualityVersion = quality.Revision.Version;
-            ReleaseGroup = remoteMovie.ParsedMovieInfo.ReleaseGroup;
-            ReleaseTitle = remoteMovie.Release.Title;
-            Indexer = remoteMovie.Release.Indexer;
-            Size = remoteMovie.Release.Size;
-            CustomFormats = remoteMovie.CustomFormats?.Select(x => x.Name).ToList();
-            CustomFormatScore = remoteMovie.CustomFormatScore;
-            Languages = remoteMovie.Languages;
-            IndexerFlags = Enum.GetValues(typeof(IndexerFlags)).Cast<IndexerFlags>().Where(f => (remoteMovie.Release.IndexerFlags & f) == f).Select(f => f.ToString()).ToList();
+            ReleaseGroup = remoteGame.ParsedGameInfo.ReleaseGroup;
+            ReleaseTitle = remoteGame.Release.Title;
+            Indexer = remoteGame.Release.Indexer;
+            Size = remoteGame.Release.Size;
+            CustomFormats = remoteGame.CustomFormats?.Select(x => x.Name).ToList();
+            CustomFormatScore = remoteGame.CustomFormatScore;
+            Languages = remoteGame.Languages;
+            IndexerFlags = Enum.GetValues(typeof(IndexerFlags)).Cast<IndexerFlags>().Where(f => (remoteGame.Release.IndexerFlags & f) == f).Select(f => f.ToString()).ToList();
         }
 
         public string Quality { get; set; }

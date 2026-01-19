@@ -10,7 +10,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
 
         public override ProviderMessage Message => new (_localizationService.GetLocalizedString("MetadataMediaBrowserDeprecated", new Dictionary<string, object> { { "version", "v6" } }), ProviderMessageType.Warning);
 
-        public override MetadataFile FindMetadataFile(Movie movie, string path)
+        public override MetadataFile FindMetadataFile(Game game, string path)
         {
             var filename = Path.GetFileName(path);
 
@@ -41,28 +41,28 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
 
             var metadata = new MetadataFile
             {
-                MovieId = movie.Id,
+                GameId = game.Id,
                 Consumer = GetType().Name,
-                RelativePath = movie.Path.GetRelativePath(path)
+                RelativePath = game.Path.GetRelativePath(path)
             };
 
-            if (filename.Equals("movie.xml", StringComparison.InvariantCultureIgnoreCase))
+            if (filename.Equals("game.xml", StringComparison.InvariantCultureIgnoreCase))
             {
-                metadata.Type = MetadataType.MovieMetadata;
+                metadata.Type = MetadataType.GameMetadata;
                 return metadata;
             }
 
             return null;
         }
 
-        public override MetadataFileResult MovieMetadata(Movie movie, MovieFile movieFile)
+        public override MetadataFileResult GameMetadata(Game game, GameFile gameFile)
         {
-            if (!Settings.MovieMetadata)
+            if (!Settings.GameMetadata)
             {
                 return null;
             }
 
-            _logger.Debug("Generating movie.xml for: {0}", movie.Title);
+            _logger.Debug("Generating game.xml for: {0}", game.Title);
             var sb = new StringBuilder();
             var xws = new XmlWriterSettings();
             xws.OmitXmlDeclaration = true;
@@ -70,37 +70,37 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
 
             using (var xw = XmlWriter.Create(sb, xws))
             {
-                var movieElement = new XElement("Movie");
+                var gameElement = new XElement("Game");
 
-                movieElement.Add(new XElement("id", movie.MovieMetadata.Value.ImdbId));
-                movieElement.Add(new XElement("Status", movie.MovieMetadata.Value.Status));
+                gameElement.Add(new XElement("id", game.GameMetadata.Value.ImdbId));
+                gameElement.Add(new XElement("Status", game.GameMetadata.Value.Status));
 
-                movieElement.Add(new XElement("Added", movie.Added.ToString("MM/dd/yyyy HH:mm:ss tt")));
-                movieElement.Add(new XElement("LockData", "false"));
-                movieElement.Add(new XElement("Overview", movie.MovieMetadata.Value.Overview));
-                movieElement.Add(new XElement("LocalTitle", movie.Title));
+                gameElement.Add(new XElement("Added", game.Added.ToString("MM/dd/yyyy HH:mm:ss tt")));
+                gameElement.Add(new XElement("LockData", "false"));
+                gameElement.Add(new XElement("Overview", game.GameMetadata.Value.Overview));
+                gameElement.Add(new XElement("LocalTitle", game.Title));
 
-                movieElement.Add(new XElement("Rating", movie.MovieMetadata.Value.Ratings.Tmdb?.Value ?? 0));
-                movieElement.Add(new XElement("ProductionYear", movie.Year));
-                movieElement.Add(new XElement("RunningTime", movie.MovieMetadata.Value.Runtime));
-                movieElement.Add(new XElement("IMDB", movie.MovieMetadata.Value.ImdbId));
-                movieElement.Add(new XElement("Genres", movie.MovieMetadata.Value.Genres.Select(genre => new XElement("Genre", genre))));
+                gameElement.Add(new XElement("Rating", game.GameMetadata.Value.Ratings.Igdb?.Value ?? 0));
+                gameElement.Add(new XElement("ProductionYear", game.Year));
+                gameElement.Add(new XElement("RunningTime", game.GameMetadata.Value.Runtime));
+                gameElement.Add(new XElement("IMDB", game.GameMetadata.Value.ImdbId));
+                gameElement.Add(new XElement("Genres", game.GameMetadata.Value.Genres.Select(genre => new XElement("Genre", genre))));
 
-                var doc = new XDocument(movieElement);
+                var doc = new XDocument(gameElement);
                 doc.Save(xw);
 
-                _logger.Debug("Saving movie.xml for {0}", movie.Title);
+                _logger.Debug("Saving game.xml for {0}", game.Title);
 
-                return new MetadataFileResult("movie.xml", doc.ToString());
+                return new MetadataFileResult("game.xml", doc.ToString());
             }
         }
 
-        public override List<ImageFileResult> MovieImages(Movie movie)
+        public override List<ImageFileResult> GameImages(Game game)
         {
             return new List<ImageFileResult>();
         }
 
-        private IEnumerable<ImageFileResult> ProcessMovieImages(Movie movie)
+        private IEnumerable<ImageFileResult> ProcessGameImages(Game game)
         {
             return new List<ImageFileResult>();
         }

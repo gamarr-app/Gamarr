@@ -8,8 +8,8 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Lifecycle;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Collections;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Collections;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Test.CustomFormats;
 using NzbDrone.Core.Test.Framework;
@@ -50,9 +50,9 @@ namespace NzbDrone.Core.Test.Profiles
         }
 
         [Test]
-        public void should_not_be_able_to_delete_profile_if_assigned_to_movie()
+        public void should_not_be_able_to_delete_profile_if_assigned_to_game()
         {
-            var movieList = Builder<Movie>.CreateListOfSize(3)
+            var gameList = Builder<Game>.CreateListOfSize(3)
                                             .Random(1)
                                             .With(c => c.QualityProfileId = 2)
                                             .Build().ToList();
@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.Profiles
                                                             .With(c => c.QualityProfileId = 1)
                                                             .Build().ToList();
 
-            Mocker.GetMock<IMovieService>().Setup(c => c.GetAllMovies()).Returns(movieList);
+            Mocker.GetMock<IGameService>().Setup(c => c.GetAllGames()).Returns(gameList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importList);
 
             Assert.Throws<QualityProfileInUseException>(() => Subject.Delete(2));
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.Profiles
         [Test]
         public void should_not_be_able_to_delete_profile_if_assigned_to_list()
         {
-            var movieList = Builder<Movie>.CreateListOfSize(3)
+            var gameList = Builder<Game>.CreateListOfSize(3)
                 .All()
                 .With(c => c.QualityProfileId = 1)
                 .Build().ToList();
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(c => c.QualityProfileId = 2)
                 .Build().ToList();
 
-            Mocker.GetMock<IMovieService>().Setup(c => c.GetAllMovies()).Returns(movieList);
+            Mocker.GetMock<IGameService>().Setup(c => c.GetAllGames()).Returns(gameList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importList);
 
             Assert.Throws<QualityProfileInUseException>(() => Subject.Delete(2));
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Test.Profiles
         [Test]
         public void should_not_be_able_to_delete_profile_if_assigned_to_collection()
         {
-            var movieList = Builder<Movie>.CreateListOfSize(3)
+            var gameList = Builder<Game>.CreateListOfSize(3)
                 .All()
                 .With(c => c.QualityProfileId = 1)
                 .Build().ToList();
@@ -104,14 +104,14 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(c => c.QualityProfileId = 1)
                 .Build().ToList();
 
-            var collectionList = Builder<MovieCollection>.CreateListOfSize(3)
+            var collectionList = Builder<GameCollection>.CreateListOfSize(3)
                                                 .All()
                                                 .With(c => c.QualityProfileId = 2)
                                                 .Build().ToList();
 
-            Mocker.GetMock<IMovieService>().Setup(c => c.GetAllMovies()).Returns(movieList);
+            Mocker.GetMock<IGameService>().Setup(c => c.GetAllGames()).Returns(gameList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importList);
-            Mocker.GetMock<IMovieCollectionService>().Setup(c => c.GetAllCollections()).Returns(collectionList);
+            Mocker.GetMock<IGameCollectionService>().Setup(c => c.GetAllCollections()).Returns(collectionList);
 
             Assert.Throws<QualityProfileInUseException>(() => Subject.Delete(2));
 
@@ -119,9 +119,9 @@ namespace NzbDrone.Core.Test.Profiles
         }
 
         [Test]
-        public void should_delete_profile_if_not_assigned_to_movie_or_list()
+        public void should_delete_profile_if_not_assigned_to_game_or_list()
         {
-            var movieList = Builder<Movie>.CreateListOfSize(3)
+            var gameList = Builder<Game>.CreateListOfSize(3)
                                             .All()
                                             .With(c => c.QualityProfileId = 2)
                                             .Build().ToList();
@@ -131,14 +131,14 @@ namespace NzbDrone.Core.Test.Profiles
                                                             .With(c => c.QualityProfileId = 2)
                                                             .Build().ToList();
 
-            var collectionList = Builder<MovieCollection>.CreateListOfSize(3)
+            var collectionList = Builder<GameCollection>.CreateListOfSize(3)
                                                             .All()
                                                             .With(c => c.QualityProfileId = 2)
                                                             .Build().ToList();
 
-            Mocker.GetMock<IMovieService>().Setup(c => c.GetAllMovies()).Returns(movieList);
+            Mocker.GetMock<IGameService>().Setup(c => c.GetAllGames()).Returns(gameList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importList);
-            Mocker.GetMock<IMovieCollectionService>().Setup(c => c.GetAllCollections()).Returns(collectionList);
+            Mocker.GetMock<IGameCollectionService>().Setup(c => c.GetAllCollections()).Returns(collectionList);
 
             Subject.Delete(1);
 

@@ -9,8 +9,8 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch;
 using NzbDrone.Core.IndexerSearch.Definitions;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Translations;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.IndexerSearchTests
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
         public class ReleaseSearchServiceFixture : CoreTest<ReleaseSearchService>
     {
         private Mock<IIndexer> _mockIndexer;
-        private Movie _movie;
+        private Game _game;
 
         [SetUp]
         public void SetUp()
@@ -35,32 +35,32 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 .Setup(s => s.GetSearchDecision(It.IsAny<List<Parser.Model.ReleaseInfo>>(), It.IsAny<SearchCriteriaBase>()))
                 .Returns(new List<DownloadDecision>());
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                 .With(v => v.Monitored = true)
                 .Build();
 
-            Mocker.GetMock<IMovieService>()
-                .Setup(v => v.GetMovie(_movie.Id))
-                .Returns(_movie);
+            Mocker.GetMock<IGameService>()
+                .Setup(v => v.GetGame(_game.Id))
+                .Returns(_game);
 
-            Mocker.GetMock<IMovieTranslationService>()
-                .Setup(s => s.GetAllTranslationsForMovieMetadata(It.IsAny<int>()))
-                .Returns(new List<MovieTranslation>());
+            Mocker.GetMock<IGameTranslationService>()
+                .Setup(s => s.GetAllTranslationsForGameMetadata(It.IsAny<int>()))
+                .Returns(new List<GameTranslation>());
         }
 
         private List<SearchCriteriaBase> WatchForSearchCriteria()
         {
             var result = new List<SearchCriteriaBase>();
 
-            _mockIndexer.Setup(v => v.Fetch(It.IsAny<MovieSearchCriteria>()))
-                .Callback<MovieSearchCriteria>(s => result.Add(s))
+            _mockIndexer.Setup(v => v.Fetch(It.IsAny<GameSearchCriteria>()))
+                .Callback<GameSearchCriteria>(s => result.Add(s))
                 .Returns(Task.FromResult<IList<Parser.Model.ReleaseInfo>>(new List<Parser.Model.ReleaseInfo>()));
 
             return result;
         }
 
         [Test]
-        public async Task Tags_IndexerTags_MovieNoTags_IndexerNotIncluded()
+        public async Task Tags_IndexerTags_GameNoTags_IndexerNotIncluded()
         {
             _mockIndexer.SetupGet(s => s.Definition).Returns(new IndexerDefinition
             {
@@ -70,41 +70,41 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.MovieSearch(_movie, true, false);
+            await Subject.GameSearch(_game, true, false);
 
-            var criteria = allCriteria.OfType<MovieSearchCriteria>().ToList();
+            var criteria = allCriteria.OfType<GameSearchCriteria>().ToList();
 
             criteria.Count.Should().Be(0);
         }
 
         [Test]
-        public async Task Tags_IndexerNoTags_MovieTags_IndexerIncluded()
+        public async Task Tags_IndexerNoTags_GameTags_IndexerIncluded()
         {
             _mockIndexer.SetupGet(s => s.Definition).Returns(new IndexerDefinition
             {
                 Id = 1
             });
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                 .With(v => v.Monitored = true)
                 .With(v => v.Tags = new HashSet<int> { 3 })
                 .Build();
 
-            Mocker.GetMock<IMovieService>()
-                .Setup(v => v.GetMovie(_movie.Id))
-                .Returns(_movie);
+            Mocker.GetMock<IGameService>()
+                .Setup(v => v.GetGame(_game.Id))
+                .Returns(_game);
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.MovieSearch(_movie, true, false);
+            await Subject.GameSearch(_game, true, false);
 
-            var criteria = allCriteria.OfType<MovieSearchCriteria>().ToList();
+            var criteria = allCriteria.OfType<GameSearchCriteria>().ToList();
 
             criteria.Count.Should().Be(1);
         }
 
         [Test]
-        public async Task Tags_IndexerAndMovieTagsMatch_IndexerIncluded()
+        public async Task Tags_IndexerAndGameTagsMatch_IndexerIncluded()
         {
             _mockIndexer.SetupGet(s => s.Definition).Returns(new IndexerDefinition
             {
@@ -112,26 +112,26 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 Tags = new HashSet<int> { 1, 2, 3 }
             });
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                 .With(v => v.Monitored = true)
                 .With(v => v.Tags = new HashSet<int> { 3, 4, 5 })
                 .Build();
 
-            Mocker.GetMock<IMovieService>()
-                .Setup(v => v.GetMovie(_movie.Id))
-                .Returns(_movie);
+            Mocker.GetMock<IGameService>()
+                .Setup(v => v.GetGame(_game.Id))
+                .Returns(_game);
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.MovieSearch(_movie, true, false);
+            await Subject.GameSearch(_game, true, false);
 
-            var criteria = allCriteria.OfType<MovieSearchCriteria>().ToList();
+            var criteria = allCriteria.OfType<GameSearchCriteria>().ToList();
 
             criteria.Count.Should().Be(1);
         }
 
         [Test]
-        public async Task Tags_IndexerAndMovieTagsMismatch_IndexerNotIncluded()
+        public async Task Tags_IndexerAndGameTagsMismatch_IndexerNotIncluded()
         {
             _mockIndexer.SetupGet(s => s.Definition).Returns(new IndexerDefinition
             {
@@ -139,20 +139,20 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 Tags = new HashSet<int> { 1, 2, 3 }
             });
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                 .With(v => v.Monitored = true)
                 .With(v => v.Tags = new HashSet<int> { 4, 5, 6 })
                 .Build();
 
-            Mocker.GetMock<IMovieService>()
-                .Setup(v => v.GetMovie(_movie.Id))
-                .Returns(_movie);
+            Mocker.GetMock<IGameService>()
+                .Setup(v => v.GetGame(_game.Id))
+                .Returns(_game);
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.MovieSearch(_movie, true, false);
+            await Subject.GameSearch(_game, true, false);
 
-            var criteria = allCriteria.OfType<MovieSearchCriteria>().ToList();
+            var criteria = allCriteria.OfType<GameSearchCriteria>().ToList();
 
             criteria.Count.Should().Be(0);
         }

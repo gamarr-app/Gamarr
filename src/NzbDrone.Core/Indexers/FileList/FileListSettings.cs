@@ -34,10 +34,10 @@ namespace NzbDrone.Core.Indexers.FileList
 
             Categories = new[]
             {
-                (int)FileListCategories.Movie_SD,
-                (int)FileListCategories.Movie_HD,
-                (int)FileListCategories.Movie_HDRO,
-                (int)FileListCategories.Movie_4K
+                (int)FileListCategories.Game_SD,
+                (int)FileListCategories.Game_HD,
+                (int)FileListCategories.Game_HDRO,
+                (int)FileListCategories.Game_4K
             };
 
             MultiLanguages = Array.Empty<int>();
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Indexers.FileList
         [FieldDefinition(8, Type = FieldType.Select, SelectOptions = typeof(FailDownloads), Label = "IndexerSettingsFailDownloads", HelpText = "IndexerSettingsFailDownloadsHelpText", Advanced = true)]
         public IEnumerable<int> FailDownloads { get; set; }
 
-        [FieldDefinition(9, Type = FieldType.Select, SelectOptions = typeof(IndexerFlags), Label = "IndexerSettingsRequiredFlags", HelpText = "IndexerSettingsRequiredFlagsHelpText", HelpLink = "https://wiki.servarr.com/radarr/settings#indexer-flags", Advanced = true)]
+        [FieldDefinition(9, Type = FieldType.Select, SelectOptions = typeof(IndexerFlags), Label = "IndexerSettingsRequiredFlags", HelpText = "IndexerSettingsRequiredFlagsHelpText", HelpLink = "https://wiki.servarr.com/gamarr/settings#indexer-flags", Advanced = true)]
         public IEnumerable<int> RequiredFlags { get; set; }
 
         public NzbDroneValidationResult Validate()
@@ -87,24 +87,24 @@ namespace NzbDrone.Core.Indexers.FileList
         Anime = 24,
         [FieldOption(Label = "Animation")]
         Animation = 15,
-        [FieldOption("Movies SD")]
-        Movie_SD = 1,
-        [FieldOption("Movies DVD")]
-        Movie_DVD = 2,
-        [FieldOption("Movies DVD-RO")]
-        Movie_DVDRO = 3,
-        [FieldOption("Movies HD")]
-        Movie_HD = 4,
-        [FieldOption("Movies HD-RO")]
-        Movie_HDRO = 19,
-        [FieldOption("Movies 4K")]
-        Movie_4K = 6,
-        [FieldOption("Movies Blu-Ray")]
-        Movie_BluRay = 20,
-        [FieldOption("Movies 4K Blu-Ray")]
-        Movie_BluRay4K = 26,
-        [FieldOption("Movies 3D")]
-        Movie_3D = 25,
+        [FieldOption("Games SD")]
+        Game_SD = 1,
+        [FieldOption("Games DVD")]
+        Game_DVD = 2,
+        [FieldOption("Games DVD-RO")]
+        Game_DVDRO = 3,
+        [FieldOption("Games HD")]
+        Game_HD = 4,
+        [FieldOption("Games HD-RO")]
+        Game_HDRO = 19,
+        [FieldOption("Games 4K")]
+        Game_4K = 6,
+        [FieldOption("Games Blu-Ray")]
+        Game_BluRay = 20,
+        [FieldOption("Games 4K Blu-Ray")]
+        Game_BluRay4K = 26,
+        [FieldOption("Games 3D")]
+        Game_3D = 25,
         [FieldOption("RO Dubbed")]
         RoDubbed = 28,
         [FieldOption("XXX")]

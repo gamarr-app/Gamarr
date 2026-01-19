@@ -2,23 +2,23 @@ using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Organizer
 {
     public interface IFilenameSampleService
     {
-        SampleResult GetMovieSample(NamingConfig nameSpec);
-        string GetMovieFolderSample(NamingConfig nameSpec);
+        SampleResult GetGameSample(NamingConfig nameSpec);
+        string GetGameFolderSample(NamingConfig nameSpec);
     }
 
     public class FileNameSampleService : IFilenameSampleService
     {
         private readonly IBuildFileNames _buildFileNames;
 
-        private static MovieFile _movieFile;
-        private static Movie _movie;
+        private static GameFile _gameFile;
+        private static Game _game;
         private static List<CustomFormat> _customFormats;
 
         public FileNameSampleService(IBuildFileNames buildFileNames)
@@ -39,30 +39,30 @@ namespace NzbDrone.Core.Organizer
                 Subtitles = new List<string> { "eng", "ger" }
             };
 
-            _movieFile = new MovieFile
+            _gameFile = new GameFile
             {
                 Quality = new QualityModel(Quality.Bluray1080p, new Revision(2)),
-                RelativePath = "The.Movie.Title.2010.1080p.BluRay.DTS.x264-EVOLVE.mkv",
-                SceneName = "The.Movie.Title.2010.1080p.BluRay.DTS.x264-EVOLVE",
+                RelativePath = "The.Game.Title.2010.1080p.BluRay.DTS.x264-EVOLVE.mkv",
+                SceneName = "The.Game.Title.2010.1080p.BluRay.DTS.x264-EVOLVE",
                 ReleaseGroup = "EVOLVE",
                 MediaInfo = mediaInfo,
                 Edition = "Ultimate extended edition",
             };
 
-            _movie = new Movie
+            _game = new Game
             {
-                MovieMetadata = new MovieMetadata
+                GameMetadata = new GameMetadata
                 {
-                    Title = "The Movie: Title",
-                    OriginalTitle = "The Original Movie Title",
-                    CollectionTitle = "The Movie Collection",
-                    CollectionTmdbId = 123654,
+                    Title = "The Game: Title",
+                    OriginalTitle = "The Original Game Title",
+                    CollectionTitle = "The Game Collection",
+                    CollectionIgdbId = 123654,
                     Certification = "R",
                     Year = 2010,
                     ImdbId = "tt0066921",
-                    TmdbId = 345691
+                    IgdbId = 345691
                 },
-                MovieMetadataId = 1
+                GameMetadataId = 1
             };
 
             _customFormats = new List<CustomFormat>
@@ -80,28 +80,28 @@ namespace NzbDrone.Core.Organizer
             };
         }
 
-        public SampleResult GetMovieSample(NamingConfig nameSpec)
+        public SampleResult GetGameSample(NamingConfig nameSpec)
         {
             var result = new SampleResult
             {
-                FileName = BuildSample(_movie, _movieFile, nameSpec),
-                Movie = _movie,
-                MovieFile = _movieFile
+                FileName = BuildSample(_game, _gameFile, nameSpec),
+                Game = _game,
+                GameFile = _gameFile
             };
 
             return result;
         }
 
-        public string GetMovieFolderSample(NamingConfig nameSpec)
+        public string GetGameFolderSample(NamingConfig nameSpec)
         {
-            return _buildFileNames.GetMovieFolder(_movie, nameSpec);
+            return _buildFileNames.GetGameFolder(_game, nameSpec);
         }
 
-        private string BuildSample(Movie movie, MovieFile movieFile, NamingConfig nameSpec)
+        private string BuildSample(Game game, GameFile gameFile, NamingConfig nameSpec)
         {
             try
             {
-                return _buildFileNames.BuildFileName(movie, movieFile, nameSpec, _customFormats);
+                return _buildFileNames.BuildFileName(game, gameFile, nameSpec, _customFormats);
             }
             catch (NamingFormatException)
             {

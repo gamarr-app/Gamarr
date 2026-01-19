@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.Datastore
             var quality = new QualityModel { Quality = Quality.Bluray720p, Revision = new Revision(version: 2) };
             var languages = new List<Language> { Language.English };
 
-            var history = Builder<MovieHistory>.CreateNew()
+            var history = Builder<GameHistory>.CreateNew()
                             .With(c => c.Id = 0)
                             .With(c => c.Quality = quality)
                             .With(c => c.Languages = languages)
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.Datastore
 
             Db.Insert(history);
 
-            var loadedQuality = Db.Single<MovieHistory>().Quality;
+            var loadedQuality = Db.Single<GameHistory>().Quality;
             loadedQuality.Should().Be(quality);
         }
 
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             var languages = new List<Language> { Language.English };
 
-            var history = Builder<MovieHistory>.CreateListOfSize(2)
+            var history = Builder<GameHistory>.CreateListOfSize(2)
                             .All().With(c => c.Id = 0)
                             .With(c => c.Languages = languages)
                             .Build().ToList();
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Test.Datastore
 
             Db.InsertMany(history);
 
-            var returnedHistory = Db.All<MovieHistory>();
+            var returnedHistory = Db.All<GameHistory>();
 
             returnedHistory[0].Quality.Quality.Should().Be(Quality.HDTV1080p);
         }

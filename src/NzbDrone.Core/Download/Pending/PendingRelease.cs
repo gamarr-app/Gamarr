@@ -6,21 +6,21 @@ namespace NzbDrone.Core.Download.Pending
 {
     public class PendingRelease : ModelBase
     {
-        public int MovieId { get; set; }
+        public int GameId { get; set; }
         public string Title { get; set; }
         public DateTime Added { get; set; }
-        public ParsedMovieInfo ParsedMovieInfo { get; set; }
+        public ParsedGameInfo ParsedGameInfo { get; set; }
         public ReleaseInfo Release { get; set; }
         public PendingReleaseReason Reason { get; set; }
         public PendingReleaseAdditionalInfo AdditionalInfo { get; set; }
 
         // Not persisted
-        public RemoteMovie RemoteMovie { get; set; }
+        public RemoteGame RemoteGame { get; set; }
     }
 
     public class PendingReleaseAdditionalInfo
     {
-        public MovieMatchType MovieMatchType { get; set; }
+        public GameMatchType GameMatchType { get; set; }
         public ReleaseSourceType ReleaseSource { get; set; }
     }
 }
