@@ -330,5 +330,153 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().NotBeNull($"Failed to parse: {postTitle}");
             result.PrimaryGameTitle.Should().Be(title);
         }
+
+        // Real-world FitGirl Repack releases (high seeder count)
+        [TestCase("Elden Ring Deluxe Edition v 1.03.2 DLC 2022 PC Steam-Rip", "Elden Ring Deluxe Edition")]
+        [TestCase("ELDEN RING Shadow of the Erdtree Deluxe Edition v1 12 v1 12 1 9 DLCs Bonuses Windows 7 Fix MULTi14 FitGirl Repack Selective Download from 47 4-GB", "ELDEN RING Shadow of the Erdtree Deluxe Edition")]
+        [TestCase("God of War v1 0 1 Day 1 Patch Build 8008283 Bonus OST MULTi18 FitGirl Repack Selective Download from 26-GB", "God of War")]
+        [TestCase("Red Dead Redemption 2 Build 1311.23 MULTi13 FitGirl Repack", "Red Dead Redemption 2")]
+        [TestCase("Red Dead Redemption v1 0 40 57107 Bonus Content MULTi13 FitGirl Repack Selective Download from 5 4-GB", "Red Dead Redemption")]
+        [TestCase("Starfield v1 7 23 0 2 DLCs Bonus Artbook OST MULTi9 FitGirl Repack Selective Download from 62 2-GB", "Starfield")]
+        [TestCase("Cyberpunk 2077 Ultimate Edition v2 3 All DLCs Bonus Content", "Cyberpunk 2077 Ultimate Edition")]
+        [TestCase("Hogwarts Legacy Digital Deluxe Edition Build 10461750 All DLCs Console DLCs Unlocker Bonus OSTs Trainer MULTi14 From 56 8 GB EMPRESS DODI-Repack", "Hogwarts Legacy Digital Deluxe Edition")]
+        [TestCase("The Legend of Zelda Tears of the Kingdom v1.0.0 Switch Emulators MULTi10 FitGirl Repack", "The Legend of Zelda Tears of the Kingdom")]
+        [TestCase("Hollow Knight Silksong v1.0.28324 MULTi10 FitGirl Repack", "Hollow Knight Silksong")]
+        [TestCase("Sekiro Shadows Die Twice Game of the Year Edition v1 06 Bonus Content MULTi13 FitGirl Repack Selective Download from 7 2-GB", "Sekiro Shadows Die Twice Game of the Year Edition")]
+        [TestCase("FINAL FANTASY VII REBIRTH Digital Deluxe Edition All DLCs Bonus Content Unlocker Fixes MULTi11 FitGirl Monkey Repack Selective Download from 131 6-GB", "FINAL FANTASY VII REBIRTH Digital Deluxe Edition")]
+        [TestCase("Call of Duty Black Ops 6 v11 1 Campaign Only 4 Bonus OSTs MULTi14 FitGirl Repack Selective Download from 39 3-GB", "Call of Duty Black Ops 6")]
+        [TestCase("Hades II Hades 2 v1 131346 Bonus OST MULTi15 FitGirl Repack Selective Download from 3 3-GB", "Hades II Hades 2")]
+        public void should_parse_fitgirl_repack_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real-world DODI Repack releases
+        [TestCase("ELDEN RING Deluxe Edition Shadow of the Erdtree Premium Bundle v1 12 1 12 1 All DLCs Bonus Content MULTi15 From 49 9 GB DODI-Repack", "ELDEN RING Deluxe Edition Shadow of the Erdtree Premium Bundle")]
+        [TestCase("God of War Ragnarok Digital Deluxe Edition All DLCs Bonus Content 6 GB VRam Fix MULTi22 From 68 5 GB DODI-Repack", "God of War Ragnarok Digital Deluxe Edition")]
+        [TestCase("Red Dead Redemption Undead Nightmare 2024 PC v1 0 40 57107 Bonus Content MULTi13 From 7 6 GB DODI-Repack", "Red Dead Redemption Undead Nightmare")]
+        [TestCase("Hollow Knight Silksong v1.0.28324 MULTi10 DODI Repack", "Hollow Knight Silksong")]
+        [TestCase("Final Fantasy VII Rebirth Digital Deluxe Edition v1 0 0 0 All DLCs Bonus Content MULTi11 From 137 GB Fast Install DODI-Repack", "Final Fantasy VII Rebirth Digital Deluxe Edition")]
+        public void should_parse_dodi_repack_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real-world scene releases (CODEX, EMPRESS, RUNE, FLT, CPY)
+        [TestCase("Hogwarts Legacy Deluxe Edition EMPRESS", "Hogwarts Legacy Deluxe Edition")]
+        [TestCase("ELDEN RING Shadow of the Erdtree RUNE", "ELDEN RING Shadow of the Erdtree")]
+        [TestCase("God of War-FLT", "God of War")]
+        [TestCase("Starfield-RUNE", "Starfield")]
+        [TestCase("Death Stranding-CPY", "Death Stranding")]
+        [TestCase("Horizon Zero Dawn-CODEX", "Horizon Zero Dawn")]
+        [TestCase("Sekiro Shadows Die Twice-CODEX", "Sekiro Shadows Die Twice")]
+        [TestCase("DEATH STRANDING DIRECTORS CUT FLT", "DEATH STRANDING DIRECTORS CUT")]
+        [TestCase("Hollow Knight Silksong-FLT", "Hollow Knight Silksong")]
+        [TestCase("FINAL FANTASY VII REBIRTH FLT", "FINAL FANTASY VII REBIRTH")]
+        [TestCase("Hades II RUNE", "Hades II")]
+        [TestCase("God of War Ragnarok RUNE", "God of War Ragnarok")]
+        public void should_parse_scene_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real-world Russian repacker releases (xatab, R.G. Механики)
+        [TestCase("FIFA 17 Super Deluxe Edition 2016 PC RePack от xatab", "FIFA 17 Super Deluxe Edition")]
+        [TestCase("Resident Evil 7 Biohazard v 1.03u5 DLC 2017 PC RePack от xatab Gold Edition", "Resident Evil 7 Biohazard Gold Edition")]
+        [TestCase("Call of Duty WWII 2017 PC Rip от xatab", "Call of Duty WWII")]
+        [TestCase("Hollow Knight v 1.2.2.1 2 DLC 2017 PC RePack от xatab", "Hollow Knight")]
+        [TestCase("God of War v 1.0.8 1.0.447.8 2022 PC RePack от R.G. Механики", "God of War")]
+        [TestCase("Elden Ring Deluxe Edition v 1.02.3 DLC 2022 PC RePack от R.G. Механики", "Elden Ring Deluxe Edition")]
+        public void should_parse_russian_repacker_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real-world Switch emulator releases
+        [TestCase("Super Mario Galaxy Super Mario Galaxy 2 v1.2.0 5 Switch Emulators MULTi11 FitGirl Repack", "Super Mario Galaxy Super Mario Galaxy 2")]
+        [TestCase("Mario Luigi Brothership v1.0.0 Ryujinx Suyu Switch Emulators MULTi10 FitGirl Repack", "Mario Luigi Brothership")]
+        [TestCase("The Legend of Zelda Echoes of Wisdom v1 0 1 Ryujinx Suyu Switch Emulators MULTi12 FitGirl-Repack", "The Legend of Zelda Echoes of Wisdom")]
+        [TestCase("Nintendo Switch The Legend of Zelda Tears of the Kingdom NSP RUS Multi10", "The Legend of Zelda Tears of the Kingdom")]
+        [TestCase("Nintendo Switch Hollow Knight NSZ RUS Multi9", "Hollow Knight")]
+        [TestCase("Red Dead Redemption v1 0 1 Undead Nightmare DLC Bonus Content Switch Emulators MULT10 FitGirl Repack Selective Download from 7 6-GB", "Red Dead Redemption")]
+        public void should_parse_switch_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real-world GOG releases
+        [TestCase("DL Hollow Knight L RUS ENG 8 2017 Arcade 1.5.78.11833a 2 DLC GOG", "Hollow Knight")]
+        [TestCase("DL The Witcher 3 Wild Hunt Complete Edition L RUS ENG 14 RUS ENG 6 2015 RPG 4.04a redkit update 2 18 DLC GOG", "The Witcher 3 Wild Hunt Complete Edition")]
+        [TestCase("Cyberpunk 2077 GOG", "Cyberpunk 2077")]
+        [TestCase("Baldurs Gate 3 live v4 1 1 5932596 76418 win gog", "Baldurs Gate 3")]
+        public void should_parse_gog_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real-world update/patch releases
+        [TestCase("ELDEN RING Shadow of the Erdtree Update v1 16 1 RUNE", "ELDEN RING Shadow of the Erdtree")]
+        [TestCase("Baldurs Gate 3 Update v4 1 1 6848561 RUNE", "Baldurs Gate 3")]
+        [TestCase("Cyberpunk 2077 Update v2 3", "Cyberpunk 2077")]
+        [TestCase("Starfield Update v1 7 36 0", "Starfield")]
+        [TestCase("God of War Ragnarok Update v1 2", "God of War Ragnarok")]
+        [TestCase("Sekiro Shadows Die Twice Update v1 04-CODEX", "Sekiro Shadows Die Twice")]
+        [TestCase("Baldurs Gate 3 Language Pack v4 1 1 6072089 RUNE", "Baldurs Gate 3")]
+        public void should_parse_update_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Games with numbers in title
+        [TestCase("Baldurs Gate 3 v4.1.1.5009956-EMPRESS", "Baldurs Gate 3")]
+        [TestCase("Red Dead Redemption 2 Ultimate Edition v1491.50-FitGirl", "Red Dead Redemption 2 Ultimate Edition")]
+        [TestCase("FIFA 23 v 1.0.82.43747 2022 PC RePack-FitGirl", "FIFA 23")]
+        [TestCase("Resident Evil 2 Biohazard RE 2 Deluxe Edition v 20220613 DLCs 2019 PC RePack-FitGirl", "Resident Evil 2 Biohazard RE 2 Deluxe Edition")]
+        [TestCase("FINAL FANTASY I VI Bundle Pixel Remaster Bonus DLCs Font Fixes MULTi12 FitGirl Repack Selective Download from 1 3-GB", "FINAL FANTASY I VI Bundle Pixel Remaster")]
+        [TestCase("GTA 5 Grand Theft Auto V v 1.0.3725.0 1.72 Bonus 2015 PC RePack-FitGirl", "GTA 5 Grand Theft Auto V")]
+        [TestCase("Call of Duty Black Ops 6 Campaign r4v3n Vault Edition v111", "Call of Duty Black Ops 6 Campaign")]
+        public void should_parse_games_with_numbers_in_title(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Portable and P2P releases
+        [TestCase("DL Elden Ring P RUS ENG 12 ENG 2022 RPG 1.16.0 6 DLC Portable", "Elden Ring")]
+        [TestCase("ELDEN RING NIGHTREIGN RUNE PORTABLE", "ELDEN RING NIGHTREIGN")]
+        [TestCase("DL Starfield P ENG 8 ENG 2023 RPG 1.15.222.0 3 DLC Portable", "Starfield")]
+        [TestCase("Hogwarts Legacy Digital Deluxe Edition Build 10461750 All DLCs MULTi14 Portable", "Hogwarts Legacy Digital Deluxe Edition")]
+        public void should_parse_portable_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // ElAmigos releases
+        [TestCase("Hogwarts Legacy Deluxe Edition MULTi11 -ElAmigos", "Hogwarts Legacy Deluxe Edition")]
+        [TestCase("Cyberpunk 2077 MULTi19-ElAmigos", "Cyberpunk 2077")]
+        [TestCase("God of War 2022 MULTi19-ElAmigos", "God of War")]
+        public void should_parse_elamigos_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
     }
 }

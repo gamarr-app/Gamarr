@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Parser
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(QualityParser));
 
         // Scene groups - most common game scene release groups
-        private static readonly Regex SceneGroupRegex = new (@"\b(?<scene>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY)\b",
+        private static readonly Regex SceneGroupRegex = new (@"\b(?<scene>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Cracked indicators
@@ -98,7 +98,10 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled);
 
         // More comprehensive version regex for game releases
-        private static readonly Regex GameVersionRegex = new (@"[._\-\s]v?(?<version>\d+(?:\.\d+){1,3})[._\-\s]|[._\-\s](?:BUILD|B)[._\-]?(?<build>\d+)|[._\-\s](?:Update|Patch)[._\-\s]?(?<update>\d+(?:\.\d+)*)?",
+        // Handles both dot-separated (v1.2.3) and space-separated (v1 2 3) versions
+        // Space-separated limited to 4 components (major minor patch build)
+        // Update/Patch requires a version number (no trailing ? to avoid matching "Update" alone)
+        private static readonly Regex GameVersionRegex = new (@"[._\-\s]v?(?<version>\d+(?:\.\d+){1,3})[._\-\s]|[._\-\s]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?:\s|$)|[._\-\s](?:BUILD|B)[._\-]?(?<build>\d+)|[._\-\s](?:Update|Patch)[._\-\s]?(?<update>\d+(?:\.\d+)*)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -124,6 +127,19 @@ namespace NzbDrone.Core.Parser
                 if (GameVersion.TryParse(versionString, out var version))
                 {
                     Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            // Try space-separated version (v1 2 3 -> 1.2.3)
+            // Convert space-separated to dot-separated for parsing
+            if (match.Groups["spaceversion"].Success)
+            {
+                var versionString = match.Groups["spaceversion"].Value.Trim();
+                versionString = Regex.Replace(versionString, @"\s+", ".");
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from space-separated '{1}'", version, name);
                     return version;
                 }
             }

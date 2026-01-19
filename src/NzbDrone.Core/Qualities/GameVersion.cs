@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Qualities
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex BuildRegex = new Regex(
-            @"^(?:build|b)\.?(?<build>\d+)$",
+            @"^(?:build|b)[.\s]?(?<build>\d+)$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public GameVersion()

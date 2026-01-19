@@ -46,16 +46,19 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             get
             {
-                yield return GetDefinition("DOGnzb", GetSettings("https://api.dognzb.cr"));
-                yield return GetDefinition("DrunkenSlug", GetSettings("https://drunkenslug.com"));
-                yield return GetDefinition("Nzb.su", GetSettings("https://api.nzb.su"));
-                yield return GetDefinition("NZBCat", GetSettings("https://nzb.cat"));
-                yield return GetDefinition("NZBFinder.ws", GetSettings("https://nzbfinder.ws", categories: new[] { 2030, 2040, 2045, 2050, 2060, 2070 }));
-                yield return GetDefinition("NZBgeek", GetSettings("https://api.nzbgeek.info"));
-                yield return GetDefinition("nzbplanet.net", GetSettings("https://api.nzbplanet.net"));
-                yield return GetDefinition("SimplyNZBs", GetSettings("https://simplynzbs.com"));
-                yield return GetDefinition("Tabula Rasa", GetSettings("https://www.tabula-rasa.pw", apiPath: @"/api/v1/api"));
-                yield return GetDefinition("Usenet Crawler", GetSettings("https://www.usenet-crawler.com"));
+                // Game categories: 1000=Console, 4000=PC
+                var gameCategories = new[] { 1000, 4000 };
+
+                yield return GetDefinition("DOGnzb", GetSettings("https://api.dognzb.cr", categories: gameCategories));
+                yield return GetDefinition("DrunkenSlug", GetSettings("https://drunkenslug.com", categories: gameCategories));
+                yield return GetDefinition("Nzb.su", GetSettings("https://api.nzb.su", categories: gameCategories));
+                yield return GetDefinition("NZBCat", GetSettings("https://nzb.cat", categories: gameCategories));
+                yield return GetDefinition("NZBFinder.ws", GetSettings("https://nzbfinder.ws", categories: gameCategories));
+                yield return GetDefinition("NZBgeek", GetSettings("https://api.nzbgeek.info", categories: gameCategories));
+                yield return GetDefinition("nzbplanet.net", GetSettings("https://api.nzbplanet.net", categories: gameCategories));
+                yield return GetDefinition("SimplyNZBs", GetSettings("https://simplynzbs.com", categories: gameCategories));
+                yield return GetDefinition("Tabula Rasa", GetSettings("https://www.tabula-rasa.pw", apiPath: @"/api/v1/api", categories: gameCategories));
+                yield return GetDefinition("Usenet Crawler", GetSettings("https://www.usenet-crawler.com", categories: gameCategories));
             }
         }
 
