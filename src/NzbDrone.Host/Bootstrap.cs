@@ -22,8 +22,10 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Options;
+using NzbDrone.Common.Http.Dispatchers;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Datastore.Extensions;
+using NzbDrone.Core.Http;
 using NzbDrone.Core.MetadataSource;
 using PostgresOptions = NzbDrone.Core.Datastore.PostgresOptions;
 
@@ -92,6 +94,9 @@ namespace NzbDrone.Host
                                     .AddNzbDroneLogger()
                                     .AddDatabase()
                                     .AddStartupContext(startupContext);
+
+                                // Register MockHttpDispatcher to wrap ManagedHttpDispatcher for mock metadata support
+                                c.Register<IHttpDispatcher, MockHttpDispatcher>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
 
                                 // Register AggregateGameInfoProxy to use both RAWG and IGDB
                                 c.Register<ISearchForNewGame, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
@@ -168,6 +173,9 @@ namespace NzbDrone.Host
                         .AddNzbDroneLogger()
                         .AddDatabase()
                         .AddStartupContext(context);
+
+                    // Register MockHttpDispatcher to wrap ManagedHttpDispatcher for mock metadata support
+                    c.Register<IHttpDispatcher, MockHttpDispatcher>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
 
                     // Register AggregateGameInfoProxy to use both RAWG and IGDB
                     c.Register<ISearchForNewGame, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
