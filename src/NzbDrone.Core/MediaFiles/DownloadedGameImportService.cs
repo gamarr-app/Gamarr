@@ -32,6 +32,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly IImportApprovedGame _importApprovedGame;
         private readonly IDetectSample _detectSample;
+        private readonly IReleaseStructureValidator _releaseStructureValidator;
         private readonly IRuntimeInfo _runtimeInfo;
         private readonly IConfigService _config;
         private readonly IHistoryService _historyService;
@@ -44,6 +45,7 @@ namespace NzbDrone.Core.MediaFiles
                                                IMakeImportDecision importDecisionMaker,
                                                IImportApprovedGame importApprovedGame,
                                                IDetectSample detectSample,
+                                               IReleaseStructureValidator releaseStructureValidator,
                                                IRuntimeInfo runtimeInfo,
                                                IConfigService config,
                                                IHistoryService historyService,
@@ -56,6 +58,7 @@ namespace NzbDrone.Core.MediaFiles
             _importDecisionMaker = importDecisionMaker;
             _importApprovedGame = importApprovedGame;
             _detectSample = detectSample;
+            _releaseStructureValidator = releaseStructureValidator;
             _runtimeInfo = runtimeInfo;
             _config = config;
             _historyService = historyService;
@@ -197,6 +200,35 @@ namespace NzbDrone.Core.MediaFiles
             if (folderInfo != null)
             {
                 _logger.Debug("{0} folder quality: {1}", cleanedUpName, folderInfo.Quality);
+            }
+
+            // Validate release structure to detect potentially malicious releases
+            var releaseGroup = folderInfo?.ReleaseGroup;
+            var structureValidation = _releaseStructureValidator.ValidateReleaseStructure(directoryInfo.FullName, releaseGroup, cleanedUpName);
+
+            if (structureValidation.SuspiciousFiles.Any())
+            {
+                _logger.Warn("Suspicious files found in release '{0}': {1}", cleanedUpName, string.Join(", ", structureValidation.SuspiciousFiles));
+                return new List<ImportResult>
+                {
+                    RejectionResult(ImportRejectionReason.SuspiciousReleaseStructure,
+                        $"Caution: Found suspicious files that may be malware: {string.Join(", ", structureValidation.SuspiciousFiles.Take(3))}")
+                };
+            }
+
+            if (!structureValidation.IsValid && structureValidation.Confidence == ReleaseStructureConfidence.High)
+            {
+                _logger.Warn("Release structure mismatch for '{0}': {1}", cleanedUpName, structureValidation.Message);
+                return new List<ImportResult>
+                {
+                    RejectionResult(ImportRejectionReason.ReleaseGroupMismatch,
+                        $"Caution: {structureValidation.Message}")
+                };
+            }
+
+            if (structureValidation.DetectedGroup != null)
+            {
+                _logger.Debug("Release structure validated as {0}", structureValidation.DetectedGroup);
             }
 
             var videoFiles = _diskScanService.FilterPaths(directoryInfo.FullName, _diskScanService.GetVideoFiles(directoryInfo.FullName));
