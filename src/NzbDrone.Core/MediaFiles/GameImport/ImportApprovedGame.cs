@@ -89,7 +89,17 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     gameFile.DateAdded = DateTime.UtcNow;
                     gameFile.GameId = localGame.Game.Id;
                     gameFile.Path = localGame.Path.CleanFilePath();
-                    gameFile.Size = _diskProvider.GetFileSize(localGame.Path);
+
+                    // For games, the path may be a folder - calculate size accordingly
+                    if (_diskProvider.FolderExists(localGame.Path))
+                    {
+                        gameFile.Size = _diskProvider.GetFolderSize(localGame.Path);
+                    }
+                    else
+                    {
+                        gameFile.Size = _diskProvider.GetFileSize(localGame.Path);
+                    }
+
                     gameFile.Quality = localGame.Quality;
                     gameFile.Languages = localGame.Languages;
                     gameFile.MediaInfo = localGame.MediaInfo;

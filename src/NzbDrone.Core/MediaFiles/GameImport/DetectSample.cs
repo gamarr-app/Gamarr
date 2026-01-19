@@ -25,6 +25,13 @@ namespace NzbDrone.Core.MediaFiles.GameImport
 
         public DetectSampleResult IsSample(GameMetadata game, string path)
         {
+            // Folders (game directories) are never samples
+            if (Directory.Exists(path))
+            {
+                _logger.Debug("Skipping sample check for directory: {0}", path);
+                return DetectSampleResult.NotSample;
+            }
+
             var extension = Path.GetExtension(path);
 
             if (extension != null)

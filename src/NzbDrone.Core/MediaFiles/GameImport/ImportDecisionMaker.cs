@@ -121,7 +121,16 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                 var fileGameInfo = Parser.Parser.ParseGamePath(localGame.Path);
 
                 localGame.FileGameInfo = fileGameInfo;
-                localGame.Size = _diskProvider.GetFileSize(localGame.Path);
+
+                // Handle both files and folders (games are typically folders)
+                if (_diskProvider.FolderExists(localGame.Path))
+                {
+                    localGame.Size = _diskProvider.GetFolderSize(localGame.Path);
+                }
+                else
+                {
+                    localGame.Size = _diskProvider.GetFileSize(localGame.Path);
+                }
 
                 _aggregationService.Augment(localGame, downloadClientItem);
 

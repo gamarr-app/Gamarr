@@ -40,7 +40,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
 
         public LocalGame Augment(LocalGame localGame, DownloadClientItem downloadClientItem)
         {
-            var isMediaFile = MediaFileExtensions.Extensions.Contains(Path.GetExtension(localGame.Path));
+            var isFolder = _diskProvider.FolderExists(localGame.Path);
+            var isMediaFile = !isFolder && MediaFileExtensions.Extensions.Contains(Path.GetExtension(localGame.Path));
 
             if (localGame.DownloadClientGameInfo == null &&
                 localGame.FolderGameInfo == null &&
@@ -52,10 +53,20 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
                 }
             }
 
-            localGame.Size = _diskProvider.GetFileSize(localGame.Path);
+            // Handle folder size for game folders
+            if (isFolder)
+            {
+                localGame.Size = _diskProvider.GetFolderSize(localGame.Path);
+            }
+            else
+            {
+                localGame.Size = _diskProvider.GetFileSize(localGame.Path);
+            }
+
             localGame.SceneName = localGame.SceneSource ? SceneNameCalculator.GetSceneName(localGame) : null;
 
-            if (isMediaFile && (!localGame.ExistingFile || _configService.EnableMediaInfo))
+            // Skip media info for folders - games don't have video media info
+            if (!isFolder && isMediaFile && (!localGame.ExistingFile || _configService.EnableMediaInfo))
             {
                 localGame.MediaInfo = _videoFileInfoReader.GetMediaInfo(localGame.Path);
             }
