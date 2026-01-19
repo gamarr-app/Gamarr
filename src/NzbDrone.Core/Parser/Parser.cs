@@ -34,6 +34,10 @@ namespace NzbDrone.Core.Parser
             // Game release with parenthesized version: "Hades II (v2025.06.18)" or "Game (v1.2.3)"
             new Regex(@"^(?<title>(?![(\[]).+?)\s*\(v(?<version>\d+(?:\.\d+)+)\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // r4v3n release group format: "Game Title r4v3n Edition v123"
+            // r4v3n is a scene-style group, title stops at "r4v3n"
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+(?<releasegroup>r4v3n)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Update/Patch/Language Pack releases: "Game Update v1.2-CODEX" or "Game Language Pack RUNE"
             // Title stops at Update/Patch/Language Pack keywords, but not if version info comes before
             // Negative lookahead ensures we don't capture title with version info before "Patch"
@@ -52,7 +56,8 @@ namespace NzbDrone.Core.Parser
 
             // Russian repacker format: "Game Name 2016 PC RePack от xatab" or "Game Name v1.0 2022 PC RePack от R.G. Механики"
             // Title stops at version indicator (v followed by digits) or year before PC
-            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+v\s*\d|\s+(19|20)\d{2}\s+PC)(?:\s+v[\s\d.]+[a-z]*(?:\s+\d+\s+DLCs?)?)?(?:\s+(?<year>(19|20)\d{2}))?\s+PC\s+(?:RePack|Rip)\s+(?:от|by|from)\s+(?:xatab|R\.?G\.?\s*(?:Механики|Механіки|Mechanics|Catalyst|Freedom|SteamGames)?|FitGirl|DODI|Chovka|Decepticon|Wanterlude|Let.?sPlay)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Version pattern handles formats like "v 1.03u5" (letter+digit suffixes), DLC with or without count
+            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+v\s*\d|\s+(19|20)\d{2}\s+PC)(?:\s+v[\s\d.]+(?:[a-z]+\d*)*(?:\s+(?:\d+\s+)?DLCs?)?)?(?:\s+(?<year>(19|20)\d{2}))?\s+PC\s+(?:RePack|Rip)\s+(?:от|by|from)\s+(?:xatab|R\.?G\.?\s*(?:Механики|Механіки|Mechanics|Catalyst|Freedom|SteamGames)?|FitGirl|DODI|Chovka|Decepticon|Wanterlude|Let.?sPlay)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Switch emulator format: "Nintendo Switch Game Name NSP/NSZ RUS Multi10" or "Game Name Switch Emulators"
             // Stop title at version number (v1 or similar) or at Switch marker if no version
@@ -88,6 +93,10 @@ namespace NzbDrone.Core.Parser
             // FitGirl/repacker format with space-separated version: "Title v1 0 1 Day 1 Patch ... FitGirl Repack"
             // Title stops at first "v" followed by digit
             new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+v\d).*?FitGirl\s+(?:Monkey\s+)?Repack", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // FitGirl/repacker format with Bonus metadata: "Title Bonus DLCs ... MULTi## FitGirl Repack"
+            // Title stops at "Bonus" when followed by DLCs/Content and repacker
+            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+Bonus\s+(?:DLCs?|Content)).*?(?:FitGirl|DODI)[-_. ]?Repack", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // ElAmigos/repacker format with year: "Title YEAR MULTi##-ElAmigos"
             // Strip realistic years (1980-2049) before MULTi but keep fictional years (2050+) like "Cyberpunk 2077"
@@ -371,7 +380,40 @@ namespace NzbDrone.Core.Parser
 
                                 Logger.Debug("Release Group parsed: {0}", result.ReleaseGroup);
 
-                                result.Languages = LanguageParser.ParseLanguages(result.ReleaseGroup.IsNotNullOrWhiteSpace() ? simpleReleaseTitle.Replace(result.ReleaseGroup, "RlsGrp") : simpleReleaseTitle);
+                                // Use simpleReleaseTitle (with title replaced by "A Game") to avoid false positives from language words in titles (e.g. "The Italian Job")
+                                // But also check original releaseTitle for specific language markers unlikely to be in titles (HebDubbed, UKR)
+                                var langTitle = result.ReleaseGroup.IsNotNullOrWhiteSpace() ? simpleReleaseTitle.Replace(result.ReleaseGroup, "RlsGrp") : simpleReleaseTitle;
+                                result.Languages = LanguageParser.ParseLanguages(langTitle);
+
+                                // Check for specific language markers in the full release title that might have been stripped
+                                // Hebrew (HebDubbed) and Ukrainian (UKR) use specific markers unlikely to be in game titles
+                                var fullTitle = result.ReleaseGroup.IsNotNullOrWhiteSpace() ? releaseTitle.Replace(result.ReleaseGroup, "RlsGrp") : releaseTitle;
+                                var additionalLangs = LanguageParser.ParseLanguages(fullTitle);
+
+                                // Add Hebrew/Ukrainian from the full title if not already detected
+                                var specificLangs = additionalLangs.Where(l =>
+                                    l == Languages.Language.Hebrew ||
+                                    l == Languages.Language.Ukrainian).ToList();
+                                if (specificLangs.Any())
+                                {
+                                    // If current result is just Unknown, replace with specific langs
+                                    // Otherwise, add any missing specific langs to the result
+                                    if (result.Languages.Count == 1 && result.Languages[0] == Languages.Language.Unknown)
+                                    {
+                                        result.Languages = specificLangs;
+                                    }
+                                    else
+                                    {
+                                        foreach (var lang in specificLangs)
+                                        {
+                                            if (!result.Languages.Contains(lang))
+                                            {
+                                                result.Languages.Add(lang);
+                                            }
+                                        }
+                                    }
+                                }
+
                                 Logger.Debug("Languages parsed: {0}", string.Join(", ", result.Languages));
 
                                 result.Quality = QualityParser.ParseQuality(title);

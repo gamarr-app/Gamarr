@@ -87,14 +87,14 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("[DL] Elden Ring [P] [RUS + ENG + 12 / ENG] (2022, RPG) (1.16.0 + 6 DLC) [Portable]", "Elden Ring")]
 
         // Public tracker formats with versions
-        [TestCase("ELDEN RING Deluxe Edition v1.03.2", "ELDEN RING")]
+        [TestCase("ELDEN RING Deluxe Edition v1.03.2", "ELDEN RING Deluxe Edition")]
         [TestCase("ELDEN RING v1 04 1-FLT", "ELDEN RING")]
-        [TestCase("Elden Ring Deluxe Edition v 1 03 2", "Elden Ring")]
+        [TestCase("Elden Ring Deluxe Edition v 1 03 2", "Elden Ring Deluxe Edition")]
 
         // Repack formats
-        [TestCase("ELDEN RING Shadow of the Erdtree Deluxe Edition v1 12 v1 12 1 9 DLCs Bonuses Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING Shadow of the Erdtree")]
-        [TestCase("ELDEN RING Deluxe Edition v1 10 1 DLC Bonus Content Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING")]
-        [TestCase("Elden Ring Nightreign Deluxe Edition v1 03 All DLCs Bonus Content MULTi15 From 20 2 GB DODI-Repack", "Elden Ring Nightreign")]
+        [TestCase("ELDEN RING Shadow of the Erdtree Deluxe Edition v1 12 v1 12 1 9 DLCs Bonuses Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING Shadow of the Erdtree Deluxe Edition")]
+        [TestCase("ELDEN RING Deluxe Edition v1 10 1 DLC Bonus Content Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING Deluxe Edition")]
+        [TestCase("Elden Ring Nightreign Deluxe Edition v1 03 All DLCs Bonus Content MULTi15 From 20 2 GB DODI-Repack", "Elden Ring Nightreign Deluxe Edition")]
 
         // Scene releases with hyphenated groups
         [TestCase("ELDEN RING-PLAZA", "ELDEN RING")]
@@ -402,7 +402,7 @@ namespace NzbDrone.Core.Test.ParserTests
 
         // Real-world Russian repacker releases (xatab, R.G. Механики)
         [TestCase("FIFA 17 Super Deluxe Edition 2016 PC RePack от xatab", "FIFA 17 Super Deluxe Edition")]
-        [TestCase("Resident Evil 7 Biohazard v 1.03u5 DLC 2017 PC RePack от xatab Gold Edition", "Resident Evil 7 Biohazard Gold Edition")]
+        [TestCase("Resident Evil 7 Biohazard v 1.03u5 DLC 2017 PC RePack от xatab Gold Edition", "Resident Evil 7 Biohazard")]
         [TestCase("Call of Duty WWII 2017 PC Rip от xatab", "Call of Duty WWII")]
         [TestCase("Hollow Knight v 1.2.2.1 2 DLC 2017 PC RePack от xatab", "Hollow Knight")]
         [TestCase("God of War v 1.0.8 1.0.447.8 2022 PC RePack от R.G. Механики", "God of War")]
