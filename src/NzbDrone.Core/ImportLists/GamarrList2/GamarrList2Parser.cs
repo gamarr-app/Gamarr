@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.ImportLists.Exceptions;
 using NzbDrone.Core.ImportLists.ImportListGames;
-using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 
 namespace NzbDrone.Core.ImportLists.GamarrList2
 {
@@ -21,7 +20,7 @@ namespace NzbDrone.Core.ImportLists.GamarrList2
                 return games;
             }
 
-            var jsonResponse = JsonConvert.DeserializeObject<List<GameResource>>(importResponse.Content);
+            var jsonResponse = JsonConvert.DeserializeObject<List<GamarrList2Resource>>(importResponse.Content);
 
             // no games were return
             if (jsonResponse == null)

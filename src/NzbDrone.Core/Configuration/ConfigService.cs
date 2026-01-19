@@ -9,11 +9,8 @@ using NzbDrone.Core.Configuration.Events;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Security;
-
-#pragma warning disable CS0618 // Disable obsolete warnings for TMDbCountryCode (using for backward compatibility)
 
 namespace NzbDrone.Core.Configuration
 {
@@ -130,9 +127,9 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("ImportExclusions", value); }
         }
 
-        public TMDbCountryCode CertificationCountry
+        public CountryCode CertificationCountry
         {
-            get { return GetValueEnum("CertificationCountry", TMDbCountryCode.US); }
+            get { return GetValueEnum("CertificationCountry", CountryCode.US); }
 
             set { SetValue("CertificationCountry", value); }
         }
