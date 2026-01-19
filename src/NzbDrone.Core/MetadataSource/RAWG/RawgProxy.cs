@@ -266,14 +266,14 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             {
                 game.Images.Add(new MediaCover.MediaCover
                 {
-                    Url = resource.Background_Image,
+                    RemoteUrl = resource.Background_Image,
                     CoverType = MediaCoverTypes.Fanart
                 });
 
                 // Also use as poster if no other poster available
                 game.Images.Add(new MediaCover.MediaCover
                 {
-                    Url = resource.Background_Image,
+                    RemoteUrl = resource.Background_Image,
                     CoverType = MediaCoverTypes.Poster
                 });
             }
@@ -285,7 +285,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 {
                     game.Images.Add(new MediaCover.MediaCover
                     {
-                        Url = screenshot.Image,
+                        RemoteUrl = screenshot.Image,
                         CoverType = MediaCoverTypes.Screenshot
                     });
                 }
@@ -337,7 +337,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 {
                     new MediaCover.MediaCover
                     {
-                        Url = resource.Background_Image,
+                        RemoteUrl = resource.Background_Image,
                         CoverType = MediaCoverTypes.Poster
                     }
                 };

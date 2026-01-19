@@ -33,7 +33,7 @@ function IgdbRating(props: IgdbRatingProps) {
               }}
             />
           )}
-          {(value * 10).toFixed()}%
+          {value.toFixed()}%
         </span>
       }
       tooltip={translate('CountVotes', { votes })}
