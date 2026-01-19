@@ -59,6 +59,10 @@ namespace NzbDrone.Core.Parser
             // As a last resort for games that have ( or [ in their title.
             new Regex(@"^(?<title>.+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|\d+|\]|\W\d+)))+(\W+|_|$)(?!\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
+            // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
+            new Regex(@"^\[(?:DL|UL|SP)\]\s*(?<title>[^\[\]]+?)\s*(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Game releases without year - match title up to release group or version terminator
             // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, PROPHET, TiNYiSO, RUNE, etc.
             // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
