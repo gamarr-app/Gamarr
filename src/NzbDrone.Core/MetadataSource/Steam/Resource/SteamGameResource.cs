@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace NzbDrone.Core.MetadataSource.Steam.Resource
 {
@@ -140,14 +141,35 @@ namespace NzbDrone.Core.MetadataSource.Steam.Resource
 
     public class SteamSearchItem
     {
+        [JsonProperty("id")]
         public int Id { get; set; }
+
+        [JsonProperty("type")]
         public string Type { get; set; }
+
+        [JsonProperty("name")]
         public string Name { get; set; }
-        public bool Controllersuport { get; set; }
+
+        [JsonProperty("controllersupport")]
+        public bool ControllerSupport { get; set; }
+
+        [JsonProperty("price")]
         public SteamSearchPrice Price { get; set; }
-        public string Tiny_Image { get; set; }
-        public string Small_Capsule_Image { get; set; }
-        public string Large_Capsule_Image { get; set; }
+
+        [JsonProperty("tiny_image")]
+        public string TinyImage { get; set; }
+
+        [JsonProperty("small_capsule_image")]
+        public string SmallCapsuleImage { get; set; }
+
+        [JsonProperty("large_capsule_image")]
+        public string LargeCapsuleImage { get; set; }
+
+        [JsonProperty("metascore")]
+        public string Metascore { get; set; }
+
+        [JsonProperty("platforms")]
+        public SteamPlatforms Platforms { get; set; }
     }
 
     public class SteamSearchPrice

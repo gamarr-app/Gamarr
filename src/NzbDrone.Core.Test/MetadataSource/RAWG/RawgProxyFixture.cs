@@ -1,6 +1,5 @@
 using System;
 using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;

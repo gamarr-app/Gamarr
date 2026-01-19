@@ -113,7 +113,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 }
 
                 return response.Resource.Items
-                    .Where(item => item.Type == "game")
+                    .Where(item => item.Type == "app" || item.Type == "game")
                     .Take(limit)
                     .Select(MapSearchResult)
                     .Where(g => g != null)
@@ -199,40 +199,24 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
             if (!string.IsNullOrEmpty(data.Header_Image))
             {
-                game.Images.Add(new MediaCover.MediaCover
-                {
-                    Url = data.Header_Image,
-                    CoverType = MediaCoverTypes.Poster
-                });
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Header_Image));
             }
 
             if (!string.IsNullOrEmpty(data.Capsule_Imagev5))
             {
-                game.Images.Add(new MediaCover.MediaCover
-                {
-                    Url = data.Capsule_Imagev5,
-                    CoverType = MediaCoverTypes.Poster
-                });
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Capsule_Imagev5));
             }
 
             if (!string.IsNullOrEmpty(data.Background_Raw ?? data.Background))
             {
-                game.Images.Add(new MediaCover.MediaCover
-                {
-                    Url = data.Background_Raw ?? data.Background,
-                    CoverType = MediaCoverTypes.Fanart
-                });
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, data.Background_Raw ?? data.Background));
             }
 
             if (data.Screenshots != null)
             {
                 foreach (var screenshot in data.Screenshots.Take(5))
                 {
-                    game.Images.Add(new MediaCover.MediaCover
-                    {
-                        Url = screenshot.Path_Full,
-                        CoverType = MediaCoverTypes.Screenshot
-                    });
+                    game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Screenshot, screenshot.Path_Full));
                 }
             }
 
@@ -253,17 +237,26 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 CleanTitle = item.Name.CleanGameTitle(),
                 SortTitle = GameTitleNormalizer.Normalize(item.Name, item.Id),
                 Status = GameStatusType.Released,
-                Images = new List<MediaCover.MediaCover>()
+                Images = new List<MediaCover.MediaCover>(),
+                Ratings = new Ratings(),
+                Platforms = MapPlatforms(item.Platforms)
             };
 
-            var imageUrl = item.Large_Capsule_Image ?? item.Small_Capsule_Image ?? item.Tiny_Image;
+            // Add image from search result
+            var imageUrl = item.LargeCapsuleImage ?? item.SmallCapsuleImage ?? item.TinyImage;
             if (!string.IsNullOrEmpty(imageUrl))
             {
-                game.Images.Add(new MediaCover.MediaCover
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, imageUrl));
+            }
+
+            // Add Metacritic rating if available
+            if (!string.IsNullOrEmpty(item.Metascore) && int.TryParse(item.Metascore, out var metascore) && metascore > 0)
+            {
+                game.Ratings.Metacritic = new RatingChild
                 {
-                    Url = imageUrl,
-                    CoverType = MediaCoverTypes.Poster
-                });
+                    Value = metascore,
+                    Type = RatingType.Critic
+                };
             }
 
             return game;

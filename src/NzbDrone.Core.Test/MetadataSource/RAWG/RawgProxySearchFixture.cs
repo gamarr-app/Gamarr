@@ -1,6 +1,5 @@
 using System;
 using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MetadataSource.RAWG;
@@ -76,7 +75,7 @@ namespace NzbDrone.Core.Test.MetadataSource.RAWG
 
             result.Should().NotBeEmpty();
             result[0].GameMetadata.Should().NotBeNull();
-            result[0].GameMetadata.Images.Should().NotBeEmpty();
+            result[0].GameMetadata.Value.Images.Should().NotBeEmpty();
 
             ExceptionVerification.IgnoreWarns();
         }
@@ -88,7 +87,7 @@ namespace NzbDrone.Core.Test.MetadataSource.RAWG
 
             result.Should().NotBeEmpty();
             result[0].GameMetadata.Should().NotBeNull();
-            result[0].GameMetadata.Platforms.Should().NotBeEmpty();
+            result[0].GameMetadata.Value.Platforms.Should().NotBeEmpty();
 
             ExceptionVerification.IgnoreWarns();
         }
