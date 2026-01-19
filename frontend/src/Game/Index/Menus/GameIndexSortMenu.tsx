@@ -119,30 +119,12 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="imdbRating"
+          name="metacriticRating"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('ImdbRating')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="rottenTomatoesRating"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('RottenTomatoesRating')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="traktRating"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('TraktRating')}
+          {translate('MetacriticRating')}
         </SortMenuItem>
 
         <SortMenuItem

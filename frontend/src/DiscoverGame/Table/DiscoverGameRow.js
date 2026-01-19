@@ -2,16 +2,14 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import ImportListList from 'Components/ImportListList';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
+import MetacriticRating from 'Components/MetacriticRating';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import Popover from 'Components/Tooltip/Popover';
-import TraktRating from 'Components/TraktRating';
 import AddNewDiscoverGameModal from 'DiscoverGame/AddNewDiscoverGameModal';
 import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
@@ -278,35 +276,13 @@ class DiscoverGameRow extends Component {
               );
             }
 
-            if (name === 'imdbRating') {
+            if (name === 'metacriticRating') {
               return (
                 <VirtualTableRowCell
                   key={name}
                   className={styles[name]}
                 >
-                  {ratings.imdb ? <ImdbRating ratings={ratings} /> : null}
-                </VirtualTableRowCell>
-              );
-            }
-
-            if (name === 'rottenTomatoesRating') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {ratings.rottenTomatoes ? <RottenTomatoRating ratings={ratings} /> : null}
-                </VirtualTableRowCell>
-              );
-            }
-
-            if (name === 'traktRating') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {ratings.trakt ? <TraktRating ratings={ratings} /> : null}
+                  {ratings.metacritic ? <MetacriticRating ratings={ratings} /> : null}
                 </VirtualTableRowCell>
               );
             }

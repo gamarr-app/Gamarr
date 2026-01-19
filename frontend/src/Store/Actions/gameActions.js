@@ -176,42 +176,10 @@ export const filterPredicates = {
     return predicate(rating, filterValue);
   },
 
-  imdbRating: function({ ratings = {} }, filterValue, type) {
+  metacriticRating: function({ ratings = {} }, filterValue, type) {
     const predicate = filterTypePredicates[type];
 
-    const rating = ratings.imdb ? ratings.imdb.value : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  imdbVotes: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.imdb ? ratings.imdb.votes : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  rottenTomatoesRating: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.rottenTomatoes ? ratings.rottenTomatoes.value : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  traktRating: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.trakt ? ratings.trakt.value : 0;
-
-    return predicate(rating * 10, filterValue);
-  },
-
-  traktVotes: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.trakt ? ratings.trakt.votes : 0;
+    const rating = ratings.metacritic ? ratings.metacritic.value : 0;
 
     return predicate(rating, filterValue);
   },

@@ -25,9 +25,7 @@ export interface GameIndexAppState {
     showPhysicalRelease: boolean;
     showReleaseDate: boolean;
     showIgdbRating: boolean;
-    showImdbRating: boolean;
-    showRottenTomatoesRating: boolean;
-    showTraktRating: boolean;
+    showMetacriticRating: boolean;
     showTags: boolean;
     showSearchAction: boolean;
   };

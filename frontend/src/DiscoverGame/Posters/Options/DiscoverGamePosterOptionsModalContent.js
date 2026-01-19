@@ -46,9 +46,7 @@ class DiscoverGamePosterOptionsModalContent extends Component {
       size: props.size,
       showTitle: props.showTitle,
       showIgdbRating: props.showIgdbRating,
-      showImdbRating: props.showImdbRating,
-      showRottenTomatoesRating: props.showRottenTomatoesRating,
-      showTraktRating: props.showTraktRating,
+      showMetacriticRating: props.showMetacriticRating,
       includeRecommendations: props.includeRecommendations,
       includeTrending: props.includeTrending,
       includePopular: props.includePopular
@@ -60,9 +58,7 @@ class DiscoverGamePosterOptionsModalContent extends Component {
       size,
       showTitle,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating,
+      showMetacriticRating,
       includeRecommendations,
       includeTrending,
       includePopular
@@ -82,16 +78,8 @@ class DiscoverGamePosterOptionsModalContent extends Component {
       state.showIgdbRating = showIgdbRating;
     }
 
-    if (showImdbRating !== prevProps.showImdbRating) {
-      state.showImdbRating = showImdbRating;
-    }
-
-    if (showRottenTomatoesRating !== prevProps.showRottenTomatoesRating) {
-      state.showRottenTomatoesRating = showRottenTomatoesRating;
-    }
-
-    if (showTraktRating !== prevProps.showTraktRating) {
-      state.showTraktRating = showTraktRating;
+    if (showMetacriticRating !== prevProps.showMetacriticRating) {
+      state.showMetacriticRating = showMetacriticRating;
     }
 
     if (includeRecommendations !== prevProps.includeRecommendations) {
@@ -144,9 +132,7 @@ class DiscoverGamePosterOptionsModalContent extends Component {
       size,
       showTitle,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating,
+      showMetacriticRating,
       includeRecommendations,
       includeTrending,
       includePopular
@@ -233,37 +219,13 @@ class DiscoverGamePosterOptionsModalContent extends Component {
             </FormGroup>
 
             <FormGroup>
-              <FormLabel>{translate('ShowImdbRating')}</FormLabel>
+              <FormLabel>{translate('ShowMetacriticRating')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.CHECK}
-                name="showImdbRating"
-                value={showImdbRating}
-                helpText={translate('ShowImdbRatingHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowRottenTomatoesRating')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showRottenTomatoesRating"
-                value={showRottenTomatoesRating}
-                helpText={translate('ShowRottenTomatoesRatingHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowTraktRating')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showTraktRating"
-                value={showTraktRating}
-                helpText={translate('ShowTraktRatingPosterHelpText')}
+                name="showMetacriticRating"
+                value={showMetacriticRating}
+                helpText={translate('ShowMetacriticRatingHelpText')}
                 onChange={this.onChangePosterOption}
               />
             </FormGroup>
@@ -286,9 +248,7 @@ DiscoverGamePosterOptionsModalContent.propTypes = {
   size: PropTypes.string.isRequired,
   showTitle: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showTraktRating: PropTypes.bool.isRequired,
+  showMetacriticRating: PropTypes.bool.isRequired,
   includeRecommendations: PropTypes.bool.isRequired,
   includeTrending: PropTypes.bool.isRequired,
   includePopular: PropTypes.bool.isRequired,
