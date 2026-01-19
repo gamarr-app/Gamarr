@@ -26,7 +26,6 @@ namespace NzbDrone.Core.Parser.Model
         public int IndexerPriority { get; set; }
         public DownloadProtocol DownloadProtocol { get; set; }
         public int IgdbId { get; set; }
-        public int ImdbId { get; set; }
         public DateTime PublishDate { get; set; }
 
         public string Origin { get; set; }
@@ -91,7 +90,6 @@ namespace NzbDrone.Core.Parser.Model
                     stringBuilder.AppendLine("CommentUrl: " + CommentUrl ?? "Empty");
                     stringBuilder.AppendLine("DownloadProtocol: " + DownloadProtocol ?? "Empty");
                     stringBuilder.AppendLine("IgdbId: " + IgdbId ?? "Empty");
-                    stringBuilder.AppendLine("ImdbId: " + ImdbId ?? "Empty");
                     stringBuilder.AppendLine("PublishDate: " + PublishDate ?? "Empty");
                     return stringBuilder.ToString();
                 default:

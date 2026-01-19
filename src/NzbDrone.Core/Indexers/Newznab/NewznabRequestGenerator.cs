@@ -5,8 +5,6 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.IndexerSearch.Definitions;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for SupportsImdbSearch property
-
 namespace NzbDrone.Core.Indexers.Newznab
 {
     public class NewznabRequestGenerator : IIndexerRequestGenerator
@@ -32,21 +30,6 @@ namespace NzbDrone.Core.Indexers.Newznab
 
                 return capabilities.SupportedSearchParameters != null &&
                        capabilities.SupportedSearchParameters.Contains("q");
-            }
-        }
-
-        /// <summary>
-        /// DEPRECATED: IMDb search is not applicable for games - IMDb is a movie database.
-        /// This property is kept for backwards compatibility but will always return false.
-        /// Use SupportsIgdbSearch instead.
-        /// </summary>
-        [Obsolete("IMDb search is not applicable for games. Use IGDB search instead.")]
-        private bool SupportsImdbSearch
-        {
-            get
-            {
-                // IMDb search disabled for games - IMDb is a movie database
-                return false;
             }
         }
 

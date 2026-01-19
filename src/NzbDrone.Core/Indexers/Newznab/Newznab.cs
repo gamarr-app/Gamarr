@@ -142,7 +142,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                 }
 
                 if (capabilities.SupportedGameSearchParameters != null &&
-                    new[] { "q", "igdbid", "imdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
+                    new[] { "q", "igdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
                 {
                     return null;
                 }

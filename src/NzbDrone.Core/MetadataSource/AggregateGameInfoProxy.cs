@@ -167,13 +167,6 @@ namespace NzbDrone.Core.MetadataSource
             return null;
         }
 
-        public GameMetadata GetGameByImdbId(string imdbId)
-        {
-            // IMDb is not applicable to games
-            _logger.Warn("IMDb lookup is not applicable to games. Use Steam App ID or IGDB ID instead.");
-            return null;
-        }
-
         public GameCollection GetCollectionInfo(int collectionId)
         {
             // RAWG doesn't have collection support, try IGDB

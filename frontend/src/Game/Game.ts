@@ -54,7 +54,6 @@ export interface GameAddOptions {
 
 interface Game extends ModelBase {
   igdbId: number;
-  imdbId?: string;
   sortTitle: string;
   overview: string;
   youTubeTrailerId?: string;

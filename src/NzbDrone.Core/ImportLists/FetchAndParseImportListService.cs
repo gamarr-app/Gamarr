@@ -131,7 +131,7 @@ namespace NzbDrone.Core.ImportLists
 
             Task.WaitAll(taskList.ToArray());
 
-            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.ImdbId, r.Title }).ToList();
+            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.Title }).ToList();
 
             _logger.Debug("Found {0} total reports from {1} lists", result.Games.Count, result.SyncedLists);
 
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.ImportLists
                 _logger.Error(e, "Error during Import List Sync of {0} ({1})", importList.Name, importListLocal.Definition.Name);
             }
 
-            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.ImdbId, r.Title }).ToList();
+            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.Title }).ToList();
 
             _logger.Debug("Found {0} games from {1} ({2})", result.Games.Count, importList.Name, importListLocal.Definition.Name);
 
@@ -192,7 +192,7 @@ namespace NzbDrone.Core.ImportLists
 
         private List<ImportListGame> MapGameReports(IEnumerable<ImportListGame> reports)
         {
-            var mappedGames = reports.Select(m => _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = m.Title, IgdbId = m.IgdbId, ImdbId = m.ImdbId, Year = m.Year }))
+            var mappedGames = reports.Select(m => _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = m.Title, IgdbId = m.IgdbId, Year = m.Year }))
                 .Where(x => x != null)
                 .DistinctBy(x => x.IgdbId)
                 .ToList();

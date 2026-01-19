@@ -513,7 +513,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const {
     id,
     igdbId,
-    imdbId,
     title,
     originalTitle,
     year,
@@ -734,7 +733,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       tooltip={
                         <GameDetailsLinks
                           igdbId={igdbId}
-                          imdbId={imdbId}
                           youTubeTrailerId={youTubeTrailerId}
                         />
                       }

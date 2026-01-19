@@ -93,24 +93,6 @@ namespace Gamarr.Api.V3.Games
             return result.ToResource(availDelay, translation);
         }
 
-        [HttpGet("imdb")]
-        [Produces("application/json")]
-        [Obsolete("IMDb lookup is not applicable to games")]
-        public GameResource SearchByImdbId(string imdbId)
-        {
-            var availDelay = _configService.AvailabilityDelay;
-            var metadata = _gameInfo.GetGameByImdbId(imdbId);
-
-            if (metadata == null)
-            {
-                return null;
-            }
-
-            var result = new Game { GameMetadata = metadata };
-            var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
-            return result.ToResource(availDelay, translation);
-        }
-
         [HttpGet]
         [Produces("application/json")]
         public IEnumerable<GameResource> Search([FromQuery] string term)

@@ -20,8 +20,6 @@ using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Tags;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with metadata)
-
 namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 {
     public class XbmcMetadata : MetadataBase<XbmcMetadataSettings>
@@ -248,13 +246,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 uniqueId.SetAttributeValue("type", "igdb");
                 uniqueId.SetAttributeValue("default", true);
                 details.Add(uniqueId);
-
-                if (game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
-                {
-                    var imdbId = new XElement("uniqueid", game.GameMetadata.Value.ImdbId);
-                    imdbId.SetAttributeValue("type", "imdb");
-                    details.Add(imdbId);
-                }
 
                 foreach (var genre in game.GameMetadata.Value.Genres)
                 {

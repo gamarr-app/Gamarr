@@ -22,7 +22,6 @@ namespace NzbDrone.Core.Parser.Model
         public string ReleaseHash { get; set; }
         public string Edition { get; set; }
         public int Year { get; set; }
-        public string ImdbId { get; set; }
         public int IgdbId { get; set; }
         public string HardcodedSubs { get; set; }
 

@@ -9,8 +9,6 @@ using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for IMDb parsing methods
-
 namespace NzbDrone.Core.Parser
 {
     public static class Parser
@@ -111,7 +109,6 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex NormalizeRegex = new Regex(@"((?:\b|_)(?<!^|[^a-zA-Z0-9_']\w[^a-zA-Z0-9_'])([aà](?!$|[^a-zA-Z0-9_']\w[^a-zA-Z0-9_'])|an|the|and|or|of)(?!$)(?:\b|_))|\W|_",
                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex ReportImdbId = new Regex(@"(?<imdbid>tt\d{7,8})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ReportIgdbId = new Regex(@"igdb(id)?-(?<igdbid>\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly RegexReplace SimpleTitleRegex = new RegexReplace(@"(?:(480|540|576|720|1080|2160)[ip]|[xh][\W_]?26[45]|DD\W?5\W1|[<>?*]|848x480|1280x720|1920x1080|3840x2160|4096x2160|(8|10)b(it)?|10-bit)\s*?(?![a-b0-9])",
@@ -296,7 +293,6 @@ namespace NzbDrone.Core.Parser
                                 result.ReleaseTitle = releaseTitle;
                                 result.SimpleReleaseTitle = simpleReleaseTitle;
 
-                                result.ImdbId = ParseImdbId(simpleReleaseTitle);
                                 result.IgdbId = ParseIgdbId(simpleReleaseTitle);
 
                                 return result;
@@ -320,19 +316,6 @@ namespace NzbDrone.Core.Parser
 
             Logger.Debug("Unable to parse {0}", title);
             return null;
-        }
-
-        /// <summary>
-        /// DEPRECATED: IMDb is a movie database and does not apply to games.
-        /// This method is kept for backwards compatibility but should not be used.
-        /// Returns empty string as IMDb IDs are not relevant for game releases.
-        /// </summary>
-        [Obsolete("IMDb is a movie database and does not apply to games. This method always returns empty string.")]
-        public static string ParseImdbId(string title)
-        {
-            // IMDb parsing disabled for games - IMDb is a movie database
-            // Return empty string to indicate no IMDb ID found
-            return "";
         }
 
         public static int ParseIgdbId(string title)
@@ -373,19 +356,6 @@ namespace NzbDrone.Core.Parser
             t = t.Replace("Ü", "Ue");
             t = t.Replace("ß", "ss");
             return t;
-        }
-
-        /// <summary>
-        /// DEPRECATED: IMDb is a movie database and does not apply to games.
-        /// This method is kept for backwards compatibility but should not be used.
-        /// Returns null as IMDb IDs are not relevant for game releases.
-        /// </summary>
-        [Obsolete("IMDb is a movie database and does not apply to games. This method always returns null.")]
-        public static string NormalizeImdbId(string imdbId)
-        {
-            // IMDb normalization disabled for games - IMDb is a movie database
-            // Return null to indicate no valid IMDb ID
-            return null;
         }
 
         public static string ToUrlSlug(string value, bool invalidDashReplacement = false, string trimEndChars = "-_", string deduplicateChars = "-_")

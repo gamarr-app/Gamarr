@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 using NzbDrone.Common.Extensions;
@@ -93,7 +92,6 @@ namespace NzbDrone.Core.Indexers.Newznab
             releaseInfo = base.ProcessItem(item, releaseInfo);
 
             releaseInfo.IgdbId = GetIgdbId(item);
-            releaseInfo.ImdbId = GetImdbId(item);
             releaseInfo.IndexerFlags = GetFlags(item);
 
             return releaseInfo;
@@ -185,43 +183,6 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
 
             return 0;
-        }
-
-        protected virtual int GetImdbId(XElement item)
-        {
-            var imdbIdString = TryGetNewznabAttribute(item, "imdb");
-
-            if (!imdbIdString.IsNullOrWhiteSpace() && int.TryParse(imdbIdString, out var imdbId))
-            {
-                return imdbId;
-            }
-
-            return 0;
-        }
-
-        protected virtual string GetImdbTitle(XElement item)
-        {
-            var imdbTitle = TryGetNewznabAttribute(item, "imdbtitle");
-            if (!imdbTitle.IsNullOrWhiteSpace())
-            {
-                return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
-                    Parser.Parser.ReplaceGermanUmlauts(
-                        Parser.Parser.NormalizeTitle(imdbTitle).Replace(" ", ".")));
-            }
-
-            return string.Empty;
-        }
-
-        protected virtual int GetImdbYear(XElement item)
-        {
-            var imdbYearString = TryGetNewznabAttribute(item, "imdbyear");
-
-            if (!imdbYearString.IsNullOrWhiteSpace() && int.TryParse(imdbYearString, out var imdbYear))
-            {
-                return imdbYear;
-            }
-
-            return 1900;
         }
 
         protected IndexerFlags GetFlags(XElement item)

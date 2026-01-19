@@ -13,8 +13,6 @@ using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.ThingiProvider;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with metadata)
-
 namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
 {
     public class MediaBrowserMetadata : MetadataBase<MediaBrowserMetadataSettings>
@@ -74,7 +72,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
             {
                 var gameElement = new XElement("Game");
 
-                gameElement.Add(new XElement("id", game.GameMetadata.Value.ImdbId));
+                gameElement.Add(new XElement("id", game.GameMetadata.Value.IgdbId));
                 gameElement.Add(new XElement("Status", game.GameMetadata.Value.Status));
 
                 gameElement.Add(new XElement("Added", game.Added.ToString("MM/dd/yyyy HH:mm:ss tt")));
@@ -85,7 +83,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
                 gameElement.Add(new XElement("Rating", game.GameMetadata.Value.Ratings.Igdb?.Value ?? 0));
                 gameElement.Add(new XElement("ProductionYear", game.Year));
                 gameElement.Add(new XElement("RunningTime", game.GameMetadata.Value.Runtime));
-                gameElement.Add(new XElement("IMDB", game.GameMetadata.Value.ImdbId));
+                gameElement.Add(new XElement("IgdbId", game.GameMetadata.Value.IgdbId));
                 gameElement.Add(new XElement("Genres", game.GameMetadata.Value.Genres.Select(genre => new XElement("Genre", genre))));
 
                 var doc = new XDocument(gameElement);

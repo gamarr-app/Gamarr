@@ -1,5 +1,3 @@
-#pragma warning disable CS0618
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -36,13 +34,11 @@ namespace NzbDrone.Core.ImportLists.Plex
             foreach (var item in items)
             {
                 var igdbIdString = FindGuid(item.Guids, "igdb");
-                var imdbId = FindGuid(item.Guids, "imdb");
 
                 int.TryParse(igdbIdString, out var igdbId);
 
                 games.AddIfNotNull(new ImportListGame()
                 {
-                    ImdbId = imdbId,
                     IgdbId = igdbId,
                     Title = item.Title,
                     Year = item.Year

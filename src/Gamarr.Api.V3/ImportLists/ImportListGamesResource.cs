@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System;
 using System.Collections.Generic;
 using NzbDrone.Core.ImportLists.ImportListGames;
@@ -33,7 +32,6 @@ namespace Gamarr.Api.V3.ImportLists
         public string Studio { get; set; }
 
         public int Runtime { get; set; }
-        public string ImdbId { get; set; }
         public int IgdbId { get; set; }
         public string Folder { get; set; }
         public string Certification { get; set; }
@@ -77,7 +75,6 @@ namespace Gamarr.Api.V3.ImportLists
                 Year = model.Year,
 
                 Runtime = model.GameMetadata.Value.Runtime,
-                ImdbId = model.ImdbId,
                 Certification = model.GameMetadata.Value.Certification,
                 Website = model.GameMetadata.Value.Website,
                 Genres = model.GameMetadata.Value.Genres,
@@ -114,7 +111,6 @@ namespace Gamarr.Api.V3.ImportLists
                 Year = model.Year,
 
                 Runtime = model.GameMetadata.Value.Runtime,
-                ImdbId = model.ImdbId,
                 Certification = model.GameMetadata.Value.Certification,
                 Website = model.GameMetadata.Value.Website,
                 Genres = model.GameMetadata.Value.Genres,

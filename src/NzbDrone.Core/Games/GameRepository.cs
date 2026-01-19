@@ -10,8 +10,6 @@ using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
-
 namespace NzbDrone.Core.Games
 {
     public interface IGameRepository : IBasicRepository<Game>
@@ -29,9 +27,6 @@ namespace NzbDrone.Core.Games
         List<Game> FindByIgdbId(List<int> igdbids);
         List<int> AllGameIgdbIds();
         Game FindByRawgId(int rawgId);
-
-        // Deprecated - kept for backwards compatibility
-        Game FindByImdbId(string imdbid);
 
         List<Game> GamesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored);
         PagingSpec<Game> GamesWithoutFiles(PagingSpec<Game> pagingSpec);
@@ -218,12 +213,6 @@ namespace NzbDrone.Core.Games
                 });
 
             return gameDictionary.Values.ToList();
-        }
-
-        public Game FindByImdbId(string imdbid)
-        {
-            var imdbIdWithPrefix = Parser.Parser.NormalizeImdbId(imdbid);
-            return imdbIdWithPrefix == null ? null : Query(x => x.GameMetadata.Value.ImdbId == imdbIdWithPrefix).FirstOrDefault();
         }
 
         public Game FindByIgdbId(int igdbid)

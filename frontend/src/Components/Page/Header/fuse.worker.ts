@@ -7,7 +7,7 @@ const fuseOptions = {
   ignoreLocation: true,
   threshold: 0.3,
   minMatchCharLength: 1,
-  keys: ['title', 'alternateTitles.title', 'igdbId', 'imdbId', 'tags.label'],
+  keys: ['title', 'alternateTitles.title', 'igdbId', 'tags.label'],
 };
 
 function getSuggestions(games: SuggestedGame[], value: string) {

@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Notifications.Xbmc
 
         public List<XbmcGame> GetGames(XbmcSettings settings)
         {
-            var response = ProcessRequest(settings, "VideoLibrary.GetGames", new List<string> { "file", "imdbnumber" });
+            var response = ProcessRequest(settings, "VideoLibrary.GetGames", new List<string> { "file", "igdbid" });
 
             return Json.Deserialize<GameResponse>(response).Result.Games;
         }
