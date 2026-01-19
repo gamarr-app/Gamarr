@@ -271,7 +271,7 @@ class DiscoverGameRow extends Component {
                   key={name}
                   className={styles[name]}
                 >
-                  {ratings.igdb ? <IgdbRating ratings={ratings} /> : null}
+                  {ratings.igdb?.value ? <IgdbRating ratings={ratings} /> : null}
                 </VirtualTableRowCell>
               );
             }
@@ -282,7 +282,7 @@ class DiscoverGameRow extends Component {
                   key={name}
                   className={styles[name]}
                 >
-                  {ratings.metacritic ? <MetacriticRating ratings={ratings} /> : null}
+                  {ratings.metacritic?.value ? <MetacriticRating ratings={ratings} /> : null}
                 </VirtualTableRowCell>
               );
             }

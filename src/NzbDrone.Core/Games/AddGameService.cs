@@ -109,6 +109,15 @@ namespace NzbDrone.Core.Games
         {
             var game = new Game();
 
+            // If we have a SteamAppId but no IgdbId, use the metadata from the search result directly
+            if (newGame.IgdbId <= 0 && newGame.GameMetadata?.Value?.SteamAppId > 0)
+            {
+                _logger.Debug("Adding Steam game without IGDB ID. SteamAppId: {0}", newGame.GameMetadata.Value.SteamAppId);
+                game.GameMetadata = newGame.GameMetadata.Value;
+                game.ApplyChanges(newGame);
+                return game;
+            }
+
             try
             {
                 game.GameMetadata = _gameInfo.GetGameInfo(newGame.IgdbId).Item1;

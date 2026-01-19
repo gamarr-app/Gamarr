@@ -109,8 +109,18 @@ namespace Gamarr.Api.V3.Games
                 .ValidId()
                 .SetValidator(qualityProfileExistsValidator);
 
-            PostValidator.RuleFor(s => s.Title).NotEmpty().When(s => s.IgdbId <= 0);
-            PostValidator.RuleFor(s => s.IgdbId).NotNull().NotEmpty().SetValidator(gamesExistsValidator);
+            PostValidator.RuleFor(s => s.Title).NotEmpty().When(s => s.IgdbId <= 0 && s.SteamAppId <= 0);
+
+            // Allow either IgdbId or SteamAppId (for Steam-only games)
+            PostValidator.RuleFor(s => s.IgdbId)
+                .NotNull()
+                .NotEmpty()
+                .SetValidator(gamesExistsValidator)
+                .When(s => s.SteamAppId <= 0);
+            PostValidator.RuleFor(s => s.SteamAppId)
+                .GreaterThan(0)
+                .When(s => s.IgdbId <= 0)
+                .WithMessage("Either IgdbId or SteamAppId must be provided");
         }
 
         [HttpGet]

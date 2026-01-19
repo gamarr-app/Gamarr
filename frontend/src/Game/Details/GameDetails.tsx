@@ -757,12 +757,12 @@ function GameDetails({ gameId }: GameDetailsProps) {
               </div>
 
               <div className={styles.details}>
-                {ratings.igdb ? (
+                {ratings.igdb?.value ? (
                   <span className={styles.rating}>
                     <IgdbRating ratings={ratings} iconSize={20} />
                   </span>
                 ) : null}
-                {ratings.metacritic ? (
+                {ratings.metacritic?.value ? (
                   <span className={styles.rating}>
                     <MetacriticRating ratings={ratings} iconSize={20} />
                   </span>
