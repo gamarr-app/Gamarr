@@ -48,8 +48,8 @@ export interface SuggestedGame
     | 'sortTitle'
     | 'images'
     | 'alternateTitles'
+    | 'steamAppId'
     | 'igdbId'
-    | 'imdbId'
   > {
   firstCharacter: string;
   tags: Tag[];
@@ -82,8 +82,8 @@ function createUnoptimizedSelector() {
           sortTitle,
           images,
           alternateTitles = [],
+          steamAppId,
           igdbId,
-          imdbId,
           tags = [],
         } = game;
 
@@ -94,8 +94,8 @@ function createUnoptimizedSelector() {
           sortTitle,
           images,
           alternateTitles,
+          steamAppId,
           igdbId,
-          imdbId,
           firstCharacter: title.charAt(0).toLowerCase(),
           tags: tags.reduce<Tag[]>((acc, id) => {
             const matchingTag = allTags.find((tag) => tag.id === id);

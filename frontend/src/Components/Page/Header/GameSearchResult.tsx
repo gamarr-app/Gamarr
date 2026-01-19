@@ -16,7 +16,7 @@ interface GameSearchResultProps extends SuggestedGame {
 }
 
 function GameSearchResult(props: GameSearchResultProps) {
-  const { match, title, year, images, alternateTitles, igdbId, imdbId, tags } =
+  const { match, title, year, images, alternateTitles, steamAppId, igdbId, tags } =
     props;
 
   let alternateTitle = null;
@@ -47,12 +47,12 @@ function GameSearchResult(props: GameSearchResultProps) {
           <div className={styles.alternateTitle}>{alternateTitle.title}</div>
         ) : null}
 
-        {match.key === 'igdbId' && igdbId ? (
-          <div className={styles.alternateTitle}>IgdbId: {igdbId}</div>
+        {match.key === 'steamAppId' && steamAppId ? (
+          <div className={styles.alternateTitle}>SteamAppId: {steamAppId}</div>
         ) : null}
 
-        {match.key === 'imdbId' && imdbId ? (
-          <div className={styles.alternateTitle}>ImdbId: {imdbId}</div>
+        {match.key === 'igdbId' && igdbId ? (
+          <div className={styles.alternateTitle}>IgdbId: {igdbId}</div>
         ) : null}
 
         {tag ? (

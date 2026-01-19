@@ -17,7 +17,7 @@ export interface ParsedGameInfo {
   releaseGroup?: string;
   edition?: string;
   igdbId?: number;
-  imdbId?: string;
+  steamAppId?: number;
 }
 
 export interface ParseModel extends ModelBase {

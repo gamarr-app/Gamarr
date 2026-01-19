@@ -17,8 +17,8 @@
   flex: 0 0 70px;
 }
 
-.igdbId,
-.imdbId {
+.steamAppId,
+.igdbId {
   composes: cell;
 
   flex: 0 0 110px;

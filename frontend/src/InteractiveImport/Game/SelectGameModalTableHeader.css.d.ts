@@ -2,7 +2,7 @@
 // Please do not change this file!
 interface CssExports {
   'igdbId': string;
-  'imdbId': string;
+  'steamAppId': string;
   'title': string;
   'year': string;
 }
