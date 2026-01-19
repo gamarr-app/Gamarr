@@ -485,6 +485,9 @@ namespace NzbDrone.Core.MetadataSource.IGDB.Resource
         [JsonProperty("category")]
         public int Category { get; set; }
 
+        [JsonProperty("game")]
+        public int? Game { get; set; }
+
         [JsonProperty("uid")]
         public string Uid { get; set; }
 

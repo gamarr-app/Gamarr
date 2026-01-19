@@ -46,10 +46,31 @@ namespace NzbDrone.Core.Games
             set { GameMetadata.Value.Title = value; }
         }
 
+        /// <summary>
+        /// Primary identifier - Steam App ID
+        /// </summary>
+        public int SteamAppId
+        {
+            get { return GameMetadata.Value.SteamAppId; }
+            set { GameMetadata.Value.SteamAppId = value; }
+        }
+
+        /// <summary>
+        /// Secondary identifier - IGDB ID (for metadata enrichment)
+        /// </summary>
         public int IgdbId
         {
             get { return GameMetadata.Value.IgdbId; }
             set { GameMetadata.Value.IgdbId = value; }
+        }
+
+        /// <summary>
+        /// Secondary identifier - RAWG ID (for metadata enrichment)
+        /// </summary>
+        public int RawgId
+        {
+            get { return GameMetadata.Value.RawgId; }
+            set { GameMetadata.Value.RawgId = value; }
         }
 
         /// <summary>
@@ -151,7 +172,7 @@ namespace NzbDrone.Core.Games
 
         public override string ToString()
         {
-            return string.Format("[{1} ({2})][{0}, {3}]", GameMetadata.Value.ImdbId, GameMetadata.Value.Title.NullSafe(), GameMetadata.Value.Year.NullSafe(), GameMetadata.Value.IgdbId);
+            return string.Format("[{0} ({1})][Steam:{2}, IGDB:{3}]", GameMetadata.Value.Title.NullSafe(), GameMetadata.Value.Year.NullSafe(), GameMetadata.Value.SteamAppId, GameMetadata.Value.IgdbId);
         }
 
         public void ApplyChanges(Game otherGame)

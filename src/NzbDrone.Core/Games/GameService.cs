@@ -24,16 +24,25 @@ namespace NzbDrone.Core.Games
         PagingSpec<Game> Paged(PagingSpec<Game> pagingSpec);
         Game AddGame(Game newGame);
         List<Game> AddGames(List<Game> newGames);
-        Game FindByImdbId(string imdbid);
-        Game FindByIgdbId(int igdbid);
+
+        // Primary identifier - Steam App ID
         Game FindBySteamAppId(int steamAppId);
+        List<int> AllGameSteamAppIds();
+
+        // Secondary identifiers
+        Game FindByIgdbId(int igdbid);
+        List<int> AllGameIgdbIds();
+        Game FindByRawgId(int rawgId);
+
+        // Deprecated - kept for backwards compatibility
+        Game FindByImdbId(string imdbid);
+
         Game FindByTitle(string title);
         Game FindByTitle(string title, int year);
         Game FindByTitle(List<string> titles, int? year, List<string> otherTitles, List<Game> candidates);
         List<Game> FindByTitleCandidates(List<string> titles, out List<string> otherTitles);
         Game FindByPath(string path);
         Dictionary<int, string> AllGamePaths();
-        List<int> AllGameIgdbIds();
         bool GameExists(Game game);
         List<Game> GetGamesByFileId(int fileId);
         List<Game> GetGamesByCollectionIgdbId(int collectionId);
@@ -198,9 +207,21 @@ namespace NzbDrone.Core.Games
             return _gameRepository.FindByIgdbId(igdbid);
         }
 
+        // Primary identifier - Steam App ID
         public Game FindBySteamAppId(int steamAppId)
         {
             return _gameRepository.FindBySteamAppId(steamAppId);
+        }
+
+        public List<int> AllGameSteamAppIds()
+        {
+            return _gameRepository.AllGameSteamAppIds();
+        }
+
+        // Secondary identifier - RAWG ID
+        public Game FindByRawgId(int rawgId)
+        {
+            return _gameRepository.FindByRawgId(rawgId);
         }
 
         public Game FindByPath(string path)
@@ -373,6 +394,17 @@ namespace NzbDrone.Core.Games
         {
             Game result = null;
 
+            // Primary identifier - Steam App ID
+            if (game.SteamAppId != 0)
+            {
+                result = _gameRepository.FindBySteamAppId(game.SteamAppId);
+                if (result != null)
+                {
+                    return true;
+                }
+            }
+
+            // Secondary identifier - IGDB ID
             if (game.IgdbId != 0)
             {
                 result = _gameRepository.FindByIgdbId(game.IgdbId);
@@ -382,9 +414,10 @@ namespace NzbDrone.Core.Games
                 }
             }
 
-            if (game.ImdbId.IsNotNullOrWhiteSpace())
+            // Secondary identifier - RAWG ID
+            if (game.RawgId != 0)
             {
-                result = _gameRepository.FindByImdbId(game.ImdbId);
+                result = _gameRepository.FindByRawgId(game.RawgId);
                 if (result != null)
                 {
                     return true;

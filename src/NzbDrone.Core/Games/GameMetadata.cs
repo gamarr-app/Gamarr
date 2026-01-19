@@ -29,8 +29,20 @@ namespace NzbDrone.Core.Games
             GameType = GameType.MainGame;
         }
 
-        public int IgdbId { get; set; }
+        /// <summary>
+        /// Primary identifier - Steam App ID
+        /// </summary>
         public int SteamAppId { get; set; }
+
+        /// <summary>
+        /// Secondary identifier - IGDB ID (for metadata enrichment)
+        /// </summary>
+        public int IgdbId { get; set; }
+
+        /// <summary>
+        /// Secondary identifier - RAWG ID (for metadata enrichment)
+        /// </summary>
+        public int RawgId { get; set; }
 
         public List<MediaCover.MediaCover> Images { get; set; }
         public List<string> Genres { get; set; }

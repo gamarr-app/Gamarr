@@ -72,14 +72,26 @@ namespace Gamarr.Api.V3.Games
         public string CleanTitle { get; set; }
 
         /// <summary>
+        /// Primary identifier - Steam App ID
+        /// </summary>
+        public int SteamAppId { get; set; }
+
+        /// <summary>
+        /// Secondary identifier - IGDB ID (for metadata enrichment)
+        /// </summary>
+        public int IgdbId { get; set; }
+
+        /// <summary>
+        /// Secondary identifier - RAWG ID (for metadata enrichment)
+        /// </summary>
+        public int RawgId { get; set; }
+
+        /// <summary>
         /// DEPRECATED: IMDb is a movie database and does not apply to games.
         /// This field is kept for backwards compatibility but will always be null/empty for games.
         /// </summary>
         [Obsolete("IMDb is a movie database and does not apply to games. This field will always be null/empty.")]
         public string ImdbId { get; set; }
-
-        public int IgdbId { get; set; }
-        public int SteamAppId { get; set; }
         public string TitleSlug { get; set; }
         public string RootFolderPath { get; set; }
         public string Folder { get; set; }
@@ -126,8 +138,9 @@ namespace Gamarr.Api.V3.Games
             return new GameResource
             {
                 Id = model.Id,
+                SteamAppId = model.SteamAppId,
                 IgdbId = model.IgdbId,
-                SteamAppId = model.GameMetadata.Value.SteamAppId,
+                RawgId = model.RawgId,
                 Title = translatedTitle,
                 OriginalTitle = model.GameMetadata.Value.OriginalTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
@@ -159,7 +172,7 @@ namespace Gamarr.Api.V3.Games
                 Runtime = model.GameMetadata.Value.Runtime,
                 CleanTitle = model.GameMetadata.Value.CleanTitle,
                 ImdbId = model.ImdbId,
-                TitleSlug = model.GameMetadata.Value.IgdbId.ToString(),
+                TitleSlug = model.SteamAppId > 0 ? model.SteamAppId.ToString() : model.IgdbId.ToString(),
                 RootFolderPath = model.RootFolderPath,
                 Certification = model.GameMetadata.Value.Certification,
                 Website = model.GameMetadata.Value.Website,
@@ -192,8 +205,9 @@ namespace Gamarr.Api.V3.Games
 
                 GameMetadata = new GameMetadata
                 {
-                    IgdbId = resource.IgdbId,
                     SteamAppId = resource.SteamAppId,
+                    IgdbId = resource.IgdbId,
+                    RawgId = resource.RawgId,
                     Title = resource.Title,
                     Genres = resource.Genres,
                     Images = resource.Images,

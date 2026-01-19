@@ -118,15 +118,19 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(s => s.RootFolderPath)
                   .Ignore(s => s.Title)
                   .Ignore(s => s.Year)
-                  .Ignore(s => s.IgdbId)
-                  .Ignore(s => s.ImdbId)
+                  .Ignore(s => s.SteamAppId)  // Delegated to GameMetadata
+                  .Ignore(s => s.IgdbId)      // Delegated to GameMetadata
+                  .Ignore(s => s.RawgId)      // Delegated to GameMetadata
+                  .Ignore(s => s.ImdbId)      // Delegated to GameMetadata
                   .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<ImportListGame>("ImportListGames").RegisterModel()
                   .Ignore(s => s.Title)
                   .Ignore(s => s.Year)
-                  .Ignore(s => s.IgdbId)
-                  .Ignore(s => s.ImdbId)
+                  .Ignore(s => s.SteamAppId)  // Delegated to GameMetadata
+                  .Ignore(s => s.IgdbId)      // Delegated to GameMetadata
+                  .Ignore(s => s.RawgId)      // Delegated to GameMetadata
+                  .Ignore(s => s.ImdbId)      // Delegated to GameMetadata
                   .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<AlternativeTitle>("AlternativeTitles").RegisterModel();

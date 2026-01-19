@@ -18,10 +18,21 @@ namespace NzbDrone.Core.Games
     {
         bool GamePathExists(string path);
         List<Game> FindByTitles(List<string> titles);
-        Game FindByImdbId(string imdbid);
+
+        // Primary identifier - Steam App ID
+        Game FindBySteamAppId(int steamAppId);
+        List<Game> FindBySteamAppId(List<int> steamAppIds);
+        List<int> AllGameSteamAppIds();
+
+        // Secondary identifiers
         Game FindByIgdbId(int igdbid);
         List<Game> FindByIgdbId(List<int> igdbids);
-        Game FindBySteamAppId(int steamAppId);
+        List<int> AllGameIgdbIds();
+        Game FindByRawgId(int rawgId);
+
+        // Deprecated - kept for backwards compatibility
+        Game FindByImdbId(string imdbid);
+
         List<Game> GamesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored);
         PagingSpec<Game> GamesWithoutFiles(PagingSpec<Game> pagingSpec);
         List<Game> GetGamesByFileId(int fileId);
@@ -29,7 +40,6 @@ namespace NzbDrone.Core.Games
         PagingSpec<Game> GamesWhereCutoffUnmet(PagingSpec<Game> pagingSpec, List<QualitiesBelowCutoff> qualitiesBelowCutoff);
         Game FindByPath(string path);
         Dictionary<int, string> AllGamePaths();
-        List<int> AllGameIgdbIds();
         Dictionary<int, List<int>> AllGameTags();
         List<int> GetRecommendations();
         bool ExistsByMetadataId(int metadataId);
@@ -226,9 +236,29 @@ namespace NzbDrone.Core.Games
             return Query(x => igdbids.Contains(x.IgdbId));
         }
 
+        // Primary identifier - Steam App ID
         public Game FindBySteamAppId(int steamAppId)
         {
             return Query(x => x.GameMetadata.Value.SteamAppId == steamAppId).FirstOrDefault();
+        }
+
+        public List<Game> FindBySteamAppId(List<int> steamAppIds)
+        {
+            return Query(x => steamAppIds.Contains(x.SteamAppId));
+        }
+
+        public List<int> AllGameSteamAppIds()
+        {
+            using (var conn = _database.OpenConnection())
+            {
+                return conn.Query<int>("SELECT \"SteamAppId\" FROM \"GameMetadata\" JOIN \"Games\" ON (\"Games\".\"GameMetadataId\" = \"GameMetadata\".\"Id\") WHERE \"SteamAppId\" > 0").ToList();
+            }
+        }
+
+        // Secondary identifier - RAWG ID
+        public Game FindByRawgId(int rawgId)
+        {
+            return Query(x => x.GameMetadata.Value.RawgId == rawgId).FirstOrDefault();
         }
 
         public List<Game> GetGamesByFileId(int fileId)

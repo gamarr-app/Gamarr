@@ -99,11 +99,33 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return new Tuple<GameMetadata, List<Credit>>(game, credits);
         }
 
+        public GameMetadata GetGameBySteamAppId(int steamAppId)
+        {
+            // IGDB tracks Steam IDs via the external_games endpoint
+            // Category 1 = Steam
+            var query = $"fields game; where category = 1 & uid = \"{steamAppId}\"; limit 1;";
+            var externalGames = ExecuteQuery<IgdbExternalGameResource>("external_games", query);
+
+            if (externalGames == null || !externalGames.Any() || externalGames.First().Game == null)
+            {
+                _logger.Debug("No IGDB game found for Steam App ID {0}", steamAppId);
+                return null;
+            }
+
+            var igdbId = externalGames.First().Game.Value;
+            var result = GetGameInfo(igdbId);
+            if (result?.Item1 != null)
+            {
+                result.Item1.SteamAppId = steamAppId;
+            }
+
+            return result?.Item1;
+        }
+
         public GameMetadata GetGameByImdbId(string imdbId)
         {
-            // IGDB doesn't use IMDb IDs directly, but we can search external games
-            // TODO: Implement lookup via external_games endpoint
-            _logger.Warn("IGDB does not support IMDb ID lookup. Use IGDB ID or game title instead.");
+            // IGDB doesn't use IMDb IDs directly
+            _logger.Warn("IGDB does not support IMDb ID lookup. Use Steam App ID or IGDB ID instead.");
             return null;
         }
 

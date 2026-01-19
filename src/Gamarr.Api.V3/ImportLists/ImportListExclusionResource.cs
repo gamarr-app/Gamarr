@@ -7,7 +7,17 @@ namespace Gamarr.Api.V3.ImportLists
     public class ImportListExclusionResource : ProviderResource<ImportListExclusionResource>
     {
         // public int Id { get; set; }
+
+        /// <summary>
+        /// Primary identifier - Steam App ID
+        /// </summary>
+        public int SteamAppId { get; set; }
+
+        /// <summary>
+        /// Secondary identifier - IGDB ID
+        /// </summary>
         public int IgdbId { get; set; }
+
         public string GameTitle { get; set; }
         public int GameYear { get; set; }
     }
@@ -24,6 +34,7 @@ namespace Gamarr.Api.V3.ImportLists
             return new ImportListExclusionResource
             {
                 Id = model.Id,
+                SteamAppId = model.SteamAppId,
                 IgdbId = model.IgdbId,
                 GameTitle = model.GameTitle,
                 GameYear = model.GameYear
@@ -40,6 +51,7 @@ namespace Gamarr.Api.V3.ImportLists
             return new ImportListExclusion
             {
                 Id = resource.Id,
+                SteamAppId = resource.SteamAppId,
                 IgdbId = resource.IgdbId,
                 GameTitle = resource.GameTitle,
                 GameYear = resource.GameYear
