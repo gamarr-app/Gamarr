@@ -1134,8 +1134,6 @@
     "ShowTagsHelpText": "포스터 아래에 태그 표시",
     "ShowIgdbRating": "TMDb 평점 보기",
     "ShowIgdbRatingHelpText": "포스터 아래에 TMDb 평점 표시",
-    "ShowTraktRating": "Trakt 평점 보기",
-    "ShowTraktRatingPosterHelpText": "포스터 아래에 Trakt 등급 표시",
     "Started": "시작됨",
     "TodayAt": "오늘 {time}",
     "ToggleMonitoredToUnmonitored": "모니터링 설정, 모니터링을 해제하려면 클릭하세요",

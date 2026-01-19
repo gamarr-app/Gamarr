@@ -1818,8 +1818,6 @@
     "NotificationsGotifySettingsMetadataLinksGameHelpText": "Añade un enlace a los metadatos de la película cuando se envían notificaciones",
     "NotificationsGotifySettingsPreferredMetadataLink": "Enlace de metadatos preferido",
     "NotificationsGotifySettingsPreferredMetadataLinkHelpText": "Enlace de metadatos para clientes que solo soportan un único enlace",
-    "ShowTraktRatingPosterHelpText": "Mostrar valoraciones de Tomato debajo del póster",
-    "ShowTraktRating": "Mostrar calificaciones de Trakt",
     "TraktRating": "Calificaciones de Trakt",
     "TraktVotes": "Votos de Trakt",
     "AnnouncedGameAvailabilityDescription": "Las películas se consideran disponibles tan pronto como son añadidas a {appName}.",

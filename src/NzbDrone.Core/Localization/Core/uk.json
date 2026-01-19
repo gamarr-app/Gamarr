@@ -1443,8 +1443,6 @@
     "GameRequested": "Фільм запитано",
     "NotificationsSettingsUpdateMapPathsToGameHelpText": "Шлях {serviceName}, використовується для зміни шляхів фільмів, коли {serviceName} бачить місцезнаходження бібліотеки по-різному, ніж {appName} (потрібне \"Оновлення бібліотеки\")",
     "SearchForCutoffUnmetGames": "Шукати всі фільми, що не досягли порогових значень",
-    "ShowTraktRating": "Показати рейтинг Trakt",
-    "ShowTraktRatingPosterHelpText": "Показати рейтинг Trakt під постером",
     "ShowIgdbRating": "ПОказати TMDb рейтинг",
     "GameIsNotAvailable": "Фільм недоступний",
     "CountVotes": "{votes} голосів",
