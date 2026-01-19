@@ -4,9 +4,8 @@ namespace NzbDrone.Core.ImportLists
     {
         Program,
         IGDB,
-        Trakt,
         Plex,
-        Simkl,
+        Steam,
         Other,
         Advanced
     }
