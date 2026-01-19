@@ -131,7 +131,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_replace_GAME_TITLE_with_random_casing_should_keep_original_casing()
         {
-            _namingConfig.StandardGameFormat = "{mOvIe-tItLE}";
+            _namingConfig.StandardGameFormat = "{GaMe-TiTlE}";
 
             Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(_game.Title.Replace(' ', '-'));

@@ -88,7 +88,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
             var game = MapGame(games.First());
 
-            // TODO: IGDB doesn't have cast/crew like movies, return empty credits
+            // TODO: IGDB has involved companies but not traditional cast/crew, return empty credits for now
             var credits = new List<Credit>();
 
             return new Tuple<GameMetadata, List<Credit>>(game, credits);
