@@ -82,6 +82,7 @@ class DiscoverGameOverview extends Component {
   render() {
     const {
       igdbId,
+      steamAppId,
       imdbId,
       youTubeTrailerId,
       title,
@@ -114,7 +115,9 @@ class DiscoverGameOverview extends Component {
       height: `${posterHeight}px`
     };
 
-    const linkProps = isExisting ? { to: `/game/${igdbId}` } : { onPress: this.onPress };
+    // Use steamAppId for slug if available, otherwise igdbId
+    const titleSlug = steamAppId > 0 ? steamAppId : igdbId;
+    const linkProps = isExisting ? { to: `/game/${titleSlug}` } : { onPress: this.onPress };
 
     const contentHeight = getContentHeight(rowHeight, isSmallScreen);
     const overviewHeight = contentHeight - titleRowHeight;
@@ -292,6 +295,7 @@ class DiscoverGameOverview extends Component {
 
 DiscoverGameOverview.propTypes = {
   igdbId: PropTypes.number.isRequired,
+  steamAppId: PropTypes.number,
   imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,

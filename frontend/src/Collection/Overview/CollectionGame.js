@@ -66,6 +66,7 @@ class CollectionGame extends Component {
       overview,
       year,
       igdbId,
+      steamAppId,
       images,
       monitored,
       hasFile,
@@ -87,7 +88,9 @@ class CollectionGame extends Component {
       isNewAddGameModalOpen
     } = this.state;
 
-    const linkProps = id ? { to: `/game/${igdbId}` } : { onPress: this.onAddGamePress };
+    // Use steamAppId for slug if available, otherwise igdbId
+    const titleSlug = steamAppId > 0 ? steamAppId : igdbId;
+    const linkProps = id ? { to: `/game/${titleSlug}` } : { onPress: this.onAddGamePress };
 
     const elementStyle = {
       width: `${posterWidth}px`,
@@ -208,6 +211,7 @@ CollectionGame.propTypes = {
   isExistingGame: PropTypes.bool,
   isExcluded: PropTypes.bool,
   igdbId: PropTypes.number.isRequired,
+  steamAppId: PropTypes.number,
   imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   onMonitorTogglePress: PropTypes.func.isRequired
