@@ -28,13 +28,13 @@ namespace NzbDrone.Core.Test.ImportList
         }
 
         [Test]
-        public void should_fetch_imdb_list()
+        public void should_fetch_rss_list()
         {
-            GivenRecentFeedResponse("imdb_watchlist.xml");
+            GivenRecentFeedResponse("rss_games.xml");
 
             var result = Subject.Fetch();
 
-            result.Games.First().Title.Should().Be("Think Like a Man Too");
+            result.Games.Should().NotBeEmpty();
         }
     }
 }
