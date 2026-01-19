@@ -1,0 +1,88 @@
+{
+  "220": {
+    "success": true,
+    "data": {
+      "type": "game",
+      "name": "Half-Life 2",
+      "steam_appid": 220,
+      "required_age": 0,
+      "is_free": false,
+      "detailed_description": "1998., . Half-Life sends a shock through the game industry with its combination of pounding action and continuous, immersive storytelling.",
+      "about_the_game": "1998. HALF-LIFE sends a shock through the game industry with its combination of pounding action and continuous, immersive storytelling. Valve's debut title wins more than 50 game-of-the-year awards on its way to being named 'Best PC Game Ever' by PC Gamer, and game critics hail its revolutionary gameplay.",
+      "short_description": "1998. HALF-LIFE sends a shock through the game industry with its combination of pounding action and continuous, immersive storytelling.",
+      "supported_languages": "English<strong>*</strong>, French<strong>*</strong>, German<strong>*</strong>, Italian, Korean, Spanish - Spain<strong>*</strong>, Simplified Chinese, Traditional Chinese, Russian<strong>*</strong>, Japanese, Portuguese, Polish, Danish, Dutch, Finnish, Norwegian, Swedish, Hungarian, Czech, Romanian, Turkish, Portuguese - Brazil, Bulgarian, Greek, Ukrainian, Spanish - Latin America, Vietnamese, Thai<br><strong>*</strong>languages with full audio support",
+      "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/220/header.jpg",
+      "capsule_image": "https://cdn.akamai.steamstatic.com/steam/apps/220/capsule_231x87.jpg",
+      "capsule_imagev5": "https://cdn.akamai.steamstatic.com/steam/apps/220/capsule_184x69.jpg",
+      "website": "http://www.half-life.com/halflife2",
+      "pc_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 7, Vista, XP<br></li><li><strong>Processor:</strong> 1.7 GHz<br></li><li><strong>Memory:</strong> 512 MB RAM<br></li><li><strong>Graphics:</strong> DirectX 8.1 level Graphics Card<br></li><li><strong>Storage:</strong> 6500 MB available space</li></ul>",
+        "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 7, Vista, XP<br></li><li><strong>Processor:</strong> Pentium 4 processor (3.0GHz, or better)<br></li><li><strong>Memory:</strong> 1 GB RAM<br></li><li><strong>Graphics:</strong> DirectX 9 level Graphics Card<br></li><li><strong>Storage:</strong> 6500 MB available space</li></ul>"
+      },
+      "mac_requirements": [],
+      "linux_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Ubuntu 12.04<br></li><li><strong>Processor:</strong> Dual core from Intel or AMD at 2.8 GHz<br></li><li><strong>Memory:</strong> 1 GB RAM<br></li><li><strong>Graphics:</strong> nVidia GeForce 8600/9600GT, ATI/AMD Radeon HD2600/3600<br></li><li><strong>Storage:</strong> 8 GB available space</li></ul>"
+      },
+      "developers": ["Valve"],
+      "publishers": ["Valve"],
+      "packages": [36],
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      },
+      "metacritic": {
+        "score": 96,
+        "url": "https://www.metacritic.com/game/pc/half-life-2"
+      },
+      "categories": [
+        { "id": 2, "description": "Single-player" },
+        { "id": 22, "description": "Steam Achievements" },
+        { "id": 29, "description": "Steam Trading Cards" }
+      ],
+      "genres": [
+        { "id": "1", "description": "Action" }
+      ],
+      "screenshots": [
+        {
+          "id": 0,
+          "path_thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/220/ss_1.600x338.jpg",
+          "path_full": "https://cdn.akamai.steamstatic.com/steam/apps/220/ss_1.1920x1080.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "id": 5765,
+          "name": "Half-Life 2 Trailer",
+          "thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/5765/movie.293x165.jpg",
+          "webm": {
+            "480": "http://cdn.akamai.steamstatic.com/steam/apps/5765/movie480.webm",
+            "max": "http://cdn.akamai.steamstatic.com/steam/apps/5765/movie_max.webm"
+          },
+          "mp4": {
+            "480": "http://cdn.akamai.steamstatic.com/steam/apps/5765/movie480.mp4",
+            "max": "http://cdn.akamai.steamstatic.com/steam/apps/5765/movie_max.mp4"
+          },
+          "highlight": true
+        }
+      ],
+      "recommendations": {
+        "total": 164230
+      },
+      "release_date": {
+        "coming_soon": false,
+        "date": "Nov 16, 2004"
+      },
+      "support_info": {
+        "url": "https://help.steampowered.com/",
+        "email": ""
+      },
+      "background": "https://cdn.akamai.steamstatic.com/steam/apps/220/page_bg_generated_v6b.jpg",
+      "background_raw": "https://cdn.akamai.steamstatic.com/steam/apps/220/page.bg.jpg",
+      "content_descriptors": {
+        "ids": [],
+        "notes": null
+      }
+    }
+  }
+}

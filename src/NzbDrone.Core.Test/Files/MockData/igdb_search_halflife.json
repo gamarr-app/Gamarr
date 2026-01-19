@@ -1,0 +1,149 @@
+[
+  {
+    "id": 21,
+    "name": "Half-Life 2",
+    "slug": "half-life-2",
+    "summary": "Gordon Freeman is on his way to City 17...",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1100304000,
+    "total_rating": 93.8,
+    "total_rating_count": 2550,
+    "url": "https://www.igdb.com/games/half-life-2",
+    "cover": {
+      "id": 90001,
+      "image_id": "co1wyy",
+      "width": 264,
+      "height": 352
+    },
+    "genres": [
+      { "id": 5, "name": "Shooter", "slug": "shooter" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10001,
+        "developer": true,
+        "publisher": false,
+        "company": { "id": 1, "name": "Valve Corporation", "slug": "valve-corporation" }
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Half-Life",
+    "slug": "half-life",
+    "summary": "The original Half-Life game...",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 911433600,
+    "total_rating": 91.5,
+    "total_rating_count": 2100,
+    "url": "https://www.igdb.com/games/half-life",
+    "cover": {
+      "id": 90003,
+      "image_id": "co1zzz",
+      "width": 264,
+      "height": 352
+    },
+    "genres": [
+      { "id": 5, "name": "Shooter", "slug": "shooter" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10004,
+        "developer": true,
+        "publisher": false,
+        "company": { "id": 1, "name": "Valve Corporation", "slug": "valve-corporation" }
+      }
+    ]
+  },
+  {
+    "id": 877,
+    "name": "Half-Life 2: Episode One",
+    "slug": "half-life-2-episode-one",
+    "summary": "Episode One is the first in a series of episodes...",
+    "category": 2,
+    "status": 0,
+    "first_release_date": 1149120000,
+    "total_rating": 87.2,
+    "total_rating_count": 1500,
+    "url": "https://www.igdb.com/games/half-life-2-episode-one",
+    "cover": {
+      "id": 90004,
+      "image_id": "co1aaa",
+      "width": 264,
+      "height": 352
+    },
+    "genres": [
+      { "id": 5, "name": "Shooter", "slug": "shooter" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "parent_game": { "id": 21, "name": "Half-Life 2" }
+  },
+  {
+    "id": 878,
+    "name": "Half-Life 2: Episode Two",
+    "slug": "half-life-2-episode-two",
+    "summary": "Episode Two is the second in a series of episodes...",
+    "category": 2,
+    "status": 0,
+    "first_release_date": 1192579200,
+    "total_rating": 89.5,
+    "total_rating_count": 1400,
+    "url": "https://www.igdb.com/games/half-life-2-episode-two",
+    "cover": {
+      "id": 90005,
+      "image_id": "co1bbb",
+      "width": 264,
+      "height": 352
+    },
+    "genres": [
+      { "id": 5, "name": "Shooter", "slug": "shooter" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "parent_game": { "id": 21, "name": "Half-Life 2" }
+  },
+  {
+    "id": 28192,
+    "name": "Half-Life: Alyx",
+    "slug": "half-life-alyx",
+    "summary": "Half-Life: Alyx is Valve's VR return to the Half-Life series...",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1584921600,
+    "total_rating": 93.1,
+    "total_rating_count": 800,
+    "url": "https://www.igdb.com/games/half-life-alyx",
+    "cover": {
+      "id": 90006,
+      "image_id": "co1ccc",
+      "width": 264,
+      "height": 352
+    },
+    "genres": [
+      { "id": 5, "name": "Shooter", "slug": "shooter" },
+      { "id": 31, "name": "Adventure", "slug": "adventure" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10005,
+        "developer": true,
+        "publisher": true,
+        "company": { "id": 1, "name": "Valve Corporation", "slug": "valve-corporation" }
+      }
+    ]
+  }
+]

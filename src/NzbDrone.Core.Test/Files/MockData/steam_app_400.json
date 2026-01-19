@@ -1,0 +1,66 @@
+{
+  "400": {
+    "success": true,
+    "data": {
+      "type": "game",
+      "name": "Portal",
+      "steam_appid": 400,
+      "required_age": 0,
+      "is_free": false,
+      "detailed_description": "Portal is a new single player game from Valve. Set in the mysterious Aperture Science Laboratories, Portal has been called one of the most innovative new games on the horizon and will offer gamers hours of unique gameplay.",
+      "about_the_game": "Portal is a new single player game from Valve. Set in the mysterious Aperture Science Laboratories, Portal has been called one of the most innovative new games on the horizon and will offer gamers hours of unique gameplay. The game is designed to change the way players approach, manipulate, and surmise the possibilities in a given environment.",
+      "short_description": "Portal is a new single player game from Valve. Set in Aperture Science Laboratories, Portal has been called one of the most innovative new games on the horizon.",
+      "supported_languages": "English<strong>*</strong>, French<strong>*</strong>, German<strong>*</strong>, Russian<strong>*</strong>, Japanese, Korean, Simplified Chinese, Spanish - Spain<strong>*</strong>",
+      "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/400/header.jpg",
+      "website": "http://www.whatistheorangebox.com/",
+      "pc_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 7 (32/64-bit)/Vista/XP<br></li><li><strong>Processor:</strong> 1.7 GHz<br></li><li><strong>Memory:</strong> 512 MB RAM<br></li><li><strong>Graphics:</strong> DirectX 8.1 level Graphics Card<br></li><li><strong>Storage:</strong> 4 GB available space</li></ul>"
+      },
+      "mac_requirements": [],
+      "linux_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Ubuntu 12.04<br></li><li><strong>Processor:</strong> Dual core from Intel or AMD at 2.8 GHz<br></li><li><strong>Memory:</strong> 1 GB RAM<br></li><li><strong>Graphics:</strong> nVidia GeForce 8600/9600GT<br></li><li><strong>Storage:</strong> 4 GB available space</li></ul>"
+      },
+      "developers": ["Valve"],
+      "publishers": ["Valve"],
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      },
+      "metacritic": {
+        "score": 90,
+        "url": "https://www.metacritic.com/game/pc/portal"
+      },
+      "categories": [
+        { "id": 2, "description": "Single-player" },
+        { "id": 22, "description": "Steam Achievements" }
+      ],
+      "genres": [
+        { "id": "1", "description": "Action" }
+      ],
+      "screenshots": [
+        {
+          "id": 0,
+          "path_thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/400/ss_1.600x338.jpg",
+          "path_full": "https://cdn.akamai.steamstatic.com/steam/apps/400/ss_1.1920x1080.jpg"
+        }
+      ],
+      "recommendations": {
+        "total": 97230
+      },
+      "release_date": {
+        "coming_soon": false,
+        "date": "Oct 10, 2007"
+      },
+      "support_info": {
+        "url": "https://help.steampowered.com/",
+        "email": ""
+      },
+      "background": "https://cdn.akamai.steamstatic.com/steam/apps/400/page_bg_generated_v6b.jpg",
+      "content_descriptors": {
+        "ids": [],
+        "notes": null
+      }
+    }
+  }
+}

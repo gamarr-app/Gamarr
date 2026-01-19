@@ -26,6 +26,8 @@ namespace NzbDrone.Test.Common
         public string ApiKey { get; private set; }
         public PostgresOptions PostgresOptions { get; private set; }
         public int Port { get; private set; }
+        public bool UseMockMetadata { get; set; }
+        public string MockDataPath { get; set; }
 
         public NzbDroneRunner(Logger logger, PostgresOptions postgresOptions, int port = 6767)
         {
@@ -145,7 +147,23 @@ namespace NzbDrone.Test.Common
                 envVars.Add("Gamarr__Postgres__Password", PostgresOptions.Password);
                 envVars.Add("Gamarr__Postgres__MainDb", PostgresOptions.MainDb);
                 envVars.Add("Gamarr__Postgres__LogDb", PostgresOptions.LogDb);
+            }
 
+            // Add mock metadata support for testing without network access
+            if (UseMockMetadata)
+            {
+                envVars.Add("GAMARR_MOCK_METADATA", "true");
+
+                if (!string.IsNullOrEmpty(MockDataPath))
+                {
+                    envVars.Add("GAMARR_MOCK_DATA_PATH", MockDataPath);
+                }
+
+                TestContext.Progress.WriteLine("Mock metadata mode enabled. Path: {0}", MockDataPath ?? "auto-detect");
+            }
+
+            if (envVars.Count > 0)
+            {
                 TestContext.Progress.WriteLine("Using env vars:\n{0}", envVars.ToJson());
             }
 
