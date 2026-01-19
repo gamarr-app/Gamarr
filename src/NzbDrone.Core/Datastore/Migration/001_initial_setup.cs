@@ -23,11 +23,11 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Label").AsString().Unique();
 
             Create.TableForModel("NamingConfig")
-                .WithColumn("RenameGames").AsBoolean().Nullable()
-                .WithColumn("ReplaceIllegalCharacters").AsBoolean().WithDefaultValue(true)
-                .WithColumn("ColonReplacementFormat").AsInt32().WithDefaultValue(0)
+                .WithColumn("ReplaceIllegalCharacters").AsBoolean().NotNullable()
                 .WithColumn("StandardGameFormat").AsString().Nullable()
-                .WithColumn("GameFolderFormat").AsString().Nullable();
+                .WithColumn("GameFolderFormat").AsString().Nullable()
+                .WithColumn("ColonReplacementFormat").AsInt32().NotNullable()
+                .WithColumn("RenameGames").AsBoolean().NotNullable();
 
             // ===========================================
             // QUALITY PROFILES & DEFINITIONS
@@ -137,19 +137,19 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("AggregatedRatingCount").AsInt32().Nullable();
 
             Create.TableForModel("Games")
-                .WithColumn("GameMetadataId").AsInt32().Unique()
-                .WithColumn("Path").AsString()
-                .WithColumn("Monitored").AsBoolean()
-                .WithColumn("MinimumAvailability").AsInt32()
-                .WithColumn("QualityProfileId").AsInt32()
-                .WithColumn("Tags").AsString().Nullable()
+                .WithColumn("Path").AsString().NotNullable()
+                .WithColumn("Monitored").AsBoolean().NotNullable()
+                .WithColumn("QualityProfileId").AsInt32().NotNullable()
                 .WithColumn("Added").AsDateTime().Nullable()
+                .WithColumn("Tags").AsString().Nullable()
                 .WithColumn("AddOptions").AsString().Nullable()
-                .WithColumn("GameFileId").AsInt32().WithDefaultValue(0)
+                .WithColumn("GameFileId").AsInt32().NotNullable()
+                .WithColumn("MinimumAvailability").AsInt32().NotNullable()
+                .WithColumn("GameMetadataId").AsInt32().NotNullable().Unique()
                 .WithColumn("LastSearchTime").AsDateTime().Nullable();
 
             Create.TableForModel("GameFiles")
-                .WithColumn("GameId").AsInt32().Indexed()
+                .WithColumn("GameId").AsInt32().NotNullable().Indexed()
                 .WithColumn("Quality").AsString().NotNullable()
                 .WithColumn("Size").AsInt64().NotNullable()
                 .WithColumn("DateAdded").AsDateTime().NotNullable()
@@ -212,28 +212,28 @@ namespace NzbDrone.Core.Datastore.Migration
             // ===========================================
 
             Create.TableForModel("History")
-                .WithColumn("GameId").AsInt32().Indexed()
-                .WithColumn("SourceTitle").AsString()
-                .WithColumn("Date").AsDateTime().Indexed()
-                .WithColumn("Quality").AsString()
-                .WithColumn("Data").AsString()
+                .WithColumn("SourceTitle").AsString().NotNullable()
+                .WithColumn("Date").AsDateTime().NotNullable().Indexed()
+                .WithColumn("Quality").AsString().NotNullable()
+                .WithColumn("Data").AsString().NotNullable()
                 .WithColumn("EventType").AsInt32().Nullable()
-                .WithColumn("DownloadId").AsString().Nullable().Indexed()
-                .WithColumn("Languages").AsString().WithDefaultValue("[]");
+                .WithColumn("DownloadId").AsString().Nullable()
+                .WithColumn("GameId").AsInt32().NotNullable()
+                .WithColumn("Languages").AsString().NotNullable();
 
             Create.TableForModel("Blocklist")
-                .WithColumn("GameId").AsInt32().Indexed()
-                .WithColumn("SourceTitle").AsString()
-                .WithColumn("Quality").AsString()
-                .WithColumn("Date").AsDateTime()
+                .WithColumn("SourceTitle").AsString().NotNullable()
+                .WithColumn("Quality").AsString().NotNullable()
+                .WithColumn("Date").AsDateTime().NotNullable()
                 .WithColumn("PublishedDate").AsDateTime().Nullable()
                 .WithColumn("Size").AsInt64().Nullable()
                 .WithColumn("Protocol").AsInt32().Nullable()
                 .WithColumn("Indexer").AsString().Nullable()
                 .WithColumn("Message").AsString().Nullable()
                 .WithColumn("TorrentInfoHash").AsString().Nullable()
-                .WithColumn("Languages").AsString().WithDefaultValue("[]")
-                .WithColumn("IndexerFlags").AsInt32().WithDefaultValue(0);
+                .WithColumn("GameId").AsInt32().Nullable()
+                .WithColumn("Languages").AsString().NotNullable()
+                .WithColumn("IndexerFlags").AsInt32().NotNullable();
 
             Create.TableForModel("DownloadHistory")
                 .WithColumn("EventType").AsInt32().NotNullable()
@@ -252,18 +252,18 @@ namespace NzbDrone.Core.Datastore.Migration
             // ===========================================
 
             Create.TableForModel("ImportLists")
-                .WithColumn("Enabled").AsBoolean()
-                .WithColumn("Name").AsString().Unique()
-                .WithColumn("Implementation").AsString()
+                .WithColumn("Enabled").AsBoolean().NotNullable()
+                .WithColumn("Name").AsString().NotNullable().Unique()
+                .WithColumn("Implementation").AsString().NotNullable()
                 .WithColumn("ConfigContract").AsString().Nullable()
                 .WithColumn("Settings").AsString().Nullable()
-                .WithColumn("EnableAuto").AsBoolean()
-                .WithColumn("RootFolderPath").AsString()
-                .WithColumn("QualityProfileId").AsInt32()
-                .WithColumn("MinimumAvailability").AsInt32()
+                .WithColumn("EnableAuto").AsBoolean().NotNullable()
+                .WithColumn("RootFolderPath").AsString().NotNullable()
+                .WithColumn("QualityProfileId").AsInt32().NotNullable()
+                .WithColumn("MinimumAvailability").AsInt32().NotNullable()
                 .WithColumn("Tags").AsString().Nullable()
-                .WithColumn("SearchOnAdd").AsBoolean().WithDefaultValue(true)
-                .WithColumn("Monitor").AsInt32().WithDefaultValue(0);
+                .WithColumn("SearchOnAdd").AsBoolean().NotNullable()
+                .WithColumn("Monitor").AsInt32().NotNullable();
 
             Create.TableForModel("ImportListStatus")
                 .WithColumn("ProviderId").AsInt32().NotNullable().Unique()
@@ -274,8 +274,8 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("LastInfoSync").AsDateTime().Nullable();
 
             Create.TableForModel("ImportListGames")
-                .WithColumn("ListId").AsInt32()
-                .WithColumn("GameMetadataId").AsInt32().Indexed();
+                .WithColumn("ListId").AsInt32().NotNullable()
+                .WithColumn("GameMetadataId").AsInt32().NotNullable().Indexed();
 
             Create.TableForModel("ImportExclusions")
                 .WithColumn("IgdbId").AsInt32().NotNullable().Unique()
@@ -366,12 +366,12 @@ namespace NzbDrone.Core.Datastore.Migration
             // ===========================================
 
             Create.TableForModel("PendingReleases")
-                .WithColumn("GameId").AsInt32().WithDefaultValue(0)
-                .WithColumn("Title").AsString()
-                .WithColumn("Added").AsDateTime()
+                .WithColumn("Title").AsString().NotNullable()
+                .WithColumn("Added").AsDateTime().NotNullable()
+                .WithColumn("Release").AsString().NotNullable()
+                .WithColumn("GameId").AsInt32().NotNullable()
                 .WithColumn("ParsedGameInfo").AsString().Nullable()
-                .WithColumn("Release").AsString()
-                .WithColumn("Reason").AsInt32().WithDefaultValue(0)
+                .WithColumn("Reason").AsInt32().NotNullable()
                 .WithColumn("AdditionalInfo").AsString().Nullable();
 
             // ===========================================
