@@ -64,6 +64,13 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("www.Torrenting.org - Game.2008.720p.X264-DIMENSION", "Game")]
         [TestCase("The.French.Game.2013.720p.BluRay.x264 - ROUGH[PublicHD]", "The French Game")]
         [TestCase("The.Good.German.2006.720p.BluRay.x264-RlsGrp", "The Good German", Description = "Hardcoded to exclude from German regex")]
+
+        // Game-style release names with version and release groups
+        [TestCase("Cyberpunk.2077.v2.1-CODEX", "Cyberpunk 2077")]
+        [TestCase("Elden.Ring.v1.10-FitGirl", "Elden Ring")]
+        [TestCase("The.Witcher.3.Wild.Hunt.v4.04-PLAZA", "The Witcher 3 Wild Hunt")]
+        [TestCase("Half-Life.2-RELOADED", "Half-Life 2")]
+        [TestCase("Baldurs.Gate.3.v4.1.1.5009956-EMPRESS", "Baldurs Gate 3")]
         public void should_parse_game_title(string postTitle, string title)
         {
             Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Be(title);

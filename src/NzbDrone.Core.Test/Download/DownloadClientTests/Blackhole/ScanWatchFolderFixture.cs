@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
     [TestFixture]
     public class ScanWatchFolderFixture : CoreTest<ScanWatchFolder>
     {
-        protected readonly string _title = "Cyberpunk.2077.v2.1-GOG";
+        protected readonly string _title = "Cyberpunk.2077.v2.1-CODEX";
         protected string _completedDownloadFolder = @"c:\blackhole\completed".AsOsAgnostic();
 
         protected void GivenCompletedItem()

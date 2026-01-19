@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 FileSizeLo = 1000,
                 RemainingSizeLo = 10,
                 Category = "game",
-                NzbName = "Cyberpunk.2077.v2.1-GOG",
+                NzbName = "Cyberpunk.2077.v2.1-CODEX",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } }
             };
 
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             {
                 FileSizeLo = 1000,
                 Category = "game",
-                Name = "Cyberpunk.2077.v2.1-GOG",
+                Name = "Cyberpunk.2077.v2.1-CODEX",
                 DestDir = "somedirectory",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "Some Error",
@@ -66,8 +66,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             {
                 FileSizeLo = 1000,
                 Category = "game",
-                Name = "Cyberpunk.2077.v2.1-GOG",
-                DestDir = "/remote/mount/tv/Cyberpunk.2077.v2.1-GOG",
+                Name = "Cyberpunk.2077.v2.1-CODEX",
+                DestDir = "/remote/mount/tv/Cyberpunk.2077.v2.1-CODEX",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "SUCCESS",
                 UnpackStatus = "NONE",
@@ -403,14 +403,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                 .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic()));
+                .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic()));
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic());
         }
 
         [Test]

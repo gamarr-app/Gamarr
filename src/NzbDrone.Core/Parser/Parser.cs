@@ -24,6 +24,18 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex[] ReportGameTitleRegex = new[]
         {
+            // Game release with version: GameName.v1.2.3-GROUP (must be at beginning to avoid year-like numbers in title being parsed as years)
+            new Regex(@"^(?<title>(?![(\[]).+?)[._]v(?<version>\d+(?:\.\d+)*)[._-](?<releasegroup>[A-Za-z0-9]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Game releases without year - match title up to known release group at END of string (must be before year patterns to keep years in game titles)
+            // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, etc.
+            // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
+            new Regex(@"^(?<title>(?![(\[]).+?)[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP)(?:[-_.]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
+            // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
+            new Regex(@"^\[(?:DL|UL|SP)\]\s*(?<title>[^\[\]]+?)\s*(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Anime [Subgroup] and Year
             new Regex(@"^(?:\[(?<subgroup>.+?)\][-_. ]?)(?<title>(?![(\[]).+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|x|\d+|\]|\W\d+)))+.*?(?<hash>\[\w{8}\])?(?:$|\.)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
@@ -59,16 +71,8 @@ namespace NzbDrone.Core.Parser
             // As a last resort for games that have ( or [ in their title.
             new Regex(@"^(?<title>.+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|\d+|\]|\W\d+)))+(\W+|_|$)(?!\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
-            // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
-            new Regex(@"^\[(?:DL|UL|SP)\]\s*(?<title>[^\[\]]+?)\s*(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
-            // Game releases without year - match title up to release group or version terminator
-            // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, PROPHET, TiNYiSO, RUNE, etc.
-            // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
-            // Store rips: GOG, Steam-RIP, etc.
-            // Version numbers: v1.0, v2.1.5, etc.
-            new Regex(@"^(?<title>(?![(\[]).+?)[-_. ](?:(?:CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|P2P|HI2U|TENOKE|I_KnoW|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|REPACK)(?:[-_. ]|$)|v\d+(?:\.\d+)*[-_. ])", RegexOptions.IgnoreCase | RegexOptions.Compiled)
+            // Game release without version: GameName-GROUP (fallback for scene-style naming, group must be uppercase 4+ chars)
+            new Regex(@"^(?<title>[A-Za-z0-9][A-Za-z0-9._-]*?[A-Za-z0-9])-(?<releasegroup>[A-Z]{4,})$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
@@ -276,6 +280,12 @@ namespace NzbDrone.Core.Parser
                                 if (!subGroup.IsNullOrWhiteSpace())
                                 {
                                     result.ReleaseGroup = subGroup;
+                                }
+
+                                // Check for release group from game-style release regex
+                                if (match[0].Groups["releasegroup"].Success && !match[0].Groups["releasegroup"].Value.IsNullOrWhiteSpace())
+                                {
+                                    result.ReleaseGroup = match[0].Groups["releasegroup"].Value;
                                 }
 
                                 result.HardcodedSubs = ParseHardcodeSubs(title);

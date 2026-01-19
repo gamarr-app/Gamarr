@@ -102,7 +102,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             var page = results.GetAllTiers().First().First();
 
             page.Url.Query.Should().NotContain("steamappid=292030");
-            page.Url.Query.Should().Contain("q=The");
+            page.Url.Query.Should().Contain("q=Witcher");
         }
 
         [Test]

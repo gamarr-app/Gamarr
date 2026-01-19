@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Cyberpunk.2077.v2.1-GOG")
+                                                    .With(h => h.Title = "Cyberpunk.2077.v2.1-CODEX")
                                                     .Build();
 
             var remoteGame = BuildRemoteGame();
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Returns(new List<GameHistory>());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-GOG"))
+                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-CODEX"))
                   .Returns(remoteGame.Game);
         }
 
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         public void should_not_process_when_there_is_a_title_mismatch()
         {
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-GOG"))
+                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-CODEX"))
                   .Returns((Game)null);
 
             Subject.Check(_trackedDownload);
