@@ -4,14 +4,12 @@ import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
+import MetacriticRating from 'Components/MetacriticRating';
 import Popover from 'Components/Tooltip/Popover';
-import TraktRating from 'Components/TraktRating';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import EditGameModal from 'Game/Edit/EditGameModal';
@@ -54,9 +52,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     showPhysicalRelease,
     showReleaseDate,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating,
+    showMetacriticRating,
     showTags,
     showSearchAction,
   } = useSelector(selectPosterOptions);
@@ -328,21 +324,9 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         </div>
       ) : null}
 
-      {showImdbRating && !!ratings.imdb ? (
+      {showMetacriticRating && !!ratings.metacritic ? (
         <div className={styles.title}>
-          <ImdbRating ratings={ratings} iconSize={12} />
-        </div>
-      ) : null}
-
-      {showRottenTomatoesRating && !!ratings.rottenTomatoes ? (
-        <div className={styles.title}>
-          <RottenTomatoRating ratings={ratings} iconSize={12} />
-        </div>
-      ) : null}
-
-      {showTraktRating && !!ratings.trakt ? (
-        <div className={styles.title}>
-          <TraktRating ratings={ratings} iconSize={12} />
+          <MetacriticRating ratings={ratings} iconSize={12} />
         </div>
       ) : null}
 
@@ -381,9 +365,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         originalLanguage={originalLanguage}
         tags={tags}
         showIgdbRating={showIgdbRating}
-        showImdbRating={showImdbRating}
-        showRottenTomatoesRating={showRottenTomatoesRating}
-        showTraktRating={showTraktRating}
+        showMetacriticRating={showMetacriticRating}
         showTags={showTags}
       />
 

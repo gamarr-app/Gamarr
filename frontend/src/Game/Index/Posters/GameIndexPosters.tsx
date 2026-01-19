@@ -148,9 +148,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
       showPhysicalRelease,
       showReleaseDate,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating,
+      showMetacriticRating,
       showTags,
     } = posterOptions;
 
@@ -192,15 +190,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
       heights.push(19);
     }
 
-    if (showImdbRating) {
-      heights.push(19);
-    }
-
-    if (showRottenTomatoesRating) {
-      heights.push(19);
-    }
-
-    if (showTraktRating) {
+    if (showMetacriticRating) {
       heights.push(19);
     }
 
@@ -248,18 +238,8 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
           heights.push(19);
         }
         break;
-      case 'imdbRating':
-        if (!showImdbRating) {
-          heights.push(19);
-        }
-        break;
-      case 'rottenTomatoesRating':
-        if (!showRottenTomatoesRating) {
-          heights.push(19);
-        }
-        break;
-      case 'traktRating':
-        if (!showTraktRating) {
+      case 'metacriticRating':
+        if (!showMetacriticRating) {
           heights.push(19);
         }
         break;

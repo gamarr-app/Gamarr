@@ -57,9 +57,7 @@ function GameIndexPosterOptionsModalContent(
     showPhysicalRelease,
     showReleaseDate,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating,
+    showMetacriticRating,
     showTags,
     showSearchAction,
   } = posterOptions;
@@ -200,37 +198,13 @@ function GameIndexPosterOptionsModalContent(
           </FormGroup>
 
           <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowImdbRating')}</FormLabel>
+            <FormLabel>{translate('ShowMetacriticRating')}</FormLabel>
 
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="showImdbRating"
-              value={showImdbRating}
-              helpText={translate('ShowImdbRatingHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowRottenTomatoesRating')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showRottenTomatoesRating"
-              value={showRottenTomatoesRating}
-              helpText={translate('ShowRottenTomatoesRatingHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowTraktRating')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showTraktRating"
-              value={showTraktRating}
-              helpText={translate('ShowTraktRatingPosterHelpText')}
+              name="showMetacriticRating"
+              value={showMetacriticRating}
+              helpText={translate('ShowMetacriticRatingHelpText')}
               onChange={onPosterOptionChange}
             />
           </FormGroup>
