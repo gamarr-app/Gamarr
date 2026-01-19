@@ -874,8 +874,6 @@
     "ShowRatings": "顯示評分",
     "ShowRelativeDates": "顯示相對日期",
     "ShowIgdbRatingHelpText": "在海報下方顯示 TMDb 評分",
-    "ShowTraktRating": "顯示 Trakt 評分",
-    "ShowTraktRatingPosterHelpText": "在海報下方顯示 Trakt 評分",
     "ShowUnknownGameItems": "顯示未知電影項目",
     "ShowYear": "顯示年份",
     "ShowUnknownGameItemsHelpText": "顯示佇列中沒有對應電影的項目。這可能包括已刪除的電影或任何其他在 {appName} 分類中的項目",

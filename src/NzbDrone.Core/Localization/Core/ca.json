@@ -1949,8 +1949,6 @@
     "SetIndexerFlagsModalTitle": "{modalTitle} - Estableix les banderes de l'indexador",
     "ShowTags": "Mostra les etiquetes",
     "ShowTagsHelpText": "Mostra les etiquetes sota el cartell",
-    "ShowTraktRating": "Mostra la puntuació del Trakt",
-    "ShowTraktRatingPosterHelpText": "Mostra la puntuació del Trakt sota el cartell",
     "SkipFreeSpaceCheckHelpText": "Useu quan {appName} no pugui detectar espai lliure del directori arrel",
     "SkipRedownload": "Omet que es torni a descarregar",
     "SkipRedownloadHelpText": "Evita que {appName} intenti baixar una versió alternativa per a aquest element",

@@ -1,4 +1,4 @@
-﻿{
+{
     "About": "Über",
     "Activity": "Aktivität",
     "AddExclusion": "Ausschluss hinzufügen",
@@ -1840,8 +1840,6 @@
     "NewNonExcluded": "Neu, nicht ausgeschlossen",
     "NoGameReleaseDatesAvailable": "Keine Veröffentlichungstermine auf [TMDb]({url}) für diesen Film verfügbar.",
     "NotificationsTelegramSettingsMetadataLinksGameHelpText": "Füge Links zu den Film-Metadaten hinzu, wenn Benachrichtigungen gesendet werden",
-    "ShowTraktRating": "Trakt-Bewertung anzeigen",
-    "ShowTraktRatingPosterHelpText": "Trakt-Bewertung unter dem Poster anzeigen",
     "TraktRating": "Trakt-Bewertung",
     "TraktVotes": "Trakt-Stimmen",
     "NotificationsGotifySettingsMetadataLinksGameHelpText": "Füge Links zu den Film-Metadaten hinzu, wenn Benachrichtigungen gesendet werden",

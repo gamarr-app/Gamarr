@@ -1458,7 +1458,6 @@
     "TomorrowAt": "Domani alle {time}",
     "YesterdayAt": "Ieri alle {time}",
     "GameCollectionFolderMultipleMissingRootsHealthCheckMessage": "Diverse cartelle principale sono perse per l’importazione: {rootFoldersInfo}",
-    "ShowTraktRatingPosterHelpText": "Mostra valutazione Tomato sotta la locandina",
     "FolderNameTokens": "Token nome file",
     "DefaultNotFoundMessage": "Ti devi essere perso, non c'è nulla da vedere qui.",
     "Completed": "Completo",
