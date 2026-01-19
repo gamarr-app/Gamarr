@@ -46,6 +46,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         private void WithFirstFileUpgradable()
         {
             _firstFile.Quality = new QualityModel(Quality.Scene);
+
+            // Ensure the profile allows upgrades and cutoff is not met
+            _parseResultSingle.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities();
+            _parseResultSingle.Game.QualityProfile.UpgradeAllowed = true;
+            _parseResultSingle.Game.QualityProfile.Cutoff = Quality.Steam.Id;
+
+            // Set the release to a higher QUALITY (not just revision) so it's a quality upgrade
+            // This bypasses the 7-day proper check since it's not just a revision upgrade
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
         }
 
         [Test]

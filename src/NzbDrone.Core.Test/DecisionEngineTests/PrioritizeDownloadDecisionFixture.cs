@@ -574,6 +574,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void ensure_download_decisions_indexer_priority_is_not_perfered_over_quality()
         {
+            // Quality order: Scene (4) < Steam (9) < Uplay (12)
             var remoteGame1 = GivenRemoteGame(new QualityModel(Quality.Uplay), indexerPriority: 25);
             var remoteGame2 = GivenRemoteGame(new QualityModel(Quality.Steam), indexerPriority: 50);
             var remoteGame3 = GivenRemoteGame(new QualityModel(Quality.Scene), indexerPriority: 1);
@@ -582,10 +583,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var decisions = new List<DownloadDecision>();
             decisions.AddRange(new[] { new DownloadDecision(remoteGame1), new DownloadDecision(remoteGame2), new DownloadDecision(remoteGame3), new DownloadDecision(remoteGame4) });
 
+            // Quality takes priority over indexer priority
+            // Expected order: Uplay (highest), then Steam (lower indexer priority first), then Scene (lowest)
             var qualifiedReports = Subject.PrioritizeDecisionsForGames(decisions);
-            qualifiedReports.First().RemoteGame.Should().Be(remoteGame4);
-            qualifiedReports.Skip(1).First().RemoteGame.Should().Be(remoteGame2);
-            qualifiedReports.Skip(2).First().RemoteGame.Should().Be(remoteGame1);
+            qualifiedReports.First().RemoteGame.Should().Be(remoteGame1);
+            qualifiedReports.Skip(1).First().RemoteGame.Should().Be(remoteGame4);
+            qualifiedReports.Skip(2).First().RemoteGame.Should().Be(remoteGame2);
             qualifiedReports.Last().RemoteGame.Should().Be(remoteGame3);
         }
     }
