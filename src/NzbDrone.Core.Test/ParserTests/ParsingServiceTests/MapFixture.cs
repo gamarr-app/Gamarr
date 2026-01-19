@@ -129,7 +129,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         {
             GivenMatchByGameTitle();
 
-            Subject.Map(_parsedGameInfo, "", 0, null);
+            Subject.Map(_parsedGameInfo, 0, 0, null);
 
             Mocker.GetMock<IGameService>()
                 .Verify(v => v.FindByTitle(It.IsAny<List<string>>(), It.IsAny<int>(), It.IsAny<List<string>>(), null), Times.Once());
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         {
             GivenMatchByGameTitle();
 
-            Subject.Map(_parsedGameInfo, "", 0, _gameSearchCriteria);
+            Subject.Map(_parsedGameInfo, 0, 0, _gameSearchCriteria);
 
             Mocker.GetMock<IGameService>()
                   .Verify(v => v.FindByTitle(It.IsAny<string>()), Times.Never());
@@ -149,26 +149,26 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_match_alternative_title()
         {
-            Subject.Map(_alternativeTitleInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_alternativeTitleInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
 
         [Test]
         public void should_match_translation_title()
         {
-            Subject.Map(_translationTitleInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_translationTitleInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
 
         [Test]
         public void should_match_roman_title()
         {
-            Subject.Map(_romanTitleInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_romanTitleInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
 
         [Test]
         public void should_match_umlauts()
         {
-            Subject.Map(_umlautInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
-            Subject.Map(_umlautAltInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_umlautInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_umlautAltInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
     }
 }

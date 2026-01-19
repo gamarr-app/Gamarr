@@ -20,23 +20,14 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _game = Builder<Game>
                       .CreateNew()
                       .With(s => s.Title = "Game Title")
-                      .With(s => s.ImdbId = "tt12345")
                       .With(s => s.IgdbId = 123456)
+                      .With(s => s.SteamAppId = 789012)
                       .Build();
 
             _namingConfig = NamingConfig.Default;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
-        }
-
-        [Test]
-        public void should_add_imdb_id()
-        {
-            _namingConfig.GameFolderFormat = "{Game Title} ({ImdbId})";
-
-            Subject.GetGameFolder(_game)
-                   .Should().Be($"Game Title ({_game.ImdbId})");
         }
 
         [Test]
@@ -49,35 +40,12 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [Test]
-        public void should_add_imdb_tag()
+        public void should_add_steam_app_id()
         {
-            _namingConfig.GameFolderFormat = "{Game Title} {imdb-{ImdbId}}";
+            _namingConfig.GameFolderFormat = "{Game Title} ({SteamAppId})";
 
             Subject.GetGameFolder(_game)
-                   .Should().Be($"Game Title {{imdb-{_game.ImdbId}}}");
-        }
-
-        [TestCase("{Game Title} {imdb-{ImdbId}}")]
-        [TestCase("{Game Title} {imdbid-{ImdbId}}")]
-        [TestCase("{Game Title} {{imdb-{ImdbId}}}")]
-        [TestCase("{Game Title} {{imdbid-{ImdbId}}}")]
-        public void should_skip_imdb_tag_if_null(string gameFormat)
-        {
-            _namingConfig.GameFolderFormat = gameFormat;
-
-            _game.ImdbId = null;
-
-            Subject.GetGameFolder(_game)
-                   .Should().Be("Game Title");
-        }
-
-        [TestCase("{Game Title} {{imdb-{ImdbId}}}")]
-        public void should_handle_imdb_tag_curly_brackets(string gameFormat)
-        {
-            _namingConfig.GameFolderFormat = gameFormat;
-
-            Subject.GetGameFolder(_game)
-                .Should().Be($"Game Title {{{{imdb-{_game.ImdbId}}}}}");
+                   .Should().Be($"Game Title ({_game.SteamAppId})");
         }
 
         [TestCase("{Game Title} {{igdb-{IgdbId}}}")]
@@ -87,6 +55,15 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
             Subject.GetGameFolder(_game)
                 .Should().Be($"Game Title {{{{igdb-{_game.IgdbId}}}}}");
+        }
+
+        [TestCase("{Game Title} {{steam-{SteamAppId}}}")]
+        public void should_handle_steam_tag_curly_brackets(string gameFormat)
+        {
+            _namingConfig.GameFolderFormat = gameFormat;
+
+            Subject.GetGameFolder(_game)
+                .Should().Be($"Game Title {{{{steam-{_game.SteamAppId}}}}}");
         }
     }
 }

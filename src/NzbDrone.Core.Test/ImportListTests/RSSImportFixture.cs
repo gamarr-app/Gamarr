@@ -35,7 +35,6 @@ namespace NzbDrone.Core.Test.ImportList
             var result = Subject.Fetch();
 
             result.Games.First().Title.Should().Be("Think Like a Man Too");
-            result.Games.First().ImdbId.Should().Be("tt2239832");
         }
     }
 }

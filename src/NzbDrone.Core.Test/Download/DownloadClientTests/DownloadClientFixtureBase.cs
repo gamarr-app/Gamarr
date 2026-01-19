@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 .Returns(30);
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), (SearchCriteriaBase)null))
+                .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), (SearchCriteriaBase)null))
                 .Returns(() => CreateRemoteGame());
 
             Mocker.GetMock<IHttpClient>()

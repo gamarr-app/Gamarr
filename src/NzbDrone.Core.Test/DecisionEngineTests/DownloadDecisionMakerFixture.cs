@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>())).Returns(_remoteEpisode);
+                  .Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>())).Returns(_remoteEpisode);
         }
 
         private void GivenSpecifications(params Mock<IDownloadDecisionEngineSpecification>[] mocks)
@@ -125,7 +125,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
             _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
             _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetSearchDecision(_reports, new GameSearchCriteria()).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
             _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
             _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
@@ -166,7 +166,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1);
 
-            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
                      .Throws<TestException>();
 
             _reports = new List<ReleaseInfo>
@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports);
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Exactly(_reports.Count));
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Exactly(_reports.Count));
 
             ExceptionVerification.ExpectedErrors(3);
         }
@@ -229,7 +229,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1);
 
-            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
                      .Throws<TestException>();
 
             _reports = new List<ReleaseInfo>

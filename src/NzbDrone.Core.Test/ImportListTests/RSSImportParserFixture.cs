@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Linq;
 using System.Text;
 using FluentAssertions;
@@ -28,7 +27,6 @@ namespace NzbDrone.Core.Test.ImportList
             var result = Subject.ParseResponse(CreateResponse("http://my.indexer.com/api?q=My+Favourite+Show", xml));
 
             result.First().Title.Should().Be("Think Like a Man Too");
-            result.First().ImdbId.Should().Be("tt2239832");
         }
     }
 }

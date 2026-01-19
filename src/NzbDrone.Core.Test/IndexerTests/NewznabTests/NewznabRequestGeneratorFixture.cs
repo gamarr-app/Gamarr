@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977, IgdbId = 11 },
+                Game = new Games.Game { Title = "Star Wars", Year = 1977, IgdbId = 11 },
                 SceneTitles = new List<string> { "Star Wars" }
             };
 
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_not_search_by_imdbid_if_not_supported()
+        public void should_not_search_by_igdbid_if_not_supported()
         {
             _capabilities.SupportedGameSearchParameters = new[] { "q" };
 
@@ -101,21 +101,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().NotContain("imdbid=0076759");
+            page.Url.Query.Should().NotContain("igdbid=");
             page.Url.Query.Should().Contain("q=Star");
-        }
-
-        [Test]
-        public void should_search_by_imdbid_if_supported()
-        {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
-
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.GetTier(0).Should().HaveCount(1);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().Contain("imdbid=0076759");
         }
 
         [Test]
@@ -132,23 +119,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_prefer_search_by_igdbid_if_rid_supported()
+        public void should_use_igdbid_search_when_supported()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
-
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.GetTier(0).Should().HaveCount(1);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().Contain("igdbid=11");
-            page.Url.Query.Should().NotContain("imdbid=0076759");
-        }
-
-        [Test]
-        public void should_use_aggregrated_id_search_if_supported()
-        {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid" };
             _capabilities.SupportsAggregateIdSearch = true;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
@@ -157,7 +130,6 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             var page = results.GetTier(0).First().First();
 
             page.Url.Query.Should().Contain("igdbid=11");
-            page.Url.Query.Should().Contain("imdbid=0076759");
         }
 
         [Test]
@@ -178,10 +150,10 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_not_use_aggregrated_id_search_if_no_ids_are_known()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q" };
             _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
 
-            _gameSearchCriteria.Game.ImdbId = null;
+            _gameSearchCriteria.Game.IgdbId = 0;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
@@ -193,7 +165,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_fallback_to_q()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid" };
             _capabilities.SupportsAggregateIdSearch = true;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
@@ -202,7 +174,6 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             var pageTier2 = results.GetTier(1).First().First();
 
             pageTier2.Url.Query.Should().NotContain("igdbid=11");
-            pageTier2.Url.Query.Should().NotContain("imdbid=0076759");
             pageTier2.Url.Query.Should().Contain("q=");
         }
 
