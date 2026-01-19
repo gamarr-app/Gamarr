@@ -61,8 +61,15 @@ namespace Gamarr.Api.V3.Games
         public GameResource SearchBySteamAppId(int steamAppId)
         {
             var availDelay = _configService.AvailabilityDelay;
-            var result = new Game { GameMetadata = _gameInfo.GetGameBySteamAppId(steamAppId) };
-            var translation = result.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
+            var metadata = _gameInfo.GetGameBySteamAppId(steamAppId);
+
+            if (metadata == null)
+            {
+                return null;
+            }
+
+            var result = new Game { GameMetadata = metadata };
+            var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
             return result.ToResource(availDelay, translation);
         }
 
@@ -74,8 +81,15 @@ namespace Gamarr.Api.V3.Games
         public GameResource SearchByIgdbId(int igdbId)
         {
             var availDelay = _configService.AvailabilityDelay;
-            var result = new Game { GameMetadata = _gameInfo.GetGameInfo(igdbId).Item1 };
-            var translation = result.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
+            var metadata = _gameInfo.GetGameInfo(igdbId).Item1;
+
+            if (metadata == null)
+            {
+                return null;
+            }
+
+            var result = new Game { GameMetadata = metadata };
+            var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
             return result.ToResource(availDelay, translation);
         }
 
@@ -84,10 +98,16 @@ namespace Gamarr.Api.V3.Games
         [Obsolete("IMDb lookup is not applicable to games")]
         public GameResource SearchByImdbId(string imdbId)
         {
-            var result = new Game { GameMetadata = _gameInfo.GetGameByImdbId(imdbId) };
-
             var availDelay = _configService.AvailabilityDelay;
-            var translation = result.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
+            var metadata = _gameInfo.GetGameByImdbId(imdbId);
+
+            if (metadata == null)
+            {
+                return null;
+            }
+
+            var result = new Game { GameMetadata = metadata };
+            var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
             return result.ToResource(availDelay, translation);
         }
 
