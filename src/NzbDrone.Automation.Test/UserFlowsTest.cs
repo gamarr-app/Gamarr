@@ -157,6 +157,91 @@ namespace NzbDrone.Automation.Test
         }
 
         [Test]
+        public async Task Add_Game_Full_Flow_Works()
+        {
+            // First, set up required configuration via API
+            var apiKey = await GetApiKey();
+
+            // Create root folder
+            await CreateRootFolderAsync(apiKey, "/tmp/gamarr-test-games");
+
+            // Navigate to add game page
+            await NavigateToAsync("/add/new");
+
+            // Search for a known Steam game
+            var searchInput = Page.Locator("input[class*='searchInput']");
+            await Expect(searchInput).ToBeVisibleAsync();
+            await searchInput.FillAsync("The Witness");
+            await searchInput.PressAsync("Enter");
+
+            // Wait for search results to appear
+            await Page.Locator("div[class*='searchResult']").First.WaitForAsync(new LocatorWaitForOptions
+            {
+                State = WaitForSelectorState.Visible,
+                Timeout = 30000
+            });
+
+            await TakeScreenshotAsync("add_game_search_results");
+
+            // Click on the first search result to open add modal
+            await Page.Locator("div[class*='searchResult']").First.ClickAsync();
+
+            // Wait for the modal to appear
+            await Page.Locator("div[class*='ModalContent']").WaitForAsync(new LocatorWaitForOptions
+            {
+                State = WaitForSelectorState.Visible,
+                Timeout = 10000
+            });
+
+            await TakeScreenshotAsync("add_game_modal");
+
+            // Verify modal has required elements
+            await Expect(Page.Locator("div[class*='ModalContent']")).ToBeVisibleAsync();
+
+            // Click the Add Game button
+            var addButton = Page.GetByRole(AriaRole.Button, new () { Name = "Add Game" });
+            await Expect(addButton).ToBeVisibleAsync();
+            await addButton.ClickAsync();
+
+            // Wait for the modal to close or redirect
+            await Task.Delay(2000);
+
+            // Take screenshot of result
+            await TakeScreenshotAsync("add_game_result");
+
+            // Verify no JavaScript errors occurred
+            await AssertNoJavaScriptErrors();
+        }
+
+        private async Task<string> GetApiKey()
+        {
+            // Get API key from config endpoint
+            var response = await Page.APIRequest.GetAsync($"{BaseUrl}/api/v3/config/host");
+            var json = await response.JsonAsync();
+            return json?.GetProperty("apiKey").GetString() ?? "";
+        }
+
+        private async Task CreateRootFolderAsync(string apiKey, string path)
+        {
+            // Create the directory if it doesn't exist
+            System.IO.Directory.CreateDirectory(path);
+
+            // Create root folder via API
+            try
+            {
+                await Page.APIRequest.PostAsync($"{BaseUrl}/api/v3/rootfolder", new APIRequestContextOptions
+                {
+                    Headers = new Dictionary<string, string> { { "X-Api-Key", apiKey } },
+                    DataObject = new { path }
+                });
+            }
+            catch
+            {
+                // Root folder might already exist, that's ok
+            }
+        }
+
+        [Test]
         public async Task Add_Game_Page_Has_Required_Elements()
         {
             await NavigateToAsync("/add/new");
