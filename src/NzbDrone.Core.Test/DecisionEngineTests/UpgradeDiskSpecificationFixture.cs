@@ -238,7 +238,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_if_cutoff_is_not_met_and_language_is_higher()
+        public void should_return_true_if_cutoff_is_not_met_and_quality_is_higher()
         {
             GivenProfile(new QualityProfile
             {
@@ -247,7 +247,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.Scene, new Revision(version: 2)));
+            // File has lower quality, release has higher quality
+            GivenFileQuality(new QualityModel(Quality.Scene, new Revision(version: 1)));
+            GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 1)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
 

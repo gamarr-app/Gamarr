@@ -105,8 +105,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_when_quality_in_queue_is_lower()
         {
-            _game.QualityProfile.Cutoff = Quality.GOG.Id;
+            _game.QualityProfile.Cutoff = Quality.Steam.Id;
 
+            // Set _remoteGame to have higher quality (GOG)
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG);
+
+            // Queue item has lower quality (Scene)
             var remoteGame = Builder<RemoteGame>.CreateNew()
                 .With(r => r.Game = _game)
                 .With(r => r.ParsedGameInfo = new ParsedGameInfo

@@ -146,25 +146,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_release_has_higher_quality_and_cutoff_is_not_already_met()
         {
-            var profile = new QualityProfile
-            {
-                Items = Qualities.QualityFixture.GetDefaultQualities(),
-                UpgradeAllowed = true,
-                Cutoff = Quality.Origin.Id
-            };
-
-            Subject.IsUpgradable(
-                    profile,
-                    new QualityModel(Quality.Uplay, new Revision(version: 1)),
-                    new List<CustomFormat>(),
-                    new QualityModel(Quality.Origin, new Revision(version: 1)),
-                    new List<CustomFormat>())
-                .Should().Be(UpgradeableRejectReason.None);
-        }
-
-        [Test]
-        public void should_return_false_if_release_has_higher_quality_and_cutoff_is_already_met()
-        {
+            // Quality order: Scene < GOG < Steam < Epic < Origin < Uplay
             var profile = new QualityProfile
             {
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
@@ -174,9 +156,29 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                     profile,
-                    new QualityModel(Quality.Uplay, new Revision(version: 1)),
-                    new List<CustomFormat>(),
                     new QualityModel(Quality.Origin, new Revision(version: 1)),
+                    new List<CustomFormat>(),
+                    new QualityModel(Quality.Uplay, new Revision(version: 1)),
+                    new List<CustomFormat>())
+                .Should().Be(UpgradeableRejectReason.None);
+        }
+
+        [Test]
+        public void should_return_false_if_release_has_higher_quality_and_cutoff_is_already_met()
+        {
+            // Quality order: Scene < GOG < Steam < Epic < Origin < Uplay
+            var profile = new QualityProfile
+            {
+                Items = Qualities.QualityFixture.GetDefaultQualities(),
+                UpgradeAllowed = true,
+                Cutoff = Quality.Origin.Id
+            };
+
+            Subject.IsUpgradable(
+                    profile,
+                    new QualityModel(Quality.Origin, new Revision(version: 1)),
+                    new List<CustomFormat>(),
+                    new QualityModel(Quality.Uplay, new Revision(version: 1)),
                     new List<CustomFormat>())
                 .Should().Be(UpgradeableRejectReason.QualityCutoff);
         }
