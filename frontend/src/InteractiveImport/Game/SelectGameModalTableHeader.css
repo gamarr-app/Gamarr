@@ -10,7 +10,7 @@
   flex: 0 0 70px;
 }
 
-.imdbId,
+.steamAppId,
 .igdbId {
   composes: headerCell  from '~Components/Table/VirtualTableHeaderCell.css';
 

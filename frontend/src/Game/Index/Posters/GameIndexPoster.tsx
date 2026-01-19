@@ -66,8 +66,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     status,
     images,
     titleSlug,
+    steamAppId,
     igdbId,
-    imdbId,
     youTubeTrailerId,
     hasFile,
     isAvailable,
@@ -182,8 +182,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
               title={translate('Links')}
               body={
                 <GameDetailsLinks
+                  steamAppId={steamAppId}
                   igdbId={igdbId}
-                  imdbId={imdbId}
                   youTubeTrailerId={youTubeTrailerId}
                 />
               }

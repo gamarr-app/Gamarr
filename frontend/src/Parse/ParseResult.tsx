@@ -26,7 +26,7 @@ function ParseResult(props: ParseResultProps) {
     releaseHash,
     quality,
     igdbId,
-    imdbId,
+    steamAppId,
   } = parsedGameInfo;
 
   const finalLanguages = languages ?? parsedGameInfo.languages;
@@ -66,12 +66,12 @@ function ParseResult(props: ParseResultProps) {
           data={releaseHash ? releaseHash : '-'}
         />
 
-        {igdbId ? (
-          <ParseResultItem title={translate('IGDBId')} data={igdbId} />
+        {steamAppId ? (
+          <ParseResultItem title={translate('SteamAppId')} data={steamAppId} />
         ) : null}
 
-        {imdbId ? (
-          <ParseResultItem title={translate('IMDbId')} data={imdbId} />
+        {igdbId ? (
+          <ParseResultItem title={translate('IGDBId')} data={igdbId} />
         ) : null}
       </FieldSet>
 
