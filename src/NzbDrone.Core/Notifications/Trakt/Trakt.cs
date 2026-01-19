@@ -13,6 +13,8 @@ using NzbDrone.Core.Notifications.Trakt.Resource;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Validation;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with Trakt)
+
 namespace NzbDrone.Core.Notifications.Trakt
 {
     public class Trakt : NotificationBase<TraktSettings>

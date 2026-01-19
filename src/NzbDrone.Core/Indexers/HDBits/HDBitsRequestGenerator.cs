@@ -26,32 +26,28 @@ namespace NzbDrone.Core.Indexers.HDBits
             var pageableRequests = new IndexerPageableRequestChain();
             var query = new TorrentQuery();
 
-            if (TryAddSearchParameters(query, searchCriteria))
-            {
-                pageableRequests.Add(GetRequest(query));
-            }
+            // IMDb search removed - IMDb is a movie database and doesn't apply to games
+            // TODO: HDBits is a movie-focused tracker and may not be suitable for game searches
+            // For now, use a basic query without IMDb ID filtering
+            // The indexer may return no results for games
+
+            // Attempt to add any search parameters that are available
+            TryAddSearchParameters(query, searchCriteria);
+            pageableRequests.Add(GetRequest(query));
 
             return pageableRequests;
         }
 
         private bool TryAddSearchParameters(TorrentQuery query, SearchCriteriaBase searchCriteria)
         {
-            if (searchCriteria.Game.GameMetadata.Value.ImdbId.IsNullOrWhiteSpace())
-            {
-                return false;
-            }
+            // IMDb search removed - IMDb is a movie database and doesn't apply to games
+            // HDBits relies heavily on IMDb for identification, which won't work for games
+            // TODO: Consider whether HDBits indexer should be disabled/removed for game manager
+            // as it's a movie-focused tracker
 
-            var imdbId = int.Parse(searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2));
-
-            if (imdbId != 0)
-            {
-                query.ImdbInfo ??= new ImdbInfo();
-                query.ImdbInfo.Id = imdbId;
-
-                return true;
-            }
-
-            return false;
+            // Return true to indicate we can proceed with a basic search
+            // even without IMDb filtering
+            return true;
         }
 
         public Func<IDictionary<string, string>> GetCookies { get; set; }

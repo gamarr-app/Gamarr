@@ -58,7 +58,9 @@ namespace NzbDrone.Core.ImportLists
 
         public List<IImportList> Discoverable()
         {
-            var enabledImportLists = GetAvailableProviders().Where(n => n.GetType() == typeof(GamarrList.GamarrListImport) || n.GetType() == typeof(TMDb.Popular.TMDbPopularImport));
+            // TMDb import lists have been removed as they are movie-specific
+            // Only GamarrList is used for game discovery
+            var enabledImportLists = GetAvailableProviders().Where(n => n.GetType() == typeof(GamarrList.GamarrListImport));
 
             return enabledImportLists.ToList();
         }

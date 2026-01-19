@@ -10,6 +10,8 @@ using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
+
 namespace NzbDrone.Core.Games
 {
     public interface IGameRepository : IBasicRepository<Game>

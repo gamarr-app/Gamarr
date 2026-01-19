@@ -13,6 +13,8 @@ using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.RomanNumerals;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
+
 namespace NzbDrone.Core.Games
 {
     public interface IGameService

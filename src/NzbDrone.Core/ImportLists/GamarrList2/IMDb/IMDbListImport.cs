@@ -9,15 +9,22 @@ using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.ImportLists.GamarrList2.IMDbList
 {
+    /// <summary>
+    /// DEPRECATED: IMDb lists are movie-specific and do not apply to games.
+    /// This class is kept for backwards compatibility but should not be used.
+    /// Use IGDB-based import lists instead.
+    /// </summary>
+    [Obsolete("IMDb lists are movie-specific and do not apply to games. Use IGDB-based lists instead.")]
     public class IMDbListImport : HttpImportListBase<IMDbListSettings>
     {
         private readonly IHttpRequestBuilderFactory _gamarrMetadata;
 
-        public override string Name => "IMDb Lists";
+        public override string Name => "IMDb Lists (Deprecated)";
 
         public override ImportListType ListType => ImportListType.Other;
         public override TimeSpan MinRefreshInterval => TimeSpan.FromHours(12);
-        public override bool Enabled => true;
+        // Disabled by default since IMDb doesn't apply to games
+        public override bool Enabled => false;
         public override bool EnableAuto => false;
 
         public IMDbListImport(IGamarrCloudRequestBuilder requestBuilder,

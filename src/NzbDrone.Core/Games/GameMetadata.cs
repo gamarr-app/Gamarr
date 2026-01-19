@@ -6,6 +6,8 @@ using NzbDrone.Core.Languages;
 using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Translations;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId property
+
 namespace NzbDrone.Core.Games
 {
     public class GameMetadata : Entity<GameMetadata>
@@ -44,7 +46,14 @@ namespace NzbDrone.Core.Games
         public DateTime? LastInfoSync { get; set; }
         public int Runtime { get; set; }
         public string Website { get; set; }
+
+        /// <summary>
+        /// DEPRECATED: IMDb is a movie database and does not apply to games.
+        /// This field is kept for backwards compatibility but will always be null/empty for games.
+        /// </summary>
+        [Obsolete("IMDb is a movie database and does not apply to games. This field will always be null/empty.")]
         public string ImdbId { get; set; }
+
         public string Title { get; set; }
         public string CleanTitle { get; set; }
         public string SortTitle { get; set; }

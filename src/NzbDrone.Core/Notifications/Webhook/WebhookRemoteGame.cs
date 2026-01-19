@@ -1,6 +1,8 @@
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with webhooks)
+
 namespace NzbDrone.Core.Notifications.Webhook
 {
     public class WebhookRemoteGame

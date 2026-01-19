@@ -19,14 +19,20 @@ public static class NotificationMetadataLinkGenerator
         {
             var linkType = (MetadataLinkType)type;
 
-            if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
-            {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Imdb, "IMDb", $"https://www.imdb.com/title/{game.ImdbId}"));
-            }
-
+            // IGDB - Internet Game Database (primary link for games)
             if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "TMDb", $"https://www.thegamedb.org/game/{game.IgdbId}"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
+            }
+
+            // IMDb links are deprecated for games - IMDb is a movie database
+            // Keeping for backwards compatibility but not generating links
+            // if (linkType == MetadataLinkType.Imdb) { /* Deprecated - no-op */ }
+
+            // Trakt link for games
+            if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
+            {
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Trakt, "Trakt", $"https://trakt.tv/search/igdb/{game.IgdbId}?id_type=game"));
             }
         }
 

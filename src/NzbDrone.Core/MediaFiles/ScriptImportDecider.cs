@@ -13,6 +13,8 @@ using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Tags;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with scripts)
+
 namespace NzbDrone.Core.MediaFiles
 {
     public interface IImportScript

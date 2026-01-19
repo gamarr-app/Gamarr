@@ -5,6 +5,8 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.IndexerSearch.Definitions;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for SupportsImdbSearch property
+
 namespace NzbDrone.Core.Indexers.Newznab
 {
     public class NewznabRequestGenerator : IIndexerRequestGenerator
@@ -33,14 +35,18 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
         }
 
+        /// <summary>
+        /// DEPRECATED: IMDb search is not applicable for games - IMDb is a movie database.
+        /// This property is kept for backwards compatibility but will always return false.
+        /// Use SupportsIgdbSearch instead.
+        /// </summary>
+        [Obsolete("IMDb search is not applicable for games. Use IGDB search instead.")]
         private bool SupportsImdbSearch
         {
             get
             {
-                var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
-
-                return capabilities.SupportedGameSearchParameters != null &&
-                       capabilities.SupportedGameSearchParameters.Contains("imdbid");
+                // IMDb search disabled for games - IMDb is a movie database
+                return false;
             }
         }
 
@@ -115,41 +121,16 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         private void AddGameIdPageableRequests(IndexerPageableRequestChain chain, int maxPages, IEnumerable<int> categories, SearchCriteriaBase searchCriteria)
         {
+            // IGDB is the primary metadata source for games
             var includeIgdbSearch = SupportsIgdbSearch && searchCriteria.Game.GameMetadata.Value.IgdbId > 0;
-            var includeImdbSearch = SupportsImdbSearch && searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace();
+            // IMDb search removed - IMDb is a movie database and doesn't apply to games
 
-            if (SupportsAggregatedIdSearch && (includeIgdbSearch || includeImdbSearch))
+            if (includeIgdbSearch)
             {
-                var ids = "";
-
-                if (includeIgdbSearch)
-                {
-                    ids += $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}";
-                }
-
-                if (includeImdbSearch)
-                {
-                    ids += $"&imdbid={searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2)}";
-                }
-
-                chain.Add(GetPagedRequests(maxPages, categories, "game", ids));
-            }
-            else
-            {
-                if (includeIgdbSearch)
-                {
-                    chain.Add(GetPagedRequests(maxPages,
-                        categories,
-                        "game",
-                        $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
-                }
-                else if (includeImdbSearch)
-                {
-                    chain.Add(GetPagedRequests(maxPages,
-                        categories,
-                        "game",
-                        $"&imdbid={searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2)}"));
-                }
+                chain.Add(GetPagedRequests(maxPages,
+                    categories,
+                    "game",
+                    $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
             }
 
             if (SupportsSearch && searchCriteria.Game.Year > 0)

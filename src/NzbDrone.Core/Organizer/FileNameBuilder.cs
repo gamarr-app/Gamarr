@@ -17,6 +17,8 @@ using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Qualities;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with file naming)
+
 namespace NzbDrone.Core.Organizer
 {
     public interface IBuildFileNames

@@ -9,6 +9,8 @@ using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for IMDb parsing methods
+
 namespace NzbDrone.Core.Parser
 {
     public static class Parser
@@ -320,20 +322,16 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
+        /// <summary>
+        /// DEPRECATED: IMDb is a movie database and does not apply to games.
+        /// This method is kept for backwards compatibility but should not be used.
+        /// Returns empty string as IMDb IDs are not relevant for game releases.
+        /// </summary>
+        [Obsolete("IMDb is a movie database and does not apply to games. This method always returns empty string.")]
         public static string ParseImdbId(string title)
         {
-            var match = ReportImdbId.Match(title);
-            if (match.Success)
-            {
-                if (match.Groups["imdbid"].Value != null)
-                {
-                    if (match.Groups["imdbid"].Length == 9 || match.Groups["imdbid"].Length == 10)
-                    {
-                        return match.Groups["imdbid"].Value;
-                    }
-                }
-            }
-
+            // IMDb parsing disabled for games - IMDb is a movie database
+            // Return empty string to indicate no IMDb ID found
             return "";
         }
 
@@ -377,21 +375,16 @@ namespace NzbDrone.Core.Parser
             return t;
         }
 
+        /// <summary>
+        /// DEPRECATED: IMDb is a movie database and does not apply to games.
+        /// This method is kept for backwards compatibility but should not be used.
+        /// Returns null as IMDb IDs are not relevant for game releases.
+        /// </summary>
+        [Obsolete("IMDb is a movie database and does not apply to games. This method always returns null.")]
         public static string NormalizeImdbId(string imdbId)
         {
-            var imdbRegex = new Regex(@"^(\d{1,10}|(tt)\d{1,10})$");
-
-            if (!imdbRegex.IsMatch(imdbId))
-            {
-                return null;
-            }
-
-            if (imdbId.Length > 2)
-            {
-                imdbId = imdbId.Replace("tt", "").PadLeft(7, '0');
-                return $"tt{imdbId}";
-            }
-
+            // IMDb normalization disabled for games - IMDb is a movie database
+            // Return null to indicate no valid IMDb ID
             return null;
         }
 

@@ -194,40 +194,18 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             return games;
         }
 
+        /// <summary>
+        /// DEPRECATED: IMDb is a movie database and does not apply to games.
+        /// This method is kept for backwards compatibility but always returns null.
+        /// Use GetGameInfo with IGDB ID instead.
+        /// </summary>
+        [Obsolete("IMDb is a movie database and does not apply to games. Use GetGameInfo with IGDB ID instead.")]
         public GameMetadata GetGameByImdbId(string imdbId)
         {
-            imdbId = Parser.Parser.NormalizeImdbId(imdbId);
-
-            if (imdbId == null)
-            {
-                return null;
-            }
-
-            var httpRequest = _gamarrMetadata.Create()
-                                             .SetSegment("route", "game/imdb")
-                                             .Resource(imdbId.ToString())
-                                             .Build();
-
-            httpRequest.AllowAutoRedirect = true;
-            httpRequest.SuppressHttpError = true;
-
-            var httpResponse = _httpClient.Get<List<GameResource>>(httpRequest);
-
-            if (httpResponse.HasHttpError)
-            {
-                if (httpResponse.StatusCode == HttpStatusCode.NotFound)
-                {
-                    throw new GameNotFoundException(imdbId);
-                }
-                else
-                {
-                    throw new HttpException(httpRequest, httpResponse);
-                }
-            }
-
-            var game = httpResponse.Resource.SelectList(MapGame).FirstOrDefault();
-
-            return game;
+            // IMDb lookup disabled for games - IMDb is a movie database
+            // Return null to indicate no game found
+            _logger.Debug("GetGameByImdbId called but IMDb is not applicable for games. Returning null.");
+            return null;
         }
 
         public GameMetadata MapGame(GameResource resource)
@@ -236,7 +214,8 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             var altTitles = new List<AlternativeTitle>();
 
             game.IgdbId = resource.IgdbId;
-            game.ImdbId = resource.ImdbId;
+            // IMDb ID is no longer populated - IMDb is a movie database, not applicable for games
+            // game.ImdbId = resource.ImdbId;
             game.Title = resource.Title;
             game.OriginalTitle = resource.OriginalTitle;
             game.CleanTitle = resource.Title.CleanGameTitle();
@@ -363,17 +342,13 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                     newGame = GetGameInfo(game.IgdbId).Item1;
                 }
-                else if (game.ImdbId.IsNotNullOrWhiteSpace())
-                {
-                    newGame = _gameMetadataService.FindByImdbId(Parser.Parser.NormalizeImdbId(game.ImdbId));
-
-                    if (newGame != null)
-                    {
-                        return newGame;
-                    }
-
-                    newGame = GetGameByImdbId(game.ImdbId);
-                }
+                // IMDb lookup removed - IMDb is a movie database, not applicable for games
+                // else if (game.ImdbId.IsNotNullOrWhiteSpace())
+                // {
+                //     newGame = _gameMetadataService.FindByImdbId(Parser.Parser.NormalizeImdbId(game.ImdbId));
+                //     if (newGame != null) { return newGame; }
+                //     newGame = GetGameByImdbId(game.ImdbId);
+                // }
                 else
                 {
                     var yearStr = "";
@@ -448,18 +423,11 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                         yearTerm = parserResult.Year.ToString();
                     }
 
-                    if (parserResult.ImdbId.IsNotNullOrWhiteSpace())
-                    {
-                        try
-                        {
-                            var gameLookup = GetGameByImdbId(parserResult.ImdbId);
-                            return gameLookup == null ? new List<Game>() : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
-                        }
-                        catch (Exception)
-                        {
-                            return new List<Game>();
-                        }
-                    }
+                    // IMDb lookup removed - IMDb is a movie database, not applicable for games
+                    // if (parserResult.ImdbId.IsNotNullOrWhiteSpace())
+                    // {
+                    //     // Deprecated: GetGameByImdbId always returns null for games
+                    // }
 
                     if (parserResult.IgdbId > 0)
                     {
@@ -477,26 +445,11 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                 parserTitle = StripTrailingTheFromTitle(parserTitle);
 
+                // IMDb search removed - IMDb is a movie database, not applicable for games
                 if (lowerTitle.StartsWith("imdb:") || lowerTitle.StartsWith("imdbid:"))
                 {
-                    var slug = lowerTitle.Split(':')[1].Trim();
-
-                    var imdbid = slug;
-
-                    if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace))
-                    {
-                        return new List<Game>();
-                    }
-
-                    try
-                    {
-                        var gameLookup = GetGameByImdbId(imdbid);
-                        return gameLookup == null ? new List<Game>() : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
-                    }
-                    catch (GameNotFoundException)
-                    {
-                        return new List<Game>();
-                    }
+                    _logger.Debug("IMDb search requested but IMDb is not applicable for games. Use IGDB instead.");
+                    return new List<Game>();
                 }
 
                 if (lowerTitle.StartsWith("igdb:") || lowerTitle.StartsWith("igdbid:"))

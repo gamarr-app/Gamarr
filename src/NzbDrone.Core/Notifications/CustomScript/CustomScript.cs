@@ -19,6 +19,8 @@ using NzbDrone.Core.Tags;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Validation;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with scripts)
+
 namespace NzbDrone.Core.Notifications.CustomScript
 {
     public class CustomScript : NotificationBase<CustomScriptSettings>
