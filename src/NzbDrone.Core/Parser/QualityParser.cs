@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Repack releases (FitGirl, DODI, XATAB, etc.)
-        private static readonly Regex RepackRegex = new (@"\b(?<repack>REPACK|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|MR[\s._-]?DJ|KAOS|DARCK[\s._-]?REPACKS?|MASQUERADE|R[\s.]?G[\s._-]?(?:MECHANICS|CATALYST|FREEDOM|STEAMGAMES))\b",
+        private static readonly Regex RepackRegex = new (@"\b(?<repack>REPACK|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|MR[\s._-]?DJ|KAOS|DARCK[\s._-]?REPACKS?|MASQUERADE|CHOVKA|DECEPTICON|WANTERLUDE|R[\s.]?G[\s._-]?(?:МЕХАНИКИ|МЕХАНІКИ|MECHANICS|CATALYST|FREEDOM|STEAMGAMES))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // ISO/Retail releases
@@ -58,7 +58,9 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex PreloadRegex = new (@"\b(?<preload>PRELOAD|PRE[\s._-]?RELEASE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex UpdateOnlyRegex = new (@"\b(?<update>UPDATE[\s._-]?(?:ONLY)?|PATCH[\s._-]?(?:ONLY)?|V\d+[._]\d+(?:[._]\d+)*[\s._-]?(?:UPDATE|PATCH)?)\b",
+        // Matches releases that are updates/patches only (not full games)
+        // Examples: "Game Update v1.2", "Game Language Pack", but NOT "Game v1.2 FitGirl"
+        private static readonly Regex UpdateOnlyRegex = new (@"\b(?<update>UPDATE(?:[\s._-]?ONLY)?|PATCH(?:[\s._-]?ONLY)?|LANGUAGE[\s._-]?PACK|HOTFIX)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex DLCRegex = new (@"\b(?<dlc>(?:INCL(?:UDES?)?[\s._-]?)?(?:ALL[\s._-]?)?DLC[sS]?|DLC[\s._-]?(?:PACK|UNLOCKER)|COMPLETE[\s._-]?(?:EDITION|PACK)|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR)\b",
@@ -248,26 +250,49 @@ namespace NzbDrone.Core.Parser
                 return result;
             }
 
-            // Check for update/patch only
-            if (UpdateOnlyRegex.IsMatch(normalizedName) && !DLCRegex.IsMatch(normalizedName))
-            {
-                // Make sure it's update-only and not a full game with version
-                if (normalizedName.ContainsIgnoreCase("update only") ||
-                    normalizedName.ContainsIgnoreCase("patch only") ||
-                    Regex.IsMatch(normalizedName, @"\bupdate\b.*\bv\d+", RegexOptions.IgnoreCase))
-                {
-                    result.SourceDetectionSource = QualityDetectionSource.Name;
-                    result.Quality = Quality.UpdateOnly;
-                    return result;
-                }
-            }
-
-            // Check for GOG releases (DRM-free)
+            // Check for GOG releases (DRM-free) - high priority
             if (GOGRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.GOG;
                 return result;
+            }
+
+            // Check for scene releases (with or without crack) - must be before repack/update checks
+            // Scene group takes precedence over update/language pack indicators
+            if (SceneGroupRegex.IsMatch(normalizedName))
+            {
+                result.SourceDetectionSource = QualityDetectionSource.Name;
+
+                if (CrackedRegex.IsMatch(normalizedName))
+                {
+                    result.Quality = Quality.SceneCracked;
+                }
+                else
+                {
+                    result.Quality = Quality.Scene;
+                }
+
+                return result;
+            }
+
+            // Check for update/patch only releases (after scene group check)
+            // Must contain "Update" or "Patch" as standalone word (not as part of game title)
+            if (UpdateOnlyRegex.IsMatch(normalizedName))
+            {
+                // Check for indicators that this is an update-only release
+                var isUpdateRelease = normalizedName.ContainsIgnoreCase("update only") ||
+                    normalizedName.ContainsIgnoreCase("patch only") ||
+                    normalizedName.ContainsIgnoreCase("hotfix") ||
+                    Regex.IsMatch(normalizedName, @"\bupdate\s+v[\d\s._]+", RegexOptions.IgnoreCase) ||
+                    Regex.IsMatch(normalizedName, @"\bpatch\s+v[\d\s._]+", RegexOptions.IgnoreCase);
+
+                if (isUpdateRelease)
+                {
+                    result.SourceDetectionSource = QualityDetectionSource.Name;
+                    result.Quality = Quality.UpdateOnly;
+                    return result;
+                }
             }
 
             // Check for repack releases
@@ -341,23 +366,6 @@ namespace NzbDrone.Core.Parser
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Retail;
-                return result;
-            }
-
-            // Check for scene releases (with or without crack)
-            if (SceneGroupRegex.IsMatch(normalizedName))
-            {
-                result.SourceDetectionSource = QualityDetectionSource.Name;
-
-                if (CrackedRegex.IsMatch(normalizedName))
-                {
-                    result.Quality = Quality.SceneCracked;
-                }
-                else
-                {
-                    result.Quality = Quality.Scene;
-                }
-
                 return result;
             }
 
