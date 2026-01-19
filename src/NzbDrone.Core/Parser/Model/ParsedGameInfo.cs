@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Qualities;
 
@@ -24,6 +25,8 @@ namespace NzbDrone.Core.Parser.Model
         public int Year { get; set; }
         public int IgdbId { get; set; }
         public string HardcodedSubs { get; set; }
+        public PlatformFamily Platform { get; set; }
+        public string PlatformString { get; set; }
 
         public string GameTitle => PrimaryGameTitle;
 

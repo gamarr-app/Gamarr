@@ -277,6 +277,13 @@ namespace NzbDrone.Core.Parser
                                 result.Quality = QualityParser.ParseQuality(title);
                                 Logger.Debug("Quality parsed: {0}", result.Quality);
 
+                                result.Platform = PlatformParser.ParsePlatform(title);
+                                result.PlatformString = PlatformParser.ParsePlatformString(title);
+                                if (result.Platform != Games.PlatformFamily.Unknown)
+                                {
+                                    Logger.Debug("Platform parsed: {0} ({1})", result.Platform, result.PlatformString);
+                                }
+
                                 if (result.Edition.IsNullOrWhiteSpace())
                                 {
                                     result.Edition = ParseEdition(simpleReleaseTitle);

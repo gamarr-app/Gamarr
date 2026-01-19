@@ -27,19 +27,19 @@ namespace NzbDrone.Core.Parser
                                                                             (?<brazilian>\b(dublado|pt-BR)\b)|
                                                                             (?<greek>greek)|
                                                                             (?<french>\b(?:FR|VO|VF|VFF|VFQ|VFI|VF2|TRUEFRENCH|FRENCH|FRE|FRA)\b)|
-                                                                            (?<russian>\b(?:rus|ru)\b)|
+                                                                            (?<russian>\b(?:rus|ru)\b|\[RUS\])|
                                                                             (?<hungarian>\b(?:HUNDUB|HUN)\b)|
                                                                             (?<hebrew>\b(?:HebDub|HebDubbed)\b)|
                                                                             (?<polish>\b(?:PL\W?DUB|DUB\W?PL|LEK\W?PL|PL\W?LEK)\b)|
                                                                             (?<chinese>\[(?:CH[ST]|BIG5|GB)\]|简|繁|字幕)|
-                                                                            (?<ukrainian>(?:(?:\dx)?UKR))|
+                                                                            (?<ukrainian>(?:(?:\dx)?UKR)|\[UKR\])|
                                                                             (?<spanish>\b(?:español|castellano)\b)|
                                                                             (?<catalan>\b(?:catalan?|catalán|català)\b)|
                                                                             (?<latvian>\b(?:lat|lav|lv)\b)|
                                                                             (?<telugu>\btel\b)|
                                                                             (?<vietnamese>\bVIE\b)|
-                                                                            (?<japanese>\bJAP\b)|
-                                                                            (?<korean>\bKOR\b)|
+                                                                            (?<japanese>\bJAP\b|\[JAP\]|\[JPN\])|
+                                                                            (?<korean>\bKOR\b|\[KOR\])|
                                                                             (?<urdu>\burdu\b)|
                                                                             (?<romansh>\b(?:romansh|rumantsch|romansch)\b)|
                                                                             (?<mongolian>\b(?:mongolian|khalkha)\b)|
