@@ -7,8 +7,6 @@ using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Games;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with MediaBrowser)
-
 namespace NzbDrone.Core.Notifications.Emby
 {
     public class MediaBrowserProxy
@@ -72,11 +70,6 @@ namespace NzbDrone.Core.Notifications.Emby
                 var paths = ProcessGetRequest<MediaBrowserItems>(request, settings).Items.GroupBy(item =>
                 {
                     if (item is { ProviderIds.Igdb: int igdbid } && igdbid != 0 && igdbid == game.IgdbId)
-                    {
-                        return MediaBrowserMatchQuality.Id;
-                    }
-
-                    if (item is { ProviderIds.Imdb: string imdbid } && imdbid == game.ImdbId)
                     {
                         return MediaBrowserMatchQuality.Id;
                     }

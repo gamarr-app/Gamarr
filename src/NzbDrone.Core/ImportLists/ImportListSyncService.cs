@@ -9,8 +9,6 @@ using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Games;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
-
 namespace NzbDrone.Core.ImportLists
 {
     public class ImportListSyncService : IExecute<ImportListSyncCommand>
@@ -114,7 +112,6 @@ namespace NzbDrone.Core.ImportLists
                     IgdbId = report.IgdbId,
                     Title = report.Title,
                     Year = report.Year,
-                    ImdbId = report.ImdbId,
                     AddOptions = new AddGameOptions
                     {
                         SearchForGame = monitorType != MonitorTypes.None && importList.SearchOnAdd,
@@ -132,11 +129,6 @@ namespace NzbDrone.Core.ImportLists
                 if (x.IgdbId != 0)
                 {
                     return x.IgdbId.ToString();
-                }
-
-                if (x.ImdbId.IsNotNullOrWhiteSpace())
-                {
-                    return x.ImdbId;
                 }
 
                 return x.Title;
@@ -198,9 +190,7 @@ namespace NzbDrone.Core.ImportLists
 
             foreach (var game in gamesInLibrary)
             {
-                var gameExists = listGames.Any(c =>
-                    c.IgdbId == game.IgdbId ||
-                    (c.ImdbId.IsNotNullOrWhiteSpace() && game.ImdbId.IsNotNullOrWhiteSpace() && c.ImdbId == game.ImdbId));
+                var gameExists = listGames.Any(c => c.IgdbId == game.IgdbId);
 
                 if (!gameExists)
                 {

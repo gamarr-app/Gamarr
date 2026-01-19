@@ -1,5 +1,3 @@
-#pragma warning disable CS0618
-
 using System.Xml.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -36,20 +34,15 @@ namespace NzbDrone.Core.ImportLists.Rss.Plex
 
             if (guid.IsNotNullOrWhiteSpace())
             {
-                if (guid.StartsWith("imdb://"))
-                {
-                    info.ImdbId = Parser.Parser.ParseImdbId(guid.Replace("imdb://", ""));
-                }
-
                 if (int.TryParse(guid.Replace("igdb://", ""), out var igdbId))
                 {
                     info.IgdbId = igdbId;
                 }
             }
 
-            if (info.ImdbId.IsNullOrWhiteSpace() && info.IgdbId == 0)
+            if (info.IgdbId == 0)
             {
-                _logger.Warn("Each item in the RSS feed must have a guid element with a IMDB ID or IGDB ID: '{0}'", info.Title);
+                _logger.Warn("Each item in the RSS feed must have a guid element with an IGDB ID: '{0}'", info.Title);
 
                 return null;
             }

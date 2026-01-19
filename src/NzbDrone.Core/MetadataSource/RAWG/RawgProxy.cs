@@ -112,12 +112,6 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             }
         }
 
-        public GameMetadata GetGameByImdbId(string imdbId)
-        {
-            _logger.Warn("RAWG does not support IMDb ID lookup.");
-            return null;
-        }
-
         public GameCollection GetCollectionInfo(int collectionId)
         {
             // RAWG doesn't have direct collection support like IGDB

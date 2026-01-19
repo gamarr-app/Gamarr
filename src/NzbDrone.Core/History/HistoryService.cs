@@ -150,7 +150,6 @@ namespace NzbDrone.Core.History
             history.Data.Add("DownloadUrl", message.Game.Release.DownloadUrl);
             history.Data.Add("Guid", message.Game.Release.Guid);
             history.Data.Add("IgdbId", message.Game.Release.IgdbId.ToString());
-            history.Data.Add("ImdbId", message.Game.Release.ImdbId.ToString());
             history.Data.Add("Protocol", ((int)message.Game.Release.DownloadProtocol).ToString());
             history.Data.Add("CustomFormatScore", message.Game.CustomFormatScore.ToString());
             history.Data.Add("GameMatchType", message.Game.GameMatchType.ToString());

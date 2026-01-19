@@ -17,8 +17,6 @@ using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Qualities;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with file naming)
-
 namespace NzbDrone.Core.Organizer
 {
     public interface IBuildFileNames
@@ -40,7 +38,7 @@ namespace NzbDrone.Core.Organizer
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly Logger _logger;
 
-        private static readonly Regex TitleRegex = new Regex(@"(?<tag>\{(?<prefix>[-{ ._\[(]*)(?:imdb(?:id)?-|edition-))?\{(?<prefix>[-{ ._\[(]*)(?<token>(?:[a-z0-9]+)(?:(?<separator>[- ._]+)(?:[a-z0-9]+))?)(?::(?<customFormat>[ ,a-z0-9|+-]+(?<![- ])))?(?<suffix>[-} ._)\]]*)\}",
+        private static readonly Regex TitleRegex = new Regex(@"(?<tag>\{(?<prefix>[-{ ._\[(]*)(?:edition-))?\{(?<prefix>[-{ ._\[(]*)(?<token>(?:[a-z0-9]+)(?:(?<separator>[- ._]+)(?:[a-z0-9]+))?)(?::(?<customFormat>[ ,a-z0-9|+-]+(?<![- ])))?(?<suffix>[-} ._)\]]*)\}",
                                                              RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         public static readonly Regex ReleaseYearRegex = new Regex(@"\{[-{ ._\[(]*Release[- ._]Year[-} ._)\]]*\}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -337,8 +335,8 @@ namespace NzbDrone.Core.Organizer
 
         private void AddIdTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Game game)
         {
-            tokenHandlers["{ImdbId}"] = m => game.GameMetadata.Value.ImdbId ?? string.Empty;
             tokenHandlers["{IgdbId}"] = m => game.GameMetadata.Value.IgdbId.ToString();
+            tokenHandlers["{SteamAppId}"] = m => game.GameMetadata.Value.SteamAppId.ToString();
         }
 
         private void AddGameFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, GameFile gameFile, bool multipleTokens)

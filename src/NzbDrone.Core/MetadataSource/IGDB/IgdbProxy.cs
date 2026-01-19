@@ -122,13 +122,6 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return result?.Item1;
         }
 
-        public GameMetadata GetGameByImdbId(string imdbId)
-        {
-            // IGDB doesn't use IMDb IDs directly
-            _logger.Warn("IGDB does not support IMDb ID lookup. Use Steam App ID or IGDB ID instead.");
-            return null;
-        }
-
         public GameCollection GetCollectionInfo(int igdbId)
         {
             var query = $"fields id, name, slug, games.*; where id = {igdbId};";

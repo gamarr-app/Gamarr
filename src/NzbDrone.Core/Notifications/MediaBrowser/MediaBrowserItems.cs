@@ -17,7 +17,6 @@ namespace NzbDrone.Core.Notifications.Emby
 
     public class MediaBrowserProviderIds
     {
-        public string Imdb { get; set; }
         public int Igdb { get; set; }
     }
 

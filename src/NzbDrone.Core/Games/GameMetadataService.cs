@@ -7,7 +7,6 @@ namespace NzbDrone.Core.Games
     {
         GameMetadata Get(int id);
         GameMetadata FindByIgdbId(int igdbId);
-        GameMetadata FindByImdbId(string imdbId);
         List<GameMetadata> GetGamesWithCollections();
         List<GameMetadata> GetGamesByCollectionIgdbId(int collectionId);
         bool Upsert(GameMetadata game);
@@ -31,11 +30,6 @@ namespace NzbDrone.Core.Games
         public GameMetadata FindByIgdbId(int igdbId)
         {
             return _gameMetadataRepository.FindByIgdbId(igdbId);
-        }
-
-        public GameMetadata FindByImdbId(string imdbId)
-        {
-            return _gameMetadataRepository.FindByImdbId(imdbId);
         }
 
         public List<GameMetadata> GetGamesWithCollections()

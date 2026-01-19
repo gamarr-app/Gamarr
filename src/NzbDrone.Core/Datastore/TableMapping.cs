@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,7 +120,6 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(s => s.SteamAppId)  // Delegated to GameMetadata
                   .Ignore(s => s.IgdbId)      // Delegated to GameMetadata
                   .Ignore(s => s.RawgId)      // Delegated to GameMetadata
-                  .Ignore(s => s.ImdbId)      // Delegated to GameMetadata
                   .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<ImportListGame>("ImportListGames").RegisterModel()
@@ -130,7 +128,6 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(s => s.SteamAppId)  // Delegated to GameMetadata
                   .Ignore(s => s.IgdbId)      // Delegated to GameMetadata
                   .Ignore(s => s.RawgId)      // Delegated to GameMetadata
-                  .Ignore(s => s.ImdbId)      // Delegated to GameMetadata
                   .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<AlternativeTitle>("AlternativeTitles").RegisterModel();

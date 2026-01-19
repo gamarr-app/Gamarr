@@ -13,8 +13,6 @@ using Gamarr.Api.V3.GameFiles;
 using Gamarr.Http.REST;
 using Swashbuckle.AspNetCore.Annotations;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId property
-
 namespace Gamarr.Api.V3.Games
 {
     public class GameResource : RestResource
@@ -86,12 +84,6 @@ namespace Gamarr.Api.V3.Games
         /// </summary>
         public int RawgId { get; set; }
 
-        /// <summary>
-        /// DEPRECATED: IMDb is a movie database and does not apply to games.
-        /// This field is kept for backwards compatibility but will always be null/empty for games.
-        /// </summary>
-        [Obsolete("IMDb is a movie database and does not apply to games. This field will always be null/empty.")]
-        public string ImdbId { get; set; }
         public string TitleSlug { get; set; }
         public string RootFolderPath { get; set; }
         public string Folder { get; set; }
@@ -171,7 +163,6 @@ namespace Gamarr.Api.V3.Games
 
                 Runtime = model.GameMetadata.Value.Runtime,
                 CleanTitle = model.GameMetadata.Value.CleanTitle,
-                ImdbId = model.ImdbId,
                 TitleSlug = model.SteamAppId > 0 ? model.SteamAppId.ToString() : model.IgdbId.ToString(),
                 RootFolderPath = model.RootFolderPath,
                 Certification = model.GameMetadata.Value.Certification,
@@ -225,7 +216,6 @@ namespace Gamarr.Api.V3.Games
                     Studio = resource.Studio,
                     Runtime = resource.Runtime,
                     CleanTitle = resource.CleanTitle,
-                    ImdbId = resource.ImdbId,
                 },
 
                 Path = resource.Path,

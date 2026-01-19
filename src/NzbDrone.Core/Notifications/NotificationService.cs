@@ -12,8 +12,6 @@ using NzbDrone.Core.Qualities;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Update.History.Events;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
-
 namespace NzbDrone.Core.Notifications
 {
     public class NotificationService

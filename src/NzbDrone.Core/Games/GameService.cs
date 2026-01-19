@@ -13,8 +13,6 @@ using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.RomanNumerals;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
-
 namespace NzbDrone.Core.Games
 {
     public interface IGameService
@@ -33,9 +31,6 @@ namespace NzbDrone.Core.Games
         Game FindByIgdbId(int igdbid);
         List<int> AllGameIgdbIds();
         Game FindByRawgId(int rawgId);
-
-        // Deprecated - kept for backwards compatibility
-        Game FindByImdbId(string imdbid);
 
         Game FindByTitle(string title);
         Game FindByTitle(string title, int year);
@@ -195,11 +190,6 @@ namespace NzbDrone.Core.Games
             }
 
             return _gameRepository.FindByTitles(lookupTitles);
-        }
-
-        public Game FindByImdbId(string imdbid)
-        {
-            return _gameRepository.FindByImdbId(imdbid);
         }
 
         public Game FindByIgdbId(int igdbid)

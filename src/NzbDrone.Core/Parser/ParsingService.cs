@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace NzbDrone.Core.Parser
     public interface IParsingService
     {
         Game GetGame(string title);
-        RemoteGame Map(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria = null);
+        RemoteGame Map(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria = null);
         RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId);
         ParsedGameInfo ParseMinimalPathGameInfo(string path);
     }
@@ -78,9 +77,9 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public RemoteGame Map(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria = null)
+        public RemoteGame Map(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria = null)
         {
-            return Map(parsedGameInfo, imdbId, igdbId, null, searchCriteria);
+            return Map(parsedGameInfo, igdbId, null, searchCriteria);
         }
 
         public RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId)
@@ -92,7 +91,7 @@ namespace NzbDrone.Core.Parser
             };
         }
 
-        public RemoteGame Map(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, Game game, SearchCriteriaBase searchCriteria)
+        private RemoteGame Map(ParsedGameInfo parsedGameInfo, int igdbId, Game game, SearchCriteriaBase searchCriteria)
         {
             var remoteGame = new RemoteGame
             {
@@ -101,7 +100,7 @@ namespace NzbDrone.Core.Parser
 
             if (game == null)
             {
-                var gameMatch = FindGame(parsedGameInfo, imdbId, igdbId, searchCriteria);
+                var gameMatch = FindGame(parsedGameInfo, igdbId, searchCriteria);
 
                 if (gameMatch != null)
                 {
@@ -125,16 +124,11 @@ namespace NzbDrone.Core.Parser
             return remoteGame;
         }
 
-        private FindGameResult FindGame(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria)
+        private FindGameResult FindGame(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria)
         {
             FindGameResult result = null;
 
-            if (!string.IsNullOrWhiteSpace(imdbId) && imdbId != "0")
-            {
-                result = TryGetGameByImDbId(parsedGameInfo, imdbId);
-            }
-
-            if (result == null && igdbId > 0)
+            if (igdbId > 0)
             {
                 result = TryGetGameByIgdbId(parsedGameInfo, igdbId);
             }
@@ -143,7 +137,7 @@ namespace NzbDrone.Core.Parser
             {
                 if (searchCriteria != null)
                 {
-                    result = TryGetGameBySearchCriteria(parsedGameInfo, imdbId, igdbId, searchCriteria);
+                    result = TryGetGameBySearchCriteria(parsedGameInfo, igdbId, searchCriteria);
                 }
                 else
                 {
@@ -159,24 +153,11 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
-        private FindGameResult TryGetGameByImDbId(ParsedGameInfo parsedGameInfo, string imdbId)
-        {
-            var game = _gameService.FindByImdbId(imdbId);
-
-            // Should fix practically all problems, where indexer is shite at adding correct imdbids to games.
-            if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
-            {
-                return new FindGameResult(game, GameMatchType.Id);
-            }
-
-            return null;
-        }
-
         private FindGameResult TryGetGameByIgdbId(ParsedGameInfo parsedGameInfo, int igdbId)
         {
             var game = _gameService.FindByIgdbId(igdbId);
 
-            // Should fix practically all problems, where indexer is shite at adding correct imdbids to games.
+            // Should fix practically all problems, where indexer is shite at adding correct IDs to games.
             if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
             {
                 return new FindGameResult(game, GameMatchType.Id);
@@ -210,7 +191,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        private FindGameResult TryGetGameBySearchCriteria(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria)
+        private FindGameResult TryGetGameBySearchCriteria(ParsedGameInfo parsedGameInfo, int igdbId, SearchCriteriaBase searchCriteria)
         {
             Game possibleGame = null;
 
@@ -242,11 +223,6 @@ namespace NzbDrone.Core.Parser
             }
 
             if (igdbId > 0 && igdbId == searchCriteria.Game.IgdbId)
-            {
-                return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
-            }
-
-            if (imdbId.IsNotNullOrWhiteSpace() && imdbId == searchCriteria.Game.ImdbId)
             {
                 return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
             }

@@ -144,25 +144,12 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             }
 
             releaseInfo.Title = title;
-            var result = Parser.Parser.ParseGameTitle(title); // Depreciated anyways
+            var result = Parser.Parser.ParseGameTitle(title);
 
             if (result != null)
             {
                 releaseInfo.Title = result.PrimaryGameTitle;
                 releaseInfo.Year = result.Year;
-                releaseInfo.ImdbId = result.ImdbId;
-            }
-
-            try
-            {
-                if (releaseInfo.ImdbId.IsNullOrWhiteSpace())
-                {
-                    releaseInfo.ImdbId = GetImdbId(item);
-                }
-            }
-            catch (Exception)
-            {
-                _logger.Debug("Unable to extract Imdb Id :(.");
             }
 
             return releaseInfo;
@@ -188,17 +175,6 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             }
 
             return XElementExtensions.ParseDate(dateString);
-        }
-
-        protected virtual string GetImdbId(XElement item)
-        {
-            var url = item.TryGetValue("link");
-            if (url.IsNullOrWhiteSpace())
-            {
-                return "";
-            }
-
-            return Parser.Parser.ParseImdbId(url);
         }
 
         protected IEnumerable<XElement> GetItems(XDocument document)

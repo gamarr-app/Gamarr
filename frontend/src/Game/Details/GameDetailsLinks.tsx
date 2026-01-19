@@ -6,107 +6,38 @@ import { kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './GameDetailsLinks.css';
 
-type GameDetailsLinksProps = Pick<
-  Game,
-  'igdbId' | 'imdbId' | 'youTubeTrailerId'
->;
+type GameDetailsLinksProps = Pick<Game, 'igdbId' | 'youTubeTrailerId'>;
 
 function GameDetailsLinks(props: GameDetailsLinksProps) {
-  const { igdbId, imdbId, youTubeTrailerId } = props;
+  const { igdbId, youTubeTrailerId } = props;
 
   return (
     <div className={styles.links}>
       <Link
         className={styles.link}
-        to={`https://www.thegamedb.org/game/${igdbId}`}
+        to={`https://www.igdb.com/games/${igdbId}`}
       >
         <Label
           className={styles.linkLabel}
           kind={kinds.INFO}
           size={sizes.LARGE}
         >
-          {translate('TMDb')}
+          IGDB
         </Label>
       </Link>
 
       <Link
         className={styles.link}
-        to={`https://trakt.tv/search/igdb/${igdbId}?id_type=game`}
+        to={`https://store.steampowered.com/search/?term=${igdbId}`}
       >
         <Label
           className={styles.linkLabel}
           kind={kinds.INFO}
           size={sizes.LARGE}
         >
-          {translate('Trakt')}
+          Steam
         </Label>
       </Link>
-
-      <Link
-        className={styles.link}
-        to={`https://letterboxd.com/igdb/${igdbId}`}
-      >
-        <Label
-          className={styles.linkLabel}
-          kind={kinds.INFO}
-          size={sizes.LARGE}
-        >
-          {translate('Letterboxd')}
-        </Label>
-      </Link>
-
-      {imdbId ? (
-        <>
-          <Link
-            className={styles.link}
-            to={`https://imdb.com/title/${imdbId}/`}
-          >
-            <Label
-              className={styles.linkLabel}
-              kind={kinds.INFO}
-              size={sizes.LARGE}
-            >
-              {translate('IMDb')}
-            </Label>
-          </Link>
-
-          <Link className={styles.link} to={`https://gamechat.org/${imdbId}/`}>
-            <Label
-              className={styles.linkLabel}
-              kind={kinds.INFO}
-              size={sizes.LARGE}
-            >
-              {translate('GameChat')}
-            </Label>
-          </Link>
-
-          <Link
-            className={styles.link}
-            to={`https://mdblist.com/game/${imdbId}`}
-          >
-            <Label
-              className={styles.linkLabel}
-              kind={kinds.INFO}
-              size={sizes.LARGE}
-            >
-              MDBList
-            </Label>
-          </Link>
-
-          <Link
-            className={styles.link}
-            to={`https://www.blu-ray.com/search/?quicksearch=1&quicksearch_keyword=${imdbId}&section=theatrical`}
-          >
-            <Label
-              className={styles.linkLabel}
-              kind={kinds.INFO}
-              size={sizes.LARGE}
-            >
-              Blu-ray
-            </Label>
-          </Link>
-        </>
-      ) : null}
 
       {youTubeTrailerId ? (
         <Link

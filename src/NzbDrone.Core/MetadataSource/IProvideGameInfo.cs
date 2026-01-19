@@ -25,9 +25,5 @@ namespace NzbDrone.Core.MetadataSource
 
         // Changed games tracking
         HashSet<int> GetChangedGames(DateTime startTime);
-
-        // Deprecated
-        [Obsolete("IMDb lookup is not applicable to games")]
-        GameMetadata GetGameByImdbId(string imdbId);
     }
 }

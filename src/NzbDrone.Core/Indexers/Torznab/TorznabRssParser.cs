@@ -63,7 +63,6 @@ namespace NzbDrone.Core.Indexers.Torznab
             if (torrentInfo != null)
             {
                 torrentInfo.IgdbId = GetIgdbId(item);
-                torrentInfo.ImdbId = GetImdbId(item);
                 torrentInfo.IndexerFlags = GetFlags(item);
             }
 
@@ -160,18 +159,6 @@ namespace NzbDrone.Core.Indexers.Torznab
             if (!igdbIdString.IsNullOrWhiteSpace() && int.TryParse(igdbIdString, out var igdbId))
             {
                 return igdbId;
-            }
-
-            return 0;
-        }
-
-        protected virtual int GetImdbId(XElement item)
-        {
-            var imdbIdString = TryGetTorznabAttribute(item, "imdb");
-
-            if (!imdbIdString.IsNullOrWhiteSpace() && int.TryParse(imdbIdString, out var imdbId))
-            {
-                return imdbId;
             }
 
             return 0;

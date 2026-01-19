@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,7 +120,6 @@ namespace NzbDrone.Core.Games
             }
 
             gameMetadata.Title = gameInfo.Title;
-            gameMetadata.ImdbId = gameInfo.ImdbId;
             gameMetadata.Overview = gameInfo.Overview;
             gameMetadata.Status = gameInfo.Status;
             gameMetadata.Images = gameInfo.Images;

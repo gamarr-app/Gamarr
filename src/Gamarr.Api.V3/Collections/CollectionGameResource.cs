@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Collections.Generic;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.Games;
@@ -9,7 +8,6 @@ namespace Gamarr.Api.V3.Collections
     public class CollectionGameResource
     {
         public int IgdbId { get; set; }
-        public string ImdbId { get; set; }
         public string Title { get; set; }
         public string CleanTitle { get; set; }
         public string SortTitle { get; set; }
@@ -45,7 +43,6 @@ namespace Gamarr.Api.V3.Collections
                 Overview = translatedOverview,
                 SortTitle = model.SortTitle,
                 Images = model.Images,
-                ImdbId = model.ImdbId,
                 Ratings = model.Ratings,
                 Runtime = model.Runtime,
                 CleanTitle = model.CleanTitle,

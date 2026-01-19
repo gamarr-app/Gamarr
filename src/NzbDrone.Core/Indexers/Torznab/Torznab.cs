@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Indexers.Torznab
                 }
 
                 if (capabilities.SupportedGameSearchParameters != null &&
-                    new[] { "q", "igdbid", "imdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
+                    new[] { "q", "igdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
                 {
                     return null;
                 }

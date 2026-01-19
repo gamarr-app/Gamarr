@@ -13,8 +13,6 @@ using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Tags;
 
-#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with scripts)
-
 namespace NzbDrone.Core.MediaFiles
 {
     public interface IImportScript
@@ -138,7 +136,6 @@ namespace NzbDrone.Core.MediaFiles
             environmentVariables.Add("Gamarr_Game_Year", game.GameMetadata.Value.Year.ToString());
             environmentVariables.Add("Gamarr_Game_Path", game.Path);
             environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
-            environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_OriginalLanguage", IsoLanguages.Get(game.GameMetadata.Value.OriginalLanguage).ThreeLetterCode);
             environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
             environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", game.Tags.Select(t => _tagRepository.Get(t).Label)));
