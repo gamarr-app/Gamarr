@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Test.Framework;
@@ -21,8 +22,7 @@ namespace NzbDrone.Core.Test.NotificationTests
             {
                 IgdbId = 1942,
                 Title = "The Witcher 3: Wild Hunt",
-                SteamId = 292030,
-                RawgId = 3328
+                SteamAppId = 292030
             };
 
             _game = new Game
@@ -53,12 +53,12 @@ namespace NzbDrone.Core.Test.NotificationTests
             result.Should().NotBeNull();
             result.Should().HaveCount(1);
             result[0].Type.Should().Be(MetadataLinkType.Igdb);
-            result[0].Name.Should().Be("IGDB");
-            result[0].Url.Should().Contain("igdb.com/games/1942");
+            result[0].Label.Should().Be("IGDB");
+            result[0].Link.Should().Contain("igdb.com/games/1942");
         }
 
         [Test]
-        public void should_generate_steam_link_when_steam_id_exists()
+        public void should_generate_steam_link_when_steam_app_id_exists()
         {
             var links = new List<int> { (int)MetadataLinkType.Steam };
 
@@ -67,28 +67,14 @@ namespace NzbDrone.Core.Test.NotificationTests
             result.Should().NotBeNull();
             result.Should().HaveCount(1);
             result[0].Type.Should().Be(MetadataLinkType.Steam);
-            result[0].Name.Should().Be("Steam");
-            result[0].Url.Should().Contain("store.steampowered.com/app/292030");
+            result[0].Label.Should().Be("Steam");
+            result[0].Link.Should().Contain("store.steampowered.com/app/292030");
         }
 
         [Test]
-        public void should_generate_rawg_link_when_rawg_id_exists()
+        public void should_not_generate_steam_link_when_steam_app_id_is_zero()
         {
-            var links = new List<int> { (int)MetadataLinkType.Rawg };
-
-            var result = NotificationMetadataLinkGenerator.GenerateLinks(_game, links);
-
-            result.Should().NotBeNull();
-            result.Should().HaveCount(1);
-            result[0].Type.Should().Be(MetadataLinkType.Rawg);
-            result[0].Name.Should().Be("RAWG");
-            result[0].Url.Should().Contain("rawg.io/games/3328");
-        }
-
-        [Test]
-        public void should_not_generate_steam_link_when_steam_id_is_zero()
-        {
-            _gameMetadata.SteamId = 0;
+            _gameMetadata.SteamAppId = 0;
             var links = new List<int> { (int)MetadataLinkType.Steam };
 
             var result = NotificationMetadataLinkGenerator.GenerateLinks(_game, links);
@@ -98,34 +84,20 @@ namespace NzbDrone.Core.Test.NotificationTests
         }
 
         [Test]
-        public void should_not_generate_rawg_link_when_rawg_id_is_zero()
-        {
-            _gameMetadata.RawgId = 0;
-            var links = new List<int> { (int)MetadataLinkType.Rawg };
-
-            var result = NotificationMetadataLinkGenerator.GenerateLinks(_game, links);
-
-            result.Should().NotBeNull();
-            result.Should().BeEmpty();
-        }
-
-        [Test]
-        public void should_generate_all_links_when_all_ids_exist()
+        public void should_generate_multiple_links_when_ids_exist()
         {
             var links = new List<int>
             {
                 (int)MetadataLinkType.Igdb,
-                (int)MetadataLinkType.Steam,
-                (int)MetadataLinkType.Rawg
+                (int)MetadataLinkType.Steam
             };
 
             var result = NotificationMetadataLinkGenerator.GenerateLinks(_game, links);
 
             result.Should().NotBeNull();
-            result.Should().HaveCount(3);
+            result.Should().HaveCount(2);
             result.Select(l => l.Type).Should().Contain(MetadataLinkType.Igdb);
             result.Select(l => l.Type).Should().Contain(MetadataLinkType.Steam);
-            result.Select(l => l.Type).Should().Contain(MetadataLinkType.Rawg);
         }
 
         [Test]
@@ -135,6 +107,15 @@ namespace NzbDrone.Core.Test.NotificationTests
             var links = new List<int> { (int)MetadataLinkType.Igdb };
 
             var result = NotificationMetadataLinkGenerator.GenerateLinks(_game, links);
+
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_return_empty_list_for_empty_metadata_links()
+        {
+            var result = NotificationMetadataLinkGenerator.GenerateLinks(_game, new List<int>());
 
             result.Should().NotBeNull();
             result.Should().BeEmpty();
