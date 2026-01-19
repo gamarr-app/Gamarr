@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 FileSizeLo = 1000,
                 RemainingSizeLo = 10,
                 Category = "game",
-                NzbName = "Droned.1998.1080p.WEB-DL-DRONE",
+                NzbName = "Cyberpunk.2077.v2.1-GOG",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } }
             };
 
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             {
                 FileSizeLo = 1000,
                 Category = "game",
-                Name = "Droned.1998.1080p.WEB-DL-DRONE",
+                Name = "Cyberpunk.2077.v2.1-GOG",
                 DestDir = "somedirectory",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "Some Error",
@@ -66,8 +66,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             {
                 FileSizeLo = 1000,
                 Category = "game",
-                Name = "Droned.1998.1080p.WEB-DL-DRONE",
-                DestDir = "/remote/mount/tv/Droned.1998.1080p.WEB-DL-DRONE",
+                Name = "Cyberpunk.2077.v2.1-GOG",
+                DestDir = "/remote/mount/tv/Cyberpunk.2077.v2.1-GOG",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "SUCCESS",
                 UnpackStatus = "NONE",
@@ -79,8 +79,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
 
             _downloadClientItem = Builder<DownloadClientItem>
                                   .CreateNew()
-                                  .With(d => d.DownloadId = "_Droned.S01E01.Pilot.1080p.WEB-DL-DRONE_0")
-                                  .With(d => d.OutputPath = new OsPath("/remote/mount/tv/Droned.S01E01.Pilot.1080p.WEB-DL-DRONE".AsOsAgnostic()))
+                                  .With(d => d.DownloadId = "_Elden.Ring.v1.10-CODEX_0")
+                                  .With(d => d.OutputPath = new OsPath("/remote/mount/tv/Elden.Ring.v1.10-CODEX".AsOsAgnostic()))
                                   .Build();
 
             Mocker.GetMock<INzbgetProxy>()
@@ -403,14 +403,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                 .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                .Returns(new OsPath(@"O:\mymount\Droned.1998.1080p.WEB-DL-DRONE".AsOsAgnostic()));
+                .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic()));
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Droned.1998.1080p.WEB-DL-DRONE".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic());
         }
 
         [Test]
@@ -461,7 +461,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         [Test]
         public void should_use_final_dir_when_set_instead_of_dest_dir()
         {
-            _completed.FinalDir = "/remote/mount/tv2/Droned.S01E01.Pilot.1080p.WEB-DL-DRONE";
+            _completed.FinalDir = "/remote/mount/tv2/Elden.Ring.v1.10-CODEX";
 
             GivenQueue(null);
             GivenHistory(_completed);

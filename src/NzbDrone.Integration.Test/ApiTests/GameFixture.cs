@@ -16,10 +16,10 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(0)]
         public void add_game_with_tags_should_store_them()
         {
-            EnsureNoGame(680, "Pulp Fiction");
+            EnsureNoGame(21, "Half-Life 2");
             var tag = EnsureTag("abc");
 
-            var game = Games.Lookup("igdb:680").Single();
+            var game = Games.Lookup("igdb:21").Single();
 
             game.QualityProfileId = 1;
             game.Path = Path.Combine(GameRootFolder, game.Title);
@@ -37,7 +37,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void add_game_should_trigger_autotag()
         {
             var tag = EnsureTag("autotag-test");
-            var game = Games.Lookup("igdb:680").Single();
+            var game = Games.Lookup("igdb:21").Single();
             game.Genres = new List<string> { "Thriller" };
 
             var item = AutoTagging.Post(new AutoTaggingResource
@@ -68,7 +68,7 @@ namespace NzbDrone.Integration.Test.ApiTests
                 }
             });
 
-            EnsureNoGame(680, "Pulp Fiction");
+            EnsureNoGame(21, "Half-Life 2");
 
             game.QualityProfileId = 1;
             game.Path = Path.Combine(GameRootFolder, game.Title);
@@ -83,9 +83,9 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(0)]
         public void add_game_without_profileid_should_return_badrequest()
         {
-            EnsureNoGame(680, "Pulp Fiction");
+            EnsureNoGame(21, "Half-Life 2");
 
-            var game = Games.Lookup("igdb:680").Single();
+            var game = Games.Lookup("igdb:21").Single();
 
             game.Path = Path.Combine(GameRootFolder, game.Title);
 
@@ -96,9 +96,9 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(0)]
         public void add_game_without_path_should_return_badrequest()
         {
-            EnsureNoGame(680, "Pulp Fiction");
+            EnsureNoGame(21, "Half-Life 2");
 
-            var game = Games.Lookup("igdb:680").Single();
+            var game = Games.Lookup("igdb:21").Single();
 
             game.QualityProfileId = 1;
 
@@ -109,9 +109,9 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(1)]
         public void add_game()
         {
-            EnsureNoGame(680, "Pulp Fiction");
+            EnsureNoGame(21, "Half-Life 2");
 
-            var game = Games.Lookup("igdb:680").Single();
+            var game = Games.Lookup("igdb:21").Single();
 
             game.QualityProfileId = 1;
             game.Path = Path.Combine(GameRootFolder, game.Title);
@@ -128,22 +128,22 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(2)]
         public void get_all_games()
         {
-            EnsureGame(680, "Pulp Fiction");
-            EnsureGame(155, "The Dark Knight");
+            EnsureGame(21, "Half-Life 2");
+            EnsureGame(38, "Portal");
 
             var games = Games.All();
 
             games.Should().NotBeNullOrEmpty();
-            games.Should().Contain(v => v.IgdbId == 680);
-            games.Should().Contain(v => v.IgdbId == 155);
+            games.Should().Contain(v => v.IgdbId == 21);
+            games.Should().Contain(v => v.IgdbId == 38);
         }
 
         [Test]
         [Order(2)]
         public void get_game_by_igdbid()
         {
-            EnsureGame(680, "Pulp Fiction");
-            EnsureGame(155, "The Dark Knight");
+            EnsureGame(21, "Half-Life 2");
+            EnsureGame(38, "Portal");
 
             var queryParams = new Dictionary<string, object>()
             {
@@ -153,14 +153,14 @@ namespace NzbDrone.Integration.Test.ApiTests
             var games = Games.All(queryParams);
 
             games.Should().NotBeNullOrEmpty();
-            games.Should().Contain(v => v.IgdbId == 680);
+            games.Should().Contain(v => v.IgdbId == 21);
         }
 
         [Test]
         [Order(2)]
         public void get_game_by_id()
         {
-            var game = EnsureGame(680, "Pulp Fiction");
+            var game = EnsureGame(21, "Half-Life 2");
 
             var result = Games.Get(game.Id);
 
@@ -177,7 +177,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(2)]
         public void update_game_profile_id()
         {
-            var game = EnsureGame(680, "Pulp Fiction");
+            var game = EnsureGame(21, "Half-Life 2");
 
             var profileId = 1;
             if (game.QualityProfileId == profileId)
@@ -196,7 +196,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(3)]
         public void update_game_monitored()
         {
-            var game = EnsureGame(680, "Pulp Fiction", false);
+            var game = EnsureGame(21, "Half-Life 2", false);
 
             game.Monitored.Should().BeFalse();
 
@@ -211,7 +211,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(3)]
         public void update_game_tags()
         {
-            var game = EnsureGame(680, "Pulp Fiction");
+            var game = EnsureGame(21, "Half-Life 2");
             var tag = EnsureTag("abc");
 
             if (game.Tags.Contains(tag.Id))
@@ -234,13 +234,13 @@ namespace NzbDrone.Integration.Test.ApiTests
         [Order(4)]
         public void delete_game()
         {
-            var game = EnsureGame(680, "Pulp Fiction");
+            var game = EnsureGame(21, "Half-Life 2");
 
             Games.Get(game.Id).Should().NotBeNull();
 
             Games.Delete(game.Id);
 
-            Games.All().Should().NotContain(v => v.IgdbId == 680);
+            Games.All().Should().NotContain(v => v.IgdbId == 21);
         }
     }
 }

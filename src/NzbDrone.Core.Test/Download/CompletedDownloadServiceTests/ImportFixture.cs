@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.Download
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Drone.1998")
+                                                    .With(h => h.Title = "Witcher3.GOTY.v4.0-GOG")
                                                     .Build();
 
             var remoteGame = BuildRemoteGame();
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Download
                   .Returns(new GameHistory());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Drone.1998"))
+                  .Setup(s => s.GetGame("Witcher3.GOTY.v4.0-GOG"))
                   .Returns(remoteGame.Game);
 
             Mocker.GetMock<IHistoryService>()
@@ -76,17 +76,17 @@ namespace NzbDrone.Core.Test.Download
         private void GivenABadlyNamedDownload()
         {
             _trackedDownload.DownloadItem.DownloadId = "1234";
-            _trackedDownload.DownloadItem.Title = "Droned Pilot"; // Set a badly named download
+            _trackedDownload.DownloadItem.Title = "Elden Ring"; // Set a badly named download
             Mocker.GetMock<IHistoryService>()
                .Setup(s => s.MostRecentForDownloadId(It.Is<string>(i => i == "1234")))
-               .Returns(new GameHistory() { SourceTitle = "Droned 1998" });
+               .Returns(new GameHistory() { SourceTitle = "Elden.Ring.v1.10-CODEX" });
 
             Mocker.GetMock<IParsingService>()
                .Setup(s => s.GetGame(It.IsAny<string>()))
                .Returns((Game)null);
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.GetGame("Droned 1998"))
+                .Setup(s => s.GetGame("Elden.Ring.v1.10-CODEX"))
                 .Returns(BuildRemoteGame().Game);
         }
 
@@ -106,11 +106,11 @@ namespace NzbDrone.Core.Test.Download
                            {
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Droned.1999.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.11.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -130,11 +130,11 @@ namespace NzbDrone.Core.Test.Download
                            {
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
                            });
 
             _trackedDownload.RemoteGame.Game = new Game();
@@ -151,8 +151,8 @@ namespace NzbDrone.Core.Test.Download
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }), "Test Failure"),
-                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.1998.mkv" }), "Test Failure")
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }), "Test Failure"),
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }), "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -171,8 +171,8 @@ namespace NzbDrone.Core.Test.Download
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                {
-                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv", Game = _trackedDownload.RemoteGame.Game })),
-                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv" }), "Test Failure")
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso", Game = _trackedDownload.RemoteGame.Game })),
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }), "Test Failure")
                });
 
             Subject.Import(_trackedDownload);
@@ -189,7 +189,7 @@ namespace NzbDrone.Core.Test.Download
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                {
-                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv", Game = _trackedDownload.RemoteGame.Game }))
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso", Game = _trackedDownload.RemoteGame.Game }))
                });
 
             Mocker.GetMock<IGameService>()

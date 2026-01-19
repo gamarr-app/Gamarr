@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Drone.S01E01.HDTV")
+                                                    .With(h => h.Title = "Cyberpunk.2077.v2.1-GOG")
                                                     .Build();
 
             var remoteGame = BuildRemoteGame();
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Returns(new List<GameHistory>());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Drone.S01E01.HDTV"))
+                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-GOG"))
                   .Returns(remoteGame.Game);
         }
 
@@ -85,12 +85,12 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         private void GivenABadlyNamedDownload()
         {
             _trackedDownload.DownloadItem.DownloadId = "1234";
-            _trackedDownload.DownloadItem.Title = "Droned Pilot"; // Set a badly named download
+            _trackedDownload.DownloadItem.Title = "Elden Ring"; // Set a badly named download
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.Is<string>(i => i == "1234")))
                   .Returns(new List<GameHistory>
                   {
-                      new GameHistory() { SourceTitle = "Droned S01E01", EventType = GameHistoryEventType.Grabbed }
+                      new GameHistory() { SourceTitle = "Elden.Ring.v1.10-CODEX", EventType = GameHistoryEventType.Grabbed }
                   });
 
             Mocker.GetMock<IParsingService>()
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Returns((Game)null);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Droned S01E01"))
+                  .Setup(s => s.GetGame("Elden.Ring.v1.10-CODEX"))
                   .Returns(BuildRemoteGame().Game);
         }
 
@@ -158,7 +158,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Droned.S01E01.mkv" }))
+                               new ImportResult(new ImportDecision(new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }))
                            });
 
             Subject.Check(_trackedDownload);
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         public void should_not_process_when_there_is_a_title_mismatch()
         {
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Drone.S01E01.HDTV"))
+                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-GOG"))
                   .Returns((Game)null);
 
             Subject.Check(_trackedDownload);

@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
     [TestFixture]
     public class ScanWatchFolderFixture : CoreTest<ScanWatchFolder>
     {
-        protected readonly string _title = "Droned.1998.1080p.WEB-DL-DRONE";
+        protected readonly string _title = "Cyberpunk.2077.v2.1-GOG";
         protected string _completedDownloadFolder = @"c:\blackhole\completed".AsOsAgnostic();
 
         protected void GivenCompletedItem()

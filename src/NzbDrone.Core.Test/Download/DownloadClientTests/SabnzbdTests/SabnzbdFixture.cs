@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Timeleft = TimeSpan.FromSeconds(10),
                             Category = "game",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Droned.1998.1080p.WEB-DL-DRONE"
+                            Title = "Cyberpunk.2077.v2.1-GOG"
                         }
                     }
             };
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Category = "game",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Droned.1998.1080p.WEB-DL-DRONE"
+                            Title = "Cyberpunk.2077.v2.1-GOG"
                         }
                     }
             };
@@ -84,8 +84,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Category = "game",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Droned.1998.1080p.WEB-DL-DRONE",
-                            Storage = "/remote/mount/vv/Droned.1998.1080p.WEB-DL-DRONE"
+                            Title = "Cyberpunk.2077.v2.1-GOG",
+                            Storage = "/remote/mount/vv/Cyberpunk.2077.v2.1-GOG"
                         }
                     }
             };
@@ -373,10 +373,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                   .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()), Times.Once());
         }
 
-        [TestCase(@"Droned.1998.1080p.WEB-DL-DRONE", @"Droned.1998_1080p_WEB-DL-DRONE.mkv")]
-        [TestCase(@"Droned.1998.1080p.WEB-DL-DRONE", @"SubDir\Droned.1998_1080p_WEB-DL-DRONE.mkv")]
-        [TestCase(@"Droned.1998.1080p.WEB-DL-DRONE.mkv", @"SubDir\Droned.1998_1080p_WEB-DL-DRONE.mkv")]
-        [TestCase(@"Droned.1998.1080p.WEB-DL-DRONE.mkv", @"SubDir\SubDir\Droned.1998_1080p_WEB-DL-DRONE.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-GOG", @"Cyberpunk.2077_v2.1-GOG.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-GOG", @"SubDir\Cyberpunk.2077_v2.1-GOG.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-GOG.mkv", @"SubDir\Cyberpunk.2077_v2.1-GOG.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-GOG.mkv", @"SubDir\SubDir\Cyberpunk.2077_v2.1-GOG.mkv")]
         public void should_return_path_to_jobfolder(string title, string storage)
         {
             _completed.Items.First().Title = title;
@@ -395,14 +395,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                 .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                .Returns(new OsPath(@"O:\mymount\Droned.1998.1080p.WEB-DL-DRONE".AsOsAgnostic()));
+                .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic()));
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Droned.1998.1080p.WEB-DL-DRONE".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic());
         }
 
         [Test]

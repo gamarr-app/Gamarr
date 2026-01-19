@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaInfo.MediaInfoFormatterTests
         [TestCase("truehd, thd+,  ", "Atmos", "TrueHD Atmos")]
         [TestCase("truehd, thd+,  ", "TrueHD.Atmos.7.1", "TrueHD Atmos")]
         [TestCase("truehd, thd+,  ", "", "TrueHD Atmos")]
-        [TestCase("wmav1, , ", "Droned.wmv", "WMA")]
+        [TestCase("wmav1, , ", "Cyberpunk.2077.wmv", "WMA")]
         [TestCase("wmav2, , ", "B.N.S04E18.720p.WEB-DL", "WMA")]
         [TestCase("opus, ,  ", "Roadkill Ep3x11 - YouTube.webm", "Opus")]
         [TestCase("mp3, ,  ", "climbing.mp4", "MP3")]

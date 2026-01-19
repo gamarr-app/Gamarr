@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01E01.Test\'s.1080p.WEB-DL-DRONE.mkv",
+                Name = @"Cyberpunk.2077.v2.1-GOG.mkv",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -310,7 +310,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var file = new QBittorrentTorrentFile
             {
-                Name = "Droned.S01E01.Tests.1080p.WEB-DL-DRONE.mkv"
+                Name = "Cyberpunk.2077.v2.1-GOG.mkv"
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });
@@ -332,7 +332,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01E01.Test\'s.1080p.WEB-DL-DRONE",
+                Name = @"Cyberpunk.2077.v2.1-GOG",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -343,7 +343,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var file = new QBittorrentTorrentFile
             {
-                Name = "Folder/Droned.S01E01.Tests.1080p.WEB-DL-DRONE.mkv"
+                Name = "Folder/Cyberpunk.2077.v2.1-GOG.mkv"
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });
@@ -365,7 +365,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01.\1/2",
+                Name = @"Elden.Ring.\1/2",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -378,11 +378,11 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             {
                 new QBittorrentTorrentFile
                 {
-                    Name = @"Droned.S01.12\E01.mkv".AsOsAgnostic()
+                    Name = @"Elden.Ring.12\E01.mkv".AsOsAgnostic()
                 },
                 new QBittorrentTorrentFile
                 {
-                    Name = @"Droned.S01.12\E02.mkv".AsOsAgnostic()
+                    Name = @"Elden.Ring.12\E02.mkv".AsOsAgnostic()
                 }
             };
 
@@ -396,7 +396,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var result = Subject.GetImportItem(item, null);
 
-            result.OutputPath.FullPath.Should().Be(Path.Combine(torrent.SavePath, "Droned.S01.12"));
+            result.OutputPath.FullPath.Should().Be(Path.Combine(torrent.SavePath, "Elden.Ring.12"));
         }
 
         public void missingFiles_item_should_have_required_properties()
@@ -426,14 +426,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01.\1/2",
+                Name = @"Elden.Ring.\1/2",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
                 State = state,
                 Label = "",
                 SavePath = @"C:\Torrents".AsOsAgnostic(),
-                ContentPath = @"C:\Torrents\Droned.S01.12".AsOsAgnostic()
+                ContentPath = @"C:\Torrents\Elden.Ring.12".AsOsAgnostic()
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });

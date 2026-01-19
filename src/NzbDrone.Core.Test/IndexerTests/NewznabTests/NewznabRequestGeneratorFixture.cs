@@ -27,8 +27,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { SteamAppId = 76759, Title = "Star Wars", Year = 1977, IgdbId = 11 },
-                SceneTitles = new List<string> { "Star Wars" }
+                Game = new Games.Game { SteamAppId = 292030, Title = "The Witcher 3 Wild Hunt", Year = 2015, IgdbId = 1942 },
+                SceneTitles = new List<string> { "The Witcher 3 Wild Hunt" }
             };
 
             _capabilities = new NewznabCapabilities();
@@ -101,8 +101,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().NotContain("steamappid=76759");
-            page.Url.Query.Should().Contain("q=Star");
+            page.Url.Query.Should().NotContain("steamappid=292030");
+            page.Url.Query.Should().Contain("q=The");
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("steamappid=76759");
+            page.Url.Query.Should().Contain("steamappid=292030");
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("igdbid=11");
+            page.Url.Query.Should().Contain("igdbid=1942");
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("steamappid=76759");
+            page.Url.Query.Should().Contain("steamappid=292030");
         }
 
         [Test]
@@ -155,7 +155,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("steamappid=76759");
+            page.Url.Query.Should().Contain("steamappid=292030");
         }
 
         [Test]
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             var pageTier3 = results.GetTier(2).First().First();
 
             pageTier3.Url.Query.Should().NotContain("steamappid=76759");
-            pageTier3.Url.Query.Should().NotContain("igdbid=11");
+            pageTier3.Url.Query.Should().NotContain("igdbid=1942");
             pageTier3.Url.Query.Should().Contain("q=");
         }
 
