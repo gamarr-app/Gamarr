@@ -3,13 +3,11 @@ import React, { Component } from 'react';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
+import MetacriticRating from 'Components/MetacriticRating';
 import Popover from 'Components/Tooltip/Popover';
-import TraktRating from 'Components/TraktRating';
 import AddNewDiscoverGameModal from 'DiscoverGame/AddNewDiscoverGameModal';
 import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
@@ -91,9 +89,7 @@ class DiscoverGamePoster extends Component {
       posterHeight,
       showTitle,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating,
+      showMetacriticRating,
       ratings,
       isExisting,
       isExcluded,
@@ -213,21 +209,9 @@ class DiscoverGamePoster extends Component {
           </div>
         ) : null}
 
-        {showImdbRating && !!ratings.imdb ? (
+        {showMetacriticRating && !!ratings.metacritic ? (
           <div className={styles.title}>
-            <ImdbRating ratings={ratings} iconSize={12} />
-          </div>
-        ) : null}
-
-        {showRottenTomatoesRating && !!ratings.rottenTomatoes ? (
-          <div className={styles.title}>
-            <RottenTomatoRating ratings={ratings} iconSize={12} />
-          </div>
-        ) : null}
-
-        {showTraktRating && !!ratings.trakt ? (
-          <div className={styles.title}>
-            <TraktRating ratings={ratings} iconSize={12} />
+            <MetacriticRating ratings={ratings} iconSize={12} />
           </div>
         ) : null}
 
@@ -238,9 +222,7 @@ class DiscoverGamePoster extends Component {
           gameRuntimeFormat={gameRuntimeFormat}
           ratings={ratings}
           showIgdbRating={showIgdbRating}
-          showImdbRating={showImdbRating}
-          showRottenTomatoesRating={showRottenTomatoesRating}
-          showTraktRating={showTraktRating}
+          showMetacriticRating={showMetacriticRating}
           {...otherProps}
         />
 
@@ -281,9 +263,7 @@ DiscoverGamePoster.propTypes = {
   posterHeight: PropTypes.number.isRequired,
   showTitle: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showTraktRating: PropTypes.bool.isRequired,
+  showMetacriticRating: PropTypes.bool.isRequired,
   ratings: PropTypes.object.isRequired,
   showRelativeDates: PropTypes.bool.isRequired,
   shortDateFormat: PropTypes.string.isRequired,
