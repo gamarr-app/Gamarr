@@ -23,6 +23,13 @@ using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.MetadataSource.SkyHook
 {
+    /// <summary>
+    /// Legacy metadata proxy that uses the GamarrMetadata API.
+    /// TODO: This class is deprecated and will be replaced by IgdbProxy.
+    /// The IgdbProxy provides direct IGDB API integration with proper OAuth.
+    /// For now, this class is kept as a fallback until IgdbProxy is fully tested.
+    /// </summary>
+    [Obsolete("Use NzbDrone.Core.MetadataSource.IGDB.IgdbProxy instead")]
     public class SkyHookProxy : IProvideGameInfo, ISearchForNewGame
     {
         private readonly IHttpClient _httpClient;

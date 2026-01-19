@@ -66,6 +66,12 @@ namespace NzbDrone.Core.Configuration
         // Metadata Provider
         TMDbCountryCode CertificationCountry { get; set; }
 
+        // IGDB API Settings
+        // TODO: These credentials should be configured by the user via Settings -> General
+        // Register at https://dev.twitch.tv/console to get credentials
+        string IgdbClientId { get; set; }
+        string IgdbClientSecret { get; set; }
+
         // UI
         int FirstDayOfWeek { get; set; }
         string CalendarWeekColumnHeader { get; set; }
