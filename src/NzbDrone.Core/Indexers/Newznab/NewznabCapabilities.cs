@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             DefaultPageSize = 100;
             MaxPageSize = 100;
             SupportedSearchParameters = new[] { "q" };
-            SupportedGameSearchParameters = new[] { "q", "igdbid" };
+            SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
             SupportsAggregateIdSearch = false;
             TextSearchEngine = "sphinx"; // This should remain 'sphinx' for older newznab installs
             GameTextSearchEngine = "sphinx"; // This should remain 'sphinx' for older newznab installs

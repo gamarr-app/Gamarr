@@ -47,7 +47,7 @@ namespace Gamarr.Api.V3.Parse
                 };
             }
 
-            var remoteGame = _parsingService.Map(parsedGameInfo, "", 0);
+            var remoteGame = _parsingService.Map(parsedGameInfo, 0, 0, null);
 
             if (remoteGame != null)
             {

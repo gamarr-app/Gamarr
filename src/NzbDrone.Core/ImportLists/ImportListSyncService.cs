@@ -74,31 +74,39 @@ namespace NzbDrone.Core.ImportLists
             ProcessListItems(listItemsResult);
         }
 
-        private void ProcessGameReport(ImportListDefinition importList, ImportListGame report, List<ImportListExclusion> listExclusions, List<int> dbGames, List<Game> gamesToAdd)
+        private void ProcessGameReport(ImportListDefinition importList, ImportListGame report, List<ImportListExclusion> listExclusions, List<int> dbGameSteamIds, List<int> dbGameIgdbIds, List<Game> gamesToAdd)
         {
-            if (report.IgdbId == 0 || !importList.EnableAuto)
+            // Need either Steam App ID (primary) or IGDB ID (secondary) to proceed
+            if ((report.SteamAppId == 0 && report.IgdbId == 0) || !importList.EnableAuto)
             {
                 return;
             }
 
-            // Check to see if game in DB
-            if (dbGames.Contains(report.IgdbId))
+            // Check to see if game in DB by Steam App ID (primary) or IGDB ID (secondary)
+            if ((report.SteamAppId > 0 && dbGameSteamIds.Contains(report.SteamAppId)) ||
+                (report.IgdbId > 0 && dbGameIgdbIds.Contains(report.IgdbId)))
             {
-                _logger.Debug("{0} [{1}] Rejected, Game Exists in DB", report.IgdbId, report.Title);
+                _logger.Debug("Steam:{0}/IGDB:{1} [{2}] Rejected, Game Exists in DB", report.SteamAppId, report.IgdbId, report.Title);
                 return;
             }
 
-            // Check to see if game excluded
-            var excludedGame = listExclusions.SingleOrDefault(s => s.IgdbId == report.IgdbId);
+            // Check to see if game excluded (by Steam App ID or IGDB ID)
+            var excludedGame = listExclusions.SingleOrDefault(s =>
+                (report.SteamAppId > 0 && s.SteamAppId == report.SteamAppId) ||
+                (report.IgdbId > 0 && s.IgdbId == report.IgdbId));
 
             if (excludedGame != null)
             {
-                _logger.Debug("{0} [{1}] Rejected due to list exclusion", report.IgdbId, report.Title);
+                _logger.Debug("Steam:{0}/IGDB:{1} [{2}] Rejected due to list exclusion", report.SteamAppId, report.IgdbId, report.Title);
                 return;
             }
 
-            // Append Artist if not already in DB or already on add list
-            if (gamesToAdd.All(s => s.IgdbId != report.IgdbId))
+            // Append Game if not already in DB or already on add list
+            var alreadyInList = gamesToAdd.Any(s =>
+                (report.SteamAppId > 0 && s.SteamAppId == report.SteamAppId) ||
+                (report.IgdbId > 0 && s.IgdbId == report.IgdbId));
+
+            if (!alreadyInList)
             {
                 var monitorType = importList.Monitor;
 
@@ -109,6 +117,7 @@ namespace NzbDrone.Core.ImportLists
                     QualityProfileId = importList.QualityProfileId,
                     MinimumAvailability = importList.MinimumAvailability,
                     Tags = importList.Tags,
+                    SteamAppId = report.SteamAppId,
                     IgdbId = report.IgdbId,
                     Title = report.Title,
                     Year = report.Year,
@@ -124,11 +133,19 @@ namespace NzbDrone.Core.ImportLists
 
         private void ProcessListItems(ImportListFetchResult listFetchResult)
         {
+            // Deduplicate by Steam App ID (primary) then IGDB ID (secondary) then Title
             listFetchResult.Games = listFetchResult.Games.DistinctBy(x =>
             {
+                // Primary identifier - Steam App ID
+                if (x.SteamAppId != 0)
+                {
+                    return $"steam:{x.SteamAppId}";
+                }
+
+                // Secondary identifier - IGDB ID
                 if (x.IgdbId != 0)
                 {
-                    return x.IgdbId.ToString();
+                    return $"igdb:{x.IgdbId}";
                 }
 
                 return x.Title;
@@ -137,7 +154,8 @@ namespace NzbDrone.Core.ImportLists
             var listedGames = listFetchResult.Games.ToList();
 
             var importExclusions = _listExclusionService.All();
-            var dbGames = _gameService.AllGameIgdbIds();
+            var dbGameSteamIds = _gameService.AllGameSteamAppIds();
+            var dbGameIgdbIds = _gameService.AllGameIgdbIds();
             var gamesToAdd = new List<Game>();
 
             var groupedGames = listedGames.GroupBy(x => x.ListId);
@@ -148,9 +166,10 @@ namespace NzbDrone.Core.ImportLists
 
                 foreach (var game in list)
                 {
-                    if (game.IgdbId != 0)
+                    // Process if we have either Steam App ID or IGDB ID
+                    if (game.SteamAppId != 0 || game.IgdbId != 0)
                     {
-                        ProcessGameReport(importList, game, importExclusions, dbGames, gamesToAdd);
+                        ProcessGameReport(importList, game, importExclusions, dbGameSteamIds, dbGameIgdbIds, gamesToAdd);
                     }
                 }
             }
@@ -183,14 +202,16 @@ namespace NzbDrone.Core.ImportLists
 
             var listGames = _listGameService.GetAllListGames();
 
-            // TODO use AllGameIgdbIds here?
             var gamesInLibrary = _gameService.GetAllGames();
 
             var gamesToUpdate = new List<Game>();
 
             foreach (var game in gamesInLibrary)
             {
-                var gameExists = listGames.Any(c => c.IgdbId == game.IgdbId);
+                // Check if game exists in lists by Steam App ID (primary) or IGDB ID (secondary)
+                var gameExists = listGames.Any(c =>
+                    (game.SteamAppId > 0 && c.SteamAppId == game.SteamAppId) ||
+                    (game.IgdbId > 0 && c.IgdbId == game.IgdbId));
 
                 if (!gameExists)
                 {

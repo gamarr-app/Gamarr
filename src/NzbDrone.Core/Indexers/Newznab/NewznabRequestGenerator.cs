@@ -33,6 +33,17 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
         }
 
+        private bool SupportsSteamSearch
+        {
+            get
+            {
+                var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
+
+                return capabilities.SupportedGameSearchParameters != null &&
+                       capabilities.SupportedGameSearchParameters.Contains("steamappid");
+            }
+        }
+
         private bool SupportsIgdbSearch
         {
             get
@@ -104,13 +115,29 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         private void AddGameIdPageableRequests(IndexerPageableRequestChain chain, int maxPages, IEnumerable<int> categories, SearchCriteriaBase searchCriteria)
         {
-            // IGDB is the primary metadata source for games
+            // Primary identifier - Steam App ID
+            var includeSteamSearch = SupportsSteamSearch && searchCriteria.Game.GameMetadata.Value.SteamAppId > 0;
+
+            // Secondary identifier - IGDB ID
             var includeIgdbSearch = SupportsIgdbSearch && searchCriteria.Game.GameMetadata.Value.IgdbId > 0;
 
-            // IMDb search removed - IMDb is a movie database and doesn't apply to games
+            // Search by Steam App ID first (primary identifier)
+            if (includeSteamSearch)
+            {
+                chain.Add(GetPagedRequests(maxPages,
+                    categories,
+                    "game",
+                    $"&steamappid={searchCriteria.Game.GameMetadata.Value.SteamAppId}"));
+            }
 
+            // Fall back to IGDB ID if no Steam search or as additional search
             if (includeIgdbSearch)
             {
+                if (includeSteamSearch)
+                {
+                    chain.AddTier();
+                }
+
                 chain.Add(GetPagedRequests(maxPages,
                     categories,
                     "game",
