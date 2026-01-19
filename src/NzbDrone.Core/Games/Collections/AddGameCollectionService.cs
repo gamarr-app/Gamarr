@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Games.Collections
             }
             catch (GameNotFoundException)
             {
-                _logger.Error("IgdbId {0} was not found, it may have been removed from TMDb.", newCollection.IgdbId);
+                _logger.Error("IgdbId {0} was not found, it may have been removed from IGDB.", newCollection.IgdbId);
 
                 return null;
             }

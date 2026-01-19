@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Games
                 {
                     gameMetadata.Status = GameStatusType.Deleted;
                     _gameMetadataService.Upsert(gameMetadata);
-                    _logger.Debug("Game marked as deleted on TMDb for {0}", game.Title);
+                    _logger.Debug("Game marked as deleted on IGDB for {0}", game.Title);
                     _eventAggregator.PublishEvent(new GameUpdatedEvent(game));
                 }
 
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Games
 
             if (gameMetadata.IgdbId != gameInfo.IgdbId)
             {
-                _logger.Warn("Game '{0}' (TMDb: {1}) was replaced with '{2}' (TMDb: {3}), because the original was a duplicate.", game.Title, game.IgdbId, gameInfo.Title, gameInfo.IgdbId);
+                _logger.Warn("Game '{0}' (IGDB: {1}) was replaced with '{2}' (IGDB: {3}), because the original was a duplicate.", game.Title, game.IgdbId, gameInfo.Title, gameInfo.IgdbId);
                 gameMetadata.IgdbId = gameInfo.IgdbId;
             }
 
@@ -243,7 +243,7 @@ namespace NzbDrone.Core.Games
                     }
                     catch (GameNotFoundException)
                     {
-                        _logger.Error("Game '{0}' (TMDb {1}) was not found, it may have been removed from The Game Database.", game.Title, game.IgdbId);
+                        _logger.Error("Game '{0}' (IGDB {1}) was not found, it may have been removed from The Game Database.", game.Title, game.IgdbId);
                     }
                     catch (Exception e)
                     {
@@ -277,7 +277,7 @@ namespace NzbDrone.Core.Games
                         }
                         catch (GameNotFoundException)
                         {
-                            _logger.Error("Game '{0}' (TMDb {1}) was not found, it may have been removed from The Game Database.", gameLocal.Title, gameLocal.IgdbId);
+                            _logger.Error("Game '{0}' (IGDB {1}) was not found, it may have been removed from The Game Database.", gameLocal.Title, gameLocal.IgdbId);
                             continue;
                         }
                         catch (Exception e)

@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Games
             catch (GameNotFoundException)
             {
                 _collectionService.RemoveCollection(collection);
-                _logger.Debug("Removing collection not present on TMDb for {0}", collection.Title);
+                _logger.Debug("Removing collection not present on IGDB for {0}", collection.Title);
 
                 throw;
             }
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Games
                     }
                     catch (GameNotFoundException)
                     {
-                        _logger.Error("Collection '{0}' (TMDb {1}) was not found, it may have been removed from The Game Database.", collection.Title, collection.IgdbId);
+                        _logger.Error("Collection '{0}' (IGDB {1}) was not found, it may have been removed from The Game Database.", collection.Title, collection.IgdbId);
                     }
                 }
             }
