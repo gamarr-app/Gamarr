@@ -122,7 +122,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Popularity").AsFloat().Nullable()
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("Recommendations").AsString().WithDefaultValue("[]")
-                .WithColumn("CollectionIgdbId").AsInt32().WithDefaultValue(0).Indexed()
+                .WithColumn("CollectionIgdbId").AsInt32().Nullable().Indexed()
                 .WithColumn("CollectionTitle").AsString().Nullable()
                 .WithColumn("GameType").AsInt32().WithDefaultValue(0)
                 .WithColumn("ParentGameId").AsInt32().Nullable()
@@ -137,13 +137,13 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("AggregatedRatingCount").AsInt32().Nullable();
 
             Create.TableForModel("Games")
-                .WithColumn("Path").AsString().NotNullable()
+                .WithColumn("Path").AsString().NotNullable().Indexed()
                 .WithColumn("Monitored").AsBoolean().NotNullable()
                 .WithColumn("QualityProfileId").AsInt32().NotNullable()
                 .WithColumn("Added").AsDateTime().Nullable()
                 .WithColumn("Tags").AsString().Nullable()
                 .WithColumn("AddOptions").AsString().Nullable()
-                .WithColumn("GameFileId").AsInt32().NotNullable()
+                .WithColumn("GameFileId").AsInt32().NotNullable().Indexed()
                 .WithColumn("MinimumAvailability").AsInt32().NotNullable()
                 .WithColumn("GameMetadataId").AsInt32().NotNullable().Unique()
                 .WithColumn("LastSearchTime").AsDateTime().Nullable();
@@ -221,6 +221,14 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("GameId").AsInt32().NotNullable()
                 .WithColumn("Languages").AsString().NotNullable();
 
+            Create.Index("IX_History_GameId_Date").OnTable("History")
+                .OnColumn("GameId").Ascending()
+                .OnColumn("Date").Descending();
+
+            Create.Index("IX_History_DownloadId_Date").OnTable("History")
+                .OnColumn("DownloadId").Ascending()
+                .OnColumn("Date").Descending();
+
             Create.TableForModel("Blocklist")
                 .WithColumn("SourceTitle").AsString().NotNullable()
                 .WithColumn("Quality").AsString().NotNullable()
@@ -231,16 +239,18 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Indexer").AsString().Nullable()
                 .WithColumn("Message").AsString().Nullable()
                 .WithColumn("TorrentInfoHash").AsString().Nullable()
-                .WithColumn("GameId").AsInt32().Nullable()
+                .WithColumn("GameId").AsInt32().Nullable().Indexed()
                 .WithColumn("Languages").AsString().NotNullable()
                 .WithColumn("IndexerFlags").AsInt32().NotNullable();
 
+            Create.Index("IX_Blocklist_Date").OnTable("Blocklist").OnColumn("Date").Ascending();
+
             Create.TableForModel("DownloadHistory")
-                .WithColumn("EventType").AsInt32().NotNullable()
+                .WithColumn("EventType").AsInt32().NotNullable().Indexed()
                 .WithColumn("GameId").AsInt32().NotNullable().Indexed()
                 .WithColumn("DownloadId").AsString().NotNullable().Indexed()
                 .WithColumn("SourceTitle").AsString().NotNullable()
-                .WithColumn("Date").AsDateTime().NotNullable().Indexed()
+                .WithColumn("Date").AsDateTime().NotNullable()
                 .WithColumn("Protocol").AsInt32().Nullable()
                 .WithColumn("IndexerId").AsInt32().Nullable()
                 .WithColumn("DownloadClientId").AsInt32().Nullable()
@@ -296,7 +306,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("EnableAutomaticSearch").AsBoolean().Nullable()
                 .WithColumn("EnableInteractiveSearch").AsBoolean().WithDefaultValue(true)
                 .WithColumn("Priority").AsInt32().WithDefaultValue(25)
-                .WithColumn("Tags").AsString().WithDefaultValue("[]")
+                .WithColumn("Tags").AsString().Nullable()
                 .WithColumn("DownloadClientId").AsInt32().WithDefaultValue(0);
 
             Create.TableForModel("IndexerStatus")
@@ -318,7 +328,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Priority").AsInt32().WithDefaultValue(1)
                 .WithColumn("RemoveCompletedDownloads").AsBoolean().WithDefaultValue(true)
                 .WithColumn("RemoveFailedDownloads").AsBoolean().WithDefaultValue(true)
-                .WithColumn("Tags").AsString().WithDefaultValue("[]");
+                .WithColumn("Tags").AsString().Nullable();
 
             Create.TableForModel("DownloadClientStatus")
                 .WithColumn("ProviderId").AsInt32().NotNullable().Unique()
@@ -379,7 +389,7 @@ namespace NzbDrone.Core.Datastore.Migration
             // ===========================================
 
             Create.TableForModel("MetadataFiles")
-                .WithColumn("GameId").AsInt32().NotNullable().Indexed()
+                .WithColumn("GameId").AsInt32().NotNullable()
                 .WithColumn("Consumer").AsString().NotNullable()
                 .WithColumn("Type").AsInt32().NotNullable()
                 .WithColumn("RelativePath").AsString().NotNullable()
