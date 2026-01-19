@@ -33,23 +33,23 @@ namespace NzbDrone.Core.ImportLists.RSSImport
 
                 yield return new ImportListDefinition
                 {
-                    Name = "IMDb List",
+                    Name = "Steam Wishlist",
                     Enabled = Enabled,
                     EnableAuto = true,
                     QualityProfileId = 1,
                     Implementation = GetType().Name,
                     MinRefreshInterval = MinRefreshInterval,
-                    Settings = new RSSImportSettings { Link = "https://rss.imdb.com/list/YOURLISTID" },
+                    Settings = new RSSImportSettings { Link = "https://store.steampowered.com/wishlist/id/YOURUSERNAME/wishlistdata/" },
                 };
                 yield return new ImportListDefinition
                 {
-                    Name = "IMDb Watchlist",
+                    Name = "Custom RSS Feed",
                     Enabled = Enabled,
                     EnableAuto = true,
                     QualityProfileId = 1,
                     Implementation = GetType().Name,
                     MinRefreshInterval = MinRefreshInterval,
-                    Settings = new RSSImportSettings { Link = "https://rss.imdb.com/user/IMDBUSERID/watchlist" },
+                    Settings = new RSSImportSettings { Link = "https://example.com/games/rss" },
                 };
             }
         }

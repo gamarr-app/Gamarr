@@ -129,8 +129,8 @@ const gameTokens = [
 ];
 
 const gameIdTokens = [
-  { token: '{ImdbId}', example: 'tt12345' },
-  { token: '{IgdbId}', example: '123456' },
+  { token: '{SteamAppId}', example: '1245620' },
+  { token: '{IgdbId}', example: '119133' },
 ];
 
 const qualityTokens = [
