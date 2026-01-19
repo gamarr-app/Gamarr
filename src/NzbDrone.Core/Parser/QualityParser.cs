@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Parser
@@ -61,6 +62,26 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex DLCRegex = new (@"\b(?<dlc>(?:INCL(?:UDES?)?[\s._-]?)?(?:ALL[\s._-]?)?DLC[sS]?|DLC[\s._-]?(?:PACK|UNLOCKER)|COMPLETE[\s._-]?(?:EDITION|PACK)|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // DLC-only releases (requires base game)
+        private static readonly Regex DlcOnlyRegex = new (@"\b(?<dlconly>DLC[\s._-]?ONLY|(?:^|[\s._-])DLC(?:[\s._-]|$)|ADDON[\s._-]?ONLY|EXPANSION[\s._-]?ONLY)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // Season pass / DLC bundle
+        private static readonly Regex SeasonPassRegex = new (@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLC[\s._-]?BUNDLE|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // Expansion packs
+        private static readonly Regex ExpansionRegex = new (@"\b(?<expansion>EXPANSION(?:[\s._-]?PACK)?|STANDALONE[\s._-]?EXPANSION)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // Complete/GOTY editions (base game + all DLC)
+        private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?ALL[\s._-]?DLC[sS]?|ALL[\s._-]?DLC[sS]?[\s._-]?(?:INCL(?:UDED)?|PACK))\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // Update/Patch only (requires base game)
+        private static readonly Regex UpdatePatchOnlyRegex = new (@"\b(?<updateonly>UPDATE[\s._-]?ONLY|PATCH[\s._-]?ONLY|(?:UPDATE|PATCH)[\s._-]?\d+[\s._-]?ONLY|HOTFIX[\s._-]?ONLY)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex MultiLangRegex = new (@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",
@@ -130,6 +151,57 @@ namespace NzbDrone.Core.Parser
             }
 
             return new GameVersion();
+        }
+
+        /// <summary>
+        /// Parse the content type from release title (DLC-only, Complete Edition, etc.)
+        /// </summary>
+        public static ReleaseContentType ParseContentType(string name)
+        {
+            if (name.IsNullOrWhiteSpace())
+            {
+                return ReleaseContentType.Unknown;
+            }
+
+            var normalizedName = name.Replace('_', ' ').Replace('.', ' ').Trim();
+
+            // Check for update/patch only first (most specific)
+            if (UpdatePatchOnlyRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected update-only release: {0}", name);
+                return ReleaseContentType.UpdateOnly;
+            }
+
+            // Check for DLC-only releases
+            if (DlcOnlyRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected DLC-only release: {0}", name);
+                return ReleaseContentType.DlcOnly;
+            }
+
+            // Check for season pass / DLC bundle
+            if (SeasonPassRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected season pass/DLC bundle: {0}", name);
+                return ReleaseContentType.SeasonPass;
+            }
+
+            // Check for expansion packs
+            if (ExpansionRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected expansion pack: {0}", name);
+                return ReleaseContentType.Expansion;
+            }
+
+            // Check for complete/GOTY editions (base game + all DLC)
+            if (CompleteEditionRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected complete edition with all DLC: {0}", name);
+                return ReleaseContentType.BaseGameWithAllDlc;
+            }
+
+            // Default to unknown - could be base game only or undetected
+            return ReleaseContentType.Unknown;
         }
 
         public static QualityModel ParseQuality(string name)

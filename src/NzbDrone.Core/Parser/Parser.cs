@@ -304,6 +304,12 @@ namespace NzbDrone.Core.Parser
                                     Logger.Debug("Game version parsed: {0}", result.GameVersion);
                                 }
 
+                                result.ContentType = QualityParser.ParseContentType(title);
+                                if (result.ContentType != Model.ReleaseContentType.Unknown)
+                                {
+                                    Logger.Debug("Content type parsed: {0}", result.ContentType);
+                                }
+
                                 result.Platform = PlatformParser.ParsePlatform(title);
                                 result.PlatformString = PlatformParser.ParsePlatformString(title);
                                 if (result.Platform != Games.PlatformFamily.Unknown)
