@@ -6,6 +6,11 @@ using NzbDrone.Core.IndexerSearch.Definitions;
 
 namespace NzbDrone.Core.Indexers.PassThePopcorn
 {
+    /// <summary>
+    /// PassThePopcorn is a movie-focused tracker.
+    /// TODO: Consider whether this indexer should be disabled/removed for game manager
+    /// as it's a movie-focused tracker that uses IMDb IDs which don't apply to games.
+    /// </summary>
     public class PassThePopcornRequestGenerator : IIndexerRequestGenerator
     {
         private readonly PassThePopcornSettings _settings;
@@ -28,15 +33,22 @@ namespace NzbDrone.Core.Indexers.PassThePopcorn
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            if (searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
-            {
-                pageableRequests.Add(GetRequest(searchCriteria.Game.GameMetadata.Value.ImdbId));
-            }
-            else if (searchCriteria.Game.Year > 0)
+            // IMDb search removed - PassThePopcorn is a movie tracker that uses IMDb IDs
+            // which don't apply to games. Fall back to title-based search.
+            // TODO: Consider whether PassThePopcorn should be disabled for game searches
+
+            if (searchCriteria.Game.Year > 0)
             {
                 foreach (var queryTitle in searchCriteria.CleanSceneTitles)
                 {
                     pageableRequests.Add(GetRequest($"{queryTitle}&year={searchCriteria.Game.Year}"));
+                }
+            }
+            else
+            {
+                foreach (var queryTitle in searchCriteria.CleanSceneTitles)
+                {
+                    pageableRequests.Add(GetRequest(queryTitle));
                 }
             }
 

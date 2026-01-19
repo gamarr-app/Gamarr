@@ -12,6 +12,8 @@ using NzbDrone.Core.Qualities;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Update.History.Events;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
+
 namespace NzbDrone.Core.Notifications
 {
     public class NotificationService
@@ -45,7 +47,8 @@ namespace NzbDrone.Core.Notifications
         private string GetMessage(Game game, QualityModel quality)
         {
             var qualityString = quality.Quality.ToString();
-            var imdbUrl = "https://www.imdb.com/title/" + game.GameMetadata.Value.ImdbId + "/";
+            // IGDB - Internet Game Database (primary metadata source for games)
+            var igdbUrl = "https://www.igdb.com/games/" + game.GameMetadata.Value.IgdbId;
 
             if (quality.Revision.Version > 1)
             {
@@ -56,7 +59,7 @@ namespace NzbDrone.Core.Notifications
                                     game.Title,
                                     game.Year,
                                     qualityString,
-                                    imdbUrl);
+                                    igdbUrl);
         }
 
         private bool ShouldHandleGame(ProviderDefinition definition, Game game)

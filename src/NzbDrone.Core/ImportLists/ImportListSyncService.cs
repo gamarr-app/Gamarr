@@ -9,6 +9,8 @@ using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Games;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
+
 namespace NzbDrone.Core.ImportLists
 {
     public class ImportListSyncService : IExecute<ImportListSyncCommand>

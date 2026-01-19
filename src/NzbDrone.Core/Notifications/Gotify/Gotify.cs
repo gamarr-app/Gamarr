@@ -161,17 +161,15 @@ namespace NzbDrone.Core.Notifications.Gotify
                         var linkText = "";
                         var linkUrl = "";
 
+                        // IGDB - Internet Game Database (primary link for games)
                         if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
                         {
-                            linkText = "TMDb";
-                            linkUrl = $"https://www.thegamedb.org/game/{game.IgdbId}";
+                            linkText = "IGDB";
+                            linkUrl = $"https://www.igdb.com/games/{game.IgdbId}";
                         }
 
-                        if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
-                        {
-                            linkText = "IMDb";
-                            linkUrl = $"https://www.imdb.com/title/{game.ImdbId}";
-                        }
+                        // IMDb links deprecated - IMDb is a movie database, not applicable for games
+                        // if (linkType == MetadataLinkType.Imdb) { /* Deprecated - no-op */ }
 
                         if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
                         {
@@ -179,11 +177,14 @@ namespace NzbDrone.Core.Notifications.Gotify
                             linkUrl = $"https://trakt.tv/search/igdb/{game.IgdbId}?id_type=game";
                         }
 
-                        sb.AppendLine($"[{linkText}]({linkUrl})");
-
-                        if (link == Settings.PreferredMetadataLink)
+                        if (linkText.Length > 0 && linkUrl.Length > 0)
                         {
-                            payload.SetClickUrl(linkUrl);
+                            sb.AppendLine($"[{linkText}]({linkUrl})");
+
+                            if (link == Settings.PreferredMetadataLink)
+                            {
+                                payload.SetClickUrl(linkUrl);
+                            }
                         }
                     }
                 }

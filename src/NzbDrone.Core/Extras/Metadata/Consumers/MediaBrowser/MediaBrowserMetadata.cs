@@ -13,6 +13,8 @@ using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.ThingiProvider;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with metadata)
+
 namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
 {
     public class MediaBrowserMetadata : MetadataBase<MediaBrowserMetadataSettings>

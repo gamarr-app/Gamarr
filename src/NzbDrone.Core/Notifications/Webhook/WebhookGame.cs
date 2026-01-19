@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Games;
+
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with webhooks)
 
 namespace NzbDrone.Core.Notifications.Webhook
 {

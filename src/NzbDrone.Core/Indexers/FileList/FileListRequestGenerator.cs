@@ -24,16 +24,23 @@ namespace NzbDrone.Core.Indexers.FileList
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            if (searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
-            {
-                pageableRequests.Add(GetRequest("search-torrents", $"&type=imdb&query={searchCriteria.Game.GameMetadata.Value.ImdbId}"));
-            }
-            else if (searchCriteria.Game.Year > 0)
+            // IMDb search removed - IMDb is a movie database and doesn't apply to games
+            // TODO: FileList may need to add IGDB support for game searches
+            // For now, fall back to title-based search
+
+            if (searchCriteria.Game.Year > 0)
             {
                 foreach (var queryTitle in searchCriteria.CleanSceneTitles)
                 {
                     var titleYearSearchQuery = $"{queryTitle}+{searchCriteria.Game.Year}";
                     pageableRequests.Add(GetRequest("search-torrents", $"&type=name&query={titleYearSearchQuery.Trim()}"));
+                }
+            }
+            else
+            {
+                foreach (var queryTitle in searchCriteria.CleanSceneTitles)
+                {
+                    pageableRequests.Add(GetRequest("search-torrents", $"&type=name&query={queryTitle.Trim()}"));
                 }
             }
 

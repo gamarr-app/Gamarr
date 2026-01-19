@@ -8,6 +8,12 @@ using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.ImportLists.TMDb
 {
+    /// <summary>
+    /// DEPRECATED: TMDb import lists are movie-specific and do not apply to games.
+    /// This class is kept for backwards compatibility but should not be used.
+    /// Use IGDB-based import lists instead.
+    /// </summary>
+    [Obsolete("TMDb import lists are movie-specific and do not apply to games. Use IGDB-based lists instead.")]
     public abstract class TMDbImportListBase<TSettings> : HttpImportListBase<TSettings>
         where TSettings : TMDbSettingsBase<TSettings>, new()
     {
@@ -15,6 +21,10 @@ namespace NzbDrone.Core.ImportLists.TMDb
         public override TimeSpan MinRefreshInterval => TimeSpan.FromHours(12);
         public override int PageSize => 20;
         protected override bool UsePreGeneratedPages => true;
+
+        // Mark as disabled by default since TMDb doesn't apply to games
+        public override bool Enabled => false;
+        public override bool EnableAuto => false;
 
         public readonly ISearchForNewGame _skyhookProxy;
         public readonly IHttpRequestBuilderFactory _requestBuilder;

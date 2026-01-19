@@ -20,6 +20,8 @@ using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Tags;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with metadata)
+
 namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 {
     public class XbmcMetadata : MetadataBase<XbmcMetadataSettings>
@@ -433,11 +435,11 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
             if (Settings.GameMetadataURL)
             {
-                xmlResult += "https://www.thegamedb.org/game/" + game.GameMetadata.Value.IgdbId;
+                // IGDB - Internet Game Database (primary metadata source for games)
+                xmlResult += "https://www.igdb.com/games/" + game.GameMetadata.Value.IgdbId;
                 xmlResult += Environment.NewLine;
 
-                xmlResult += "https://www.imdb.com/title/" + game.GameMetadata.Value.ImdbId;
-                xmlResult += Environment.NewLine;
+                // IMDb URL removed - IMDb is a movie database, not applicable for games
             }
 
             var metadataFileName = GetGameMetadataFilename(gameFile.RelativePath);

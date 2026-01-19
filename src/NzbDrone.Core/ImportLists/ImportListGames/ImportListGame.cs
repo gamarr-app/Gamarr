@@ -1,5 +1,8 @@
+using System;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Games;
+
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility)
 
 namespace NzbDrone.Core.ImportLists.ImportListGames
 {
@@ -26,6 +29,11 @@ namespace NzbDrone.Core.ImportLists.ImportListGames
             set { GameMetadata.Value.IgdbId = value; }
         }
 
+        /// <summary>
+        /// DEPRECATED: IMDb is a movie database and does not apply to games.
+        /// This property is kept for backwards compatibility but will always be null/empty for games.
+        /// </summary>
+        [Obsolete("IMDb is a movie database and does not apply to games. This property will always be null/empty.")]
         public string ImdbId
         {
             get { return GameMetadata.Value.ImdbId; }

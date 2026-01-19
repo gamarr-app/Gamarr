@@ -6,6 +6,8 @@ using NLog;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.Games;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for ImdbId (kept for backward compatibility with Xbmc)
+
 namespace NzbDrone.Core.Notifications.Xbmc
 {
     public interface IXbmcService

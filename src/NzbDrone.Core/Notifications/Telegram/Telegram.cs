@@ -131,15 +131,14 @@ namespace NzbDrone.Core.Notifications.Telegram
             {
                 var linkType = (MetadataLinkType)link;
 
+                // IGDB - Internet Game Database (primary link for games)
                 if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
                 {
-                    links.Add(new TelegramLink("TMDb", $"https://www.thegamedb.org/game/{game.IgdbId}"));
+                    links.Add(new TelegramLink("IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
                 }
 
-                if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
-                {
-                    links.Add(new TelegramLink("IMDb", $"https://www.imdb.com/title/{game.ImdbId}"));
-                }
+                // IMDb links deprecated - IMDb is a movie database, not applicable for games
+                // if (linkType == MetadataLinkType.Imdb) { /* Deprecated - no-op */ }
 
                 if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
                 {

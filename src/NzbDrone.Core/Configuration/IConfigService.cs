@@ -5,6 +5,8 @@ using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Security;
 
+#pragma warning disable CS0618 // Disable obsolete warnings for TMDbCountryCode (using for backward compatibility)
+
 namespace NzbDrone.Core.Configuration
 {
     public interface IConfigService
