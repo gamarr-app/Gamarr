@@ -18,6 +18,9 @@ public static class ReleaseGroupParser
     // name only...be very careful with this last; high chance of false positives
     private static readonly Regex ExceptionReleaseGroupRegexExact = new (@"\b(?<releasegroup>KRaLiMaRKo|E\.N\.D|D\-Z0N3|Koten_Gars|BluDragon|ZØNEHD|HQMUX|VARYG|YIFY|YTS(.(MX|LT|AG))?|TMd|Eml HDTeam|LMain|DarQ|BEN THE MEN|TAoE|QxR|126811)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    // Game repack groups: [DODI Repack], [FitGirl Repack], etc.
+    private static readonly Regex GameRepackGroupRegex = new (@"\[(?<releasegroup>DODI|FitGirl|XATAB|ElAmigos|CorePack|KaOs|R\.G\.\s*Mechanics|R\.G\.\s*Catalyst|Chovka|EMPRESS|GOG|Masquerade)(?:\s+Repack)?\]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     // groups whose releases end with RlsGroup) or RlsGroup]
     private static readonly Regex ExceptionReleaseGroupRegex = new (@"(?<=[._ \[])(?<releasegroup>(Silence|afm72|Panda|Ghost|MONOLITH|Tigole|Joy|ImE|UTR|t3nzin|Anime Time|Project Angel|Hakata Ramen|HONE|GiLG|Vyndros|SEV|Garshasp|Kappa|Natty|RCVR|SAMPA|YOGI|r00t|EDGE2020|RZeroX|FreetheFish|Anna|Bandi|Qman|theincognito|HDO|DusIctv|DHD|CtrlHD|-ZR-|ADC|XZVN|RH|Kametsu)(?=\]|\)))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -45,6 +48,14 @@ public static class ReleaseGroupParser
         if (animeMatch.Success)
         {
             return animeMatch.Groups["subgroup"].Value;
+        }
+
+        // Check for game repack groups like [DODI Repack], [FitGirl Repack]
+        var gameRepackMatch = GameRepackGroupRegex.Match(title);
+
+        if (gameRepackMatch.Success)
+        {
+            return gameRepackMatch.Groups["releasegroup"].Value;
         }
 
         title = CleanReleaseGroupRegex.Replace(title);

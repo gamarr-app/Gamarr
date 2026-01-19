@@ -4,6 +4,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Games.Commands;
+using NzbDrone.Core.IndexerSearch;
 using Gamarr.Api.V3.RootFolders;
 
 namespace NzbDrone.Integration.Test.ApiTests
