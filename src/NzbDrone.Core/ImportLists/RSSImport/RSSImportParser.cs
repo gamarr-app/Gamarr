@@ -137,7 +137,7 @@ namespace NzbDrone.Core.ImportLists.RSSImport
         {
             var title = GetTitle(item);
 
-            // Loosely allow games (will work with IMDB)
+            // Filter out TV content from RSS feeds
             if (title.ContainsIgnoreCase("TV Series") || title.ContainsIgnoreCase("Mini-Series") || title.ContainsIgnoreCase("TV Episode"))
             {
                 return null;

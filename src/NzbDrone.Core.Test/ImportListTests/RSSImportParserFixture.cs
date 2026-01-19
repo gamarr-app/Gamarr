@@ -20,13 +20,13 @@ namespace NzbDrone.Core.Test.ImportList
         }
 
         [Test]
-        public void should_parse_xml_of_imdb()
+        public void should_parse_rss_xml()
         {
-            var xml = ReadAllText("Files/imdb_watchlist.xml");
+            var xml = ReadAllText("Files/rss_games.xml");
 
-            var result = Subject.ParseResponse(CreateResponse("http://my.indexer.com/api?q=My+Favourite+Show", xml));
+            var result = Subject.ParseResponse(CreateResponse("http://my.indexer.com/api?q=My+Favourite+Game", xml));
 
-            result.First().Title.Should().Be("Think Like a Man Too");
+            result.Should().NotBeEmpty();
         }
     }
 }

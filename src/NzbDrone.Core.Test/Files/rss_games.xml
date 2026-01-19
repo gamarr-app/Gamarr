@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Game Releases</title>
+    <link>https://example.com/games</link>
+    <description>Latest game releases</description>
+    <item>
+      <title>Elden Ring (2022)</title>
+      <link>https://example.com/games/elden-ring</link>
+      <description>FromSoftware action RPG</description>
+      <pubDate>Fri, 25 Feb 2022 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Portal 2 (2011)</title>
+      <link>https://example.com/games/portal-2</link>
+      <description>Valve puzzle game</description>
+      <pubDate>Tue, 19 Apr 2011 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Cyberpunk 2077 (2020)</title>
+      <link>https://example.com/games/cyberpunk-2077</link>
+      <description>CD Projekt Red RPG</description>
+      <pubDate>Thu, 10 Dec 2020 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
