@@ -34,7 +34,8 @@ namespace NzbDrone.Core.Parser
 
             // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
             // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
-            new Regex(@"^\[(?:DL|UL|SP)\]\s*(?<title>[^\[\]]+?)\s*(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Example: [CD] Half-Life 2 [P] [RUS + ENG / ENG] (2004, FPS) (1.0.1.0) [Tycoon]
+            new Regex(@"^\[(?:DL|UL|SP|CD|DVD|P|L)\]\s*(?<title>[^\[\]]+?)\s*(?:\[[^\]]*\]\s*)*\((?<year>(1(8|9)|20)\d{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Anime [Subgroup] and Year
             new Regex(@"^(?:\[(?<subgroup>.+?)\][-_. ]?)(?<title>(?![(\[]).+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|x|\d+|\]|\W\d+)))+.*?(?<hash>\[\w{8}\])?(?:$|\.)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
