@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using NLog;
@@ -29,6 +30,18 @@ namespace NzbDrone.Integration.Test
 
         protected override string ApiKey => _runner.ApiKey;
 
+        /// <summary>
+        /// Override this property to enable mock metadata mode for tests.
+        /// When enabled, IGDB and Steam API calls will return mock data instead of making network requests.
+        /// </summary>
+        protected virtual bool UseMockMetadata => false;
+
+        /// <summary>
+        /// Override this property to specify a custom path to mock data files.
+        /// If not specified, the system will auto-detect the mock data path.
+        /// </summary>
+        protected virtual string MockDataPath => null;
+
         protected override void StartTestTarget()
         {
             Port = Interlocked.Increment(ref StaticPort);
@@ -43,7 +56,36 @@ namespace NzbDrone.Integration.Test
             _runner = new NzbDroneRunner(LogManager.GetCurrentClassLogger(), PostgresOptions, Port);
             _runner.Kill();
 
+            // Configure mock metadata mode
+            _runner.UseMockMetadata = UseMockMetadata;
+            _runner.MockDataPath = MockDataPath ?? FindMockDataPath();
+
             _runner.Start();
+        }
+
+        /// <summary>
+        /// Attempts to find the mock data path relative to the test directory.
+        /// </summary>
+        private string FindMockDataPath()
+        {
+            var testDir = TestContext.CurrentContext.TestDirectory;
+            var possiblePaths = new[]
+            {
+                Path.Combine(testDir, "Files", "MockData"),
+                Path.Combine(testDir, "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "src", "NzbDrone.Core.Test", "Files", "MockData"),
+            };
+
+            foreach (var path in possiblePaths)
+            {
+                var fullPath = Path.GetFullPath(path);
+                if (Directory.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            return null;
         }
 
         protected override void InitializeTestTarget()

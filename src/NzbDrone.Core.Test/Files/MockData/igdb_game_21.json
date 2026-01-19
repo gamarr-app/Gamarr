@@ -1,0 +1,135 @@
+[
+  {
+    "id": 21,
+    "name": "Half-Life 2",
+    "slug": "half-life-2",
+    "summary": "Gordon Freeman is on his way to City 17, but after a couple of issues with the teleporter, the Resistance's base at Black Mesa East is compromised. Gordon must make his way through Ravenholm, then through the ruins of the city itself, in order to save Eli Vance and foil the plans of the Combine.",
+    "storyline": "Dr. Gordon Freeman has been placed in stasis by the G-Man after the events of Half-Life. He awakens after nearly two decades, arriving via train at City 17, a fictional city in Eastern Europe that has become the primary base of operations for the Combine.",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1100304000,
+    "aggregated_rating": 95.2,
+    "aggregated_rating_count": 50,
+    "rating": 92.5,
+    "rating_count": 2500,
+    "total_rating": 93.8,
+    "total_rating_count": 2550,
+    "hypes": 1500,
+    "follows": 5000,
+    "url": "https://www.igdb.com/games/half-life-2",
+    "cover": {
+      "id": 90001,
+      "image_id": "co1wyy",
+      "width": 264,
+      "height": 352,
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1wyy.jpg"
+    },
+    "screenshots": [
+      {
+        "id": 80001,
+        "image_id": "sc1abc",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "id": 80002,
+        "image_id": "sc1abd",
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "artworks": [
+      {
+        "id": 70001,
+        "image_id": "ar1xyz",
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "videos": [
+      {
+        "id": 60001,
+        "name": "Official Trailer",
+        "video_id": "ID1SCJX7bXg"
+      }
+    ],
+    "genres": [
+      { "id": 5, "name": "Shooter", "slug": "shooter" },
+      { "id": 31, "name": "Adventure", "slug": "adventure" }
+    ],
+    "themes": [
+      { "id": 1, "name": "Action", "slug": "action" },
+      { "id": 18, "name": "Science fiction", "slug": "science-fiction" }
+    ],
+    "game_modes": [
+      { "id": 1, "name": "Single player", "slug": "single-player" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 },
+      { "id": 12, "name": "Xbox 360", "abbreviation": "X360", "slug": "xbox360", "category": 1 },
+      { "id": 9, "name": "PlayStation 3", "abbreviation": "PS3", "slug": "ps3", "category": 1 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10001,
+        "developer": true,
+        "publisher": false,
+        "company": { "id": 1, "name": "Valve Corporation", "slug": "valve-corporation" }
+      },
+      {
+        "id": 10002,
+        "developer": false,
+        "publisher": true,
+        "company": { "id": 2, "name": "Sierra Entertainment", "slug": "sierra-entertainment" }
+      }
+    ],
+    "game_engines": [
+      { "id": 9, "name": "Source", "slug": "source" }
+    ],
+    "keywords": [
+      { "id": 1, "name": "first-person shooter", "slug": "first-person-shooter" },
+      { "id": 2, "name": "physics-based gameplay", "slug": "physics-based-gameplay" }
+    ],
+    "alternative_names": [
+      { "id": 50001, "name": "HL2", "comment": "Abbreviation" }
+    ],
+    "collection": {
+      "id": 22,
+      "name": "Half-Life",
+      "slug": "half-life"
+    },
+    "franchise": {
+      "id": 23,
+      "name": "Half-Life",
+      "slug": "half-life"
+    },
+    "dlcs": [
+      { "id": 877, "name": "Half-Life 2: Episode One" },
+      { "id": 878, "name": "Half-Life 2: Episode Two" }
+    ],
+    "similar_games": [
+      { "id": 38, "name": "Portal" },
+      { "id": 74, "name": "BioShock" }
+    ],
+    "age_ratings": [
+      { "id": 30001, "category": 1, "rating": 7, "synopsis": "Mature 17+" }
+    ],
+    "release_dates": [
+      {
+        "id": 40001,
+        "date": 1100304000,
+        "human": "Nov 16, 2004",
+        "category": 0,
+        "region": 2,
+        "platform": { "id": 6, "name": "PC (Microsoft Windows)" }
+      }
+    ],
+    "websites": [
+      { "id": 20001, "category": 1, "url": "https://www.half-life.com/en/halflife2", "trusted": true },
+      { "id": 20002, "category": 13, "url": "https://store.steampowered.com/app/220/HalfLife_2/", "trusted": true }
+    ],
+    "external_games": [
+      { "id": 15001, "category": 1, "uid": "220", "url": "https://store.steampowered.com/app/220" }
+    ]
+  }
+]

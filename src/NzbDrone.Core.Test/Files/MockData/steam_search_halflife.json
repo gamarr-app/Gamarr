@@ -1,0 +1,76 @@
+{
+  "total": 5,
+  "items": [
+    {
+      "id": 220,
+      "type": "app",
+      "name": "Half-Life 2",
+      "controllersupport": false,
+      "tiny_image": "https://cdn.akamai.steamstatic.com/steam/apps/220/capsule_231x87.jpg",
+      "small_capsule_image": "https://cdn.akamai.steamstatic.com/steam/apps/220/capsule_231x87.jpg",
+      "large_capsule_image": "https://cdn.akamai.steamstatic.com/steam/apps/220/capsule_467x181.jpg",
+      "metascore": "96",
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      },
+      "price": {
+        "currency": "USD",
+        "initial": 999,
+        "final": 999
+      }
+    },
+    {
+      "id": 70,
+      "type": "app",
+      "name": "Half-Life",
+      "controllersupport": false,
+      "tiny_image": "https://cdn.akamai.steamstatic.com/steam/apps/70/capsule_231x87.jpg",
+      "small_capsule_image": "https://cdn.akamai.steamstatic.com/steam/apps/70/capsule_231x87.jpg",
+      "metascore": "96",
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      }
+    },
+    {
+      "id": 380,
+      "type": "app",
+      "name": "Half-Life 2: Episode One",
+      "controllersupport": false,
+      "tiny_image": "https://cdn.akamai.steamstatic.com/steam/apps/380/capsule_231x87.jpg",
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      }
+    },
+    {
+      "id": 420,
+      "type": "app",
+      "name": "Half-Life 2: Episode Two",
+      "controllersupport": false,
+      "tiny_image": "https://cdn.akamai.steamstatic.com/steam/apps/420/capsule_231x87.jpg",
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      }
+    },
+    {
+      "id": 546560,
+      "type": "app",
+      "name": "Half-Life: Alyx",
+      "controllersupport": false,
+      "tiny_image": "https://cdn.akamai.steamstatic.com/steam/apps/546560/capsule_231x87.jpg",
+      "metascore": "93",
+      "platforms": {
+        "windows": true,
+        "mac": false,
+        "linux": true
+      }
+    }
+  ]
+}
