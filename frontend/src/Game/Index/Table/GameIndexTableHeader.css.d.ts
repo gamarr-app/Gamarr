@@ -9,9 +9,9 @@ interface CssExports {
   'gameStatus': string;
   'genres': string;
   'igdbRating': string;
-  'imdbRating': string;
   'inCinemas': string;
   'keywords': string;
+  'metacriticRating': string;
   'minimumAvailability': string;
   'originalLanguage': string;
   'originalTitle': string;
@@ -21,14 +21,12 @@ interface CssExports {
   'qualityProfileId': string;
   'releaseDate': string;
   'releaseGroups': string;
-  'rottenTomatoesRating': string;
   'runtime': string;
   'sizeOnDisk': string;
   'sortTitle': string;
   'status': string;
   'studio': string;
   'tags': string;
-  'traktRating': string;
   'year': string;
 }
 export const cssExports: CssExports;

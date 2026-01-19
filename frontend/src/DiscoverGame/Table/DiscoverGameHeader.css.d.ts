@@ -7,21 +7,19 @@ interface CssExports {
   'digitalRelease': string;
   'genres': string;
   'igdbRating': string;
-  'imdbRating': string;
   'inCinemas': string;
   'isPopular': string;
   'isRecommendation': string;
   'isTrending': string;
   'lists': string;
+  'metacriticRating': string;
   'originalLanguage': string;
   'physicalRelease': string;
   'popularity': string;
-  'rottenTomatoesRating': string;
   'runtime': string;
   'sortTitle': string;
   'status': string;
   'studio': string;
-  'traktRating': string;
   'year': string;
 }
 export const cssExports: CssExports;

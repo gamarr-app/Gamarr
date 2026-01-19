@@ -38,11 +38,12 @@ export interface RatingValues {
 }
 
 export interface Ratings {
-  imdb: RatingValues;
   igdb: RatingValues;
   metacritic: RatingValues;
-  rottenTomatoes: RatingValues;
-  trakt: RatingValues;
+  // Deprecated: movie-specific ratings not used for games
+  imdb?: RatingValues;
+  rottenTomatoes?: RatingValues;
+  trakt?: RatingValues;
 }
 
 export interface AlternativeTitle extends ModelBase {
