@@ -72,7 +72,11 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
         private static bool IsMockMode()
         {
-            var envValue = Environment.GetEnvironmentVariable("GAMARR_MOCK_METADATA");
+            // Check both uppercase and lowercase variants due to case-sensitive
+            // environment variables on Linux and StringDictionary lowercasing keys
+            var envValue = Environment.GetEnvironmentVariable("GAMARR_MOCK_METADATA")
+                        ?? Environment.GetEnvironmentVariable("gamarr_mock_metadata");
+
             return !string.IsNullOrEmpty(envValue) &&
                    (envValue.Equals("true", StringComparison.OrdinalIgnoreCase) ||
                     envValue.Equals("1", StringComparison.OrdinalIgnoreCase));
