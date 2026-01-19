@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
         public void Setup()
         {
             _localGame = Builder<LocalGame>.CreateNew()
-                                                 .With(l => l.Path = @"C:\Test\Unsorted\Series.Title.S01E01.720p.HDTV-Sonarr\S01E05.mkv".AsOsAgnostic())
+                                                 .With(l => l.Path = @"C:\Test\Unsorted\Game.Title.v1.0-Gamarr\game.exe".AsOsAgnostic())
                                                  .With(l => l.FileGameInfo =
                                                      Builder<ParsedGameInfo>.CreateNew()
                                                                                .Build())
