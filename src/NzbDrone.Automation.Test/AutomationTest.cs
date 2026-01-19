@@ -1,26 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using FluentAssertions;
+using Microsoft.Playwright;
+using Microsoft.Playwright.NUnit;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
-using NzbDrone.Automation.Test.PageModel;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Test.Common;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Remote;
 
 namespace NzbDrone.Automation.Test
 {
     [TestFixture]
     [AutomationTest]
-    public abstract class AutomationTest
+    public abstract class AutomationTest : PageTest
     {
         private NzbDroneRunner _runner;
-        protected RemoteWebDriver driver;
+        protected List<string> ConsoleErrors { get; private set; } = new();
+        protected const string BaseUrl = "http://localhost:7878";
 
         public AutomationTest()
         {
@@ -32,63 +27,119 @@ namespace NzbDrone.Automation.Test
             LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Trace, consoleTarget));
         }
 
-        [OneTimeSetUp]
-        public void SmokeTestSetup()
+        public override BrowserNewContextOptions ContextOptions()
         {
-            var options = new ChromeOptions();
-            options.AddArguments("--headless");
-            var service = ChromeDriverService.CreateDefaultService();
+            return new BrowserNewContextOptions
+            {
+                ViewportSize = new ViewportSize { Width = 1920, Height = 1080 },
+                IgnoreHTTPSErrors = true
+            };
+        }
 
-            // Timeout as windows automation tests seem to take alot longer to get going
-            driver = new ChromeDriver(service, options, TimeSpan.FromMinutes(3));
-
-            driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
-            driver.Manage().Window.FullScreen();
-
+        [OneTimeSetUp]
+        public async Task SmokeTestSetup()
+        {
             _runner = new NzbDroneRunner(LogManager.GetCurrentClassLogger(), null);
             _runner.KillAll();
             _runner.Start(true);
 
-            driver.Navigate().GoToUrl("http://localhost:7878");
-
-            var page = new PageBase(driver);
-            page.WaitForNoSpinner();
-
-            driver.ExecuteScript("window.Gamarr.NameViews = true;");
-
-            GetPageErrors().Should().BeEmpty();
+            // Wait for server to be ready
+            await Task.Delay(2000);
         }
 
-        protected IEnumerable<string> GetPageErrors()
+        [SetUp]
+        public async Task TestSetup()
         {
-            return driver.FindElements(By.CssSelector("#errors div"))
-                .Select(e => e.Text);
+            ConsoleErrors.Clear();
+
+            // Listen for console errors
+            Page.Console += (_, msg) =>
+            {
+                if (msg.Type == "error")
+                {
+                    ConsoleErrors.Add(msg.Text);
+                }
+            };
+
+            // Listen for page errors (uncaught exceptions)
+            Page.PageError += (_, error) =>
+            {
+                ConsoleErrors.Add(error);
+            };
+
+            await Page.GotoAsync(BaseUrl);
+            await WaitForNoSpinner();
+
+            // Enable debug mode
+            await Page.EvaluateAsync("window.Gamarr.NameViews = true");
         }
 
-        protected void TakeScreenshot(string name)
+        [TearDown]
+        public async Task TestTearDown()
         {
-            try
+            if (ConsoleErrors.Count > 0)
             {
-                var image = (driver as ITakesScreenshot).GetScreenshot();
-                image.SaveAsFile($"./{name}_test_screenshot.png", ScreenshotImageFormat.Png);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to save screenshot {name}, {ex.Message}");
+                var screenshotPath = $"./{TestContext.CurrentContext.Test.Name}_error_screenshot.png";
+                await Page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath });
+                Assert.Fail($"JavaScript errors detected:\n{string.Join("\n", ConsoleErrors)}");
             }
         }
 
         [OneTimeTearDown]
         public void SmokeTestTearDown()
         {
-            _runner.KillAll();
-            driver.Quit();
+            _runner?.KillAll();
         }
 
-        [TearDown]
-        public void AutomationTearDown()
+        protected async Task WaitForNoSpinner(int timeoutMs = 30000)
         {
-            GetPageErrors().Should().BeEmpty();
+            // Give the spinner time to appear
+            await Task.Delay(200);
+
+            try
+            {
+                await Page.Locator(".followingBalls").WaitForAsync(new LocatorWaitForOptions
+                {
+                    State = WaitForSelectorState.Hidden,
+                    Timeout = timeoutMs
+                });
+            }
+            catch (TimeoutException)
+            {
+                // Spinner might not exist, which is fine
+            }
+        }
+
+        protected async Task NavigateToAsync(string path)
+        {
+            await Page.GotoAsync($"{BaseUrl}{path}");
+            await WaitForNoSpinner();
+        }
+
+        protected async Task TakeScreenshotAsync(string name)
+        {
+            try
+            {
+                await Page.ScreenshotAsync(new PageScreenshotOptions
+                {
+                    Path = $"./{name}_test_screenshot.png"
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save screenshot {name}: {ex.Message}");
+            }
+        }
+
+        protected async Task ClickNavLinkAsync(string text)
+        {
+            await Page.GetByRole(AriaRole.Link, new() { Name = text }).ClickAsync();
+            await WaitForNoSpinner();
+        }
+
+        protected async Task AssertNoJavaScriptErrors()
+        {
+            Assert.That(ConsoleErrors, Is.Empty, $"JavaScript errors found: {string.Join(", ", ConsoleErrors)}");
         }
     }
 }
