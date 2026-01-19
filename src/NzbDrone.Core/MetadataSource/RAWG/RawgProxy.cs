@@ -38,6 +38,12 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             _logger = logger;
         }
 
+        public Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId)
+        {
+            // RAWG doesn't support direct Steam lookup; use AggregateGameInfoProxy for Steam games
+            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+        }
+
         public Tuple<GameMetadata, List<Credit>> GetGameInfo(int rawgId)
         {
             var apiKey = _configService.RawgApiKey;

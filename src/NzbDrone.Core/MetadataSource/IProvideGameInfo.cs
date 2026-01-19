@@ -10,6 +10,7 @@ namespace NzbDrone.Core.MetadataSource
     {
         GameMetadata GetGameByImdbId(string imdbId);
         Tuple<GameMetadata, List<Credit>> GetGameInfo(int igdbId);
+        Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId);
         GameCollection GetCollectionInfo(int igdbId);
         List<GameMetadata> GetBulkGameInfo(List<int> igdbIds);
         List<GameMetadata> GetTrendingGames();

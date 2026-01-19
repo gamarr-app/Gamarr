@@ -75,6 +75,12 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             _logger = logger;
         }
 
+        public Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId)
+        {
+            // IGDB doesn't support direct Steam lookup; use AggregateGameInfoProxy for Steam games
+            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+        }
+
         public Tuple<GameMetadata, List<Credit>> GetGameInfo(int igdbId)
         {
             var query = $"{GameFields} where id = {igdbId};";

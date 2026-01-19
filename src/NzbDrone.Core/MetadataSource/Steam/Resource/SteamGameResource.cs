@@ -1,8 +1,39 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NzbDrone.Core.MetadataSource.Steam.Resource
 {
+    /// <summary>
+    /// Handles Steam's inconsistent API where pc_requirements can be either an object or an empty array [].
+    /// </summary>
+    public class SteamRequirementsConverter : JsonConverter<SteamPcRequirements>
+    {
+        public override SteamPcRequirements ReadJson(JsonReader reader, Type objectType, SteamPcRequirements existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            var token = JToken.Load(reader);
+
+            // Steam returns [] when there are no requirements
+            if (token.Type == JTokenType.Array)
+            {
+                return null;
+            }
+
+            if (token.Type == JTokenType.Object)
+            {
+                return token.ToObject<SteamPcRequirements>();
+            }
+
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, SteamPcRequirements value, JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, value);
+        }
+    }
+
     public class SteamAppDetailsResponse
     {
         public bool Success { get; set; }
@@ -24,8 +55,13 @@ namespace NzbDrone.Core.MetadataSource.Steam.Resource
         public string Capsule_Image { get; set; }
         public string Capsule_Imagev5 { get; set; }
         public string Website { get; set; }
+        [JsonConverter(typeof(SteamRequirementsConverter))]
         public SteamPcRequirements Pc_Requirements { get; set; }
+
+        [JsonConverter(typeof(SteamRequirementsConverter))]
         public SteamPcRequirements Mac_Requirements { get; set; }
+
+        [JsonConverter(typeof(SteamRequirementsConverter))]
         public SteamPcRequirements Linux_Requirements { get; set; }
         public List<string> Developers { get; set; }
         public List<string> Publishers { get; set; }
