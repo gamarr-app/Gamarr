@@ -47,7 +47,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
                 localGame.FolderGameInfo == null &&
                 localGame.FileGameInfo == null)
             {
-                if (isMediaFile)
+                // Don't throw if we already have a game set (e.g., scanning existing game folder)
+                // Game files like .doi, .bin don't have parseable names, they just exist in the game folder
+                if (isMediaFile && localGame.Game == null)
                 {
                     throw new AugmentingFailedException("Unable to parse game info from path: {0}", localGame.Path);
                 }
