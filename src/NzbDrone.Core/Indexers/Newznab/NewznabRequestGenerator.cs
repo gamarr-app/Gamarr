@@ -144,24 +144,19 @@ namespace NzbDrone.Core.Indexers.Newznab
                     $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
             }
 
-            if (SupportsSearch && searchCriteria.Game.Year > 0)
+            if (SupportsSearch)
             {
                 chain.AddTier();
                 var queryTitles = TextSearchEngine == "raw" ? searchCriteria.SceneTitles : searchCriteria.CleanSceneTitles;
 
                 foreach (var queryTitle in queryTitles)
                 {
-                    var searchQuery = queryTitle;
-
-                    if (!Settings.RemoveYear)
-                    {
-                        searchQuery += $" {searchCriteria.Game.Year}";
-                    }
-
+                    // For games, don't include year by default - game titles are usually unique enough
+                    // and many indexers don't include years in game releases
                     chain.Add(GetPagedRequests(MaxPages,
                         Settings.Categories,
                         "search",
-                        $"&q={NewsnabifyTitle(searchQuery)}"));
+                        $"&q={NewsnabifyTitle(queryTitle)}"));
                 }
             }
         }

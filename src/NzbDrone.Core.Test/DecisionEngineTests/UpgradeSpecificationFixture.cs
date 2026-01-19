@@ -271,5 +271,99 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                     new List<CustomFormat> { customFormatTwo })
                 .Should().Be(UpgradeableRejectReason.None);
         }
+
+        [Test]
+        public void should_return_true_when_new_version_is_higher()
+        {
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 1, 0, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_when_new_version_is_lower()
+        {
+            var currentVersion = new GameVersion(2, 0, 0, 0);
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_versions_are_equal()
+        {
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_true_when_current_version_is_null()
+        {
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(null, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_true_when_current_version_is_empty()
+        {
+            var currentVersion = new GameVersion();
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_when_new_version_is_null()
+        {
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, null).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_new_version_is_empty()
+        {
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion();
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_both_versions_are_null()
+        {
+            Subject.IsVersionUpgrade(null, null).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_both_versions_are_empty()
+        {
+            var currentVersion = new GameVersion();
+            var newVersion = new GameVersion();
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_compare_patch_versions_correctly()
+        {
+            var currentVersion = new GameVersion(1, 0, 1, 0);
+            var newVersion = new GameVersion(1, 0, 5, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_compare_build_versions_correctly()
+        {
+            var currentVersion = new GameVersion(0, 0, 0, 100);
+            var newVersion = new GameVersion(0, 0, 0, 200);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeTrue();
+        }
     }
 }

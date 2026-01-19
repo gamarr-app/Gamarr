@@ -27,6 +27,7 @@ namespace NzbDrone.Core.Parser.Model
         public string HardcodedSubs { get; set; }
         public PlatformFamily Platform { get; set; }
         public string PlatformString { get; set; }
+        public GameVersion GameVersion { get; set; }
 
         public string GameTitle => PrimaryGameTitle;
 
