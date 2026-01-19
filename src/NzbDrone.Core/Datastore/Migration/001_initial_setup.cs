@@ -44,11 +44,12 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Name").AsString().Unique()
                 .WithColumn("Cutoff").AsInt32()
                 .WithColumn("Items").AsString().NotNullable()
-                .WithColumn("MinFormatScore").AsInt32().WithDefaultValue(0)
-                .WithColumn("CutoffFormatScore").AsInt32().WithDefaultValue(0)
-                .WithColumn("MinUpgradeFormatScore").AsInt32().WithDefaultValue(1)
-                .WithColumn("UpgradeAllowed").AsBoolean().WithDefaultValue(true)
-                .WithColumn("FormatItems").AsString().WithDefaultValue("[]");
+                .WithColumn("Language").AsInt32().Nullable()
+                .WithColumn("FormatItems").AsString().NotNullable()
+                .WithColumn("UpgradeAllowed").AsBoolean().Nullable()
+                .WithColumn("MinFormatScore").AsInt32().NotNullable()
+                .WithColumn("CutoffFormatScore").AsInt32().NotNullable()
+                .WithColumn("MinUpgradeFormatScore").AsInt32().WithDefaultValue(1);
 
             Create.TableForModel("DelayProfiles")
                 .WithColumn("EnableUsenet").AsBoolean().NotNullable()
@@ -149,59 +150,59 @@ namespace NzbDrone.Core.Datastore.Migration
 
             Create.TableForModel("GameFiles")
                 .WithColumn("GameId").AsInt32().Indexed()
-                .WithColumn("RelativePath").AsString().Nullable()
-                .WithColumn("Size").AsInt64()
-                .WithColumn("DateAdded").AsDateTime()
-                .WithColumn("OriginalFilePath").AsString().Nullable()
+                .WithColumn("Quality").AsString().NotNullable()
+                .WithColumn("Size").AsInt64().NotNullable()
+                .WithColumn("DateAdded").AsDateTime().NotNullable()
                 .WithColumn("SceneName").AsString().Nullable()
-                .WithColumn("ReleaseGroup").AsString().Nullable()
-                .WithColumn("Quality").AsString()
-                .WithColumn("IndexerFlags").AsInt32().WithDefaultValue(0)
                 .WithColumn("MediaInfo").AsString().Nullable()
+                .WithColumn("ReleaseGroup").AsString().Nullable()
+                .WithColumn("RelativePath").AsString().Nullable()
                 .WithColumn("Edition").AsString().Nullable()
-                .WithColumn("Languages").AsString().WithDefaultValue("[]")
-                .WithColumn("GameVersion").AsInt32().WithDefaultValue(0);
+                .WithColumn("Languages").AsString().NotNullable()
+                .WithColumn("IndexerFlags").AsInt32().NotNullable()
+                .WithColumn("OriginalFilePath").AsString().Nullable();
 
             Create.TableForModel("AlternativeTitles")
-                .WithColumn("GameMetadataId").AsInt32().Indexed()
-                .WithColumn("Title").AsString()
-                .WithColumn("CleanTitle").AsString().Indexed()
-                .WithColumn("SourceType").AsInt32().WithDefaultValue(0);
+                .WithColumn("Title").AsString().NotNullable()
+                .WithColumn("CleanTitle").AsString().NotNullable().Unique()
+                .WithColumn("SourceType").AsInt32().NotNullable()
+                .WithColumn("GameMetadataId").AsInt32().NotNullable().Indexed();
+
+            Create.Index().OnTable("AlternativeTitles").OnColumn("CleanTitle").Ascending();
 
             Create.TableForModel("GameTranslations")
-                .WithColumn("GameMetadataId").AsInt32().Indexed()
-                .WithColumn("Title").AsString()
-                .WithColumn("CleanTitle").AsString().Indexed()
+                .WithColumn("Title").AsString().Nullable()
+                .WithColumn("CleanTitle").AsString().Nullable().Indexed()
                 .WithColumn("Overview").AsString().Nullable()
-                .WithColumn("Language").AsInt32();
+                .WithColumn("Language").AsInt32().NotNullable()
+                .WithColumn("GameMetadataId").AsInt32().NotNullable().Indexed();
 
-            Create.Index().OnTable("GameTranslations").OnColumn("GameMetadataId").Ascending()
-                                                      .OnColumn("Language").Ascending().WithOptions().Unique();
+            Create.Index().OnTable("GameTranslations").OnColumn("Language").Ascending();
 
             Create.TableForModel("Credits")
-                .WithColumn("GameMetadataId").AsInt32().Indexed()
-                .WithColumn("Name").AsString()
-                .WithColumn("CreditIgdbId").AsString().Nullable()
-                .WithColumn("PersonIgdbId").AsInt32().WithDefaultValue(0)
-                .WithColumn("Images").AsString().Nullable()
-                .WithColumn("Department").AsString().Nullable()
-                .WithColumn("Job").AsString().Nullable()
+                .WithColumn("CreditIgdbId").AsString().NotNullable().Unique()
+                .WithColumn("PersonIgdbId").AsInt32().NotNullable()
+                .WithColumn("Name").AsString().NotNullable()
+                .WithColumn("Images").AsString().NotNullable()
                 .WithColumn("Character").AsString().Nullable()
-                .WithColumn("Order").AsInt32()
-                .WithColumn("Type").AsInt32();
+                .WithColumn("Order").AsInt32().NotNullable()
+                .WithColumn("Job").AsString().Nullable()
+                .WithColumn("Department").AsString().Nullable()
+                .WithColumn("Type").AsInt32().NotNullable()
+                .WithColumn("GameMetadataId").AsInt32().NotNullable().Indexed();
 
             Create.TableForModel("Collections")
-                .WithColumn("IgdbId").AsInt32().Unique()
-                .WithColumn("Title").AsString()
-                .WithColumn("CleanTitle").AsString().Nullable()
+                .WithColumn("IgdbId").AsInt32().NotNullable().Unique()
+                .WithColumn("QualityProfileId").AsInt32().NotNullable()
+                .WithColumn("RootFolderPath").AsString().NotNullable()
+                .WithColumn("MinimumAvailability").AsInt32().NotNullable()
+                .WithColumn("SearchOnAdd").AsBoolean().NotNullable()
+                .WithColumn("Title").AsString().NotNullable()
                 .WithColumn("SortTitle").AsString().Nullable()
+                .WithColumn("CleanTitle").AsString().NotNullable()
                 .WithColumn("Overview").AsString().Nullable()
-                .WithColumn("Images").AsString().Nullable()
-                .WithColumn("Monitored").AsBoolean().WithDefaultValue(false)
-                .WithColumn("QualityProfileId").AsInt32().WithDefaultValue(0)
-                .WithColumn("RootFolderPath").AsString().Nullable()
-                .WithColumn("SearchOnAdd").AsBoolean().WithDefaultValue(true)
-                .WithColumn("MinimumAvailability").AsInt32().WithDefaultValue(0)
+                .WithColumn("Images").AsString().NotNullable()
+                .WithColumn("Monitored").AsBoolean().NotNullable()
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("Added").AsDateTime().Nullable()
                 .WithColumn("Tags").AsString().Nullable();
@@ -277,10 +278,10 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("GameMetadataId").AsInt32().Indexed();
 
             Create.TableForModel("ImportExclusions")
-                .WithColumn("SteamAppId").AsInt32().WithDefaultValue(0)
-                .WithColumn("IgdbId").AsInt32().WithDefaultValue(0)
+                .WithColumn("IgdbId").AsInt32().NotNullable().Unique()
                 .WithColumn("GameTitle").AsString().Nullable()
-                .WithColumn("GameYear").AsInt32().WithDefaultValue(0);
+                .WithColumn("GameYear").AsInt32().WithDefaultValue(0)
+                .WithColumn("SteamAppId").AsInt32().WithDefaultValue(0);
 
             // ===========================================
             // PROVIDERS (INDEXERS, DOWNLOAD CLIENTS, ETC)
@@ -389,19 +390,20 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Hash").AsString().Nullable();
 
             Create.TableForModel("SubtitleFiles")
-                .WithColumn("GameId").AsInt32().NotNullable().Indexed()
-                .WithColumn("GameFileId").AsInt32().Nullable()
+                .WithColumn("GameId").AsInt32().NotNullable()
+                .WithColumn("GameFileId").AsInt32().NotNullable()
                 .WithColumn("RelativePath").AsString().NotNullable()
                 .WithColumn("Extension").AsString().NotNullable()
                 .WithColumn("Added").AsDateTime().NotNullable()
                 .WithColumn("LastUpdated").AsDateTime().NotNullable()
                 .WithColumn("Language").AsInt32().NotNullable()
                 .WithColumn("LanguageTags").AsString().Nullable()
-                .WithColumn("Title").AsString().Nullable();
+                .WithColumn("Title").AsString().Nullable()
+                .WithColumn("Copy").AsInt32().WithDefaultValue(0);
 
             Create.TableForModel("ExtraFiles")
-                .WithColumn("GameId").AsInt32().NotNullable().Indexed()
-                .WithColumn("GameFileId").AsInt32().Nullable()
+                .WithColumn("GameId").AsInt32().NotNullable()
+                .WithColumn("GameFileId").AsInt32().NotNullable()
                 .WithColumn("RelativePath").AsString().NotNullable()
                 .WithColumn("Extension").AsString().NotNullable()
                 .WithColumn("Added").AsDateTime().NotNullable()
