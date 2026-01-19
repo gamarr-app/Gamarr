@@ -80,7 +80,8 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.MediaBrowser
                 gameElement.Add(new XElement("Overview", game.GameMetadata.Value.Overview));
                 gameElement.Add(new XElement("LocalTitle", game.Title));
 
-                gameElement.Add(new XElement("Rating", game.GameMetadata.Value.Ratings.Igdb?.Value ?? 0));
+                // Convert from 0-100 scale to 0-10 for MediaBrowser/Jellyfin
+                gameElement.Add(new XElement("Rating", (game.GameMetadata.Value.Ratings.Igdb?.Value ?? 0) / 10));
                 gameElement.Add(new XElement("ProductionYear", game.Year));
                 gameElement.Add(new XElement("RunningTime", game.GameMetadata.Value.Runtime));
                 gameElement.Add(new XElement("IgdbId", game.GameMetadata.Value.IgdbId));
