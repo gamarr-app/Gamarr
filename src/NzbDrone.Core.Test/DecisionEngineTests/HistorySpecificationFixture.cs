@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(c => c.QualityProfile = new QualityProfile
                 {
                     Items = Qualities.QualityFixture.GetDefaultQualities(),
-                    Cutoff = Quality.Bluray1080p.Id,
+                    Cutoff = Quality.GOG.Id,
                     FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("None"),
                     MinFormatScore = 0,
                     UpgradeAllowed = true
@@ -54,12 +54,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultSingle = new RemoteGame
             {
                 Game = _fakeGame,
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene, new Revision(version: 2)) },
                 CustomFormats = new List<CustomFormat>()
             };
 
-            _upgradableQuality = new QualityModel(Quality.SDTV, new Revision(version: 1));
-            _notupgradableQuality = new QualityModel(Quality.HDTV1080p, new Revision(version: 2));
+            _upgradableQuality = new QualityModel(Quality.Scene, new Revision(version: 1));
+            _notupgradableQuality = new QualityModel(Quality.Origin, new Revision(version: 2));
 
             Mocker.GetMock<IConfigService>()
                   .SetupGet(s => s.EnableCompletedDownloadHandling)
@@ -162,13 +162,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _fakeGame.QualityProfile = new QualityProfile
             {
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
-                Cutoff = Quality.Bluray1080p.Id,
+                Cutoff = Quality.GOG.Id,
                 FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(),
                 MinFormatScore = 0
             };
 
-            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.WEBDL1080p, new Revision(version: 1));
-            _upgradableQuality = new QualityModel(Quality.WEBDL1080p, new Revision(version: 1));
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Steam, new Revision(version: 1));
+            _upgradableQuality = new QualityModel(Quality.Steam, new Revision(version: 1));
 
             Mocker.GetMock<ICustomFormatCalculationService>()
                 .Setup(x => x.ParseCustomFormat(It.IsAny<GameHistory>(), It.IsAny<Game>()))
@@ -185,13 +185,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _fakeGame.QualityProfile = new QualityProfile
             {
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
-                Cutoff = Quality.WEBDL1080p.Id,
+                Cutoff = Quality.Steam.Id,
                 FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(),
                 MinFormatScore = 0
             };
 
-            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.WEBDL1080p, new Revision(version: 1));
-            _upgradableQuality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1));
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Steam, new Revision(version: 1));
+            _upgradableQuality = new QualityModel(Quality.GOG, new Revision(version: 1));
 
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, GameHistoryEventType.Grabbed);
 
@@ -220,13 +220,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _fakeGame.QualityProfile = new QualityProfile
             {
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
-                Cutoff = Quality.WEBDL1080p.Id,
+                Cutoff = Quality.Steam.Id,
                 FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(),
                 MinFormatScore = 0
             };
 
-            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1));
-            _upgradableQuality = new QualityModel(Quality.WEBDL1080p, new Revision(version: 1));
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 1));
+            _upgradableQuality = new QualityModel(Quality.Steam, new Revision(version: 1));
 
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, "test", _upgradableQuality, DateTime.UtcNow.AddDays(-100), GameHistoryEventType.Grabbed);
 

@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Games
         public List<MediaCover.MediaCover> Images { get; set; }
         public List<string> Genres { get; set; }
         public List<string> Keywords { get; set; }
-        public DateTime? InDevelopment { get; set; }
+        public DateTime? EarlyAccess { get; set; }
         public DateTime? PhysicalRelease { get; set; }
         public DateTime? DigitalRelease { get; set; }
         public string Certification { get; set; }
@@ -167,7 +167,7 @@ namespace NzbDrone.Core.Games
             {
                 if ((PhysicalRelease.HasValue && PhysicalRelease.Value >= DateTime.UtcNow.AddDays(-21)) ||
                     (DigitalRelease.HasValue && DigitalRelease.Value >= DateTime.UtcNow.AddDays(-21)) ||
-                    (InDevelopment.HasValue && InDevelopment.Value >= DateTime.UtcNow.AddDays(-120)))
+                    (EarlyAccess.HasValue && EarlyAccess.Value >= DateTime.UtcNow.AddDays(-120)))
                 {
                     return true;
                 }
@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Games
 
         public DateTime PhysicalReleaseDate()
         {
-            return PhysicalRelease ?? (InDevelopment?.AddDays(90) ?? DateTime.MaxValue);
+            return PhysicalRelease ?? (EarlyAccess?.AddDays(90) ?? DateTime.MaxValue);
         }
     }
 }

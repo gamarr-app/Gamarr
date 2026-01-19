@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _qualityProfile = new QualityProfile
             {
-                Cutoff = Quality.Bluray1080p.Id,
+                Cutoff = Quality.GOG.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = false,
                 CutoffFormatScore = 100,
@@ -60,9 +60,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.Bluray1080p),
+                new QualityModel(Quality.GOG),
                 new List<CustomFormat>())
             .Should().BeFalse();
         }
@@ -74,9 +74,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                     _qualityProfile,
-                    new QualityModel(Quality.DVD),
+                    new QualityModel(Quality.Scene),
                     new List<CustomFormat> { _customFormatOne },
-                    new QualityModel(Quality.DVD),
+                    new QualityModel(Quality.Scene),
                     new List<CustomFormat> { _customFormatTwo })
                 .Should().BeFalse();
         }
@@ -88,9 +88,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatOne },
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatTwo })
             .Should().BeTrue();
         }
@@ -102,9 +102,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatOne },
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatOne })
             .Should().BeTrue();
         }
@@ -116,9 +116,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatTwo },
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatOne })
             .Should().BeTrue();
         }
@@ -130,9 +130,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatTwo },
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat> { _customFormatOne })
             .Should().BeTrue();
         }
@@ -144,9 +144,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.Bluray1080p),
+                new QualityModel(Quality.GOG),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -158,9 +158,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -172,9 +172,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -186,9 +186,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.SDTV),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -200,9 +200,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.DVD),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.SDTV),
+                new QualityModel(Quality.Scene),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -214,9 +214,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                     _qualityProfile,
-                    new QualityModel(Quality.DVD, new Revision(1)),
+                    new QualityModel(Quality.Scene, new Revision(1)),
                     new List<CustomFormat> { _customFormatOne },
-                    new QualityModel(Quality.DVD, new Revision(2)),
+                    new QualityModel(Quality.Scene, new Revision(2)),
                     new List<CustomFormat> { _customFormatOne })
                 .Should().BeTrue();
         }

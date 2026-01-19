@@ -21,7 +21,7 @@ namespace Gamarr.Api.V3.ImportLists
         public Language OriginalLanguage { get; set; }
         public GameStatusType Status { get; set; }
         public string Overview { get; set; }
-        public DateTime? InDevelopment { get; set; }
+        public DateTime? EarlyAccess { get; set; }
         public DateTime? PhysicalRelease { get; set; }
         public DateTime? DigitalRelease { get; set; }
         public List<MediaCover> Images { get; set; }
@@ -64,7 +64,7 @@ namespace Gamarr.Api.V3.ImportLists
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
-                InDevelopment = model.GameMetadata.Value.InDevelopment,
+                EarlyAccess = model.GameMetadata.Value.EarlyAccess,
                 PhysicalRelease = model.GameMetadata.Value.PhysicalRelease,
                 DigitalRelease = model.GameMetadata.Value.DigitalRelease,
 
@@ -101,7 +101,7 @@ namespace Gamarr.Api.V3.ImportLists
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
-                InDevelopment = model.GameMetadata.Value.InDevelopment,
+                EarlyAccess = model.GameMetadata.Value.EarlyAccess,
                 PhysicalRelease = model.GameMetadata.Value.PhysicalRelease,
                 DigitalRelease = model.GameMetadata.Value.DigitalRelease,
 

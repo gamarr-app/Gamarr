@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
-            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.Uplay), ReleaseGroup = "GamarrTest" };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(Moq.It.IsAny<Quality>()))
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _game.Title = "The Fantastic Life of Mr. Sisko";
 
-            _gameFile.Quality.Quality = Quality.Bluray1080p;
+            _gameFile.Quality.Quality = Quality.GOG;
             _gameFile.ReleaseGroup = "IWishIWasALittleBitTallerIWishIWasABallerIWishIHadAGirlWhoLookedGoodIWouldCallHerIWishIHadARabbitInAHatWithABatAndASixFourImpala";
             _namingConfig.StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}-{ReleaseGroup:12}";
 
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _game.Title = "The Fantastic Life of Mr. Sisko";
 
-            _gameFile.Quality.Quality = Quality.Bluray1080p;
+            _gameFile.Quality.Quality = Quality.GOG;
             _gameFile.ReleaseGroup = "IWishIWasALittleBitTallerIWishIWasABallerIWishIHadAGirlWhoLookedGoodIWouldCallHerIWishIHadARabbitInAHatWithABatAndASixFourImpala";
             _namingConfig.StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}-{ReleaseGroup:-17}";
 

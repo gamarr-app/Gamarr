@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                                      .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                                      .Build();
 
-            _quality = new QualityModel(Quality.DVD);
+            _quality = new QualityModel(Quality.Scene);
 
             _localGame = new LocalGame
             {

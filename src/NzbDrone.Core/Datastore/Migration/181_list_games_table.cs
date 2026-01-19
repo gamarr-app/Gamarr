@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Images").AsString()
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("Runtime").AsInt32()
-                .WithColumn("InDevelopment").AsDateTime().Nullable()
+                .WithColumn("EarlyAccess").AsDateTime().Nullable()
                 .WithColumn("Year").AsInt32().Nullable()
                 .WithColumn("Ratings").AsString().Nullable()
                 .WithColumn("Genres").AsString().Nullable()

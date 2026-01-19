@@ -38,7 +38,7 @@ namespace Gamarr.Api.V3.Games
         public long? SizeOnDisk { get; set; }
         public GameStatusType Status { get; set; }
         public string Overview { get; set; }
-        public DateTime? InDevelopment { get; set; }
+        public DateTime? EarlyAccess { get; set; }
         public DateTime? PhysicalRelease { get; set; }
         public DateTime? DigitalRelease { get; set; }
         public DateTime? ReleaseDate { get; set; }
@@ -121,7 +121,7 @@ namespace Gamarr.Api.V3.Games
                 OriginalTitle = model.GameMetadata.Value.OriginalTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
                 SortTitle = GameTitleNormalizer.Normalize(translatedTitle, model.IgdbId),
-                InDevelopment = model.GameMetadata.Value.InDevelopment,
+                EarlyAccess = model.GameMetadata.Value.EarlyAccess,
                 PhysicalRelease = model.GameMetadata.Value.PhysicalRelease,
                 DigitalRelease = model.GameMetadata.Value.DigitalRelease,
                 ReleaseDate = model.GetReleaseDate(),
@@ -187,7 +187,7 @@ namespace Gamarr.Api.V3.Games
                     Images = resource.Images,
                     OriginalTitle = resource.OriginalTitle,
                     SortTitle = resource.SortTitle,
-                    InDevelopment = resource.InDevelopment,
+                    EarlyAccess = resource.EarlyAccess,
                     PhysicalRelease = resource.PhysicalRelease,
                     Year = resource.Year,
                     SecondaryYear = resource.SecondaryYear,

@@ -237,7 +237,7 @@ namespace NzbDrone.Core.Games
         {
             var builder = Builder()
                 .Where<Game>(m =>
-                              (m.GameMetadata.Value.InDevelopment >= start && m.GameMetadata.Value.InDevelopment <= end) ||
+                              (m.GameMetadata.Value.EarlyAccess >= start && m.GameMetadata.Value.EarlyAccess <= end) ||
                               (m.GameMetadata.Value.PhysicalRelease >= start && m.GameMetadata.Value.PhysicalRelease <= end) ||
                               (m.GameMetadata.Value.DigitalRelease >= start && m.GameMetadata.Value.DigitalRelease <= end));
 

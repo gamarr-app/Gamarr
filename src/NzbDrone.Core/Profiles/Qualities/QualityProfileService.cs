@@ -128,86 +128,57 @@ namespace NzbDrone.Core.Profiles.Qualities
 
             _logger.Info("Setting up default quality profiles");
 
+            // Any - accepts all game quality types
             AddDefaultProfile("Any",
-                Quality.Bluray480p,
-                Quality.WORKPRINT,
-                Quality.CAM,
-                Quality.TELESYNC,
-                Quality.TELECINE,
-                Quality.DVDSCR,
-                Quality.REGIONAL,
-                Quality.SDTV,
-                Quality.DVD,
-                Quality.DVDR,
-                Quality.HDTV720p,
-                Quality.HDTV1080p,
-                Quality.HDTV2160p,
-                Quality.WEBDL480p,
-                Quality.WEBRip480p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.WEBDL2160p,
-                Quality.WEBRip2160p,
-                Quality.Bluray480p,
-                Quality.Bluray576p,
-                Quality.Bluray720p,
-                Quality.Bluray1080p,
-                Quality.Bluray2160p,
-                Quality.Remux1080p,
-                Quality.Remux2160p,
-                Quality.BRDISK);
+                Quality.GOG,
+                Quality.Scene,
+                Quality.SceneCracked,
+                Quality.GOG,
+                Quality.Steam,
+                Quality.Epic,
+                Quality.Origin,
+                Quality.Uplay,
+                Quality.Repack,
+                Quality.RepackAllDLC,
+                Quality.ISO,
+                Quality.Retail,
+                Quality.Portable,
+                Quality.MultiLang);
 
-            AddDefaultProfile("SD",
-                Quality.Bluray480p,
-                Quality.WORKPRINT,
-                Quality.CAM,
-                Quality.TELESYNC,
-                Quality.TELECINE,
-                Quality.DVDSCR,
-                Quality.REGIONAL,
-                Quality.SDTV,
-                Quality.DVD,
-                Quality.WEBDL480p,
-                Quality.WEBRip480p,
-                Quality.Bluray480p,
-                Quality.Bluray576p);
+            // DRM-Free - prefers GOG and DRM-free releases
+            AddDefaultProfile("DRM-Free",
+                Quality.GOG,
+                Quality.GOG,
+                Quality.Portable);
 
-            AddDefaultProfile("HD-720p",
-                Quality.Bluray720p,
-                Quality.HDTV720p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.Bluray720p);
+            // Repack - prefers compressed repacks (smaller download size)
+            AddDefaultProfile("Repack",
+                Quality.RepackAllDLC,
+                Quality.Repack,
+                Quality.RepackAllDLC);
 
-            AddDefaultProfile("HD-1080p",
-                Quality.Bluray1080p,
-                Quality.HDTV1080p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.Bluray1080p,
-                Quality.Remux1080p);
+            // Scene - prefers scene releases
+            AddDefaultProfile("Scene",
+                Quality.Scene,
+                Quality.Scene,
+                Quality.SceneCracked);
 
-            AddDefaultProfile("Ultra-HD",
-                Quality.Remux2160p,
-                Quality.HDTV2160p,
-                Quality.WEBDL2160p,
-                Quality.WEBRip2160p,
-                Quality.Bluray2160p,
-                Quality.Remux2160p);
+            // Store Rips - prefers store rips
+            AddDefaultProfile("Store Rips",
+                Quality.Steam,
+                Quality.Steam,
+                Quality.Epic,
+                Quality.Origin,
+                Quality.Uplay,
+                Quality.GOG);
 
-            AddDefaultProfile("HD - 720p/1080p",
-                Quality.Bluray720p,
-                Quality.HDTV720p,
-                Quality.HDTV1080p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.Bluray720p,
-                Quality.Bluray1080p,
-                Quality.Remux1080p);
+            // Complete Edition - prefers releases with all DLC
+            AddDefaultProfile("Complete Edition",
+                Quality.RepackAllDLC,
+                Quality.RepackAllDLC,
+                Quality.GOG,
+                Quality.Repack,
+                Quality.Scene);
         }
 
         public QualityProfile GetDefaultProfile(string name, Quality cutoff = null, params Quality[] allowed)

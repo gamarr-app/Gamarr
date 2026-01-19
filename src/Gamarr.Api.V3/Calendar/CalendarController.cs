@@ -77,7 +77,7 @@ namespace Gamarr.Api.V3.Calendar
             var resources = MapToResource(results);
 
             return resources
-                .OrderBy(m => m.InDevelopment)
+                .OrderBy(m => m.EarlyAccess)
                 .ThenBy(m => m.DigitalRelease)
                 .ThenBy(m => m.PhysicalRelease)
                 .ToList();

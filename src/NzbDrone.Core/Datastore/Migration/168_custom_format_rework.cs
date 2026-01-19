@@ -138,21 +138,21 @@ namespace NzbDrone.Core.Datastore.Migration
             switch (value)
             {
                 case "cam":
-                    return QualitySource.CAM;
+                    return QualitySource.SCENE;
                 case "telesync":
-                    return QualitySource.TELESYNC;
+                    return QualitySource.SCENE;
                 case "telecine":
-                    return QualitySource.TELECINE;
+                    return QualitySource.SCENE;
                 case "workprint":
-                    return QualitySource.WORKPRINT;
+                    return QualitySource.SCENE;
                 case "dvd":
-                    return QualitySource.DVD;
+                    return QualitySource.SCENE;
                 case "tv":
-                    return QualitySource.TV;
+                    return QualitySource.SCENE;
                 case "webdl":
-                    return QualitySource.WEBDL;
+                    return QualitySource.STEAM;
                 case "bluray":
-                    return QualitySource.BLURAY;
+                    return QualitySource.GOG;
                 default:
                     return QualitySource.UNKNOWN;
             }
@@ -163,15 +163,15 @@ namespace NzbDrone.Core.Datastore.Migration
             switch (value)
             {
                 case "regional":
-                    return Modifier.REGIONAL;
+                    return Modifier.MULTI_LANG;
                 case "screener":
-                    return Modifier.SCREENER;
+                    return Modifier.CRACKED;
                 case "rawhd":
-                    return Modifier.RAWHD;
+                    return Modifier.DRM_FREE;
                 case "brdisk":
-                    return Modifier.BRDISK;
+                    return Modifier.DRM_FREE;
                 case "remux":
-                    return Modifier.REMUX;
+                    return Modifier.DRM_FREE;
                 default:
                     return Modifier.NONE;
             }

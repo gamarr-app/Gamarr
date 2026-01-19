@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.NotificationTests
         [Test]
         public void should_add_collection_game_if_valid_mediainfo()
         {
-            GiventValidMediaInfo(Quality.Bluray2160p, "5.1", "DTS", "Progressive", HdrFormat.DolbyVisionHdr10);
+            GiventValidMediaInfo(Quality.RepackAllDLC, "5.1", "DTS", "Progressive", HdrFormat.DolbyVisionHdr10);
 
             Subject.OnDownload(_downloadMessage);
 
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.Test.NotificationTests
         [Test]
         public void should_format_audio_channels_to_one_decimal_when_adding_collection_game()
         {
-            GiventValidMediaInfo(Quality.Bluray2160p, "2.0", "DTS", "Progressive", HdrFormat.DolbyVisionHdr10);
+            GiventValidMediaInfo(Quality.RepackAllDLC, "2.0", "DTS", "Progressive", HdrFormat.DolbyVisionHdr10);
 
             Subject.OnDownload(_downloadMessage);
 

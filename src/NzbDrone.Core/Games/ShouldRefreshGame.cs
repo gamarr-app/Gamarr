@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Games
                     return false;
                 }
 
-                if (game.Status is GameStatusType.Announced or GameStatusType.InDevelopment)
+                if (game.Status is GameStatusType.Announced or GameStatusType.EarlyAccess)
                 {
                     _logger.Trace("Game {0} is announced or in cinemas, should refresh.", game.Title);
                     return true;

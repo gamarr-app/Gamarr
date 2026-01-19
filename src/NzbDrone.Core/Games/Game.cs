@@ -86,9 +86,9 @@ namespace NzbDrone.Core.Games
             {
                 minimumAvailabilityDate = DateTime.MinValue;
             }
-            else if (MinimumAvailability == GameStatusType.InDevelopment && GameMetadata.Value.InDevelopment.HasValue)
+            else if (MinimumAvailability == GameStatusType.EarlyAccess && GameMetadata.Value.EarlyAccess.HasValue)
             {
-                minimumAvailabilityDate = GameMetadata.Value.InDevelopment.Value;
+                minimumAvailabilityDate = GameMetadata.Value.EarlyAccess.Value;
             }
             else
             {
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Games
                 }
                 else
                 {
-                    minimumAvailabilityDate = GameMetadata.Value.InDevelopment?.AddDays(90) ?? DateTime.MaxValue;
+                    minimumAvailabilityDate = GameMetadata.Value.EarlyAccess?.AddDays(90) ?? DateTime.MaxValue;
                 }
             }
 
@@ -122,14 +122,14 @@ namespace NzbDrone.Core.Games
         {
             if (MinimumAvailability is GameStatusType.TBA or GameStatusType.Announced)
             {
-                return new[] { GameMetadata.Value.InDevelopment, GameMetadata.Value.DigitalRelease, GameMetadata.Value.PhysicalRelease }
+                return new[] { GameMetadata.Value.EarlyAccess, GameMetadata.Value.DigitalRelease, GameMetadata.Value.PhysicalRelease }
                     .Where(x => x.HasValue)
                     .Min();
             }
 
-            if (MinimumAvailability == GameStatusType.InDevelopment && GameMetadata.Value.InDevelopment.HasValue)
+            if (MinimumAvailability == GameStatusType.EarlyAccess && GameMetadata.Value.EarlyAccess.HasValue)
             {
-                return GameMetadata.Value.InDevelopment.Value;
+                return GameMetadata.Value.EarlyAccess.Value;
             }
 
             if (GameMetadata.Value.DigitalRelease.HasValue || GameMetadata.Value.PhysicalRelease.HasValue)
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.Games
                     .Min();
             }
 
-            return GameMetadata.Value.InDevelopment?.AddDays(90);
+            return GameMetadata.Value.EarlyAccess?.AddDays(90);
         }
 
         public override string ToString()

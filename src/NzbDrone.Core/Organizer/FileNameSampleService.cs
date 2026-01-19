@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 
@@ -25,28 +24,13 @@ namespace NzbDrone.Core.Organizer
         {
             _buildFileNames = buildFileNames;
 
-            var mediaInfo = new MediaInfoModel
-            {
-                VideoFormat = "AVC",
-                VideoBitDepth = 10,
-                VideoMultiViewCount = 2,
-                VideoColourPrimaries = "bt2020",
-                VideoTransferCharacteristics = "HLG",
-                AudioFormat = "DTS",
-                AudioChannels = 6,
-                AudioChannelPositions = "5.1",
-                AudioLanguages = new List<string> { "ger" },
-                Subtitles = new List<string> { "eng", "ger" }
-            };
-
             _gameFile = new GameFile
             {
-                Quality = new QualityModel(Quality.Bluray1080p, new Revision(2)),
-                RelativePath = "The.Game.Title.2010.1080p.BluRay.DTS.x264-EVOLVE.mkv",
-                SceneName = "The.Game.Title.2010.1080p.BluRay.DTS.x264-EVOLVE",
-                ReleaseGroup = "EVOLVE",
-                MediaInfo = mediaInfo,
-                Edition = "Ultimate extended edition",
+                Quality = new QualityModel(Quality.GOG, new Revision(1)),
+                RelativePath = "The.Game.Title.2010.GOG",
+                SceneName = "The.Game.Title.2010.GOG",
+                ReleaseGroup = "GOG",
+                Edition = "Complete Edition",
             };
 
             _game = new Game
@@ -57,9 +41,8 @@ namespace NzbDrone.Core.Organizer
                     OriginalTitle = "The Original Game Title",
                     CollectionTitle = "The Game Collection",
                     CollectionIgdbId = 123654,
-                    Certification = "R",
+                    Certification = "M",  // ESRB Mature rating
                     Year = 2010,
-                    ImdbId = "tt0066921",
                     IgdbId = 345691
                 },
                 GameMetadataId = 1
@@ -69,12 +52,12 @@ namespace NzbDrone.Core.Organizer
             {
                 new CustomFormat
                 {
-                    Name = "Surround Sound",
+                    Name = "DRM-Free",
                     IncludeCustomFormatWhenRenaming = true
                 },
                 new CustomFormat
                 {
-                    Name = "x264",
+                    Name = "All DLC",
                     IncludeCustomFormatWhenRenaming = true
                 }
             };

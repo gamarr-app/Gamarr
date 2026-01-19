@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             {
                 Path = @"C:\Test\30 Rock\30.rock.s01e01.avi",
                 Game = new Game { GameMetadata = _game },
-                Quality = new QualityModel(Quality.HDTV720p)
+                Quality = new QualityModel(Quality.Uplay)
             };
         }
 

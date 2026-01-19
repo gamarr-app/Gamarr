@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Games
             {
                 var collectionGames = _gameMetadataService
                     .GetGamesByCollectionIgdbId(collection.IgdbId)
-                    .Where(m => m.Status is GameStatusType.InDevelopment or GameStatusType.Released)
+                    .Where(m => m.Status is GameStatusType.EarlyAccess or GameStatusType.Released)
                     .ToList();
 
                 var existingGames = _gameService.AllGameIgdbIds();

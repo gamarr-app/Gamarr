@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(c => c.GameId = _game1.Id)
                 .All()
                 .With(c => c.Id = 0)
-                .With(c => c.Quality = new QualityModel(Quality.Bluray1080p))
+                .With(c => c.Quality = new QualityModel(Quality.GOG))
                 .With(c => c.Languages = new List<Language> { Language.English })
                 .BuildListOfNew();
 

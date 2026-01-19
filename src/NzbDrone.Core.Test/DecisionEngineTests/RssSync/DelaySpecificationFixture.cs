@@ -47,11 +47,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                                                    .Build();
 
             _profile.Items = new List<QualityProfileQualityItem>();
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.HDTV720p });
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.WEBDL720p });
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.Bluray720p });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.Uplay });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.Epic });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.Repack });
 
-            _profile.Cutoff = Quality.WEBDL720p.Id;
+            _profile.Cutoff = Quality.Epic.Id;
 
             _remoteGame.ParsedGameInfo = new ParsedGameInfo();
             _remoteGame.Release = new ReleaseInfo();
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_system_invoked_search_and_release_is_younger_than_delay()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.SDTV);
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Scene);
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
@@ -108,7 +108,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         public void should_be_false_when_quality_is_last_allowed_in_profile_and_bypass_disabled()
         {
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Bluray720p);
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Repack);
 
             _delayProfile.UsenetDelay = 720;
 
@@ -122,7 +122,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _delayProfile.BypassIfHighestQuality = true;
 
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Bluray720p);
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Repack);
 
             Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_older_than_delay()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.HDTV720p);
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Uplay);
             _remoteGame.Release.PublishDate = DateTime.UtcNow.AddHours(-10);
 
             _delayProfile.UsenetDelay = 60;
@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_release_is_younger_than_delay()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.SDTV);
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Scene);
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
@@ -152,10 +152,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_a_proper_for_existing_game()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.HDTV720p, new Revision(version: 2));
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Uplay, new Revision(version: 2));
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.HDTV720p));
+            GivenExistingFile(new QualityModel(Quality.Uplay));
             GivenUpgradeForExistingFile();
 
             Mocker.GetMock<IUpgradableSpecification>()
@@ -170,10 +170,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_a_real_for_existing_game()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.HDTV720p, new Revision(real: 1));
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Uplay, new Revision(real: 1));
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.HDTV720p));
+            GivenExistingFile(new QualityModel(Quality.Uplay));
             GivenUpgradeForExistingFile();
 
             Mocker.GetMock<IUpgradableSpecification>()
@@ -188,10 +188,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_release_is_proper_for_existing_game_of_different_quality()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.HDTV720p, new Revision(version: 2));
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Uplay, new Revision(version: 2));
             _remoteGame.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.SDTV));
+            GivenExistingFile(new QualityModel(Quality.Scene));
 
             _delayProfile.UsenetDelay = 720;
 

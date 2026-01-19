@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", GetTagLabels(game)));
             environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
-            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.EarlyAccess.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
             environmentVariables.Add("Gamarr_Release_Title", remoteGame.Release.Title);
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Game_Path", game.Path);
             environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
-            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.EarlyAccess.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
             environmentVariables.Add("Gamarr_GameFile_Id", gameFile.Id.ToString());
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Game_Path", game.Path);
             environmentVariables.Add("Gamarr_Game_ImdbId", game.GameMetadata.Value.ImdbId ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_IgdbId", game.GameMetadata.Value.IgdbId.ToString());
-            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.EarlyAccess.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_GameFile_Ids", string.Join(",", renamedFiles.Select(e => e.GameFile.Id)));
             environmentVariables.Add("Gamarr_GameFile_RelativePaths", string.Join("|", renamedFiles.Select(e => e.GameFile.RelativePath)));

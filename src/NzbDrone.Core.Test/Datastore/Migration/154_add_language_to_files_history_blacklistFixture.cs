@@ -17,14 +17,14 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     {
         private void AddDefaultProfile(add_language_to_files_history_blacklist m, string name, Language language)
         {
-            var allowed = new Quality[] { Quality.WEBDL720p };
+            var allowed = new Quality[] { Quality.Epic };
 
             var items = Quality.DefaultQualityDefinitions
                 .OrderBy(v => v.Weight)
                 .Select(v => new { Quality = (int)v.Quality, Allowed = allowed.Contains(v.Quality) })
                 .ToList();
 
-            var profile = new { Id = 1, Name = name, Cutoff = (int)Quality.WEBDL720p, Items = items.ToJson(), Language = (int)language };
+            var profile = new { Id = 1, Name = name, Cutoff = (int)Quality.Epic, Items = items.ToJson(), Language = (int)language };
 
             var game = new
             {

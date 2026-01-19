@@ -20,10 +20,10 @@ namespace NzbDrone.Core.Test.Profiles
         {
             var profile = new QualityProfile
             {
-                Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Bluray1080p, Quality.DVD, Quality.HDTV720p),
+                Items = Qualities.QualityFixture.GetDefaultQualities(Quality.GOG, Quality.Scene, Quality.Uplay),
                 MinFormatScore = 0,
                 FormatItems = CustomFormatsTestHelpers.GetDefaultFormatItems(),
-                Cutoff = Quality.Bluray1080p.Id,
+                Cutoff = Quality.GOG.Id,
                 Name = "TestProfile"
             };
 

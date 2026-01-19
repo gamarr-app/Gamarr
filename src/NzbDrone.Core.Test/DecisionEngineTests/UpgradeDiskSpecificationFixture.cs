@@ -37,13 +37,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _firstFile = new GameFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _firstFile = new GameFile { Quality = new QualityModel(Quality.GOG, new Revision(version: 2)), DateAdded = DateTime.Now };
 
             var fakeGame = Builder<Game>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
                     UpgradeAllowed = true,
-                    Cutoff = Quality.Bluray1080p.Id,
+                    Cutoff = Quality.GOG.Id,
                     Items = Qualities.QualityFixture.GetDefaultQualities(),
                     FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("None"),
                     MinFormatScore = 0,
@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultSingle = new RemoteGame
             {
                 Game = fakeGame,
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene, new Revision(version: 2)) },
                 CustomFormats = new List<CustomFormat>()
             };
 
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithFirstFileUpgradable()
         {
-            _firstFile.Quality = new QualityModel(Quality.SDTV);
+            _firstFile.Quality = new QualityModel(Quality.Scene);
         }
 
         [Test]
@@ -121,16 +121,16 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .Setup(x => x.ParseCustomFormat(It.IsAny<GameFile>()))
                 .Returns(new List<CustomFormat>());
 
-            _firstFile.Quality = new QualityModel(Quality.WEBDL1080p);
-            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.WEBDL1080p);
+            _firstFile.Quality = new QualityModel(Quality.Steam);
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Steam);
             _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_not_be_upgradable_if_revision_downgrade_if_propers_are_preferred()
         {
-            _firstFile.Quality = new QualityModel(Quality.WEBDL1080p, new Revision(2));
-            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.WEBDL1080p);
+            _firstFile.Quality = new QualityModel(Quality.Steam, new Revision(2));
+            _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Steam);
             _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -139,12 +139,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.HDTV720p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -153,12 +153,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.Bluray1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -167,13 +167,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.HDTV720p, new Revision(version: 1)));
-            GivenNewQuality(new QualityModel(Quality.HDTV720p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 1)));
+            GivenNewQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
 
@@ -182,13 +182,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.HDTV720p, new Revision(version: 2)));
-            GivenNewQuality(new QualityModel(Quality.Bluray1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
+            GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -197,13 +197,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.HDTV720p, new Revision(version: 2)));
-            GivenNewQuality(new QualityModel(Quality.Bluray1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
+            GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -212,13 +212,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.HDTV720p, new Revision(version: 2)));
-            GivenNewQuality(new QualityModel(Quality.Bluray1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
+            GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -227,13 +227,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.SDTV, new Revision(version: 2)));
-            GivenNewQuality(new QualityModel(Quality.Bluray1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Scene, new Revision(version: 2)));
+            GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
 
@@ -242,12 +242,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.SDTV, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Scene, new Revision(version: 2)));
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
 
@@ -258,15 +258,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 MinFormatScore = 0,
                 FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("My Format"),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.HDTV720p));
-            GivenNewQuality(new QualityModel(Quality.Bluray1080p));
+            GivenFileQuality(new QualityModel(Quality.Uplay));
+            GivenNewQuality(new QualityModel(Quality.GOG));
 
             GivenOldCustomFormats(new List<CustomFormat>());
             GivenNewCustomFormats(new List<CustomFormat> { customFormat });
@@ -279,13 +279,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.HDTV1080p.Id,
+                Cutoff = Quality.Origin.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             });
 
-            GivenFileQuality(new QualityModel(Quality.WEBDL1080p, new Revision(version: 1)));
-            GivenNewQuality(new QualityModel(Quality.WEBDL1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Steam, new Revision(version: 1)));
+            GivenNewQuality(new QualityModel(Quality.Steam, new Revision(version: 2)));
 
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
@@ -295,13 +295,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.RAWHD.Id,
+                Cutoff = Quality.Retail.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = false
             });
 
-            GivenFileQuality(new QualityModel(Quality.WEBDL1080p));
-            GivenNewQuality(new QualityModel(Quality.Bluray1080p));
+            GivenFileQuality(new QualityModel(Quality.Steam));
+            GivenNewQuality(new QualityModel(Quality.GOG));
 
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
@@ -313,7 +313,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.SDTV.Id,
+                Cutoff = Quality.Scene.Id,
                 MinFormatScore = 0,
                 CutoffFormatScore = 10000,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
@@ -330,8 +330,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 }
             };
 
-            GivenFileQuality(new QualityModel(Quality.WEBDL1080p));
-            GivenNewQuality(new QualityModel(Quality.WEBDL1080p));
+            GivenFileQuality(new QualityModel(Quality.Steam));
+            GivenNewQuality(new QualityModel(Quality.Steam));
 
             GivenOldCustomFormats(new List<CustomFormat>());
             GivenNewCustomFormats(new List<CustomFormat> { customFormat });
@@ -350,7 +350,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenProfile(new QualityProfile
             {
-                Cutoff = Quality.SDTV.Id,
+                Cutoff = Quality.Scene.Id,
                 MinFormatScore = 0,
                 CutoffFormatScore = 10000,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
@@ -367,8 +367,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 }
             };
 
-            GivenFileQuality(new QualityModel(Quality.WEBDL1080p, new Revision(version: 1)));
-            GivenNewQuality(new QualityModel(Quality.WEBDL1080p, new Revision(version: 2)));
+            GivenFileQuality(new QualityModel(Quality.Steam, new Revision(version: 1)));
+            GivenNewQuality(new QualityModel(Quality.Steam, new Revision(version: 2)));
 
             GivenOldCustomFormats(new List<CustomFormat>());
             GivenNewCustomFormats(new List<CustomFormat> { customFormat });

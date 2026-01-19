@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.Datastore.Converters
         [Test]
         public void should_return_int_when_saving_quality_to_db()
         {
-            var quality = Quality.Bluray1080p;
+            var quality = Quality.GOG;
 
             Subject.SetValue(_param, quality);
             _param.Value.Should().Be(quality.Id);
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.Datastore.Converters
         [Test]
         public void should_return_quality_when_getting_string_from_db()
         {
-            var quality = Quality.Bluray1080p;
+            var quality = Quality.GOG;
 
             Subject.Parse(quality.Id).Should().Be(quality);
         }

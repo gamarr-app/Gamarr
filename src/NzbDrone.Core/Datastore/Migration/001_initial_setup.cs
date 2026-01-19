@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("LastDiskSync").AsDateTime().Nullable()
                 .WithColumn("Runtime").AsInt32()
-                .WithColumn("InDevelopment").AsDateTime().Nullable()
+                .WithColumn("EarlyAccess").AsDateTime().Nullable()
                 .WithColumn("Year").AsInt32().Nullable()
                 .WithColumn("Added").AsDateTime().Nullable()
                 .WithColumn("Actors").AsString().Nullable()

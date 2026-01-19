@@ -48,14 +48,14 @@ namespace NzbDrone.Core.Test.HistoryTests
         public void should_get_download_history()
         {
             var historyBluray = Builder<GameHistory>.CreateNew()
-                .With(c => c.Quality = new QualityModel(Quality.Bluray1080p))
+                .With(c => c.Quality = new QualityModel(Quality.GOG))
                 .With(c => c.Languages = new List<Language> { Language.English })
                 .With(c => c.GameId = 12)
                 .With(c => c.EventType = GameHistoryEventType.Grabbed)
                 .BuildNew();
 
             var historyDvd = Builder<GameHistory>.CreateNew()
-                .With(c => c.Quality = new QualityModel(Quality.DVD))
+                .With(c => c.Quality = new QualityModel(Quality.Scene))
                 .With(c => c.Languages = new List<Language> { Language.English })
                 .With(c => c.GameId = 12)
                 .With(c => c.EventType = GameHistoryEventType.Grabbed)
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Test.HistoryTests
             Subject.Insert(historyBluray);
             Subject.Insert(historyDvd);
 
-            var downloadHistory = Subject.FindDownloadHistory(12, new QualityModel(Quality.Bluray1080p));
+            var downloadHistory = Subject.FindDownloadHistory(12, new QualityModel(Quality.GOG));
 
             downloadHistory.Should().HaveCount(1);
         }
