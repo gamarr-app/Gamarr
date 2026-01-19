@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import Label from 'Components/Label';
 import Link from 'Components/Link/Link';
+import MetacriticRating from 'Components/MetacriticRating';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GameStatusLabel from 'Game/Details/GameStatusLabel';
@@ -202,9 +202,9 @@ class AddNewGameSearchResult extends Component {
               </Label>
 
               {
-                ratings.imdb ?
+                ratings.metacritic ?
                   <Label size={sizes.LARGE}>
-                    <ImdbRating
+                    <MetacriticRating
                       ratings={ratings}
                       iconSize={13}
                     />

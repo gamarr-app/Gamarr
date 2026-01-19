@@ -31,9 +31,9 @@ const rows = [
     valueProp: 'ratings.igdb.value'
   },
   {
-    name: 'imdbRating',
-    showProp: 'showImdbRating',
-    valueProp: 'ratings.imdb.value'
+    name: 'metacriticRating',
+    showProp: 'showMetacriticRating',
+    valueProp: 'ratings.metacritic.value'
   },
   {
     name: 'certification',
@@ -87,11 +87,11 @@ function getInfoRowProps(row, props) {
     };
   }
 
-  if (name === 'imdbRating' && !!props.ratings.imdb) {
+  if (name === 'metacriticRating' && !!props.ratings.metacritic) {
     return {
-      title: translate('ImdbRating'),
-      iconName: icons.IMDB,
-      label: `${(props.ratings.imdb.value).toFixed(1)}`
+      title: translate('MetacriticRating'),
+      iconName: icons.HEART,
+      label: `${props.ratings.metacritic.value}`
     };
   }
 
@@ -146,7 +146,7 @@ DiscoverGameOverviewInfo.propTypes = {
   showStudio: PropTypes.bool.isRequired,
   showGenres: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
+  showMetacriticRating: PropTypes.bool.isRequired,
   showCertification: PropTypes.bool.isRequired,
   studio: PropTypes.string,
   year: PropTypes.number,

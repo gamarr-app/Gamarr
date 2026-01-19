@@ -48,7 +48,7 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
       showStudio: props.showStudio,
       showGenres: props.showGenres,
       showIgdbRating: props.showIgdbRating,
-      showImdbRating: props.showImdbRating,
+      showMetacriticRating: props.showMetacriticRating,
       showCertification: props.showCertification,
       includeRecommendations: props.includeRecommendations,
       includeTrending: props.includeTrending,
@@ -63,7 +63,7 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
       showStudio,
       showGenres,
       showIgdbRating,
-      showImdbRating,
+      showMetacriticRating,
       showCertification,
       includeRecommendations,
       includeTrending,
@@ -92,8 +92,8 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
       state.showIgdbRating = showIgdbRating;
     }
 
-    if (showImdbRating !== prevProps.showImdbRating) {
-      state.showImdbRating = showImdbRating;
+    if (showMetacriticRating !== prevProps.showMetacriticRating) {
+      state.showMetacriticRating = showMetacriticRating;
     }
 
     if (showCertification !== prevProps.showCertification) {
@@ -152,7 +152,7 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
       showStudio,
       showGenres,
       showIgdbRating,
-      showImdbRating,
+      showMetacriticRating,
       showCertification,
       includeRecommendations,
       includeTrending,
@@ -260,12 +260,12 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
             </FormGroup>
 
             <FormGroup>
-              <FormLabel>{translate('ShowImdbRating')}</FormLabel>
+              <FormLabel>{translate('ShowMetacriticRating')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.CHECK}
-                name="showImdbRating"
-                value={showImdbRating}
+                name="showMetacriticRating"
+                value={showMetacriticRating}
                 onChange={this.onChangeOverviewOption}
               />
             </FormGroup>
@@ -301,7 +301,7 @@ DiscoverGameOverviewOptionsModalContent.propTypes = {
   showStudio: PropTypes.bool.isRequired,
   showGenres: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
+  showMetacriticRating: PropTypes.bool.isRequired,
   showCertification: PropTypes.bool.isRequired,
   includeRecommendations: PropTypes.bool.isRequired,
   includeTrending: PropTypes.bool.isRequired,
