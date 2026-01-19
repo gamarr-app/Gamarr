@@ -7,20 +7,20 @@ namespace NzbDrone.Core.ImportLists.RSSImport
     {
         public RSSImportSettings Settings { get; set; }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMovies(null));
+            pageableRequests.Add(GetGames(null));
 
             return pageableRequests;
         }
 
-        // public ImportListPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        // public ImportListPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         // {
         //    return new ImportListPageableRequestChain();
         // }
-        private IEnumerable<ImportListRequest> GetMovies(string searchParameters)
+        private IEnumerable<ImportListRequest> GetGames(string searchParameters)
         {
             var request = new ImportListRequest($"{Settings.Link.Trim()}", HttpAccept.Rss);
             yield return request;

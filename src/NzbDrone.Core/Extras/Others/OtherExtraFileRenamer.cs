@@ -2,13 +2,13 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Extras.Others
 {
     public interface IOtherExtraFileRenamer
     {
-        void RenameOtherExtraFile(Movie movie, string path);
+        void RenameOtherExtraFile(Game game, string path);
     }
 
     public class OtherExtraFileRenamer : IOtherExtraFileRenamer
@@ -29,22 +29,22 @@ namespace NzbDrone.Core.Extras.Others
             _otherExtraFileService = otherExtraFileService;
         }
 
-        public void RenameOtherExtraFile(Movie movie, string path)
+        public void RenameOtherExtraFile(Game game, string path)
         {
             if (!_diskProvider.FileExists(path))
             {
                 return;
             }
 
-            var relativePath = movie.Path.GetRelativePath(path);
-            var otherExtraFile = _otherExtraFileService.FindByPath(movie.Id, relativePath);
+            var relativePath = game.Path.GetRelativePath(path);
+            var otherExtraFile = _otherExtraFileService.FindByPath(game.Id, relativePath);
 
             if (otherExtraFile != null)
             {
                 var newPath = path + "-orig";
 
                 // Recycle an existing -orig file.
-                RemoveOtherExtraFile(movie, newPath);
+                RemoveOtherExtraFile(game, newPath);
 
                 // Rename the file to .*-orig
                 _diskProvider.MoveFile(path, newPath);
@@ -54,15 +54,15 @@ namespace NzbDrone.Core.Extras.Others
             }
         }
 
-        private void RemoveOtherExtraFile(Movie movie, string path)
+        private void RemoveOtherExtraFile(Game game, string path)
         {
             if (!_diskProvider.FileExists(path))
             {
                 return;
             }
 
-            var relativePath = movie.Path.GetRelativePath(path);
-            var otherExtraFile = _otherExtraFileService.FindByPath(movie.Id, relativePath);
+            var relativePath = game.Path.GetRelativePath(path);
+            var otherExtraFile = _otherExtraFileService.FindByPath(game.Id, relativePath);
 
             if (otherExtraFile != null)
             {

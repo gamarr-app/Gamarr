@@ -45,7 +45,7 @@
   border: none !important;
 }
 
-.movieTitle,
+.gameTitle,
 .genres {
   @add-mixin truncate;
 
@@ -110,7 +110,7 @@
 
   .date,
   .time,
-  .movieTitle {
+  .gameTitle {
     flex: 0 0 100%;
   }
 }

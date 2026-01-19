@@ -3,7 +3,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -14,24 +14,24 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class LanguageSpecificationFixture : CoreTest
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         [SetUp]
         public void Setup()
         {
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
-                ParsedMovieInfo = new ParsedMovieInfo
+                ParsedGameInfo = new ParsedGameInfo
                 {
                     Languages = new List<Language> { Language.English }
                 },
-                Movie = new Movie
+                Game = new Game
                          {
                              QualityProfile = new QualityProfile
                              {
                                  Language = Language.English
                              },
-                             MovieMetadata = new MovieMetadata
+                             GameMetadata = new GameMetadata
                              {
                                  OriginalLanguage = Language.French
                              }
@@ -41,17 +41,17 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithEnglishRelease()
         {
-            _remoteMovie.Languages = new List<Language> { Language.English };
+            _remoteGame.Languages = new List<Language> { Language.English };
         }
 
         private void WithGermanRelease()
         {
-            _remoteMovie.Languages = new List<Language> { Language.German };
+            _remoteGame.Languages = new List<Language> { Language.German };
         }
 
         private void WithFrenchRelease()
         {
-            _remoteMovie.Languages = new List<Language> { Language.French };
+            _remoteGame.Languages = new List<Language> { Language.French };
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             WithEnglishRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -67,44 +67,44 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             WithGermanRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_if_release_is_german_and_profile_original()
         {
-            _remoteMovie.Movie.QualityProfile.Language = Language.Original;
+            _remoteGame.Game.QualityProfile.Language = Language.Original;
 
             WithGermanRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_true_if_release_is_french_and_profile_original()
         {
-            _remoteMovie.Movie.QualityProfile.Language = Language.Original;
+            _remoteGame.Game.QualityProfile.Language = Language.Original;
 
             WithFrenchRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_if_allowed_language_any()
         {
-            _remoteMovie.Movie.QualityProfile = new QualityProfile
+            _remoteGame.Game.QualityProfile = new QualityProfile
             {
                 Language = Language.Any
             };
 
             WithGermanRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
 
             WithEnglishRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
     }
 }

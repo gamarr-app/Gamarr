@@ -21,7 +21,7 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             Link = "https://rss.yoursite.com";
         }
 
-        [FieldDefinition(0, Label = "RSS Link", HelpText = "Link to the rss feed of movies.")]
+        [FieldDefinition(0, Label = "RSS Link", HelpText = "Link to the rss feed of games.")]
         public string Link { get; set; }
 
         public override NzbDroneValidationResult Validate()

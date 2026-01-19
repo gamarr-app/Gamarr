@@ -1,6 +1,6 @@
 using System;
 using Equ;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.ImportLists
@@ -12,7 +12,7 @@ namespace NzbDrone.Core.ImportLists
         public bool Enabled { get; set; }
         public bool EnableAuto { get; set; }
         public MonitorTypes Monitor { get; set; }
-        public MovieStatusType MinimumAvailability { get; set; }
+        public GameStatusType MinimumAvailability { get; set; }
         public int QualityProfileId { get; set; }
         public string RootFolderPath { get; set; }
         public bool SearchOnAdd { get; set; }

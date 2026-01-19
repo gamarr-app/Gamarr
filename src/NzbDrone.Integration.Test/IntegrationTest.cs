@@ -19,7 +19,7 @@ namespace NzbDrone.Integration.Test
 
         protected NzbDroneRunner _runner;
 
-        public override string MovieRootFolder => GetTempDirectory("MovieRootFolder");
+        public override string GameRootFolder => GetTempDirectory("GameRootFolder");
 
         protected int Port { get; private set; }
 

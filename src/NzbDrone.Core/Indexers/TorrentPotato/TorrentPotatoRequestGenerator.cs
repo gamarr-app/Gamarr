@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Indexers.TorrentPotato
             yield return new IndexerRequest(requestBuilder.Build());
         }
 
-        private IEnumerable<IndexerRequest> GetMovieRequest(MovieSearchCriteria searchCriteria)
+        private IEnumerable<IndexerRequest> GetGameRequest(GameSearchCriteria searchCriteria)
         {
             var requestBuilder = new HttpRequestBuilder(Settings.BaseUrl)
                  .Accept(HttpAccept.Json);
@@ -55,22 +55,22 @@ namespace NzbDrone.Core.Indexers.TorrentPotato
                 requestBuilder.AddQueryParam("user", "");
             }
 
-            if (searchCriteria.Movie.ImdbId.IsNotNullOrWhiteSpace())
+            if (searchCriteria.Game.ImdbId.IsNotNullOrWhiteSpace())
             {
-                requestBuilder.AddQueryParam("imdbid", searchCriteria.Movie.ImdbId);
+                requestBuilder.AddQueryParam("imdbid", searchCriteria.Game.ImdbId);
             }
             else
             {
-                requestBuilder.AddQueryParam("search", $"{searchCriteria.Movie.Title} {searchCriteria.Movie.Year}");
+                requestBuilder.AddQueryParam("search", $"{searchCriteria.Game.Title} {searchCriteria.Game.Year}");
             }
 
             yield return new IndexerRequest(requestBuilder.Build());
         }
 
-        public IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
-            pageableRequests.Add(GetMovieRequest(searchCriteria));
+            pageableRequests.Add(GetGameRequest(searchCriteria));
             return pageableRequests;
         }
 

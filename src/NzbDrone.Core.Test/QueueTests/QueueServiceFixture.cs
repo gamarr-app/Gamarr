@@ -6,7 +6,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Queue;
 using NzbDrone.Core.Test.Framework;
@@ -28,19 +28,19 @@ namespace NzbDrone.Core.Test.QueueTests
                                         .With(v => v.DownloadClientInfo = downloadClientInfo)
                                         .Build();
 
-            var series = Builder<Movie>.CreateNew()
+            var series = Builder<Game>.CreateNew()
                                         .Build();
 
-            var remoteEpisode = Builder<RemoteMovie>.CreateNew()
-                                                   .With(r => r.Movie = series)
-                                                   .With(r => r.ParsedMovieInfo = new ParsedMovieInfo())
+            var remoteEpisode = Builder<RemoteGame>.CreateNew()
+                                                   .With(r => r.Game = series)
+                                                   .With(r => r.ParsedGameInfo = new ParsedGameInfo())
                                                    .Build();
 
             _trackedDownloads = Builder<TrackedDownload>.CreateListOfSize(1)
                 .All()
                 .With(v => v.IsTrackable = true)
                 .With(v => v.DownloadItem = downloadItem)
-                .With(v => v.RemoteMovie = remoteEpisode)
+                .With(v => v.RemoteGame = remoteEpisode)
                 .Build()
                 .ToList();
         }

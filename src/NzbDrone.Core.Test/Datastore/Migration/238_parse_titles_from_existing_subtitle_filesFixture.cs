@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         [TestCase("Name (2020) - [AAC 2.0].eng.forced.3.ass", "Name (2020)/Name (2020) - [AAC 2.0].mkv", null, 3)]
         [TestCase("Name (2020) - [AAC 2.0].fra.default.3.forced.ass", "Name (2020)/Name (2020) - [AAC 2.0].mkv", null, 3)]
         [TestCase("Name (2020) - Name.2020.S01E03.REAL.PROPER.1080p.HEVC.x265-MeGusta - 0609901d2ea34acd81c9030980406065.en.forced.srt", "Name (2020)/Name (2020) - Name.2020.S01E03.REAL.PROPER.1080p.HEVC.x265-MeGusta - 0609901d2ea34acd81c9030980406065.mkv", null, 0)]
-        public void should_process_file_with_missing_title(string subtitlePath, string moviePath, string title, int copy)
+        public void should_process_file_with_missing_title(string subtitlePath, string gamePath, string title, int copy)
         {
             var now = DateTime.UtcNow;
 
@@ -47,8 +47,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             {
                 c.Insert.IntoTable("SubtitleFiles").Row(new
                 {
-                    MovieId = 1,
-                    MovieFileId = 1,
+                    GameId = 1,
+                    GameFileId = 1,
                     RelativePath = subtitlePath,
                     Added = now,
                     LastUpdated = now,
@@ -57,11 +57,11 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     LanguageTags = new List<string> { "sdh" }.ToJson()
                 });
 
-                c.Insert.IntoTable("MovieFiles").Row(new
+                c.Insert.IntoTable("GameFiles").Row(new
                 {
                     Id = 1,
-                    MovieId = 1,
-                    RelativePath = moviePath,
+                    GameId = 1,
+                    RelativePath = gamePath,
                     Quality = new { }.ToJson(),
                     IndexerFlags = 0,
                     Size = 0,
@@ -84,8 +84,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     public class SubtitleFile238
     {
         public int Id { get; set; }
-        public int MovieId { get; set; }
-        public int? MovieFileId { get; set; }
+        public int GameId { get; set; }
+        public int? GameFileId { get; set; }
         public string RelativePath { get; set; }
         public DateTime Added { get; set; }
         public DateTime LastUpdated { get; set; }

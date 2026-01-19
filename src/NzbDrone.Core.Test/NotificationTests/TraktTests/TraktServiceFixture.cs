@@ -4,7 +4,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Notifications.Trakt;
 using NzbDrone.Core.Notifications.Trakt.Resource;
@@ -24,8 +24,8 @@ namespace NzbDrone.Core.Test.NotificationTests
         {
             _downloadMessage = new DownloadMessage
             {
-                Movie = new Movie(),
-                MovieFile = new MovieFile
+                Game = new Game(),
+                GameFile = new GameFile
                 {
                     MediaInfo = null,
                     Quality = new QualityModel
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.NotificationTests
 
         private void GiventValidMediaInfo(Quality quality, string audioChannels, string audioFormat, string scanType, HdrFormat hdrFormat = HdrFormat.None)
         {
-            _downloadMessage.MovieFile.MediaInfo = new MediaInfoModel
+            _downloadMessage.GameFile.MediaInfo = new MediaInfoModel
             {
                 AudioChannelPositions = audioChannels,
                 AudioFormat = audioFormat,
@@ -58,49 +58,49 @@ namespace NzbDrone.Core.Test.NotificationTests
                 VideoHdrFormat = hdrFormat
             };
 
-            _downloadMessage.MovieFile.Quality.Quality = quality;
+            _downloadMessage.GameFile.Quality.Quality = quality;
         }
 
         [Test]
-        public void should_add_collection_movie_if_null_mediainfo()
+        public void should_add_collection_game_if_null_mediainfo()
         {
             Subject.OnDownload(_downloadMessage);
 
             Mocker.GetMock<ITraktProxy>()
-                  .Verify(v => v.AddToCollection(It.IsAny<TraktCollectMoviesResource>(), It.IsAny<string>()), Times.Once());
+                  .Verify(v => v.AddToCollection(It.IsAny<TraktCollectGamesResource>(), It.IsAny<string>()), Times.Once());
         }
 
         [Test]
-        public void should_add_collection_movie_if_valid_mediainfo()
+        public void should_add_collection_game_if_valid_mediainfo()
         {
             GiventValidMediaInfo(Quality.Bluray2160p, "5.1", "DTS", "Progressive", HdrFormat.DolbyVisionHdr10);
 
             Subject.OnDownload(_downloadMessage);
 
             Mocker.GetMock<ITraktProxy>()
-                  .Verify(v => v.AddToCollection(It.Is<TraktCollectMoviesResource>(t =>
-                    t.Movies.First().Audio == "dts" &&
-                    t.Movies.First().AudioChannels == "5.1" &&
-                    t.Movies.First().Resolution == "uhd_4k" &&
-                    t.Movies.First().MediaType == "bluray" &&
-                    t.Movies.First().Hdr == "hdr10"),
+                  .Verify(v => v.AddToCollection(It.Is<TraktCollectGamesResource>(t =>
+                    t.Games.First().Audio == "dts" &&
+                    t.Games.First().AudioChannels == "5.1" &&
+                    t.Games.First().Resolution == "uhd_4k" &&
+                    t.Games.First().MediaType == "bluray" &&
+                    t.Games.First().Hdr == "hdr10"),
                   It.IsAny<string>()), Times.Once());
         }
 
         [Test]
-        public void should_format_audio_channels_to_one_decimal_when_adding_collection_movie()
+        public void should_format_audio_channels_to_one_decimal_when_adding_collection_game()
         {
             GiventValidMediaInfo(Quality.Bluray2160p, "2.0", "DTS", "Progressive", HdrFormat.DolbyVisionHdr10);
 
             Subject.OnDownload(_downloadMessage);
 
             Mocker.GetMock<ITraktProxy>()
-                  .Verify(v => v.AddToCollection(It.Is<TraktCollectMoviesResource>(t =>
-                    t.Movies.First().Audio == "dts" &&
-                    t.Movies.First().AudioChannels == "2.0" &&
-                    t.Movies.First().Resolution == "uhd_4k" &&
-                    t.Movies.First().MediaType == "bluray" &&
-                    t.Movies.First().Hdr == "hdr10"),
+                  .Verify(v => v.AddToCollection(It.Is<TraktCollectGamesResource>(t =>
+                    t.Games.First().Audio == "dts" &&
+                    t.Games.First().AudioChannels == "2.0" &&
+                    t.Games.First().Resolution == "uhd_4k" &&
+                    t.Games.First().MediaType == "bluray" &&
+                    t.Games.First().Hdr == "hdr10"),
                   It.IsAny<string>()), Times.Once());
         }
     }

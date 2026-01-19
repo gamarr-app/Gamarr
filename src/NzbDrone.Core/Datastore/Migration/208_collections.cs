@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Datastore.Migration
         protected override void MainDbUpgrade()
         {
             Create.TableForModel("Collections")
-                .WithColumn("TmdbId").AsInt32().Unique()
+                .WithColumn("IgdbId").AsInt32().Unique()
                 .WithColumn("QualityProfileId").AsInt32()
                 .WithColumn("RootFolderPath").AsString()
                 .WithColumn("MinimumAvailability").AsInt32()
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("Added").AsDateTime().Nullable();
 
-            Alter.Table("MovieMetadata").AddColumn("CollectionTmdbId").AsInt32().Nullable()
+            Alter.Table("GameMetadata").AddColumn("CollectionIgdbId").AsInt32().Nullable()
                                         .AddColumn("CollectionTitle").AsString().Nullable();
 
             Alter.Table("ImportLists").AddColumn("Monitor").AsInt32().Nullable();
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Datastore.Migration
 
             Delete.Column("ShouldMonitor").FromTable("ImportLists");
             Delete.FromTable("ImportLists").Row(new { Implementation = "TMDbCollectionImport" });
-            Delete.Column("Collection").FromTable("MovieMetadata");
+            Delete.Column("Collection").FromTable("GameMetadata");
         }
 
         private void MigrateCollections(IDbConnection conn, IDbTransaction tran)
@@ -66,11 +66,11 @@ namespace NzbDrone.Core.Datastore.Migration
                 }
             }
 
-            var newCollections = new List<MovieCollection208>();
+            var newCollections = new List<GameCollection208>();
             using (var cmd = conn.CreateCommand())
             {
                 cmd.Transaction = tran;
-                cmd.CommandText = "SELECT \"Collection\", \"ProfileId\", \"MinimumAvailability\", \"Path\" FROM \"Movies\" JOIN \"MovieMetadata\" ON \"Movies\".\"MovieMetadataId\" = \"MovieMetadata\".\"Id\" WHERE \"Collection\" IS NOT NULL";
+                cmd.CommandText = "SELECT \"Collection\", \"ProfileId\", \"MinimumAvailability\", \"Path\" FROM \"Games\" JOIN \"GameMetadata\" ON \"Games\".\"GameMetadataId\" = \"GameMetadata\".\"Id\" WHERE \"Collection\" IS NOT NULL";
 
                 var addedCollections = new List<int>();
                 var added = DateTime.UtcNow;
@@ -82,15 +82,15 @@ namespace NzbDrone.Core.Datastore.Migration
                         var collection = reader.GetString(0);
                         var qualityProfileId = reader.GetInt32(1);
                         var minimumAvailability = reader.GetInt32(2);
-                        var moviePath = reader.GetString(3);
-                        var data = STJson.Deserialize<MovieCollection207>(collection);
+                        var gamePath = reader.GetString(3);
+                        var data = STJson.Deserialize<GameCollection207>(collection);
 
-                        if (data.TmdbId == 0 || newCollections.Any(d => d.TmdbId == data.TmdbId))
+                        if (data.IgdbId == 0 || newCollections.Any(d => d.IgdbId == data.IgdbId))
                         {
                             continue;
                         }
 
-                        var rootFolderPath = rootPaths.Where(r => r.IsParentPath(moviePath))
+                        var rootFolderPath = rootPaths.Where(r => r.IsParentPath(gamePath))
                                           .OrderByDescending(r => r.Length)
                                           .FirstOrDefault();
 
@@ -101,16 +101,16 @@ namespace NzbDrone.Core.Datastore.Migration
 
                         if (rootFolderPath == null)
                         {
-                            rootFolderPath = moviePath.GetParentPath();
+                            rootFolderPath = gamePath.GetParentPath();
                         }
 
-                        var collectionName = data.Name ?? $"Collection {data.TmdbId}";
+                        var collectionName = data.Name ?? $"Collection {data.IgdbId}";
 
-                        newCollections.Add(new MovieCollection208
+                        newCollections.Add(new GameCollection208
                         {
-                            TmdbId = data.TmdbId,
+                            IgdbId = data.IgdbId,
                             Title = collectionName,
-                            CleanTitle = collectionName.CleanMovieTitle(),
+                            CleanTitle = collectionName.CleanGameTitle(),
                             SortTitle = Parser.Parser.NormalizeTitle(collectionName),
                             Added = added,
                             QualityProfileId = qualityProfileId,
@@ -122,13 +122,13 @@ namespace NzbDrone.Core.Datastore.Migration
                 }
             }
 
-            var updateSql = "INSERT INTO \"Collections\" (\"TmdbId\", \"Title\", \"CleanTitle\", \"SortTitle\", \"Added\", \"QualityProfileId\", \"RootFolderPath\", \"SearchOnAdd\", \"MinimumAvailability\") VALUES (@TmdbId, @Title, @CleanTitle, @SortTitle, @Added, @QualityProfileId, @RootFolderPath, @SearchOnAdd, @MinimumAvailability)";
+            var updateSql = "INSERT INTO \"Collections\" (\"IgdbId\", \"Title\", \"CleanTitle\", \"SortTitle\", \"Added\", \"QualityProfileId\", \"RootFolderPath\", \"SearchOnAdd\", \"MinimumAvailability\") VALUES (@IgdbId, @Title, @CleanTitle, @SortTitle, @Added, @QualityProfileId, @RootFolderPath, @SearchOnAdd, @MinimumAvailability)";
             conn.Execute(updateSql, newCollections, transaction: tran);
         }
 
         private void MigrateCollectionMonitorStatus(IDbConnection conn, IDbTransaction tran)
         {
-            var updatedCollections = new List<MovieCollection208>();
+            var updatedCollections = new List<GameCollection208>();
             using (var cmd = conn.CreateCommand())
             {
                 cmd.Transaction = tran;
@@ -143,23 +143,23 @@ namespace NzbDrone.Core.Datastore.Migration
                         var settings = reader.GetString(2);
                         var shouldMonitor = reader.GetBoolean(3);
                         var listId = reader.GetInt32(4);
-                        var data = STJson.Deserialize<TmdbCollectionSettings206>(settings);
+                        var data = STJson.Deserialize<IgdbCollectionSettings206>(settings);
 
                         if (!enabled || !enabledAutoAdd || !int.TryParse(data.CollectionId, out var collectionId))
                         {
                             continue;
                         }
 
-                        updatedCollections.Add(new MovieCollection208
+                        updatedCollections.Add(new GameCollection208
                         {
-                            TmdbId = collectionId,
+                            IgdbId = collectionId,
                             Monitored = true
                         });
                     }
                 }
             }
 
-            var updateSql = "UPDATE \"Collections\" SET \"Monitored\" = @Monitored WHERE \"TmdbId\" = @TmdbId";
+            var updateSql = "UPDATE \"Collections\" SET \"Monitored\" = @Monitored WHERE \"IgdbId\" = @IgdbId";
             conn.Execute(updateSql, updatedCollections, transaction: tran);
         }
 
@@ -193,12 +193,12 @@ namespace NzbDrone.Core.Datastore.Migration
 
         private void MapCollections(IDbConnection conn, IDbTransaction tran)
         {
-            var updatedMeta = new List<MovieMetadata208>();
+            var updatedMeta = new List<GameMetadata208>();
 
             using (var cmd = conn.CreateCommand())
             {
                 cmd.Transaction = tran;
-                cmd.CommandText = "SELECT \"Id\", \"Collection\" FROM \"MovieMetadata\" WHERE \"Collection\" IS NOT NULL";
+                cmd.CommandText = "SELECT \"Id\", \"Collection\" FROM \"GameMetadata\" WHERE \"Collection\" IS NOT NULL";
 
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -206,32 +206,32 @@ namespace NzbDrone.Core.Datastore.Migration
                     {
                         var id = reader.GetInt32(0);
                         var collection = reader.GetString(1);
-                        var data = STJson.Deserialize<MovieCollection207>(collection);
+                        var data = STJson.Deserialize<GameCollection207>(collection);
 
-                        var collectionId = data.TmdbId;
+                        var collectionId = data.IgdbId;
                         var collectionTitle = data.Name;
 
-                        updatedMeta.Add(new MovieMetadata208
+                        updatedMeta.Add(new GameMetadata208
                         {
                             CollectionTitle = collectionTitle,
-                            CollectionTmdbId = collectionId,
+                            CollectionIgdbId = collectionId,
                             Id = id
                         });
                     }
                 }
             }
 
-            var updateSql = "UPDATE \"MovieMetadata\" SET \"CollectionTmdbId\" = @CollectionTmdbId, \"CollectionTitle\" = @CollectionTitle WHERE \"Id\" = @Id";
+            var updateSql = "UPDATE \"GameMetadata\" SET \"CollectionIgdbId\" = @CollectionIgdbId, \"CollectionTitle\" = @CollectionTitle WHERE \"Id\" = @Id";
             conn.Execute(updateSql, updatedMeta, transaction: tran);
         }
 
-        private class MovieCollection207
+        private class GameCollection207
         {
             public string Name { get; set; }
-            public int TmdbId { get; set; }
+            public int IgdbId { get; set; }
         }
 
-        private class MovieCollection208
+        private class GameCollection208
         {
             public int Id { get; set; }
             public string Title { get; set; }
@@ -243,13 +243,13 @@ namespace NzbDrone.Core.Datastore.Migration
             public bool SearchOnAdd { get; set; }
             public int MinimumAvailability { get; set; }
             public bool Monitored { get; set; }
-            public int TmdbId { get; set; }
+            public int IgdbId { get; set; }
         }
 
-        private class MovieMetadata208
+        private class GameMetadata208
         {
             public int Id { get; set; }
-            public int CollectionTmdbId { get; set; }
+            public int CollectionIgdbId { get; set; }
             public string CollectionTitle { get; set; }
         }
 
@@ -259,7 +259,7 @@ namespace NzbDrone.Core.Datastore.Migration
             public int Monitor { get; set; }
         }
 
-        private class TmdbCollectionSettings206
+        private class IgdbCollectionSettings206
         {
             public string CollectionId { get; set; }
         }

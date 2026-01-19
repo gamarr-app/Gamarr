@@ -9,7 +9,7 @@
          "apps",
          "consoles",
          "emp",
-         "movies",
+         "games",
          "tv"
       ],
       "color_scheme":"lightblue",

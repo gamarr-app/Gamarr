@@ -86,10 +86,10 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         public List<QBittorrentTorrent> GetTorrents(QBittorrentSettings settings)
         {
             var request = BuildRequest(settings).Resource("/query/torrents");
-            if (settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddQueryParam("label", settings.MovieCategory);
-                request.AddQueryParam("category", settings.MovieCategory);
+                request.AddQueryParam("label", settings.GameCategory);
+                request.AddQueryParam("category", settings.GameCategory);
             }
 
             var response = ProcessRequest<List<QBittorrentTorrent>>(request, settings);
@@ -136,9 +136,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                                                 .Post()
                                                 .AddFormParameter("urls", torrentUrl);
 
-            if (settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddFormParameter("category", settings.MovieCategory);
+                request.AddFormParameter("category", settings.GameCategory);
             }
 
             // Note: ForceStart is handled by separate api call
@@ -166,9 +166,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                                                 .Post()
                                                 .AddFormUpload("torrents", fileName, fileContent);
 
-            if (settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddFormParameter("category", settings.MovieCategory);
+                request.AddFormParameter("category", settings.GameCategory);
             }
 
             // Note: ForceStart is handled by separate api call

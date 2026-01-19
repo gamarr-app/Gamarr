@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { toggleCollectionMonitored } from 'Store/Actions/movieCollectionActions';
+import { toggleCollectionMonitored } from 'Store/Actions/gameCollectionActions';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import CollectionOverview from './CollectionOverview';
 

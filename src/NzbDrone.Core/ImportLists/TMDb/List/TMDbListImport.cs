@@ -14,14 +14,14 @@ namespace NzbDrone.Core.ImportLists.TMDb.List
         public override bool EnableAuto => false;
         public override int PageSize => 1;
 
-        public TMDbListImport(IRadarrCloudRequestBuilder requestBuilder,
+        public TMDbListImport(IGamarrCloudRequestBuilder requestBuilder,
                                  IHttpClient httpClient,
                                  IImportListStatusService importListStatusService,
                                  IConfigService configService,
                                  IParsingService parsingService,
-                                 ISearchForNewMovie searchForNewMovie,
+                                 ISearchForNewGame searchForNewGame,
                                  Logger logger)
-        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewMovie, logger)
+        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewGame, logger)
         {
         }
 

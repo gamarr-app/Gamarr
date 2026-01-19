@@ -67,9 +67,9 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 arguments.Add("download-dir", downloadDirectory);
             }
 
-            if (settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                arguments.Add("labels", new List<string> { settings.MovieCategory });
+                arguments.Add("labels", new List<string> { settings.GameCategory });
             }
 
             ProcessRequest("torrent-add", arguments, settings);
@@ -88,9 +88,9 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 arguments.Add("download-dir", downloadDirectory);
             }
 
-            if (settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                arguments.Add("labels", new List<string> { settings.MovieCategory });
+                arguments.Add("labels", new List<string> { settings.GameCategory });
             }
 
             ProcessRequest("torrent-add", arguments, settings);

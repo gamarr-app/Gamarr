@@ -5,7 +5,7 @@ using NLog;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Subtitles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.Extras.Metadata
@@ -31,12 +31,12 @@ namespace NzbDrone.Core.Extras.Metadata
 
         public override int Order => 0;
 
-        public override IEnumerable<ExtraFile> ProcessFiles(Movie movie, List<string> filesOnDisk, List<string> importedFiles, string fileNameBeforeRename)
+        public override IEnumerable<ExtraFile> ProcessFiles(Game game, List<string> filesOnDisk, List<string> importedFiles, string fileNameBeforeRename)
         {
-            _logger.Debug("Looking for existing metadata in {0}", movie.Path);
+            _logger.Debug("Looking for existing metadata in {0}", game.Path);
 
             var metadataFiles = new List<MetadataFile>();
-            var filterResult = FilterAndClean(movie, filesOnDisk, importedFiles, fileNameBeforeRename is not null);
+            var filterResult = FilterAndClean(game, filesOnDisk, importedFiles, fileNameBeforeRename is not null);
 
             foreach (var possibleMetadataFile in filterResult.FilesOnDisk)
             {
@@ -49,17 +49,17 @@ namespace NzbDrone.Core.Extras.Metadata
 
                 foreach (var consumer in _consumers)
                 {
-                    var metadata = consumer.FindMetadataFile(movie, possibleMetadataFile);
+                    var metadata = consumer.FindMetadataFile(game, possibleMetadataFile);
 
                     if (metadata == null)
                     {
                         continue;
                     }
 
-                    if (metadata.Type == MetadataType.MovieImage ||
-                        metadata.Type == MetadataType.MovieMetadata)
+                    if (metadata.Type == MetadataType.GameImage ||
+                        metadata.Type == MetadataType.GameMetadata)
                     {
-                        var minimalInfo = _parsingService.ParseMinimalPathMovieInfo(possibleMetadataFile);
+                        var minimalInfo = _parsingService.ParseMinimalPathGameInfo(possibleMetadataFile);
 
                         if (minimalInfo == null)
                         {
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Extras.Metadata
                             continue;
                         }
 
-                        metadata.MovieFileId = movie.MovieFileId;
+                        metadata.GameFileId = game.GameFileId;
                     }
 
                     metadata.Extension = Path.GetExtension(possibleMetadataFile);

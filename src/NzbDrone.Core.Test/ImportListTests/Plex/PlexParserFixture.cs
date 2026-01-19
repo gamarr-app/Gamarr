@@ -30,9 +30,9 @@ namespace NzbDrone.Core.Test.ImportList.Plex
             result.First().Title.Should().Be("Arrival");
             result.First().Year.Should().Be(2016);
             result.First().ImdbId.Should().Be("tt2543164");
-            result.First().TmdbId.Should().Be(0);
+            result.First().IgdbId.Should().Be(0);
 
-            result[1].TmdbId.Should().Be(274854);
+            result[1].IgdbId.Should().Be(274854);
             result[1].ImdbId.Should().Be("tt1618442");
         }
     }

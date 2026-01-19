@@ -122,7 +122,7 @@ namespace NzbDrone.Core.Notifications.Plex.PlexTv
                                  .AddQueryParam("excludeElements", "Image")
                                  .AddQueryParam("includeGuids", "1")
                                  .AddQueryParam("sort", "watchlistedAt:desc")
-                                 .AddQueryParam("type", (int)PlexMediaType.Movie)
+                                 .AddQueryParam("type", (int)PlexMediaType.Game)
                                  .AddQueryParam("X-Plex-Container-Size", pageSize)
                                  .AddQueryParam("X-Plex-Container-Start", pageOffset);
 

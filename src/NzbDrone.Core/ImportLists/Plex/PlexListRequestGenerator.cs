@@ -18,16 +18,16 @@ namespace NzbDrone.Core.ImportLists.Plex
             _pageSize = pageSize;
         }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequest());
+            pageableRequests.Add(GetGamesRequest());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequest()
+        private IEnumerable<ImportListRequest> GetGamesRequest()
         {
             for (var page = 0; page < MaxPages; page++)
             {

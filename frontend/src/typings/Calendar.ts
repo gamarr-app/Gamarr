@@ -1,6 +1,6 @@
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 
-export type CalendarItem = Movie;
+export type CalendarItem = Game;
 
 export type CalendarEvent = CalendarItem;
 

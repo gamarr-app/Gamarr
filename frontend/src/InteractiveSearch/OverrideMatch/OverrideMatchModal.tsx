@@ -11,7 +11,7 @@ interface OverrideMatchModalProps {
   title: string;
   indexerId: number;
   guid: string;
-  movieId?: number;
+  gameId?: number;
   languages: Language[];
   quality: QualityModel;
   protocol: DownloadProtocol;
@@ -26,7 +26,7 @@ function OverrideMatchModal(props: OverrideMatchModalProps) {
     title,
     indexerId,
     guid,
-    movieId,
+    gameId,
     languages,
     quality,
     protocol,
@@ -41,7 +41,7 @@ function OverrideMatchModal(props: OverrideMatchModalProps) {
         title={title}
         indexerId={indexerId}
         guid={guid}
-        movieId={movieId}
+        gameId={gameId}
         languages={languages}
         quality={quality}
         protocol={protocol}

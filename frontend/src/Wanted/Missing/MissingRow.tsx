@@ -4,15 +4,15 @@ import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
-import MovieSearchCell from 'Movie/MovieSearchCell';
-import MovieStatus from 'Movie/MovieStatus';
-import MovieTitleLink from 'Movie/MovieTitleLink';
+import GameSearchCell from 'Game/GameSearchCell';
+import GameStatus from 'Game/GameStatus';
+import GameTitleLink from 'Game/GameTitleLink';
 import { SelectStateInputProps } from 'typings/props';
 import styles from './MissingRow.css';
 
 interface MissingRowProps {
   id: number;
-  movieFileId?: number;
+  gameFileId?: number;
   inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
@@ -27,7 +27,7 @@ interface MissingRowProps {
 
 function MissingRow({
   id,
-  movieFileId,
+  gameFileId,
   inCinemas,
   digitalRelease,
   physicalRelease,
@@ -58,19 +58,19 @@ function MissingRow({
           return null;
         }
 
-        if (name === 'movieMetadata.sortTitle') {
+        if (name === 'gameMetadata.sortTitle') {
           return (
             <TableRowCell key={name}>
-              <MovieTitleLink titleSlug={titleSlug} title={title} />
+              <GameTitleLink titleSlug={titleSlug} title={title} />
             </TableRowCell>
           );
         }
 
-        if (name === 'movieMetadata.year') {
+        if (name === 'gameMetadata.year') {
           return <TableRowCell key={name}>{year}</TableRowCell>;
         }
 
-        if (name === 'movieMetadata.inCinemas') {
+        if (name === 'gameMetadata.inCinemas') {
           return (
             <RelativeDateCell
               key={name}
@@ -80,7 +80,7 @@ function MissingRow({
           );
         }
 
-        if (name === 'movieMetadata.digitalRelease') {
+        if (name === 'gameMetadata.digitalRelease') {
           return (
             <RelativeDateCell
               key={name}
@@ -90,7 +90,7 @@ function MissingRow({
           );
         }
 
-        if (name === 'movieMetadata.physicalRelease') {
+        if (name === 'gameMetadata.physicalRelease') {
           return (
             <RelativeDateCell
               key={name}
@@ -100,7 +100,7 @@ function MissingRow({
           );
         }
 
-        if (name === 'movies.lastSearchTime') {
+        if (name === 'games.lastSearchTime') {
           return (
             <RelativeDateCell
               key={name}
@@ -113,10 +113,10 @@ function MissingRow({
         if (name === 'status') {
           return (
             <TableRowCell key={name} className={styles.status}>
-              <MovieStatus
-                movieId={id}
-                movieFileId={movieFileId}
-                movieEntity="wanted.missing"
+              <GameStatus
+                gameId={id}
+                gameFileId={gameFileId}
+                gameEntity="wanted.missing"
               />
             </TableRowCell>
           );
@@ -124,10 +124,10 @@ function MissingRow({
 
         if (name === 'actions') {
           return (
-            <MovieSearchCell
+            <GameSearchCell
               key={name}
-              movieId={id}
-              movieEntity="wanted.missing"
+              gameId={id}
+              gameEntity="wanted.missing"
             />
           );
         }

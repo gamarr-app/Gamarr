@@ -28,9 +28,9 @@ import translate from 'Utilities/String/translate';
 import styles from './EditImportListExclusionModalContent.css';
 
 const newImportListExclusion = {
-  movieTitle: '',
-  movieYear: 0,
-  tmdbId: 0,
+  gameTitle: '',
+  gameYear: 0,
+  igdbId: 0,
 };
 
 function createImportListExclusionSelector(id?: number) {
@@ -71,7 +71,7 @@ function EditImportListExclusionModalContent({
   const { isFetching, isSaving, item, error, saveError, ...otherProps } =
     useSelector(createImportListExclusionSelector(id));
 
-  const { movieTitle, movieYear, tmdbId } = item;
+  const { gameTitle, gameYear, igdbId } = item;
 
   const dispatch = useDispatch();
   const previousIsSaving = usePrevious(isSaving);
@@ -131,13 +131,13 @@ function EditImportListExclusionModalContent({
         {!isFetching && !error && (
           <Form {...otherProps}>
             <FormGroup>
-              <FormLabel>{translate('TMDBId')}</FormLabel>
+              <FormLabel>{translate('IGDBId')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.NUMBER}
-                name="tmdbId"
-                helpText={translate('TmdbIdExcludeHelpText')}
-                {...tmdbId}
+                name="igdbId"
+                helpText={translate('IgdbIdExcludeHelpText')}
+                {...igdbId}
                 onChange={onInputChange}
               />
             </FormGroup>
@@ -147,9 +147,9 @@ function EditImportListExclusionModalContent({
 
               <FormInputGroup
                 type={inputTypes.TEXT}
-                name="movieTitle"
-                helpText={translate('MovieTitleToExcludeHelpText')}
-                {...movieTitle}
+                name="gameTitle"
+                helpText={translate('GameTitleToExcludeHelpText')}
+                {...gameTitle}
                 onChange={onInputChange}
               />
             </FormGroup>
@@ -159,9 +159,9 @@ function EditImportListExclusionModalContent({
 
               <FormInputGroup
                 type={inputTypes.NUMBER}
-                name="movieYear"
-                helpText={translate('MovieYearToExcludeHelpText')}
-                {...movieYear}
+                name="gameYear"
+                helpText={translate('GameYearToExcludeHelpText')}
+                {...gameYear}
                 onChange={onInputChange}
               />
             </FormGroup>

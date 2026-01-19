@@ -12,12 +12,12 @@ namespace NzbDrone.Core.Parser.Model
         public long Size { get; set; }
         public IndexerFlags IndexerFlags { get; set; }
 
-        public List<int> MovieIds { get; set; }
+        public List<int> GameIds { get; set; }
 
-        public GrabbedReleaseInfo(List<MovieHistory> grabbedHistories)
+        public GrabbedReleaseInfo(List<GameHistory> grabbedHistories)
         {
             var grabbedHistory = grabbedHistories.MaxBy(h => h.Date);
-            var movieIds = grabbedHistories.Select(h => h.MovieId).Distinct().ToList();
+            var gameIds = grabbedHistories.Select(h => h.GameId).Distinct().ToList();
 
             grabbedHistory.Data.TryGetValue("indexer", out var indexer);
             grabbedHistory.Data.TryGetValue("size", out var sizeString);
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Parser.Model
             Indexer = indexer;
             Size = size;
             IndexerFlags = indexerFlags;
-            MovieIds = movieIds;
+            GameIds = gameIds;
         }
     }
 }

@@ -19,10 +19,10 @@ function NotificationEventItems(props) {
     onDownload,
     onUpgrade,
     onRename,
-    onMovieAdded,
-    onMovieDelete,
-    onMovieFileDelete,
-    onMovieFileDeleteForUpgrade,
+    onGameAdded,
+    onGameDelete,
+    onGameFileDelete,
+    onGameFileDeleteForUpgrade,
     onHealthIssue,
     onHealthRestored,
     onApplicationUpdate,
@@ -31,10 +31,10 @@ function NotificationEventItems(props) {
     supportsOnDownload,
     supportsOnUpgrade,
     supportsOnRename,
-    supportsOnMovieAdded,
-    supportsOnMovieDelete,
-    supportsOnMovieFileDelete,
-    supportsOnMovieFileDeleteForUpgrade,
+    supportsOnGameAdded,
+    supportsOnGameDelete,
+    supportsOnGameFileDelete,
+    supportsOnGameFileDeleteForUpgrade,
     supportsOnApplicationUpdate,
     supportsOnManualInteractionRequired,
     supportsOnHealthIssue,
@@ -48,7 +48,7 @@ function NotificationEventItems(props) {
       <div>
         <FormInputHelpText
           text={translate('NotificationTriggersHelpText')}
-          link="https://wiki.servarr.com/radarr/settings#connections"
+          link="https://wiki.servarr.com/gamarr/settings#connections"
         />
         <div className={styles.events}>
           <div>
@@ -101,10 +101,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onMovieAdded"
-              helpText={translate('OnMovieAdded')}
-              isDisabled={!supportsOnMovieAdded.value}
-              {...onMovieAdded}
+              name="onGameAdded"
+              helpText={translate('OnGameAdded')}
+              isDisabled={!supportsOnGameAdded.value}
+              {...onGameAdded}
               onChange={onInputChange}
             />
           </div>
@@ -112,10 +112,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onMovieDelete"
-              helpText={translate('OnMovieDelete')}
-              isDisabled={!supportsOnMovieDelete.value}
-              {...onMovieDelete}
+              name="onGameDelete"
+              helpText={translate('OnGameDelete')}
+              isDisabled={!supportsOnGameDelete.value}
+              {...onGameDelete}
               onChange={onInputChange}
             />
           </div>
@@ -123,23 +123,23 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onMovieFileDelete"
-              helpText={translate('OnMovieFileDelete')}
-              isDisabled={!supportsOnMovieFileDelete.value}
-              {...onMovieFileDelete}
+              name="onGameFileDelete"
+              helpText={translate('OnGameFileDelete')}
+              isDisabled={!supportsOnGameFileDelete.value}
+              {...onGameFileDelete}
               onChange={onInputChange}
             />
           </div>
 
           {
-            onMovieFileDelete.value &&
+            onGameFileDelete.value &&
               <div>
                 <FormInputGroup
                   type={inputTypes.CHECK}
-                  name="onMovieFileDeleteForUpgrade"
-                  helpText={translate('OnMovieFileDeleteForUpgrade')}
-                  isDisabled={!supportsOnMovieFileDeleteForUpgrade.value}
-                  {...onMovieFileDeleteForUpgrade}
+                  name="onGameFileDeleteForUpgrade"
+                  helpText={translate('OnGameFileDeleteForUpgrade')}
+                  isDisabled={!supportsOnGameFileDeleteForUpgrade.value}
+                  {...onGameFileDeleteForUpgrade}
                   onChange={onInputChange}
                 />
               </div>

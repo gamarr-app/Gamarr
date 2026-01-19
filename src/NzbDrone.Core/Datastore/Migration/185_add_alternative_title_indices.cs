@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Datastore.Migration
         protected override void MainDbUpgrade()
         {
             Create.Index().OnTable("AlternativeTitles").OnColumn("CleanTitle");
-            Create.Index().OnTable("MovieTranslations").OnColumn("CleanTitle");
+            Create.Index().OnTable("GameTranslations").OnColumn("CleanTitle");
         }
     }
 }

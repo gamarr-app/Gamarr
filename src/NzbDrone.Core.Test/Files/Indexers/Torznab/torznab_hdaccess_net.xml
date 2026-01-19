@@ -56,7 +56,7 @@
       <torznab:attr name="category" value="2060" />
       <torznab:attr name="category" value="100001" />
       <torznab:attr name="category" value="100018" />
-      <torznab:attr name="type" value="movie" />
+      <torznab:attr name="type" value="game" />
       <torznab:attr name="seeders" value="41" />
       <torznab:attr name="peers" value="41" />
       <torznab:attr name="coverurl" value="http://s5.postimg.org/gl7z658on/screenshot_1008.png" />
@@ -80,7 +80,7 @@
       <torznab:attr name="category" value="2060" />
       <torznab:attr name="category" value="100002" />
       <torznab:attr name="category" value="100022" />
-      <torznab:attr name="type" value="movie" />
+      <torznab:attr name="type" value="game" />
       <torznab:attr name="seeders" value="57" />
       <torznab:attr name="peers" value="58" />
       <torznab:attr name="coverurl" value="https://hdaccess.net/imdb/images/2305051.jpg" />
@@ -104,7 +104,7 @@
       <torznab:attr name="category" value="2060" />
       <torznab:attr name="category" value="100002" />
       <torznab:attr name="category" value="100026" />
-      <torznab:attr name="type" value="movie" />
+      <torznab:attr name="type" value="game" />
       <torznab:attr name="seeders" value="6" />
       <torznab:attr name="peers" value="7" />
       <torznab:attr name="coverurl" value="https://hdaccess.net/imdb/images/0118548.jpg" />

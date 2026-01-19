@@ -14,7 +14,7 @@ namespace NzbDrone.Core.ImportLists.Simkl.User
         {
         }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.ImportLists.Simkl.User
 
         private IEnumerable<ImportListRequest> GetSeriesRequest()
         {
-            var link = $"{Settings.BaseUrl.Trim()}/sync/all-items/movies/{((SimklUserListType)Settings.ListType).ToString().ToLowerInvariant()}";
+            var link = $"{Settings.BaseUrl.Trim()}/sync/all-items/games/{((SimklUserListType)Settings.ListType).ToString().ToLowerInvariant()}";
 
             var request = new ImportListRequest(link, HttpAccept.Json);
 

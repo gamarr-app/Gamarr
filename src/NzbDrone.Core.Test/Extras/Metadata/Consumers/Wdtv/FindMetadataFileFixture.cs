@@ -4,7 +4,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Extras.Metadata;
 using NzbDrone.Core.Extras.Metadata.Consumers.Wdtv;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
@@ -13,48 +13,48 @@ namespace NzbDrone.Core.Test.Extras.Metadata.Consumers.Wdtv
     [TestFixture]
     public class FindMetadataFileFixture : CoreTest<WdtvMetadata>
     {
-        private Movie _movie;
+        private Game _game;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew()
-                                     .With(s => s.Path = @"C:\Test\Movies\The.Movie".AsOsAgnostic())
+            _game = Builder<Game>.CreateNew()
+                                     .With(s => s.Path = @"C:\Test\Games\The.Game".AsOsAgnostic())
                                      .Build();
         }
 
         [Test]
         public void should_return_null_if_filename_is_not_handled()
         {
-            var path = Path.Combine(_movie.Path, "file.jpg");
+            var path = Path.Combine(_game.Path, "file.jpg");
 
-            Subject.FindMetadataFile(_movie, path).Should().BeNull();
+            Subject.FindMetadataFile(_game, path).Should().BeNull();
         }
 
-        [TestCase(".xml", MetadataType.MovieMetadata)]
-        [TestCase(".metathumb", MetadataType.MovieImage)]
-        public void should_return_metadata_for_movie_if_valid_file_for_movie(string extension, MetadataType type)
+        [TestCase(".xml", MetadataType.GameMetadata)]
+        [TestCase(".metathumb", MetadataType.GameImage)]
+        public void should_return_metadata_for_game_if_valid_file_for_game(string extension, MetadataType type)
         {
-            var path = Path.Combine(_movie.Path, "the.movie.2011" + extension);
+            var path = Path.Combine(_game.Path, "the.game.2011" + extension);
 
-            Subject.FindMetadataFile(_movie, path).Type.Should().Be(type);
+            Subject.FindMetadataFile(_game, path).Type.Should().Be(type);
         }
 
         [TestCase(".xml")]
         [TestCase(".metathumb")]
-        public void should_return_null_if_not_valid_file_for_movie(string extension)
+        public void should_return_null_if_not_valid_file_for_game(string extension)
         {
-            var path = Path.Combine(_movie.Path, "the.movie" + extension);
+            var path = Path.Combine(_game.Path, "the.game" + extension);
 
-            Subject.FindMetadataFile(_movie, path).Should().BeNull();
+            Subject.FindMetadataFile(_game, path).Should().BeNull();
         }
 
         [Test]
-        public void should_return_movie_image_for_folder_jpg_in_movie_folder()
+        public void should_return_game_image_for_folder_jpg_in_game_folder()
         {
-            var path = Path.Combine(_movie.Path, "folder.jpg");
+            var path = Path.Combine(_game.Path, "folder.jpg");
 
-            Subject.FindMetadataFile(_movie, path).Type.Should().Be(MetadataType.MovieImage);
+            Subject.FindMetadataFile(_game, path).Type.Should().Be(MetadataType.GameImage);
         }
     }
 }

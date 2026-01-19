@@ -6,11 +6,11 @@ import * as commandNames from 'Commands/commandNames';
 import withScrollPosition from 'Components/withScrollPosition';
 import { executeCommand } from 'Store/Actions/commandActions';
 import {
-  fetchMovieCollections,
-  saveMovieCollections,
-  setMovieCollectionsFilter,
-  setMovieCollectionsSort
-} from 'Store/Actions/movieCollectionActions';
+  fetchGameCollections,
+  saveGameCollections,
+  setGameCollectionsFilter,
+  setGameCollectionsSort
+} from 'Store/Actions/gameCollectionActions';
 import { clearQueueDetails, fetchQueueDetails } from 'Store/Actions/queueActions';
 import scrollPositions from 'Store/scrollPositions';
 import createCollectionClientSideCollectionItemsSelector from 'Store/Selectors/createCollectionClientSideCollectionItemsSelector';
@@ -20,7 +20,7 @@ import Collection from './Collection';
 
 function createMapStateToProps() {
   return createSelector(
-    createCollectionClientSideCollectionItemsSelector('movieCollections'),
+    createCollectionClientSideCollectionItemsSelector('gameCollections'),
     createCommandExecutingSelector(commandNames.REFRESH_COLLECTIONS),
     createDimensionsSelector(),
     (
@@ -39,8 +39,8 @@ function createMapStateToProps() {
 
 function createMapDispatchToProps(dispatch, props) {
   return {
-    dispatchFetchMovieCollections() {
-      dispatch(fetchMovieCollections());
+    dispatchFetchGameCollections() {
+      dispatch(fetchGameCollections());
     },
     dispatchFetchQueueDetails() {
       dispatch(fetchQueueDetails());
@@ -49,15 +49,15 @@ function createMapDispatchToProps(dispatch, props) {
       dispatch(clearQueueDetails());
     },
     onUpdateSelectedPress(payload) {
-      dispatch(saveMovieCollections(payload));
+      dispatch(saveGameCollections(payload));
     },
     onSortSelect(sortKey) {
-      dispatch(setMovieCollectionsSort({ sortKey }));
+      dispatch(setGameCollectionsSort({ sortKey }));
     },
     onFilterSelect(selectedFilterKey) {
-      dispatch(setMovieCollectionsFilter({ selectedFilterKey }));
+      dispatch(setGameCollectionsFilter({ selectedFilterKey }));
     },
-    onRefreshMovieCollectionsPress() {
+    onRefreshGameCollectionsPress() {
       dispatch(executeCommand({
         name: commandNames.REFRESH_COLLECTIONS
       }));
@@ -71,7 +71,7 @@ class CollectionConnector extends Component {
   // Lifecycle
 
   componentDidMount() {
-    this.props.dispatchFetchMovieCollections();
+    this.props.dispatchFetchGameCollections();
     this.props.dispatchFetchQueueDetails();
   }
 
@@ -83,7 +83,7 @@ class CollectionConnector extends Component {
   // Listeners
 
   onScroll = ({ scrollTop }) => {
-    scrollPositions.movieCollections = scrollTop;
+    scrollPositions.gameCollections = scrollTop;
   };
 
   onUpdateSelectedPress = (payload) => {
@@ -95,7 +95,7 @@ class CollectionConnector extends Component {
 
   render() {
     const {
-      dispatchFetchMovieCollections,
+      dispatchFetchGameCollections,
       dispatchFetchQueueDetails,
       dispatchClearQueueDetails,
       ...otherProps
@@ -116,12 +116,12 @@ CollectionConnector.propTypes = {
   isSmallScreen: PropTypes.bool.isRequired,
   view: PropTypes.string.isRequired,
   onUpdateSelectedPress: PropTypes.func.isRequired,
-  dispatchFetchMovieCollections: PropTypes.func.isRequired,
+  dispatchFetchGameCollections: PropTypes.func.isRequired,
   dispatchFetchQueueDetails: PropTypes.func.isRequired,
   dispatchClearQueueDetails: PropTypes.func.isRequired
 };
 
 export default withScrollPosition(
   connect(createMapStateToProps, createMapDispatchToProps)(CollectionConnector),
-  'movieCollections'
+  'gameCollections'
 );

@@ -6,9 +6,9 @@ export type HistoryEventType =
   | 'grabbed'
   | 'downloadFolderImported'
   | 'downloadFailed'
-  | 'movieFileDeleted'
-  | 'movieFolderImported'
-  | 'movieFileRenamed'
+  | 'gameFileDeleted'
+  | 'gameFolderImported'
+  | 'gameFileRenamed'
   | 'downloadIgnored';
 
 export interface GrabbedHistoryData {
@@ -24,11 +24,11 @@ export interface GrabbedHistoryData {
   size: string;
   downloadUrl: string;
   guid: string;
-  tmdbId: string;
+  igdbId: string;
   imdbId: string;
   protocol: string;
   customFormatScore?: string;
-  movieMatchType: string;
+  gameMatchType: string;
   releaseSource: string;
   indexerFlags: string;
 }
@@ -47,13 +47,13 @@ export interface DownloadFolderImportedHistory {
   size: string;
 }
 
-export interface MovieFileDeletedHistory {
+export interface GameFileDeletedHistory {
   customFormatScore?: string;
   reason: 'Manual' | 'MissingFromDisk' | 'Upgrade';
   size: string;
 }
 
-export interface MovieFileRenamedHistory {
+export interface GameFileRenamedHistory {
   sourcePath: string;
   sourceRelativePath: string;
   path: string;
@@ -68,12 +68,12 @@ export type HistoryData =
   | GrabbedHistoryData
   | DownloadFailedHistory
   | DownloadFolderImportedHistory
-  | MovieFileDeletedHistory
-  | MovieFileRenamedHistory
+  | GameFileDeletedHistory
+  | GameFileRenamedHistory
   | DownloadIgnoredHistory;
 
 export default interface History {
-  movieId: number;
+  gameId: number;
   sourceTitle: string;
   languages: Language[];
   quality: QualityModel;

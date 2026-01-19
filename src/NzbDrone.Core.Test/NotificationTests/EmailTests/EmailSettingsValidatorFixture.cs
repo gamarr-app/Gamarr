@@ -26,8 +26,8 @@ namespace NzbDrone.Core.Test.NotificationTests.EmailTests
                                         .With(s => s.Server = "someserver")
                                         .With(s => s.Port = 567)
                                         .With(s => s.UseEncryption = (int)EmailEncryptionType.Always)
-                                        .With(s => s.From = "radarr@radarr.video")
-                                        .With(s => s.To = new string[] { "radarr@radarr.video" })
+                                        .With(s => s.From = "gamarr@gamarr.video")
+                                        .With(s => s.To = new string[] { "gamarr@gamarr.video" })
                                         .Build();
         }
 
@@ -61,8 +61,8 @@ namespace NzbDrone.Core.Test.NotificationTests.EmailTests
             _validator.Validate(_emailSettings).IsValid.Should().BeFalse();
         }
 
-        [TestCase("radarr")]
-        [TestCase("radarr.video")]
+        [TestCase("gamarr")]
+        [TestCase("gamarr.video")]
         public void should_not_be_valid_if_to_is_invalid(string email)
         {
             _emailSettings.To = new string[] { email };
@@ -70,8 +70,8 @@ namespace NzbDrone.Core.Test.NotificationTests.EmailTests
             _validator.Validate(_emailSettings).IsValid.Should().BeFalse();
         }
 
-        [TestCase("radarr")]
-        [TestCase("radarr.video")]
+        [TestCase("gamarr")]
+        [TestCase("gamarr.video")]
         public void should_not_be_valid_if_cc_is_invalid(string email)
         {
             _emailSettings.Cc = new string[] { email };
@@ -79,8 +79,8 @@ namespace NzbDrone.Core.Test.NotificationTests.EmailTests
             _validator.Validate(_emailSettings).IsValid.Should().BeFalse();
         }
 
-        [TestCase("radarr")]
-        [TestCase("radarr.video")]
+        [TestCase("gamarr")]
+        [TestCase("gamarr.video")]
         public void should_not_be_valid_if_bcc_is_invalid(string email)
         {
             _emailSettings.Bcc = new string[] { email };

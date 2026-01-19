@@ -5,8 +5,8 @@ namespace NzbDrone.Core.Extras.Files
 {
     public abstract class ExtraFile : ModelBase
     {
-        public int MovieId { get; set; }
-        public int? MovieFileId { get; set; }
+        public int GameId { get; set; }
+        public int? GameFileId { get; set; }
         public string RelativePath { get; set; }
         public DateTime Added { get; set; }
         public DateTime LastUpdated { get; set; }

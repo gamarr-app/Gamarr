@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Signal
 {
@@ -19,27 +19,27 @@ namespace NzbDrone.Core.Notifications.Signal
 
         public override void OnGrab(GrabMessage grabMessage)
         {
-            _proxy.SendNotification(MOVIE_GRABBED_TITLE, grabMessage.Message, Settings);
+            _proxy.SendNotification(GAME_GRABBED_TITLE, grabMessage.Message, Settings);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
-            _proxy.SendNotification(MOVIE_DOWNLOADED_TITLE, message.Message, Settings);
+            _proxy.SendNotification(GAME_DOWNLOADED_TITLE, message.Message, Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            _proxy.SendNotification(MOVIE_ADDED_TITLE, $"{movie.Title} added to library", Settings);
+            _proxy.SendNotification(GAME_ADDED_TITLE, $"{game.Title} added to library", Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(MOVIE_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
+            _proxy.SendNotification(GAME_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(MOVIE_DELETED_TITLE, deleteMessage.Message, Settings);
+            _proxy.SendNotification(GAME_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

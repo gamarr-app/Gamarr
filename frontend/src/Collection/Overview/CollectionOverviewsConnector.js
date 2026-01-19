@@ -6,7 +6,7 @@ import CollectionOverviews from './CollectionOverviews';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.movieCollections.overviewOptions,
+    (state) => state.gameCollections.overviewOptions,
     createUISettingsSelector(),
     createDimensionsSelector(),
     (overviewOptions, uiSettings, dimensions) => {

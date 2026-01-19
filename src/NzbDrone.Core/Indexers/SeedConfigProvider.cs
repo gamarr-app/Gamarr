@@ -6,7 +6,7 @@ namespace NzbDrone.Core.Indexers
 {
     public interface ISeedConfigProvider
     {
-        TorrentSeedConfiguration GetSeedConfiguration(RemoteMovie release);
+        TorrentSeedConfiguration GetSeedConfiguration(RemoteGame release);
         TorrentSeedConfiguration GetSeedConfiguration(int indexerId);
     }
 
@@ -19,19 +19,19 @@ namespace NzbDrone.Core.Indexers
             _cachedIndexerSettingsProvider = cachedIndexerSettingsProvider;
         }
 
-        public TorrentSeedConfiguration GetSeedConfiguration(RemoteMovie remoteMovie)
+        public TorrentSeedConfiguration GetSeedConfiguration(RemoteGame remoteGame)
         {
-            if (remoteMovie.Release.DownloadProtocol != DownloadProtocol.Torrent)
+            if (remoteGame.Release.DownloadProtocol != DownloadProtocol.Torrent)
             {
                 return null;
             }
 
-            if (remoteMovie.Release.IndexerId == 0)
+            if (remoteGame.Release.IndexerId == 0)
             {
                 return null;
             }
 
-            return GetSeedConfiguration(remoteMovie.Release.IndexerId);
+            return GetSeedConfiguration(remoteGame.Release.IndexerId);
         }
 
         public TorrentSeedConfiguration GetSeedConfiguration(int indexerId)

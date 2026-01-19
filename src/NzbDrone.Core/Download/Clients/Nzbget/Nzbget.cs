@@ -36,18 +36,18 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
             _proxy = proxy;
         }
 
-        protected override string AddFromNzbFile(RemoteMovie remoteMovie, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContent)
         {
-            var category = Settings.MovieCategory;
+            var category = Settings.GameCategory;
 
-            var priority = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie ? Settings.RecentMoviePriority : Settings.OlderMoviePriority;
+            var priority = remoteGame.Game.GameMetadata.Value.IsRecentGame ? Settings.RecentGamePriority : Settings.OlderGamePriority;
 
             var addpaused = Settings.AddPaused;
             var response = _proxy.DownloadNzb(fileContent, filename, category, priority, addpaused, Settings);
 
             if (response == null)
             {
-                throw new DownloadClientRejectedReleaseException(remoteMovie.Release, "NZBGet rejected the NZB for an unknown reason");
+                throw new DownloadClientRejectedReleaseException(remoteGame.Release, "NZBGet rejected the NZB for an unknown reason");
             }
 
             return response;
@@ -198,7 +198,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
 
         public override IEnumerable<DownloadClientItem> GetItems()
         {
-            return GetQueue().Concat(GetHistory()).Where(downloadClientItem => downloadClientItem.Category == Settings.MovieCategory);
+            return GetQueue().Concat(GetHistory()).Where(downloadClientItem => downloadClientItem.Category == Settings.GameCategory);
         }
 
         public override void RemoveItem(DownloadClientItem item, bool deleteData)
@@ -215,7 +215,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
         {
             var config = _proxy.GetConfig(Settings);
 
-            var category = GetCategories(config).FirstOrDefault(v => v.Name == Settings.MovieCategory);
+            var category = GetCategories(config).FirstOrDefault(v => v.Name == Settings.GameCategory);
 
             var status = new DownloadClientInfo
             {
@@ -307,9 +307,9 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
             var config = _proxy.GetConfig(Settings);
             var categories = GetCategories(config);
 
-            if (!Settings.MovieCategory.IsNullOrWhiteSpace() && !categories.Any(v => v.Name == Settings.MovieCategory))
+            if (!Settings.GameCategory.IsNullOrWhiteSpace() && !categories.Any(v => v.Name == Settings.GameCategory))
             {
-                return new NzbDroneValidationFailure("MovieCategory", _localizationService.GetLocalizedString("DownloadClientValidationCategoryMissing"))
+                return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientValidationCategoryMissing"))
                 {
                     InfoLink = _proxy.GetBaseUrl(Settings),
                     DetailedDescription = _localizationService.GetLocalizedString("DownloadClientValidationCategoryMissingDetail", new Dictionary<string, object> { { "clientName", Name } })

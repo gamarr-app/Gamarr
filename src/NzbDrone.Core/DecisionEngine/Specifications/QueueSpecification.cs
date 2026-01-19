@@ -35,17 +35,17 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
             var queue = _queueService.GetQueue();
-            var matchingMovies = queue.Where(q => q.RemoteMovie?.Movie != null &&
-                                                   q.RemoteMovie.Movie.Id == subject.Movie.Id)
+            var matchingGames = queue.Where(q => q.RemoteGame?.Game != null &&
+                                                   q.RemoteGame.Game.Id == subject.Game.Id)
                                        .ToList();
 
-            foreach (var queueItem in matchingMovies)
+            foreach (var queueItem in matchingGames)
             {
-                var remoteMovie = queueItem.RemoteMovie;
-                var qualityProfile = subject.Movie.QualityProfile;
+                var remoteGame = queueItem.RemoteGame;
+                var qualityProfile = subject.Game.QualityProfile;
 
                 // To avoid a race make sure it's not FailedPending (failed awaiting removal/search).
                 // Failed items (already searching for a replacement) won't be part of the queue since
@@ -55,35 +55,35 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     continue;
                 }
 
-                var queuedItemCustomFormats = _formatService.ParseCustomFormat(remoteMovie, (long)queueItem.Size);
+                var queuedItemCustomFormats = _formatService.ParseCustomFormat(remoteGame, (long)queueItem.Size);
 
                 _logger.Debug("Checking if existing release in queue meets cutoff. Queued quality is: {0} - {1}",
-                              remoteMovie.ParsedMovieInfo.Quality,
+                              remoteGame.ParsedGameInfo.Quality,
                               queuedItemCustomFormats.ConcatToString());
 
                 if (!_upgradableSpecification.CutoffNotMet(qualityProfile,
-                    remoteMovie.ParsedMovieInfo.Quality,
+                    remoteGame.ParsedGameInfo.Quality,
                     queuedItemCustomFormats,
-                    subject.ParsedMovieInfo.Quality))
+                    subject.ParsedGameInfo.Quality))
                 {
-                    return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueCutoffMet, "Quality for release in queue already meets cutoff: {0}", remoteMovie.ParsedMovieInfo.Quality);
+                    return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueCutoffMet, "Quality for release in queue already meets cutoff: {0}", remoteGame.ParsedGameInfo.Quality);
                 }
 
-                _logger.Debug("Checking if release is higher quality than queued release. Queued quality is: {0}", remoteMovie.ParsedMovieInfo.Quality);
+                _logger.Debug("Checking if release is higher quality than queued release. Queued quality is: {0}", remoteGame.ParsedGameInfo.Quality);
 
                 var upgradeableRejectReason = _upgradableSpecification.IsUpgradable(qualityProfile,
-                    remoteMovie.ParsedMovieInfo.Quality,
+                    remoteGame.ParsedGameInfo.Quality,
                     queuedItemCustomFormats,
-                    subject.ParsedMovieInfo.Quality,
+                    subject.ParsedGameInfo.Quality,
                     subject.CustomFormats);
 
                 switch (upgradeableRejectReason)
                 {
                     case UpgradeableRejectReason.BetterQuality:
-                        return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueHigherPreference, "Release in queue is of equal or higher preference: {0}", remoteMovie.ParsedMovieInfo.Quality);
+                        return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueHigherPreference, "Release in queue is of equal or higher preference: {0}", remoteGame.ParsedGameInfo.Quality);
 
                     case UpgradeableRejectReason.BetterRevision:
-                        return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueHigherRevision, "Release in queue is of equal or higher revision: {0}", remoteMovie.ParsedMovieInfo.Quality.Revision);
+                        return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueHigherRevision, "Release in queue is of equal or higher revision: {0}", remoteGame.ParsedGameInfo.Quality.Revision);
 
                     case UpgradeableRejectReason.QualityCutoff:
                         return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueCutoffMet, "Release in queue meets quality cutoff: {0}", qualityProfile.Items[qualityProfile.GetIndex(qualityProfile.Cutoff).Index]);
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                         return DownloadSpecDecision.Reject(DownloadRejectionReason.QueueUpgradesNotAllowed, "Release in queue and Quality Profile '{0}' does not allow upgrades", qualityProfile.Name);
                 }
 
-                if (_upgradableSpecification.IsRevisionUpgrade(remoteMovie.ParsedMovieInfo.Quality, subject.ParsedMovieInfo.Quality))
+                if (_upgradableSpecification.IsRevisionUpgrade(remoteGame.ParsedGameInfo.Quality, subject.ParsedGameInfo.Quality))
                 {
                     if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)
                     {

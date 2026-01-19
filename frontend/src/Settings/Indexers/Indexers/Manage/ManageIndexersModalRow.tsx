@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import Label from 'Components/Label';
-import MovieTagList from 'Components/MovieTagList';
+import GameTagList from 'Components/GameTagList';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import Column from 'Components/Table/Column';
@@ -91,7 +91,7 @@ function ManageIndexersModalRow(props: ManageIndexersModalRowProps) {
       <TableRowCell className={styles.priority}>{priority}</TableRowCell>
 
       <TableRowCell className={styles.tags}>
-        <MovieTagList tags={tags} />
+        <GameTagList tags={tags} />
       </TableRowCell>
     </TableRow>
   );

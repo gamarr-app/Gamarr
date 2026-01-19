@@ -5,7 +5,7 @@
   <searching>
     <search available="yes"/>
     <tv-search available="yes"/>
-    <movie-search available="yes"/>
+    <game-search available="yes"/>
     <audio-search available="yes"/>
   </searching>
   <categories>

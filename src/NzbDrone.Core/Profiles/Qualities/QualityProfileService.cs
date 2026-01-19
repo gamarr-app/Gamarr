@@ -7,8 +7,8 @@ using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Collections;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Collections;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Profiles.Qualities
@@ -32,21 +32,21 @@ namespace NzbDrone.Core.Profiles.Qualities
     {
         private readonly IQualityProfileRepository _profileRepository;
         private readonly ICustomFormatService _formatService;
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly IImportListFactory _importListFactory;
-        private readonly IMovieCollectionService _collectionService;
+        private readonly IGameCollectionService _collectionService;
         private readonly Logger _logger;
 
         public QualityProfileService(IQualityProfileRepository profileRepository,
                               ICustomFormatService formatService,
-                              IMovieService movieService,
+                              IGameService gameService,
                               IImportListFactory importListFactory,
-                              IMovieCollectionService collectionService,
+                              IGameCollectionService collectionService,
                               Logger logger)
         {
             _profileRepository = profileRepository;
             _formatService = formatService;
-            _movieService = movieService;
+            _gameService = gameService;
             _importListFactory = importListFactory;
             _collectionService = collectionService;
             _logger = logger;
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Profiles.Qualities
 
         public void Delete(int id)
         {
-            if (_movieService.GetAllMovies().Any(c => c.QualityProfileId == id) || _importListFactory.All().Any(c => c.QualityProfileId == id) || _collectionService.GetAllCollections().Any(c => c.QualityProfileId == id))
+            if (_gameService.GetAllGames().Any(c => c.QualityProfileId == id) || _importListFactory.All().Any(c => c.QualityProfileId == id) || _collectionService.GetAllCollections().Any(c => c.QualityProfileId == id))
             {
                 throw new QualityProfileInUseException(id);
             }

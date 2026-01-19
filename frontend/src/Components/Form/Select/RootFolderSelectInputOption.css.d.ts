@@ -4,7 +4,7 @@ interface CssExports {
   'freeSpace': string;
   'isMissing': string;
   'isMobile': string;
-  'movieFolder': string;
+  'gameFolder': string;
   'optionText': string;
   'value': string;
 }

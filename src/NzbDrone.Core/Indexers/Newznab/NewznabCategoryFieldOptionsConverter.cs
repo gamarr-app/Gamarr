@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Indexers.Newznab
     {
         public static List<FieldSelectOption<int>> GetFieldSelectOptions(List<NewznabCategory> categories)
         {
-            // Categories not relevant for Radarr
+            // Categories not relevant for Gamarr
             var ignoreCategories = new[] { 1000, 3000, 4000, 6000, 7000 };
 
             // And maybe relevant for specific users
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                 categories.Add(new NewznabCategory
                 {
                     Id = 2000,
-                    Name = "Movies",
+                    Name = "Games",
                     Subcategories = new List<NewznabCategory>
                     {
                         new NewznabCategory { Id = 2010, Name = "Foreign" },

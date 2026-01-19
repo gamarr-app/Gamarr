@@ -212,8 +212,8 @@ export const defaultState = {
       type: filterBuilderTypes.NUMBER
     },
     {
-      name: 'movieRequested',
-      label: () => translate('MovieRequested'),
+      name: 'gameRequested',
+      label: () => translate('GameRequested'),
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.BOOL
     }
@@ -236,7 +236,7 @@ export const SET_RELEASES_SORT = 'releases/setReleasesSort';
 export const CLEAR_RELEASES = 'releases/clearReleases';
 export const GRAB_RELEASE = 'releases/grabRelease';
 export const UPDATE_RELEASE = 'releases/updateRelease';
-export const SET_RELEASES_FILTER = 'releases/setMovieReleasesFilter';
+export const SET_RELEASES_FILTER = 'releases/setGameReleasesFilter';
 
 //
 // Action Creators

@@ -1,5 +1,5 @@
-const radarrYellow = '#ffc230';
-const radarrAlternateYellow = '#2193b5';
+const gamarrYellow = '#ffc230';
+const gamarrAlternateYellow = '#2193b5';
 const darkGray = '#888';
 const mediumGray = '#999';
 const gray = '#adadad';
@@ -27,7 +27,7 @@ module.exports = {
   queueColor: '#7a43b6',
   purple,
   pink,
-  radarrYellow,
+  gamarrYellow,
   helpTextColor: '#909293',
   darkGray,
   gray,
@@ -36,8 +36,8 @@ module.exports = {
 
   // Theme Colors
 
-  themeBlue: radarrYellow,
-  themeAlternateYellow: radarrAlternateYellow,
+  themeBlue: gamarrYellow,
+  themeAlternateYellow: gamarrAlternateYellow,
   themeRed: '#c4273c',
   themeDarkColor: '#494949',
   themeLightColor: '#595959',
@@ -134,7 +134,7 @@ module.exports = {
   //
   // Menu
   menuItemColor: '#e1e2e3',
-  menuItemHoverColor: radarrYellow,
+  menuItemHoverColor: gamarrYellow,
   menuItemHoverBackgroundColor: '#606060',
 
   //
@@ -223,10 +223,10 @@ module.exports = {
   tableRowHoverBackgroundColor: 'rgba(255, 255, 255, 0.08)',
 
   //
-  // Movie
+  // Game
 
-  addMovieBackgroundColor: '#2a2a2a',
-  movieBackgroundColor: '#2a2a2a',
+  addGameBackgroundColor: '#2a2a2a',
+  gameBackgroundColor: '#2a2a2a',
   searchIconContainerBackgroundColor: '#2b2b2b',
 
   //

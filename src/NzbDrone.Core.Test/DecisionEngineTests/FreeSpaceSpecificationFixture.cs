@@ -6,7 +6,7 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -15,12 +15,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 {
     public class FreeSpaceSpecificationFixture : CoreTest<FreeSpaceSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         [SetUp]
         public void Setup()
         {
-            _remoteMovie = new RemoteMovie() { Release = new ReleaseInfo(), Movie = new Movie { Path = @"C:\Test\Films\Movie".AsOsAgnostic() } };
+            _remoteGame = new RemoteGame() { Release = new ReleaseInfo(), Game = new Game { Path = @"C:\Test\Films\Game".AsOsAgnostic() } };
         }
 
         private void WithMinimumFreeSpace(int size)
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithSize(int size)
         {
-            _remoteMovie.Release.Size = size.Megabytes();
+            _remoteGame.Release.Size = size.Megabytes();
         }
 
         [Test]
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(1000);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Mocker.GetMock<IDiskProvider>().Setup(s => s.GetAvailableSpace(It.IsAny<string>())).Throws<DirectoryNotFoundException>();
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
     }
 }

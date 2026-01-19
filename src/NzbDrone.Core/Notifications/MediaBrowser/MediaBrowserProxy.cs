@@ -5,7 +5,7 @@ using System.Net;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Emby
 {
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Notifications.Emby
             {
                 Name = title,
                 Description = message,
-                ImageUrl = "https://raw.github.com/Radarr/Radarr/develop/Logo/64.png"
+                ImageUrl = "https://raw.github.com/Gamarr/Gamarr/develop/Logo/64.png"
             }.ToJson());
 
             try
@@ -51,35 +51,35 @@ namespace NzbDrone.Core.Notifications.Emby
             }
         }
 
-        public HashSet<string> GetPaths(MediaBrowserSettings settings, Movie movie)
+        public HashSet<string> GetPaths(MediaBrowserSettings settings, Game game)
         {
             var path = "/Items";
             var url = GetUrl(settings);
 
-            // NameStartsWith uses the sort title, which is not the movie title
+            // NameStartsWith uses the sort title, which is not the game title
             var request = new HttpRequestBuilder(url)
                 .Resource(path)
                 .AddQueryParam("recursive", "true")
-                .AddQueryParam("includeItemTypes", "Movie")
+                .AddQueryParam("includeItemTypes", "Game")
                 .AddQueryParam("fields", "Path,ProviderIds")
-                .AddQueryParam("years", movie.Year)
+                .AddQueryParam("years", game.Year)
                 .Build();
 
             try
             {
                 var paths = ProcessGetRequest<MediaBrowserItems>(request, settings).Items.GroupBy(item =>
                 {
-                    if (item is { ProviderIds.Tmdb: int tmdbid } && tmdbid != 0 && tmdbid == movie.TmdbId)
+                    if (item is { ProviderIds.Igdb: int igdbid } && igdbid != 0 && igdbid == game.IgdbId)
                     {
                         return MediaBrowserMatchQuality.Id;
                     }
 
-                    if (item is { ProviderIds.Imdb: string imdbid } && imdbid == movie.ImdbId)
+                    if (item is { ProviderIds.Imdb: string imdbid } && imdbid == game.ImdbId)
                     {
                         return MediaBrowserMatchQuality.Id;
                     }
 
-                    if (item is { Name: var name } && name == movie.Title)
+                    if (item is { Name: var name } && name == game.Title)
                     {
                         return MediaBrowserMatchQuality.Name;
                     }
@@ -89,24 +89,24 @@ namespace NzbDrone.Core.Notifications.Emby
 
                 if (paths.Key == MediaBrowserMatchQuality.None)
                 {
-                    _logger.Trace("Could not find movie by name");
+                    _logger.Trace("Could not find game by name");
 
                     return new HashSet<string>();
                 }
 
-                _logger.Trace("Found movie by name/id: {0}", string.Join(" ", paths));
+                _logger.Trace("Found game by name/id: {0}", string.Join(" ", paths));
 
                 return paths.ToHashSet();
             }
             catch (InvalidOperationException)
             {
-                _logger.Trace("Could not find movie by name.");
+                _logger.Trace("Could not find game by name.");
 
                 return new HashSet<string>();
             }
         }
 
-        public void Update(MediaBrowserSettings settings, string moviePath, string updateType)
+        public void Update(MediaBrowserSettings settings, string gamePath, string updateType)
         {
             var path = "/Library/Media/Updated";
             var request = BuildRequest(path, settings);
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.Notifications.Emby
                 {
                     new
                     {
-                        Path = moviePath,
+                        Path = gamePath,
                         UpdateType = updateType
                     }
                 }

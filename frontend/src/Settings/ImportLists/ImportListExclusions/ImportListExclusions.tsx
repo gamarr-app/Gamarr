@@ -43,19 +43,19 @@ import styles from './ImportListExclusions.css';
 
 const COLUMNS: Column[] = [
   {
-    name: 'tmdbId',
-    label: () => translate('TMDBId'),
+    name: 'igdbId',
+    label: () => translate('IGDBId'),
     isVisible: true,
     isSortable: true,
   },
   {
-    name: 'movieTitle',
+    name: 'gameTitle',
     label: () => translate('Title'),
     isVisible: true,
     isSortable: true,
   },
   {
-    name: 'movieYear',
+    name: 'gameYear',
     label: () => translate('Year'),
     isVisible: true,
     isSortable: true,

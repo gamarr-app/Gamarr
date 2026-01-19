@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -16,8 +16,8 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
     public class CustomFormatsFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
+        private Game _game;
+        private GameFile _gameFile;
         private NamingConfig _namingConfig;
 
         private List<CustomFormat> _customFormats;
@@ -25,18 +25,18 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>
+            _game = Builder<Game>
                     .CreateNew()
                     .With(s => s.Title = "South Park")
                     .Build();
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameMovies = true;
+            _namingConfig.RenameGames = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
-            _movieFile = new MovieFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "RadarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
 
             _customFormats = new List<CustomFormat>()
             {
@@ -70,18 +70,18 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("{Custom Formats}", "INTERNAL AMZN NAME WITH SPACES")]
         public void should_replace_custom_formats(string format, string expected)
         {
-            _namingConfig.StandardMovieFormat = format;
+            _namingConfig.StandardGameFormat = format;
 
-            Subject.BuildFileName(_movie, _movieFile, customFormats: _customFormats)
+            Subject.BuildFileName(_game, _gameFile, customFormats: _customFormats)
                    .Should().Be(expected);
         }
 
         [TestCase("{Custom Formats}", "")]
         public void should_replace_custom_formats_with_no_custom_formats(string format, string expected)
         {
-            _namingConfig.StandardMovieFormat = format;
+            _namingConfig.StandardGameFormat = format;
 
-            Subject.BuildFileName(_movie, _movieFile, customFormats: new List<CustomFormat>())
+            Subject.BuildFileName(_game, _gameFile, customFormats: new List<CustomFormat>())
                    .Should().Be(expected);
         }
 
@@ -93,9 +93,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("{Custom Formats:INTERNAL,NAME WITH SPACES}", "INTERNAL NAME WITH SPACES")]
         public void should_replace_custom_formats_with_filtered_names(string format, string expected)
         {
-            _namingConfig.StandardMovieFormat = format;
+            _namingConfig.StandardGameFormat = format;
 
-            Subject.BuildFileName(_movie, _movieFile, customFormats: _customFormats)
+            Subject.BuildFileName(_game, _gameFile, customFormats: _customFormats)
                    .Should().Be(expected);
         }
 
@@ -103,9 +103,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("{Custom Formats:}", "{Custom Formats:}")]
         public void should_not_replace_custom_formats_due_to_invalid_token(string format, string expected)
         {
-            _namingConfig.StandardMovieFormat = format;
+            _namingConfig.StandardGameFormat = format;
 
-            Subject.BuildFileName(_movie, _movieFile, customFormats: _customFormats)
+            Subject.BuildFileName(_game, _gameFile, customFormats: _customFormats)
                    .Should().Be(expected);
         }
 
@@ -118,9 +118,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("{Custom Format:AMZN} - {Custom Format:INTERNAL}", "AMZN - INTERNAL")]
         public void should_replace_custom_format(string format, string expected)
         {
-            _namingConfig.StandardMovieFormat = format;
+            _namingConfig.StandardGameFormat = format;
 
-            Subject.BuildFileName(_movie, _movieFile, customFormats: _customFormats)
+            Subject.BuildFileName(_game, _gameFile, customFormats: _customFormats)
                    .Should().Be(expected);
         }
 
@@ -129,9 +129,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("{Custom Format:AMZN}", "")]
         public void should_replace_custom_format_with_no_custom_formats(string format, string expected)
         {
-            _namingConfig.StandardMovieFormat = format;
+            _namingConfig.StandardGameFormat = format;
 
-            Subject.BuildFileName(_movie, _movieFile, customFormats: new List<CustomFormat>())
+            Subject.BuildFileName(_game, _gameFile, customFormats: new List<CustomFormat>())
                    .Should().Be(expected);
         }
     }

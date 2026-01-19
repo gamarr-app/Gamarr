@@ -20,24 +20,24 @@ namespace NzbDrone.Core.Test.RootFolderTests
         [Test]
         public void should_return_root_folder_that_is_parent_path()
         {
-            GivenRootFolders(@"C:\Test\Movies".AsOsAgnostic(), @"D:\Test\Movies".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(@"C:\Test\Movies\Movie Title".AsOsAgnostic()).Should().Be(@"C:\Test\Movies".AsOsAgnostic());
+            GivenRootFolders(@"C:\Test\Games".AsOsAgnostic(), @"D:\Test\Games".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(@"C:\Test\Games\Game Title".AsOsAgnostic()).Should().Be(@"C:\Test\Games".AsOsAgnostic());
         }
 
         [Test]
         public void should_return_root_folder_that_is_grandparent_path()
         {
-            GivenRootFolders(@"C:\Test\Movies".AsOsAgnostic(), @"D:\Test\Movies".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(@"C:\Test\Movies\M\Movie Title".AsOsAgnostic()).Should().Be(@"C:\Test\Movies".AsOsAgnostic());
+            GivenRootFolders(@"C:\Test\Games".AsOsAgnostic(), @"D:\Test\Games".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(@"C:\Test\Games\M\Game Title".AsOsAgnostic()).Should().Be(@"C:\Test\Games".AsOsAgnostic());
         }
 
         [Test]
         public void should_get_parent_path_from_os_path_if_matching_root_folder_is_not_found()
         {
-            var moviePath = @"T:\Test\Movies\Movie Title".AsOsAgnostic();
+            var gamePath = @"T:\Test\Games\Game Title".AsOsAgnostic();
 
-            GivenRootFolders(@"C:\Test\Movies".AsOsAgnostic(), @"D:\Test\Movies".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(moviePath).Should().Be(@"T:\Test\Movies".AsOsAgnostic());
+            GivenRootFolders(@"C:\Test\Games".AsOsAgnostic(), @"D:\Test\Games".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(gamePath).Should().Be(@"T:\Test\Games".AsOsAgnostic());
         }
 
         [Test]
@@ -45,10 +45,10 @@ namespace NzbDrone.Core.Test.RootFolderTests
         {
             WindowsOnly();
 
-            var moviePath = "/mnt/movies/Movie Title";
+            var gamePath = "/mnt/games/Game Title";
 
-            GivenRootFolders(@"C:\Test\Movies".AsOsAgnostic(), @"D:\Test\Movies".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(moviePath).Should().Be(@"/mnt/movies");
+            GivenRootFolders(@"C:\Test\Games".AsOsAgnostic(), @"D:\Test\Games".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(gamePath).Should().Be(@"/mnt/games");
         }
 
         [Test]
@@ -56,10 +56,10 @@ namespace NzbDrone.Core.Test.RootFolderTests
         {
             PosixOnly();
 
-            var moviePath = @"T:\Test\Movies\Movie Title";
+            var gamePath = @"T:\Test\Games\Game Title";
 
-            GivenRootFolders(@"C:\Test\Movies".AsOsAgnostic(), @"D:\Test\Movies".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(moviePath).Should().Be(@"T:\Test\Movies");
+            GivenRootFolders(@"C:\Test\Games".AsOsAgnostic(), @"D:\Test\Games".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(gamePath).Should().Be(@"T:\Test\Games");
         }
     }
 }

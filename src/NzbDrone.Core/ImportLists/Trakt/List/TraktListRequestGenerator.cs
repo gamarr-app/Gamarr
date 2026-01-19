@@ -14,16 +14,16 @@ namespace NzbDrone.Core.ImportLists.Trakt.List
             _traktProxy = traktProxy;
         }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequest());
+            pageableRequests.Add(GetGamesRequest());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequest()
+        private IEnumerable<ImportListRequest> GetGamesRequest()
         {
             var link = string.Empty;
 
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.ImportLists.Trakt.List
             // - does not trim underscore from the end
             // - allows multiple underscores in a row
             var listName = Parser.Parser.ToUrlSlug(Settings.Listname.Trim(), true, "-", "-");
-            link += $"users/{Settings.Username.Trim()}/lists/{listName}/items/movies?limit={Settings.Limit}";
+            link += $"users/{Settings.Username.Trim()}/lists/{listName}/items/games?limit={Settings.Limit}";
 
             var request = new ImportListRequest(_traktProxy.BuildRequest(link, HttpMethod.Get, Settings.AccessToken));
 

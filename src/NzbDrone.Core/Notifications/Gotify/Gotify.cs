@@ -7,13 +7,13 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaCover;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Gotify
 {
     public class Gotify : NotificationBase<GotifySettings>
     {
-        private const string RadarrImageUrl = "https://raw.githubusercontent.com/Radarr/Radarr/develop/Logo/128.png";
+        private const string GamarrImageUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/128.png";
 
         private readonly IGotifyProxy _proxy;
         private readonly ILocalizationService _localizationService;
@@ -31,27 +31,27 @@ namespace NzbDrone.Core.Notifications.Gotify
 
         public override void OnGrab(GrabMessage message)
         {
-            SendNotification(MOVIE_GRABBED_TITLE, message.Message, message.Movie);
+            SendNotification(GAME_GRABBED_TITLE, message.Message, message.Game);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
-            SendNotification(MOVIE_DOWNLOADED_TITLE, message.Message, message.Movie);
+            SendNotification(GAME_DOWNLOADED_TITLE, message.Message, message.Game);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            SendNotification(MOVIE_ADDED_TITLE, $"{movie.Title} added to library", movie);
+            SendNotification(GAME_ADDED_TITLE, $"{game.Title} added to library", game);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            SendNotification(MOVIE_FILE_DELETED_TITLE, deleteMessage.Message, deleteMessage.Movie);
+            SendNotification(GAME_FILE_DELETED_TITLE, deleteMessage.Message, deleteMessage.Game);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            SendNotification(MOVIE_DELETED_TITLE, deleteMessage.Message, deleteMessage.Movie);
+            SendNotification(GAME_DELETED_TITLE, deleteMessage.Message, deleteMessage.Game);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Notifications.Gotify
 
         public override void OnManualInteractionRequired(ManualInteractionRequiredMessage message)
         {
-            SendNotification(MANUAL_INTERACTION_REQUIRED_TITLE, message.Message, message.Movie);
+            SendNotification(MANUAL_INTERACTION_REQUIRED_TITLE, message.Message, message.Game);
         }
 
         public override ValidationResult Test()
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Notifications.Gotify
                 const string title = "Test Notification";
 
                 var sb = new StringBuilder();
-                sb.AppendLine("This is a test message from Radarr");
+                sb.AppendLine("This is a test message from Gamarr");
 
                 var payload = new GotifyMessage
                 {
@@ -92,12 +92,12 @@ namespace NzbDrone.Core.Notifications.Gotify
                     Priority = Settings.Priority
                 };
 
-                if (Settings.IncludeMoviePoster)
+                if (Settings.IncludeGamePoster)
                 {
                     isMarkdown = true;
 
-                    sb.AppendLine($"\r![]({RadarrImageUrl})");
-                    payload.SetImage(RadarrImageUrl);
+                    sb.AppendLine($"\r![]({GamarrImageUrl})");
+                    payload.SetImage(GamarrImageUrl);
                 }
 
                 if (Settings.MetadataLinks.Any())
@@ -105,8 +105,8 @@ namespace NzbDrone.Core.Notifications.Gotify
                     isMarkdown = true;
 
                     sb.AppendLine("");
-                    sb.AppendLine("[Radarr.video](https://radarr.video)");
-                    payload.SetClickUrl("https://radarr.video");
+                    sb.AppendLine("[Gamarr.video](https://gamarr.video)");
+                    payload.SetClickUrl("https://gamarr.video");
                 }
 
                 payload.Message = sb.ToString();
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Notifications.Gotify
             return new ValidationResult(failures);
         }
 
-        private void SendNotification(string title, string message, Movie movie)
+        private void SendNotification(string title, string message, Game game)
         {
             var isMarkdown = false;
             var sb = new StringBuilder();
@@ -136,11 +136,11 @@ namespace NzbDrone.Core.Notifications.Gotify
                 Priority = Settings.Priority
             };
 
-            if (movie != null)
+            if (game != null)
             {
-                if (Settings.IncludeMoviePoster)
+                if (Settings.IncludeGamePoster)
                 {
-                    var poster = movie.MovieMetadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster)?.RemoteUrl;
+                    var poster = game.GameMetadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster)?.RemoteUrl;
 
                     if (poster != null)
                     {
@@ -161,22 +161,22 @@ namespace NzbDrone.Core.Notifications.Gotify
                         var linkText = "";
                         var linkUrl = "";
 
-                        if (linkType == MetadataLinkType.Tmdb && movie.TmdbId > 0)
+                        if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
                         {
                             linkText = "TMDb";
-                            linkUrl = $"https://www.themoviedb.org/movie/{movie.TmdbId}";
+                            linkUrl = $"https://www.thegamedb.org/game/{game.IgdbId}";
                         }
 
-                        if (linkType == MetadataLinkType.Imdb && movie.ImdbId.IsNotNullOrWhiteSpace())
+                        if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
                         {
                             linkText = "IMDb";
-                            linkUrl = $"https://www.imdb.com/title/{movie.ImdbId}";
+                            linkUrl = $"https://www.imdb.com/title/{game.ImdbId}";
                         }
 
-                        if (linkType == MetadataLinkType.Trakt && movie.TmdbId > 0)
+                        if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
                         {
                             linkText = "Trakt";
-                            linkUrl = $"https://trakt.tv/search/tmdb/{movie.TmdbId}?id_type=movie";
+                            linkUrl = $"https://trakt.tv/search/igdb/{game.IgdbId}?id_type=game";
                         }
 
                         sb.AppendLine($"[{linkText}]({linkUrl})");

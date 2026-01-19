@@ -23,8 +23,8 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
                             @"30 Rock2.avi",
                             @"30 Rock3.MP4",
                             @"30 Rock4.wMv",
-                            @"movie.exe",
-                            @"movie"
+                            @"game.exe",
+                            @"game"
                         };
         }
 

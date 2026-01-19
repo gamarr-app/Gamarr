@@ -35,19 +35,19 @@ namespace NzbDrone.Core.Download
 
         public override DownloadProtocol Protocol => DownloadProtocol.Usenet;
 
-        protected abstract string AddFromNzbFile(RemoteMovie remoteMovie, string filename, byte[] fileContents);
+        protected abstract string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContents);
 
-        public override async Task<string> Download(RemoteMovie remoteMovie, IIndexer indexer)
+        public override async Task<string> Download(RemoteGame remoteGame, IIndexer indexer)
         {
-            var url = remoteMovie.Release.DownloadUrl;
-            var filename = FileNameBuilder.CleanFileName(remoteMovie.Release.Title) + ".nzb";
+            var url = remoteGame.Release.DownloadUrl;
+            var filename = FileNameBuilder.CleanFileName(remoteGame.Release.Title) + ".nzb";
 
             byte[] nzbData;
 
             try
             {
                 var request = indexer?.GetDownloadRequest(url) ?? new HttpRequest(url);
-                request.RateLimitKey = remoteMovie?.Release?.IndexerId.ToString();
+                request.RateLimitKey = remoteGame?.Release?.IndexerId.ToString();
                 request.AllowAutoRedirect = true;
 
                 var response = await RetryStrategy
@@ -56,14 +56,14 @@ namespace NzbDrone.Core.Download
 
                 nzbData = response.ResponseData;
 
-                _logger.Debug("Downloaded nzb for movie '{0}' finished ({1} bytes from {2})", remoteMovie.Release.Title, nzbData.Length, url);
+                _logger.Debug("Downloaded nzb for game '{0}' finished ({1} bytes from {2})", remoteGame.Release.Title, nzbData.Length, url);
             }
             catch (HttpException ex)
             {
                 if (ex.Response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
                 {
-                    _logger.Error(ex, "Downloading nzb file for movie '{0}' failed since it no longer exists ({1})", remoteMovie.Release.Title, url);
-                    throw new ReleaseUnavailableException(remoteMovie.Release, "Downloading nzb failed", ex);
+                    _logger.Error(ex, "Downloading nzb file for game '{0}' failed since it no longer exists ({1})", remoteGame.Release.Title, url);
+                    throw new ReleaseUnavailableException(remoteGame.Release, "Downloading nzb failed", ex);
                 }
 
                 if ((int)ex.Response.StatusCode == 429)
@@ -72,22 +72,22 @@ namespace NzbDrone.Core.Download
                 }
                 else
                 {
-                    _logger.Error(ex, "Downloading nzb for movie '{0}' failed ({1})", remoteMovie.Release.Title, url);
+                    _logger.Error(ex, "Downloading nzb for game '{0}' failed ({1})", remoteGame.Release.Title, url);
                 }
 
-                throw new ReleaseDownloadException(remoteMovie.Release, "Downloading nzb failed", ex);
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading nzb failed", ex);
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Downloading nzb for movie '{0}' failed ({1})", remoteMovie.Release.Title, url);
+                _logger.Error(ex, "Downloading nzb for game '{0}' failed ({1})", remoteGame.Release.Title, url);
 
-                throw new ReleaseDownloadException(remoteMovie.Release, "Downloading nzb failed", ex);
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading nzb failed", ex);
             }
 
             _nzbValidationService.Validate(filename, nzbData);
 
-            _logger.Info("Adding report [{0}] to the queue.", remoteMovie.Release.Title);
-            return AddFromNzbFile(remoteMovie, filename, nzbData);
+            _logger.Info("Adding report [{0}] to the queue.", remoteGame.Release.Title);
+            return AddFromNzbFile(remoteGame, filename, nzbData);
         }
     }
 }

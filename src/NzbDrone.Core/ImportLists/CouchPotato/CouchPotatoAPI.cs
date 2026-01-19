@@ -4,13 +4,13 @@ namespace NzbDrone.Core.ImportLists.CouchPotato
 {
     public class CouchPotatoResponse
     {
-        public Movie[] movies { get; set; }
+        public Game[] games { get; set; }
         public int total { get; set; }
         public bool empty { get; set; }
         public bool success { get; set; }
     }
 
-    public class Movie
+    public class Game
     {
         public string status { get; set; }
         public Info info { get; set; }
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.ImportLists.CouchPotato
     public class Info
     {
         public string[] genres { get; set; }
-        public int? tmdb_id { get; set; }
+        public int? igdb_id { get; set; }
         public string plot { get; set; }
         public string tagline { get; set; }
         public int? year { get; set; }
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.ImportLists.CouchPotato
         public string[] titles { get; set; }
         public string imdb { get; set; }
         public string mpaa { get; set; }
-        public bool? via_tmdb { get; set; }
+        public bool? via_igdb { get; set; }
         public string[] actors { get; set; }
         public string[] writers { get; set; }
 

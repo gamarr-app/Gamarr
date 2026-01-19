@@ -4,7 +4,7 @@ using FluentAssertions;
 using FluentValidation.Results;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Validation;
 using NzbDrone.Test.Common;
@@ -58,24 +58,24 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnDownload was called");
             }
 
-            public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+            public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
             {
                 TestLogger.Info("OnRename was called");
             }
 
-            public override void OnMovieAdded(Movie movie)
+            public override void OnGameAdded(Game game)
             {
-                TestLogger.Info("OnMovieAdded was called");
+                TestLogger.Info("OnGameAdded was called");
             }
 
-            public override void OnMovieFileDelete(MovieFileDeleteMessage message)
+            public override void OnGameFileDelete(GameFileDeleteMessage message)
             {
-                TestLogger.Info("OnMovieFileDelete was called");
+                TestLogger.Info("OnGameFileDelete was called");
             }
 
-            public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+            public override void OnGameDelete(GameDeleteMessage deleteMessage)
             {
-                TestLogger.Info("OnMovieDelete was called");
+                TestLogger.Info("OnGameDelete was called");
             }
 
             public override void OnHealthIssue(NzbDrone.Core.HealthCheck.HealthCheck artist)
@@ -131,10 +131,10 @@ namespace NzbDrone.Core.Test.NotificationTests
             notification.SupportsOnDownload.Should().BeTrue();
             notification.SupportsOnUpgrade.Should().BeTrue();
             notification.SupportsOnRename.Should().BeTrue();
-            notification.SupportsOnMovieAdded.Should().BeTrue();
-            notification.SupportsOnMovieDelete.Should().BeTrue();
-            notification.SupportsOnMovieFileDelete.Should().BeTrue();
-            notification.SupportsOnMovieFileDeleteForUpgrade.Should().BeTrue();
+            notification.SupportsOnGameAdded.Should().BeTrue();
+            notification.SupportsOnGameDelete.Should().BeTrue();
+            notification.SupportsOnGameFileDelete.Should().BeTrue();
+            notification.SupportsOnGameFileDeleteForUpgrade.Should().BeTrue();
             notification.SupportsOnHealthIssue.Should().BeTrue();
             notification.SupportsOnHealthRestored.Should().BeTrue();
             notification.SupportsOnApplicationUpdate.Should().BeTrue();
@@ -150,10 +150,10 @@ namespace NzbDrone.Core.Test.NotificationTests
             notification.SupportsOnDownload.Should().BeFalse();
             notification.SupportsOnUpgrade.Should().BeFalse();
             notification.SupportsOnRename.Should().BeFalse();
-            notification.SupportsOnMovieAdded.Should().BeFalse();
-            notification.SupportsOnMovieDelete.Should().BeFalse();
-            notification.SupportsOnMovieFileDelete.Should().BeFalse();
-            notification.SupportsOnMovieFileDeleteForUpgrade.Should().BeFalse();
+            notification.SupportsOnGameAdded.Should().BeFalse();
+            notification.SupportsOnGameDelete.Should().BeFalse();
+            notification.SupportsOnGameFileDelete.Should().BeFalse();
+            notification.SupportsOnGameFileDeleteForUpgrade.Should().BeFalse();
             notification.SupportsOnHealthIssue.Should().BeFalse();
             notification.SupportsOnHealthRestored.Should().BeFalse();
             notification.SupportsOnApplicationUpdate.Should().BeFalse();

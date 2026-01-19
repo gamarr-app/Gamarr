@@ -4,7 +4,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.IndexerSearch.Definitions;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Parser.RomanNumerals;
 
@@ -12,23 +12,23 @@ namespace NzbDrone.Core.Parser
 {
     public interface IParsingService
     {
-        Movie GetMovie(string title);
-        RemoteMovie Map(ParsedMovieInfo parsedMovieInfo, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria = null);
-        RemoteMovie Map(ParsedMovieInfo parsedMovieInfo, int movieId);
-        ParsedMovieInfo ParseMinimalPathMovieInfo(string path);
+        Game GetGame(string title);
+        RemoteGame Map(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria = null);
+        RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId);
+        ParsedGameInfo ParseMinimalPathGameInfo(string path);
     }
 
     public class ParsingService : IParsingService
     {
         private static HashSet<ArabicRomanNumeral> _arabicRomanNumeralMappings;
 
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly Logger _logger;
 
-        public ParsingService(IMovieService movieService,
+        public ParsingService(IGameService gameService,
                               Logger logger)
         {
-            _movieService = movieService;
+            _gameService = gameService;
             _logger = logger;
 
             if (_arabicRomanNumeralMappings == null)
@@ -37,191 +37,191 @@ namespace NzbDrone.Core.Parser
             }
         }
 
-        public ParsedMovieInfo ParseMinimalPathMovieInfo(string path)
+        public ParsedGameInfo ParseMinimalPathGameInfo(string path)
         {
             var fileInfo = new FileInfo(path);
 
-            var result = Parser.ParseMovieTitle(fileInfo.Name, true);
+            var result = Parser.ParseGameTitle(fileInfo.Name, true);
 
             if (result == null)
             {
-                _logger.Debug("Attempting to parse movie info using directory and file names. '{0}'", fileInfo.Directory.Name);
-                result = Parser.ParseMovieTitle(fileInfo.Directory.Name + " " + fileInfo.Name);
+                _logger.Debug("Attempting to parse game info using directory and file names. '{0}'", fileInfo.Directory.Name);
+                result = Parser.ParseGameTitle(fileInfo.Directory.Name + " " + fileInfo.Name);
             }
 
             if (result == null)
             {
-                _logger.Debug("Attempting to parse movie info using directory name. '{0}'", fileInfo.Directory.Name);
-                result = Parser.ParseMovieTitle(fileInfo.Directory.Name + fileInfo.Extension);
+                _logger.Debug("Attempting to parse game info using directory name. '{0}'", fileInfo.Directory.Name);
+                result = Parser.ParseGameTitle(fileInfo.Directory.Name + fileInfo.Extension);
             }
 
             return result;
         }
 
-        public Movie GetMovie(string title)
+        public Game GetGame(string title)
         {
-            var parsedMovieInfo = Parser.ParseMovieTitle(title);
+            var parsedGameInfo = Parser.ParseGameTitle(title);
 
-            if (parsedMovieInfo == null)
+            if (parsedGameInfo == null)
             {
-                return _movieService.FindByTitle(title);
+                return _gameService.FindByTitle(title);
             }
 
-            var result = TryGetMovieByTitleAndOrYear(parsedMovieInfo);
+            var result = TryGetGameByTitleAndOrYear(parsedGameInfo);
 
             if (result != null)
             {
-                return result.Movie;
+                return result.Game;
             }
 
             return null;
         }
 
-        public RemoteMovie Map(ParsedMovieInfo parsedMovieInfo, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria = null)
+        public RemoteGame Map(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria = null)
         {
-            return Map(parsedMovieInfo, imdbId, tmdbId, null, searchCriteria);
+            return Map(parsedGameInfo, imdbId, igdbId, null, searchCriteria);
         }
 
-        public RemoteMovie Map(ParsedMovieInfo parsedMovieInfo, int movieId)
+        public RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId)
         {
-            return new RemoteMovie
+            return new RemoteGame
             {
-                ParsedMovieInfo = parsedMovieInfo,
-                Movie = _movieService.GetMovie(movieId)
+                ParsedGameInfo = parsedGameInfo,
+                Game = _gameService.GetGame(gameId)
             };
         }
 
-        public RemoteMovie Map(ParsedMovieInfo parsedMovieInfo, string imdbId, int tmdbId, Movie movie, SearchCriteriaBase searchCriteria)
+        public RemoteGame Map(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, Game game, SearchCriteriaBase searchCriteria)
         {
-            var remoteMovie = new RemoteMovie
+            var remoteGame = new RemoteGame
             {
-                ParsedMovieInfo = parsedMovieInfo
+                ParsedGameInfo = parsedGameInfo
             };
 
-            if (movie == null)
+            if (game == null)
             {
-                var movieMatch = FindMovie(parsedMovieInfo, imdbId, tmdbId, searchCriteria);
+                var gameMatch = FindGame(parsedGameInfo, imdbId, igdbId, searchCriteria);
 
-                if (movieMatch != null)
+                if (gameMatch != null)
                 {
-                    movie = movieMatch.Movie;
-                    remoteMovie.MovieMatchType = movieMatch.MatchType;
+                    game = gameMatch.Game;
+                    remoteGame.GameMatchType = gameMatch.MatchType;
                 }
             }
 
-            if (movie != null)
+            if (game != null)
             {
-                remoteMovie.Movie = movie;
+                remoteGame.Game = game;
             }
 
-            remoteMovie.Languages = parsedMovieInfo.Languages;
+            remoteGame.Languages = parsedGameInfo.Languages;
 
             if (searchCriteria != null)
             {
-                remoteMovie.MovieRequested = remoteMovie.Movie?.Id == searchCriteria.Movie?.Id;
+                remoteGame.GameRequested = remoteGame.Game?.Id == searchCriteria.Game?.Id;
             }
 
-            return remoteMovie;
+            return remoteGame;
         }
 
-        private FindMovieResult FindMovie(ParsedMovieInfo parsedMovieInfo, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria)
+        private FindGameResult FindGame(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria)
         {
-            FindMovieResult result = null;
+            FindGameResult result = null;
 
             if (!string.IsNullOrWhiteSpace(imdbId) && imdbId != "0")
             {
-                result = TryGetMovieByImDbId(parsedMovieInfo, imdbId);
+                result = TryGetGameByImDbId(parsedGameInfo, imdbId);
             }
 
-            if (result == null && tmdbId > 0)
+            if (result == null && igdbId > 0)
             {
-                result = TryGetMovieByTmdbId(parsedMovieInfo, tmdbId);
+                result = TryGetGameByIgdbId(parsedGameInfo, igdbId);
             }
 
             if (result == null)
             {
                 if (searchCriteria != null)
                 {
-                    result = TryGetMovieBySearchCriteria(parsedMovieInfo, imdbId, tmdbId, searchCriteria);
+                    result = TryGetGameBySearchCriteria(parsedGameInfo, imdbId, igdbId, searchCriteria);
                 }
                 else
                 {
-                    result = TryGetMovieByTitleAndOrYear(parsedMovieInfo);
+                    result = TryGetGameByTitleAndOrYear(parsedGameInfo);
                 }
             }
 
             if (result == null)
             {
-                _logger.Debug($"No matching movie for titles '{string.Join(", ", parsedMovieInfo.MovieTitles)} ({parsedMovieInfo.Year})'");
+                _logger.Debug($"No matching game for titles '{string.Join(", ", parsedGameInfo.GameTitles)} ({parsedGameInfo.Year})'");
             }
 
             return result;
         }
 
-        private FindMovieResult TryGetMovieByImDbId(ParsedMovieInfo parsedMovieInfo, string imdbId)
+        private FindGameResult TryGetGameByImDbId(ParsedGameInfo parsedGameInfo, string imdbId)
         {
-            var movie = _movieService.FindByImdbId(imdbId);
+            var game = _gameService.FindByImdbId(imdbId);
 
-            // Should fix practically all problems, where indexer is shite at adding correct imdbids to movies.
-            if (movie != null && (parsedMovieInfo.Year < 1800 || movie.MovieMetadata.Value.Year == parsedMovieInfo.Year || movie.MovieMetadata.Value.SecondaryYear == parsedMovieInfo.Year))
+            // Should fix practically all problems, where indexer is shite at adding correct imdbids to games.
+            if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
             {
-                return new FindMovieResult(movie, MovieMatchType.Id);
+                return new FindGameResult(game, GameMatchType.Id);
             }
 
             return null;
         }
 
-        private FindMovieResult TryGetMovieByTmdbId(ParsedMovieInfo parsedMovieInfo, int tmdbId)
+        private FindGameResult TryGetGameByIgdbId(ParsedGameInfo parsedGameInfo, int igdbId)
         {
-            var movie = _movieService.FindByTmdbId(tmdbId);
+            var game = _gameService.FindByIgdbId(igdbId);
 
-            // Should fix practically all problems, where indexer is shite at adding correct imdbids to movies.
-            if (movie != null && (parsedMovieInfo.Year < 1800 || movie.MovieMetadata.Value.Year == parsedMovieInfo.Year || movie.MovieMetadata.Value.SecondaryYear == parsedMovieInfo.Year))
+            // Should fix practically all problems, where indexer is shite at adding correct imdbids to games.
+            if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
             {
-                return new FindMovieResult(movie, MovieMatchType.Id);
+                return new FindGameResult(game, GameMatchType.Id);
             }
 
             return null;
         }
 
-        private FindMovieResult TryGetMovieByTitleAndOrYear(ParsedMovieInfo parsedMovieInfo)
+        private FindGameResult TryGetGameByTitleAndOrYear(ParsedGameInfo parsedGameInfo)
         {
-            var candidates = _movieService.FindByTitleCandidates(parsedMovieInfo.MovieTitles, out var otherTitles);
+            var candidates = _gameService.FindByTitleCandidates(parsedGameInfo.GameTitles, out var otherTitles);
 
-            Movie movieByTitleAndOrYear;
-            if (parsedMovieInfo.Year > 1800)
+            Game gameByTitleAndOrYear;
+            if (parsedGameInfo.Year > 1800)
             {
-                movieByTitleAndOrYear = _movieService.FindByTitle(parsedMovieInfo.MovieTitles, parsedMovieInfo.Year, otherTitles, candidates);
-                if (movieByTitleAndOrYear != null)
+                gameByTitleAndOrYear = _gameService.FindByTitle(parsedGameInfo.GameTitles, parsedGameInfo.Year, otherTitles, candidates);
+                if (gameByTitleAndOrYear != null)
                 {
-                    return new FindMovieResult(movieByTitleAndOrYear, MovieMatchType.Title);
+                    return new FindGameResult(gameByTitleAndOrYear, GameMatchType.Title);
                 }
 
                 return null;
             }
 
-            movieByTitleAndOrYear = _movieService.FindByTitle(parsedMovieInfo.MovieTitles, null, otherTitles, candidates);
-            if (movieByTitleAndOrYear != null)
+            gameByTitleAndOrYear = _gameService.FindByTitle(parsedGameInfo.GameTitles, null, otherTitles, candidates);
+            if (gameByTitleAndOrYear != null)
             {
-                return new FindMovieResult(movieByTitleAndOrYear, MovieMatchType.Title);
+                return new FindGameResult(gameByTitleAndOrYear, GameMatchType.Title);
             }
 
             return null;
         }
 
-        private FindMovieResult TryGetMovieBySearchCriteria(ParsedMovieInfo parsedMovieInfo, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria)
+        private FindGameResult TryGetGameBySearchCriteria(ParsedGameInfo parsedGameInfo, string imdbId, int igdbId, SearchCriteriaBase searchCriteria)
         {
-            Movie possibleMovie = null;
+            Game possibleGame = null;
 
             var possibleTitles = new List<string>
             {
-                searchCriteria.Movie.MovieMetadata.Value.CleanTitle
+                searchCriteria.Game.GameMetadata.Value.CleanTitle
             };
-            possibleTitles.AddIfNotNull(searchCriteria.Movie.MovieMetadata.Value.CleanOriginalTitle);
-            possibleTitles.AddRange(searchCriteria.Movie.MovieMetadata.Value.AlternativeTitles.Select(t => t.CleanTitle));
-            possibleTitles.AddRange(searchCriteria.Movie.MovieMetadata.Value.Translations.Select(t => t.CleanTitle));
+            possibleTitles.AddIfNotNull(searchCriteria.Game.GameMetadata.Value.CleanOriginalTitle);
+            possibleTitles.AddRange(searchCriteria.Game.GameMetadata.Value.AlternativeTitles.Select(t => t.CleanTitle));
+            possibleTitles.AddRange(searchCriteria.Game.GameMetadata.Value.Translations.Select(t => t.CleanTitle));
 
-            var cleanTitles = parsedMovieInfo.MovieTitles.Select(t => t.CleanMovieTitle()).ToArray();
+            var cleanTitles = parsedGameInfo.GameTitles.Select(t => t.CleanGameTitle()).ToArray();
 
             if (possibleTitles.Any(pt =>
                 cleanTitles.Contains(pt)
@@ -229,25 +229,25 @@ namespace NzbDrone.Core.Parser
                     cleanTitles.Contains(pt.Replace(mn.ArabicNumeralAsString, mn.RomanNumeralLowerCase))
                     || cleanTitles.Any(t => t.Replace(mn.ArabicNumeralAsString, mn.RomanNumeralLowerCase) == pt))))
             {
-                possibleMovie = searchCriteria.Movie;
+                possibleGame = searchCriteria.Game;
             }
 
-            if (possibleMovie != null)
+            if (possibleGame != null)
             {
-                if (parsedMovieInfo.Year < 1800 || possibleMovie.MovieMetadata.Value.Year == parsedMovieInfo.Year || possibleMovie.MovieMetadata.Value.SecondaryYear == parsedMovieInfo.Year)
+                if (parsedGameInfo.Year < 1800 || possibleGame.GameMetadata.Value.Year == parsedGameInfo.Year || possibleGame.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year)
                 {
-                    return new FindMovieResult(possibleMovie, MovieMatchType.Title);
+                    return new FindGameResult(possibleGame, GameMatchType.Title);
                 }
             }
 
-            if (tmdbId > 0 && tmdbId == searchCriteria.Movie.TmdbId)
+            if (igdbId > 0 && igdbId == searchCriteria.Game.IgdbId)
             {
-                return new FindMovieResult(searchCriteria.Movie, MovieMatchType.Id);
+                return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
             }
 
-            if (imdbId.IsNotNullOrWhiteSpace() && imdbId == searchCriteria.Movie.ImdbId)
+            if (imdbId.IsNotNullOrWhiteSpace() && imdbId == searchCriteria.Game.ImdbId)
             {
-                return new FindMovieResult(searchCriteria.Movie, MovieMatchType.Id);
+                return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
             }
 
             return null;

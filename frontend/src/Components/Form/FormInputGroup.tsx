@@ -32,9 +32,9 @@ import IndexerSelectInput, {
 import LanguageSelectInput, {
   LanguageSelectInputProps,
 } from './Select/LanguageSelectInput';
-import MonitorMoviesSelectInput, {
-  MonitorMoviesSelectInputProps,
-} from './Select/MonitorMoviesSelectInput';
+import MonitorGamesSelectInput, {
+  MonitorGamesSelectInputProps,
+} from './Select/MonitorGamesSelectInput';
 import ProviderDataSelectInput, {
   ProviderOptionSelectInputProps,
 } from './Select/ProviderOptionSelectInput';
@@ -46,7 +46,7 @@ import RootFolderSelectInput, {
 } from './Select/RootFolderSelectInput';
 import UMaskInput, { UMaskInputProps } from './Select/UMaskInput';
 import DeviceInput, { DeviceInputProps } from './Tag/DeviceInput';
-import MovieTagInput, { MovieTagInputProps } from './Tag/MovieTagInput';
+import GameTagInput, { GameTagInputProps } from './Tag/GameTagInput';
 import TagSelectInput, { TagSelectInputProps } from './Tag/TagSelectInput';
 import TextTagInput, { TextTagInputProps } from './Tag/TextTagInput';
 import TextArea, { TextAreaProps } from './TextArea';
@@ -68,8 +68,8 @@ const componentMap: Record<InputType, ElementType> = {
   indexerSelect: IndexerSelectInput,
   keyValueList: KeyValueListInput,
   languageSelect: LanguageSelectInput,
-  monitorMoviesSelect: MonitorMoviesSelectInput,
-  movieTag: MovieTagInput,
+  monitorGamesSelect: MonitorGamesSelectInput,
+  gameTag: GameTagInput,
   number: NumberInput,
   oauth: OAuthInput,
   password: PasswordInput,
@@ -77,7 +77,7 @@ const componentMap: Record<InputType, ElementType> = {
   qualityProfileSelect: QualityProfileSelectInput,
   rootFolderSelect: RootFolderSelectInput,
   select: EnhancedSelectInput,
-  tag: MovieTagInput,
+  tag: GameTagInput,
   tagSelect: TagSelectInput,
   text: TextInput,
   textArea: TextArea,
@@ -117,10 +117,10 @@ type PickProps<V, C extends InputType> = C extends 'text'
   ? KeyValueListInputProps
   : C extends 'languageSelect'
   ? LanguageSelectInputProps
-  : C extends 'monitorMoviesSelect'
-  ? MonitorMoviesSelectInputProps
-  : C extends 'movieTag'
-  ? MovieTagInputProps<V>
+  : C extends 'monitorGamesSelect'
+  ? MonitorGamesSelectInputProps
+  : C extends 'gameTag'
+  ? GameTagInputProps<V>
   : C extends 'number'
   ? NumberInputProps
   : C extends 'oauth'
@@ -137,7 +137,7 @@ type PickProps<V, C extends InputType> = C extends 'text'
   ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
     EnhancedSelectInputProps<any, V>
   : C extends 'tag'
-  ? MovieTagInputProps<V>
+  ? GameTagInputProps<V>
   : C extends 'tagSelect'
   ? TagSelectInputProps
   : C extends 'text'

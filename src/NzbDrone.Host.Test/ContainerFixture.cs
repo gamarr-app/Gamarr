@@ -101,8 +101,8 @@ namespace NzbDrone.App.Test
         [Test]
         public void should_return_same_instance_of_singletons_by_different_same_interface()
         {
-            var first = _container.GetServices<IHandle<MovieGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
-            var second = _container.GetServices<IHandle<MovieGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
+            var first = _container.GetServices<IHandle<GameGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
+            var second = _container.GetServices<IHandle<GameGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
 
             first.Should().BeSameAs(second);
         }
@@ -110,7 +110,7 @@ namespace NzbDrone.App.Test
         [Test]
         public void should_return_same_instance_of_singletons_by_different_interfaces()
         {
-            var first = _container.GetServices<IHandle<MovieGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
+            var first = _container.GetServices<IHandle<GameGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
             var second = (DownloadMonitoringService)_container.GetRequiredService<IExecute<RefreshMonitoredDownloadsCommand>>();
 
             first.Should().BeSameAs(second);

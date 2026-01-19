@@ -4,7 +4,7 @@ using System.IO;
 using FluentValidation.Results;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.Extras.Metadata
@@ -27,19 +27,19 @@ namespace NzbDrone.Core.Extras.Metadata
             return new ValidationResult();
         }
 
-        public virtual string GetFilenameAfterMove(Movie movie, MovieFile movieFile, MetadataFile metadataFile)
+        public virtual string GetFilenameAfterMove(Game game, GameFile gameFile, MetadataFile metadataFile)
         {
-            var existingFilename = Path.Combine(movie.Path, metadataFile.RelativePath);
+            var existingFilename = Path.Combine(game.Path, metadataFile.RelativePath);
             var extension = Path.GetExtension(existingFilename).TrimStart('.');
-            var newFileName = Path.ChangeExtension(Path.Combine(movie.Path, movieFile.RelativePath), extension);
+            var newFileName = Path.ChangeExtension(Path.Combine(game.Path, gameFile.RelativePath), extension);
 
             return newFileName;
         }
 
-        public abstract MetadataFile FindMetadataFile(Movie movie, string path);
+        public abstract MetadataFile FindMetadataFile(Game game, string path);
 
-        public abstract MetadataFileResult MovieMetadata(Movie movie, MovieFile movieFile);
-        public abstract List<ImageFileResult> MovieImages(Movie movie);
+        public abstract MetadataFileResult GameMetadata(Game game, GameFile gameFile);
+        public abstract List<ImageFileResult> GameImages(Game game);
 
         public virtual object RequestAction(string action, IDictionary<string, string> query)
         {

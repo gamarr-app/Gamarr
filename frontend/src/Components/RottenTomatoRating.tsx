@@ -1,5 +1,5 @@
 import React from 'react';
-import { Ratings, RatingValues } from 'Movie/Movie';
+import { Ratings, RatingValues } from 'Game/Game';
 import translate from 'Utilities/String/translate';
 import styles from './RottenTomatoRating.css';
 

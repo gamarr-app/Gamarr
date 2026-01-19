@@ -1,7 +1,7 @@
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Test.Framework;
 
@@ -10,17 +10,17 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class IdFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _movie;
+        private Game _game;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>
+            _game = Builder<Game>
                       .CreateNew()
-                      .With(s => s.Title = "Movie Title")
+                      .With(s => s.Title = "Game Title")
                       .With(s => s.ImdbId = "tt12345")
-                      .With(s => s.TmdbId = 123456)
+                      .With(s => s.IgdbId = 123456)
                       .Build();
 
             _namingConfig = NamingConfig.Default;
@@ -32,60 +32,60 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_add_imdb_id()
         {
-            _namingConfig.MovieFolderFormat = "{Movie Title} ({ImdbId})";
+            _namingConfig.GameFolderFormat = "{Game Title} ({ImdbId})";
 
-            Subject.GetMovieFolder(_movie)
-                   .Should().Be($"Movie Title ({_movie.ImdbId})");
+            Subject.GetGameFolder(_game)
+                   .Should().Be($"Game Title ({_game.ImdbId})");
         }
 
         [Test]
-        public void should_add_tmdb_id()
+        public void should_add_igdb_id()
         {
-            _namingConfig.MovieFolderFormat = "{Movie Title} ({TmdbId})";
+            _namingConfig.GameFolderFormat = "{Game Title} ({IgdbId})";
 
-            Subject.GetMovieFolder(_movie)
-                   .Should().Be($"Movie Title ({_movie.TmdbId})");
+            Subject.GetGameFolder(_game)
+                   .Should().Be($"Game Title ({_game.IgdbId})");
         }
 
         [Test]
         public void should_add_imdb_tag()
         {
-            _namingConfig.MovieFolderFormat = "{Movie Title} {imdb-{ImdbId}}";
+            _namingConfig.GameFolderFormat = "{Game Title} {imdb-{ImdbId}}";
 
-            Subject.GetMovieFolder(_movie)
-                   .Should().Be($"Movie Title {{imdb-{_movie.ImdbId}}}");
+            Subject.GetGameFolder(_game)
+                   .Should().Be($"Game Title {{imdb-{_game.ImdbId}}}");
         }
 
-        [TestCase("{Movie Title} {imdb-{ImdbId}}")]
-        [TestCase("{Movie Title} {imdbid-{ImdbId}}")]
-        [TestCase("{Movie Title} {{imdb-{ImdbId}}}")]
-        [TestCase("{Movie Title} {{imdbid-{ImdbId}}}")]
-        public void should_skip_imdb_tag_if_null(string movieFormat)
+        [TestCase("{Game Title} {imdb-{ImdbId}}")]
+        [TestCase("{Game Title} {imdbid-{ImdbId}}")]
+        [TestCase("{Game Title} {{imdb-{ImdbId}}}")]
+        [TestCase("{Game Title} {{imdbid-{ImdbId}}}")]
+        public void should_skip_imdb_tag_if_null(string gameFormat)
         {
-            _namingConfig.MovieFolderFormat = movieFormat;
+            _namingConfig.GameFolderFormat = gameFormat;
 
-            _movie.ImdbId = null;
+            _game.ImdbId = null;
 
-            Subject.GetMovieFolder(_movie)
-                   .Should().Be("Movie Title");
+            Subject.GetGameFolder(_game)
+                   .Should().Be("Game Title");
         }
 
-        [TestCase("{Movie Title} {{imdb-{ImdbId}}}")]
-        public void should_handle_imdb_tag_curly_brackets(string movieFormat)
+        [TestCase("{Game Title} {{imdb-{ImdbId}}}")]
+        public void should_handle_imdb_tag_curly_brackets(string gameFormat)
         {
-            _namingConfig.MovieFolderFormat = movieFormat;
+            _namingConfig.GameFolderFormat = gameFormat;
 
-            Subject.GetMovieFolder(_movie)
-                .Should().Be($"Movie Title {{{{imdb-{_movie.ImdbId}}}}}");
+            Subject.GetGameFolder(_game)
+                .Should().Be($"Game Title {{{{imdb-{_game.ImdbId}}}}}");
         }
 
-        [TestCase("{Movie Title} {{tmdb-{TmdbId}}}")]
-        public void should_handle_tmdb_tag_curly_brackets(string movieFormat)
+        [TestCase("{Game Title} {{igdb-{IgdbId}}}")]
+        public void should_handle_igdb_tag_curly_brackets(string gameFormat)
         {
-            _namingConfig.MovieFolderFormat = movieFormat;
+            _namingConfig.GameFolderFormat = gameFormat;
 
-            Subject.GetMovieFolder(_movie)
-                .Should().Be($"Movie Title {{{{tmdb-{_movie.TmdbId}}}}}");
+            Subject.GetGameFolder(_game)
+                .Should().Be($"Game Title {{{{igdb-{_game.IgdbId}}}}}");
         }
     }
 }

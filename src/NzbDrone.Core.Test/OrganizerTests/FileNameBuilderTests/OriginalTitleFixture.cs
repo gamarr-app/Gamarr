@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -15,22 +15,22 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class OriginalTitleFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
+        private Game _game;
+        private GameFile _gameFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>
+            _game = Builder<Game>
                     .CreateNew()
-                    .With(s => s.Title = "My Movie")
+                    .With(s => s.Title = "My Game")
                     .Build();
 
-            _movieFile = new MovieFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "RadarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameMovies = true;
+            _namingConfig.RenameGames = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -47,42 +47,42 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_not_recursively_include_current_filename()
         {
-            _movieFile.RelativePath = "My Movie";
-            _namingConfig.StandardMovieFormat = "{Movie Title} {[Original Title]}";
+            _gameFile.RelativePath = "My Game";
+            _namingConfig.StandardGameFormat = "{Game Title} {[Original Title]}";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be("My Movie");
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be("My Game");
         }
 
         [Test]
         public void should_include_original_title_if_not_current_file_name()
         {
-            _movieFile.SceneName = "my.movie.2008";
-            _movieFile.RelativePath = "My Movie";
-            _namingConfig.StandardMovieFormat = "{Movie Title} {[Original Title]}";
+            _gameFile.SceneName = "my.game.2008";
+            _gameFile.RelativePath = "My Game";
+            _namingConfig.StandardGameFormat = "{Game Title} {[Original Title]}";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be("My Movie [my.movie.2008]");
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be("My Game [my.game.2008]");
         }
 
         [Test]
         public void should_include_current_filename_if_not_renaming_files()
         {
-            _movieFile.SceneName = "my.movie.2008";
-            _namingConfig.RenameMovies = false;
+            _gameFile.SceneName = "my.game.2008";
+            _namingConfig.RenameGames = false;
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be("my.movie.2008");
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be("my.game.2008");
         }
 
         [Test]
         public void should_include_current_filename_if_not_including_multiple_naming_tokens()
         {
-            _movieFile.RelativePath = "My Movie";
-            _namingConfig.StandardMovieFormat = "{Original Title}";
+            _gameFile.RelativePath = "My Game";
+            _namingConfig.StandardGameFormat = "{Original Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be("My Movie");
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be("My Game");
         }
     }
 }

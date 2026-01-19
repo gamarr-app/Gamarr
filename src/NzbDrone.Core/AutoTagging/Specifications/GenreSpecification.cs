@@ -3,7 +3,7 @@ using System.Linq;
 using FluentValidation;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Annotations;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -26,9 +26,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         [FieldDefinition(1, Label = "AutoTaggingSpecificationGenre", Type = FieldType.Tag)]
         public IEnumerable<string> Value { get; set; }
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return movie?.MovieMetadata?.Value?.Genres.Any(genre => Value.ContainsIgnoreCase(genre)) ?? false;
+            return game?.GameMetadata?.Value?.Genres.Any(genre => Value.ContainsIgnoreCase(genre)) ?? false;
         }
 
         public override NzbDroneValidationResult Validate()

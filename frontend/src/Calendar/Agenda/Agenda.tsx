@@ -2,11 +2,11 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import AgendaEvent from './AgendaEvent';
 import styles from './Agenda.css';
 
-interface AgendaMovie extends Movie {
+interface AgendaGame extends Game {
   sortDate: moment.Moment;
 }
 
@@ -16,7 +16,7 @@ function Agenda() {
   );
 
   const events = useMemo(() => {
-    const result = items.map((item): AgendaMovie => {
+    const result = items.map((item): AgendaGame => {
       const { inCinemas, digitalRelease, physicalRelease } = item;
 
       const dates = [];

@@ -35,29 +35,29 @@ namespace NzbDrone.Core.Datastore.Migration
 
         protected override void MainDbUpgrade()
         {
-            Execute.WithConnection(FixRadarrLists);
+            Execute.WithConnection(FixGamarrLists);
             Execute.WithConnection(FixStevenLuLists);
         }
 
-        private void FixRadarrLists(IDbConnection conn, IDbTransaction tran)
+        private void FixGamarrLists(IDbConnection conn, IDbTransaction tran)
         {
-            var rows = conn.Query<NetImportDefinition178>($"SELECT * FROM \"NetImport\" WHERE \"ConfigContract\" = 'RadarrListSettings'");
+            var rows = conn.Query<NetImportDefinition178>($"SELECT * FROM \"NetImport\" WHERE \"ConfigContract\" = 'GamarrListSettings'");
 
-            var radarrUrls = new List<string>
+            var gamarrUrls = new List<string>
             {
-                "https://api.radarr.video/v2",
-                "https://staging.api.radarr.video"
+                "https://api.gamarr.video/v2",
+                "https://staging.api.gamarr.video"
             };
 
             foreach (var row in rows)
             {
-                var settings = JsonSerializer.Deserialize<RadarrListSettings177>(row.Settings, _serializerSettings);
+                var settings = JsonSerializer.Deserialize<GamarrListSettings177>(row.Settings, _serializerSettings);
                 object newSettings;
 
-                if (!radarrUrls.Contains(settings.APIURL.TrimEnd('/')))
+                if (!gamarrUrls.Contains(settings.APIURL.TrimEnd('/')))
                 {
                     // Combine root and path in new settings
-                    newSettings = new RadarrListSettings178
+                    newSettings = new GamarrListSettings178
                     {
                         Url = settings.APIURL.TrimEnd('/') + '/' + settings.Path.TrimStart('/')
                     };
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Datastore.Migration
                         }
                         else
                         {
-                            newSettings = new RadarrListSettings178
+                            newSettings = new GamarrListSettings178
                             {
                                 Url = settings.APIURL.TrimEnd('/') + '/' + settings.Path.TrimStart('/')
                             };
@@ -128,12 +128,12 @@ namespace NzbDrone.Core.Datastore.Migration
             {
                 var settings = JsonSerializer.Deserialize<StevenLuSettings178>(row.Settings, _serializerSettings);
 
-                if (settings.Link.StartsWith("https://s3.amazonaws.com/popular-movies"))
+                if (settings.Link.StartsWith("https://s3.amazonaws.com/popular-games"))
                 {
                     var newSettings = new StevenLu2Settings178();
 
                     // convert to 2
-                    if (settings.Link == "https://s3.amazonaws.com/popular-movies/movies.json")
+                    if (settings.Link == "https://s3.amazonaws.com/popular-games/games.json")
                     {
                         newSettings.Source = (int)StevenLuSource178.Standard;
                         newSettings.MinScore = 5;
@@ -143,7 +143,7 @@ namespace NzbDrone.Core.Datastore.Migration
                     {
                         var split = settings.Link.Split('/').Last().Split('-');
                         if (split.Length == 3 &&
-                            split[0] == "movies" &&
+                            split[0] == "games" &&
                             Enum.TryParse(split[1], out StevenLuSource178 source) &&
                             int.TryParse(split[2], out var score) &&
                             scores.Contains(score))
@@ -182,13 +182,13 @@ namespace NzbDrone.Core.Datastore.Migration
             public string Tags { get; set; }
         }
 
-        public class RadarrListSettings177
+        public class GamarrListSettings177
         {
             public string APIURL { get; set; }
             public string Path { get; set; }
         }
 
-        public class RadarrListSettings178
+        public class GamarrListSettings178
         {
             public string Url { get; set; }
         }

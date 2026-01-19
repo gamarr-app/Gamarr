@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
         public DelugeLabel GetLabelOptions(DelugeSettings settings)
         {
-            var response = ProcessRequest<DelugeLabel>(settings, "label.get_options", settings.MovieCategory);
+            var response = ProcessRequest<DelugeLabel>(settings, "label.get_options", settings.GameCategory);
 
             return response;
         }

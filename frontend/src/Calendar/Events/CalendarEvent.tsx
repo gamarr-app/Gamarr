@@ -7,7 +7,7 @@ import getStatusStyle from 'Calendar/getStatusStyle';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { icons, kinds } from 'Helpers/Props';
-import useMovieFile from 'MovieFile/useMovieFile';
+import useGameFile from 'GameFile/useGameFile';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import translate from 'Utilities/String/translate';
@@ -16,7 +16,7 @@ import styles from './CalendarEvent.css';
 
 interface CalendarEventProps {
   id: number;
-  movieFileId?: number;
+  gameFileId?: number;
   title: string;
   titleSlug: string;
   genres: string[];
@@ -33,7 +33,7 @@ interface CalendarEventProps {
 
 function CalendarEvent({
   id,
-  movieFileId,
+  gameFileId,
   title,
   titleSlug,
   genres = [],
@@ -47,13 +47,13 @@ function CalendarEvent({
   hasFile,
   grabbed,
 }: CalendarEventProps) {
-  const movieFile = useMovieFile(movieFileId);
+  const gameFile = useGameFile(gameFileId);
   const queueItem = useSelector(createQueueItemSelectorForHook(id));
 
   const { enableColorImpairedMode } = useSelector(createUISettingsSelector());
 
   const {
-    showMovieInformation,
+    showGameInformation,
     showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
@@ -69,7 +69,7 @@ function CalendarEvent({
     isAvailable
   );
   const joinedGenres = genres.slice(0, 2).join(', ');
-  const link = `/movie/${titleSlug}`;
+  const link = `/game/${titleSlug}`;
 
   const eventTypes = useMemo(() => {
     const momentDate = moment(date);
@@ -124,7 +124,7 @@ function CalendarEvent({
 
       <div className={styles.overlay}>
         <div className={styles.info}>
-          <div className={styles.movieTitle}>{title}</div>
+          <div className={styles.gameTitle}>{title}</div>
 
           <div
             className={classNames(
@@ -142,16 +142,16 @@ function CalendarEvent({
               <Icon
                 className={styles.statusIcon}
                 name={icons.DOWNLOADING}
-                title={translate('MovieIsDownloading')}
+                title={translate('GameIsDownloading')}
               />
             ) : null}
 
             {showCutoffUnmetIcon &&
-            !!movieFile &&
-            movieFile.qualityCutoffNotMet ? (
+            !!gameFile &&
+            gameFile.qualityCutoffNotMet ? (
               <Icon
                 className={styles.statusIcon}
-                name={icons.MOVIE_FILE}
+                name={icons.GAME_FILE}
                 kind={kinds.WARNING}
                 title={translate('QualityCutoffNotMet')}
               />
@@ -159,13 +159,13 @@ function CalendarEvent({
           </div>
         </div>
 
-        {showMovieInformation ? (
+        {showGameInformation ? (
           <>
-            <div className={styles.movieInfo}>
+            <div className={styles.gameInfo}>
               <div className={styles.genres}>{joinedGenres}</div>
             </div>
 
-            <div className={styles.movieInfo}>
+            <div className={styles.gameInfo}>
               <div className={styles.eventType}>{eventTypes.join(', ')}</div>
 
               <div>{certification}</div>

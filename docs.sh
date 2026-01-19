@@ -22,14 +22,14 @@ testPackageFolder='_tests'
 rm -rf $outputFolder
 rm -rf $testPackageFolder
 
-slnFile=src/Radarr.sln
+slnFile=src/Gamarr.sln
 
 platform=Posix
 
 if [ "$PLATFORM" = "Windows" ]; then
-  application=Radarr.Console.dll
+  application=Gamarr.Console.dll
 else
-  application=Radarr.dll
+  application=Gamarr.dll
 fi
 
 dotnet clean $slnFile -c Debug
@@ -40,7 +40,7 @@ dotnet msbuild -restore $slnFile -p:Configuration=Debug -p:Platform=$platform -p
 dotnet new tool-manifest
 dotnet tool install --version 8.1.4 Swashbuckle.AspNetCore.Cli
 
-dotnet tool run swagger tofile --output ./src/Radarr.Api.V3/openapi.json "$outputFolder/$FRAMEWORK/$RUNTIME/$application" v3 &
+dotnet tool run swagger tofile --output ./src/Gamarr.Api.V3/openapi.json "$outputFolder/$FRAMEWORK/$RUNTIME/$application" v3 &
 
 sleep 45
 

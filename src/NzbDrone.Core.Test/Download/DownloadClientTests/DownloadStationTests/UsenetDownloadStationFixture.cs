@@ -34,14 +34,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         protected string _defaultDestination = "somepath";
         protected OsPath _physicalPath = new OsPath("/mnt/sdb1/mydata");
 
-        protected RemoteMovie _remoteEpisode;
+        protected RemoteGame _remoteEpisode;
 
         protected Dictionary<string, object> _downloadStationConfigItems;
 
         [SetUp]
         public void Setup()
         {
-            _remoteEpisode = CreateRemoteMovie();
+            _remoteEpisode = CreateRemoteGame();
 
             _settings = new DownloadStationSettings()
             {
@@ -274,7 +274,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             GivenTvDirectory();
             GivenSuccessfulDownload();
 
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
 
             var id = await Subject.Download(remoteEpisode, CreateIndexer());
 
@@ -291,7 +291,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             GivenTvCategory();
             GivenSuccessfulDownload();
 
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
 
             var id = await Subject.Download(remoteEpisode, CreateIndexer());
 
@@ -307,7 +307,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             GivenSerialNumber();
             GivenSuccessfulDownload();
 
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
 
             var id = await Subject.Download(remoteEpisode, CreateIndexer());
 
@@ -382,7 +382,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         [Test]
         public void Download_should_throw_and_not_add_task_if_cannot_get_serial_number()
         {
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
 
             Mocker.GetMock<ISerialNumberProvider>()
                   .Setup(s => s.GetSerialNumber(_settings))

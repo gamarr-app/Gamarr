@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Indexers.HDBits
             return pageableRequests;
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
             var query = new TorrentQuery();
@@ -36,12 +36,12 @@ namespace NzbDrone.Core.Indexers.HDBits
 
         private bool TryAddSearchParameters(TorrentQuery query, SearchCriteriaBase searchCriteria)
         {
-            if (searchCriteria.Movie.MovieMetadata.Value.ImdbId.IsNullOrWhiteSpace())
+            if (searchCriteria.Game.GameMetadata.Value.ImdbId.IsNullOrWhiteSpace())
             {
                 return false;
             }
 
-            var imdbId = int.Parse(searchCriteria.Movie.MovieMetadata.Value.ImdbId.Substring(2));
+            var imdbId = int.Parse(searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2));
 
             if (imdbId != 0)
             {

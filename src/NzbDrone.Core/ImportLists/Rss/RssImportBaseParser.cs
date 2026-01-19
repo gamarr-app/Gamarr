@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.Exceptions;
 
@@ -23,13 +23,13 @@ namespace NzbDrone.Core.ImportLists.Rss
             _logger = logger;
         }
 
-        public virtual IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(importResponse))
             {
-                return movies;
+                return games;
             }
 
             var document = LoadXmlDocument(importResponse);
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.ImportLists.Rss
                 {
                     var itemInfo = ProcessItem(item);
 
-                    movies.AddIfNotNull(itemInfo);
+                    games.AddIfNotNull(itemInfo);
                 }
                 catch (UnsupportedFeedException itemEx)
                 {
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.ImportLists.Rss
                 }
             }
 
-            return movies;
+            return games;
         }
 
         protected virtual bool PreProcess(ImportListResponse importListResponse)
@@ -117,23 +117,23 @@ namespace NzbDrone.Core.ImportLists.Rss
             return channel.Elements("item");
         }
 
-        protected virtual ImportListMovie ProcessItem(XElement item)
+        protected virtual ImportListGame ProcessItem(XElement item)
         {
-            var info = new ImportListMovie
+            var info = new ImportListGame
             {
                 Title = item.TryGetValue("title", "Unknown")
             };
 
             var guid = item.TryGetValue("guid");
 
-            if (guid != null && int.TryParse(guid, out var tmdbId))
+            if (guid != null && int.TryParse(guid, out var igdbId))
             {
-                info.TmdbId = tmdbId;
+                info.IgdbId = igdbId;
             }
 
-            if (info.TmdbId == 0)
+            if (info.IgdbId == 0)
             {
-                throw new UnsupportedFeedException("Each item in the RSS feed must have a guid element with a TMDB ID");
+                throw new UnsupportedFeedException("Each item in the RSS feed must have a guid element with a IGDB ID");
             }
 
             return info;

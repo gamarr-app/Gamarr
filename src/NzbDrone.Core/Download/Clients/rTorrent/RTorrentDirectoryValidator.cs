@@ -17,12 +17,12 @@ namespace NzbDrone.Core.Download.Clients.rTorrent
                                           PathExistsValidator pathExistsValidator,
                                           MappedNetworkDriveValidator mappedNetworkDriveValidator)
         {
-            RuleFor(c => c.MovieDirectory).Cascade(CascadeMode.Stop)
+            RuleFor(c => c.GameDirectory).Cascade(CascadeMode.Stop)
                                        .IsValidPath()
                                        .SetValidator(rootFolderValidator)
                                        .SetValidator(mappedNetworkDriveValidator)
                                        .SetValidator(pathExistsValidator)
-                                       .When(c => c.MovieDirectory.IsNotNullOrWhiteSpace())
+                                       .When(c => c.GameDirectory.IsNotNullOrWhiteSpace())
                                        .When(c => c.Host == "localhost" || c.Host == "127.0.0.1");
         }
     }

@@ -4,58 +4,58 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.MediaFiles
 {
     [TestFixture]
-    public class MediaFileRepositoryFixture : DbTest<MediaFileRepository, MovieFile>
+    public class MediaFileRepositoryFixture : DbTest<MediaFileRepository, GameFile>
     {
-        private Movie _movie1;
-        private Movie _movie2;
+        private Game _game1;
+        private Game _game2;
 
         [SetUp]
         public void Setup()
         {
-            _movie1 = Builder<Movie>.CreateNew()
+            _game1 = Builder<Game>.CreateNew()
                                     .With(s => s.Id = 7)
                                     .Build();
 
-            _movie2 = Builder<Movie>.CreateNew()
+            _game2 = Builder<Game>.CreateNew()
                                     .With(s => s.Id = 8)
                                     .Build();
         }
 
         [Test]
-        public void get_files_by_movie()
+        public void get_files_by_game()
         {
-            var files = Builder<MovieFile>.CreateListOfSize(10)
+            var files = Builder<GameFile>.CreateListOfSize(10)
                 .All()
                 .With(c => c.Id = 0)
                 .With(c => c.Quality = new QualityModel())
                 .With(c => c.Languages = new List<Language> { Language.English })
                 .Random(4)
-                .With(s => s.MovieId = 12)
+                .With(s => s.GameId = 12)
                 .BuildListOfNew();
 
             Db.InsertMany(files);
 
-            var movieFiles = Subject.GetFilesByMovie(12);
+            var gameFiles = Subject.GetFilesByGame(12);
 
-            movieFiles.Should().HaveCount(4);
-            movieFiles.Should().OnlyContain(c => c.MovieId == 12);
+            gameFiles.Should().HaveCount(4);
+            gameFiles.Should().OnlyContain(c => c.GameId == 12);
         }
 
         [Test]
-        public void should_delete_files_by_movieId()
+        public void should_delete_files_by_gameId()
         {
-            var items = Builder<MovieFile>.CreateListOfSize(5)
+            var items = Builder<GameFile>.CreateListOfSize(5)
                 .TheFirst(1)
-                .With(c => c.MovieId = _movie2.Id)
+                .With(c => c.GameId = _game2.Id)
                 .TheRest()
-                .With(c => c.MovieId = _movie1.Id)
+                .With(c => c.GameId = _game1.Id)
                 .All()
                 .With(c => c.Id = 0)
                 .With(c => c.Quality = new QualityModel(Quality.Bluray1080p))
@@ -64,10 +64,10 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Db.InsertMany(items);
 
-            Subject.DeleteForMovies(new List<int> { _movie1.Id });
+            Subject.DeleteForGames(new List<int> { _game1.Id });
 
-            var removedItems = Subject.GetFilesByMovie(_movie1.Id);
-            var nonRemovedItems = Subject.GetFilesByMovie(_movie2.Id);
+            var removedItems = Subject.GetFilesByGame(_game1.Id);
+            var nonRemovedItems = Subject.GetFilesByGame(_game2.Id);
 
             removedItems.Should().HaveCount(0);
             nonRemovedItems.Should().HaveCount(1);

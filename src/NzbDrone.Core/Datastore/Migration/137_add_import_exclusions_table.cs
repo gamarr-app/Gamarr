@@ -16,9 +16,9 @@ namespace NzbDrone.Core.Datastore.Migration
             if (!Schema.Table("ImportExclusions").Exists())
             {
                 Create.TableForModel("ImportExclusions")
-                    .WithColumn("TmdbId").AsInt64().NotNullable().Unique()
-                    .WithColumn("MovieTitle").AsString().Nullable()
-                    .WithColumn("MovieYear").AsInt64().Nullable().WithDefaultValue(0);
+                    .WithColumn("IgdbId").AsInt64().NotNullable().Unique()
+                    .WithColumn("GameTitle").AsString().Nullable()
+                    .WithColumn("GameYear").AsInt64().Nullable().WithDefaultValue(0);
             }
 
             Execute.WithConnection(AddExisting);
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Datastore.Migration
                         using (var updateCmd = conn.CreateCommand())
                         {
                             updateCmd.Transaction = tran;
-                            updateCmd.CommandText = "INSERT INTO \"ImportExclusions\" (tmdbid, MovieTitle) VALUES " + string.Join(", ", importExclusions);
+                            updateCmd.CommandText = "INSERT INTO \"ImportExclusions\" (igdbid, GameTitle) VALUES " + string.Join(", ", importExclusions);
 
                             updateCmd.ExecuteNonQuery();
                         }

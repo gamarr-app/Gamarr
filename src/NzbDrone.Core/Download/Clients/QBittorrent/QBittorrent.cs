@@ -52,36 +52,36 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // set post-import category
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MovieImportedCategory != Settings.MovieCategory)
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.GameImportedCategory != Settings.GameCategory)
             {
                 try
                 {
-                    Proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MovieImportedCategory, Settings);
+                    Proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.GameImportedCategory, Settings);
                 }
                 catch (DownloadClientException)
                 {
                     _logger.Warn("Failed to set post-import torrent label \"{0}\" for {1} in qBittorrent. Does the label exist?",
-                        Settings.MovieImportedCategory,
+                        Settings.GameImportedCategory,
                         downloadClientItem.Title);
                 }
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             if (!Proxy.GetConfig(Settings).DhtEnabled && !magnetLink.Contains("&tr="))
             {
                 throw new NotSupportedException("Magnet Links without trackers not supported if DHT is disabled");
             }
 
-            var setShareLimits = remoteMovie.SeedConfiguration != null && (remoteMovie.SeedConfiguration.Ratio.HasValue || remoteMovie.SeedConfiguration.SeedTime.HasValue);
+            var setShareLimits = remoteGame.SeedConfiguration != null && (remoteGame.SeedConfiguration.Ratio.HasValue || remoteGame.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
-            var moveToTop = (isRecentMovie && Settings.RecentMoviePriority == (int)QBittorrentPriority.First) || (!isRecentMovie && Settings.OlderMoviePriority == (int)QBittorrentPriority.First);
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
+            var moveToTop = (isRecentGame && Settings.RecentGamePriority == (int)QBittorrentPriority.First) || (!isRecentGame && Settings.OlderGamePriority == (int)QBittorrentPriority.First);
             var forceStart = (QBittorrentState)Settings.InitialState == QBittorrentState.ForceStart;
 
-            Proxy.AddTorrentFromUrl(magnetLink, addHasSetShareLimits && setShareLimits ? remoteMovie.SeedConfiguration : null, Settings);
+            Proxy.AddTorrentFromUrl(magnetLink, addHasSetShareLimits && setShareLimits ? remoteGame.SeedConfiguration : null, Settings);
 
             if ((!addHasSetShareLimits && setShareLimits) || moveToTop || forceStart)
             {
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 {
                     try
                     {
-                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteMovie.SeedConfiguration, Settings);
+                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteGame.SeedConfiguration, Settings);
                     }
                     catch (Exception ex)
                     {
@@ -130,15 +130,15 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
-            var setShareLimits = remoteMovie.SeedConfiguration != null && (remoteMovie.SeedConfiguration.Ratio.HasValue || remoteMovie.SeedConfiguration.SeedTime.HasValue);
+            var setShareLimits = remoteGame.SeedConfiguration != null && (remoteGame.SeedConfiguration.Ratio.HasValue || remoteGame.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
-            var moveToTop = (isRecentMovie && Settings.RecentMoviePriority == (int)QBittorrentPriority.First) || (!isRecentMovie && Settings.OlderMoviePriority == (int)QBittorrentPriority.First);
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
+            var moveToTop = (isRecentGame && Settings.RecentGamePriority == (int)QBittorrentPriority.First) || (!isRecentGame && Settings.OlderGamePriority == (int)QBittorrentPriority.First);
             var forceStart = (QBittorrentState)Settings.InitialState == QBittorrentState.ForceStart;
 
-            Proxy.AddTorrentFromFile(filename, fileContent, addHasSetShareLimits ? remoteMovie.SeedConfiguration : null, Settings);
+            Proxy.AddTorrentFromFile(filename, fileContent, addHasSetShareLimits ? remoteGame.SeedConfiguration : null, Settings);
 
             if ((!addHasSetShareLimits && setShareLimits) || moveToTop || forceStart)
             {
@@ -151,7 +151,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 {
                     try
                     {
-                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteMovie.SeedConfiguration, Settings);
+                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteGame.SeedConfiguration, Settings);
                     }
                     catch (Exception ex)
                     {
@@ -231,7 +231,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                     Category = torrent.Category.IsNotNullOrWhiteSpace() ? torrent.Category : torrent.Label,
                     Title = torrent.Name,
                     TotalSize = torrent.Size,
-                    DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MovieImportedCategory.IsNotNullOrWhiteSpace()),
+                    DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.GameImportedCategory.IsNotNullOrWhiteSpace()),
                     RemainingSize = (long)(torrent.Size * (1.0 - torrent.Progress)),
                     RemainingTime = GetRemainingTime(torrent),
                     SeedRatio = torrent.Ratio
@@ -376,15 +376,15 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
             var destDir = new OsPath(config.SavePath);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace() && version >= Version.Parse("2.0"))
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace() && version >= Version.Parse("2.0"))
             {
-                if (Proxy.GetLabels(Settings).TryGetValue(Settings.MovieCategory, out var label) && label.SavePath.IsNotNullOrWhiteSpace())
+                if (Proxy.GetLabels(Settings).TryGetValue(Settings.GameCategory, out var label) && label.SavePath.IsNotNullOrWhiteSpace())
                 {
                     var savePath = label.SavePath;
 
                     if (savePath.StartsWith("//"))
                     {
-                        _logger.Trace("Replacing double forward slashes in path '{0}'. If this is not meant to be a Windows UNC path fix the 'Save Path' in qBittorrent's {1} category", savePath, Settings.MovieCategory);
+                        _logger.Trace("Replacing double forward slashes in path '{0}'. If this is not meant to be a Windows UNC path fix the 'Save Path' in qBittorrent's {1} category", savePath, Settings.GameCategory);
                         savePath = savePath.Replace('/', '\\');
                     }
 
@@ -445,7 +445,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 else if (version < Version.Parse("1.6"))
                 {
                     // API version 6 introduced support for labels
-                    if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+                    if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                     {
                         return new NzbDroneValidationFailure("Category", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryUnsupported"))
                         {
@@ -453,10 +453,10 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                         };
                     }
                 }
-                else if (Settings.MovieCategory.IsNullOrWhiteSpace())
+                else if (Settings.GameCategory.IsNullOrWhiteSpace())
                 {
                     // warn if labels are supported, but category is not provided
-                    return new NzbDroneValidationFailure("MovieCategory", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryRecommended"))
+                    return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryRecommended"))
                     {
                         IsWarning = true,
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryRecommendedDetail")
@@ -509,7 +509,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private ValidationFailure TestCategory()
         {
-            if (Settings.MovieCategory.IsNullOrWhiteSpace() && Settings.MovieImportedCategory.IsNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNullOrWhiteSpace() && Settings.GameImportedCategory.IsNullOrWhiteSpace())
             {
                 return null;
             }
@@ -523,28 +523,28 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
             var labels = Proxy.GetLabels(Settings);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.MovieCategory))
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.GameCategory))
             {
-                Proxy.AddLabel(Settings.MovieCategory, Settings);
+                Proxy.AddLabel(Settings.GameCategory, Settings);
                 labels = Proxy.GetLabels(Settings);
 
-                if (!labels.ContainsKey(Settings.MovieCategory))
+                if (!labels.ContainsKey(Settings.GameCategory))
                 {
-                    return new NzbDroneValidationFailure("MovieCategory", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryAddFailure"))
+                    return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryAddFailure"))
                     {
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryAddFailureDetail")
                     };
                 }
             }
 
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.MovieImportedCategory))
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.GameImportedCategory))
             {
-                Proxy.AddLabel(Settings.MovieImportedCategory, Settings);
+                Proxy.AddLabel(Settings.GameImportedCategory, Settings);
                 labels = Proxy.GetLabels(Settings);
 
-                if (!labels.ContainsKey(Settings.MovieImportedCategory))
+                if (!labels.ContainsKey(Settings.GameImportedCategory))
                 {
-                    return new NzbDroneValidationFailure("MovieImportedCategory", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryAddFailure"))
+                    return new NzbDroneValidationFailure("GameImportedCategory", _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryAddFailure"))
                     {
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationCategoryAddFailureDetail")
                     };
@@ -556,8 +556,8 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private ValidationFailure TestPrioritySupport()
         {
-            var recentPriorityDefault = Settings.RecentMoviePriority == (int)QBittorrentPriority.Last;
-            var olderPriorityDefault = Settings.OlderMoviePriority == (int)QBittorrentPriority.Last;
+            var recentPriorityDefault = Settings.RecentGamePriority == (int)QBittorrentPriority.Last;
+            var olderPriorityDefault = Settings.OlderGamePriority == (int)QBittorrentPriority.Last;
 
             if (olderPriorityDefault && recentPriorityDefault)
             {
@@ -572,14 +572,14 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 {
                     if (!recentPriorityDefault)
                     {
-                        return new NzbDroneValidationFailure(nameof(Settings.RecentMoviePriority), _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationQueueingNotEnabled"))
+                        return new NzbDroneValidationFailure(nameof(Settings.RecentGamePriority), _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationQueueingNotEnabled"))
                         {
                             DetailedDescription = _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationQueueingNotEnabledDetail")
                         };
                     }
                     else if (!olderPriorityDefault)
                     {
-                        return new NzbDroneValidationFailure(nameof(Settings.OlderMoviePriority), _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationQueueingNotEnabled"))
+                        return new NzbDroneValidationFailure(nameof(Settings.OlderGamePriority), _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationQueueingNotEnabled"))
                         {
                             DetailedDescription = _localizationService.GetLocalizedString("DownloadClientQbittorrentValidationQueueingNotEnabledDetail")
                         };

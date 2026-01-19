@@ -9,7 +9,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -19,11 +19,11 @@ namespace NzbDrone.Core.Test.Extras
     [TestFixture]
     public class ExtraServiceFixture : CoreTest<ExtraService>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
-        private LocalMovie _localMovie;
+        private Game _game;
+        private GameFile _gameFile;
+        private LocalGame _localGame;
 
-        private string _movieFolder;
+        private string _gameFolder;
         private string _releaseFolder;
 
         private Mock<IManageExtraFiles> _subtitleService;
@@ -32,33 +32,33 @@ namespace NzbDrone.Core.Test.Extras
         [SetUp]
         public void Setup()
         {
-            _movieFolder = @"C:\Test\Movies\Movie Title".AsOsAgnostic();
-            _releaseFolder = @"C:\Test\Unsorted TV\Movie.Title.2022".AsOsAgnostic();
+            _gameFolder = @"C:\Test\Games\Game Title".AsOsAgnostic();
+            _releaseFolder = @"C:\Test\Unsorted TV\Game.Title.2022".AsOsAgnostic();
 
-            _movie = Builder<Movie>.CreateNew()
-                                     .With(s => s.Path = _movieFolder)
+            _game = Builder<Game>.CreateNew()
+                                     .With(s => s.Path = _gameFolder)
                                      .Build();
 
-            _movieFile = Builder<MovieFile>.CreateNew()
-                                               .With(f => f.Path = Path.Combine(_movie.Path, "Movie Title - 2022.mkv").AsOsAgnostic())
-                                               .With(f => f.RelativePath = @"Movie Title - 2022.mkv".AsOsAgnostic())
+            _gameFile = Builder<GameFile>.CreateNew()
+                                               .With(f => f.Path = Path.Combine(_game.Path, "Game Title - 2022.mkv").AsOsAgnostic())
+                                               .With(f => f.RelativePath = @"Game Title - 2022.mkv".AsOsAgnostic())
                                                .Build();
 
-            _localMovie = Builder<LocalMovie>.CreateNew()
-                                                 .With(l => l.Movie = _movie)
-                                                 .With(l => l.Path = Path.Combine(_releaseFolder, "Movie.Title.2022.mkv").AsOsAgnostic())
+            _localGame = Builder<LocalGame>.CreateNew()
+                                                 .With(l => l.Game = _game)
+                                                 .With(l => l.Path = Path.Combine(_releaseFolder, "Game.Title.2022.mkv").AsOsAgnostic())
                                                  .Build();
 
             _subtitleService = new Mock<IManageExtraFiles>();
             _subtitleService.SetupGet(s => s.Order).Returns(0);
-            _subtitleService.Setup(s => s.CanImportFile(It.IsAny<LocalMovie>(), It.IsAny<MovieFile>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _subtitleService.Setup(s => s.CanImportFile(It.IsAny<LocalGame>(), It.IsAny<GameFile>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Returns(false);
-            _subtitleService.Setup(s => s.CanImportFile(It.IsAny<LocalMovie>(), It.IsAny<MovieFile>(), It.IsAny<string>(), ".srt", It.IsAny<bool>()))
+            _subtitleService.Setup(s => s.CanImportFile(It.IsAny<LocalGame>(), It.IsAny<GameFile>(), It.IsAny<string>(), ".srt", It.IsAny<bool>()))
                 .Returns(true);
 
             _otherExtraService = new Mock<IManageExtraFiles>();
             _otherExtraService.SetupGet(s => s.Order).Returns(1);
-            _otherExtraService.Setup(s => s.CanImportFile(It.IsAny<LocalMovie>(), It.IsAny<MovieFile>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _otherExtraService.Setup(s => s.CanImportFile(It.IsAny<LocalGame>(), It.IsAny<GameFile>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Returns(true);
 
             Mocker.SetConstant<IEnumerable<IManageExtraFiles>>(new[]
@@ -73,9 +73,9 @@ namespace NzbDrone.Core.Test.Extras
             Mocker.GetMock<IDiskProvider>().Setup(s => s.GetParentFolder(It.IsAny<string>()))
                   .Returns((string path) => Directory.GetParent(path).FullName);
 
-            WithExistingFolder(_movie.Path);
-            WithExistingFile(_movieFile.Path);
-            WithExistingFile(_localMovie.Path);
+            WithExistingFolder(_game.Path);
+            WithExistingFile(_gameFile.Path);
+            WithExistingFile(_localGame.Path);
 
             Mocker.GetMock<IConfigService>().Setup(v => v.ImportExtraFiles).Returns(true);
             Mocker.GetMock<IConfigService>().Setup(v => v.ExtraFileExtensions).Returns("nfo,srt");
@@ -122,25 +122,25 @@ namespace NzbDrone.Core.Test.Extras
         {
             Mocker.GetMock<IConfigService>().Setup(v => v.ImportExtraFiles).Returns(false);
 
-            var nfofile = Path.Combine(_releaseFolder, "Movie.Title.2022.nfo").AsOsAgnostic();
+            var nfofile = Path.Combine(_releaseFolder, "Game.Title.2022.nfo").AsOsAgnostic();
 
             var files = new List<string>
             {
-                _localMovie.Path,
+                _localGame.Path,
                 nfofile
             };
 
             WithExistingFiles(files);
 
-            Subject.ImportMovie(_localMovie, _movieFile, true);
+            Subject.ImportGame(_localGame, _gameFile, true);
 
-            _subtitleService.Verify(v => v.CanImportFile(_localMovie, _movieFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
-            _otherExtraService.Verify(v => v.CanImportFile(_localMovie, _movieFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+            _subtitleService.Verify(v => v.CanImportFile(_localGame, _gameFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+            _otherExtraService.Verify(v => v.CanImportFile(_localGame, _gameFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
         }
 
         [Test]
-        [TestCase("Movie Title - 2022.sub")]
-        [TestCase("Movie Title - 2022.ass")]
+        [TestCase("Game Title - 2022.sub")]
+        [TestCase("Game Title - 2022.ass")]
         public void should_not_pass_unwanted_file(string filePath)
         {
             Mocker.GetMock<IConfigService>().Setup(v => v.ImportExtraFiles).Returns(false);
@@ -149,72 +149,72 @@ namespace NzbDrone.Core.Test.Extras
 
             var files = new List<string>
             {
-                _localMovie.Path,
+                _localGame.Path,
                 nfofile
             };
 
             WithExistingFiles(files);
 
-            Subject.ImportMovie(_localMovie, _movieFile, true);
+            Subject.ImportGame(_localGame, _gameFile, true);
 
-            _subtitleService.Verify(v => v.CanImportFile(_localMovie, _movieFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
-            _otherExtraService.Verify(v => v.CanImportFile(_localMovie, _movieFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+            _subtitleService.Verify(v => v.CanImportFile(_localGame, _gameFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+            _otherExtraService.Verify(v => v.CanImportFile(_localGame, _gameFile, It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
         }
 
         [Test]
         public void should_pass_subtitle_file_to_subtitle_service()
         {
-            var subtitleFile = Path.Combine(_releaseFolder, "Movie.Title.2022.en.srt").AsOsAgnostic();
+            var subtitleFile = Path.Combine(_releaseFolder, "Game.Title.2022.en.srt").AsOsAgnostic();
 
             var files = new List<string>
             {
-                _localMovie.Path,
+                _localGame.Path,
                 subtitleFile
             };
 
             WithExistingFiles(files);
 
-            Subject.ImportMovie(_localMovie, _movieFile, true);
+            Subject.ImportGame(_localGame, _gameFile, true);
 
-            _subtitleService.Verify(v => v.ImportFiles(_localMovie, _movieFile, new List<string> { subtitleFile }, true), Times.Once());
-            _otherExtraService.Verify(v => v.ImportFiles(_localMovie, _movieFile, new List<string> { subtitleFile }, true), Times.Never());
+            _subtitleService.Verify(v => v.ImportFiles(_localGame, _gameFile, new List<string> { subtitleFile }, true), Times.Once());
+            _otherExtraService.Verify(v => v.ImportFiles(_localGame, _gameFile, new List<string> { subtitleFile }, true), Times.Never());
         }
 
         [Test]
         public void should_pass_nfo_file_to_other_service()
         {
-            var nfofile = Path.Combine(_releaseFolder, "Movie.Title.2022.nfo").AsOsAgnostic();
+            var nfofile = Path.Combine(_releaseFolder, "Game.Title.2022.nfo").AsOsAgnostic();
 
             var files = new List<string>
             {
-                _localMovie.Path,
+                _localGame.Path,
                 nfofile
             };
 
             WithExistingFiles(files);
 
-            Subject.ImportMovie(_localMovie, _movieFile, true);
+            Subject.ImportGame(_localGame, _gameFile, true);
 
-            _subtitleService.Verify(v => v.ImportFiles(_localMovie, _movieFile, new List<string> { nfofile }, true), Times.Never());
-            _otherExtraService.Verify(v => v.ImportFiles(_localMovie, _movieFile, new List<string> { nfofile }, true), Times.Once());
+            _subtitleService.Verify(v => v.ImportFiles(_localGame, _gameFile, new List<string> { nfofile }, true), Times.Never());
+            _otherExtraService.Verify(v => v.ImportFiles(_localGame, _gameFile, new List<string> { nfofile }, true), Times.Once());
         }
 
         [Test]
         public void should_search_subtitles_when_importing_from_job_folder()
         {
-            _localMovie.FolderMovieInfo = new ParsedMovieInfo();
+            _localGame.FolderGameInfo = new ParsedGameInfo();
 
-            var subtitleFile = Path.Combine(_releaseFolder, "Movie.Title.2022.en.srt").AsOsAgnostic();
+            var subtitleFile = Path.Combine(_releaseFolder, "Game.Title.2022.en.srt").AsOsAgnostic();
 
             var files = new List<string>
             {
-                _localMovie.Path,
+                _localGame.Path,
                 subtitleFile
             };
 
             WithExistingFiles(files);
 
-            Subject.ImportMovie(_localMovie, _movieFile, true);
+            Subject.ImportGame(_localGame, _gameFile, true);
 
             Mocker.GetMock<IDiskProvider>().Verify(v => v.GetFiles(_releaseFolder, true), Times.Once);
             Mocker.GetMock<IDiskProvider>().Verify(v => v.GetFiles(_releaseFolder, false), Times.Never);
@@ -223,19 +223,19 @@ namespace NzbDrone.Core.Test.Extras
         [Test]
         public void should_not_search_subtitles_when_not_importing_from_job_folder()
         {
-            _localMovie.FolderMovieInfo = null;
+            _localGame.FolderGameInfo = null;
 
-            var subtitleFile = Path.Combine(_releaseFolder, "Movie.Title.2022.en.srt").AsOsAgnostic();
+            var subtitleFile = Path.Combine(_releaseFolder, "Game.Title.2022.en.srt").AsOsAgnostic();
 
             var files = new List<string>
             {
-                _localMovie.Path,
+                _localGame.Path,
                 subtitleFile
             };
 
             WithExistingFiles(files);
 
-            Subject.ImportMovie(_localMovie, _movieFile, true);
+            Subject.ImportGame(_localGame, _gameFile, true);
 
             Mocker.GetMock<IDiskProvider>().Verify(v => v.GetFiles(_releaseFolder, true), Times.Never);
             Mocker.GetMock<IDiskProvider>().Verify(v => v.GetFiles(_releaseFolder, false), Times.Once);

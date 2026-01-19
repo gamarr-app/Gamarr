@@ -14,9 +14,9 @@ namespace NzbDrone.Core.Notifications
         List<INotification> OnDownloadEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnUpgradeEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnRenameEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnMovieAddedEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnMovieDeleteEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnMovieFileDeleteEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnGameAddedEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnGameDeleteEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnGameFileDeleteEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnHealthIssueEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnHealthRestoredEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnApplicationUpdateEnabled(bool filterBlockedNotifications = true);
@@ -80,44 +80,44 @@ namespace NzbDrone.Core.Notifications
             return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnRename).ToList();
         }
 
-        public List<INotification> OnMovieAddedEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnGameAddedEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieAdded)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameAdded)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieAdded).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameAdded).ToList();
         }
 
-        public List<INotification> OnMovieDeleteEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnGameDeleteEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieDelete)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameDelete)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieDelete).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameDelete).ToList();
         }
 
-        public List<INotification> OnMovieFileDeleteEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnGameFileDeleteEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieFileDelete)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameFileDelete)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieFileDelete).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameFileDelete).ToList();
         }
 
-        public List<INotification> OnMovieFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnGameFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieFileDeleteForUpgrade)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameFileDeleteForUpgrade)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnMovieFileDeleteForUpgrade).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnGameFileDeleteForUpgrade).ToList();
         }
 
         public List<INotification> OnHealthIssueEnabled(bool filterBlockedNotifications = true)
@@ -184,10 +184,10 @@ namespace NzbDrone.Core.Notifications
             definition.SupportsOnDownload = provider.SupportsOnDownload;
             definition.SupportsOnUpgrade = provider.SupportsOnUpgrade;
             definition.SupportsOnRename = provider.SupportsOnRename;
-            definition.SupportsOnMovieAdded = provider.SupportsOnMovieAdded;
-            definition.SupportsOnMovieDelete = provider.SupportsOnMovieDelete;
-            definition.SupportsOnMovieFileDelete = provider.SupportsOnMovieFileDelete;
-            definition.SupportsOnMovieFileDeleteForUpgrade = provider.SupportsOnMovieFileDeleteForUpgrade;
+            definition.SupportsOnGameAdded = provider.SupportsOnGameAdded;
+            definition.SupportsOnGameDelete = provider.SupportsOnGameDelete;
+            definition.SupportsOnGameFileDelete = provider.SupportsOnGameFileDelete;
+            definition.SupportsOnGameFileDeleteForUpgrade = provider.SupportsOnGameFileDeleteForUpgrade;
             definition.SupportsOnHealthIssue = provider.SupportsOnHealthIssue;
             definition.SupportsOnHealthRestored = provider.SupportsOnHealthRestored;
             definition.SupportsOnApplicationUpdate = provider.SupportsOnApplicationUpdate;

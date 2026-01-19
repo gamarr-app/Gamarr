@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Download
         public async Task<ProcessedDecisions> ProcessDecisions(List<DownloadDecision> decisions)
         {
             var qualifiedReports = GetQualifiedReports(decisions);
-            var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisionsForMovies(qualifiedReports);
+            var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisionsForGames(qualifiedReports);
             var grabbed = new List<DownloadDecision>();
             var pending = new List<DownloadDecision>();
             var rejected = decisions.Where(d => d.Rejected).ToList();
@@ -50,10 +50,10 @@ namespace NzbDrone.Core.Download
 
             foreach (var report in prioritizedDecisions)
             {
-                var downloadProtocol = report.RemoteMovie.Release.DownloadProtocol;
+                var downloadProtocol = report.RemoteGame.Release.DownloadProtocol;
 
                 // Skip if already grabbed
-                if (IsMovieProcessed(grabbed, report))
+                if (IsGameProcessed(grabbed, report))
                 {
                     continue;
                 }
@@ -161,28 +161,28 @@ namespace NzbDrone.Core.Download
         internal bool IsQualifiedReport(DownloadDecision decision)
         {
             // Process both approved and temporarily rejected
-            return (decision.Approved || decision.TemporarilyRejected) && decision.RemoteMovie.Movie != null;
+            return (decision.Approved || decision.TemporarilyRejected) && decision.RemoteGame.Game != null;
         }
 
-        private bool IsMovieProcessed(List<DownloadDecision> decisions, DownloadDecision report)
+        private bool IsGameProcessed(List<DownloadDecision> decisions, DownloadDecision report)
         {
-            var movieId = report.RemoteMovie.Movie.Id;
+            var gameId = report.RemoteGame.Game.Id;
 
-            return decisions.Select(r => r.RemoteMovie.Movie)
+            return decisions.Select(r => r.RemoteGame.Game)
                             .Select(e => e.Id)
                             .ToList()
-                            .Contains(movieId);
+                            .Contains(gameId);
         }
 
         private void PreparePending(List<Tuple<DownloadDecision, PendingReleaseReason>> queue, List<DownloadDecision> grabbed, List<DownloadDecision> pending, DownloadDecision report, PendingReleaseReason reason)
         {
-            // If a release was already grabbed with a matching movie we should store it as a fallback
+            // If a release was already grabbed with a matching game we should store it as a fallback
             // and filter it out the next time it is processed.
             // If a higher quality release failed to add to the download client, but a lower quality release
             // was sent to another client we still list it normally so it apparent that it'll grab next time.
             // Delayed is treated the same, but only the first is listed the subsequent items as stored as Fallback.
-            if (IsMovieProcessed(grabbed, report) ||
-                IsMovieProcessed(pending, report))
+            if (IsGameProcessed(grabbed, report) ||
+                IsGameProcessed(pending, report))
             {
                 reason = PendingReleaseReason.Fallback;
             }
@@ -193,32 +193,32 @@ namespace NzbDrone.Core.Download
 
         private async Task<ProcessedDecisionResult> ProcessDecisionInternal(DownloadDecision decision, int? downloadClientId = null)
         {
-            var remoteMovie = decision.RemoteMovie;
-            var remoteIndexer = remoteMovie.Release.Indexer;
+            var remoteGame = decision.RemoteGame;
+            var remoteIndexer = remoteGame.Release.Indexer;
 
             try
             {
-                _logger.Trace("Grabbing release '{0}' from Indexer {1} at priority {2}.", remoteMovie, remoteIndexer, remoteMovie.Release.IndexerPriority);
-                await _downloadService.DownloadReport(remoteMovie, downloadClientId);
+                _logger.Trace("Grabbing release '{0}' from Indexer {1} at priority {2}.", remoteGame, remoteIndexer, remoteGame.Release.IndexerPriority);
+                await _downloadService.DownloadReport(remoteGame, downloadClientId);
 
                 return ProcessedDecisionResult.Grabbed;
             }
             catch (ReleaseUnavailableException)
             {
-                _logger.Warn("Failed to download release '{0}' from Indexer {1}. Release not available", remoteMovie, remoteIndexer);
+                _logger.Warn("Failed to download release '{0}' from Indexer {1}. Release not available", remoteGame, remoteIndexer);
                 return ProcessedDecisionResult.Rejected;
             }
             catch (Exception ex)
             {
                 if (ex is DownloadClientUnavailableException || ex is DownloadClientAuthenticationException)
                 {
-                    _logger.Debug(ex, "Failed to send release '{0}' from Indexer {1} to download client, storing until later.", remoteMovie, remoteIndexer);
+                    _logger.Debug(ex, "Failed to send release '{0}' from Indexer {1} to download client, storing until later.", remoteGame, remoteIndexer);
 
                     return ProcessedDecisionResult.Failed;
                 }
                 else
                 {
-                    _logger.Warn(ex, "Couldn't add release '{0}' from Indexer {1} to download queue.", remoteMovie, remoteIndexer);
+                    _logger.Warn(ex, "Couldn't add release '{0}' from Indexer {1} to download queue.", remoteGame, remoteIndexer);
                     return ProcessedDecisionResult.Skipped;
                 }
             }

@@ -4,7 +4,7 @@ using System.Linq;
 using NzbDrone.Common;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Files;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Extras
 {
@@ -19,30 +19,30 @@ namespace NzbDrone.Core.Extras
         }
 
         public abstract int Order { get; }
-        public abstract IEnumerable<ExtraFile> ProcessFiles(Movie movie, List<string> filesOnDisk, List<string> importedFiles, string fileNameBeforeRename);
+        public abstract IEnumerable<ExtraFile> ProcessFiles(Game game, List<string> filesOnDisk, List<string> importedFiles, string fileNameBeforeRename);
 
-        public virtual ImportExistingExtraFileFilterResult<TExtraFile> FilterAndClean(Movie movie, List<string> filesOnDisk, List<string> importedFiles, bool keepExistingEntries)
+        public virtual ImportExistingExtraFileFilterResult<TExtraFile> FilterAndClean(Game game, List<string> filesOnDisk, List<string> importedFiles, bool keepExistingEntries)
         {
-            var movieFiles = _extraFileService.GetFilesByMovie(movie.Id);
+            var gameFiles = _extraFileService.GetFilesByGame(game.Id);
 
             if (keepExistingEntries)
             {
-                var incompleteImports = movieFiles.IntersectBy(f => Path.Combine(movie.Path, f.RelativePath), filesOnDisk, i => i, PathEqualityComparer.Instance).Select(f => f.Id);
+                var incompleteImports = gameFiles.IntersectBy(f => Path.Combine(game.Path, f.RelativePath), filesOnDisk, i => i, PathEqualityComparer.Instance).Select(f => f.Id);
 
                 _extraFileService.DeleteMany(incompleteImports);
 
-                return Filter(movie, filesOnDisk, importedFiles, new List<TExtraFile>());
+                return Filter(game, filesOnDisk, importedFiles, new List<TExtraFile>());
             }
 
-            Clean(movie, filesOnDisk, importedFiles, movieFiles);
+            Clean(game, filesOnDisk, importedFiles, gameFiles);
 
-            return Filter(movie, filesOnDisk, importedFiles, movieFiles);
+            return Filter(game, filesOnDisk, importedFiles, gameFiles);
         }
 
-        private ImportExistingExtraFileFilterResult<TExtraFile> Filter(Movie movie, List<string> filesOnDisk, List<string> importedFiles, List<TExtraFile> movieFiles)
+        private ImportExistingExtraFileFilterResult<TExtraFile> Filter(Game game, List<string> filesOnDisk, List<string> importedFiles, List<TExtraFile> gameFiles)
         {
-            var previouslyImported = movieFiles.IntersectBy(s => Path.Combine(movie.Path, s.RelativePath), filesOnDisk, f => f, PathEqualityComparer.Instance).ToList();
-            var filteredFiles = filesOnDisk.Except(previouslyImported.Select(f => Path.Combine(movie.Path, f.RelativePath)).ToList(), PathEqualityComparer.Instance)
+            var previouslyImported = gameFiles.IntersectBy(s => Path.Combine(game.Path, s.RelativePath), filesOnDisk, f => f, PathEqualityComparer.Instance).ToList();
+            var filteredFiles = filesOnDisk.Except(previouslyImported.Select(f => Path.Combine(game.Path, f.RelativePath)).ToList(), PathEqualityComparer.Instance)
                                            .Except(importedFiles, PathEqualityComparer.Instance)
                                            .ToList();
 
@@ -51,12 +51,12 @@ namespace NzbDrone.Core.Extras
             return new ImportExistingExtraFileFilterResult<TExtraFile>(previouslyImported, filteredFiles);
         }
 
-        private void Clean(Movie movie, List<string> filesOnDisk, List<string> importedFiles, List<TExtraFile> movieFiles)
+        private void Clean(Game game, List<string> filesOnDisk, List<string> importedFiles, List<TExtraFile> gameFiles)
         {
-            var alreadyImportedFileIds = movieFiles.IntersectBy(f => Path.Combine(movie.Path, f.RelativePath), importedFiles, i => i, PathEqualityComparer.Instance)
+            var alreadyImportedFileIds = gameFiles.IntersectBy(f => Path.Combine(game.Path, f.RelativePath), importedFiles, i => i, PathEqualityComparer.Instance)
                 .Select(f => f.Id);
 
-            var deletedFiles = movieFiles.ExceptBy(f => Path.Combine(movie.Path, f.RelativePath), filesOnDisk, i => i, PathEqualityComparer.Instance)
+            var deletedFiles = gameFiles.ExceptBy(f => Path.Combine(game.Path, f.RelativePath), filesOnDisk, i => i, PathEqualityComparer.Instance)
                 .Select(f => f.Id);
 
             _extraFileService.DeleteMany(alreadyImportedFileIds);

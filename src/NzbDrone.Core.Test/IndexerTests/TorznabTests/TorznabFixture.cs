@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Test.IndexerTests.TorznabTests
             releaseInfo.Indexer.Should().Be(Subject.Definition.Name);
             releaseInfo.PublishDate.Should().Be(DateTime.Parse("Wed, 17 May 2017 20:36:06 +0000").ToUniversalTime());
             releaseInfo.Size.Should().Be(316477946);
-            releaseInfo.TmdbId.Should().Be(0);
+            releaseInfo.IgdbId.Should().Be(0);
             releaseInfo.InfoHash.Should().Be("2d69a861bef5a9f2cdf791b7328e37b7953205e1");
             releaseInfo.Seeders.Should().BeNull();
             releaseInfo.Peers.Should().BeNull();

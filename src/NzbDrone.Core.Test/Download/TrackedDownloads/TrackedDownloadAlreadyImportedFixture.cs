@@ -5,7 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -14,37 +14,37 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
     [TestFixture]
     public class TrackedDownloadAlreadyImportedFixture : CoreTest<TrackedDownloadAlreadyImported>
     {
-        private Movie _movie;
+        private Game _game;
         private TrackedDownload _trackedDownload;
-        private List<MovieHistory> _historyItems;
+        private List<GameHistory> _historyItems;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew().Build();
+            _game = Builder<Game>.CreateNew().Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(r => r.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(r => r.Game = _game)
                                                       .Build();
 
             var downloadItem = Builder<DownloadClientItem>.CreateNew()
                                                          .Build();
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
-                                                       .With(t => t.RemoteMovie = remoteMovie)
+                                                       .With(t => t.RemoteGame = remoteGame)
                                                        .With(t => t.DownloadItem = downloadItem)
                                                        .Build();
 
-            _historyItems = new List<MovieHistory>();
+            _historyItems = new List<GameHistory>();
         }
 
-        public void GivenHistoryForMovie(Movie movie, params MovieHistoryEventType[] eventTypes)
+        public void GivenHistoryForGame(Game game, params GameHistoryEventType[] eventTypes)
         {
             foreach (var eventType in eventTypes)
             {
                 _historyItems.Add(
-                    Builder<MovieHistory>.CreateNew()
-                                            .With(h => h.MovieId = movie.Id)
+                    Builder<GameHistory>.CreateNew()
+                                            .With(h => h.GameId = game.Id)
                                             .With(h => h.EventType = eventType)
                                             .Build());
             }
@@ -59,9 +59,9 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_return_false_if_single_movie_download_is_not_imported()
+        public void should_return_false_if_single_game_download_is_not_imported()
         {
-            GivenHistoryForMovie(_movie, MovieHistoryEventType.Grabbed);
+            GivenHistoryForGame(_game, GameHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()
@@ -69,9 +69,9 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_return_true_if_single_movie_download_is_imported()
+        public void should_return_true_if_single_game_download_is_imported()
         {
-            GivenHistoryForMovie(_movie, MovieHistoryEventType.DownloadFolderImported, MovieHistoryEventType.Grabbed);
+            GivenHistoryForGame(_game, GameHistoryEventType.DownloadFolderImported, GameHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()

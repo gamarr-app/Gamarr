@@ -40,7 +40,7 @@ namespace NzbDrone.Core.ImportLists.Plex
         {
             Settings.Validate().Filter("AccessToken").ThrowOnError();
 
-            return FetchMovies(g => g.GetMovies());
+            return FetchGames(g => g.GetGames());
         }
 
         public override IParseImportListResponse GetParser()

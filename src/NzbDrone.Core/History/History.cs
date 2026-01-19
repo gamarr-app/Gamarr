@@ -2,38 +2,38 @@ using System;
 using System.Collections.Generic;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.History
 {
-    public class MovieHistory : ModelBase
+    public class GameHistory : ModelBase
     {
         public const string DOWNLOAD_CLIENT = "downloadClient";
-        public const string MOVIE_MATCH_TYPE = "movieMatchType";
+        public const string GAME_MATCH_TYPE = "gameMatchType";
         public const string RELEASE_SOURCE = "releaseSource";
         public const string RELEASE_GROUP = "releaseGroup";
         public const string SIZE = "size";
         public const string INDEXER = "indexer";
 
-        public MovieHistory()
+        public GameHistory()
         {
             Data = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public int MovieId { get; set; }
+        public int GameId { get; set; }
         public string SourceTitle { get; set; }
         public QualityModel Quality { get; set; }
         public DateTime Date { get; set; }
-        public Movie Movie { get; set; }
-        public MovieHistoryEventType EventType { get; set; }
+        public Game Game { get; set; }
+        public GameHistoryEventType EventType { get; set; }
         public Dictionary<string, string> Data { get; set; }
         public List<Language> Languages { get; set; }
 
         public string DownloadId { get; set; }
     }
 
-    public enum MovieHistoryEventType
+    public enum GameHistoryEventType
     {
         Unknown = 0,
         Grabbed = 1,
@@ -43,9 +43,9 @@ namespace NzbDrone.Core.History
         DownloadFailed = 4,
 
         // EpisodeFileDeleted = 5, // deprecated
-        MovieFileDeleted = 6,
-        MovieFolderImported = 7, // not used yet
-        MovieFileRenamed = 8,
+        GameFileDeleted = 6,
+        GameFolderImported = 7, // not used yet
+        GameFileRenamed = 8,
         DownloadIgnored = 9
     }
 }

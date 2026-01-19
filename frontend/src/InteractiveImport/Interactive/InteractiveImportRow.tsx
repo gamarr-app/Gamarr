@@ -10,15 +10,15 @@ import Popover from 'Components/Tooltip/Popover';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
 import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
-import SelectMovieModal from 'InteractiveImport/Movie/SelectMovieModal';
+import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
 import Language from 'Language/Language';
-import IndexerFlags from 'Movie/IndexerFlags';
-import Movie from 'Movie/Movie';
-import MovieFormats from 'Movie/MovieFormats';
-import MovieLanguages from 'Movie/MovieLanguages';
-import MovieQuality from 'Movie/MovieQuality';
+import IndexerFlags from 'Game/IndexerFlags';
+import Game from 'Game/Game';
+import GameFormats from 'Game/GameFormats';
+import GameLanguages from 'Game/GameLanguages';
+import GameQuality from 'Game/GameQuality';
 import { QualityModel } from 'Quality/Quality';
 import {
   reprocessInteractiveImportItems,
@@ -34,21 +34,21 @@ import InteractiveImportRowCellPlaceholder from './InteractiveImportRowCellPlace
 import styles from './InteractiveImportRow.css';
 
 type SelectType =
-  | 'movie'
+  | 'game'
   | 'releaseGroup'
   | 'quality'
   | 'language'
   | 'indexerFlags';
 
 type SelectedChangeProps = SelectStateInputProps & {
-  hasMovieFileId: boolean;
+  hasGameFileId: boolean;
 };
 
 interface InteractiveImportRowProps {
   id: number;
-  allowMovieChange: boolean;
+  allowGameChange: boolean;
   relativePath: string;
-  movie?: Movie;
+  game?: Game;
   releaseGroup?: string;
   quality?: QualityModel;
   languages?: Language[];
@@ -58,7 +58,7 @@ interface InteractiveImportRowProps {
   indexerFlags: number;
   rejections: Rejection[];
   columns: Column[];
-  movieFileId?: number;
+  gameFileId?: number;
   isReprocessing?: boolean;
   isSelected?: boolean;
   modalTitle: string;
@@ -69,9 +69,9 @@ interface InteractiveImportRowProps {
 function InteractiveImportRow(props: InteractiveImportRowProps) {
   const {
     id,
-    allowMovieChange,
+    allowGameChange,
     relativePath,
-    movie,
+    game,
     quality,
     languages,
     releaseGroup,
@@ -82,7 +82,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     rejections,
     isSelected,
     modalTitle,
-    movieFileId,
+    gameFileId,
     columns,
     onSelectedChange,
     onValidRowChange,
@@ -90,8 +90,8 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
 
   const dispatch = useDispatch();
 
-  const isMovieColumnVisible = useMemo(
-    () => columns.find((c) => c.name === 'movie')?.isVisible ?? false,
+  const isGameColumnVisible = useMemo(
+    () => columns.find((c) => c.name === 'game')?.isVisible ?? false,
     [columns]
   );
   const isIndexerFlagsColumnVisible = useMemo(
@@ -105,10 +105,10 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
 
   useEffect(
     () => {
-      if (allowMovieChange && movie && quality && languages && size > 0) {
+      if (allowGameChange && game && quality && languages && size > 0) {
         onSelectedChange({
           id,
-          hasMovieFileId: !!movieFileId,
+          hasGameFileId: !!gameFileId,
           value: true,
           shiftKey: false,
         });
@@ -119,50 +119,50 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
   );
 
   useEffect(() => {
-    const isValid = !!(movie && quality && languages);
+    const isValid = !!(game && quality && languages);
 
     if (isSelected && !isValid) {
       onValidRowChange(id, false);
     } else {
       onValidRowChange(id, true);
     }
-  }, [id, movie, quality, languages, isSelected, onValidRowChange]);
+  }, [id, game, quality, languages, isSelected, onValidRowChange]);
 
   const handleSelectedChange = useCallback(
     (result: SelectStateInputProps) => {
       onSelectedChange({
         ...result,
-        hasMovieFileId: !!movieFileId,
+        hasGameFileId: !!gameFileId,
       });
     },
-    [movieFileId, onSelectedChange]
+    [gameFileId, onSelectedChange]
   );
 
   const selectRowAfterChange = useCallback(() => {
     if (!isSelected) {
       onSelectedChange({
         id,
-        hasMovieFileId: !!movieFileId,
+        hasGameFileId: !!gameFileId,
         value: true,
         shiftKey: false,
       });
     }
-  }, [id, movieFileId, isSelected, onSelectedChange]);
+  }, [id, gameFileId, isSelected, onSelectedChange]);
 
   const onSelectModalClose = useCallback(() => {
     setSelectModalOpen(null);
   }, [setSelectModalOpen]);
 
-  const onSelectMoviePress = useCallback(() => {
-    setSelectModalOpen('movie');
+  const onSelectGamePress = useCallback(() => {
+    setSelectModalOpen('game');
   }, [setSelectModalOpen]);
 
-  const onMovieSelect = useCallback(
-    (movie: Movie) => {
+  const onGameSelect = useCallback(
+    (game: Game) => {
       dispatch(
         updateInteractiveImportItem({
           id,
-          movie,
+          game,
         })
       );
 
@@ -258,9 +258,9 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     [id, dispatch, setSelectModalOpen, selectRowAfterChange]
   );
 
-  const movieTitle = movie ? movie.title : '';
+  const gameTitle = game ? game.title : '';
 
-  const showMoviePlaceholder = isSelected && !movie;
+  const showGamePlaceholder = isSelected && !game;
   const showReleaseGroupPlaceholder = isSelected && !releaseGroup;
   const showQualityPlaceholder = isSelected && !quality;
   const showLanguagePlaceholder = isSelected && !languages;
@@ -278,16 +278,16 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
         {relativePath}
       </TableRowCell>
 
-      {isMovieColumnVisible ? (
+      {isGameColumnVisible ? (
         <TableRowCellButton
-          isDisabled={!allowMovieChange}
-          title={allowMovieChange ? translate('ClickToChangeMovie') : undefined}
-          onPress={onSelectMoviePress}
+          isDisabled={!allowGameChange}
+          title={allowGameChange ? translate('ClickToChangeGame') : undefined}
+          onPress={onSelectGamePress}
         >
-          {showMoviePlaceholder ? (
+          {showGamePlaceholder ? (
             <InteractiveImportRowCellPlaceholder />
           ) : (
-            movieTitle
+            gameTitle
           )}
         </TableRowCellButton>
       ) : null}
@@ -311,7 +311,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
         {showQualityPlaceholder && <InteractiveImportRowCellPlaceholder />}
 
         {!showQualityPlaceholder && !!quality && (
-          <MovieQuality className={styles.label} quality={quality} />
+          <GameQuality className={styles.label} quality={quality} />
         )}
       </TableRowCellButton>
 
@@ -323,7 +323,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
         {showLanguagePlaceholder && <InteractiveImportRowCellPlaceholder />}
 
         {!showLanguagePlaceholder && !!languages && (
-          <MovieLanguages className={styles.label} languages={languages} />
+          <GameLanguages className={styles.label} languages={languages} />
         )}
       </TableRowCellButton>
 
@@ -339,7 +339,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
             title={translate('CustomFormats')}
             body={
               <div className={styles.customFormatTooltip}>
-                <MovieFormats formats={customFormats} />
+                <GameFormats formats={customFormats} />
               </div>
             }
             position={tooltipPositions.LEFT}
@@ -387,10 +387,10 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
         ) : null}
       </TableRowCell>
 
-      <SelectMovieModal
-        isOpen={selectModalOpen === 'movie'}
+      <SelectGameModal
+        isOpen={selectModalOpen === 'game'}
         modalTitle={modalTitle}
-        onMovieSelect={onMovieSelect}
+        onGameSelect={onGameSelect}
         onModalClose={onSelectModalClose}
       />
 

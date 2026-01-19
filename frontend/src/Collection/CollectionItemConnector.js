@@ -8,20 +8,20 @@ function createMapStateToProps() {
   return createSelector(
     createCollectionSelector(),
     (collection) => {
-      // If a movie is deleted this selector may fire before the parent
-      // selectors, which will result in an undefined movie, if that happens
+      // If a game is deleted this selector may fire before the parent
+      // selectors, which will result in an undefined game, if that happens
       // we want to return early here and again in the render function to avoid
-      // trying to show a movie that has no information available.
+      // trying to show a game that has no information available.
 
       if (!collection) {
         return {};
       }
 
-      const allGenres = collection.movies.flatMap((movie) => movie.genres);
+      const allGenres = collection.games.flatMap((game) => game.genres);
 
       return {
         ...collection,
-        movies: [...collection.movies].sort((a, b) => b.year - a.year),
+        games: [...collection.games].sort((a, b) => b.year - a.year),
         genres: Array.from(new Set(allGenres))
       };
     }

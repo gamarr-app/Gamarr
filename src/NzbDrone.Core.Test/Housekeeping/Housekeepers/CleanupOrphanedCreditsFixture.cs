@@ -2,8 +2,8 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Housekeeping.Housekeepers;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Credits;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         public void should_delete_orphaned_credit_items()
         {
             var credit = Builder<Credit>.CreateNew()
-                                              .With(h => h.MovieMetadataId = default)
+                                              .With(h => h.GameMetadataId = default)
                                               .With(h => h.Name = "Some Credit")
                                               .BuildNew();
 
@@ -27,14 +27,14 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_credit_items()
         {
-            var movieMetadata = Builder<MovieMetadata>.CreateNew().BuildNew();
+            var gameMetadata = Builder<GameMetadata>.CreateNew().BuildNew();
 
-            Db.Insert(movieMetadata);
+            Db.Insert(gameMetadata);
 
             var credit = Builder<Credit>.CreateNew()
-                                              .With(h => h.MovieMetadataId = default)
+                                              .With(h => h.GameMetadataId = default)
                                               .With(h => h.Name = "Some Credit")
-                                              .With(b => b.MovieMetadataId = movieMetadata.Id)
+                                              .With(b => b.GameMetadataId = gameMetadata.Id)
                                               .BuildNew();
 
             Db.Insert(credit);

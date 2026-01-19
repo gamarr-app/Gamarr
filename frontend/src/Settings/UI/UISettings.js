@@ -56,7 +56,7 @@ export const timeFormatOptions = [
   { key: 'HH:mm', value: '17:00/17:30' }
 ];
 
-export const movieRuntimeFormatOptions = [
+export const gameRuntimeFormatOptions = [
   { key: 'hoursMinutes', value: '1h 15m' },
   { key: 'minutes', value: '75 mins' }
 ];
@@ -138,16 +138,16 @@ class UISettings extends Component {
                   </FormGroup>
                 </FieldSet>
 
-                <FieldSet legend={translate('Movies')}>
+                <FieldSet legend={translate('Games')}>
                   <FormGroup>
                     <FormLabel>{translate('RuntimeFormat')}</FormLabel>
 
                     <FormInputGroup
                       type={inputTypes.SELECT}
-                      name="movieRuntimeFormat"
-                      values={movieRuntimeFormatOptions}
+                      name="gameRuntimeFormat"
+                      values={gameRuntimeFormatOptions}
                       onChange={onInputChange}
-                      {...settings.movieRuntimeFormat}
+                      {...settings.gameRuntimeFormat}
                     />
                   </FormGroup>
                 </FieldSet>
@@ -232,21 +232,21 @@ class UISettings extends Component {
 
                 <FieldSet legend={translate('Language')}>
                   <FormGroup>
-                    <FormLabel>{translate('MovieInfoLanguage')}</FormLabel>
+                    <FormLabel>{translate('GameInfoLanguage')}</FormLabel>
                     <FormInputGroup
                       type={inputTypes.LANGUAGE_SELECT}
-                      name="movieInfoLanguage"
+                      name="gameInfoLanguage"
                       values={languages}
-                      helpText={translate('MovieInfoLanguageHelpText')}
-                      helpTextWarning={translate('MovieInfoLanguageHelpTextWarning')}
+                      helpText={translate('GameInfoLanguageHelpText')}
+                      helpTextWarning={translate('GameInfoLanguageHelpTextWarning')}
                       onChange={onInputChange}
-                      {...settings.movieInfoLanguage}
+                      {...settings.gameInfoLanguage}
                       errors={
-                        languages.some((language) => language.key === settings.movieInfoLanguage.value) ?
-                          settings.movieInfoLanguage.errors :
+                        languages.some((language) => language.key === settings.gameInfoLanguage.value) ?
+                          settings.gameInfoLanguage.errors :
                           [
-                            ...settings.movieInfoLanguage.errors,
-                            { message: translate('InvalidMovieInfoLanguageLanguage') }
+                            ...settings.gameInfoLanguage.errors,
+                            { message: translate('InvalidGameInfoLanguageLanguage') }
                           ]}
                     />
                   </FormGroup>

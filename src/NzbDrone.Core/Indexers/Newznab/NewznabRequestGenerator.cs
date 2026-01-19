@@ -39,19 +39,19 @@ namespace NzbDrone.Core.Indexers.Newznab
             {
                 var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
 
-                return capabilities.SupportedMovieSearchParameters != null &&
-                       capabilities.SupportedMovieSearchParameters.Contains("imdbid");
+                return capabilities.SupportedGameSearchParameters != null &&
+                       capabilities.SupportedGameSearchParameters.Contains("imdbid");
             }
         }
 
-        private bool SupportsTmdbSearch
+        private bool SupportsIgdbSearch
         {
             get
             {
                 var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
 
-                return capabilities.SupportedMovieSearchParameters != null &&
-                       capabilities.SupportedMovieSearchParameters.Contains("tmdbid");
+                return capabilities.SupportedGameSearchParameters != null &&
+                       capabilities.SupportedGameSearchParameters.Contains("igdbid");
             }
         }
 
@@ -75,13 +75,13 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
         }
 
-        private string MovieTextSearchEngine
+        private string GameTextSearchEngine
         {
             get
             {
                 var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
 
-                return capabilities.MovieTextSearchEngine;
+                return capabilities.GameTextSearchEngine;
             }
         }
 
@@ -91,10 +91,10 @@ namespace NzbDrone.Core.Indexers.Newznab
 
             var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
 
-            // Some indexers might forget to enable movie search, but normal search still works fine. Thus we force a normal search.
-            if (capabilities.SupportedMovieSearchParameters != null)
+            // Some indexers might forget to enable game search, but normal search still works fine. Thus we force a normal search.
+            if (capabilities.SupportedGameSearchParameters != null)
             {
-                pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "movie", ""));
+                pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "game", ""));
             }
             else if (capabilities.SupportedSearchParameters != null)
             {
@@ -104,55 +104,55 @@ namespace NzbDrone.Core.Indexers.Newznab
             return pageableRequests;
         }
 
-        public IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            AddMovieIdPageableRequests(pageableRequests, MaxPages, Settings.Categories, searchCriteria);
+            AddGameIdPageableRequests(pageableRequests, MaxPages, Settings.Categories, searchCriteria);
 
             return pageableRequests;
         }
 
-        private void AddMovieIdPageableRequests(IndexerPageableRequestChain chain, int maxPages, IEnumerable<int> categories, SearchCriteriaBase searchCriteria)
+        private void AddGameIdPageableRequests(IndexerPageableRequestChain chain, int maxPages, IEnumerable<int> categories, SearchCriteriaBase searchCriteria)
         {
-            var includeTmdbSearch = SupportsTmdbSearch && searchCriteria.Movie.MovieMetadata.Value.TmdbId > 0;
-            var includeImdbSearch = SupportsImdbSearch && searchCriteria.Movie.MovieMetadata.Value.ImdbId.IsNotNullOrWhiteSpace();
+            var includeIgdbSearch = SupportsIgdbSearch && searchCriteria.Game.GameMetadata.Value.IgdbId > 0;
+            var includeImdbSearch = SupportsImdbSearch && searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace();
 
-            if (SupportsAggregatedIdSearch && (includeTmdbSearch || includeImdbSearch))
+            if (SupportsAggregatedIdSearch && (includeIgdbSearch || includeImdbSearch))
             {
                 var ids = "";
 
-                if (includeTmdbSearch)
+                if (includeIgdbSearch)
                 {
-                    ids += $"&tmdbid={searchCriteria.Movie.MovieMetadata.Value.TmdbId}";
+                    ids += $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}";
                 }
 
                 if (includeImdbSearch)
                 {
-                    ids += $"&imdbid={searchCriteria.Movie.MovieMetadata.Value.ImdbId.Substring(2)}";
+                    ids += $"&imdbid={searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2)}";
                 }
 
-                chain.Add(GetPagedRequests(maxPages, categories, "movie", ids));
+                chain.Add(GetPagedRequests(maxPages, categories, "game", ids));
             }
             else
             {
-                if (includeTmdbSearch)
+                if (includeIgdbSearch)
                 {
                     chain.Add(GetPagedRequests(maxPages,
                         categories,
-                        "movie",
-                        $"&tmdbid={searchCriteria.Movie.MovieMetadata.Value.TmdbId}"));
+                        "game",
+                        $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
                 }
                 else if (includeImdbSearch)
                 {
                     chain.Add(GetPagedRequests(maxPages,
                         categories,
-                        "movie",
-                        $"&imdbid={searchCriteria.Movie.MovieMetadata.Value.ImdbId.Substring(2)}"));
+                        "game",
+                        $"&imdbid={searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2)}"));
                 }
             }
 
-            if (SupportsSearch && searchCriteria.Movie.Year > 0)
+            if (SupportsSearch && searchCriteria.Game.Year > 0)
             {
                 chain.AddTier();
                 var queryTitles = TextSearchEngine == "raw" ? searchCriteria.SceneTitles : searchCriteria.CleanSceneTitles;
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Indexers.Newznab
 
                     if (!Settings.RemoveYear)
                     {
-                        searchQuery += $" {searchCriteria.Movie.Year}";
+                        searchQuery += $" {searchCriteria.Game.Year}";
                     }
 
                     chain.Add(GetPagedRequests(MaxPages,

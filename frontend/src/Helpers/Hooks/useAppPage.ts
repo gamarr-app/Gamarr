@@ -4,8 +4,8 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import { fetchTranslations } from 'Store/Actions/appActions';
 import { fetchCustomFilters } from 'Store/Actions/customFilterActions';
-import { fetchMovies } from 'Store/Actions/movieActions';
-import { fetchMovieCollections } from 'Store/Actions/movieCollectionActions';
+import { fetchGames } from 'Store/Actions/gameActions';
+import { fetchGameCollections } from 'Store/Actions/gameCollectionActions';
 import {
   fetchImportLists,
   fetchIndexerFlags,
@@ -18,8 +18,8 @@ import { fetchTags } from 'Store/Actions/tagActions';
 
 const createErrorsSelector = () =>
   createSelector(
-    (state: AppState) => state.movies.error,
-    (state: AppState) => state.movieCollections.error,
+    (state: AppState) => state.games.error,
+    (state: AppState) => state.gameCollections.error,
     (state: AppState) => state.customFilters.error,
     (state: AppState) => state.tags.error,
     (state: AppState) => state.settings.ui.error,
@@ -30,8 +30,8 @@ const createErrorsSelector = () =>
     (state: AppState) => state.system.status.error,
     (state: AppState) => state.app.translations.error,
     (
-      moviesError,
-      movieCollectionsError,
+      gamesError,
+      gameCollectionsError,
       customFiltersError,
       tagsError,
       uiSettingsError,
@@ -43,8 +43,8 @@ const createErrorsSelector = () =>
       translationsError
     ) => {
       const hasError = !!(
-        moviesError ||
-        movieCollectionsError ||
+        gamesError ||
+        gameCollectionsError ||
         customFiltersError ||
         tagsError ||
         uiSettingsError ||
@@ -59,8 +59,8 @@ const createErrorsSelector = () =>
       return {
         hasError,
         errors: {
-          moviesError,
-          movieCollectionsError,
+          gamesError,
+          gameCollectionsError,
           customFiltersError,
           tagsError,
           uiSettingsError,
@@ -80,8 +80,8 @@ const useAppPage = () => {
 
   const isPopulated = useSelector(
     (state: AppState) =>
-      state.movies.isPopulated &&
-      state.movieCollections.isPopulated &&
+      state.games.isPopulated &&
+      state.gameCollections.isPopulated &&
       state.customFilters.isPopulated &&
       state.tags.isPopulated &&
       state.settings.ui.isPopulated &&
@@ -96,7 +96,7 @@ const useAppPage = () => {
   const { hasError, errors } = useSelector(createErrorsSelector());
 
   const isLocalStorageSupported = useMemo(() => {
-    const key = 'radarrTest';
+    const key = 'gamarrTest';
 
     try {
       localStorage.setItem(key, key);
@@ -109,8 +109,8 @@ const useAppPage = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(fetchMovies());
-    dispatch(fetchMovieCollections());
+    dispatch(fetchGames());
+    dispatch(fetchGameCollections());
     dispatch(fetchCustomFilters());
     dispatch(fetchTags());
     dispatch(fetchQualityProfiles());

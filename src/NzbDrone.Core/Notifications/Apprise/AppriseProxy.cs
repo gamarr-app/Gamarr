@@ -89,9 +89,9 @@ namespace NzbDrone.Core.Notifications.Apprise
 
         public ValidationFailure Test(AppriseSettings settings)
         {
-            const string title = "Radarr - Test Notification";
+            const string title = "Gamarr - Test Notification";
             const string body = "Success! You have properly configured your apprise notification settings.";
-            const string posterUrl = "https://raw.githubusercontent.com/Radarr/Radarr/develop/Logo/128.png";
+            const string posterUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/128.png";
 
             try
             {

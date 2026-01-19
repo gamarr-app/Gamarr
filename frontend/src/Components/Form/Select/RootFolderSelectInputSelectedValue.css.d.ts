@@ -3,7 +3,7 @@
 interface CssExports {
   'freeSpace': string;
   'isMissing': string;
-  'movieFolder': string;
+  'gameFolder': string;
   'path': string;
   'pathContainer': string;
   'selectedValue': string;

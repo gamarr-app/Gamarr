@@ -37,12 +37,12 @@ namespace NzbDrone.Core.Indexers.PassThePopcorn
             var jsonResponse = JsonConvert.DeserializeObject<PassThePopcornResponse>(indexerResponse.Content);
             if (jsonResponse.TotalResults == "0" ||
                 jsonResponse.TotalResults.IsNullOrWhiteSpace() ||
-                jsonResponse.Movies == null)
+                jsonResponse.Games == null)
             {
                 return torrentInfos;
             }
 
-            foreach (var result in jsonResponse.Movies)
+            foreach (var result in jsonResponse.Games)
             {
                 foreach (var torrent in result.Torrents)
                 {
@@ -107,7 +107,7 @@ namespace NzbDrone.Core.Indexers.PassThePopcorn
                                          $"Leechers: {torrent.Leechers}" +
                                          $"ReleaseName: {torrent.ReleaseName}" +
                                          $"ID: {torrent.Id}" +
-                                         "}. Please immediately report this info on https://github.com/Radarr/Radarr/issues/new?assignees=&labels=bug&template=bug_report.md&title=Encountered%20Exception%20Parsing%20%20PTP%20Torrent.");
+                                         "}. Please immediately report this info on https://github.com/Gamarr/Gamarr/issues/new?assignees=&labels=bug&template=bug_report.md&title=Encountered%20Exception%20Parsing%20%20PTP%20Torrent.");
                         throw;
                     }
                 }

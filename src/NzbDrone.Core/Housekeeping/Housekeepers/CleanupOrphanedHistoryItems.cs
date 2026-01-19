@@ -14,18 +14,18 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 
         public void Clean()
         {
-            CleanupOrphanedByMovie();
+            CleanupOrphanedByGame();
         }
 
-        private void CleanupOrphanedByMovie()
+        private void CleanupOrphanedByGame()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""History""
                              WHERE ""Id"" IN (
                              SELECT ""History"".""Id"" FROM ""History""
-                             LEFT OUTER JOIN ""Movies""
-                             ON ""History"".""MovieId"" = ""Movies"".""Id""
-                             WHERE ""Movies"".""Id"" IS NULL)");
+                             LEFT OUTER JOIN ""Games""
+                             ON ""History"".""GameId"" = ""Games"".""Id""
+                             WHERE ""Games"".""Id"" IS NULL)");
         }
     }
 }

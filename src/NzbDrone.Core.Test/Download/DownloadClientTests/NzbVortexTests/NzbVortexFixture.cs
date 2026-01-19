@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 Port = 2222,
                 ApiKey = "1234-ABCD",
                 TvCategory = "tv",
-                RecentMoviePriority = (int)NzbgetPriority.High
+                RecentGamePriority = (int)NzbgetPriority.High
             };
 
             _queued = new NzbVortexQueueItem
@@ -205,9 +205,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -217,9 +217,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
         {
             GivenFailedDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            Assert.ThrowsAsync<DownloadClientException>(async () => await Subject.Download(remoteMovie, CreateIndexer()));
+            Assert.ThrowsAsync<DownloadClientException>(async () => await Subject.Download(remoteGame, CreateIndexer()));
         }
 
         [Test]

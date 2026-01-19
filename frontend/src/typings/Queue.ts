@@ -1,7 +1,7 @@
 import ModelBase from 'App/ModelBase';
 import DownloadProtocol from 'DownloadClient/DownloadProtocol';
 import Language from 'Language/Language';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import { QualityModel } from 'Quality/Quality';
 import CustomFormat from 'typings/CustomFormat';
 
@@ -42,9 +42,9 @@ interface Queue extends ModelBase {
   protocol: DownloadProtocol;
   downloadClient: string;
   outputPath: string;
-  movieHasFile: boolean;
-  movieId?: number;
+  gameHasFile: boolean;
+  gameId?: number;
   downloadClientHasPostImportCategory: boolean;
-  movie?: Movie;
+  game?: Game;
 }
 export default Queue;

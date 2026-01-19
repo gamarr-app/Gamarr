@@ -7,7 +7,7 @@ using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -19,27 +19,27 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
     public class ProperSpecificationFixture : CoreTest<ProperSpecification>
     {
-        private RemoteMovie _parseResultSingle;
-        private MovieFile _firstFile;
-        private MovieFile _secondFile;
+        private RemoteGame _parseResultSingle;
+        private GameFile _firstFile;
+        private GameFile _secondFile;
 
         [SetUp]
         public void Setup()
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _firstFile = new MovieFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1)), DateAdded = DateTime.Now };
-            _secondFile = new MovieFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _firstFile = new GameFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _secondFile = new GameFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1)), DateAdded = DateTime.Now };
 
-            var fakeSeries = Builder<Movie>.CreateNew()
+            var fakeSeries = Builder<Game>.CreateNew()
                          .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Bluray1080p.Id })
-                         .With(c => c.MovieFile = _firstFile)
+                         .With(c => c.GameFile = _firstFile)
                          .Build();
 
-            _parseResultSingle = new RemoteMovie
+            _parseResultSingle = new RemoteGame
             {
-                Movie = fakeSeries,
-                ParsedMovieInfo = new ParsedMovieInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                Game = fakeSeries,
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
             };
         }
 
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         }
 
         [Test]
-        public void should_return_false_when_movieFile_was_added_more_than_7_days_ago()
+        public void should_return_false_when_gameFile_was_added_more_than_7_days_ago()
         {
             _firstFile.Quality.Quality = Quality.DVD;
 
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         }
 
         [Test]
-        public void should_return_true_when_movieFile_was_added_more_than_7_days_ago_but_proper_is_for_better_quality()
+        public void should_return_true_when_gameFile_was_added_more_than_7_days_ago_but_proper_is_for_better_quality()
         {
             WithFirstFileUpgradable();
 
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             WithFirstFileUpgradable();
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
-            Subject.IsSatisfiedBy(_parseResultSingle, new MovieSearchCriteria()).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new GameSearchCriteria()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         }
 
         [Test]
-        public void should_return_true_when_movieFile_was_added_today()
+        public void should_return_true_when_gameFile_was_added_today()
         {
             Mocker.GetMock<IConfigService>()
                   .Setup(s => s.DownloadPropersAndRepacks)

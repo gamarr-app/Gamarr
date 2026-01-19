@@ -35,20 +35,20 @@ namespace NzbDrone.Core.Download
 
             if (!_configService.AutoRedownloadFailed)
             {
-                _logger.Debug("Auto redownloading failed movies is disabled");
+                _logger.Debug("Auto redownloading failed games is disabled");
                 return;
             }
 
             if (message.ReleaseSource == ReleaseSourceType.InteractiveSearch && !_configService.AutoRedownloadFailedFromInteractiveSearch)
             {
-                _logger.Debug("Auto redownloading failed movies from interactive search is disabled");
+                _logger.Debug("Auto redownloading failed games from interactive search is disabled");
                 return;
             }
 
-            if (message.MovieId != 0)
+            if (message.GameId != 0)
             {
-                _logger.Debug("Failed download contains a movie, searching again.");
-                _commandQueueManager.Push(new MoviesSearchCommand { MovieIds = new List<int> { message.MovieId } });
+                _logger.Debug("Failed download contains a game, searching again.");
+                _commandQueueManager.Push(new GamesSearchCommand { GameIds = new List<int> { message.GameId } });
             }
         }
     }

@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Datastore.Migration
             if (!Schema.Table("AlternativeTitles").Exists())
             {
                 Create.TableForModel("AlternativeTitles")
-                      .WithColumn("MovieId").AsInt64().NotNullable()
+                      .WithColumn("GameId").AsInt64().NotNullable()
                       .WithColumn("Title").AsString().NotNullable()
                       .WithColumn("CleanTitle").AsString().NotNullable()
                       .WithColumn("SourceType").AsInt64().WithDefaultValue(0)
@@ -20,11 +20,11 @@ namespace NzbDrone.Core.Datastore.Migration
                       .WithColumn("VoteCount").AsInt64().WithDefaultValue(0)
                       .WithColumn("Language").AsInt64().WithDefaultValue(0);
 
-                Delete.Column("AlternativeTitles").FromTable("Movies");
+                Delete.Column("AlternativeTitles").FromTable("Games");
             }
 
-            Alter.Table("Movies").AddColumn("SecondaryYear").AsInt32().Nullable();
-            Alter.Table("Movies").AddColumn("SecondaryYearSourceId").AsInt64().Nullable().WithDefaultValue(0);
+            Alter.Table("Games").AddColumn("SecondaryYear").AsInt32().Nullable();
+            Alter.Table("Games").AddColumn("SecondaryYearSourceId").AsInt64().Nullable().WithDefaultValue(0);
         }
     }
 }

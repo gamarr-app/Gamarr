@@ -32,57 +32,57 @@ namespace NzbDrone.Core.Datastore.Migration
         {
             // Use original language to set default language fallback for releases
             // Set all to English (1) on migration to ensure default behavior persists until refresh
-            Alter.Table("Movies").AddColumn("OriginalLanguage").AsInt32().WithDefaultValue((int)Language.English);
-            Alter.Table("Movies").AddColumn("OriginalTitle").AsString().Nullable();
+            Alter.Table("Games").AddColumn("OriginalLanguage").AsInt32().WithDefaultValue((int)Language.English);
+            Alter.Table("Games").AddColumn("OriginalTitle").AsString().Nullable();
 
-            Alter.Table("Movies").AddColumn("DigitalRelease").AsDateTime().Nullable();
+            Alter.Table("Games").AddColumn("DigitalRelease").AsDateTime().Nullable();
 
             // Column not used
-            Delete.Column("PhysicalReleaseNote").FromTable("Movies");
-            Delete.Column("SecondaryYearSourceId").FromTable("Movies");
+            Delete.Column("PhysicalReleaseNote").FromTable("Games");
+            Delete.Column("SecondaryYearSourceId").FromTable("Games");
 
-            Alter.Table("NamingConfig").AddColumn("RenameMovies").AsBoolean().WithDefaultValue(false);
-            Execute.Sql("UPDATE \"NamingConfig\" SET \"RenameMovies\"=\"RenameEpisodes\"");
+            Alter.Table("NamingConfig").AddColumn("RenameGames").AsBoolean().WithDefaultValue(false);
+            Execute.Sql("UPDATE \"NamingConfig\" SET \"RenameGames\"=\"RenameEpisodes\"");
             Delete.Column("RenameEpisodes").FromTable("NamingConfig");
 
             // Manual SQL, Fluent Migrator doesn't support multi-column unique constraint on table creation, SQLite doesn't support adding it after creation
-            IfDatabase("sqlite").Execute.Sql("CREATE TABLE \"MovieTranslations\"(" +
+            IfDatabase("sqlite").Execute.Sql("CREATE TABLE \"GameTranslations\"(" +
                 "\"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "\"MovieId\" INTEGER NOT NULL, " +
+                "\"GameId\" INTEGER NOT NULL, " +
                 "\"Title\" TEXT, " +
                 "\"CleanTitle\" TEXT, " +
                 "\"Overview\" TEXT, " +
                 "\"Language\" INTEGER NOT NULL, " +
-                "Unique(\"MovieId\", \"Language\"));");
+                "Unique(\"GameId\", \"Language\"));");
 
-            IfDatabase("postgres").Execute.Sql("CREATE TABLE \"MovieTranslations\"(" +
+            IfDatabase("postgres").Execute.Sql("CREATE TABLE \"GameTranslations\"(" +
                 "\"Id\" SERIAL PRIMARY KEY , " +
-                "\"MovieId\" INTEGER NOT NULL, " +
+                "\"GameId\" INTEGER NOT NULL, " +
                 "\"Title\" TEXT, " +
                 "\"CleanTitle\" TEXT, " +
                 "\"Overview\" TEXT, " +
                 "\"Language\" INTEGER NOT NULL, " +
-                "Unique(\"MovieId\", \"Language\"));");
+                "Unique(\"GameId\", \"Language\"));");
 
-            // Prevent failure if two movies have same alt titles
+            // Prevent failure if two games have same alt titles
             Execute.Sql("DROP INDEX IF EXISTS \"IX_AlternativeTitles_CleanTitle\"");
 
             Execute.WithConnection(FixLanguagesMoveFile);
             Execute.WithConnection(FixLanguagesHistory);
 
-            // Force refresh all movies in library
+            // Force refresh all games in library
             Update.Table("ScheduledTasks")
                 .Set(new { LastExecution = "2014-01-01 00:00:00" })
-                .Where(new { TypeName = "NzbDrone.Core.Movies.Commands.RefreshMovieCommand" });
+                .Where(new { TypeName = "NzbDrone.Core.Games.Commands.RefreshGameCommand" });
 
-            Update.Table("Movies")
+            Update.Table("Games")
                 .Set(new { LastInfoSync = "2014-01-01 00:00:00" })
                 .AllRows();
         }
 
         private void FixLanguagesMoveFile(IDbConnection conn, IDbTransaction tran)
         {
-            var rows = conn.Query<LanguageEntity177>($"SELECT \"Id\", \"Languages\" FROM \"MovieFiles\"");
+            var rows = conn.Query<LanguageEntity177>($"SELECT \"Id\", \"Languages\" FROM \"GameFiles\"");
 
             var corrected = new List<LanguageEntity177>();
 
@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 });
             }
 
-            var updateSql = "UPDATE \"MovieFiles\" SET \"Languages\" = @Languages WHERE \"Id\" = @Id";
+            var updateSql = "UPDATE \"GameFiles\" SET \"Languages\" = @Languages WHERE \"Id\" = @Id";
             conn.Execute(updateSql, corrected, transaction: tran);
         }
 

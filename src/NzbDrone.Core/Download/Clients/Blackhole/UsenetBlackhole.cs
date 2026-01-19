@@ -35,9 +35,9 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             ScanGracePeriod = TimeSpan.FromSeconds(30);
         }
 
-        protected override string AddFromNzbFile(RemoteMovie remoteMovie, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContent)
         {
-            var title = remoteMovie.Release.Title;
+            var title = remoteGame.Release.Title;
 
             title = FileNameBuilder.CleanFileName(title);
 
@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
                 {
                     DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, false),
                     DownloadId = Definition.Name + "_" + item.DownloadId,
-                    Category = "Radarr",
+                    Category = "Gamarr",
                     Title = item.Title,
 
                     TotalSize = item.TotalSize,

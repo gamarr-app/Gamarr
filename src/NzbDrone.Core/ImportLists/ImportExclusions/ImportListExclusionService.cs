@@ -3,7 +3,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games.Events;
 
 namespace NzbDrone.Core.ImportLists.ImportExclusions
 {
@@ -13,15 +13,15 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
         List<ImportListExclusion> Add(List<ImportListExclusion> importListExclusions);
         List<ImportListExclusion> All();
         PagingSpec<ImportListExclusion> Paged(PagingSpec<ImportListExclusion> pagingSpec);
-        bool IsMovieExcluded(int tmdbId);
+        bool IsGameExcluded(int igdbId);
         void Delete(int id);
         void Delete(List<int> ids);
         ImportListExclusion Get(int id);
         ImportListExclusion Update(ImportListExclusion importListExclusion);
-        List<int> AllExcludedTmdbIds();
+        List<int> AllExcludedIgdbIds();
     }
 
-    public class ImportListExclusionService : IImportListExclusionService, IHandleAsync<MoviesDeletedEvent>
+    public class ImportListExclusionService : IImportListExclusionService, IHandleAsync<GamesDeletedEvent>
     {
         private readonly IImportListExclusionRepository _repo;
         private readonly Logger _logger;
@@ -35,9 +35,9 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 
         public ImportListExclusion Add(ImportListExclusion importListExclusion)
         {
-            if (_repo.IsMovieExcluded(importListExclusion.TmdbId))
+            if (_repo.IsGameExcluded(importListExclusion.IgdbId))
             {
-                return _repo.FindByTmdbid(importListExclusion.TmdbId);
+                return _repo.FindByIgdbid(importListExclusion.IgdbId);
             }
 
             return _repo.Insert(importListExclusion);
@@ -50,9 +50,9 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             return importListExclusions;
         }
 
-        public bool IsMovieExcluded(int tmdbId)
+        public bool IsGameExcluded(int igdbId)
         {
-            return _repo.IsMovieExcluded(tmdbId);
+            return _repo.IsGameExcluded(igdbId);
         }
 
         public void Delete(int id)
@@ -85,25 +85,25 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             return _repo.GetPaged(pagingSpec);
         }
 
-        public List<int> AllExcludedTmdbIds()
+        public List<int> AllExcludedIgdbIds()
         {
-            return _repo.AllExcludedTmdbIds();
+            return _repo.AllExcludedIgdbIds();
         }
 
-        public void HandleAsync(MoviesDeletedEvent message)
+        public void HandleAsync(GamesDeletedEvent message)
         {
             if (!message.AddImportListExclusion)
             {
                 return;
             }
 
-            _logger.Debug("Adding {0} deleted movies to import list exclusions.", message.Movies.Count);
+            _logger.Debug("Adding {0} deleted games to import list exclusions.", message.Games.Count);
 
-            var exclusionsToAdd = DeDupeExclusions(message.Movies.Select(m => new ImportListExclusion
+            var exclusionsToAdd = DeDupeExclusions(message.Games.Select(m => new ImportListExclusion
             {
-                TmdbId = m.TmdbId,
-                MovieTitle = m.Title,
-                MovieYear = m.Year
+                IgdbId = m.IgdbId,
+                GameTitle = m.Title,
+                GameYear = m.Year
             }).ToList());
 
             _repo.InsertMany(exclusionsToAdd);
@@ -111,11 +111,11 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 
         private List<ImportListExclusion> DeDupeExclusions(List<ImportListExclusion> exclusions)
         {
-            var existingExclusions = _repo.AllExcludedTmdbIds();
+            var existingExclusions = _repo.AllExcludedIgdbIds();
 
             return exclusions
-                .DistinctBy(x => x.TmdbId)
-                .Where(x => !existingExclusions.Contains(x.TmdbId))
+                .DistinctBy(x => x.IgdbId)
+                .Where(x => !existingExclusions.Contains(x.IgdbId))
                 .ToList();
         }
     }

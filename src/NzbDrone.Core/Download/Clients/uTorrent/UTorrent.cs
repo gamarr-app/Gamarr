@@ -44,33 +44,33 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // set post-import category
-            if (Settings.MovieImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MovieImportedCategory != Settings.MovieCategory)
+            if (Settings.GameImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.GameImportedCategory != Settings.GameCategory)
             {
-                _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MovieImportedCategory, Settings);
+                _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.GameImportedCategory, Settings);
 
                 // old label must be explicitly removed
-                if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+                if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                 {
-                    _proxy.RemoveTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MovieCategory, Settings);
+                    _proxy.RemoveTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.GameCategory, Settings);
                 }
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             _proxy.AddTorrentFromUrl(magnetLink, Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteMovie.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteGame.SeedConfiguration, Settings);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(hash, Settings.MovieCategory, Settings);
+                _proxy.SetTorrentLabel(hash, Settings.GameCategory, Settings);
             }
 
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentMoviePriority == (int)UTorrentPriority.First) ||
-                (!isRecentMovie && Settings.OlderMoviePriority == (int)UTorrentPriority.First))
+            if ((isRecentGame && Settings.RecentGamePriority == (int)UTorrentPriority.First) ||
+                (!isRecentGame && Settings.OlderGamePriority == (int)UTorrentPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -80,20 +80,20 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             _proxy.AddTorrentFromFile(filename, fileContent, Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteMovie.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteGame.SeedConfiguration, Settings);
 
-            if (Settings.MovieCategory.IsNotNullOrWhiteSpace())
+            if (Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(hash, Settings.MovieCategory, Settings);
+                _proxy.SetTorrentLabel(hash, Settings.GameCategory, Settings);
             }
 
-            var isRecentMovie = remoteMovie.Movie.MovieMetadata.Value.IsRecentMovie;
+            var isRecentGame = remoteGame.Game.GameMetadata.Value.IsRecentGame;
 
-            if ((isRecentMovie && Settings.RecentMoviePriority == (int)UTorrentPriority.First) ||
-                (!isRecentMovie && Settings.OlderMoviePriority == (int)UTorrentPriority.First))
+            if ((isRecentGame && Settings.RecentGamePriority == (int)UTorrentPriority.First) ||
+                (!isRecentGame && Settings.OlderGamePriority == (int)UTorrentPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
 
             foreach (var torrent in torrents)
             {
-                if (torrent.Label != Settings.MovieCategory)
+                if (torrent.Label != Settings.GameCategory)
                 {
                     continue;
                 }
@@ -125,7 +125,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
                 item.Title = torrent.Name;
                 item.TotalSize = torrent.Size;
                 item.Category = torrent.Label;
-                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MovieImportedCategory.IsNotNullOrWhiteSpace());
+                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.GameImportedCategory.IsNotNullOrWhiteSpace());
                 item.RemainingSize = torrent.Remaining;
                 item.SeedRatio = torrent.Ratio;
 
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
         {
             List<UTorrentTorrent> torrents;
 
-            var cacheKey = string.Format("{0}:{1}:{2}", Settings.Host, Settings.Port, Settings.MovieCategory);
+            var cacheKey = string.Format("{0}:{1}:{2}", Settings.Host, Settings.Port, Settings.GameCategory);
             var cache = _torrentCache.Find(cacheKey);
 
             var response = _proxy.GetTorrents(cache == null ? null : cache.CacheID, Settings);
@@ -236,7 +236,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
 
                 if (config.GetValueOrDefault("dir_add_label") == "true")
                 {
-                    destDir = destDir + Settings.MovieCategory;
+                    destDir = destDir + Settings.GameCategory;
                 }
             }
 

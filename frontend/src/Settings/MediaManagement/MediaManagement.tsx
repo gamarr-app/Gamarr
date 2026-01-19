@@ -84,7 +84,7 @@ const fileDateOptions: EnhancedSelectInputValue<string>[] = [
   {
     key: 'cinemas',
     get value() {
-      return translate('InCinemasDate');
+      return translate('InDevelopmentDate');
     },
   },
   {
@@ -173,18 +173,18 @@ function MediaManagement() {
                   isAdvanced={true}
                   size={sizes.MEDIUM}
                 >
-                  <FormLabel>{translate('CreateEmptyMovieFolders')}</FormLabel>
+                  <FormLabel>{translate('CreateEmptyGameFolders')}</FormLabel>
 
                   <FormInputGroup
                     type={inputTypes.CHECK}
                     isDisabled={
                       settings.deleteEmptyFolders.value &&
-                      !settings.createEmptyMovieFolders.value
+                      !settings.createEmptyGameFolders.value
                     }
-                    name="createEmptyMovieFolders"
-                    helpText={translate('CreateEmptyMovieFoldersHelpText')}
+                    name="createEmptyGameFolders"
+                    helpText={translate('CreateEmptyGameFoldersHelpText')}
                     onChange={handleInputChange}
-                    {...settings.createEmptyMovieFolders}
+                    {...settings.createEmptyGameFolders}
                   />
                 </FormGroup>
 
@@ -198,11 +198,11 @@ function MediaManagement() {
                   <FormInputGroup
                     type={inputTypes.CHECK}
                     isDisabled={
-                      settings.createEmptyMovieFolders.value &&
+                      settings.createEmptyGameFolders.value &&
                       !settings.deleteEmptyFolders.value
                     }
                     name="deleteEmptyFolders"
-                    helpText={translate('DeleteEmptyMovieFoldersHelpText')}
+                    helpText={translate('DeleteEmptyGameFoldersHelpText')}
                     onChange={handleInputChange}
                     {...settings.deleteEmptyFolders}
                   />
@@ -257,7 +257,7 @@ function MediaManagement() {
                   <FormInputGroup
                     type={inputTypes.CHECK}
                     name="copyUsingHardlinks"
-                    helpText={translate('CopyUsingHardlinksMovieHelpText')}
+                    helpText={translate('CopyUsingHardlinksGameHelpText')}
                     helpTextWarning={translate(
                       'CopyUsingHardlinksHelpTextWarning'
                     )}
@@ -306,7 +306,7 @@ function MediaManagement() {
                   <FormInputGroup
                     type={inputTypes.CHECK}
                     name="importExtraFiles"
-                    helpText={translate('ImportExtraFilesMovieHelpText')}
+                    helpText={translate('ImportExtraFilesGameHelpText')}
                     onChange={handleInputChange}
                     {...settings.importExtraFiles}
                   />
@@ -336,14 +336,14 @@ function MediaManagement() {
 
             <FieldSet legend={translate('FileManagement')}>
               <FormGroup size={sizes.MEDIUM}>
-                <FormLabel>{translate('UnmonitorDeletedMovies')}</FormLabel>
+                <FormLabel>{translate('UnmonitorDeletedGames')}</FormLabel>
 
                 <FormInputGroup
                   type={inputTypes.CHECK}
-                  name="autoUnmonitorPreviouslyDownloadedMovies"
-                  helpText={translate('UnmonitorDeletedMoviesHelpText')}
+                  name="autoUnmonitorPreviouslyDownloadedGames"
+                  helpText={translate('UnmonitorDeletedGamesHelpText')}
                   onChange={handleInputChange}
-                  {...settings.autoUnmonitorPreviouslyDownloadedMovies}
+                  {...settings.autoUnmonitorPreviouslyDownloadedGames}
                 />
               </FormGroup>
 
@@ -393,13 +393,13 @@ function MediaManagement() {
                 isAdvanced={true}
               >
                 <FormLabel>
-                  {translate('RescanMovieFolderAfterRefresh')}
+                  {translate('RescanGameFolderAfterRefresh')}
                 </FormLabel>
 
                 <FormInputGroup
                   type={inputTypes.SELECT}
                   name="rescanAfterRefresh"
-                  helpText={translate('RescanAfterRefreshMovieHelpText')}
+                  helpText={translate('RescanAfterRefreshGameHelpText')}
                   helpTextWarning={translate(
                     'RescanAfterRefreshHelpTextWarning'
                   )}

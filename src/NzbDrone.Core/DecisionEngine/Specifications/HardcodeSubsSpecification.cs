@@ -21,9 +21,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var hardcodeSubs = subject.ParsedMovieInfo.HardcodedSubs;
+            var hardcodeSubs = subject.ParsedGameInfo.HardcodedSubs;
 
             if (_configService.AllowHardcodedSubs || hardcodeSubs.IsNullOrWhiteSpace())
             {

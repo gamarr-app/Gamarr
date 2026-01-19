@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Download
 {
     public interface IDownloadService
     {
-        Task DownloadReport(RemoteMovie remoteMovie, int? downloadClientId);
+        Task DownloadReport(RemoteGame remoteGame, int? downloadClientId);
     }
 
     public class DownloadService : IDownloadService
@@ -50,95 +50,95 @@ namespace NzbDrone.Core.Download
             _logger = logger;
         }
 
-        public async Task DownloadReport(RemoteMovie remoteMovie, int? downloadClientId)
+        public async Task DownloadReport(RemoteGame remoteGame, int? downloadClientId)
         {
-            var filterBlockedClients = remoteMovie.Release.PendingReleaseReason == PendingReleaseReason.DownloadClientUnavailable;
+            var filterBlockedClients = remoteGame.Release.PendingReleaseReason == PendingReleaseReason.DownloadClientUnavailable;
 
-            var tags = remoteMovie.Movie?.Tags;
+            var tags = remoteGame.Game?.Tags;
 
             var downloadClient = downloadClientId.HasValue
                 ? _downloadClientProvider.Get(downloadClientId.Value)
-                : _downloadClientProvider.GetDownloadClient(remoteMovie.Release.DownloadProtocol, remoteMovie.Release.IndexerId, filterBlockedClients, tags);
+                : _downloadClientProvider.GetDownloadClient(remoteGame.Release.DownloadProtocol, remoteGame.Release.IndexerId, filterBlockedClients, tags);
 
-            await DownloadReport(remoteMovie, downloadClient);
+            await DownloadReport(remoteGame, downloadClient);
         }
 
-        private async Task DownloadReport(RemoteMovie remoteMovie, IDownloadClient downloadClient)
+        private async Task DownloadReport(RemoteGame remoteGame, IDownloadClient downloadClient)
         {
-            Ensure.That(remoteMovie.Movie, () => remoteMovie.Movie).IsNotNull();
+            Ensure.That(remoteGame.Game, () => remoteGame.Game).IsNotNull();
 
-            var downloadTitle = remoteMovie.Release.Title;
+            var downloadTitle = remoteGame.Release.Title;
 
             if (downloadClient == null)
             {
-                throw new DownloadClientUnavailableException($"{remoteMovie.Release.DownloadProtocol} Download client isn't configured yet");
+                throw new DownloadClientUnavailableException($"{remoteGame.Release.DownloadProtocol} Download client isn't configured yet");
             }
 
             // Get the seed configuration for this release.
-            remoteMovie.SeedConfiguration = _seedConfigProvider.GetSeedConfiguration(remoteMovie);
+            remoteGame.SeedConfiguration = _seedConfigProvider.GetSeedConfiguration(remoteGame);
 
             // Limit grabs to 2 per second.
-            if (remoteMovie.Release.DownloadUrl.IsNotNullOrWhiteSpace() && !remoteMovie.Release.DownloadUrl.StartsWith("magnet:"))
+            if (remoteGame.Release.DownloadUrl.IsNotNullOrWhiteSpace() && !remoteGame.Release.DownloadUrl.StartsWith("magnet:"))
             {
-                var url = new HttpUri(remoteMovie.Release.DownloadUrl);
+                var url = new HttpUri(remoteGame.Release.DownloadUrl);
                 await _rateLimitService.WaitAndPulseAsync(url.Host, TimeSpan.FromSeconds(2));
             }
 
             IIndexer indexer = null;
 
-            if (remoteMovie.Release.IndexerId > 0)
+            if (remoteGame.Release.IndexerId > 0)
             {
-                indexer = _indexerFactory.GetInstance(_indexerFactory.Get(remoteMovie.Release.IndexerId));
+                indexer = _indexerFactory.GetInstance(_indexerFactory.Get(remoteGame.Release.IndexerId));
             }
 
             string downloadClientId;
             try
             {
-                downloadClientId = await downloadClient.Download(remoteMovie, indexer);
+                downloadClientId = await downloadClient.Download(remoteGame, indexer);
                 _downloadClientStatusService.RecordSuccess(downloadClient.Definition.Id);
-                _indexerStatusService.RecordSuccess(remoteMovie.Release.IndexerId);
+                _indexerStatusService.RecordSuccess(remoteGame.Release.IndexerId);
             }
             catch (ReleaseUnavailableException)
             {
-                _logger.Trace("Release {0} no longer available on indexer.", remoteMovie);
+                _logger.Trace("Release {0} no longer available on indexer.", remoteGame);
                 throw;
             }
             catch (ReleaseBlockedException)
             {
-                _logger.Trace("Release {0} previously added to blocklist, not sending to download client again.", remoteMovie);
+                _logger.Trace("Release {0} previously added to blocklist, not sending to download client again.", remoteGame);
                 throw;
             }
             catch (DownloadClientRejectedReleaseException)
             {
-                _logger.Trace("Release {0} rejected by download client, possible duplicate.", remoteMovie);
+                _logger.Trace("Release {0} rejected by download client, possible duplicate.", remoteGame);
                 throw;
             }
             catch (ReleaseDownloadException ex)
             {
                 if (ex.InnerException is TooManyRequestsException http429)
                 {
-                    _indexerStatusService.RecordFailure(remoteMovie.Release.IndexerId, http429.RetryAfter);
+                    _indexerStatusService.RecordFailure(remoteGame.Release.IndexerId, http429.RetryAfter);
                 }
                 else
                 {
-                    _indexerStatusService.RecordFailure(remoteMovie.Release.IndexerId);
+                    _indexerStatusService.RecordFailure(remoteGame.Release.IndexerId);
                 }
 
                 throw;
             }
 
-            var movieGrabbedEvent = new MovieGrabbedEvent(remoteMovie);
-            movieGrabbedEvent.DownloadClient = downloadClient.Name;
-            movieGrabbedEvent.DownloadClientId = downloadClient.Definition.Id;
-            movieGrabbedEvent.DownloadClientName = downloadClient.Definition.Name;
+            var gameGrabbedEvent = new GameGrabbedEvent(remoteGame);
+            gameGrabbedEvent.DownloadClient = downloadClient.Name;
+            gameGrabbedEvent.DownloadClientId = downloadClient.Definition.Id;
+            gameGrabbedEvent.DownloadClientName = downloadClient.Definition.Name;
 
             if (downloadClientId.IsNotNullOrWhiteSpace())
             {
-                movieGrabbedEvent.DownloadId = downloadClientId;
+                gameGrabbedEvent.DownloadId = downloadClientId;
             }
 
-            _logger.ProgressInfo("Report for {0} ({1}) sent to {2} from indexer {3}. {4}", remoteMovie.Movie.Title, remoteMovie.Movie.Year, downloadClient.Definition.Name, remoteMovie.Release.Indexer, downloadTitle);
-            _eventAggregator.PublishEvent(movieGrabbedEvent);
+            _logger.ProgressInfo("Report for {0} ({1}) sent to {2} from indexer {3}. {4}", remoteGame.Game.Title, remoteGame.Game.Year, downloadClient.Definition.Name, remoteGame.Release.Indexer, downloadTitle);
+            _eventAggregator.PublishEvent(gameGrabbedEvent);
         }
     }
 }

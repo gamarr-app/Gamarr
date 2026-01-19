@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Notifications.Ntfy
         [FieldDefinition(6, Label = "NotificationsNtfySettingsTagsEmojis", Type = FieldType.Tag, HelpText = "NotificationsNtfySettingsTagsEmojisHelpText", Placeholder = "warning,skull", HelpLink = "https://ntfy.sh/docs/emojis/")]
         public IEnumerable<string> Tags { get; set; }
 
-        [FieldDefinition(7, Label = "NotificationsNtfySettingsClickUrl", Type = FieldType.Url, HelpText = "NotificationsNtfySettingsClickUrlHelpText", Placeholder = "https://myserver.example.com/radarr")]
+        [FieldDefinition(7, Label = "NotificationsNtfySettingsClickUrl", Type = FieldType.Url, HelpText = "NotificationsNtfySettingsClickUrlHelpText", Placeholder = "https://myserver.example.com/gamarr")]
         public string ClickUrl { get; set; }
 
         public override NzbDroneValidationResult Validate()

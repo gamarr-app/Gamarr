@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.RTorrentTests
             Subject.Definition = new DownloadClientDefinition();
             Subject.Definition.Settings = new RTorrentSettings()
             {
-                MovieCategory = null
+                GameCategory = null
             };
 
             _downloading = new RTorrentTorrent
@@ -116,7 +116,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.RTorrentTests
         {
             GivenSuccessfulDownload();
 
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
 
             var id = await Subject.Download(remoteEpisode, CreateIndexer());
 

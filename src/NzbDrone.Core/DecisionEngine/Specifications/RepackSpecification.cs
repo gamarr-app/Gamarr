@@ -24,11 +24,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
             var downloadPropersAndRepacks = _configService.DownloadPropersAndRepacks;
 
-            if (!subject.ParsedMovieInfo.Quality.Revision.IsRepack)
+            if (!subject.ParsedGameInfo.Quality.Revision.IsRepack)
             {
                 return DownloadSpecDecision.Accept();
             }
@@ -39,13 +39,13 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return DownloadSpecDecision.Accept();
             }
 
-            if (subject.Movie.MovieFileId != 0)
+            if (subject.Game.GameFileId != 0)
             {
-                var file = subject.Movie.MovieFile;
+                var file = subject.Game.GameFile;
 
-                if (_upgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedMovieInfo.Quality))
+                if (_upgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedGameInfo.Quality))
                 {
-                    var releaseGroup = subject.ParsedMovieInfo.ReleaseGroup;
+                    var releaseGroup = subject.ParsedGameInfo.ReleaseGroup;
                     var fileReleaseGroup = file.ReleaseGroup;
 
                     if (downloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)

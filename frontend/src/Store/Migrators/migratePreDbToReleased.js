@@ -1,18 +1,18 @@
 import _ from 'lodash';
 
 export default function migratePreDbToReleased(persistedState) {
-  const addMovie = _.get(persistedState, 'addMovie.defaults.minimumAvailability');
-  const discoverMovie = _.get(persistedState, 'discoverMovie.defaults.minimumAvailability');
+  const addGame = _.get(persistedState, 'addGame.defaults.minimumAvailability');
+  const discoverGame = _.get(persistedState, 'discoverGame.defaults.minimumAvailability');
 
-  if (!addMovie && !discoverMovie) {
+  if (!addGame && !discoverGame) {
     return;
   }
 
-  if (addMovie === 'preDB') {
-    persistedState.addMovie.defaults.minimumAvailability = 'released';
+  if (addGame === 'preDB') {
+    persistedState.addGame.defaults.minimumAvailability = 'released';
   }
 
-  if (discoverMovie === 'preDB') {
-    persistedState.discoverMovie.defaults.minimumAvailability = 'released';
+  if (discoverGame === 'preDB') {
+    persistedState.discoverGame.defaults.minimumAvailability = 'released';
   }
 }

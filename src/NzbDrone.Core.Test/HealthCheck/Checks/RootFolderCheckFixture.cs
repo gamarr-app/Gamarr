@@ -6,7 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Core.HealthCheck.Checks;
 using NzbDrone.Core.Localization;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -26,13 +26,13 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
 
         private void GivenMissingRootFolder(string rootFolderPath)
         {
-            var movies = Builder<Movie>.CreateListOfSize(1)
+            var games = Builder<Game>.CreateListOfSize(1)
                                         .Build()
                                         .ToList();
 
-            Mocker.GetMock<IMovieService>()
-                  .Setup(s => s.AllMoviePaths())
-                  .Returns(movies.ToDictionary(x => x.Id, x => x.Path));
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.AllGamePaths())
+                  .Returns(games.ToDictionary(x => x.Id, x => x.Path));
 
             Mocker.GetMock<IRootFolderService>()
                 .Setup(s => s.GetBestRootFolderPath(It.IsAny<string>(), null))
@@ -44,19 +44,19 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         }
 
         [Test]
-        public void should_not_return_error_when_no_movie()
+        public void should_not_return_error_when_no_game()
         {
-            Mocker.GetMock<IMovieService>()
-                  .Setup(s => s.AllMoviePaths())
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.AllGamePaths())
                   .Returns(new Dictionary<int, string>());
 
             Subject.Check().ShouldBeOk();
         }
 
         [Test]
-        public void should_return_error_if_movie_parent_is_missing()
+        public void should_return_error_if_game_parent_is_missing()
         {
-            GivenMissingRootFolder(@"C:\Movies".AsOsAgnostic());
+            GivenMissingRootFolder(@"C:\Games".AsOsAgnostic());
 
             Subject.Check().ShouldBeError();
         }
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_return_error_if_series_path_is_for_posix_os()
         {
             WindowsOnly();
-            GivenMissingRootFolder("/mnt/movies");
+            GivenMissingRootFolder("/mnt/games");
 
             Subject.Check().ShouldBeError();
         }
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_return_error_if_series_path_is_for_windows()
         {
             PosixOnly();
-            GivenMissingRootFolder(@"C:\Movies");
+            GivenMissingRootFolder(@"C:\Games");
 
             Subject.Check().ShouldBeError();
         }

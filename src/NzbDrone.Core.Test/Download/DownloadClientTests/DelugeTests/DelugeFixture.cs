@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DelugeTests
             Subject.Definition = new DownloadClientDefinition();
             Subject.Definition.Settings = new DelugeSettings()
             {
-                MovieCategory = null
+                GameCategory = null
             };
 
             _queued = new DelugeTorrent
@@ -205,9 +205,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DelugeTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -217,10 +217,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DelugeTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
-            remoteMovie.Release.DownloadUrl = magnetUrl;
+            var remoteGame = CreateRemoteGame();
+            remoteGame.Release.DownloadUrl = magnetUrl;
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().Be(expectedHash);
         }

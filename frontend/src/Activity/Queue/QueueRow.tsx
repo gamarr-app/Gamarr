@@ -15,11 +15,11 @@ import DownloadProtocol from 'DownloadClient/DownloadProtocol';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
 import Language from 'Language/Language';
-import MovieFormats from 'Movie/MovieFormats';
-import MovieLanguages from 'Movie/MovieLanguages';
-import MovieQuality from 'Movie/MovieQuality';
-import MovieTitleLink from 'Movie/MovieTitleLink';
-import useMovie from 'Movie/useMovie';
+import GameFormats from 'Game/GameFormats';
+import GameLanguages from 'Game/GameLanguages';
+import GameQuality from 'Game/GameQuality';
+import GameTitleLink from 'Game/GameTitleLink';
+import useGame from 'Game/useGame';
 import { QualityModel } from 'Quality/Quality';
 import { grabQueueItem, removeQueueItem } from 'Store/Actions/queueActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
@@ -40,7 +40,7 @@ import styles from './QueueRow.css';
 
 interface QueueRowProps {
   id: number;
-  movieId?: number;
+  gameId?: number;
   downloadId?: string;
   title: string;
   status: string;
@@ -74,7 +74,7 @@ interface QueueRowProps {
 function QueueRow(props: QueueRowProps) {
   const {
     id,
-    movieId,
+    gameId,
     downloadId,
     title,
     status,
@@ -106,7 +106,7 @@ function QueueRow(props: QueueRowProps) {
   } = props;
 
   const dispatch = useDispatch();
-  const movie = useMovie(movieId);
+  const game = useGame(gameId);
   const { showRelativeDates, shortDateFormat, timeFormat } = useSelector(
     createUISettingsSelector()
   );
@@ -185,13 +185,13 @@ function QueueRow(props: QueueRowProps) {
           );
         }
 
-        if (name === 'movies.sortTitle') {
+        if (name === 'games.sortTitle') {
           return (
             <TableRowCell key={name}>
-              {movie ? (
-                <MovieTitleLink
-                  titleSlug={movie.titleSlug}
-                  title={movie.title}
+              {game ? (
+                <GameTitleLink
+                  titleSlug={game.titleSlug}
+                  title={game.title}
                 />
               ) : (
                 title
@@ -202,14 +202,14 @@ function QueueRow(props: QueueRowProps) {
 
         if (name === 'year') {
           return (
-            <TableRowCell key={name}>{movie ? movie.year : ''}</TableRowCell>
+            <TableRowCell key={name}>{game ? game.year : ''}</TableRowCell>
           );
         }
 
         if (name === 'languages') {
           return (
             <TableRowCell key={name}>
-              <MovieLanguages languages={languages} />
+              <GameLanguages languages={languages} />
             </TableRowCell>
           );
         }
@@ -217,7 +217,7 @@ function QueueRow(props: QueueRowProps) {
         if (name === 'quality') {
           return (
             <TableRowCell key={name}>
-              {quality ? <MovieQuality quality={quality} /> : null}
+              {quality ? <GameQuality quality={quality} /> : null}
             </TableRowCell>
           );
         }
@@ -225,7 +225,7 @@ function QueueRow(props: QueueRowProps) {
         if (name === 'customFormats') {
           return (
             <TableRowCell key={name}>
-              <MovieFormats formats={customFormats} />
+              <GameFormats formats={customFormats} />
             </TableRowCell>
           );
         }
@@ -238,7 +238,7 @@ function QueueRow(props: QueueRowProps) {
                   customFormatScore,
                   customFormats.length
                 )}
-                tooltip={<MovieFormats formats={customFormats} />}
+                tooltip={<GameFormats formats={customFormats} />}
                 position={tooltipPositions.BOTTOM}
               />
             </TableRowCell>
@@ -349,7 +349,7 @@ function QueueRow(props: QueueRowProps) {
         isOpen={isRemoveQueueItemModalOpen}
         sourceTitle={title}
         canChangeCategory={!!downloadClientHasPostImportCategory}
-        canIgnore={!!movie}
+        canIgnore={!!game}
         isPending={isPending}
         onRemovePress={handleRemoveQueueItemModalConfirmed}
         onModalClose={handleRemoveQueueItemModalClose}

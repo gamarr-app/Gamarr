@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications;
 
 public static class NotificationMetadataLinkGenerator
 {
-    public static List<NotificationMetadataLink> GenerateLinks(Movie movie, IEnumerable<int> metadataLinks)
+    public static List<NotificationMetadataLink> GenerateLinks(Game game, IEnumerable<int> metadataLinks)
     {
         var links = new List<NotificationMetadataLink>();
 
-        if (movie == null)
+        if (game == null)
         {
             return links;
         }
@@ -19,14 +19,14 @@ public static class NotificationMetadataLinkGenerator
         {
             var linkType = (MetadataLinkType)type;
 
-            if (linkType == MetadataLinkType.Imdb && movie.ImdbId.IsNotNullOrWhiteSpace())
+            if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Imdb, "IMDb", $"https://www.imdb.com/title/{movie.ImdbId}"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Imdb, "IMDb", $"https://www.imdb.com/title/{game.ImdbId}"));
             }
 
-            if (linkType == MetadataLinkType.Tmdb && movie.TmdbId > 0)
+            if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Tmdb, "TMDb", $"https://www.themoviedb.org/movie/{movie.TmdbId}"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "TMDb", $"https://www.thegamedb.org/game/{game.IgdbId}"));
             }
         }
 

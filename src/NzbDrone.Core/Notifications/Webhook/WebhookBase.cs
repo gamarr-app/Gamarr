@@ -6,7 +6,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Tags;
 
 namespace NzbDrone.Core.Notifications.Webhook
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Notifications.Webhook
 
         protected WebhookGrabPayload BuildOnGrabPayload(GrabMessage message)
         {
-            var remoteMovie = message.RemoteMovie;
+            var remoteGame = message.RemoteGame;
             var quality = message.Quality;
 
             return new WebhookGrabPayload
@@ -39,45 +39,45 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.Grab,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(message.Movie),
-                RemoteMovie = new WebhookRemoteMovie(remoteMovie),
-                Release = new WebhookRelease(quality, remoteMovie),
+                Game = GetGame(message.Game),
+                RemoteGame = new WebhookRemoteGame(remoteGame),
+                Release = new WebhookRelease(quality, remoteGame),
                 DownloadClient = message.DownloadClientName,
                 DownloadClientType = message.DownloadClientType,
                 DownloadId = message.DownloadId,
-                CustomFormatInfo = new WebhookCustomFormatInfo(remoteMovie.CustomFormats, remoteMovie.CustomFormatScore)
+                CustomFormatInfo = new WebhookCustomFormatInfo(remoteGame.CustomFormats, remoteGame.CustomFormatScore)
             };
         }
 
         protected WebhookImportPayload BuildOnDownloadPayload(DownloadMessage message)
         {
-            var movieFile = message.MovieFile;
+            var gameFile = message.GameFile;
 
             var payload = new WebhookImportPayload
             {
                 EventType = WebhookEventType.Download,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(message.Movie),
-                RemoteMovie = new WebhookRemoteMovie(message.Movie),
-                MovieFile = new WebhookMovieFile(movieFile)
+                Game = GetGame(message.Game),
+                RemoteGame = new WebhookRemoteGame(message.Game),
+                GameFile = new WebhookGameFile(gameFile)
                 {
                     SourcePath = message.SourcePath
                 },
-                Release = new WebhookGrabbedRelease(message.Release, movieFile.IndexerFlags),
-                IsUpgrade = message.OldMovieFiles.Any(),
+                Release = new WebhookGrabbedRelease(message.Release, gameFile.IndexerFlags),
+                IsUpgrade = message.OldGameFiles.Any(),
                 DownloadClient = message.DownloadClientInfo?.Name,
                 DownloadClientType = message.DownloadClientInfo?.Type,
                 DownloadId = message.DownloadId,
-                CustomFormatInfo = new WebhookCustomFormatInfo(message.MovieInfo.CustomFormats, message.MovieInfo.CustomFormatScore)
+                CustomFormatInfo = new WebhookCustomFormatInfo(message.GameInfo.CustomFormats, message.GameInfo.CustomFormatScore)
             };
 
-            if (message.OldMovieFiles.Any())
+            if (message.OldGameFiles.Any())
             {
-                payload.DeletedFiles = message.OldMovieFiles.ConvertAll(x =>
-                    new WebhookMovieFile(x.MovieFile)
+                payload.DeletedFiles = message.OldGameFiles.ConvertAll(x =>
+                    new WebhookGameFile(x.GameFile)
                     {
-                        Path = Path.Combine(message.Movie.Path, x.MovieFile.RelativePath),
+                        Path = Path.Combine(message.Game.Path, x.GameFile.RelativePath),
                         RecycleBinPath = x.RecycleBinPath
                     });
             }
@@ -85,59 +85,59 @@ namespace NzbDrone.Core.Notifications.Webhook
             return payload;
         }
 
-        protected WebhookAddedPayload BuildOnMovieAdded(Movie movie)
+        protected WebhookAddedPayload BuildOnGameAdded(Game game)
         {
             return new WebhookAddedPayload
             {
-                EventType = WebhookEventType.MovieAdded,
+                EventType = WebhookEventType.GameAdded,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(movie),
-                AddMethod = movie.AddOptions.AddMethod
+                Game = GetGame(game),
+                AddMethod = game.AddOptions.AddMethod
             };
         }
 
-        protected WebhookMovieFileDeletePayload BuildOnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        protected WebhookGameFileDeletePayload BuildOnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            return new WebhookMovieFileDeletePayload
+            return new WebhookGameFileDeletePayload
             {
-                EventType = WebhookEventType.MovieFileDelete,
+                EventType = WebhookEventType.GameFileDelete,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(deleteMessage.Movie),
-                MovieFile = new WebhookMovieFile(deleteMessage.MovieFile),
+                Game = GetGame(deleteMessage.Game),
+                GameFile = new WebhookGameFile(deleteMessage.GameFile),
                 DeleteReason = deleteMessage.Reason
             };
         }
 
-        protected WebhookMovieDeletePayload BuildOnMovieDelete(MovieDeleteMessage deleteMessage)
+        protected WebhookGameDeletePayload BuildOnGameDelete(GameDeleteMessage deleteMessage)
         {
-            var payload = new WebhookMovieDeletePayload
+            var payload = new WebhookGameDeletePayload
             {
-                EventType = WebhookEventType.MovieDelete,
+                EventType = WebhookEventType.GameDelete,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(deleteMessage.Movie),
+                Game = GetGame(deleteMessage.Game),
                 DeletedFiles = deleteMessage.DeletedFiles
             };
 
-            if (deleteMessage.DeletedFiles && deleteMessage.Movie.MovieFile != null)
+            if (deleteMessage.DeletedFiles && deleteMessage.Game.GameFile != null)
             {
-                payload.MovieFolderSize = deleteMessage.Movie.MovieFile.Size;
+                payload.GameFolderSize = deleteMessage.Game.GameFile.Size;
             }
 
             return payload;
         }
 
-        protected WebhookRenamePayload BuildOnRenamePayload(Movie movie, List<RenamedMovieFile> renamedFiles)
+        protected WebhookRenamePayload BuildOnRenamePayload(Game game, List<RenamedGameFile> renamedFiles)
         {
             return new WebhookRenamePayload
             {
                 EventType = WebhookEventType.Rename,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(movie),
-                RenamedMovieFiles = renamedFiles.ConvertAll(x => new WebhookRenamedMovieFile(x))
+                Game = GetGame(game),
+                RenamedGameFiles = renamedFiles.ConvertAll(x => new WebhookRenamedGameFile(x))
             };
         }
 
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Notifications.Webhook
 
         protected WebhookManualInteractionPayload BuildManualInteractionRequiredPayload(ManualInteractionRequiredMessage message)
         {
-            var remoteMovie = message.RemoteMovie;
+            var remoteGame = message.RemoteGame;
             var quality = message.Quality;
 
             return new WebhookManualInteractionPayload
@@ -191,14 +191,14 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.ManualInteractionRequired,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = GetMovie(message.Movie),
+                Game = GetGame(message.Game),
                 DownloadInfo = new WebhookDownloadClientItem(quality, message.TrackedDownload.DownloadItem),
                 DownloadClient = message.DownloadClientInfo?.Name,
                 DownloadClientType = message.DownloadClientInfo?.Type,
                 DownloadId = message.DownloadId,
                 DownloadStatus = message.TrackedDownload.Status.ToString(),
                 DownloadStatusMessages = message.TrackedDownload.StatusMessages.Select(x => new WebhookDownloadStatusMessage(x)).ToList(),
-                CustomFormatInfo = new WebhookCustomFormatInfo(remoteMovie.CustomFormats, remoteMovie.CustomFormatScore),
+                CustomFormatInfo = new WebhookCustomFormatInfo(remoteGame.CustomFormats, remoteGame.CustomFormatScore),
                 Release = new WebhookGrabbedRelease(message.Release)
             };
         }
@@ -210,7 +210,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.Test,
                 InstanceName = _configFileProvider.InstanceName,
                 ApplicationUrl = _configService.ApplicationUrl,
-                Movie = new WebhookMovie
+                Game = new WebhookGame
                 {
                     Id = 1,
                     Title = "Test Title",
@@ -219,9 +219,9 @@ namespace NzbDrone.Core.Notifications.Webhook
                     ReleaseDate = "1970-01-01",
                     Tags = new List<string> { "test-tag" }
                 },
-                RemoteMovie = new WebhookRemoteMovie
+                RemoteGame = new WebhookRemoteGame
                 {
-                    TmdbId = 1234,
+                    IgdbId = 1234,
                     ImdbId = "5678",
                     Title = "Test title",
                     Year = 1970
@@ -238,26 +238,26 @@ namespace NzbDrone.Core.Notifications.Webhook
             };
         }
 
-        private WebhookMovie GetMovie(Movie movie)
+        private WebhookGame GetGame(Game game)
         {
-            if (movie == null)
+            if (game == null)
             {
                 return null;
             }
 
-            _mediaCoverService.ConvertToLocalUrls(movie.Id, movie.MovieMetadata.Value.Images);
+            _mediaCoverService.ConvertToLocalUrls(game.Id, game.GameMetadata.Value.Images);
 
-            return new WebhookMovie(movie, GetTagLabels(movie));
+            return new WebhookGame(game, GetTagLabels(game));
         }
 
-        private List<string> GetTagLabels(Movie movie)
+        private List<string> GetTagLabels(Game game)
         {
-            if (movie == null)
+            if (game == null)
             {
                 return null;
             }
 
-            return _tagRepository.GetTags(movie.Tags)
+            return _tagRepository.GetTags(game.Tags)
                 .Select(t => t.Label)
                 .Where(l => l.IsNotNullOrWhiteSpace())
                 .OrderBy(l => l)

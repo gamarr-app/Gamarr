@@ -22,9 +22,9 @@ namespace NzbDrone.Core.HealthCheck.Checks
         {
             var namingConfig = _namingConfigService.GetConfig();
 
-            if (namingConfig.MovieFolderFormat.IsNotNullOrWhiteSpace())
+            if (namingConfig.GameFolderFormat.IsNotNullOrWhiteSpace())
             {
-                var match = FileNameValidation.DeprecatedMovieFolderTokensRegex.Matches(namingConfig.MovieFolderFormat);
+                var match = FileNameValidation.DeprecatedGameFolderTokensRegex.Matches(namingConfig.GameFolderFormat);
 
                 if (match.Any())
                 {
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
                         GetType(),
                         HealthCheckResult.Error,
                         _localizationService.GetLocalizedString(
-                            "NamingConfigMovieFolderFormatDeprecatedHealthCheckMessage", new Dictionary<string, object>
+                            "NamingConfigGameFolderFormatDeprecatedHealthCheckMessage", new Dictionary<string, object>
                             {
                                 { "tokens", string.Join(", ", match.Select(c => c.Value).ToArray()) },
                             }));

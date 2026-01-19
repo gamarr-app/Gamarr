@@ -13,7 +13,7 @@ import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { kinds } from 'Helpers/Props';
-import useMovie from 'Movie/useMovie';
+import useGame from 'Game/useGame';
 import { executeCommand } from 'Store/Actions/commandActions';
 import { fetchOrganizePreview } from 'Store/Actions/organizePreviewActions';
 import { fetchNamingSettings } from 'Store/Actions/settingsActions';
@@ -35,12 +35,12 @@ function getValue(allSelected: boolean, allUnselected: boolean) {
 }
 
 export interface OrganizePreviewModalContentProps {
-  movieId: number;
+  gameId: number;
   onModalClose: () => void;
 }
 
 function OrganizePreviewModalContent({
-  movieId,
+  gameId,
   onModalClose,
 }: OrganizePreviewModalContentProps) {
   const dispatch = useDispatch();
@@ -58,14 +58,14 @@ function OrganizePreviewModalContent({
     item: naming,
   } = useSelector((state: AppState) => state.settings.naming);
 
-  const movie = useMovie(movieId)!;
+  const game = useGame(gameId)!;
   const [selectState, setSelectState] = useSelectState();
 
   const { allSelected, allUnselected, selectedState } = selectState;
   const isFetching = isPreviewFetching || isNamingFetching;
   const isPopulated = isPreviewPopulated && isNamingPopulated;
   const error = previewError || namingError;
-  const { renameMovies, standardMovieFormat } = naming;
+  const { renameGames, standardGameFormat } = naming;
 
   const selectAllValue = getValue(allSelected, allUnselected);
 
@@ -96,17 +96,17 @@ function OrganizePreviewModalContent({
       executeCommand({
         name: commandNames.RENAME_FILES,
         files,
-        movieId,
+        gameId,
       })
     );
 
     onModalClose();
-  }, [movieId, selectedState, dispatch, onModalClose]);
+  }, [gameId, selectedState, dispatch, onModalClose]);
 
   useEffect(() => {
-    dispatch(fetchOrganizePreview({ movieId }));
+    dispatch(fetchOrganizePreview({ gameId }));
     dispatch(fetchNamingSettings());
-  }, [movieId, dispatch]);
+  }, [gameId, dispatch]);
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -121,7 +121,7 @@ function OrganizePreviewModalContent({
 
         {!isFetching && isPopulated && !items.length ? (
           <div>
-            {renameMovies ? (
+            {renameGames ? (
               <div>{translate('OrganizeNothingToRename')}</div>
             ) : (
               <div>{translate('OrganizeRenamingDisabled')}</div>
@@ -135,7 +135,7 @@ function OrganizePreviewModalContent({
               <div>
                 <InlineMarkdown
                   data={translate('OrganizeRelativePaths', {
-                    path: movie.path,
+                    path: game.path,
                   })}
                   blockClassName={styles.path}
                 />
@@ -144,9 +144,9 @@ function OrganizePreviewModalContent({
               <div>
                 <InlineMarkdown
                   data={translate('OrganizeNamingPattern', {
-                    standardMovieFormat,
+                    standardGameFormat,
                   })}
-                  blockClassName={styles.standardMovieFormat}
+                  blockClassName={styles.standardGameFormat}
                 />
               </div>
             </Alert>
@@ -155,11 +155,11 @@ function OrganizePreviewModalContent({
               {items.map((item) => {
                 return (
                   <OrganizePreviewRow
-                    key={item.movieFileId}
-                    id={item.movieFileId}
+                    key={item.gameFileId}
+                    id={item.gameFileId}
                     existingPath={item.existingPath}
                     newPath={item.newPath}
-                    isSelected={selectedState[item.movieFileId]}
+                    isSelected={selectedState[item.gameFileId]}
                     onSelectedChange={handleSelectedChange}
                   />
                 );

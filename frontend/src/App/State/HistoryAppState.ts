@@ -5,7 +5,7 @@ import AppSectionState, {
 } from 'App/State/AppSectionState';
 import History from 'typings/History';
 
-export type MovieHistoryAppState = AppSectionState<History>;
+export type GameHistoryAppState = AppSectionState<History>;
 
 interface HistoryAppState
   extends AppSectionState<History>,

@@ -11,8 +11,8 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Translations;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -23,42 +23,42 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class FileNameBuilderFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
-        private List<MovieTranslation> _movieTranslations;
+        private Game _game;
+        private GameFile _gameFile;
+        private List<GameTranslation> _gameTranslations;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _movieTranslations = new List<MovieTranslation>
+            _gameTranslations = new List<GameTranslation>
             {
-                new MovieTranslation
+                new GameTranslation
                 {
                     Language = Language.German,
                     Title = "German South Park"
                 },
 
-                new MovieTranslation
+                new GameTranslation
                 {
                     Language = Language.French,
                     Title = "French South Park"
                 }
             };
 
-            _movie = Builder<Movie>
+            _game = Builder<Game>
                     .CreateNew()
                     .With(s => s.Title = "South Park")
-                    .With(s => s.MovieMetadata.Value.OriginalTitle = "South of the Park")
+                    .With(s => s.GameMetadata.Value.OriginalTitle = "South of the Park")
                     .Build();
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameMovies = true;
+            _namingConfig.RenameGames = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
-            _movieFile = new MovieFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "RadarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(Moq.It.IsAny<Quality>()))
@@ -68,281 +68,281 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .Setup(v => v.All())
                 .Returns(new List<CustomFormat>());
 
-            Mocker.GetMock<IMovieTranslationService>()
-                .Setup(v => v.GetAllTranslationsForMovieMetadata(It.IsAny<int>()))
-                .Returns(_movieTranslations);
+            Mocker.GetMock<IGameTranslationService>()
+                .Setup(v => v.GetAllTranslationsForGameMetadata(It.IsAny<int>()))
+                .Returns(_gameTranslations);
         }
 
         private void GivenProper()
         {
-            _movieFile.Quality.Revision.Version = 2;
+            _gameFile.Quality.Revision.Version = 2;
         }
 
         private void GivenReal()
         {
-            _movieFile.Quality.Revision.Real = 1;
+            _gameFile.Quality.Revision.Real = 1;
         }
 
         [Test]
-        public void should_replace_Movie_space_Title()
+        public void should_replace_Game_space_Title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title}";
+            _namingConfig.StandardGameFormat = "{Game Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park");
         }
 
         [Test]
-        public void should_replace_Movie_underscore_Title()
+        public void should_replace_Game_underscore_Title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie_Title}";
+            _namingConfig.StandardGameFormat = "{Game_Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South_Park");
         }
 
         [Test]
-        public void should_replace_Movie_dot_Title()
+        public void should_replace_Game_dot_Title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}";
+            _namingConfig.StandardGameFormat = "{Game.Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South.Park");
         }
 
         [Test]
-        public void should_replace_Movie_dash_Title()
+        public void should_replace_Game_dash_Title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie-Title}";
+            _namingConfig.StandardGameFormat = "{Game-Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South-Park");
         }
 
         [Test]
-        public void should_replace_MOVIE_TITLE_with_all_caps()
+        public void should_replace_GAME_TITLE_with_all_caps()
         {
-            _namingConfig.StandardMovieFormat = "{MOVIE TITLE}";
+            _namingConfig.StandardGameFormat = "{GAME TITLE}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("SOUTH PARK");
         }
 
         [Test]
-        public void should_replace_MOVIE_TITLE_with_random_casing_should_keep_original_casing()
+        public void should_replace_GAME_TITLE_with_random_casing_should_keep_original_casing()
         {
-            _namingConfig.StandardMovieFormat = "{mOvIe-tItLE}";
+            _namingConfig.StandardGameFormat = "{mOvIe-tItLE}";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be(_movie.Title.Replace(' ', '-'));
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be(_game.Title.Replace(' ', '-'));
         }
 
         [Test]
-        public void should_replace_movie_title_with_all_lower_case()
+        public void should_replace_game_title_with_all_lower_case()
         {
-            _namingConfig.StandardMovieFormat = "{movie title}";
+            _namingConfig.StandardGameFormat = "{game title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("south park");
         }
 
         [Test]
-        public void should_replace_translated_movie_title()
+        public void should_replace_translated_game_title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title:FR}";
+            _namingConfig.StandardGameFormat = "{Game Title:FR}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("French South Park");
         }
 
         [Test]
-        public void should_replace_translated_movie_title_with_base_title_if_invalid_code()
+        public void should_replace_translated_game_title_with_base_title_if_invalid_code()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title:JP}";
+            _namingConfig.StandardGameFormat = "{Game Title:JP}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park");
         }
 
         [Test]
-        public void should_replace_translated_movie_title_with_base_title_if_no_translation_exists()
+        public void should_replace_translated_game_title_with_base_title_if_no_translation_exists()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title:JA}";
+            _namingConfig.StandardGameFormat = "{Game Title:JA}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park");
         }
 
         [Test]
-        public void should_replace_translated_movie_title_with_fallback_if_no_translation_exists()
+        public void should_replace_translated_game_title_with_fallback_if_no_translation_exists()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title:JP|FR}";
+            _namingConfig.StandardGameFormat = "{Game Title:JP|FR}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("French South Park");
         }
 
         [Test]
-        public void should_replace_translated_movie_title_with_original_if_no_translation_or_fallback_exists()
+        public void should_replace_translated_game_title_with_original_if_no_translation_or_fallback_exists()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title:JP|CN}";
+            _namingConfig.StandardGameFormat = "{Game Title:JP|CN}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park");
         }
 
         [Test]
-        public void should_cleanup_Movie_Title()
+        public void should_cleanup_Game_Title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.CleanTitle}";
-            _movie.Title = "South Park (1997)";
+            _namingConfig.StandardGameFormat = "{Game.CleanTitle}";
+            _game.Title = "South Park (1997)";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South.Park.1997");
         }
 
         [Test]
-        public void should_replace_movie_original_title()
+        public void should_replace_game_original_title()
         {
-            _namingConfig.StandardMovieFormat = "{Movie OriginalTitle}";
-            _movie.MovieMetadata.Value.OriginalTitle = "South of the Park";
+            _namingConfig.StandardGameFormat = "{Game OriginalTitle}";
+            _game.GameMetadata.Value.OriginalTitle = "South of the Park";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South of the Park");
         }
 
         [Test]
-        public void should_replace_movie_certification()
+        public void should_replace_game_certification()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Certification}";
-            _movie.MovieMetadata.Value.Certification = "R";
+            _namingConfig.StandardGameFormat = "{Game Certification}";
+            _game.GameMetadata.Value.Certification = "R";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("R");
         }
 
         [Test]
-        public void should_replace_movie_collection()
+        public void should_replace_game_collection()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Collection}";
-            _movie.MovieMetadata.Value.CollectionTitle = "South Part Collection";
+            _namingConfig.StandardGameFormat = "{Game Collection}";
+            _game.GameMetadata.Value.CollectionTitle = "South Part Collection";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Part Collection");
         }
 
         [Test]
         public void should_be_empty_for_null_collection()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Collection}";
+            _namingConfig.StandardGameFormat = "{Game Collection}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().BeEmpty();
         }
 
         [Test]
         public void should_replace_quality_title()
         {
-            _namingConfig.StandardMovieFormat = "{Quality Title}";
+            _namingConfig.StandardGameFormat = "{Quality Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("HDTV-720p");
         }
 
         [Test]
         public void should_replace_quality_proper_with_proper()
         {
-            _namingConfig.StandardMovieFormat = "{Quality Proper}";
+            _namingConfig.StandardGameFormat = "{Quality Proper}";
             GivenProper();
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("Proper");
         }
 
         [Test]
         public void should_replace_quality_real_with_real()
         {
-            _namingConfig.StandardMovieFormat = "{Quality Real}";
+            _namingConfig.StandardGameFormat = "{Quality Real}";
             GivenReal();
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("REAL");
         }
 
         [Test]
         public void should_replace_all_contents_in_pattern()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title} [{Quality Title}]";
+            _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}]";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park [HDTV-720p]");
         }
 
         [Test]
         public void use_file_name_when_sceneName_is_null()
         {
-            _namingConfig.RenameMovies = false;
-            _movieFile.RelativePath = "30 Rock - S01E01 - Test";
+            _namingConfig.RenameGames = false;
+            _gameFile.RelativePath = "30 Rock - S01E01 - Test";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be(Path.GetFileNameWithoutExtension(_movieFile.RelativePath));
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be(Path.GetFileNameWithoutExtension(_gameFile.RelativePath));
         }
 
         [Test]
         public void use_path_when_sceneName_and_relative_path_are_null()
         {
-            _namingConfig.RenameMovies = false;
-            _movieFile.RelativePath = null;
-            _movieFile.Path = @"C:\Test\Unsorted\Movie - S01E01 - Test".AsOsAgnostic();
+            _namingConfig.RenameGames = false;
+            _gameFile.RelativePath = null;
+            _gameFile.Path = @"C:\Test\Unsorted\Game - S01E01 - Test".AsOsAgnostic();
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be(Path.GetFileNameWithoutExtension(_movieFile.Path));
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be(Path.GetFileNameWithoutExtension(_gameFile.Path));
         }
 
         [Test]
         public void use_file_name_when_sceneName_is_not_null()
         {
-            _namingConfig.RenameMovies = false;
-            _movieFile.SceneName = "30.Rock.S01E01.xvid-LOL";
-            _movieFile.RelativePath = "30 Rock - S01E01 - Test";
+            _namingConfig.RenameGames = false;
+            _gameFile.SceneName = "30.Rock.S01E01.xvid-LOL";
+            _gameFile.RelativePath = "30 Rock - S01E01 - Test";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("30.Rock.S01E01.xvid-LOL");
         }
 
         [Test]
         public void should_replace_illegal_characters_when_renaming_is_disabled()
         {
-            _namingConfig.RenameMovies = false;
+            _namingConfig.RenameGames = false;
             _namingConfig.ReplaceIllegalCharacters = true;
             _namingConfig.ColonReplacementFormat = ColonReplacementFormat.Smart;
 
-            _movieFile.SceneName = "30.Rock.S01E01.xvid:LOL";
-            _movieFile.RelativePath = "30 Rock - S01E01 - Test";
+            _gameFile.SceneName = "30.Rock.S01E01.xvid:LOL";
+            _gameFile.RelativePath = "30 Rock - S01E01 - Test";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                 .Should().Be("30.Rock.S01E01.xvid-LOL");
         }
 
         [Test]
         public void should_should_replace_release_group()
         {
-            _namingConfig.StandardMovieFormat = "{Release Group}";
+            _namingConfig.StandardGameFormat = "{Release Group}";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be(_movieFile.ReleaseGroup);
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be(_gameFile.ReleaseGroup);
         }
 
         [Test]
         public void should_be_able_to_use_original_title()
         {
-            _movie.Title = "30 Rock";
-            _namingConfig.StandardMovieFormat = "{Movie Title} - {Original Title}";
+            _game.Title = "30 Rock";
+            _namingConfig.StandardGameFormat = "{Game Title} - {Original Title}";
 
-            _movieFile.SceneName = "30.Rock.S01E01.xvid-LOL";
-            _movieFile.RelativePath = "30 Rock - S01E01 - Test";
+            _gameFile.SceneName = "30.Rock.S01E01.xvid-LOL";
+            _gameFile.RelativePath = "30 Rock - S01E01 - Test";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("30 Rock - 30.Rock.S01E01.xvid-LOL");
         }
 
@@ -351,36 +351,36 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_replace_double_period_with_single_period()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}.";
+            _namingConfig.StandardGameFormat = "{Game.Title}.";
 
-            Subject.BuildFileName(new Movie { Title = "Chicago P.D." }, _movieFile)
+            Subject.BuildFileName(new Game { Title = "Chicago P.D." }, _gameFile)
                    .Should().Be("Chicago.P.D.");
         }
 
         [Test]
         public void should_replace_triple_period_with_single_period()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}";
+            _namingConfig.StandardGameFormat = "{Game.Title}";
 
-            Subject.BuildFileName( new Movie { Title = "Chicago P.D.." }, _movieFile)
+            Subject.BuildFileName( new Game { Title = "Chicago P.D.." }, _gameFile)
                    .Should().Be("Chicago.P.D.S06E06.Part.1");
         }*/
 
         [Test]
         public void should_include_affixes_if_value_not_empty()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}.{_Quality.Title_}";
+            _namingConfig.StandardGameFormat = "{Game.Title}.{_Quality.Title_}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South.Park._HDTV-720p");
         }
 
         [Test]
         public void should_format_mediainfo_properly()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}.{MEDIAINFO.FULL}";
+            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
 
-            _movieFile.MediaInfo = new MediaInfoModel()
+            _gameFile.MediaInfo = new MediaInfoModel()
             {
                 VideoFormat = "h264",
                 AudioFormat = "dts",
@@ -388,7 +388,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 Subtitles = new List<string> { "eng", "spa", "ita" }
             };
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South.Park.H264.DTS[EN+ES].[EN+ES+IT]");
         }
 
@@ -411,9 +411,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("kat", "KA")]
         public void should_format_languagecodes_properly(string language, string code)
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}.{MEDIAINFO.FULL}";
+            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
 
-            _movieFile.MediaInfo = new MediaInfoModel()
+            _gameFile.MediaInfo = new MediaInfoModel()
             {
                 VideoFormat = "h264",
                 AudioFormat = "dts",
@@ -423,16 +423,16 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 SchemaRevision = 3
             };
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be($"South.Park.H264.DTS.[{code}]");
         }
 
         [Test]
         public void should_exclude_english_in_mediainfo_audio_language()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}.{MEDIAINFO.FULL}";
+            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
 
-            _movieFile.MediaInfo = new MediaInfoModel()
+            _gameFile.MediaInfo = new MediaInfoModel()
             {
                 VideoFormat = "h264",
                 AudioFormat = "dts",
@@ -440,16 +440,16 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 Subtitles = new List<string> { "eng", "spa", "ita" }
             };
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South.Park.H264.DTS.[EN+ES+IT]");
         }
 
         [Test]
         public void should_format_mediainfo_3d_properly()
         {
-            _namingConfig.StandardMovieFormat = "{Movie.Title}.{MEDIAINFO.3D}.{MediaInfo.Simple}";
+            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.3D}.{MediaInfo.Simple}";
 
-            _movieFile.MediaInfo = new MediaInfoModel()
+            _gameFile.MediaInfo = new MediaInfoModel()
             {
                 VideoFormat = "h264",
                 VideoMultiViewCount = 2,
@@ -458,102 +458,102 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 Subtitles = new List<string> { "eng", "spa", "ita" }
             };
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South.Park.3D.h264.DTS");
         }
 
         [Test]
         public void should_remove_duplicate_non_word_characters()
         {
-            _movie.Title = "Venture Bros.";
-            _namingConfig.StandardMovieFormat = "{Movie.Title}";
+            _game.Title = "Venture Bros.";
+            _namingConfig.StandardGameFormat = "{Game.Title}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("Venture.Bros");
         }
 
         [Test]
         public void should_use_existing_filename_when_scene_name_is_not_available()
         {
-            _namingConfig.RenameMovies = true;
-            _namingConfig.StandardMovieFormat = "{Original Title}";
+            _namingConfig.RenameGames = true;
+            _namingConfig.StandardGameFormat = "{Original Title}";
 
-            _movieFile.SceneName = null;
-            _movieFile.RelativePath = "existing.file.mkv";
+            _gameFile.SceneName = null;
+            _gameFile.RelativePath = "existing.file.mkv";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be(Path.GetFileNameWithoutExtension(_movieFile.RelativePath));
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be(Path.GetFileNameWithoutExtension(_gameFile.RelativePath));
         }
 
         [Test]
         public void should_be_able_to_use_only_original_title()
         {
-            _movie.Title = "30 Rock";
-            _namingConfig.StandardMovieFormat = "{Original Title}";
+            _game.Title = "30 Rock";
+            _namingConfig.StandardGameFormat = "{Original Title}";
 
-            _movieFile.SceneName = "30.Rock.S01E01.xvid-LOL";
-            _movieFile.RelativePath = "30 Rock - S01E01 - Test";
+            _gameFile.SceneName = "30.Rock.S01E01.xvid-LOL";
+            _gameFile.RelativePath = "30 Rock - S01E01 - Test";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("30.Rock.S01E01.xvid-LOL");
         }
 
         [Test]
         public void should_not_include_quality_proper_when_release_is_not_a_proper()
         {
-            _namingConfig.StandardMovieFormat = "{Quality Title} {Quality Proper}";
+            _namingConfig.StandardGameFormat = "{Quality Title} {Quality Proper}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("HDTV-720p");
         }
 
         [Test]
         public void should_wrap_proper_in_square_brackets()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title} [{Quality Title}] {[Quality Proper]}";
+            _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}] {[Quality Proper]}";
 
             GivenProper();
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park [HDTV-720p] [Proper]");
         }
 
         [Test]
         public void should_not_wrap_proper_in_square_brackets_when_not_a_proper()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title} [{Quality Title}] {[Quality Proper]}";
+            _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}] {[Quality Proper]}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park [HDTV-720p]");
         }
 
         [Test]
         public void should_replace_quality_full_with_quality_title_only_when_not_a_proper()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title} [{Quality Full}]";
+            _namingConfig.StandardGameFormat = "{Game Title} [{Quality Full}]";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park [HDTV-720p]");
         }
 
         [Test]
         public void should_replace_quality_full_with_quality_title_and_proper_only_when_a_proper()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title} [{Quality Full}]";
+            _namingConfig.StandardGameFormat = "{Game Title} [{Quality Full}]";
 
             GivenProper();
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park [HDTV-720p Proper]");
         }
 
         [Test]
         public void should_replace_quality_full_with_quality_title_and_real_when_a_real()
         {
-            _namingConfig.StandardMovieFormat = "{Movie Title} [{Quality Full}]";
+            _namingConfig.StandardGameFormat = "{Game Title} [{Quality Full}]";
             GivenReal();
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park [HDTV-720p REAL]");
         }
 
@@ -563,9 +563,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase('_')]
         public void should_trim_extra_separators_from_end_when_quality_proper_is_not_included(char separator)
         {
-            _namingConfig.StandardMovieFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
+            _namingConfig.StandardGameFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("HDTV-720p");
         }
 
@@ -575,9 +575,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase('_')]
         public void should_trim_extra_separators_from_middle_when_quality_proper_is_not_included(char separator)
         {
-            _namingConfig.StandardMovieFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Movie{0}Title}}", separator);
+            _namingConfig.StandardGameFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Game{0}Title}}", separator);
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(string.Format("HDTV-720p{0}South{0}Park", separator));
         }
 
@@ -589,48 +589,48 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
 
-            _movie.TmdbId = 124578;
-            _movie.Year = 2020;
+            _game.IgdbId = 124578;
+            _game.Year = 2020;
             GivenMediaInfoModel();
 
-            _namingConfig.StandardMovieFormat = "{Movie CleanTitle} ({Release Year}) [{Quality Title}] [tmdb-{TmdbId}] [{MediaInfo AudioCodec}]";
+            _namingConfig.StandardGameFormat = "{Game CleanTitle} ({Release Year}) [{Quality Title}] [igdb-{IgdbId}] [{MediaInfo AudioCodec}]";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be("South Park (2020) [HDTV-720p] [tmdb-124578] [DTS]");
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be("South Park (2020) [HDTV-720p] [igdb-124578] [DTS]");
         }
 
         [Test]
         public void should_be_able_to_use_original_filename_only()
         {
-            _movie.Title = "30 Rock";
-            _namingConfig.StandardMovieFormat = "{Original Filename}";
+            _game.Title = "30 Rock";
+            _namingConfig.StandardGameFormat = "{Original Filename}";
 
-            _movieFile.SceneName = "30.Rock.S01E01.xvid-LOL";
-            _movieFile.RelativePath = "30 Rock - S01E01 - Test";
+            _gameFile.SceneName = "30.Rock.S01E01.xvid-LOL";
+            _gameFile.RelativePath = "30 Rock - S01E01 - Test";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("30 Rock - S01E01 - Test");
         }
 
         [Test]
-        public void should_use_Radarr_as_release_group_when_not_available()
+        public void should_use_Gamarr_as_release_group_when_not_available()
         {
-            _movieFile.ReleaseGroup = null;
-            _namingConfig.StandardMovieFormat = "{Release Group}";
+            _gameFile.ReleaseGroup = null;
+            _namingConfig.StandardGameFormat = "{Release Group}";
 
-            Subject.BuildFileName(_movie, _movieFile)
-                   .Should().Be("Radarr");
+            Subject.BuildFileName(_game, _gameFile)
+                   .Should().Be("Gamarr");
         }
 
-        [TestCase("{Movie Title}{-Release Group}", "South Park")]
-        [TestCase("{Movie Title}{ Release Group}", "South Park")]
-        [TestCase("{Movie Title}{ [Release Group]}", "South Park")]
-        public void should_not_use_Radarr_as_release_group_if_pattern_has_separator(string pattern, string expectedFileName)
+        [TestCase("{Game Title}{-Release Group}", "South Park")]
+        [TestCase("{Game Title}{ Release Group}", "South Park")]
+        [TestCase("{Game Title}{ [Release Group]}", "South Park")]
+        public void should_not_use_Gamarr_as_release_group_if_pattern_has_separator(string pattern, string expectedFileName)
         {
-            _movieFile.ReleaseGroup = null;
-            _namingConfig.StandardMovieFormat = pattern;
+            _gameFile.ReleaseGroup = null;
+            _namingConfig.StandardGameFormat = pattern;
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(expectedFileName);
         }
 
@@ -639,10 +639,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("IMMERSE")]
         public void should_use_existing_casing_for_release_group(string releaseGroup)
         {
-            _movieFile.ReleaseGroup = releaseGroup;
-            _namingConfig.StandardMovieFormat = "{Release Group}";
+            _gameFile.ReleaseGroup = releaseGroup;
+            _namingConfig.StandardGameFormat = "{Release Group}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(releaseGroup);
         }
 
@@ -650,13 +650,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("eng/deu", "[EN+DE]")]
         public void should_format_audio_languages(string audioLanguages, string expected)
         {
-            _movieFile.ReleaseGroup = null;
+            _gameFile.ReleaseGroup = null;
 
             GivenMediaInfoModel(audioLanguages: audioLanguages);
 
-            _namingConfig.StandardMovieFormat = "{MediaInfo AudioLanguages}";
+            _namingConfig.StandardGameFormat = "{MediaInfo AudioLanguages}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(expected);
         }
 
@@ -664,13 +664,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("eng/deu", "[EN+DE]")]
         public void should_format_audio_languages_all(string audioLanguages, string expected)
         {
-            _movieFile.ReleaseGroup = null;
+            _gameFile.ReleaseGroup = null;
 
             GivenMediaInfoModel(audioLanguages: audioLanguages);
 
-            _namingConfig.StandardMovieFormat = "{MediaInfo AudioLanguagesAll}";
+            _namingConfig.StandardGameFormat = "{MediaInfo AudioLanguagesAll}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(expected);
         }
 
@@ -685,13 +685,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("eng/nld/deu", ":-EN-", "[NL+DE]-")]
         public void should_format_subtitle_languages_all(string subtitleLanguages, string format, string expected)
         {
-            _movieFile.ReleaseGroup = null;
+            _gameFile.ReleaseGroup = null;
 
             GivenMediaInfoModel(subtitles: subtitleLanguages);
 
-            _namingConfig.StandardMovieFormat = "{MediaInfo SubtitleLanguages" + format + "}End";
+            _namingConfig.StandardGameFormat = "{MediaInfo SubtitleLanguages" + format + "}End";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(expected + "End");
         }
 
@@ -700,79 +700,79 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase(HdrFormat.Hdr10, "South.Park.HDR")]
         public void should_include_hdr_for_mediainfo_videodynamicrange_with_valid_properties(HdrFormat hdrFormat, string expectedName)
         {
-            _namingConfig.StandardMovieFormat =
-                "{Movie.Title}.{MediaInfo VideoDynamicRange}";
+            _namingConfig.StandardGameFormat =
+                "{Game.Title}.{MediaInfo VideoDynamicRange}";
 
             GivenMediaInfoModel(hdrFormat: hdrFormat);
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                 .Should().Be(expectedName);
         }
 
         [Test]
         public void should_update_media_info_if_token_configured_and_revision_is_old()
         {
-            _namingConfig.StandardMovieFormat =
-                "{Movie.Title}.{MediaInfo VideoDynamicRange}";
+            _namingConfig.StandardGameFormat =
+                "{Game.Title}.{MediaInfo VideoDynamicRange}";
 
             GivenMediaInfoModel(schemaRevision: 3);
 
-            Subject.BuildFileName(_movie, _movieFile);
+            Subject.BuildFileName(_game, _gameFile);
 
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_movieFile, _movie), Times.Once());
+            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Once());
         }
 
         [Test]
-        public void should_not_update_media_info_if_no_movie_path_available()
+        public void should_not_update_media_info_if_no_game_path_available()
         {
-            _namingConfig.StandardMovieFormat =
-                "{Movie.Title}.{MediaInfo VideoDynamicRange}";
+            _namingConfig.StandardGameFormat =
+                "{Game.Title}.{MediaInfo VideoDynamicRange}";
 
             GivenMediaInfoModel(schemaRevision: 3);
-            _movie.Path = null;
+            _game.Path = null;
 
-            Subject.BuildFileName(_movie, _movieFile);
+            Subject.BuildFileName(_game, _gameFile);
 
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_movieFile, _movie), Times.Never());
+            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
         }
 
         [Test]
         public void should_not_update_media_info_if_token_not_configured_and_revision_is_old()
         {
-            _namingConfig.StandardMovieFormat =
-                "{Movie.Title}";
+            _namingConfig.StandardGameFormat =
+                "{Game.Title}";
 
             GivenMediaInfoModel(schemaRevision: 3);
 
-            Subject.BuildFileName(_movie, _movieFile);
+            Subject.BuildFileName(_game, _gameFile);
 
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_movieFile, _movie), Times.Never());
+            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
         }
 
         [Test]
         public void should_not_update_media_info_if_token_configured_and_revision_is_current()
         {
-            _namingConfig.StandardMovieFormat =
-                "{Movie.Title}.{MediaInfo VideoDynamicRange}";
+            _namingConfig.StandardGameFormat =
+                "{Game.Title}.{MediaInfo VideoDynamicRange}";
 
             GivenMediaInfoModel(schemaRevision: 5);
 
-            Subject.BuildFileName(_movie, _movieFile);
+            Subject.BuildFileName(_game, _gameFile);
 
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_movieFile, _movie), Times.Never());
+            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
         }
 
         [Test]
         public void should_not_update_media_info_if_token_configured_and_revision_is_newer()
         {
-            _namingConfig.StandardMovieFormat =
-                "{Movie.Title}.{MediaInfo VideoDynamicRange}";
+            _namingConfig.StandardGameFormat =
+                "{Game.Title}.{MediaInfo VideoDynamicRange}";
 
             GivenMediaInfoModel(schemaRevision: 8);
 
-            Subject.BuildFileName(_movie, _movieFile);
+            Subject.BuildFileName(_game, _gameFile);
 
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_movieFile, _movie), Times.Never());
+            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
         }
 
         private void GivenMediaInfoModel(string videoCodec = "h264",
@@ -784,7 +784,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             string subtitles = "eng/spa/ita",
             int schemaRevision = 5)
         {
-            _movieFile.MediaInfo = new MediaInfoModel
+            _gameFile.MediaInfo = new MediaInfoModel
             {
                 VideoFormat = videoCodec,
                 AudioFormat = audioCodec,

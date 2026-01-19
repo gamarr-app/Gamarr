@@ -3,7 +3,7 @@ using System.Linq;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaCover;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Apprise
 {
@@ -22,27 +22,27 @@ namespace NzbDrone.Core.Notifications.Apprise
 
         public override void OnGrab(GrabMessage grabMessage)
         {
-            _proxy.SendNotification(MOVIE_GRABBED_TITLE, grabMessage.Message, GetPosterUrl(grabMessage.Movie), Settings);
+            _proxy.SendNotification(GAME_GRABBED_TITLE, grabMessage.Message, GetPosterUrl(grabMessage.Game), Settings);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
-            _proxy.SendNotification(message.OldMovieFiles.Any() ? MOVIE_UPGRADED_TITLE : MOVIE_DOWNLOADED_TITLE, message.Message, GetPosterUrl(message.Movie), Settings);
+            _proxy.SendNotification(message.OldGameFiles.Any() ? GAME_UPGRADED_TITLE : GAME_DOWNLOADED_TITLE, message.Message, GetPosterUrl(message.Game), Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            _proxy.SendNotification(MOVIE_ADDED_TITLE, $"{movie.Title} ({movie.Year}) added to library", GetPosterUrl(movie), Settings);
+            _proxy.SendNotification(GAME_ADDED_TITLE, $"{game.Title} ({game.Year}) added to library", GetPosterUrl(game), Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(MOVIE_FILE_DELETED_TITLE, deleteMessage.Message, GetPosterUrl(deleteMessage.Movie), Settings);
+            _proxy.SendNotification(GAME_FILE_DELETED_TITLE, deleteMessage.Message, GetPosterUrl(deleteMessage.Game), Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(MOVIE_DELETED_TITLE, deleteMessage.Message, GetPosterUrl(deleteMessage.Movie), Settings);
+            _proxy.SendNotification(GAME_DELETED_TITLE, deleteMessage.Message, GetPosterUrl(deleteMessage.Game), Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)
@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Notifications.Apprise
 
         public override void OnManualInteractionRequired(ManualInteractionRequiredMessage message)
         {
-            _proxy.SendNotification(MANUAL_INTERACTION_REQUIRED_TITLE, message.Message, GetPosterUrl(message.Movie), Settings);
+            _proxy.SendNotification(MANUAL_INTERACTION_REQUIRED_TITLE, message.Message, GetPosterUrl(message.Game), Settings);
         }
 
         public override ValidationResult Test()
@@ -74,9 +74,9 @@ namespace NzbDrone.Core.Notifications.Apprise
             return new ValidationResult(failures);
         }
 
-        private static string GetPosterUrl(Movie movie)
+        private static string GetPosterUrl(Game game)
         {
-            return movie?.MovieMetadata?.Value?.Images?.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster)?.RemoteUrl;
+            return game?.GameMetadata?.Value?.Images?.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster)?.RemoteUrl;
         }
     }
 }

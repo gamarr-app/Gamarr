@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Indexers.TorrentRss
             return pageableRequests;
         }
 
-        public IndexerPageableRequestChain GetSearchRequests(MovieSearchCriteria searchCriteria)
+        public IndexerPageableRequestChain GetSearchRequests(GameSearchCriteria searchCriteria)
         {
             return new IndexerPageableRequestChain();
         }

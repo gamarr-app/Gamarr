@@ -11,7 +11,7 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { kinds } from 'Helpers/Props';
-import createAllMoviesSelector from 'Store/Selectors/createAllMoviesSelector';
+import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import translate from 'Utilities/String/translate';
 import TagDetailsDelayProfile from './TagDetailsDelayProfile';
 import styles from './TagDetailsModalContent.css';
@@ -22,19 +22,19 @@ function findMatchingItems<T extends ModelBase>(ids: number[], items: T[]) {
   });
 }
 
-function createUnorderedMatchingMoviesSelector(movieIds: number[]) {
-  return createSelector(createAllMoviesSelector(), (movies) =>
-    findMatchingItems(movieIds, movies)
+function createUnorderedMatchingGamesSelector(gameIds: number[]) {
+  return createSelector(createAllGamesSelector(), (games) =>
+    findMatchingItems(gameIds, games)
   );
 }
 
-function createMatchingMoviesSelector(movieIds: number[]) {
+function createMatchingGamesSelector(gameIds: number[]) {
   return createSelector(
-    createUnorderedMatchingMoviesSelector(movieIds),
-    (movies) => {
-      return movies.sort((movieA, movieB) => {
-        const sortTitleA = movieA.sortTitle;
-        const sortTitleB = movieB.sortTitle;
+    createUnorderedMatchingGamesSelector(gameIds),
+    (games) => {
+      return games.sort((gameA, gameB) => {
+        const sortTitleA = gameA.sortTitle;
+        const sortTitleB = gameB.sortTitle;
 
         if (sortTitleA > sortTitleB) {
           return 1;
@@ -65,7 +65,7 @@ export interface TagDetailsModalContentProps {
   indexerIds: number[];
   downloadClientIds: number[];
   autoTagIds: number[];
-  movieIds: number[];
+  gameIds: number[];
   onModalClose: () => void;
   onDeleteTagPress: () => void;
 }
@@ -80,11 +80,11 @@ function TagDetailsModalContent({
   indexerIds = [],
   downloadClientIds = [],
   autoTagIds = [],
-  movieIds = [],
+  gameIds = [],
   onModalClose,
   onDeleteTagPress,
 }: TagDetailsModalContentProps) {
-  const movies = useSelector(createMatchingMoviesSelector(movieIds));
+  const games = useSelector(createMatchingGamesSelector(gameIds));
 
   const delayProfiles = useSelector(
     createMatchingItemSelector(
@@ -142,9 +142,9 @@ function TagDetailsModalContent({
       <ModalBody>
         {!isTagUsed && <div>{translate('TagIsNotUsedAndCanBeDeleted')}</div>}
 
-        {movies.length ? (
-          <FieldSet legend={translate('Movies')}>
-            {movies.map((item) => {
+        {games.length ? (
+          <FieldSet legend={translate('Games')}>
+            {games.map((item) => {
               return <div key={item.id}>{item.title}</div>;
             })}
           </FieldSet>

@@ -6,11 +6,11 @@ namespace NzbDrone.Core.Indexers.PassThePopcorn
     public class PassThePopcornResponse
     {
         public string TotalResults { get; set; }
-        public IReadOnlyCollection<PassThePopcornMovie> Movies { get; set; }
+        public IReadOnlyCollection<PassThePopcornGame> Games { get; set; }
         public string Page { get; set; }
     }
 
-    public class PassThePopcornMovie
+    public class PassThePopcornGame
     {
         public string GroupId { get; set; }
         public string Title { get; set; }

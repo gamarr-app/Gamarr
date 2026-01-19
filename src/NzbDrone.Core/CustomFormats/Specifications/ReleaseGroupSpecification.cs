@@ -4,11 +4,11 @@ namespace NzbDrone.Core.CustomFormats
     {
         public override int Order => 9;
         public override string ImplementationName => "Release Group";
-        public override string InfoLink => "https://wiki.servarr.com/radarr/settings#custom-formats-2";
+        public override string InfoLink => "https://wiki.servarr.com/gamarr/settings#custom-formats-2";
 
         protected override bool IsSatisfiedByWithoutNegate(CustomFormatInput input)
         {
-            return MatchString(input.MovieInfo?.ReleaseGroup);
+            return MatchString(input.GameInfo?.ReleaseGroup);
         }
     }
 }

@@ -8,8 +8,8 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Execute.Sql("UPDATE \"MovieFiles\" SET \"MediaInfo\" = Replace(\"MediaInfo\", '\"audioChannels\"', '\"audioChannelsContainer\"');");
-            Execute.Sql("UPDATE \"MovieFiles\" SET \"MediaInfo\" = Replace(\"MediaInfo\", '\"audioChannelPositionsText\"', '\"audioChannelPositionsTextContainer\"');");
+            Execute.Sql("UPDATE \"GameFiles\" SET \"MediaInfo\" = Replace(\"MediaInfo\", '\"audioChannels\"', '\"audioChannelsContainer\"');");
+            Execute.Sql("UPDATE \"GameFiles\" SET \"MediaInfo\" = Replace(\"MediaInfo\", '\"audioChannelPositionsText\"', '\"audioChannelPositionsTextContainer\"');");
 
             // Change List Interval from Min to Hour
             IfDatabase("sqlite").Execute.Sql("UPDATE \"Config\" SET \"Value\" = max((\"Value\" / 60) + 1, 6) WHERE \"Key\" = 'importlistsyncinterval'");

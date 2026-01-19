@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Test.IndexerTests
                 .Setup(v => v.GetSettings(It.IsAny<int>()))
                 .Returns<CachedIndexerSettings>(null);
 
-            var result = Subject.GetSeedConfiguration(new RemoteMovie
+            var result = Subject.GetSeedConfiguration(new RemoteGame
             {
                 Release = new ReleaseInfo
                 {
@@ -39,21 +39,21 @@ namespace NzbDrone.Core.Test.IndexerTests
                 .Setup(v => v.GetSettings(It.IsAny<int>()))
                 .Returns<CachedIndexerSettings>(null);
 
-            var result = Subject.GetSeedConfiguration(new RemoteMovie
+            var result = Subject.GetSeedConfiguration(new RemoteGame
             {
                 Release = new ReleaseInfo
                 {
                     DownloadProtocol = DownloadProtocol.Torrent,
                     IndexerId = 1
                 },
-                ParsedMovieInfo = new ParsedMovieInfo()
+                ParsedGameInfo = new ParsedGameInfo()
             });
 
             result.Should().BeNull();
         }
 
         [Test]
-        public void should_return_seed_time_for_movies()
+        public void should_return_seed_time_for_games()
         {
             var settings = new TorznabSettings();
             settings.SeedCriteria.SeedTime = 10;
@@ -66,14 +66,14 @@ namespace NzbDrone.Core.Test.IndexerTests
                     SeedCriteriaSettings = settings.SeedCriteria
                 });
 
-            var result = Subject.GetSeedConfiguration(new RemoteMovie
+            var result = Subject.GetSeedConfiguration(new RemoteGame
             {
                 Release = new ReleaseInfo
                 {
                     DownloadProtocol = DownloadProtocol.Torrent,
                     IndexerId = 1
                 },
-                ParsedMovieInfo = new ParsedMovieInfo()
+                ParsedGameInfo = new ParsedGameInfo()
             });
 
             result.Should().NotBeNull();

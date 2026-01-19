@@ -7,7 +7,7 @@ interface ErrorPageProps {
   version: string;
   isLocalStorageSupported: boolean;
   translationsError?: Error;
-  moviesError?: Error;
+  gamesError?: Error;
   customFiltersError?: Error;
   tagsError?: Error;
   qualityProfilesError?: Error;
@@ -21,7 +21,7 @@ function ErrorPage(props: ErrorPageProps) {
     version,
     isLocalStorageSupported,
     translationsError,
-    moviesError,
+    gamesError,
     customFiltersError,
     tagsError,
     qualityProfilesError,
@@ -30,7 +30,7 @@ function ErrorPage(props: ErrorPageProps) {
     systemStatusError,
   } = props;
 
-  let errorMessage = 'Failed to load Radarr';
+  let errorMessage = 'Failed to load Gamarr';
 
   if (!isLocalStorageSupported) {
     errorMessage =
@@ -40,10 +40,10 @@ function ErrorPage(props: ErrorPageProps) {
       translationsError,
       'Failed to load translations from API'
     );
-  } else if (moviesError) {
+  } else if (gamesError) {
     errorMessage = getErrorMessage(
-      moviesError,
-      'Failed to load movie from API'
+      gamesError,
+      'Failed to load game from API'
     );
   } else if (customFiltersError) {
     errorMessage = getErrorMessage(

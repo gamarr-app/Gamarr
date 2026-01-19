@@ -25,11 +25,11 @@ namespace NzbDrone.Core.Configuration
         bool AutoRedownloadFailedFromInteractiveSearch { get; set; }
 
         // Media Management
-        bool AutoUnmonitorPreviouslyDownloadedMovies { get; set; }
+        bool AutoUnmonitorPreviouslyDownloadedGames { get; set; }
         string RecycleBin { get; set; }
         int RecycleBinCleanupDays { get; set; }
         ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
-        bool CreateEmptyMovieFolders { get; set; }
+        bool CreateEmptyGameFolders { get; set; }
         bool DeleteEmptyFolders { get; set; }
         FileDateType FileDate { get; set; }
         bool SkipFreeSpaceCheckWhenImporting { get; set; }
@@ -69,14 +69,14 @@ namespace NzbDrone.Core.Configuration
         // UI
         int FirstDayOfWeek { get; set; }
         string CalendarWeekColumnHeader { get; set; }
-        MovieRuntimeFormatType MovieRuntimeFormat { get; set; }
+        GameRuntimeFormatType GameRuntimeFormat { get; set; }
 
         string ShortDateFormat { get; set; }
         string LongDateFormat { get; set; }
         string TimeFormat { get; set; }
         bool ShowRelativeDates { get; set; }
         bool EnableColorImpairedMode { get; set; }
-        int MovieInfoLanguage { get; set; }
+        int GameInfoLanguage { get; set; }
         int UILanguage { get; set; }
 
         // Internal

@@ -8,7 +8,7 @@
     "KeyboardShortcutsConfirmModal": "中文",
     "Backup": "备份",
     "Uptime": "运行时间",
-    "YouCanAlsoSearch": "你可以通过TMDB或IMDB的ID进行搜索，如:`tmdb:71663`",
+    "YouCanAlsoSearch": "你可以通过IGDB或IMDB的ID进行搜索，如:`igdb:71663`",
     "UseProxy": "使用代理",
     "YesCancel": "确认 ,取消",
     "Yesterday": "昨天",

@@ -11,7 +11,7 @@ import translate from 'Utilities/String/translate';
 
 function QueueOptions() {
   const dispatch = useDispatch();
-  const { includeUnknownMovieItems } = useSelector(
+  const { includeUnknownGameItems } = useSelector(
     (state: AppState) => state.queue.options
   );
 
@@ -23,7 +23,7 @@ function QueueOptions() {
         })
       );
 
-      if (name === 'includeUnknownMovieItems') {
+      if (name === 'includeUnknownGameItems') {
         dispatch(gotoQueuePage({ page: 1 }));
       }
     },
@@ -32,13 +32,13 @@ function QueueOptions() {
 
   return (
     <FormGroup>
-      <FormLabel>{translate('ShowUnknownMovieItems')}</FormLabel>
+      <FormLabel>{translate('ShowUnknownGameItems')}</FormLabel>
 
       <FormInputGroup
         type={inputTypes.CHECK}
-        name="includeUnknownMovieItems"
-        value={includeUnknownMovieItems}
-        helpText={translate('ShowUnknownMovieItemsHelpText')}
+        name="includeUnknownGameItems"
+        value={includeUnknownGameItems}
+        helpText={translate('ShowUnknownGameItemsHelpText')}
         onChange={handleOptionChange}
       />
     </FormGroup>

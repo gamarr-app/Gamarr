@@ -13,18 +13,18 @@ namespace NzbDrone.Core.ImportLists.TMDb.List
         public Logger Logger { get; set; }
         public int MaxPages { get; set; }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequest());
+            pageableRequests.Add(GetGamesRequest());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequest()
+        private IEnumerable<ImportListRequest> GetGamesRequest()
         {
-            Logger.Info("TMDb List {0}: Importing movies", Settings.ListId);
+            Logger.Info("TMDb List {0}: Importing games", Settings.ListId);
 
             var requestBuilder = RequestBuilder.Create()
                 .SetSegment("api", "4")
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.ImportLists.TMDb.List
 
             Logger.Trace("TMDb List {0}: Getting total pages", Settings.ListId);
 
-            var jsonResponse = JsonConvert.DeserializeObject<MovieSearchResource>(HttpClient.Execute(requestBuilder.Build()).Content);
+            var jsonResponse = JsonConvert.DeserializeObject<GameSearchResource>(HttpClient.Execute(requestBuilder.Build()).Content);
 
             MaxPages = jsonResponse.TotalPages;
 

@@ -1,9 +1,9 @@
 export default interface MediaManagement {
-  autoUnmonitorPreviouslyDownloadedMovies: boolean;
+  autoUnmonitorPreviouslyDownloadedGames: boolean;
   recycleBin: string;
   recycleBinCleanupDays: number;
   downloadPropersAndRepacks: string;
-  createEmptyMovieFolders: boolean;
+  createEmptyGameFolders: boolean;
   deleteEmptyFolders: boolean;
   fileDate: string;
   rescanAfterRefresh: string;

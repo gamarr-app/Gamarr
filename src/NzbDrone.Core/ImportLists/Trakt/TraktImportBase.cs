@@ -40,7 +40,7 @@ namespace NzbDrone.Core.ImportLists.Trakt
                 RefreshToken();
             }
 
-            return FetchMovies(g => g.GetMovies());
+            return FetchGames(g => g.GetGames());
         }
 
         public override IParseImportListResponse GetParser()

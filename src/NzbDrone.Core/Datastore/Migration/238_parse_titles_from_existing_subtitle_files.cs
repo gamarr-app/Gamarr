@@ -8,7 +8,7 @@ using FluentMigrator;
 using NLog;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Datastore.Migration.Framework;
-using NzbDrone.Core.MediaFiles.MovieImport.Aggregation.Aggregators;
+using NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -33,17 +33,17 @@ namespace NzbDrone.Core.Datastore.Migration
             using (var cmd = conn.CreateCommand())
             {
                 cmd.Transaction = tran;
-                cmd.CommandText = "SELECT \"SubtitleFiles\".\"Id\", \"SubtitleFiles\".\"RelativePath\", \"MovieFiles\".\"RelativePath\", \"MovieFiles\".\"OriginalFilePath\" FROM \"SubtitleFiles\" JOIN \"MovieFiles\" ON \"SubtitleFiles\".\"MovieFileId\" = \"MovieFiles\".\"Id\"";
+                cmd.CommandText = "SELECT \"SubtitleFiles\".\"Id\", \"SubtitleFiles\".\"RelativePath\", \"GameFiles\".\"RelativePath\", \"GameFiles\".\"OriginalFilePath\" FROM \"SubtitleFiles\" JOIN \"GameFiles\" ON \"SubtitleFiles\".\"GameFileId\" = \"GameFiles\".\"Id\"";
 
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     var id = reader.GetInt32(0);
                     var relativePath = reader.GetString(1);
-                    var movieFileRelativePath = reader.GetString(2);
-                    var movieFileOriginalFilePath = reader[3] as string;
+                    var gameFileRelativePath = reader.GetString(2);
+                    var gameFileOriginalFilePath = reader[3] as string;
 
-                    var subtitleTitleInfo = CleanSubtitleTitleInfo(movieFileRelativePath, movieFileOriginalFilePath, relativePath);
+                    var subtitleTitleInfo = CleanSubtitleTitleInfo(gameFileRelativePath, gameFileOriginalFilePath, relativePath);
 
                     updates.Add(new
                     {
@@ -64,17 +64,17 @@ namespace NzbDrone.Core.Datastore.Migration
         {
             var subtitleTitleInfo = LanguageParser.ParseSubtitleLanguageInformation(path);
 
-            var movieFileTitle = Path.GetFileNameWithoutExtension(relativePath);
-            var originalMovieFileTitle = Path.GetFileNameWithoutExtension(originalFilePath) ?? string.Empty;
+            var gameFileTitle = Path.GetFileNameWithoutExtension(relativePath);
+            var originalGameFileTitle = Path.GetFileNameWithoutExtension(originalFilePath) ?? string.Empty;
 
-            if (subtitleTitleInfo.TitleFirst && (movieFileTitle.Contains(subtitleTitleInfo.RawTitle, StringComparison.OrdinalIgnoreCase) || originalMovieFileTitle.Contains(subtitleTitleInfo.RawTitle, StringComparison.OrdinalIgnoreCase)))
+            if (subtitleTitleInfo.TitleFirst && (gameFileTitle.Contains(subtitleTitleInfo.RawTitle, StringComparison.OrdinalIgnoreCase) || originalGameFileTitle.Contains(subtitleTitleInfo.RawTitle, StringComparison.OrdinalIgnoreCase)))
             {
-                Logger.Debug("Subtitle title '{0}' is in movie file title '{1}'. Removing from subtitle title.", subtitleTitleInfo.RawTitle, movieFileTitle);
+                Logger.Debug("Subtitle title '{0}' is in game file title '{1}'. Removing from subtitle title.", subtitleTitleInfo.RawTitle, gameFileTitle);
 
                 subtitleTitleInfo = LanguageParser.ParseBasicSubtitle(path);
             }
 
-            var cleanedTags = subtitleTitleInfo.LanguageTags.Where(t => !movieFileTitle.Contains(t, StringComparison.OrdinalIgnoreCase)).ToList();
+            var cleanedTags = subtitleTitleInfo.LanguageTags.Where(t => !gameFileTitle.Contains(t, StringComparison.OrdinalIgnoreCase)).ToList();
 
             if (cleanedTags.Count != subtitleTitleInfo.LanguageTags.Count)
             {

@@ -10,7 +10,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.RemotePathMappings;
@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 .Returns(30);
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.IsAny<ParsedMovieInfo>(), It.IsAny<string>(), It.IsAny<int>(), (SearchCriteriaBase)null))
-                .Returns(() => CreateRemoteMovie());
+                .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), (SearchCriteriaBase)null))
+                .Returns(() => CreateRemoteGame());
 
             Mocker.GetMock<IHttpClient>()
                   .Setup(s => s.GetAsync(It.IsAny<HttpRequest>()))
@@ -45,19 +45,19 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 .Returns<string, OsPath>((h, r) => r);
         }
 
-        protected virtual RemoteMovie CreateRemoteMovie()
+        protected virtual RemoteGame CreateRemoteGame()
         {
-            var remoteMovie = new RemoteMovie();
-            remoteMovie.Release = new ReleaseInfo();
-            remoteMovie.Release.Title = _title;
-            remoteMovie.Release.DownloadUrl = _downloadUrl;
-            remoteMovie.Release.DownloadProtocol = Subject.Protocol;
+            var remoteGame = new RemoteGame();
+            remoteGame.Release = new ReleaseInfo();
+            remoteGame.Release.Title = _title;
+            remoteGame.Release.DownloadUrl = _downloadUrl;
+            remoteGame.Release.DownloadProtocol = Subject.Protocol;
 
-            remoteMovie.ParsedMovieInfo = new ParsedMovieInfo();
+            remoteGame.ParsedGameInfo = new ParsedGameInfo();
 
-            remoteMovie.Movie = new Movie();
+            remoteGame.Game = new Game();
 
-            return remoteMovie;
+            return remoteGame;
         }
 
         protected virtual IIndexer CreateIndexer()

@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
     {
         private readonly IDiskProvider _diskProvider;
 
-        private readonly Regex _regex = new Regex("<(movie|tvshow|episodedetails|artist|album|musicvideo)>", RegexOptions.Compiled);
+        private readonly Regex _regex = new Regex("<(game|tvshow|episodedetails|artist|album|musicvideo)>", RegexOptions.Compiled);
 
         public XbmcNfoDetector(IDiskProvider diskProvider)
         {

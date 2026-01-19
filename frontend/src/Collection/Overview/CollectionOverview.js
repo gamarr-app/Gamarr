@@ -3,28 +3,28 @@ import React, { Component } from 'react';
 import TextTruncate from 'react-text-truncate';
 import { Navigation } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import EditMovieCollectionModal from 'Collection/Edit/EditMovieCollectionModal';
+import EditGameCollectionModal from 'Collection/Edit/EditGameCollectionModal';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import { icons, sizes } from 'Helpers/Props';
-import MovieGenres from 'Movie/MovieGenres';
+import GameGenres from 'Game/GameGenres';
 import QualityProfileName from 'Settings/Profiles/Quality/QualityProfileName';
 import dimensions from 'Styles/Variables/dimensions';
 import fonts from 'Styles/Variables/fonts';
 import translate from 'Utilities/String/translate';
-import CollectionMovieConnector from './CollectionMovieConnector';
-import CollectionMovieLabelConnector from './CollectionMovieLabelConnector';
+import CollectionGameConnector from './CollectionGameConnector';
+import CollectionGameLabelConnector from './CollectionGameLabelConnector';
 import styles from './CollectionOverview.css';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-const columnPadding = parseInt(dimensions.movieIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(dimensions.movieIndexColumnPaddingSmallScreen);
+const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
+const columnPaddingSmallScreen = parseInt(dimensions.gameIndexColumnPaddingSmallScreen);
 const defaultFontSize = parseInt(fonts.defaultFontSize);
 const lineHeight = parseFloat(fonts.lineHeight);
 
@@ -48,7 +48,7 @@ class CollectionOverview extends Component {
 
     this.state = {
       isEditCollectionModalOpen: false,
-      isNewAddMovieModalOpen: false
+      isNewAddGameModalOpen: false
     };
   }
 
@@ -67,7 +67,7 @@ class CollectionOverview extends Component {
   // Listeners
 
   onPress = () => {
-    this.setState({ isNewAddMovieModalOpen: true });
+    this.setState({ isNewAddGameModalOpen: true });
   };
 
   onEditCollectionPress = () => {
@@ -78,8 +78,8 @@ class CollectionOverview extends Component {
     this.setState({ isEditCollectionModalOpen: false });
   };
 
-  onAddMovieModalClose = () => {
-    this.setState({ isNewAddMovieModalOpen: false });
+  onAddGameModalClose = () => {
+    this.setState({ isNewAddGameModalOpen: false });
   };
 
   onChange = ({ value, shiftKey }) => {
@@ -102,9 +102,9 @@ class CollectionOverview extends Component {
       genres,
       id,
       title,
-      movies,
+      games,
       overview,
-      missingMovies,
+      missingGames,
       posterHeight,
       posterWidth,
       rowHeight,
@@ -167,7 +167,7 @@ class CollectionOverview extends Component {
                     <span ref={this.setSliderPrevRef}>
                       <IconButton
                         name={icons.ARROW_LEFT}
-                        title={translate('ScrollMovies')}
+                        title={translate('ScrollGames')}
                         size={20}
                       />
                     </span>
@@ -175,7 +175,7 @@ class CollectionOverview extends Component {
                     <span ref={this.setSliderNextRef}>
                       <IconButton
                         name={icons.ARROW_RIGHT}
-                        title={translate('ScrollMovies')}
+                        title={translate('ScrollGames')}
                         size={20}
                       />
                     </span>
@@ -196,7 +196,7 @@ class CollectionOverview extends Component {
                       size={13}
                     />
                     <span className={styles.status}>
-                      {translate('CountMissingMoviesFromLibrary', { count: missingMovies })}
+                      {translate('CountMissingGamesFromLibrary', { count: missingGames })}
                     </span>
                   </Label>
 
@@ -246,7 +246,7 @@ class CollectionOverview extends Component {
                           name={icons.GENRE}
                           size={13}
                         />
-                        <MovieGenres className={styles.genres} genres={genres} />
+                        <GameGenres className={styles.genres} genres={genres} />
                       </Label>
                   }
 
@@ -283,26 +283,26 @@ class CollectionOverview extends Component {
                       swiper.navigation.update();
                     }}
                   >
-                    {movies.map((movie) => (
-                      <SwiperSlide key={movie.tmdbId} style={{ width: posterWidth }}>
-                        <CollectionMovieConnector
-                          key={movie.tmdbId}
+                    {games.map((game) => (
+                      <SwiperSlide key={game.igdbId} style={{ width: posterWidth }}>
+                        <CollectionGameConnector
+                          key={game.igdbId}
                           posterWidth={posterWidth}
                           posterHeight={posterHeight}
                           detailedProgressBar={detailedProgressBar}
                           collectionId={id}
-                          {...movie}
+                          {...game}
                         />
                       </SwiperSlide>
                     ))}
                   </Swiper>
                 </div> :
                 <div className={styles.labelsContainer}>
-                  {movies.map((movie) => (
-                    <CollectionMovieLabelConnector
-                      key={movie.tmdbId}
+                  {games.map((game) => (
+                    <CollectionGameLabelConnector
+                      key={game.igdbId}
                       collectionId={id}
-                      {...movie}
+                      {...game}
                     />
                   ))}
                 </div>
@@ -311,7 +311,7 @@ class CollectionOverview extends Component {
           </div>
         </div>
 
-        <EditMovieCollectionModal
+        <EditGameCollectionModal
           isOpen={isEditCollectionModalOpen}
           collectionId={id}
           onModalClose={this.onEditCollectionModalClose}
@@ -328,12 +328,12 @@ CollectionOverview.propTypes = {
   minimumAvailability: PropTypes.string.isRequired,
   searchOnAdd: PropTypes.bool.isRequired,
   rootFolderPath: PropTypes.string.isRequired,
-  tmdbId: PropTypes.number.isRequired,
+  igdbId: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
   overview: PropTypes.string.isRequired,
-  movies: PropTypes.arrayOf(PropTypes.object).isRequired,
+  games: PropTypes.arrayOf(PropTypes.object).isRequired,
   genres: PropTypes.arrayOf(PropTypes.string).isRequired,
-  missingMovies: PropTypes.number.isRequired,
+  missingGames: PropTypes.number.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   rowHeight: PropTypes.number.isRequired,
   posterHeight: PropTypes.number.isRequired,

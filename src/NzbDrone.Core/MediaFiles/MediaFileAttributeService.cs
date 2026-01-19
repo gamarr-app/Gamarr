@@ -70,7 +70,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             if (OsInfo.IsWindows)
             {
-                _logger.Debug("Setting last write time on movie folder: {0}", path);
+                _logger.Debug("Setting last write time on game folder: {0}", path);
                 _diskProvider.FolderSetLastWriteTime(path, time);
             }
         }

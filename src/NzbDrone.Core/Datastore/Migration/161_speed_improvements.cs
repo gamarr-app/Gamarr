@@ -9,13 +9,13 @@ namespace NzbDrone.Core.Datastore.Migration
         protected override void MainDbUpgrade()
         {
             // Auto indices SQLite is creating
-            Create.Index("IX_MovieFiles_MovieId").OnTable("MovieFiles").OnColumn("MovieId");
-            Create.Index("IX_AlternativeTitles_MovieId").OnTable("AlternativeTitles").OnColumn("MovieId");
+            Create.Index("IX_GameFiles_GameId").OnTable("GameFiles").OnColumn("GameId");
+            Create.Index("IX_AlternativeTitles_GameId").OnTable("AlternativeTitles").OnColumn("GameId");
 
             // Speed up release processing (these are present in Sonarr)
-            Create.Index("IX_Movies_CleanTitle").OnTable("Movies").OnColumn("CleanTitle");
-            Create.Index("IX_Movies_ImdbId").OnTable("Movies").OnColumn("ImdbId");
-            Create.Index("IX_Movies_TmdbId").OnTable("Movies").OnColumn("TmdbId");
+            Create.Index("IX_Games_CleanTitle").OnTable("Games").OnColumn("CleanTitle");
+            Create.Index("IX_Games_ImdbId").OnTable("Games").OnColumn("ImdbId");
+            Create.Index("IX_Games_IgdbId").OnTable("Games").OnColumn("IgdbId");
         }
     }
 }

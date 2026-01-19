@@ -6,7 +6,7 @@ using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.TorrentRss;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Test.Common;
 
@@ -15,18 +15,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
     [TestFixture]
     public class TorrentSeedingSpecificationFixture : TestBase<TorrentSeedingSpecification>
     {
-        private Movie _movie;
-        private RemoteMovie _remoteMovie;
+        private Game _game;
+        private RemoteGame _remoteGame;
         private IndexerDefinition _indexerDefinition;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>.CreateNew().With(s => s.Id = 1).Build();
+            _game = Builder<Game>.CreateNew().With(s => s.Id = 1).Build();
 
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
-                Movie = _movie,
+                Game = _game,
                 Release = new TorrentInfo
                 {
                     IndexerId = 1,
@@ -49,28 +49,28 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
 
         private void GivenReleaseSeeders(int? seeders)
         {
-            (_remoteMovie.Release as TorrentInfo).Seeders = seeders;
+            (_remoteGame.Release as TorrentInfo).Seeders = seeders;
         }
 
         [Test]
         public void should_return_true_if_not_torrent()
         {
-            _remoteMovie.Release = new ReleaseInfo
+            _remoteGame.Release = new ReleaseInfo
             {
                 IndexerId = 1,
                 Title = "Series.Title.S01.720p.BluRay.X264-RlsGrp"
             };
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         // These tests are not needed anymore, since indexer settings are saved on the release itself!
         [Test]
         public void should_return_true_if_indexer_not_specified()
         {
-            _remoteMovie.Release.IndexerId = 0;
+            _remoteGame.Release.IndexerId = 0;
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
                   .Setup(v => v.Get(It.IsAny<int>()))
                   .Callback<int>(i => { throw new ModelNotFoundException(typeof(IndexerDefinition), i); });
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             GivenReleaseSeeders(null);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [TestCase(5)]
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             GivenReleaseSeeders(seeders);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [TestCase(0)]
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             GivenReleaseSeeders(seeders);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
     }
 }

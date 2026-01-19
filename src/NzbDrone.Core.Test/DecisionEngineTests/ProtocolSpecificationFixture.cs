@@ -4,7 +4,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Indexers;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Test.Framework;
@@ -14,15 +14,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class ProtocolSpecificationFixture : CoreTest<ProtocolSpecification>
     {
-        private RemoteMovie _remoteEpisode;
+        private RemoteGame _remoteEpisode;
         private DelayProfile _delayProfile;
 
         [SetUp]
         public void Setup()
         {
-            _remoteEpisode = new RemoteMovie();
+            _remoteEpisode = new RemoteGame();
             _remoteEpisode.Release = new ReleaseInfo();
-            _remoteEpisode.Movie = new Movie();
+            _remoteEpisode.Game = new Game();
 
             _delayProfile = new DelayProfile();
 

@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Download
 
                 if (grabbedItems.Empty())
                 {
-                    trackedDownload.Warn(trackedDownload.DownloadItem.IsEncrypted ? "Download is encrypted and wasn't grabbed by Radarr, skipping automatic download handling" : "Download has failed wasn't grabbed by Radarr, skipping automatic download handling");
+                    trackedDownload.Warn(trackedDownload.DownloadItem.IsEncrypted ? "Download is encrypted and wasn't grabbed by Gamarr, skipping automatic download handling" : "Download has failed wasn't grabbed by Gamarr, skipping automatic download handling");
                     return;
                 }
 
@@ -107,16 +107,16 @@ namespace NzbDrone.Core.Download
             PublishDownloadFailedEvent(grabbedItems.First(), failure, trackedDownload);
         }
 
-        private void PublishDownloadFailedEvent(MovieHistory historyItem, string message, TrackedDownload trackedDownload = null, bool skipRedownload = false)
+        private void PublishDownloadFailedEvent(GameHistory historyItem, string message, TrackedDownload trackedDownload = null, bool skipRedownload = false)
         {
-            Enum.TryParse(historyItem.Data.GetValueOrDefault(MovieHistory.RELEASE_SOURCE, ReleaseSourceType.Unknown.ToString()), out ReleaseSourceType releaseSource);
+            Enum.TryParse(historyItem.Data.GetValueOrDefault(GameHistory.RELEASE_SOURCE, ReleaseSourceType.Unknown.ToString()), out ReleaseSourceType releaseSource);
 
             var downloadFailedEvent = new DownloadFailedEvent
             {
-                MovieId = historyItem.MovieId,
+                GameId = historyItem.GameId,
                 Quality = historyItem.Quality,
                 SourceTitle = historyItem.SourceTitle,
-                DownloadClient = historyItem.Data.GetValueOrDefault(MovieHistory.DOWNLOAD_CLIENT),
+                DownloadClient = historyItem.Data.GetValueOrDefault(GameHistory.DOWNLOAD_CLIENT),
                 DownloadId = historyItem.DownloadId,
                 Message = message,
                 Data = historyItem.Data,
@@ -129,10 +129,10 @@ namespace NzbDrone.Core.Download
             _eventAggregator.PublishEvent(downloadFailedEvent);
         }
 
-        private List<MovieHistory> GetGrabbedHistory(string downloadId)
+        private List<GameHistory> GetGrabbedHistory(string downloadId)
         {
             // Sort by date so items are always in the same order
-            return _historyService.Find(downloadId, MovieHistoryEventType.Grabbed)
+            return _historyService.Find(downloadId, GameHistoryEventType.Grabbed)
                 .OrderByDescending(h => h.Date)
                 .ToList();
         }

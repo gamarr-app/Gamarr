@@ -1,4 +1,4 @@
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -13,6 +13,6 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         NzbDroneValidationResult Validate();
 
         IAutoTaggingSpecification Clone();
-        bool IsSatisfiedBy(Movie movie);
+        bool IsSatisfiedBy(Game game);
     }
 }

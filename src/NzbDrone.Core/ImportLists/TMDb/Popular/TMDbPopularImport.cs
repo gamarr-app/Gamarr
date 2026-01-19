@@ -9,14 +9,14 @@ namespace NzbDrone.Core.ImportLists.TMDb.Popular
 {
     public class TMDbPopularImport : TMDbImportListBase<TMDbPopularSettings>
     {
-        public TMDbPopularImport(IRadarrCloudRequestBuilder requestBuilder,
+        public TMDbPopularImport(IGamarrCloudRequestBuilder requestBuilder,
                                  IHttpClient httpClient,
                                  IImportListStatusService importListStatusService,
                                  IConfigService configService,
                                  IParsingService parsingService,
-                                 ISearchForNewMovie searchForNewMovie,
+                                 ISearchForNewGame searchForNewGame,
                                  Logger logger)
-        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewMovie, logger)
+        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewGame, logger)
         {
         }
 

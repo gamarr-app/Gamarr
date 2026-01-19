@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            Alter.Table("MovieFiles")
+            Alter.Table("GameFiles")
                  .AddColumn("Languages").AsString().NotNullable().WithDefaultValue("[]");
 
             Alter.Table("History")
@@ -47,62 +47,62 @@ namespace NzbDrone.Core.Datastore.Migration
                 while (profilesReader.Read())
                 {
                     var profileId = profilesReader.GetInt32(0);
-                    var movieLanguage = Language.English.Id;
+                    var gameLanguage = Language.English.Id;
                     try
                     {
-                        movieLanguage = profilesReader.GetInt32(1) != -1 ? profilesReader.GetInt32(1) : 1;
+                        gameLanguage = profilesReader.GetInt32(1) != -1 ? profilesReader.GetInt32(1) : 1;
                     }
                     catch (InvalidCastException e)
                     {
                         _logger.Debug("Language field not found in Profiles, using English as default." + e.Message);
                     }
 
-                    profileLanguages[profileId] = movieLanguage;
+                    profileLanguages[profileId] = gameLanguage;
                 }
 
                 profilesReader.Close();
             }
 
-            var movieLanguages = new Dictionary<int, int>();
+            var gameLanguages = new Dictionary<int, int>();
 
             using (var getSeriesCmd = conn.CreateCommand())
             {
                 getSeriesCmd.Transaction = tran;
-                getSeriesCmd.CommandText = @"SELECT ""Id"", ""ProfileId"" FROM ""Movies""";
-                using (var moviesReader = getSeriesCmd.ExecuteReader())
+                getSeriesCmd.CommandText = @"SELECT ""Id"", ""ProfileId"" FROM ""Games""";
+                using (var gamesReader = getSeriesCmd.ExecuteReader())
                 {
-                    while (moviesReader.Read())
+                    while (gamesReader.Read())
                     {
-                        var movieId = moviesReader.GetInt32(0);
-                        var movieProfileId = moviesReader.GetInt32(1);
+                        var gameId = gamesReader.GetInt32(0);
+                        var gameProfileId = gamesReader.GetInt32(1);
 
-                        movieLanguages[movieId] = profileLanguages.GetValueOrDefault(movieProfileId, Language.English.Id);
+                        gameLanguages[gameId] = profileLanguages.GetValueOrDefault(gameProfileId, Language.English.Id);
                     }
 
-                    moviesReader.Close();
+                    gamesReader.Close();
                 }
             }
 
-            var movieFileLanguages = new Dictionary<int, List<Language>>();
+            var gameFileLanguages = new Dictionary<int, List<Language>>();
             var releaseLanguages = new Dictionary<string, List<Language>>();
 
             using (var getSeriesCmd = conn.CreateCommand())
             {
                 getSeriesCmd.Transaction = tran;
-                getSeriesCmd.CommandText = @"SELECT ""Id"", ""MovieId"", ""SceneName"", ""MediaInfo"" FROM ""MovieFiles""";
-                using (var movieFilesReader = getSeriesCmd.ExecuteReader())
+                getSeriesCmd.CommandText = @"SELECT ""Id"", ""GameId"", ""SceneName"", ""MediaInfo"" FROM ""GameFiles""";
+                using (var gameFilesReader = getSeriesCmd.ExecuteReader())
                 {
-                    while (movieFilesReader.Read())
+                    while (gameFilesReader.Read())
                     {
-                        var movieFileId = movieFilesReader.GetInt32(0);
-                        var movieId = movieFilesReader.GetInt32(1);
-                        var movieFileSceneName = movieFilesReader.IsDBNull(2) ? null : movieFilesReader.GetString(2);
-                        var movieFileMediaInfo = movieFilesReader.IsDBNull(3) ? null : Json.Deserialize<MediaInfo154>(movieFilesReader.GetString(3));
+                        var gameFileId = gameFilesReader.GetInt32(0);
+                        var gameId = gameFilesReader.GetInt32(1);
+                        var gameFileSceneName = gameFilesReader.IsDBNull(2) ? null : gameFilesReader.GetString(2);
+                        var gameFileMediaInfo = gameFilesReader.IsDBNull(3) ? null : Json.Deserialize<MediaInfo154>(gameFilesReader.GetString(3));
                         var languages = new List<Language>();
 
-                        if (movieFileMediaInfo != null && movieFileMediaInfo.AudioLanguages.IsNotNullOrWhiteSpace())
+                        if (gameFileMediaInfo != null && gameFileMediaInfo.AudioLanguages.IsNotNullOrWhiteSpace())
                         {
-                            var mediaInfolanguages = movieFileMediaInfo.AudioLanguages.Split('/').Select(l => l.Trim()).Distinct().ToList();
+                            var mediaInfolanguages = gameFileMediaInfo.AudioLanguages.Split('/').Select(l => l.Trim()).Distinct().ToList();
 
                             foreach (var audioLanguage in mediaInfolanguages)
                             {
@@ -111,26 +111,26 @@ namespace NzbDrone.Core.Datastore.Migration
                             }
                         }
 
-                        if (!languages.Any(l => l.Id != 0) && movieFileSceneName.IsNotNullOrWhiteSpace())
+                        if (!languages.Any(l => l.Id != 0) && gameFileSceneName.IsNotNullOrWhiteSpace())
                         {
-                            languages = LanguageParser.ParseLanguages(movieFileSceneName);
+                            languages = LanguageParser.ParseLanguages(gameFileSceneName);
                         }
 
                         if (!languages.Any(l => l.Id != 0))
                         {
-                            languages = new List<Language> { Language.FindById(movieLanguages[movieId]) };
+                            languages = new List<Language> { Language.FindById(gameLanguages[gameId]) };
                         }
 
-                        if (movieFileSceneName.IsNotNullOrWhiteSpace())
+                        if (gameFileSceneName.IsNotNullOrWhiteSpace())
                         {
                             // Store languages for this scenerelease so we can use in history later
-                            releaseLanguages[movieFileSceneName] = languages;
+                            releaseLanguages[gameFileSceneName] = languages;
                         }
 
-                        movieFileLanguages[movieFileId] = languages;
+                        gameFileLanguages[gameFileId] = languages;
                     }
 
-                    movieFilesReader.Close();
+                    gameFilesReader.Close();
                 }
             }
 
@@ -139,14 +139,14 @@ namespace NzbDrone.Core.Datastore.Migration
             using (var getSeriesCmd = conn.CreateCommand())
             {
                 getSeriesCmd.Transaction = tran;
-                getSeriesCmd.CommandText = @"SELECT ""Id"", ""SourceTitle"", ""MovieId"" FROM ""History""";
+                getSeriesCmd.CommandText = @"SELECT ""Id"", ""SourceTitle"", ""GameId"" FROM ""History""";
                 using (var historyReader = getSeriesCmd.ExecuteReader())
                 {
                     while (historyReader.Read())
                     {
                         var historyId = historyReader.GetInt32(0);
                         var historySourceTitle = historyReader.IsDBNull(1) ? null : historyReader.GetString(1);
-                        var movieId = historyReader.GetInt32(2);
+                        var gameId = historyReader.GetInt32(2);
                         var languages = new List<Language>();
 
                         if (historySourceTitle.IsNotNullOrWhiteSpace() && releaseLanguages.ContainsKey(historySourceTitle))
@@ -161,7 +161,7 @@ namespace NzbDrone.Core.Datastore.Migration
 
                         if (!languages.Any(l => l.Id != 0))
                         {
-                            languages = new List<Language> { Language.FindById(movieLanguages[movieId]) };
+                            languages = new List<Language> { Language.FindById(gameLanguages[gameId]) };
                         }
 
                         historyLanguages[historyId] = languages;
@@ -176,14 +176,14 @@ namespace NzbDrone.Core.Datastore.Migration
             using (var getSeriesCmd = conn.CreateCommand())
             {
                 getSeriesCmd.Transaction = tran;
-                getSeriesCmd.CommandText = @"SELECT ""Id"", ""SourceTitle"", ""MovieId"" FROM ""Blacklist""";
+                getSeriesCmd.CommandText = @"SELECT ""Id"", ""SourceTitle"", ""GameId"" FROM ""Blacklist""";
                 using (var blacklistReader = getSeriesCmd.ExecuteReader())
                 {
                     while (blacklistReader.Read())
                     {
                         var blacklistId = blacklistReader.GetInt32(0);
                         var blacklistSourceTitle = blacklistReader.IsDBNull(1) ? null : blacklistReader.GetString(1);
-                        var movieId = blacklistReader.GetInt32(2);
+                        var gameId = blacklistReader.GetInt32(2);
                         var languages = new List<Language>();
 
                         if (blacklistSourceTitle.IsNotNullOrWhiteSpace())
@@ -193,7 +193,7 @@ namespace NzbDrone.Core.Datastore.Migration
 
                         if (!languages.Any(l => l.Id != 0))
                         {
-                            languages = new List<Language> { Language.FindById(movieLanguages[movieId]) };
+                            languages = new List<Language> { Language.FindById(gameLanguages[gameId]) };
                         }
 
                         blacklistLanguages[blacklistId] = languages;
@@ -203,29 +203,29 @@ namespace NzbDrone.Core.Datastore.Migration
                 }
             }
 
-            foreach (var group in movieFileLanguages.GroupBy(v => v.Value, v => v.Key))
+            foreach (var group in gameFileLanguages.GroupBy(v => v.Value, v => v.Key))
             {
                 var languages = group.Key;
 
-                var movieFileIds = group.Select(v => v.ToString()).Join(",");
+                var gameFileIds = group.Select(v => v.ToString()).Join(",");
 
-                using (var updateMovieFilesCmd = conn.CreateCommand())
+                using (var updateGameFilesCmd = conn.CreateCommand())
                 {
-                    updateMovieFilesCmd.Transaction = tran;
+                    updateGameFilesCmd.Transaction = tran;
                     if (conn.GetType().FullName == "Npgsql.NpgsqlConnection")
                     {
-                        updateMovieFilesCmd.CommandText = $"UPDATE \"MovieFiles\" SET \"Languages\" = $1 WHERE \"Id\" IN ({movieFileIds})";
+                        updateGameFilesCmd.CommandText = $"UPDATE \"GameFiles\" SET \"Languages\" = $1 WHERE \"Id\" IN ({gameFileIds})";
                     }
                     else
                     {
-                        updateMovieFilesCmd.CommandText = $"UPDATE \"MovieFiles\" SET \"Languages\" = ? WHERE \"Id\" IN ({movieFileIds})";
+                        updateGameFilesCmd.CommandText = $"UPDATE \"GameFiles\" SET \"Languages\" = ? WHERE \"Id\" IN ({gameFileIds})";
                     }
 
-                    var param = updateMovieFilesCmd.CreateParameter();
+                    var param = updateGameFilesCmd.CreateParameter();
                     languageConverter.SetValue(param, languages);
-                    updateMovieFilesCmd.Parameters.Add(param);
+                    updateGameFilesCmd.Parameters.Add(param);
 
-                    updateMovieFilesCmd.ExecuteNonQuery();
+                    updateGameFilesCmd.ExecuteNonQuery();
                 }
             }
 

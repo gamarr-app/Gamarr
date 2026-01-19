@@ -145,7 +145,7 @@ function FileBrowserModalContent(props: FileBrowserModalContentProps) {
           <Alert className={styles.mappedDrivesWarning} kind={kinds.WARNING}>
             <InlineMarkdown
               data={translate('MappedNetworkDrivesWindowsService', {
-                url: 'https://wiki.servarr.com/radarr/faq#why-cant-radarr-see-my-files-on-a-remote-server',
+                url: 'https://wiki.servarr.com/gamarr/faq#why-cant-gamarr-see-my-files-on-a-remote-server',
               })}
             />
           </Alert>

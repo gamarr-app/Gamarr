@@ -1,23 +1,23 @@
 using FluentAssertions;
 using NUnit.Framework;
-using Radarr.Api.V3.Movies;
+using Gamarr.Api.V3.Games;
 
 namespace NzbDrone.Integration.Test.ApiTests
 {
     [TestFixture]
     public class BlocklistFixture : IntegrationTest
     {
-        private MovieResource _movie;
+        private GameResource _game;
 
         [Test]
         [Ignore("Adding to blocklist not supported")]
         public void should_be_able_to_add_to_blocklist()
         {
-            _movie = EnsureMovie(11, "The Blocklist");
+            _game = EnsureGame(11, "The Blocklist");
 
-            Blocklist.Post(new Radarr.Api.V3.Blocklist.BlocklistResource
+            Blocklist.Post(new Gamarr.Api.V3.Blocklist.BlocklistResource
             {
-                MovieId = _movie.Id,
+                GameId = _game.Id,
                 SourceTitle = "Blocklist.S01E01.Brought.To.You.By-BoomBoxHD"
             });
         }

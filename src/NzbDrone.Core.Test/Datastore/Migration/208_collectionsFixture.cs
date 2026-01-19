@@ -12,21 +12,21 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     public class collectionsFixture : MigrationTest<add_collections>
     {
         [Test]
-        public void should_add_collection_from_movie_and_link_back_to_movie()
+        public void should_add_collection_from_game_and_link_back_to_game()
         {
             var db = WithMigrationTestDb(c =>
             {
-                c.Insert.IntoTable("Movies").Row(new
+                c.Insert.IntoTable("Games").Row(new
                 {
                     Monitored = true,
                     MinimumAvailability = 4,
                     ProfileId = 1,
-                    MovieFileId = 0,
-                    MovieMetadataId = 1,
-                    Path = string.Format("/Movies/{0}", "Title"),
+                    GameFileId = 0,
+                    GameMetadataId = 1,
+                    Path = string.Format("/Games/{0}", "Title"),
                 });
 
-                c.Insert.IntoTable("MovieMetadata").Row(new
+                c.Insert.IntoTable("GameMetadata").Row(new
                 {
                     Title = "Title",
                     CleanTitle = "CleanTitle",
@@ -37,41 +37,41 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OriginalTitle = "Title",
                     CleanOriginalTitle = "CleanTitle",
                     OriginalLanguage = 1,
-                    TmdbId = 132456,
-                    Collection = new { Name = "Some Collection", TmdbId = 11 }.ToJson(),
+                    IgdbId = 132456,
+                    Collection = new { Name = "Some Collection", IgdbId = 11 }.ToJson(),
                     LastInfoSync = DateTime.UtcNow,
                 });
             });
 
-            var collections = db.Query<Collection208>("SELECT \"Id\", \"Title\", \"TmdbId\", \"Monitored\" FROM \"Collections\"");
+            var collections = db.Query<Collection208>("SELECT \"Id\", \"Title\", \"IgdbId\", \"Monitored\" FROM \"Collections\"");
 
             collections.Should().HaveCount(1);
-            collections.First().TmdbId.Should().Be(11);
+            collections.First().IgdbId.Should().Be(11);
             collections.First().Title.Should().Be("Some Collection");
             collections.First().Monitored.Should().BeFalse();
 
-            var movies = db.Query<Movie208>("SELECT \"Id\", \"CollectionTmdbId\" FROM \"MovieMetadata\"");
+            var games = db.Query<Game208>("SELECT \"Id\", \"CollectionIgdbId\" FROM \"GameMetadata\"");
 
-            movies.Should().HaveCount(1);
-            movies.First().CollectionTmdbId.Should().Be(collections.First().TmdbId);
+            games.Should().HaveCount(1);
+            games.First().CollectionIgdbId.Should().Be(collections.First().IgdbId);
         }
 
         [Test]
-        public void should_skip_collection_from_movie_without_name()
+        public void should_skip_collection_from_game_without_name()
         {
             var db = WithMigrationTestDb(c =>
             {
-                c.Insert.IntoTable("Movies").Row(new
+                c.Insert.IntoTable("Games").Row(new
                 {
                     Monitored = true,
                     MinimumAvailability = 4,
                     ProfileId = 1,
-                    MovieFileId = 0,
-                    MovieMetadataId = 1,
-                    Path = string.Format("/Movies/{0}", "Title"),
+                    GameFileId = 0,
+                    GameMetadataId = 1,
+                    Path = string.Format("/Games/{0}", "Title"),
                 });
 
-                c.Insert.IntoTable("MovieMetadata").Row(new
+                c.Insert.IntoTable("GameMetadata").Row(new
                 {
                     Title = "Title",
                     CleanTitle = "CleanTitle",
@@ -82,23 +82,23 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OriginalTitle = "Title",
                     CleanOriginalTitle = "CleanTitle",
                     OriginalLanguage = 1,
-                    TmdbId = 132456,
-                    Collection = new { TmdbId = 11 }.ToJson(),
+                    IgdbId = 132456,
+                    Collection = new { IgdbId = 11 }.ToJson(),
                     LastInfoSync = DateTime.UtcNow,
                 });
             });
 
-            var collections = db.Query<Collection208>("SELECT \"Id\", \"Title\", \"TmdbId\", \"Monitored\" FROM \"Collections\"");
+            var collections = db.Query<Collection208>("SELECT \"Id\", \"Title\", \"IgdbId\", \"Monitored\" FROM \"Collections\"");
 
             collections.Should().HaveCount(1);
-            collections.First().TmdbId.Should().Be(11);
+            collections.First().IgdbId.Should().Be(11);
             collections.First().Title.Should().Be("Collection 11");
             collections.First().Monitored.Should().BeFalse();
 
-            var movies = db.Query<Movie208>("SELECT \"Id\", \"CollectionTmdbId\" FROM \"MovieMetadata\"");
+            var games = db.Query<Game208>("SELECT \"Id\", \"CollectionIgdbId\" FROM \"GameMetadata\"");
 
-            movies.Should().HaveCount(1);
-            movies.First().CollectionTmdbId.Should().Be(collections.First().TmdbId);
+            games.Should().HaveCount(1);
+            games.First().CollectionIgdbId.Should().Be(collections.First().IgdbId);
         }
 
         [Test]
@@ -106,17 +106,17 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         {
             var db = WithMigrationTestDb(c =>
             {
-                c.Insert.IntoTable("Movies").Row(new
+                c.Insert.IntoTable("Games").Row(new
                 {
                     Monitored = true,
                     MinimumAvailability = 4,
                     ProfileId = 1,
-                    MovieFileId = 0,
-                    MovieMetadataId = 1,
-                    Path = string.Format("/Movies/{0}", "Title"),
+                    GameFileId = 0,
+                    GameMetadataId = 1,
+                    Path = string.Format("/Games/{0}", "Title"),
                 });
 
-                c.Insert.IntoTable("MovieMetadata").Row(new
+                c.Insert.IntoTable("GameMetadata").Row(new
                 {
                     Title = "Title",
                     CleanTitle = "CleanTitle",
@@ -127,22 +127,22 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OriginalTitle = "Title",
                     CleanOriginalTitle = "CleanTitle",
                     OriginalLanguage = 1,
-                    TmdbId = 132456,
-                    Collection = new { Name = "Some Collection", TmdbId = 11 }.ToJson(),
+                    IgdbId = 132456,
+                    Collection = new { Name = "Some Collection", IgdbId = 11 }.ToJson(),
                     LastInfoSync = DateTime.UtcNow,
                 });
 
-                c.Insert.IntoTable("Movies").Row(new
+                c.Insert.IntoTable("Games").Row(new
                 {
                     Monitored = true,
                     MinimumAvailability = 4,
                     ProfileId = 1,
-                    MovieFileId = 0,
-                    MovieMetadataId = 2,
-                    Path = string.Format("/Movies/{0}", "Title"),
+                    GameFileId = 0,
+                    GameMetadataId = 2,
+                    Path = string.Format("/Games/{0}", "Title"),
                 });
 
-                c.Insert.IntoTable("MovieMetadata").Row(new
+                c.Insert.IntoTable("GameMetadata").Row(new
                 {
                     Title = "Title2",
                     CleanTitle = "CleanTitle2",
@@ -153,16 +153,16 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OriginalTitle = "Title2",
                     CleanOriginalTitle = "CleanTitle2",
                     OriginalLanguage = 1,
-                    TmdbId = 132457,
-                    Collection = new { Name = "Some Collection", TmdbId = 11 }.ToJson(),
+                    IgdbId = 132457,
+                    Collection = new { Name = "Some Collection", IgdbId = 11 }.ToJson(),
                     LastInfoSync = DateTime.UtcNow,
                 });
             });
 
-            var collections = db.Query<Collection208>("SELECT \"Id\", \"Title\", \"TmdbId\", \"Monitored\" FROM \"Collections\"");
+            var collections = db.Query<Collection208>("SELECT \"Id\", \"Title\", \"IgdbId\", \"Monitored\" FROM \"Collections\"");
 
             collections.Should().HaveCount(1);
-            collections.First().TmdbId.Should().Be(11);
+            collections.First().IgdbId.Should().Be(11);
             collections.First().Title.Should().Be("Some Collection");
             collections.First().Monitored.Should().BeFalse();
         }
@@ -176,18 +176,18 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 4,
                     ShouldMonitor = true,
                     Name = "IMDB List",
-                    Implementation = "RadarrLists",
-                    Settings = new RadarrListSettings169
+                    Implementation = "GamarrLists",
+                    Settings = new GamarrListSettings169
                     {
-                        APIURL = "https://api.radarr.video/v2",
+                        APIURL = "https://api.gamarr.video/v2",
                         Path = "/imdb/list?listId=ls000199717",
                     }.ToJson(),
-                    ConfigContract = "RadarrSettings"
+                    ConfigContract = "GamarrSettings"
                 });
             });
 
@@ -206,18 +206,18 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 4,
                     ShouldMonitor = false,
                     Name = "IMDB List",
-                    Implementation = "RadarrLists",
-                    Settings = new RadarrListSettings169
+                    Implementation = "GamarrLists",
+                    Settings = new GamarrListSettings169
                     {
-                        APIURL = "https://api.radarr.video/v2",
+                        APIURL = "https://api.gamarr.video/v2",
                         Path = "/imdb/list?listId=ls000199717",
                     }.ToJson(),
-                    ConfigContract = "RadarrSettings"
+                    ConfigContract = "GamarrSettings"
                 });
             });
 
@@ -228,7 +228,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         }
 
         [Test]
-        public void should_purge_tmdb_collection_lists()
+        public void should_purge_igdb_collection_lists()
         {
             var db = WithMigrationTestDb(c =>
             {
@@ -236,13 +236,13 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 4,
                     ShouldMonitor = false,
                     Name = "IMDB List",
                     Implementation = "TMDbCollectionImport",
-                    Settings = new TmdbCollectionListSettings207
+                    Settings = new IgdbCollectionListSettings207
                     {
                         CollectionId = "11"
                     }.ToJson(),
@@ -260,17 +260,17 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         {
             var db = WithMigrationTestDb(c =>
             {
-                c.Insert.IntoTable("Movies").Row(new
+                c.Insert.IntoTable("Games").Row(new
                 {
                     Monitored = true,
                     MinimumAvailability = 4,
                     ProfileId = 1,
-                    MovieFileId = 0,
-                    MovieMetadataId = 1,
-                    Path = string.Format("/Movies/{0}", "Title"),
+                    GameFileId = 0,
+                    GameMetadataId = 1,
+                    Path = string.Format("/Games/{0}", "Title"),
                 });
 
-                c.Insert.IntoTable("MovieMetadata").Row(new
+                c.Insert.IntoTable("GameMetadata").Row(new
                 {
                     Title = "Title",
                     CleanTitle = "CleanTitle",
@@ -281,8 +281,8 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     OriginalTitle = "Title",
                     CleanOriginalTitle = "CleanTitle",
                     OriginalLanguage = 1,
-                    TmdbId = 132456,
-                    Collection = new { Name = "Some Collection", TmdbId = 11 }.ToJson(),
+                    IgdbId = 132456,
+                    Collection = new { Name = "Some Collection", IgdbId = 11 }.ToJson(),
                     LastInfoSync = DateTime.UtcNow,
                 });
 
@@ -290,13 +290,13 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 {
                     Enabled = true,
                     EnableAuto = true,
-                    RootFolderPath = "D:\\Movies",
+                    RootFolderPath = "D:\\Games",
                     ProfileId = 1,
                     MinimumAvailability = 4,
                     ShouldMonitor = false,
                     Name = "IMDB List",
                     Implementation = "TMDbCollectionImport",
-                    Settings = new TmdbCollectionListSettings207
+                    Settings = new IgdbCollectionListSettings207
                     {
                         CollectionId = "11"
                     }.ToJson(),
@@ -314,15 +314,15 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     public class Collection208
     {
         public int Id { get; set; }
-        public int TmdbId { get; set; }
+        public int IgdbId { get; set; }
         public string Title { get; set; }
         public bool Monitored { get; set; }
     }
 
-    public class Movie208
+    public class Game208
     {
         public int Id { get; set; }
-        public int CollectionTmdbId { get; set; }
+        public int CollectionIgdbId { get; set; }
     }
 
     public class ListDefinition208
@@ -331,7 +331,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         public int Monitor { get; set; }
     }
 
-    public class TmdbCollectionListSettings207
+    public class IgdbCollectionListSettings207
     {
         public string CollectionId { get; set; }
     }

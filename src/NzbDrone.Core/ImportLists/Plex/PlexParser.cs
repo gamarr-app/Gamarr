@@ -4,7 +4,7 @@ using System.Net;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.ImportLists.Exceptions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Notifications.Plex.PlexTv;
 using NzbDrone.Core.Notifications.Plex.Server;
 
@@ -14,17 +14,17 @@ namespace NzbDrone.Core.ImportLists.Plex
     {
         private ImportListResponse _importResponse;
 
-        public virtual IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
             List<PlexWatchlistItem> items;
 
             _importResponse = importResponse;
 
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(_importResponse))
             {
-                return movies;
+                return games;
             }
 
             items = Json.Deserialize<PlexResponse<PlexWatchlistRespone>>(_importResponse.Content)
@@ -33,21 +33,21 @@ namespace NzbDrone.Core.ImportLists.Plex
 
             foreach (var item in items)
             {
-                var tmdbIdString = FindGuid(item.Guids, "tmdb");
+                var igdbIdString = FindGuid(item.Guids, "igdb");
                 var imdbId = FindGuid(item.Guids, "imdb");
 
-                int.TryParse(tmdbIdString, out var tmdbId);
+                int.TryParse(igdbIdString, out var igdbId);
 
-                movies.AddIfNotNull(new ImportListMovie()
+                games.AddIfNotNull(new ImportListGame()
                 {
                     ImdbId = imdbId,
-                    TmdbId = tmdbId,
+                    IgdbId = igdbId,
                     Title = item.Title,
                     Year = item.Year
                 });
             }
 
-            return movies;
+            return games;
         }
 
         protected virtual bool PreProcess(ImportListResponse importListResponse)

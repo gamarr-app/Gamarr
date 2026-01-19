@@ -4,19 +4,19 @@ namespace NzbDrone.Core.Organizer
 {
     public interface IFilenameValidationService
     {
-        ValidationFailure ValidateMovieFilename(SampleResult sampleResult);
+        ValidationFailure ValidateGameFilename(SampleResult sampleResult);
     }
 
     public class FileNameValidationService : IFilenameValidationService
     {
         private const string ERROR_MESSAGE = "Produces invalid file names";
 
-        public ValidationFailure ValidateMovieFilename(SampleResult sampleResult)
+        public ValidationFailure ValidateGameFilename(SampleResult sampleResult)
         {
-            var validationFailure = new ValidationFailure("StandardMovieFormat", ERROR_MESSAGE);
-            var parsedMovieInfo = Parser.Parser.ParseMovieTitle(sampleResult.FileName);
+            var validationFailure = new ValidationFailure("StandardGameFormat", ERROR_MESSAGE);
+            var parsedGameInfo = Parser.Parser.ParseGameTitle(sampleResult.FileName);
 
-            if (parsedMovieInfo == null)
+            if (parsedGameInfo == null)
             {
                 return validationFailure;
             }

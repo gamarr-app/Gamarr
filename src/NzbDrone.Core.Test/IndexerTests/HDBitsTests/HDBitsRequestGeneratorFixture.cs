@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Test.IndexerTests.HDBitsTests
 {
     public class HDBitsRequestGeneratorFixture : CoreTest<HDBitsRequestGenerator>
     {
-        private MovieSearchCriteria _movieSearchCriteria;
+        private GameSearchCriteria _gameSearchCriteria;
 
         [SetUp]
         public void Setup()
@@ -24,15 +24,15 @@ namespace NzbDrone.Core.Test.IndexerTests.HDBitsTests
                 Username = "somename"
             };
 
-            _movieSearchCriteria = new MovieSearchCriteria
+            _gameSearchCriteria = new GameSearchCriteria
             {
-                Movie = new Movies.Movie { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977 }
+                Game = new Games.Game { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977 }
             };
         }
 
-        private void MovieWithoutIMDB()
+        private void GameWithoutIMDB()
         {
-            _movieSearchCriteria.Movie.ImdbId = null;
+            _gameSearchCriteria.Game.ImdbId = null;
         }
 
         [Test]
@@ -57,8 +57,8 @@ namespace NzbDrone.Core.Test.IndexerTests.HDBitsTests
         [Test]
         public void should_search_by_imdbid_if_supported()
         {
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
-            var imdbQuery = int.Parse(_movieSearchCriteria.Movie.ImdbId.Substring(2));
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+            var imdbQuery = int.Parse(_gameSearchCriteria.Game.ImdbId.Substring(2));
 
             results.GetAllTiers().Should().HaveCount(1);
 
@@ -76,9 +76,9 @@ namespace NzbDrone.Core.Test.IndexerTests.HDBitsTests
         [Test]
         public void should_return_no_results_if_no_imdb()
         {
-            MovieWithoutIMDB();
+            GameWithoutIMDB();
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.GetTier(0).Should().HaveCount(0);
         }
     }

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import MovieMinimumAvailabilityPopoverContent from 'AddMovie/MovieMinimumAvailabilityPopoverContent';
+import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabilityPopoverContent';
 import { ImportListAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
@@ -166,7 +166,7 @@ function EditImportListModalContent({
               <FormInputGroup
                 type={inputTypes.CHECK}
                 name="enableAuto"
-                helpText={translate('EnableAutomaticAddMovieHelpText')}
+                helpText={translate('EnableAutomaticAddGameHelpText')}
                 {...enableAuto}
                 onChange={handleInputChange}
               />
@@ -176,9 +176,9 @@ function EditImportListModalContent({
               <FormLabel>{translate('Monitor')}</FormLabel>
 
               <FormInputGroup
-                type={inputTypes.MONITOR_MOVIES_SELECT}
+                type={inputTypes.MONITOR_GAMES_SELECT}
                 name="monitor"
-                helpText={translate('ListMonitorMovieHelpText')}
+                helpText={translate('ListMonitorGameHelpText')}
                 {...monitor}
                 onChange={handleInputChange}
               />
@@ -190,7 +190,7 @@ function EditImportListModalContent({
               <FormInputGroup
                 type={inputTypes.CHECK}
                 name="searchOnAdd"
-                helpText={translate('ListSearchOnAddMovieHelpText')}
+                helpText={translate('ListSearchOnAddGameHelpText')}
                 {...searchOnAdd}
                 onChange={handleInputChange}
               />
@@ -205,7 +205,7 @@ function EditImportListModalContent({
                     <Icon className={styles.labelIcon} name={icons.INFO} />
                   }
                   title={translate('MinimumAvailability')}
-                  body={<MovieMinimumAvailabilityPopoverContent />}
+                  body={<GameMinimumAvailabilityPopoverContent />}
                   position={tooltipPositions.RIGHT}
                 />
               </FormLabel>
@@ -214,7 +214,7 @@ function EditImportListModalContent({
                 type={inputTypes.AVAILABILITY_SELECT}
                 name="minimumAvailability"
                 {...minimumAvailability}
-                helpLink="https://wiki.servarr.com/radarr/faq#what-is-minimum-availability"
+                helpLink="https://wiki.servarr.com/gamarr/faq#what-is-minimum-availability"
                 onChange={handleInputChange}
               />
             </FormGroup>
@@ -245,7 +245,7 @@ function EditImportListModalContent({
             </FormGroup>
 
             <FormGroup>
-              <FormLabel>{translate('RadarrTags')}</FormLabel>
+              <FormLabel>{translate('GamarrTags')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.TAG}

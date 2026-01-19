@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.ImportList
 
             var result = Subject.Fetch();
 
-            result.Movies.First().Title.Should().Be("Think Like a Man Too");
-            result.Movies.First().ImdbId.Should().Be("tt2239832");
+            result.Games.First().Title.Should().Be("Think Like a Man Too");
+            result.Games.First().ImdbId.Should().Be("tt2239832");
         }
     }
 }

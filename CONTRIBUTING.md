@@ -1,15 +1,15 @@
 
 # How to Contribute
 
-We're always looking for people to help make Radarr even better, there are a number of ways to contribute.
+We're always looking for people to help make Gamarr even better, there are a number of ways to contribute.
 
 # Documentation
 
-Setup guides, [FAQ](/radarr/faq), the more information we have on the [wiki](https://wiki.servarr.com/radarr) the better.
+Setup guides, [FAQ](/gamarr/faq), the more information we have on the [wiki](https://wiki.servarr.com/gamarr) the better.
 
 # Development
 
-Radarr is written in C# (backend) and JS (frontend). The backend is built on the .NET6 (and _soon_ .NET8) framework, while the frontend utilizes Reactjs.
+Gamarr is written in C# (backend) and JS (frontend). The backend is built on the .NET6 (and _soon_ .NET8) framework, while the frontend utilizes Reactjs.
 
 ## Tools required
 
@@ -33,7 +33,7 @@ Radarr is written in C# (backend) and JS (frontend). The backend is built on the
 
 ## Getting started
 
-1. Fork Radarr
+1. Fork Gamarr
 1. Clone the repository into your development machine. [*info*](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 
 > Be sure to run lint `yarn lint --fix` on your code for any front end changes before committing.
@@ -60,11 +60,11 @@ The backend solution is most easily built and ran in Visual Studio or Rider, how
 
 #### Visual Studio
 
-> Ensure startup project is set to `Radarr.Console` and framework to `net6.0`
+> Ensure startup project is set to `Gamarr.Console` and framework to `net6.0`
 {.is-info}
 
 1. First `Build` the solution in Visual Studio, this will ensure all projects are correctly built and dependencies restored
-1. Next `Debug/Run` the project in Visual Studio to start Radarr
+1. Next `Debug/Run` the project in Visual Studio to start Gamarr
 1. Open <http://localhost:7878>
 
 #### Command line
@@ -72,21 +72,21 @@ The backend solution is most easily built and ran in Visual Studio or Rider, how
 1. Clean solution
 
 ```shell
-dotnet clean src/Radarr.sln -c Debug
+dotnet clean src/Gamarr.sln -c Debug
 ```
 
 1. Restore and Build debug configuration for the correct platform (Posix or Windows)
 
 ```shell
-dotnet msbuild -restore src/Radarr.sln -p:Configuration=Debug -p:Platform=Posix -t:PublishAllRids
+dotnet msbuild -restore src/Gamarr.sln -p:Configuration=Debug -p:Platform=Posix -t:PublishAllRids
 ```
 
 1. Run the produced executable from `/_output`
 
 ## Contributing Code
 
-- If you're adding a new, already requested feature, please comment on [GitHub Issues](https://github.com/Radarr/Radarr/issues) so work is not duplicated (If you want to add something not already on there, please talk to us first)
-- Rebase from Radarr's develop branch, do not merge
+- If you're adding a new, already requested feature, please comment on [GitHub Issues](https://github.com/Gamarr/Gamarr/issues) so work is not duplicated (If you want to add something not already on there, please talk to us first)
+- Rebase from Gamarr's develop branch, do not merge
 - Make meaningful commits, or squash them
 - Feel free to make a pull request before work is complete, this will let us see where its at and make comments/suggest improvements
 - Reach out to us on the discord if you have any questions
@@ -109,7 +109,7 @@ dotnet msbuild -restore src/Radarr.sln -p:Configuration=Debug -p:Platform=Posix 
 
 ## Unit Testing
 
-Radarr utilizes nunit for its unit, integration, and automation test suite.
+Gamarr utilizes nunit for its unit, integration, and automation test suite.
 
 ### Running Tests
 
@@ -136,20 +136,20 @@ If you have any questions about any of this, please let us know.
 
 # Translation
 
-Radarr uses a self hosted open access [Weblate](https://translate.servarr.com) instance to manage its json translation files. These files are stored in the repo at `src/NzbDrone.Core/Localization`
+Gamarr uses a self hosted open access [Weblate](https://translate.servarr.com) instance to manage its json translation files. These files are stored in the repo at `src/NzbDrone.Core/Localization`
 
 ## Contributing to an Existing Translation
 
-Weblate handles synchronization and translation of strings for all languages other than English. Editing of translated strings and translating existing strings for supported languages should be performed there for the Radarr project.
+Weblate handles synchronization and translation of strings for all languages other than English. Editing of translated strings and translating existing strings for supported languages should be performed there for the Gamarr project.
 
 The English translation, `en.json`, serves as the source for all other translations and is managed on GitHub repo.
 
 ## Adding a Language
 
-Adding translations to Radarr requires two steps
+Adding translations to Gamarr requires two steps
 
 - Adding the Language to weblate
-- Adding the Language to Radarr codebase
+- Adding the Language to Gamarr codebase
 
 ## Adding Translation Strings in Code
 

@@ -29,7 +29,7 @@ const paged = `${section}.paged`;
 
 export const defaultState = {
   options: {
-    includeUnknownMovieItems: true
+    includeUnknownGameItems: true
   },
 
   status: {
@@ -67,8 +67,8 @@ export const defaultState = {
         isModifiable: false
       },
       {
-        name: 'movies.sortTitle',
-        label: () => translate('Movie'),
+        name: 'games.sortTitle',
+        label: () => translate('Game'),
         isSortable: true,
         isVisible: true
       },
@@ -179,10 +179,10 @@ export const defaultState = {
 
     filterBuilderProps: [
       {
-        name: 'movieIds',
-        label: () => translate('Movie'),
+        name: 'gameIds',
+        label: () => translate('Game'),
         type: filterBuilderTypes.EQUAL,
-        valueType: filterBuilderValueTypes.MOVIE
+        valueType: filterBuilderValueTypes.GAME
       },
       {
         name: 'quality',
@@ -230,7 +230,7 @@ export const persistState = [
 // Helpers
 
 function fetchDataAugmenter(getState, payload, data) {
-  data.includeUnknownMovieItems = getState().queue.options.includeUnknownMovieItems;
+  data.includeUnknownGameItems = getState().queue.options.includeUnknownGameItems;
 }
 
 //

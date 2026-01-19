@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Exceptions;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.Notifications.Twitter
@@ -21,27 +21,27 @@ namespace NzbDrone.Core.Notifications.Twitter
 
         public override void OnGrab(GrabMessage message)
         {
-            _twitterService.SendNotification($"[Radarr] Grabbed: {message.Message}", Settings);
+            _twitterService.SendNotification($"[Gamarr] Grabbed: {message.Message}", Settings);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
-            _twitterService.SendNotification($"[Radarr] Imported: {message.Message}", Settings);
+            _twitterService.SendNotification($"[Gamarr] Imported: {message.Message}", Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            _twitterService.SendNotification($"[Radarr] Added: {movie.Title}", Settings);
+            _twitterService.SendNotification($"[Gamarr] Added: {game.Title}", Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            _twitterService.SendNotification($"Movie File Deleted: {deleteMessage.Message}", Settings);
+            _twitterService.SendNotification($"Game File Deleted: {deleteMessage.Message}", Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            _twitterService.SendNotification($"Movie Deleted: {deleteMessage.Message}", Settings);
+            _twitterService.SendNotification($"Game Deleted: {deleteMessage.Message}", Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

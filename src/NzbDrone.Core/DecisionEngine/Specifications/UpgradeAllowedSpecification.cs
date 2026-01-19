@@ -24,13 +24,13 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var qualityProfile = subject.Movie.QualityProfile;
+            var qualityProfile = subject.Game.QualityProfile;
 
-            if (subject.Movie.MovieFileId != 0)
+            if (subject.Game.GameFileId != 0)
             {
-                var file = subject.Movie.MovieFile;
+                var file = subject.Game.GameFile;
 
                 if (file == null)
                 {
@@ -38,14 +38,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     return DownloadSpecDecision.Accept();
                 }
 
-                file.Movie = subject.Movie;
+                file.Game = subject.Game;
                 var customFormats = _formatService.ParseCustomFormat(file);
                 _logger.Debug("Comparing file quality with report. Existing file is {0} [{1}]", file.Quality, customFormats.ConcatToString());
 
                 if (!_upgradableSpecification.IsUpgradeAllowed(qualityProfile,
                                                                file.Quality,
                                                                customFormats,
-                                                               subject.ParsedMovieInfo.Quality,
+                                                               subject.ParsedGameInfo.Quality,
                                                                subject.CustomFormats))
                 {
                     _logger.Debug("Upgrading is not allowed by the quality profile");

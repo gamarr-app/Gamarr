@@ -5,7 +5,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications.Webhook;
 using NzbDrone.Core.Tags;
 using NzbDrone.Core.Validation;
@@ -35,24 +35,24 @@ namespace NzbDrone.Core.Notifications.Notifiarr
             _proxy.SendNotification(BuildOnDownloadPayload(message), Settings);
         }
 
-        public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+        public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
         {
-            _proxy.SendNotification(BuildOnRenamePayload(movie, renamedFiles), Settings);
+            _proxy.SendNotification(BuildOnRenamePayload(game, renamedFiles), Settings);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BuildOnMovieFileDelete(deleteMessage), Settings);
+            _proxy.SendNotification(BuildOnGameFileDelete(deleteMessage), Settings);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            _proxy.SendNotification(BuildOnMovieAdded(movie), Settings);
+            _proxy.SendNotification(BuildOnGameAdded(game), Settings);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BuildOnMovieDelete(deleteMessage), Settings);
+            _proxy.SendNotification(BuildOnGameDelete(deleteMessage), Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

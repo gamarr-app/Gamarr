@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Datastore.Migration
 
         private void MigrateToFfprobe(IDbConnection conn, IDbTransaction tran)
         {
-            var existing = conn.Query<MediaInfoRaw>("SELECT \"Id\", \"MediaInfo\", \"SceneName\" FROM \"MovieFiles\"");
+            var existing = conn.Query<MediaInfoRaw>("SELECT \"Id\", \"MediaInfo\", \"SceneName\" FROM \"GameFiles\"");
 
             var updated = new List<MediaInfoRaw>();
 
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 });
             }
 
-            var updateSql = "UPDATE \"MovieFiles\" SET \"MediaInfo\" = @MediaInfo WHERE \"Id\" = @Id";
+            var updateSql = "UPDATE \"GameFiles\" SET \"MediaInfo\" = @MediaInfo WHERE \"Id\" = @Id";
             conn.Execute(updateSql, updated, transaction: tran);
         }
 

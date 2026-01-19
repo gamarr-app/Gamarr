@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("AddOptions").AsString().Nullable()
                 .WithColumn("TvMazeId").AsInt32().WithDefaultValue(0);
 
-            Create.TableForModel("Movies")
+            Create.TableForModel("Games")
                 .WithColumn("ImdbId").AsString().Unique()
                 .WithColumn("Title").AsString()
                 .WithColumn("TitleSlug").AsString().Unique()
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("LastDiskSync").AsDateTime().Nullable()
                 .WithColumn("Runtime").AsInt32()
-                .WithColumn("InCinemas").AsDateTime().Nullable()
+                .WithColumn("InDevelopment").AsDateTime().Nullable()
                 .WithColumn("Year").AsInt32().Nullable()
                 .WithColumn("Added").AsDateTime().Nullable()
                 .WithColumn("Actors").AsString().Nullable()
@@ -216,7 +216,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Added").AsDateTime()
                 .WithColumn("ParsedEpisodeInfo").AsString()
                 .WithColumn("Release").AsString()
-                .WithColumn("MovieId").AsInt32().WithDefaultValue(0);
+                .WithColumn("GameId").AsInt32().WithDefaultValue(0);
 
             Create.TableForModel("RemotePathMappings")
                 .WithColumn("Host").AsString()

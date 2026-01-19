@@ -12,7 +12,7 @@ interface Blocklist extends ModelBase {
   date?: string;
   protocol: DownloadProtocol;
   sourceTitle: string;
-  movieId?: number;
+  gameId?: number;
   indexer?: string;
   message?: string;
 }

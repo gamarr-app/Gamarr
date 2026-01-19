@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Blocklisting
 {
     public interface IBlocklistRepository : IBasicRepository<Blocklist>
     {
-        List<Blocklist> BlocklistedByTitle(int movieId, string sourceTitle);
-        List<Blocklist> BlocklistedByTorrentInfoHash(int movieId, string torrentInfoHash);
-        List<Blocklist> BlocklistedByMovie(int movieId);
-        void DeleteForMovies(List<int> movieIds);
+        List<Blocklist> BlocklistedByTitle(int gameId, string sourceTitle);
+        List<Blocklist> BlocklistedByTorrentInfoHash(int gameId, string torrentInfoHash);
+        List<Blocklist> BlocklistedByGame(int gameId);
+        void DeleteForGames(List<int> gameIds);
     }
 
     public class BlocklistRepository : BasicRepository<Blocklist>, IBlocklistRepository
@@ -21,31 +21,31 @@ namespace NzbDrone.Core.Blocklisting
         {
         }
 
-        public List<Blocklist> BlocklistedByTitle(int movieId, string sourceTitle)
+        public List<Blocklist> BlocklistedByTitle(int gameId, string sourceTitle)
         {
-            return Query(x => x.MovieId == movieId && x.SourceTitle.Contains(sourceTitle));
+            return Query(x => x.GameId == gameId && x.SourceTitle.Contains(sourceTitle));
         }
 
-        public List<Blocklist> BlocklistedByTorrentInfoHash(int movieId, string torrentInfoHash)
+        public List<Blocklist> BlocklistedByTorrentInfoHash(int gameId, string torrentInfoHash)
         {
-            return Query(x => x.MovieId == movieId && x.TorrentInfoHash.Contains(torrentInfoHash));
+            return Query(x => x.GameId == gameId && x.TorrentInfoHash.Contains(torrentInfoHash));
         }
 
-        public List<Blocklist> BlocklistedByMovie(int movieId)
+        public List<Blocklist> BlocklistedByGame(int gameId)
         {
-            var builder = Builder().Join<Blocklist, Movie>((h, a) => h.MovieId == a.Id)
-                                   .Where<Blocklist>(h => h.MovieId == movieId);
+            var builder = Builder().Join<Blocklist, Game>((h, a) => h.GameId == a.Id)
+                                   .Where<Blocklist>(h => h.GameId == gameId);
 
-            return _database.QueryJoined<Blocklist, Movie>(builder, (blocklist, movie) =>
+            return _database.QueryJoined<Blocklist, Game>(builder, (blocklist, game) =>
             {
-                blocklist.Movie = movie;
+                blocklist.Game = game;
                 return blocklist;
             }).OrderByDescending(h => h.Date).ToList();
         }
 
-        public void DeleteForMovies(List<int> movieIds)
+        public void DeleteForGames(List<int> gameIds)
         {
-            Delete(x => movieIds.Contains(x.MovieId));
+            Delete(x => gameIds.Contains(x.GameId));
         }
 
         public override PagingSpec<Blocklist> GetPaged(PagingSpec<Blocklist> pagingSpec)
@@ -61,16 +61,16 @@ namespace NzbDrone.Core.Blocklisting
         protected override SqlBuilder PagedBuilder()
         {
             var builder = Builder()
-                .Join<Blocklist, Movie>((b, m) => b.MovieId == m.Id)
-                .LeftJoin<Movie, MovieMetadata>((m, mm) => m.MovieMetadataId == mm.Id);
+                .Join<Blocklist, Game>((b, m) => b.GameId == m.Id)
+                .LeftJoin<Game, GameMetadata>((m, mm) => m.GameMetadataId == mm.Id);
 
             return builder;
         }
 
         protected override IEnumerable<Blocklist> PagedQuery(SqlBuilder builder) =>
-            _database.QueryJoined<Blocklist, Movie>(builder, (blocklist, movie) =>
+            _database.QueryJoined<Blocklist, Game>(builder, (blocklist, game) =>
             {
-                blocklist.Movie = movie;
+                blocklist.Game = game;
                 return blocklist;
             });
     }

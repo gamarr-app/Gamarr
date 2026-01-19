@@ -6,7 +6,7 @@ using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles.Events;
-using NzbDrone.Core.Movies.Events;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.ThingiProvider.Events;
 
@@ -15,10 +15,10 @@ namespace NzbDrone.Core.HealthCheck.Checks
     [CheckOn(typeof(ProviderUpdatedEvent<IImportList>))]
     [CheckOn(typeof(ProviderDeletedEvent<IImportList>))]
     [CheckOn(typeof(ModelEvent<RootFolder>))]
-    [CheckOn(typeof(MoviesDeletedEvent))]
-    [CheckOn(typeof(MovieMovedEvent))]
-    [CheckOn(typeof(MovieFileImportedEvent), CheckOnCondition.FailedOnly)]
-    [CheckOn(typeof(MovieImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
+    [CheckOn(typeof(GamesDeletedEvent))]
+    [CheckOn(typeof(GameMovedEvent))]
+    [CheckOn(typeof(GameFileImportedEvent), CheckOnCondition.FailedOnly)]
+    [CheckOn(typeof(GameImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class ImportListRootFolderCheck : HealthCheckBase
     {
         private readonly IImportListFactory _importListFactory;

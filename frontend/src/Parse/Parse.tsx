@@ -63,7 +63,7 @@ function Parse() {
             className={styles.input}
             name="title"
             value={title}
-            placeholder="eg. Movie.Title.2020.720p.HDTV-RlsGroup"
+            placeholder="eg. Game.Title.2020.720p.HDTV-RlsGroup"
             autoFocus={true}
             onChange={onInputChange}
           />
@@ -84,13 +84,13 @@ function Parse() {
           </div>
         ) : null}
 
-        {!isFetching && title && !error && !item.parsedMovieInfo ? (
+        {!isFetching && title && !error && !item.parsedGameInfo ? (
           <div className={styles.message}>
             {translate('ParseModalUnableToParse')}
           </div>
         ) : null}
 
-        {!isFetching && !error && item.parsedMovieInfo ? (
+        {!isFetching && !error && item.parsedGameInfo ? (
           <ParseResult item={item} />
         ) : null}
 

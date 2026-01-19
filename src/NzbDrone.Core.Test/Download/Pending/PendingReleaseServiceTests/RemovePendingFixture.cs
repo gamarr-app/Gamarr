@@ -5,7 +5,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Crypto;
 using NzbDrone.Core.Download.Pending;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -16,35 +16,35 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
     public class RemovePendingFixture : CoreTest<PendingReleaseService>
     {
         private List<PendingRelease> _pending;
-        private Movie _movie;
+        private Game _game;
 
         [SetUp]
         public void Setup()
         {
             _pending = new List<PendingRelease>();
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                                        .Build();
 
             Mocker.GetMock<IPendingReleaseRepository>()
-                 .Setup(s => s.AllByMovieId(It.IsAny<int>()))
+                 .Setup(s => s.AllByGameId(It.IsAny<int>()))
                  .Returns(_pending);
 
             Mocker.GetMock<IPendingReleaseRepository>()
                   .Setup(s => s.All())
                   .Returns(_pending);
 
-            Mocker.GetMock<IMovieService>()
-                  .Setup(s => s.GetMovie(It.IsAny<int>()))
-                  .Returns(_movie);
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetGame(It.IsAny<int>()))
+                  .Returns(_game);
 
-            Mocker.GetMock<IMovieService>()
-                  .Setup(s => s.GetMovies(It.IsAny<IEnumerable<int>>()))
-                  .Returns(new List<Movie> { _movie });
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetGames(It.IsAny<IEnumerable<int>>()))
+                  .Returns(new List<Game> { _game });
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetMovie(It.IsAny<string>()))
-                  .Returns(_movie);
+                  .Setup(s => s.GetGame(It.IsAny<string>()))
+                  .Returns(_game);
         }
 
         private void AddPending(int id, string title, int year)
@@ -52,19 +52,19 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _pending.Add(new PendingRelease
             {
                 Id = id,
-                Title = "Movie.Title.2020.720p-Radarr",
-                ParsedMovieInfo = new ParsedMovieInfo { MovieTitles = new List<string> { title }, Year = year },
+                Title = "Game.Title.2020.720p-Gamarr",
+                ParsedGameInfo = new ParsedGameInfo { GameTitles = new List<string> { title }, Year = year },
                 Release = Builder<ReleaseInfo>.CreateNew().Build(),
-                MovieId = _movie.Id
+                GameId = _game.Id
             });
         }
 
         [Test]
         public void should_remove_same_release()
         {
-            AddPending(id: 1, title: "Movie", year: 2001);
+            AddPending(id: 1, title: "Game", year: 2001);
 
-            var queueId = HashConverter.GetHashInt31(string.Format("pending-{0}-movie{1}", 1, _movie.Id));
+            var queueId = HashConverter.GetHashInt31(string.Format("pending-{0}-game{1}", 1, _game.Id));
 
             Subject.RemovePendingQueueItems(queueId);
 

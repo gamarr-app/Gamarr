@@ -10,7 +10,7 @@ namespace NzbDrone.Core.Test.IndexerTests.FileListTests
 {
     public class FileListRequestGeneratorFixture : CoreTest<FileListRequestGenerator>
     {
-        private MovieSearchCriteria _movieSearchCriteria;
+        private GameSearchCriteria _gameSearchCriteria;
 
         [SetUp]
         public void Setup()
@@ -23,16 +23,16 @@ namespace NzbDrone.Core.Test.IndexerTests.FileListTests
                 Username = "somename"
             };
 
-            _movieSearchCriteria = new MovieSearchCriteria
+            _gameSearchCriteria = new GameSearchCriteria
             {
-                Movie = new Movies.Movie { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977 },
+                Game = new Games.Game { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977 },
                 SceneTitles = new List<string> { "Star Wars" }
             };
         }
 
-        private void MovieWithoutIMDB()
+        private void GameWithoutIMDB()
         {
-            _movieSearchCriteria.Movie.ImdbId = null;
+            _gameSearchCriteria.Game.ImdbId = null;
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.IndexerTests.FileListTests
         [Test]
         public void should_not_search_by_imdbid_if_not_supported()
         {
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(1);
 
@@ -63,9 +63,9 @@ namespace NzbDrone.Core.Test.IndexerTests.FileListTests
         [Test]
         public void should_search_by_name_and_year_if_missing_imdbid()
         {
-            MovieWithoutIMDB();
+            GameWithoutIMDB();
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(1);
 

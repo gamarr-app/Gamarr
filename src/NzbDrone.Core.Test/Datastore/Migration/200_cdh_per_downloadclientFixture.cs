@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Settings = new DelugeSettings85
                     {
                         Host = "127.0.0.1",
-                        MovieCategory = "abc",
+                        GameCategory = "abc",
                         UrlBase = "/my/"
                     }.ToJson(),
                     ConfigContract = "DelugeSettings"
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Settings = new DelugeSettings85
                     {
                         Host = "127.0.0.1",
-                        MovieCategory = "abc",
+                        GameCategory = "abc",
                         UrlBase = "/my/"
                     }.ToJson(),
                     ConfigContract = "DelugeSettings"
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Settings = new RTorrentSettings
                     {
                         Host = "127.0.0.1",
-                        MovieCategory = "abc",
+                        GameCategory = "abc",
                         UrlBase = "/my/"
                     }.ToJson(),
                     ConfigContract = "RTorrentSettings"
@@ -122,7 +122,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         public int Port { get; set; }
         public string UrlBase { get; set; }
         public string Password { get; set; }
-        public string MovieCategory { get; set; }
+        public string GameCategory { get; set; }
         public int RecentTvPriority { get; set; }
         public int OlderTvPriority { get; set; }
         public bool UseSsl { get; set; }

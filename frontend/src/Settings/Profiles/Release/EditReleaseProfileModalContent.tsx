@@ -197,7 +197,7 @@ function EditReleaseProfileModalContent({
             <FormInputGroup
               type={inputTypes.TAG}
               name="tags"
-              helpText={translate('ReleaseProfileTagMovieHelpText')}
+              helpText={translate('ReleaseProfileTagGameHelpText')}
               {...tags}
               onChange={handleInputChange}
             />

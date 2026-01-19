@@ -22,7 +22,7 @@ function Legend() {
     iconsToShow.push(
       <LegendIconItem
         name={translate('CutoffNotMet')}
-        icon={icons.MOVIE_FILE}
+        icon={icons.GAME_FILE}
         kind={kinds.WARNING}
         fullColorEvents={fullColorEvents}
         tooltip={translate('QualityCutoffNotMet')}

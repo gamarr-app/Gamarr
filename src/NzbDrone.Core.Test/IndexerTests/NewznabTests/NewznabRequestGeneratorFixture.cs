@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 {
     public class NewznabRequestGeneratorFixture : CoreTest<NewznabRequestGenerator>
     {
-        private MovieSearchCriteria _movieSearchCriteria;
+        private GameSearchCriteria _gameSearchCriteria;
         private NewznabCapabilities _capabilities;
 
         [SetUp]
@@ -24,9 +24,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
                 ApiKey = "abcd",
             };
 
-            _movieSearchCriteria = new MovieSearchCriteria
+            _gameSearchCriteria = new GameSearchCriteria
             {
-                Movie = new Movies.Movie { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977, TmdbId = 11 },
+                Game = new Games.Game { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977, IgdbId = 11 },
                 SceneTitles = new List<string> { "Star Wars" }
             };
 
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_return_subsequent_pages()
         {
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(2);
 
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_not_get_unlimited_pages()
         {
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(2);
 
@@ -92,9 +92,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_not_search_by_imdbid_if_not_supported()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q" };
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(1);
 
@@ -107,9 +107,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_search_by_imdbid_if_supported()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetAllTiers().First().First();
@@ -118,54 +118,54 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_search_by_tmdbid_if_supported()
+        public void should_search_by_igdbid_if_supported()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q", "tmdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid" };
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("tmdbid=11");
+            page.Url.Query.Should().Contain("igdbid=11");
         }
 
         [Test]
-        public void should_prefer_search_by_tmdbid_if_rid_supported()
+        public void should_prefer_search_by_igdbid_if_rid_supported()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q", "tmdbid", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("tmdbid=11");
+            page.Url.Query.Should().Contain("igdbid=11");
             page.Url.Query.Should().NotContain("imdbid=0076759");
         }
 
         [Test]
         public void should_use_aggregrated_id_search_if_supported()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q", "tmdbid", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
             _capabilities.SupportsAggregateIdSearch = true;
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("tmdbid=11");
+            page.Url.Query.Should().Contain("igdbid=11");
             page.Url.Query.Should().Contain("imdbid=0076759");
         }
 
         [Test]
         public void should_not_use_aggregrated_id_search_if_no_ids_supported()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q" };
             _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.Tiers.Should().Be(1);
             results.GetTier(0).Should().HaveCount(1);
 
@@ -177,12 +177,12 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_not_use_aggregrated_id_search_if_no_ids_are_known()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
             _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
 
-            _movieSearchCriteria.Movie.ImdbId = null;
+            _gameSearchCriteria.Game.ImdbId = null;
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             var page = results.GetTier(0).First().First();
 
@@ -192,15 +192,15 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_fallback_to_q()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q", "tmdbid", "imdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
             _capabilities.SupportsAggregateIdSearch = true;
 
-            var results = Subject.GetSearchRequests(_movieSearchCriteria);
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
             results.Tiers.Should().Be(2);
 
             var pageTier2 = results.GetTier(1).First().First();
 
-            pageTier2.Url.Query.Should().NotContain("tmdbid=11");
+            pageTier2.Url.Query.Should().NotContain("igdbid=11");
             pageTier2.Url.Query.Should().NotContain("imdbid=0076759");
             pageTier2.Url.Query.Should().Contain("q=");
         }
@@ -208,20 +208,20 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_encode_raw_title()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q" };
             _capabilities.TextSearchEngine = "raw";
 
-            var movieRawSearchCriteria = new MovieSearchCriteria
+            var gameRawSearchCriteria = new GameSearchCriteria
             {
-                Movie = new Movies.Movie { Title = "Some Movie & Title: Words", Year = 2021, TmdbId = 123 },
-                SceneTitles = new List<string> { "Some Movie & Title: Words" }
+                Game = new Games.Game { Title = "Some Game & Title: Words", Year = 2021, IgdbId = 123 },
+                SceneTitles = new List<string> { "Some Game & Title: Words" }
             };
 
-            var results = Subject.GetSearchRequests(movieRawSearchCriteria);
+            var results = Subject.GetSearchRequests(gameRawSearchCriteria);
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("q=Some%20Movie%20%26%20Title%3A%20Words");
+            page.Url.Query.Should().Contain("q=Some%20Game%20%26%20Title%3A%20Words");
             page.Url.Query.Should().NotContain(" & ");
             page.Url.Query.Should().Contain("%26");
         }
@@ -229,20 +229,20 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_use_clean_title_and_encode()
         {
-            _capabilities.SupportedMovieSearchParameters = new[] { "q" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q" };
             _capabilities.TextSearchEngine = "sphinx";
 
-            var movieRawSearchCriteria = new MovieSearchCriteria
+            var gameRawSearchCriteria = new GameSearchCriteria
             {
-                Movie = new Movies.Movie { Title = "Some Movie & Title: Words", Year = 2021, TmdbId = 123 },
-                SceneTitles = new List<string> { "Some Movie & Title: Words" }
+                Game = new Games.Game { Title = "Some Game & Title: Words", Year = 2021, IgdbId = 123 },
+                SceneTitles = new List<string> { "Some Game & Title: Words" }
             };
 
-            var results = Subject.GetSearchRequests(movieRawSearchCriteria);
+            var results = Subject.GetSearchRequests(gameRawSearchCriteria);
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("q=Some%20Movie%20and%20Title%20Words%202021");
+            page.Url.Query.Should().Contain("q=Some%20Game%20and%20Title%20Words%202021");
             page.Url.Query.Should().Contain("and");
             page.Url.Query.Should().NotContain(" & ");
             page.Url.Query.Should().NotContain("%26");

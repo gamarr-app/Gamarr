@@ -5,7 +5,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Emby
 {
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Notifications.Emby
         {
             if (Settings.Notify)
             {
-                _mediaBrowserService.Notify(Settings, MOVIE_GRABBED_TITLE_BRANDED, grabMessage.Message);
+                _mediaBrowserService.Notify(Settings, GAME_GRABBED_TITLE_BRANDED, grabMessage.Message);
             }
         }
 
@@ -41,15 +41,15 @@ namespace NzbDrone.Core.Notifications.Emby
         {
             if (Settings.Notify)
             {
-                _mediaBrowserService.Notify(Settings, MOVIE_DOWNLOADED_TITLE_BRANDED, message.Message);
+                _mediaBrowserService.Notify(Settings, GAME_DOWNLOADED_TITLE_BRANDED, message.Message);
             }
 
-            UpdateIfEnabled(message.Movie, Created);
+            UpdateIfEnabled(message.Game, Created);
         }
 
-        public override void OnMovieRename(Movie movie, List<RenamedMovieFile> renamedFiles)
+        public override void OnGameRename(Game game, List<RenamedGameFile> renamedFiles)
         {
-            UpdateIfEnabled(movie, Modified);
+            UpdateIfEnabled(game, Modified);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck message)
@@ -76,27 +76,27 @@ namespace NzbDrone.Core.Notifications.Emby
             }
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
             if (deleteMessage.DeletedFiles)
             {
                 if (Settings.Notify)
                 {
-                    _mediaBrowserService.Notify(Settings, MOVIE_DELETED_TITLE_BRANDED, deleteMessage.Message);
+                    _mediaBrowserService.Notify(Settings, GAME_DELETED_TITLE_BRANDED, deleteMessage.Message);
                 }
 
-                UpdateIfEnabled(deleteMessage.Movie, Deleted);
+                UpdateIfEnabled(deleteMessage.Game, Deleted);
             }
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
             if (Settings.Notify)
             {
-                _mediaBrowserService.Notify(Settings, MOVIE_FILE_DELETED_TITLE_BRANDED, deleteMessage.Message);
+                _mediaBrowserService.Notify(Settings, GAME_FILE_DELETED_TITLE_BRANDED, deleteMessage.Message);
             }
 
-            UpdateIfEnabled(deleteMessage.Movie, Deleted);
+            UpdateIfEnabled(deleteMessage.Game, Deleted);
         }
 
         public override void ProcessQueue()
@@ -105,25 +105,25 @@ namespace NzbDrone.Core.Notifications.Emby
             {
                 if (Settings.UpdateLibrary)
                 {
-                    _logger.Debug("Performing library update for {0} movies", items.Count);
+                    _logger.Debug("Performing library update for {0} games", items.Count);
 
                     items.ForEach(item =>
                     {
-                        // If there is only one update type for the movie use that, otherwise send null and let Emby decide
+                        // If there is only one update type for the game use that, otherwise send null and let Emby decide
                         var updateType = item.Info.Count == 1 ? item.Info.First() : null;
 
-                        _mediaBrowserService.Update(Settings, item.Movie, updateType);
+                        _mediaBrowserService.Update(Settings, item.Game, updateType);
                     });
                 }
             });
         }
 
-        private void UpdateIfEnabled(Movie movie, string updateType)
+        private void UpdateIfEnabled(Game game, string updateType)
         {
             if (Settings.UpdateLibrary)
             {
-                _logger.Debug("Scheduling library update for movie {0} {1}", movie.Id, movie.Title);
-                _updateQueue.Add(Settings.Host, movie, updateType);
+                _logger.Debug("Scheduling library update for game {0} {1}", game.Id, game.Title);
+                _updateQueue.Add(Settings.Host, game, updateType);
             }
         }
 

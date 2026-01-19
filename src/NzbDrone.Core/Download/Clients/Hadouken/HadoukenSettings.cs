@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Download.Clients.Hadouken
         {
             Host = "localhost";
             Port = 7070;
-            Category = "radarr";
+            Category = "gamarr";
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]

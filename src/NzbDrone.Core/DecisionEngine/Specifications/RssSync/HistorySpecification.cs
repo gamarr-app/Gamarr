@@ -33,7 +33,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria != null)
             {
@@ -42,14 +42,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             }
 
             var cdhEnabled = _configService.EnableCompletedDownloadHandling;
-            var qualityProfile = subject.Movie.QualityProfile;
+            var qualityProfile = subject.Game.QualityProfile;
 
             _logger.Debug("Performing history status check on report");
 
-            _logger.Debug("Checking current status of movie [{0}] in history", subject.Movie.Id);
-            var mostRecent = _historyService.MostRecentForMovie(subject.Movie.Id);
+            _logger.Debug("Checking current status of game [{0}] in history", subject.Game.Id);
+            var mostRecent = _historyService.MostRecentForGame(subject.Game.Id);
 
-            if (mostRecent != null && mostRecent.EventType == MovieHistoryEventType.Grabbed)
+            if (mostRecent != null && mostRecent.EventType == GameHistoryEventType.Grabbed)
             {
                 var recent = mostRecent.Date.After(DateTime.UtcNow.AddHours(-12));
 
@@ -58,19 +58,19 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                     return DownloadSpecDecision.Accept();
                 }
 
-                var customFormats = _formatService.ParseCustomFormat(mostRecent, subject.Movie);
+                var customFormats = _formatService.ParseCustomFormat(mostRecent, subject.Game);
 
                 var cutoffUnmet = _upgradableSpecification.CutoffNotMet(
-                    subject.Movie.QualityProfile,
+                    subject.Game.QualityProfile,
                     mostRecent.Quality,
                     customFormats,
-                    subject.ParsedMovieInfo.Quality);
+                    subject.ParsedGameInfo.Quality);
 
                 var upgradeableRejectReason = _upgradableSpecification.IsUpgradable(
-                    subject.Movie.QualityProfile,
+                    subject.Game.QualityProfile,
                     mostRecent.Quality,
                     customFormats,
-                    subject.ParsedMovieInfo.Quality,
+                    subject.ParsedGameInfo.Quality,
                     subject.CustomFormats);
 
                 if (!cutoffUnmet)

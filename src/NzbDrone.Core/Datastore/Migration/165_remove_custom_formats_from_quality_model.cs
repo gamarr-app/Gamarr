@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Datastore.Migration
         protected override void MainDbUpgrade()
         {
             Alter.Table("Blacklist").AddColumn("IndexerFlags").AsInt32().WithDefaultValue(0);
-            Alter.Table("MovieFiles").AddColumn("IndexerFlags").AsInt32().WithDefaultValue(0);
+            Alter.Table("GameFiles").AddColumn("IndexerFlags").AsInt32().WithDefaultValue(0);
 
             // Switch Quality and Language to int in pending releases, remove custom formats
             Execute.WithConnection(FixPendingReleases);
@@ -27,24 +27,24 @@ namespace NzbDrone.Core.Datastore.Migration
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<QualityModel165>());
             Execute.WithConnection((conn, tran) => RemoveCustomFormatFromQuality(conn, tran, "Blacklist"));
             Execute.WithConnection((conn, tran) => RemoveCustomFormatFromQuality(conn, tran, "History"));
-            Execute.WithConnection((conn, tran) => RemoveCustomFormatFromQuality(conn, tran, "MovieFiles"));
+            Execute.WithConnection((conn, tran) => RemoveCustomFormatFromQuality(conn, tran, "GameFiles"));
 
             // Fish out indexer flags from history
             Execute.WithConnection(AddIndexerFlagsToBlacklist);
-            Execute.WithConnection(AddIndexerFlagsToMovieFiles);
+            Execute.WithConnection(AddIndexerFlagsToGameFiles);
         }
 
         private void FixPendingReleases(IDbConnection conn, IDbTransaction tran)
         {
-            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedMovieInfo164>());
-            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedMovieInfo165>());
-            var rows = conn.Query<ParsedMovieInfoData164>("SELECT \"Id\", \"ParsedMovieInfo\" from \"PendingReleases\"");
+            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedGameInfo164>());
+            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedGameInfo165>());
+            var rows = conn.Query<ParsedGameInfoData164>("SELECT \"Id\", \"ParsedGameInfo\" from \"PendingReleases\"");
 
-            var newRows = new List<ParsedMovieInfoData165>();
+            var newRows = new List<ParsedGameInfoData165>();
 
             foreach (var row in rows)
             {
-                var old = row.ParsedMovieInfo;
+                var old = row.ParsedGameInfo;
 
                 var newQuality = new QualityModel165
                 {
@@ -55,9 +55,9 @@ namespace NzbDrone.Core.Datastore.Migration
 
                 var languages = old.Languages?.Select(x => (Language)x).Select(x => x.Id).ToList();
 
-                var correct = new ParsedMovieInfo165
+                var correct = new ParsedGameInfo165
                 {
-                    MovieTitle = old.MovieTitle,
+                    GameTitle = old.GameTitle,
                     SimpleReleaseTitle = old.SimpleReleaseTitle,
                     Quality = newQuality,
                     Languages = languages,
@@ -68,14 +68,14 @@ namespace NzbDrone.Core.Datastore.Migration
                     ImdbId = old.ImdbId
                 };
 
-                newRows.Add(new ParsedMovieInfoData165
+                newRows.Add(new ParsedGameInfoData165
                 {
                     Id = row.Id,
-                    ParsedMovieInfo = correct
+                    ParsedGameInfo = correct
                 });
             }
 
-            var sql = $"UPDATE \"PendingReleases\" SET \"ParsedMovieInfo\" = @ParsedMovieInfo WHERE \"Id\" = @Id";
+            var sql = $"UPDATE \"PendingReleases\" SET \"ParsedGameInfo\" = @ParsedGameInfo WHERE \"Id\" = @Id";
 
             conn.Execute(sql, newRows, transaction: tran);
         }
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Datastore.Migration
         {
             var blacklists = conn.Query<BlacklistData>("SELECT \"Blacklist\".\"Id\", \"Blacklist\".\"TorrentInfoHash\", \"History\".\"Data\" " +
                                                        "FROM \"Blacklist\" " +
-                                                       "JOIN \"History\" ON \"Blacklist\".\"MovieId\" = \"History\".\"MovieId\" " +
+                                                       "JOIN \"History\" ON \"Blacklist\".\"GameId\" = \"History\".\"GameId\" " +
                                                        "WHERE \"History\".\"EventType\" = 1");
 
             var toUpdate = new List<IndexerFlagsItem>();
@@ -120,16 +120,16 @@ namespace NzbDrone.Core.Datastore.Migration
             conn.Execute(updateSql, toUpdate, transaction: tran);
         }
 
-        private void AddIndexerFlagsToMovieFiles(IDbConnection conn, IDbTransaction tran)
+        private void AddIndexerFlagsToGameFiles(IDbConnection conn, IDbTransaction tran)
         {
-            var movieFiles = conn.Query<MovieFileData>("SELECT \"MovieFiles\".\"Id\", \"MovieFiles\".\"SceneName\", \"History\".\"SourceTitle\", \"History\".\"Data\" " +
-                                                       "FROM \"MovieFiles\" " +
-                                                       "JOIN \"History\" ON \"MovieFiles\".\"MovieId\" = \"History\".\"MovieId\" " +
+            var gameFiles = conn.Query<GameFileData>("SELECT \"GameFiles\".\"Id\", \"GameFiles\".\"SceneName\", \"History\".\"SourceTitle\", \"History\".\"Data\" " +
+                                                       "FROM \"GameFiles\" " +
+                                                       "JOIN \"History\" ON \"GameFiles\".\"GameId\" = \"History\".\"GameId\" " +
                                                        "WHERE \"History\".\"EventType\" = 1");
 
             var toUpdate = new List<IndexerFlagsItem>();
 
-            foreach (var item in movieFiles)
+            foreach (var item in gameFiles)
             {
                 var dict = Json.Deserialize<Dictionary<string, string>>(item.Data);
 
@@ -147,18 +147,18 @@ namespace NzbDrone.Core.Datastore.Migration
                 }
             }
 
-            var updateSql = "UPDATE \"MovieFiles\" SET \"IndexerFlags\" = @IndexerFlags WHERE \"Id\" = @Id";
+            var updateSql = "UPDATE \"GameFiles\" SET \"IndexerFlags\" = @IndexerFlags WHERE \"Id\" = @Id";
             conn.Execute(updateSql, toUpdate, transaction: tran);
         }
 
-        private class ParsedMovieInfoData164 : ModelBase
+        private class ParsedGameInfoData164 : ModelBase
         {
-            public ParsedMovieInfo164 ParsedMovieInfo { get; set; }
+            public ParsedGameInfo164 ParsedGameInfo { get; set; }
         }
 
-        private class ParsedMovieInfo164
+        private class ParsedGameInfo164
         {
-            public string MovieTitle { get; set; }
+            public string GameTitle { get; set; }
             public string SimpleReleaseTitle { get; set; }
             public QualityModel164 Quality { get; set; }
             public List<string> Languages { get; set; }
@@ -181,14 +181,14 @@ namespace NzbDrone.Core.Datastore.Migration
             public int Id { get; set; }
         }
 
-        private class ParsedMovieInfoData165 : ModelBase
+        private class ParsedGameInfoData165 : ModelBase
         {
-            public ParsedMovieInfo165 ParsedMovieInfo { get; set; }
+            public ParsedGameInfo165 ParsedGameInfo { get; set; }
         }
 
-        private class ParsedMovieInfo165
+        private class ParsedGameInfo165
         {
-            public string MovieTitle { get; set; }
+            public string GameTitle { get; set; }
             public string SimpleReleaseTitle { get; set; }
             public QualityModel165 Quality { get; set; }
             public List<int> Languages { get; set; }
@@ -205,7 +205,7 @@ namespace NzbDrone.Core.Datastore.Migration
             public string Data { get; set; }
         }
 
-        private class MovieFileData : ModelBase
+        private class GameFileData : ModelBase
         {
             public string SceneName { get; set; }
             public string SourceTitle { get; set; }

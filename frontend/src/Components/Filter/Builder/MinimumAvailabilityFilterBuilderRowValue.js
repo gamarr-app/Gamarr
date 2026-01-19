@@ -12,7 +12,7 @@ const protocols = [
   {
     id: 'inCinemas',
     get name() {
-      return translate('InCinemas');
+      return translate('InDevelopment');
     }
   },
   {

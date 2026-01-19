@@ -20,16 +20,16 @@ namespace NzbDrone.Core.ImportLists.TMDb.Popular
             MaxPages = 3;
         }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMoviesRequests());
+            pageableRequests.Add(GetGamesRequests());
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMoviesRequests()
+        private IEnumerable<ImportListRequest> GetGamesRequests()
         {
             var minVoteCount = Settings.FilterCriteria.MinVotes;
             var minVoteAverage = Settings.FilterCriteria.MinVoteAverage;
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.ImportLists.TMDb.Popular
                 .SetSegment("api", "3")
                 .SetSegment("route", "discover")
                 .SetSegment("id", "")
-                .SetSegment("secondaryRoute", "movie")
+                .SetSegment("secondaryRoute", "game")
                 .Accept(HttpAccept.Json);
 
             switch (Settings.TMDbListType)

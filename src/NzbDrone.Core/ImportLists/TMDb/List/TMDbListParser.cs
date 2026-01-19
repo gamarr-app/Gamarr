@@ -1,47 +1,47 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 
 namespace NzbDrone.Core.ImportLists.TMDb.List
 {
     public class TMDbListParser : TMDbParser
     {
-        public override IList<ImportListMovie> ParseResponse(ImportListResponse importResponse)
+        public override IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
         {
-            var movies = new List<ImportListMovie>();
+            var games = new List<ImportListGame>();
 
             if (!PreProcess(importResponse))
             {
-                return movies;
+                return games;
             }
 
             var jsonResponse = JsonConvert.DeserializeObject<ListResponseResource>(importResponse.Content);
 
-            // no movies were return
+            // no games were return
             if (jsonResponse == null)
             {
-                return movies;
+                return games;
             }
 
-            foreach (var movie in jsonResponse.Results)
+            foreach (var game in jsonResponse.Results)
             {
-                // Media Type is not Movie
-                if (movie.MediaType != "movie")
+                // Media Type is not Game
+                if (game.MediaType != "game")
                 {
                     continue;
                 }
 
-                // Movies with no Year Fix
-                if (string.IsNullOrWhiteSpace(movie.ReleaseDate))
+                // Games with no Year Fix
+                if (string.IsNullOrWhiteSpace(game.ReleaseDate))
                 {
                     continue;
                 }
 
-                movies.AddIfNotNull(MapListMovie(movie));
+                games.AddIfNotNull(MapListGame(game));
             }
 
-            return movies;
+            return games;
         }
     }
 }

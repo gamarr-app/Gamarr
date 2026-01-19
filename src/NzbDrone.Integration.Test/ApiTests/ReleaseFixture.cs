@@ -2,7 +2,7 @@ using System.Linq;
 using System.Net;
 using FluentAssertions;
 using NUnit.Framework;
-using Radarr.Api.V3.Indexers;
+using Gamarr.Api.V3.Indexers;
 
 namespace NzbDrone.Integration.Test.ApiTests
 {
@@ -11,12 +11,12 @@ namespace NzbDrone.Integration.Test.ApiTests
     public class ReleaseFixture : IntegrationTest
     {
         [Test]
-        public void should_only_have_unknown_movie_releases()
+        public void should_only_have_unknown_game_releases()
         {
             var releases = Releases.All();
             var indexers = Indexers.All();
 
-            releases.Should().OnlyContain(c => c.Rejections.Contains("Unknown Movie"));
+            releases.Should().OnlyContain(c => c.Rejections.Contains("Unknown Game"));
             releases.Should().OnlyContain(c => BeValidRelease(c));
         }
 
@@ -47,7 +47,7 @@ namespace NzbDrone.Integration.Test.ApiTests
             releaseResource.Age.Should().BeGreaterOrEqualTo(-1);
             releaseResource.Title.Should().NotBeNullOrWhiteSpace();
             releaseResource.DownloadUrl.Should().NotBeNullOrWhiteSpace();
-            releaseResource.MovieTitles.First().Should().NotBeNullOrWhiteSpace();
+            releaseResource.GameTitles.First().Should().NotBeNullOrWhiteSpace();
 
             // TODO: uncomment these after moving to restsharp for rss
             // releaseResource.NzbInfoUrl.Should().NotBeNullOrWhiteSpace();

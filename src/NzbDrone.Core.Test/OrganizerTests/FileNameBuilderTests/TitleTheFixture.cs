@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -15,22 +15,22 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class TitleTheFixture : CoreTest<FileNameBuilder>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
+        private Game _game;
+        private GameFile _gameFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _movie = Builder<Movie>
+            _game = Builder<Game>
                     .CreateNew()
                     .With(e => e.Title = "Batman")
                     .Build();
 
-            _movieFile = new MovieFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "RadarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameMovies = true;
+            _namingConfig.RenameGames = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -56,10 +56,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("The Climax: I (Almost) Got Away With It (2016)", "Climax - I (Almost) Got Away With It, The (2016)")]
         public void should_get_expected_title_back(string title, string expected)
         {
-            _movie.Title = title;
-            _namingConfig.StandardMovieFormat = "{Movie TitleThe}";
+            _game.Title = title;
+            _namingConfig.StandardGameFormat = "{Game TitleThe}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(expected);
         }
 
@@ -69,10 +69,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("3%")]
         public void should_not_change_title(string title)
         {
-            _movie.Title = title;
-            _namingConfig.StandardMovieFormat = "{Movie TitleThe}";
+            _game.Title = title;
+            _namingConfig.StandardGameFormat = "{Game TitleThe}";
 
-            Subject.BuildFileName(_movie, _movieFile)
+            Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(title);
         }
     }

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Datastore;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.Datastore
@@ -22,12 +22,12 @@ namespace NzbDrone.Core.Test.Datastore
             Mocker.Resolve<DbFactory>();
         }
 
-        private WhereBuilderPostgres Where(Expression<Func<Movie, bool>> filter)
+        private WhereBuilderPostgres Where(Expression<Func<Game, bool>> filter)
         {
             return new WhereBuilderPostgres(filter, true, 0);
         }
 
-        private WhereBuilderPostgres WhereMeta(Expression<Func<MovieMetadata, bool>> filter)
+        private WhereBuilderPostgres WhereMeta(Expression<Func<GameMetadata, bool>> filter)
         {
             return new WhereBuilderPostgres(filter, true, 0);
         }
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             _subject = Where(x => x.Id == 10);
 
-            _subject.ToString().Should().Be($"(\"Movies\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(10);
         }
 
@@ -47,19 +47,19 @@ namespace NzbDrone.Core.Test.Datastore
             var id = 10;
             _subject = Where(x => x.Id == id);
 
-            _subject.ToString().Should().Be($"(\"Movies\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(id);
         }
 
         [Test]
         public void postgres_where_equal_property()
         {
-            var movie = new Movie { Id = 10 };
-            _subject = Where(x => x.Id == movie.Id);
+            var game = new Game { Id = 10 };
+            _subject = Where(x => x.Id == game.Id);
 
             _subject.Parameters.ParameterNames.Should().HaveCount(1);
-            _subject.ToString().Should().Be($"(\"Movies\".\"Id\" = @Clause1_P1)");
-            _subject.Parameters.Get<int>("Clause1_P1").Should().Be(movie.Id);
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = @Clause1_P1)");
+            _subject.Parameters.Get<int>("Clause1_P1").Should().Be(game.Id);
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void postgres_where_throws_without_concrete_condition_if_requiresConcreteCondition()
         {
-            Expression<Func<Movie, Movie, bool>> filter = (x, y) => x.Id == y.Id;
+            Expression<Func<Game, Game, bool>> filter = (x, y) => x.Id == y.Id;
             _subject = new WhereBuilderPostgres(filter, true, 0);
             Assert.Throws<InvalidOperationException>(() => _subject.ToString());
         }
@@ -83,9 +83,9 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void postgres_where_allows_abstract_condition_if_not_requiresConcreteCondition()
         {
-            Expression<Func<Movie, Movie, bool>> filter = (x, y) => x.Id == y.Id;
+            Expression<Func<Game, Game, bool>> filter = (x, y) => x.Id == y.Id;
             _subject = new WhereBuilderPostgres(filter, false, 0);
-            _subject.ToString().Should().Be($"(\"Movies\".\"Id\" = \"Movies\".\"Id\")");
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = \"Games\".\"Id\")");
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             _subject = WhereMeta(x => x.CleanTitle == null);
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" IS NULL)");
         }
 
         [Test]
@@ -102,16 +102,16 @@ namespace NzbDrone.Core.Test.Datastore
             string cleanTitle = null;
             _subject = WhereMeta(x => x.CleanTitle == cleanTitle);
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" IS NULL)");
         }
 
         [Test]
         public void postgres_where_equal_null_property()
         {
-            var movie = new MovieMetadata { CleanTitle = null };
-            _subject = WhereMeta(x => x.CleanTitle == movie.CleanTitle);
+            var game = new GameMetadata { CleanTitle = null };
+            _subject = WhereMeta(x => x.CleanTitle == game.CleanTitle);
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" IS NULL)");
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = WhereMeta(x => x.CleanTitle.Contains(test));
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" ILIKE '%' || @Clause1_P1 || '%')");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" ILIKE '%' || @Clause1_P1 || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = WhereMeta(x => test.Contains(x.CleanTitle));
 
-            _subject.ToString().Should().Be($"(@Clause1_P1 ILIKE '%' || \"MovieMetadata\".\"CleanTitle\" || '%')");
+            _subject.ToString().Should().Be($"(@Clause1_P1 ILIKE '%' || \"GameMetadata\".\"CleanTitle\" || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = WhereMeta(x => x.CleanTitle.StartsWith(test));
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" ILIKE @Clause1_P1 || '%')");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" ILIKE @Clause1_P1 || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = WhereMeta(x => x.CleanTitle.EndsWith(test));
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" ILIKE '%' || @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" ILIKE '%' || @Clause1_P1)");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.Test.Datastore
             var list = new List<int> { 1, 2, 3 };
             _subject = Where(x => list.Contains(x.Id));
 
-            _subject.ToString().Should().Be($"(\"Movies\".\"Id\" = ANY (('{{1, 2, 3}}')))");
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = ANY (('{{1, 2, 3}}')))");
         }
 
         [Test]
@@ -169,7 +169,7 @@ namespace NzbDrone.Core.Test.Datastore
             var list = new List<int> { 1, 2, 3 };
             _subject = WhereMeta(x => x.CleanTitle == "test" && list.Contains(x.Id));
 
-            _subject.ToString().Should().Be($"((\"MovieMetadata\".\"CleanTitle\" = @Clause1_P1) AND (\"MovieMetadata\".\"Id\" = ANY (('{{1, 2, 3}}'))))");
+            _subject.ToString().Should().Be($"((\"GameMetadata\".\"CleanTitle\" = @Clause1_P1) AND (\"GameMetadata\".\"Id\" = ANY (('{{1, 2, 3}}'))))");
         }
 
         [Test]
@@ -179,33 +179,33 @@ namespace NzbDrone.Core.Test.Datastore
 
             _subject = WhereMeta(x => list.Contains(x.CleanTitle));
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"CleanTitle\" = ANY (@Clause1_P1))");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"CleanTitle\" = ANY (@Clause1_P1))");
         }
 
         [Test]
         public void enum_as_int()
         {
-            _subject = WhereMeta(x => x.Status == MovieStatusType.Announced);
+            _subject = WhereMeta(x => x.Status == GameStatusType.Announced);
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"Status\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" = @Clause1_P1)");
         }
 
         [Test]
         public void enum_in_list()
         {
-            var allowed = new List<MovieStatusType> { MovieStatusType.Announced, MovieStatusType.InCinemas };
+            var allowed = new List<GameStatusType> { GameStatusType.Announced, GameStatusType.InDevelopment };
             _subject = WhereMeta(x => allowed.Contains(x.Status));
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"Status\" = ANY (@Clause1_P1))");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" = ANY (@Clause1_P1))");
         }
 
         [Test]
         public void enum_in_array()
         {
-            var allowed = new MovieStatusType[] { MovieStatusType.Announced, MovieStatusType.InCinemas };
+            var allowed = new GameStatusType[] { GameStatusType.Announced, GameStatusType.InDevelopment };
             _subject = WhereMeta(x => allowed.Contains(x.Status));
 
-            _subject.ToString().Should().Be($"(\"MovieMetadata\".\"Status\" = ANY (@Clause1_P1))");
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" = ANY (@Clause1_P1))");
         }
     }
 }

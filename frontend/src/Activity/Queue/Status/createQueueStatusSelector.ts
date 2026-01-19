@@ -5,8 +5,8 @@ function createQueueStatusSelector() {
   return createSelector(
     (state: AppState) => state.queue.status.isPopulated,
     (state: AppState) => state.queue.status.item,
-    (state: AppState) => state.queue.options.includeUnknownMovieItems,
-    (isPopulated, status, includeUnknownMovieItems) => {
+    (state: AppState) => state.queue.options.includeUnknownGameItems,
+    (isPopulated, status, includeUnknownGameItems) => {
       const {
         errors,
         warnings,
@@ -19,9 +19,9 @@ function createQueueStatusSelector() {
       return {
         ...status,
         isPopulated,
-        count: includeUnknownMovieItems ? totalCount : count,
-        errors: includeUnknownMovieItems ? errors || unknownErrors : errors,
-        warnings: includeUnknownMovieItems
+        count: includeUnknownGameItems ? totalCount : count,
+        errors: includeUnknownGameItems ? errors || unknownErrors : errors,
+        warnings: includeUnknownGameItems
           ? warnings || unknownWarnings
           : warnings,
       };

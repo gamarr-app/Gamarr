@@ -4,28 +4,28 @@ using Newtonsoft.Json;
 
 namespace NzbDrone.Core.ImportLists.Simkl
 {
-    public class SimklMovieIdsResource
+    public class SimklGameIdsResource
     {
         public int Simkl { get; set; }
         public string Imdb { get; set; }
-        public string Tmdb { get; set; }
+        public string Igdb { get; set; }
     }
 
-    public class SimklMoviePropsResource
+    public class SimklGamePropsResource
     {
         public string Title { get; set; }
         public int? Year { get; set; }
-        public SimklMovieIdsResource Ids { get; set; }
+        public SimklGameIdsResource Ids { get; set; }
     }
 
-    public class SimklMovieResource
+    public class SimklGameResource
     {
-        public SimklMoviePropsResource Movie { get; set; }
+        public SimklGamePropsResource Game { get; set; }
     }
 
     public class SimklResponse
     {
-        public List<SimklMovieResource> Movies { get; set; }
+        public List<SimklGameResource> Games { get; set; }
     }
 
     public class RefreshRequestResponse
@@ -56,10 +56,10 @@ namespace NzbDrone.Core.ImportLists.Simkl
 
     public class SimklSyncActivityResource
     {
-        public SimklMoviesSyncActivityResource Movies { get; set; }
+        public SimklGamesSyncActivityResource Games { get; set; }
     }
 
-    public class SimklMoviesSyncActivityResource
+    public class SimklGamesSyncActivityResource
     {
         public DateTime All { get; set; }
     }

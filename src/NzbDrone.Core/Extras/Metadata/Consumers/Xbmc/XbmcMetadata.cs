@@ -15,9 +15,9 @@ using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Credits;
-using NzbDrone.Core.Movies.Translations;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Credits;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Tags;
 
 namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
@@ -30,14 +30,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
         private readonly IDiskProvider _diskProvider;
         private readonly ICreditService _creditService;
         private readonly ITagRepository _tagRepository;
-        private readonly IMovieTranslationService _movieTranslationsService;
+        private readonly IGameTranslationService _gameTranslationsService;
 
         public XbmcMetadata(IDetectXbmcNfo detectNfo,
                             IDiskProvider diskProvider,
                             IMapCoversToLocal mediaCoverService,
                             ICreditService creditService,
                             ITagRepository tagRepository,
-                            IMovieTranslationService movieTranslationsService,
+                            IGameTranslationService gameTranslationsService,
                             Logger logger)
         {
             _logger = logger;
@@ -46,28 +46,28 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
             _detectNfo = detectNfo;
             _creditService = creditService;
             _tagRepository = tagRepository;
-            _movieTranslationsService = movieTranslationsService;
+            _gameTranslationsService = gameTranslationsService;
         }
 
-        private static readonly Regex MovieImagesRegex = new Regex(@"^(?<type>poster|banner|fanart|clearart|discart|keyart|landscape|logo|backdrop|clearlogo)\.(?:png|jpe?g)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex MovieFileImageRegex = new Regex(@"(?<type>-thumb|-poster|-banner|-fanart|-clearart|-discart|-keyart|-landscape|-logo|-backdrop|-clearlogo)\.(?:png|jpe?g)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex GameImagesRegex = new Regex(@"^(?<type>poster|banner|fanart|clearart|discart|keyart|landscape|logo|backdrop|clearlogo)\.(?:png|jpe?g)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex GameFileImageRegex = new Regex(@"(?<type>-thumb|-poster|-banner|-fanart|-clearart|-discart|-keyart|-landscape|-logo|-backdrop|-clearlogo)\.(?:png|jpe?g)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public override string Name => "Kodi (XBMC) / Emby";
 
-        public override string GetFilenameAfterMove(Movie movie, MovieFile movieFile, MetadataFile metadataFile)
+        public override string GetFilenameAfterMove(Game game, GameFile gameFile, MetadataFile metadataFile)
         {
-            var movieFilePath = Path.Combine(movie.Path, movieFile.RelativePath);
+            var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
 
-            if (metadataFile.Type == MetadataType.MovieMetadata)
+            if (metadataFile.Type == MetadataType.GameMetadata)
             {
-                return GetMovieMetadataFilename(movieFilePath);
+                return GetGameMetadataFilename(gameFilePath);
             }
 
-            _logger.Debug("Unknown movie file metadata: {0}", metadataFile.RelativePath);
-            return Path.Combine(movie.Path, metadataFile.RelativePath);
+            _logger.Debug("Unknown game file metadata: {0}", metadataFile.RelativePath);
+            return Path.Combine(game.Path, metadataFile.RelativePath);
         }
 
-        public override MetadataFile FindMetadataFile(Movie movie, string path)
+        public override MetadataFile FindMetadataFile(Game game, string path)
         {
             var filename = Path.GetFileName(path);
 
@@ -78,112 +78,112 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
             var metadata = new MetadataFile
             {
-                MovieId = movie.Id,
+                GameId = game.Id,
                 Consumer = GetType().Name,
-                RelativePath = movie.Path.GetRelativePath(path)
+                RelativePath = game.Path.GetRelativePath(path)
             };
 
-            if (MovieImagesRegex.IsMatch(filename))
+            if (GameImagesRegex.IsMatch(filename))
             {
-                metadata.Type = MetadataType.MovieImage;
+                metadata.Type = MetadataType.GameImage;
                 return metadata;
             }
 
-            if (MovieFileImageRegex.IsMatch(filename))
+            if (GameFileImageRegex.IsMatch(filename))
             {
-                metadata.Type = MetadataType.MovieImage;
+                metadata.Type = MetadataType.GameImage;
                 return metadata;
             }
 
-            if (filename.Equals("movie.nfo", StringComparison.OrdinalIgnoreCase) &&
+            if (filename.Equals("game.nfo", StringComparison.OrdinalIgnoreCase) &&
                 _detectNfo.IsXbmcNfoFile(path))
             {
-                metadata.Type = MetadataType.MovieMetadata;
+                metadata.Type = MetadataType.GameMetadata;
                 return metadata;
             }
 
-            var parseResult = Parser.Parser.ParseMovieTitle(filename);
+            var parseResult = Parser.Parser.ParseGameTitle(filename);
 
             if (parseResult != null &&
                 Path.GetExtension(filename).Equals(".nfo", StringComparison.OrdinalIgnoreCase) &&
                 _detectNfo.IsXbmcNfoFile(path))
             {
-                metadata.Type = MetadataType.MovieMetadata;
+                metadata.Type = MetadataType.GameMetadata;
                 return metadata;
             }
 
             return null;
         }
 
-        public override MetadataFileResult MovieMetadata(Movie movie, MovieFile movieFile)
+        public override MetadataFileResult GameMetadata(Game game, GameFile gameFile)
         {
             var xmlResult = string.Empty;
 
-            if (Settings.MovieMetadata)
+            if (Settings.GameMetadata)
             {
-                _logger.Debug("Generating Movie Metadata for: {0}", Path.Combine(movie.Path, movieFile.RelativePath));
+                _logger.Debug("Generating Game Metadata for: {0}", Path.Combine(game.Path, gameFile.RelativePath));
 
-                var movieMetadataLanguage = Settings.MovieMetadataLanguage == (int)Language.Original ?
-                    (int)movie.MovieMetadata.Value.OriginalLanguage :
-                    Settings.MovieMetadataLanguage;
+                var gameMetadataLanguage = Settings.GameMetadataLanguage == (int)Language.Original ?
+                    (int)game.GameMetadata.Value.OriginalLanguage :
+                    Settings.GameMetadataLanguage;
 
-                var movieTranslations = _movieTranslationsService.GetAllTranslationsForMovieMetadata(movie.MovieMetadataId);
-                var selectedSettingsLanguage = Language.FindById(movieMetadataLanguage);
-                var movieTranslation = movieTranslations.FirstOrDefault(mt => mt.Language == selectedSettingsLanguage);
+                var gameTranslations = _gameTranslationsService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
+                var selectedSettingsLanguage = Language.FindById(gameMetadataLanguage);
+                var gameTranslation = gameTranslations.FirstOrDefault(mt => mt.Language == selectedSettingsLanguage);
 
-                var credits = _creditService.GetAllCreditsForMovieMetadata(movie.MovieMetadataId);
+                var credits = _creditService.GetAllCreditsForGameMetadata(game.GameMetadataId);
 
-                var watched = GetExistingWatchedStatus(movie, movieFile.RelativePath);
+                var watched = GetExistingWatchedStatus(game, gameFile.RelativePath);
 
-                var thumbnail = movie.MovieMetadata.Value.Images.SingleOrDefault(i => i.CoverType == MediaCoverTypes.Screenshot);
-                var posters = movie.MovieMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Poster).ToList();
-                var fanarts = movie.MovieMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Fanart).ToList();
+                var thumbnail = game.GameMetadata.Value.Images.SingleOrDefault(i => i.CoverType == MediaCoverTypes.Screenshot);
+                var posters = game.GameMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Poster).ToList();
+                var fanarts = game.GameMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Fanart).ToList();
 
-                var details = new XElement("movie");
+                var details = new XElement("game");
 
-                var metadataTitle = movieTranslation?.Title ?? movie.Title;
+                var metadataTitle = gameTranslation?.Title ?? game.Title;
 
                 details.Add(new XElement("title", metadataTitle));
 
-                details.Add(new XElement("originaltitle", movie.MovieMetadata.Value.OriginalTitle));
+                details.Add(new XElement("originaltitle", game.GameMetadata.Value.OriginalTitle));
 
                 details.Add(new XElement("sorttitle", Parser.Parser.NormalizeTitle(metadataTitle)));
 
-                if (movie.MovieMetadata.Value.Ratings?.Tmdb?.Votes > 0 || movie.MovieMetadata.Value.Ratings?.Imdb?.Votes > 0 || movie.MovieMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
+                if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0 || game.GameMetadata.Value.Ratings?.Imdb?.Votes > 0 || game.GameMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
                 {
                     var setRating = new XElement("ratings");
 
                     var defaultRatingSet = false;
 
-                    if (movie.MovieMetadata.Value.Ratings?.Imdb?.Votes > 0)
+                    if (game.GameMetadata.Value.Ratings?.Imdb?.Votes > 0)
                     {
                         var setRateImdb = new XElement("rating", new XAttribute("name", "imdb"), new XAttribute("max", "10"), new XAttribute("default", "true"));
-                        setRateImdb.Add(new XElement("value", movie.MovieMetadata.Value.Ratings.Imdb.Value));
-                        setRateImdb.Add(new XElement("votes", movie.MovieMetadata.Value.Ratings.Imdb.Votes));
+                        setRateImdb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Imdb.Value));
+                        setRateImdb.Add(new XElement("votes", game.GameMetadata.Value.Ratings.Imdb.Votes));
 
                         defaultRatingSet = true;
                         setRating.Add(setRateImdb);
                     }
 
-                    if (movie.MovieMetadata.Value.Ratings?.Tmdb?.Votes > 0)
+                    if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0)
                     {
-                        var setRateTheMovieDb = new XElement("rating", new XAttribute("name", "themoviedb"), new XAttribute("max", "10"));
-                        setRateTheMovieDb.Add(new XElement("value", movie.MovieMetadata.Value.Ratings.Tmdb.Value));
-                        setRateTheMovieDb.Add(new XElement("votes", movie.MovieMetadata.Value.Ratings.Tmdb.Votes));
+                        var setRateTheGameDb = new XElement("rating", new XAttribute("name", "thegamedb"), new XAttribute("max", "10"));
+                        setRateTheGameDb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Igdb.Value));
+                        setRateTheGameDb.Add(new XElement("votes", game.GameMetadata.Value.Ratings.Igdb.Votes));
 
                         if (!defaultRatingSet)
                         {
                             defaultRatingSet = true;
-                            setRateTheMovieDb.SetAttributeValue("default", "true");
+                            setRateTheGameDb.SetAttributeValue("default", "true");
                         }
 
-                        setRating.Add(setRateTheMovieDb);
+                        setRating.Add(setRateTheGameDb);
                     }
 
-                    if (movie.MovieMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
+                    if (game.GameMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
                     {
                         var setRateRottenTomatoes = new XElement("rating", new XAttribute("name", "tomatometerallcritics"), new XAttribute("max", "100"));
-                        setRateRottenTomatoes.Add(new XElement("value", movie.MovieMetadata.Value.Ratings.RottenTomatoes.Value));
+                        setRateRottenTomatoes.Add(new XElement("value", game.GameMetadata.Value.Ratings.RottenTomatoes.Value));
 
                         if (!defaultRatingSet)
                         {
@@ -196,14 +196,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     details.Add(setRating);
                 }
 
-                if (movie.MovieMetadata.Value.Ratings?.Tmdb?.Votes > 0)
+                if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0)
                 {
-                    details.Add(new XElement("rating", movie.MovieMetadata.Value.Ratings.Tmdb.Value));
+                    details.Add(new XElement("rating", game.GameMetadata.Value.Ratings.Igdb.Value));
                 }
 
-                if (movie.MovieMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
+                if (game.GameMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
                 {
-                    details.Add(new XElement("criticrating", movie.MovieMetadata.Value.Ratings.RottenTomatoes.Value));
+                    details.Add(new XElement("criticrating", game.GameMetadata.Value.Ratings.RottenTomatoes.Value));
                 }
 
                 details.Add(new XElement("userrating"));
@@ -212,11 +212,11 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                 details.Add(new XElement("outline"));
 
-                details.Add(new XElement("plot", movieTranslation?.Overview ?? movie.MovieMetadata.Value.Overview));
+                details.Add(new XElement("plot", gameTranslation?.Overview ?? game.GameMetadata.Value.Overview));
 
                 details.Add(new XElement("tagline"));
 
-                details.Add(new XElement("runtime", movie.MovieMetadata.Value.Runtime));
+                details.Add(new XElement("runtime", game.GameMetadata.Value.Runtime));
 
                 if (thumbnail != null)
                 {
@@ -246,50 +246,50 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     details.Add(fanartElement);
                 }
 
-                if (movie.MovieMetadata.Value.Certification.IsNotNullOrWhiteSpace())
+                if (game.GameMetadata.Value.Certification.IsNotNullOrWhiteSpace())
                 {
-                    details.Add(new XElement("mpaa", movie.MovieMetadata.Value.Certification));
+                    details.Add(new XElement("mpaa", game.GameMetadata.Value.Certification));
                 }
 
                 details.Add(new XElement("playcount"));
 
                 details.Add(new XElement("lastplayed"));
 
-                details.Add(new XElement("id", movie.TmdbId));
+                details.Add(new XElement("id", game.IgdbId));
 
-                var uniqueId = new XElement("uniqueid", movie.TmdbId);
-                uniqueId.SetAttributeValue("type", "tmdb");
+                var uniqueId = new XElement("uniqueid", game.IgdbId);
+                uniqueId.SetAttributeValue("type", "igdb");
                 uniqueId.SetAttributeValue("default", true);
                 details.Add(uniqueId);
 
-                if (movie.MovieMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
+                if (game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
                 {
-                    var imdbId = new XElement("uniqueid", movie.MovieMetadata.Value.ImdbId);
+                    var imdbId = new XElement("uniqueid", game.GameMetadata.Value.ImdbId);
                     imdbId.SetAttributeValue("type", "imdb");
                     details.Add(imdbId);
                 }
 
-                foreach (var genre in movie.MovieMetadata.Value.Genres)
+                foreach (var genre in game.GameMetadata.Value.Genres)
                 {
                     details.Add(new XElement("genre", genre));
                 }
 
                 details.Add(new XElement("country"));
 
-                if (Settings.AddCollectionName && movie.MovieMetadata.Value.CollectionTitle.IsNotNullOrWhiteSpace())
+                if (Settings.AddCollectionName && game.GameMetadata.Value.CollectionTitle.IsNotNullOrWhiteSpace())
                 {
                     var setElement = new XElement("set");
 
-                    setElement.SetAttributeValue("tmdbcolid", movie.MovieMetadata.Value.CollectionTmdbId);
-                    setElement.Add(new XElement("name", movie.MovieMetadata.Value.CollectionTitle));
+                    setElement.SetAttributeValue("igdbcolid", game.GameMetadata.Value.CollectionIgdbId);
+                    setElement.Add(new XElement("name", game.GameMetadata.Value.CollectionTitle));
                     setElement.Add(new XElement("overview"));
 
                     details.Add(setElement);
                 }
 
-                if (movie.Tags.Any())
+                if (game.Tags.Any())
                 {
-                    var tags = _tagRepository.GetTags(movie.Tags);
+                    var tags = _tagRepository.GetTags(game.Tags);
 
                     foreach (var tag in tags)
                     {
@@ -297,7 +297,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     }
                 }
 
-                details.Add(new XElement("status", movie.MovieMetadata.Value.Status));
+                details.Add(new XElement("status", game.GameMetadata.Value.Status));
 
                 foreach (var credit in credits)
                 {
@@ -315,54 +315,54 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     }
                 }
 
-                if (movie.MovieMetadata.Value.InCinemas.HasValue)
+                if (game.GameMetadata.Value.InDevelopment.HasValue)
                 {
-                    details.Add(new XElement("premiered", movie.MovieMetadata.Value.InCinemas.Value.ToString("yyyy-MM-dd")));
+                    details.Add(new XElement("premiered", game.GameMetadata.Value.InDevelopment.Value.ToString("yyyy-MM-dd")));
                 }
 
-                details.Add(new XElement("year", movie.Year));
+                details.Add(new XElement("year", game.Year));
 
-                details.Add(new XElement("studio", movie.MovieMetadata.Value.Studio));
+                details.Add(new XElement("studio", game.GameMetadata.Value.Studio));
 
-                details.Add(new XElement("trailer", "plugin://plugin.video.youtube/play/?video_id=" + movie.MovieMetadata.Value.YouTubeTrailerId));
+                details.Add(new XElement("trailer", "plugin://plugin.video.youtube/play/?video_id=" + game.GameMetadata.Value.YouTubeTrailerId));
 
                 details.Add(new XElement("watched", watched));
 
-                if (movieFile.MediaInfo != null)
+                if (gameFile.MediaInfo != null)
                 {
-                    var sceneName = movieFile.GetSceneOrFileName();
+                    var sceneName = gameFile.GetSceneOrFileName();
 
                     var fileInfo = new XElement("fileinfo");
                     var streamDetails = new XElement("streamdetails");
 
                     var video = new XElement("video");
-                    video.Add(new XElement("aspect", (float)movieFile.MediaInfo.Width / (float)movieFile.MediaInfo.Height));
-                    video.Add(new XElement("bitrate", movieFile.MediaInfo.VideoBitrate));
-                    video.Add(new XElement("codec", MediaInfoFormatter.FormatVideoCodec(movieFile.MediaInfo, sceneName)));
-                    video.Add(new XElement("framerate", movieFile.MediaInfo.VideoFps));
-                    video.Add(new XElement("height", movieFile.MediaInfo.Height));
-                    video.Add(new XElement("scantype", movieFile.MediaInfo.ScanType));
-                    video.Add(new XElement("width", movieFile.MediaInfo.Width));
+                    video.Add(new XElement("aspect", (float)gameFile.MediaInfo.Width / (float)gameFile.MediaInfo.Height));
+                    video.Add(new XElement("bitrate", gameFile.MediaInfo.VideoBitrate));
+                    video.Add(new XElement("codec", MediaInfoFormatter.FormatVideoCodec(gameFile.MediaInfo, sceneName)));
+                    video.Add(new XElement("framerate", gameFile.MediaInfo.VideoFps));
+                    video.Add(new XElement("height", gameFile.MediaInfo.Height));
+                    video.Add(new XElement("scantype", gameFile.MediaInfo.ScanType));
+                    video.Add(new XElement("width", gameFile.MediaInfo.Width));
 
-                    if (movieFile.MediaInfo.RunTime != TimeSpan.Zero)
+                    if (gameFile.MediaInfo.RunTime != TimeSpan.Zero)
                     {
-                        video.Add(new XElement("duration", movieFile.MediaInfo.RunTime.TotalMinutes));
-                        video.Add(new XElement("durationinseconds", Math.Round(movieFile.MediaInfo.RunTime.TotalSeconds)));
+                        video.Add(new XElement("duration", gameFile.MediaInfo.RunTime.TotalMinutes));
+                        video.Add(new XElement("durationinseconds", Math.Round(gameFile.MediaInfo.RunTime.TotalSeconds)));
                     }
 
-                    if (movieFile.MediaInfo.VideoHdrFormat is HdrFormat.DolbyVision or HdrFormat.DolbyVisionHdr10 or HdrFormat.DolbyVisionHdr10Plus or HdrFormat.DolbyVisionHlg or HdrFormat.DolbyVisionSdr)
+                    if (gameFile.MediaInfo.VideoHdrFormat is HdrFormat.DolbyVision or HdrFormat.DolbyVisionHdr10 or HdrFormat.DolbyVisionHdr10Plus or HdrFormat.DolbyVisionHlg or HdrFormat.DolbyVisionSdr)
                     {
                         video.Add(new XElement("hdrtype", "dolbyvision"));
                     }
-                    else if (movieFile.MediaInfo.VideoHdrFormat is HdrFormat.Hdr10 or HdrFormat.Hdr10Plus or HdrFormat.Pq10)
+                    else if (gameFile.MediaInfo.VideoHdrFormat is HdrFormat.Hdr10 or HdrFormat.Hdr10Plus or HdrFormat.Pq10)
                     {
                         video.Add(new XElement("hdrtype", "hdr10"));
                     }
-                    else if (movieFile.MediaInfo.VideoHdrFormat == HdrFormat.Hlg10)
+                    else if (gameFile.MediaInfo.VideoHdrFormat == HdrFormat.Hlg10)
                     {
                         video.Add(new XElement("hdrtype", "hlg"));
                     }
-                    else if (movieFile.MediaInfo.VideoHdrFormat == HdrFormat.None)
+                    else if (gameFile.MediaInfo.VideoHdrFormat == HdrFormat.None)
                     {
                         video.Add(new XElement("hdrtype", ""));
                     }
@@ -370,16 +370,16 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     streamDetails.Add(video);
 
                     var audio = new XElement("audio");
-                    var audioChannelCount = movieFile.MediaInfo.AudioChannels;
-                    audio.Add(new XElement("bitrate", movieFile.MediaInfo.AudioBitrate));
+                    var audioChannelCount = gameFile.MediaInfo.AudioChannels;
+                    audio.Add(new XElement("bitrate", gameFile.MediaInfo.AudioBitrate));
                     audio.Add(new XElement("channels", audioChannelCount));
-                    audio.Add(new XElement("codec", MediaInfoFormatter.FormatAudioCodec(movieFile.MediaInfo, sceneName)));
-                    audio.Add(new XElement("language", movieFile.MediaInfo.AudioLanguages));
+                    audio.Add(new XElement("codec", MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, sceneName)));
+                    audio.Add(new XElement("language", gameFile.MediaInfo.AudioLanguages));
                     streamDetails.Add(audio);
 
-                    if (movieFile.MediaInfo.Subtitles is { Count: > 0 })
+                    if (gameFile.MediaInfo.Subtitles is { Count: > 0 })
                     {
-                        foreach (var s in movieFile.MediaInfo.Subtitles)
+                        foreach (var s in gameFile.MediaInfo.Subtitles)
                         {
                             var subtitle = new XElement("subtitle");
                             subtitle.Add(new XElement("language", s));
@@ -431,56 +431,56 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 xmlResult += Environment.NewLine;
             }
 
-            if (Settings.MovieMetadataURL)
+            if (Settings.GameMetadataURL)
             {
-                xmlResult += "https://www.themoviedb.org/movie/" + movie.MovieMetadata.Value.TmdbId;
+                xmlResult += "https://www.thegamedb.org/game/" + game.GameMetadata.Value.IgdbId;
                 xmlResult += Environment.NewLine;
 
-                xmlResult += "https://www.imdb.com/title/" + movie.MovieMetadata.Value.ImdbId;
+                xmlResult += "https://www.imdb.com/title/" + game.GameMetadata.Value.ImdbId;
                 xmlResult += Environment.NewLine;
             }
 
-            var metadataFileName = GetMovieMetadataFilename(movieFile.RelativePath);
+            var metadataFileName = GetGameMetadataFilename(gameFile.RelativePath);
 
             return string.IsNullOrEmpty(xmlResult) ? null : new MetadataFileResult(metadataFileName, xmlResult.Trim(Environment.NewLine.ToCharArray()));
         }
 
-        public override List<ImageFileResult> MovieImages(Movie movie)
+        public override List<ImageFileResult> GameImages(Game game)
         {
-            if (!Settings.MovieImages)
+            if (!Settings.GameImages)
             {
                 return new List<ImageFileResult>();
             }
 
-            return ProcessMovieImages(movie).ToList();
+            return ProcessGameImages(game).ToList();
         }
 
-        private IEnumerable<ImageFileResult> ProcessMovieImages(Movie movie)
+        private IEnumerable<ImageFileResult> ProcessGameImages(Game game)
         {
-            foreach (var image in movie.MovieMetadata.Value.Images)
+            foreach (var image in game.GameMetadata.Value.Images)
             {
-                var source = _mediaCoverService.GetCoverPath(movie.Id, image.CoverType);
+                var source = _mediaCoverService.GetCoverPath(game.Id, image.CoverType);
                 var destination = image.CoverType.ToString().ToLowerInvariant() + Path.GetExtension(source);
 
                 yield return new ImageFileResult(destination, source);
             }
         }
 
-        private string GetMovieMetadataFilename(string movieFilePath)
+        private string GetGameMetadataFilename(string gameFilePath)
         {
-            if (Settings.UseMovieNfo)
+            if (Settings.UseGameNfo)
             {
-                return Path.Combine(Path.GetDirectoryName(movieFilePath), "movie.nfo");
+                return Path.Combine(Path.GetDirectoryName(gameFilePath), "game.nfo");
             }
             else
             {
-                return Path.ChangeExtension(movieFilePath, "nfo");
+                return Path.ChangeExtension(gameFilePath, "nfo");
             }
         }
 
-        private bool GetExistingWatchedStatus(Movie movie, string movieFilePath)
+        private bool GetExistingWatchedStatus(Game game, string gameFilePath)
         {
-            var fullPath = Path.Combine(movie.Path, GetMovieMetadataFilename(movieFilePath));
+            var fullPath = Path.Combine(game.Path, GetGameMetadataFilename(gameFilePath));
 
             if (!_diskProvider.FileExists(fullPath))
             {

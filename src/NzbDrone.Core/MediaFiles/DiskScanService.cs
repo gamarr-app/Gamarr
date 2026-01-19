@@ -12,17 +12,17 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.MediaFiles.MovieImport;
+using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.MediaFiles
 {
     public interface IDiskScanService
     {
-        void Scan(Movie movie);
+        void Scan(Game game);
         string[] GetVideoFiles(string path, bool allDirectories = true);
         string[] GetNonVideoFiles(string path, bool allDirectories = true);
         List<string> FilterPaths(string basePath, IEnumerable<string> paths, bool filterExtras = true);
@@ -30,13 +30,13 @@ namespace NzbDrone.Core.MediaFiles
 
     public class DiskScanService :
         IDiskScanService,
-        IExecute<RescanMovieCommand>
+        IExecute<RescanGameCommand>
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IImportApprovedMovie _importApprovedMovies;
+        private readonly IImportApprovedGame _importApprovedGames;
         private readonly IConfigService _configService;
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMediaFileTableCleanupService _mediaFileTableCleanupService;
         private readonly IRootFolderService _rootFolderService;
@@ -46,9 +46,9 @@ namespace NzbDrone.Core.MediaFiles
 
         public DiskScanService(IDiskProvider diskProvider,
                                IMakeImportDecision importDecisionMaker,
-                               IImportApprovedMovie importApprovedMovies,
+                               IImportApprovedGame importApprovedGames,
                                IConfigService configService,
-                               IMovieService movieService,
+                               IGameService gameService,
                                IMediaFileService mediaFileService,
                                IMediaFileTableCleanupService mediaFileTableCleanupService,
                                IRootFolderService rootFolderService,
@@ -58,9 +58,9 @@ namespace NzbDrone.Core.MediaFiles
         {
             _diskProvider = diskProvider;
             _importDecisionMaker = importDecisionMaker;
-            _importApprovedMovies = importApprovedMovies;
+            _importApprovedGames = importApprovedGames;
             _configService = configService;
-            _movieService = movieService;
+            _gameService = gameService;
             _mediaFileService = mediaFileService;
             _mediaFileTableCleanupService = mediaFileTableCleanupService;
             _rootFolderService = rootFolderService;
@@ -74,81 +74,81 @@ namespace NzbDrone.Core.MediaFiles
         private static readonly Regex ExcludedExtraFilesRegex = new Regex(@"(-(trailer|other|behindthescenes|deleted|featurette|interview|scene|short)\.[^.]+$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex ExcludedFilesRegex = new Regex(@"^\.(_|unmanic|DS_Store$)|^Thumbs\.db$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public void Scan(Movie movie)
+        public void Scan(Game game)
         {
-            var rootFolder = _rootFolderService.GetBestRootFolderPath(movie.Path);
+            var rootFolder = _rootFolderService.GetBestRootFolderPath(game.Path);
 
-            var movieFolderExists = _diskProvider.FolderExists(movie.Path);
+            var gameFolderExists = _diskProvider.FolderExists(game.Path);
 
-            if (!movieFolderExists)
+            if (!gameFolderExists)
             {
                 if (!_diskProvider.FolderExists(rootFolder))
                 {
-                    _logger.Warn("Movie's root folder ({0}) doesn't exist.", rootFolder);
-                    _eventAggregator.PublishEvent(new MovieScanSkippedEvent(movie, MovieScanSkippedReason.RootFolderDoesNotExist));
+                    _logger.Warn("Game's root folder ({0}) doesn't exist.", rootFolder);
+                    _eventAggregator.PublishEvent(new GameScanSkippedEvent(game, GameScanSkippedReason.RootFolderDoesNotExist));
                     return;
                 }
 
                 if (_diskProvider.FolderEmpty(rootFolder))
                 {
-                    _logger.Warn("Movie's root folder ({0}) is empty. Rescan will not update movies as a failsafe.", rootFolder);
-                    _eventAggregator.PublishEvent(new MovieScanSkippedEvent(movie, MovieScanSkippedReason.RootFolderIsEmpty));
+                    _logger.Warn("Game's root folder ({0}) is empty. Rescan will not update games as a failsafe.", rootFolder);
+                    _eventAggregator.PublishEvent(new GameScanSkippedEvent(game, GameScanSkippedReason.RootFolderIsEmpty));
                     return;
                 }
             }
 
-            _logger.ProgressInfo("Scanning disk for {0}", movie.Title);
+            _logger.ProgressInfo("Scanning disk for {0}", game.Title);
 
-            if (!movieFolderExists)
+            if (!gameFolderExists)
             {
-                if (_configService.CreateEmptyMovieFolders)
+                if (_configService.CreateEmptyGameFolders)
                 {
                     if (_configService.DeleteEmptyFolders)
                     {
-                        _logger.Debug("Not creating missing movie folder: {0} because delete empty movie folders is enabled", movie.Path);
+                        _logger.Debug("Not creating missing game folder: {0} because delete empty game folders is enabled", game.Path);
                     }
                     else
                     {
-                        _logger.Debug("Creating missing movie folder: {0}", movie.Path);
+                        _logger.Debug("Creating missing game folder: {0}", game.Path);
 
-                        _diskProvider.CreateFolder(movie.Path);
-                        SetPermissions(movie.Path);
+                        _diskProvider.CreateFolder(game.Path);
+                        SetPermissions(game.Path);
                     }
                 }
                 else
                 {
-                    _logger.Debug("Movie's folder doesn't exist: {0}", movie.Path);
+                    _logger.Debug("Game's folder doesn't exist: {0}", game.Path);
                 }
 
-                CleanMediaFiles(movie, new List<string>());
-                CompletedScanning(movie, new List<string>());
+                CleanMediaFiles(game, new List<string>());
+                CompletedScanning(game, new List<string>());
 
                 return;
             }
 
             var videoFilesStopwatch = Stopwatch.StartNew();
-            var mediaFileList = FilterPaths(movie.Path, GetVideoFiles(movie.Path)).ToList();
+            var mediaFileList = FilterPaths(game.Path, GetVideoFiles(game.Path)).ToList();
             videoFilesStopwatch.Stop();
-            _logger.Trace("Finished getting movie files for: {0} [{1}]", movie, videoFilesStopwatch.Elapsed);
+            _logger.Trace("Finished getting game files for: {0} [{1}]", game, videoFilesStopwatch.Elapsed);
 
-            CleanMediaFiles(movie, mediaFileList);
+            CleanMediaFiles(game, mediaFileList);
 
-            var movieFiles = _mediaFileService.GetFilesByMovie(movie.Id);
-            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFileList, movieFiles, movie);
+            var gameFiles = _mediaFileService.GetFilesByGame(game.Id);
+            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFileList, gameFiles, game);
 
             var decisionsStopwatch = Stopwatch.StartNew();
-            var decisions = _importDecisionMaker.GetImportDecisions(unmappedFiles, movie, false);
+            var decisions = _importDecisionMaker.GetImportDecisions(unmappedFiles, game, false);
             decisionsStopwatch.Stop();
-            _logger.Trace("Import decisions complete for: {0} [{1}]", movie, decisionsStopwatch.Elapsed);
-            _importApprovedMovies.Import(decisions, false);
+            _logger.Trace("Import decisions complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
+            _importApprovedGames.Import(decisions, false);
 
             // Update existing files that have a different file size
             var fileInfoStopwatch = Stopwatch.StartNew();
-            var filesToUpdate = new List<MovieFile>();
+            var filesToUpdate = new List<GameFile>();
 
-            foreach (var file in movieFiles)
+            foreach (var file in gameFiles)
             {
-                var path = Path.Combine(movie.Path, file.RelativePath);
+                var path = Path.Combine(game.Path, file.RelativePath);
                 var fileSize = _diskProvider.GetFileSize(path);
 
                 if (file.Size == fileSize)
@@ -158,7 +158,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 file.Size = fileSize;
 
-                if (!_updateMediaInfoService.Update(file, movie))
+                if (!_updateMediaInfoService.Update(file, game))
                 {
                     filesToUpdate.Add(file);
                 }
@@ -171,25 +171,25 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             fileInfoStopwatch.Stop();
-            _logger.Trace("Reprocessing existing files complete for: {0} [{1}]", movie, decisionsStopwatch.Elapsed);
+            _logger.Trace("Reprocessing existing files complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
 
-            var filesOnDisk = GetNonVideoFiles(movie.Path);
-            var possibleExtraFiles = FilterPaths(movie.Path, filesOnDisk);
+            var filesOnDisk = GetNonVideoFiles(game.Path);
+            var possibleExtraFiles = FilterPaths(game.Path, filesOnDisk);
 
-            RemoveEmptyMovieFolder(movie.Path);
-            CompletedScanning(movie, possibleExtraFiles);
+            RemoveEmptyGameFolder(game.Path);
+            CompletedScanning(game, possibleExtraFiles);
         }
 
-        private void CleanMediaFiles(Movie movie, List<string> mediaFileList)
+        private void CleanMediaFiles(Game game, List<string> mediaFileList)
         {
-            _logger.Debug("{0} Cleaning up media files in DB", movie);
-            _mediaFileTableCleanupService.Clean(movie, mediaFileList);
+            _logger.Debug("{0} Cleaning up media files in DB", game);
+            _mediaFileTableCleanupService.Clean(game, mediaFileList);
         }
 
-        private void CompletedScanning(Movie movie, List<string> possibleExtraFiles)
+        private void CompletedScanning(Game game, List<string> possibleExtraFiles)
         {
-            _logger.Info("Completed scanning disk for {0}", movie.Title);
-            _eventAggregator.PublishEvent(new MovieScannedEvent(movie, possibleExtraFiles));
+            _logger.Info("Completed scanning disk for {0}", game.Title);
+            _eventAggregator.PublishEvent(new GameScannedEvent(game, possibleExtraFiles));
         }
 
         public string[] GetVideoFiles(string path, bool allDirectories = true)
@@ -256,7 +256,7 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        private void RemoveEmptyMovieFolder(string path)
+        private void RemoveEmptyGameFolder(string path)
         {
             if (_configService.DeleteEmptyFolders)
             {
@@ -269,20 +269,20 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void Execute(RescanMovieCommand message)
+        public void Execute(RescanGameCommand message)
         {
-            if (message.MovieId.HasValue)
+            if (message.GameId.HasValue)
             {
-                var movie = _movieService.GetMovie(message.MovieId.Value);
-                Scan(movie);
+                var game = _gameService.GetGame(message.GameId.Value);
+                Scan(game);
             }
             else
             {
-                var allMovies = _movieService.GetAllMovies();
+                var allGames = _gameService.GetAllGames();
 
-                foreach (var movie in allMovies)
+                foreach (var game in allGames)
                 {
-                    Scan(movie);
+                    Scan(game);
                 }
             }
         }

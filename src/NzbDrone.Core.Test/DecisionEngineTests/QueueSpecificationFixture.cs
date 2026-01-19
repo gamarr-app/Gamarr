@@ -9,7 +9,7 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -22,10 +22,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class QueueSpecificationFixture : CoreTest<QueueSpecification>
     {
-        private Movie _movie;
-        private RemoteMovie _remoteMovie;
+        private Game _game;
+        private RemoteGame _remoteGame;
 
-        private Movie _otherMovie;
+        private Game _otherGame;
 
         private ReleaseInfo _releaseInfo;
 
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                                      .With(e => e.QualityProfile = new QualityProfile
                                      {
                                          Items = Qualities.QualityFixture.GetDefaultQualities(),
@@ -46,21 +46,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                      })
                                      .Build();
 
-            _otherMovie = Builder<Movie>.CreateNew()
+            _otherGame = Builder<Game>.CreateNew()
                                           .With(s => s.Id = 2)
                                           .Build();
 
             _releaseInfo = Builder<ReleaseInfo>.CreateNew()
                                    .Build();
 
-            _remoteMovie = Builder<RemoteMovie>.CreateNew()
-                .With(r => r.Movie = _movie)
-                .With(r => r.ParsedMovieInfo = new ParsedMovieInfo { Quality = new QualityModel(Quality.DVD) })
+            _remoteGame = Builder<RemoteGame>.CreateNew()
+                .With(r => r.Game = _game)
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD) })
                 .With(x => x.CustomFormats = new List<CustomFormat>())
                 .Build();
 
             Mocker.GetMock<ICustomFormatCalculationService>()
-                .Setup(x => x.ParseCustomFormat(It.IsAny<RemoteMovie>(), It.IsAny<long>()))
+                .Setup(x => x.ParseCustomFormat(It.IsAny<RemoteGame>(), It.IsAny<long>()))
                 .Returns(new List<CustomFormat>());
         }
 
@@ -71,11 +71,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .Returns(new List<Queue.Queue>());
         }
 
-        private void GivenQueue(IEnumerable<RemoteMovie> remoteMovies, TrackedDownloadState trackedDownloadState = TrackedDownloadState.Downloading)
+        private void GivenQueue(IEnumerable<RemoteGame> remoteGames, TrackedDownloadState trackedDownloadState = TrackedDownloadState.Downloading)
         {
-            var queue = remoteMovies.Select(remoteMovie => new Queue.Queue
+            var queue = remoteGames.Select(remoteGame => new Queue.Queue
             {
-                RemoteMovie = remoteMovie,
+                RemoteGame = remoteGame,
                 TrackedDownloadState = trackedDownloadState
             });
 
@@ -88,138 +88,138 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_true_when_queue_is_empty()
         {
             GivenEmptyQueue();
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
-        public void should_return_true_when_movie_doesnt_match()
+        public void should_return_true_when_game_doesnt_match()
         {
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                       .With(r => r.Movie = _otherMovie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                       .With(r => r.Game = _otherGame)
                                                        .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            GivenQueue(new List<RemoteGame> { remoteGame });
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_when_quality_in_queue_is_lower()
         {
-            _movie.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                .With(r => r.Movie = _movie)
-                .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                .With(r => r.Game = _game)
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
                     Quality = new QualityModel(Quality.SDTV)
                 })
                 .With(x => x.CustomFormats = new List<CustomFormat>())
                 .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            GivenQueue(new List<RemoteGame> { remoteGame });
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_false_when_qualities_are_the_same()
         {
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(r => r.Movie = _movie)
-                                                      .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(r => r.Game = _game)
+                                                      .With(r => r.ParsedGameInfo = new ParsedGameInfo
                                                       {
                                                           Quality = new QualityModel(Quality.DVD)
                                                       })
                                                       .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            GivenQueue(new List<RemoteGame> { remoteGame });
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_when_quality_in_queue_is_better()
         {
-            _movie.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(r => r.Movie = _movie)
-                                                      .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(r => r.Game = _game)
+                                                      .With(r => r.ParsedGameInfo = new ParsedGameInfo
                                                       {
                                                           Quality = new QualityModel(Quality.HDTV720p)
                                                       })
                                                       .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            GivenQueue(new List<RemoteGame> { remoteGame });
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_if_quality_in_queue_meets_cutoff()
         {
-            _movie.QualityProfile.Cutoff = _remoteMovie.ParsedMovieInfo.Quality.Quality.Id;
+            _game.QualityProfile.Cutoff = _remoteGame.ParsedGameInfo.Quality.Quality.Id;
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(r => r.Movie = _movie)
-                                                      .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(r => r.Game = _game)
+                                                      .With(r => r.ParsedGameInfo = new ParsedGameInfo
                                                       {
                                                           Quality = new QualityModel(Quality.HDTV720p)
                                                       })
                                                       .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
+            GivenQueue(new List<RemoteGame> { remoteGame });
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_when_quality_is_better_and_upgrade_allowed_is_false_for_quality_profile()
         {
-            _movie.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
-            _movie.QualityProfile.UpgradeAllowed = false;
+            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.UpgradeAllowed = false;
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                .With(r => r.Movie = _movie)
-                .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                .With(r => r.Game = _game)
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
                     Quality = new QualityModel(Quality.Bluray1080p)
                 })
                 .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            GivenQueue(new List<RemoteGame> { remoteGame });
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_true_if_everything_is_the_same_for_failed_pending()
         {
-            _movie.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                .With(r => r.Movie = _movie)
-                .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                .With(r => r.Game = _game)
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
                     Quality = new QualityModel(Quality.DVD)
                 })
                 .With(r => r.Release = _releaseInfo)
                 .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie }, TrackedDownloadState.FailedPending);
+            GivenQueue(new List<RemoteGame> { remoteGame }, TrackedDownloadState.FailedPending);
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_false_if_same_quality_non_proper_in_queue_and_download_propers_is_do_not_upgrade()
         {
-            _remoteMovie.ParsedMovieInfo.Quality = new QualityModel(Quality.HDTV720p, new Revision(2));
-            _movie.QualityProfile.Cutoff = _remoteMovie.ParsedMovieInfo.Quality.Quality.Id;
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.HDTV720p, new Revision(2));
+            _game.QualityProfile.Cutoff = _remoteGame.ParsedGameInfo.Quality.Quality.Id;
 
             Mocker.GetMock<IConfigService>()
                 .Setup(s => s.DownloadPropersAndRepacks)
                 .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                .With(r => r.Movie = _movie)
-                .With(r => r.ParsedMovieInfo = new ParsedMovieInfo
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                .With(r => r.Game = _game)
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
                     Quality = new QualityModel(Quality.HDTV720p),
                     Languages = new List<Language> { Language.English }
@@ -228,9 +228,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(r => r.CustomFormats = new List<CustomFormat>())
                 .Build();
 
-            GivenQueue(new List<RemoteMovie> { remoteMovie });
+            GivenQueue(new List<RemoteGame> { remoteGame });
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
     }
 }

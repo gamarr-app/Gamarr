@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Indexers.HDBits
             BaseUrl = "https://hdbits.org";
             MinimumSeeders = IndexerDefaults.MINIMUM_SEEDERS;
 
-            Categories = new[] { (int)HdBitsCategory.Movie };
+            Categories = new[] { (int)HdBitsCategory.Game };
             Codecs = Array.Empty<int>();
             Mediums = Array.Empty<int>();
             MultiLanguages = Array.Empty<int>();
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Indexers.HDBits
         [FieldDefinition(10, Type = FieldType.Select, SelectOptions = typeof(FailDownloads), Label = "IndexerSettingsFailDownloads", HelpText = "IndexerSettingsFailDownloadsHelpText", Advanced = true)]
         public IEnumerable<int> FailDownloads { get; set; }
 
-        [FieldDefinition(11, Type = FieldType.Select, SelectOptions = typeof(IndexerFlags), Label = "IndexerSettingsRequiredFlags", HelpText = "IndexerSettingsRequiredFlagsHelpText", HelpLink = "https://wiki.servarr.com/radarr/settings#indexer-flags", Advanced = true)]
+        [FieldDefinition(11, Type = FieldType.Select, SelectOptions = typeof(IndexerFlags), Label = "IndexerSettingsRequiredFlags", HelpText = "IndexerSettingsRequiredFlagsHelpText", HelpLink = "https://wiki.servarr.com/gamarr/settings#indexer-flags", Advanced = true)]
         public IEnumerable<int> RequiredFlags { get; set; }
 
         public NzbDroneValidationResult Validate()
@@ -81,8 +81,8 @@ namespace NzbDrone.Core.Indexers.HDBits
 
     public enum HdBitsCategory
     {
-        [FieldOption("Movie")]
-        Movie = 1,
+        [FieldOption("Game")]
+        Game = 1,
         [FieldOption("TV")]
         Tv = 2,
         [FieldOption("Documentary")]

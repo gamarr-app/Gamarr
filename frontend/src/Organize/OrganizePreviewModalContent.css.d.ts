@@ -5,7 +5,7 @@ interface CssExports {
   'previews': string;
   'selectAllInput': string;
   'selectAllInputContainer': string;
-  'standardMovieFormat': string;
+  'standardGameFormat': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

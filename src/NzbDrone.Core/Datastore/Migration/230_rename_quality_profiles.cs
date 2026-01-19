@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Datastore.Migration
         protected override void MainDbUpgrade()
         {
             Rename.Table("Profiles").To("QualityProfiles");
-            Rename.Column("ProfileId").OnTable("Movies").To("QualityProfileId");
+            Rename.Column("ProfileId").OnTable("Games").To("QualityProfileId");
             Rename.Column("ProfileId").OnTable("ImportLists").To("QualityProfileId");
         }
     }

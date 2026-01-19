@@ -9,7 +9,7 @@ using NzbDrone.Common.Cache;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Localization;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Validation;
 
@@ -17,8 +17,8 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 {
     public interface IPlexServerService
     {
-        void UpdateLibrary(Movie movie, PlexServerSettings settings);
-        void UpdateLibrary(IEnumerable<Movie> movie, PlexServerSettings settings);
+        void UpdateLibrary(Game game, PlexServerSettings settings);
+        void UpdateLibrary(IEnumerable<Game> game, PlexServerSettings settings);
         ValidationFailure Test(PlexServerSettings settings);
     }
 
@@ -39,12 +39,12 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             _logger = logger;
         }
 
-        public void UpdateLibrary(Movie movie, PlexServerSettings settings)
+        public void UpdateLibrary(Game game, PlexServerSettings settings)
         {
-            UpdateLibrary(new[] { movie }, settings);
+            UpdateLibrary(new[] { game }, settings);
         }
 
-        public void UpdateLibrary(IEnumerable<Movie> multipleMovies, PlexServerSettings settings)
+        public void UpdateLibrary(IEnumerable<Game> multipleGames, PlexServerSettings settings)
         {
             try
             {
@@ -56,9 +56,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 var sections = GetSections(settings);
 
-                foreach (var movie in multipleMovies)
+                foreach (var game in multipleGames)
                 {
-                    UpdateSections(movie, sections, settings);
+                    UpdateSections(game, sections, settings);
                 }
 
                 _logger.Debug("Finished sending Update Request to Plex Server (took {0} ms)", watch.ElapsedMilliseconds);
@@ -74,14 +74,14 @@ namespace NzbDrone.Core.Notifications.Plex.Server
         {
             _logger.Debug("Getting sections from Plex host: {0}", settings.Host);
 
-            return _plexServerProxy.GetMovieSections(settings).ToList();
+            return _plexServerProxy.GetGameSections(settings).ToList();
         }
 
         private void ValidateVersion(Version version)
         {
             if (version >= new Version(1, 3, 0) && version < new Version(1, 3, 1))
             {
-                throw new PlexVersionException("Found version {0}, upgrade to PMS 1.3.1 to fix library updating and then restart Radarr", version);
+                throw new PlexVersionException("Found version {0}, upgrade to PMS 1.3.1 to fix library updating and then restart Gamarr", version);
             }
         }
 
@@ -95,10 +95,10 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             return version;
         }
 
-        private void UpdateSections(Movie movie, List<PlexSection> sections, PlexServerSettings settings)
+        private void UpdateSections(Game game, List<PlexSection> sections, PlexServerSettings settings)
         {
-            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(movie.Path);
-            var movieRelativePath = rootFolderPath.GetRelativePath(movie.Path);
+            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(game.Path);
+            var gameRelativePath = rootFolderPath.GetRelativePath(game.Path);
 
             // Try to update a matching section location before falling back to updating all section locations.
             foreach (var section in sections)
@@ -118,28 +118,28 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                     if (location.Path.PathEquals(mappedPath.FullPath))
                     {
                         _logger.Debug("Updating matching section location, {0}", location.Path);
-                        UpdateSectionPath(movieRelativePath, section, location, settings);
+                        UpdateSectionPath(gameRelativePath, section, location, settings);
 
                         return;
                     }
                 }
             }
 
-            _logger.Debug("Unable to find matching section location, updating all Movie sections");
+            _logger.Debug("Unable to find matching section location, updating all Game sections");
 
             foreach (var section in sections)
             {
                 foreach (var location in section.Locations)
                 {
-                    UpdateSectionPath(movieRelativePath, section, location, settings);
+                    UpdateSectionPath(gameRelativePath, section, location, settings);
                 }
             }
         }
 
-        private void UpdateSectionPath(string movieRelativePath, PlexSection section, PlexSectionLocation location, PlexServerSettings settings)
+        private void UpdateSectionPath(string gameRelativePath, PlexSection section, PlexSectionLocation location, PlexServerSettings settings)
         {
             var separator = location.Path.Contains('\\') ? "\\" : "/";
-            var locationRelativePath = movieRelativePath.Replace("\\", separator).Replace("/", separator);
+            var locationRelativePath = gameRelativePath.Replace("\\", separator).Replace("/", separator);
 
             // Plex location paths trim trailing extraneous separator characters, so it doesn't need to be trimmed
             var pathToUpdate = $"{location.Path}{separator}{locationRelativePath}";
@@ -157,7 +157,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 if (sections.Empty())
                 {
-                    return new ValidationFailure("Host", _localizationService.GetLocalizedString("NotificationsPlexValidationNoMovieLibraryFound"));
+                    return new ValidationFailure("Host", _localizationService.GetLocalizedString("NotificationsPlexValidationNoGameLibraryFound"));
                 }
             }
             catch (PlexAuthenticationException ex)

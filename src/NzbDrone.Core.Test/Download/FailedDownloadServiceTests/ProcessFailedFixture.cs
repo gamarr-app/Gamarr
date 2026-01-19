@@ -8,7 +8,7 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
     public class ProcessFailedFixture : CoreTest<FailedDownloadService>
     {
         private TrackedDownload _trackedDownload;
-        private List<MovieHistory> _grabHistory;
+        private List<GameHistory> _grabHistory;
 
         [SetUp]
         public void Setup()
@@ -30,21 +30,21 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
                                                     .With(h => h.Title = "Drone.S01E01.HDTV")
                                                     .Build();
 
-            _grabHistory = Builder<MovieHistory>.CreateListOfSize(2).BuildList();
+            _grabHistory = Builder<GameHistory>.CreateListOfSize(2).BuildList();
 
-            var remoteMovie = new RemoteMovie
+            var remoteGame = new RemoteGame
             {
-                Movie = new Movie()
+                Game = new Game()
             };
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
                     .With(c => c.State = TrackedDownloadState.FailedPending)
                     .With(c => c.DownloadItem = completed)
-                    .With(c => c.RemoteMovie = remoteMovie)
+                    .With(c => c.RemoteGame = remoteGame)
                     .Build();
 
             Mocker.GetMock<IHistoryService>()
-                  .Setup(s => s.Find(_trackedDownload.DownloadItem.DownloadId, MovieHistoryEventType.Grabbed))
+                  .Setup(s => s.Find(_trackedDownload.DownloadItem.DownloadId, GameHistoryEventType.Grabbed))
                   .Returns(_grabHistory);
         }
 

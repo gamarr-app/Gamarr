@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications
 {
@@ -16,32 +16,32 @@ namespace NzbDrone.Core.Notifications
             public bool Refreshing { get; set; }
         }
 
-        private readonly ICached<UpdateQueue> _pendingMoviesCache;
+        private readonly ICached<UpdateQueue> _pendingGamesCache;
 
         public MediaServerUpdateQueue(ICacheManager cacheManager)
         {
-            _pendingMoviesCache = cacheManager.GetRollingCache<UpdateQueue>(typeof(TQueueHost), "pendingMovies", TimeSpan.FromDays(1));
+            _pendingGamesCache = cacheManager.GetRollingCache<UpdateQueue>(typeof(TQueueHost), "pendingGames", TimeSpan.FromDays(1));
         }
 
-        public void Add(string identifier, Movie movie, TItemInfo info)
+        public void Add(string identifier, Game game, TItemInfo info)
         {
-            var queue = _pendingMoviesCache.Get(identifier, () => new UpdateQueue());
+            var queue = _pendingGamesCache.Get(identifier, () => new UpdateQueue());
 
             lock (queue)
             {
-                var item = queue.Pending.TryGetValue(movie.Id, out var value)
+                var item = queue.Pending.TryGetValue(game.Id, out var value)
                     ? value
-                    : new UpdateQueueItem<TItemInfo>(movie);
+                    : new UpdateQueueItem<TItemInfo>(game);
 
                 item.Info.Add(info);
 
-                queue.Pending[movie.Id] = item;
+                queue.Pending[game.Id] = item;
             }
         }
 
         public void ProcessQueue(string identifier, Action<List<UpdateQueueItem<TItemInfo>>> update)
         {
-            var queue = _pendingMoviesCache.Find(identifier);
+            var queue = _pendingGamesCache.Find(identifier);
 
             if (queue == null)
             {
@@ -93,12 +93,12 @@ namespace NzbDrone.Core.Notifications
 
     public class UpdateQueueItem<TItemInfo>
     {
-        public Movie Movie { get; set; }
+        public Game Game { get; set; }
         public HashSet<TItemInfo> Info { get; set; }
 
-        public UpdateQueueItem(Movie movie)
+        public UpdateQueueItem(Game game)
         {
-            Movie = movie;
+            Game = game;
             Info = new HashSet<TItemInfo>();
         }
     }

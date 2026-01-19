@@ -7,16 +7,16 @@ namespace NzbDrone.Core.ImportLists.CouchPotato
     {
         public CouchPotatoSettings Settings { get; set; }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
-            pageableRequests.Add(GetMovies(null));
+            pageableRequests.Add(GetGames(null));
 
             return pageableRequests;
         }
 
-        private IEnumerable<ImportListRequest> GetMovies(string searchParameters)
+        private IEnumerable<ImportListRequest> GetGames(string searchParameters)
         {
             var urlBase = "";
             if (!string.IsNullOrWhiteSpace(Settings.UrlBase))
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.ImportLists.CouchPotato
                 status = "?status=active";
             }
 
-            var request = new ImportListRequest($"{Settings.Link.Trim()}:{Settings.Port}{urlBase}/api/{Settings.ApiKey}/movie.list/{status}", HttpAccept.Json);
+            var request = new ImportListRequest($"{Settings.Link.Trim()}:{Settings.Port}{urlBase}/api/{Settings.ApiKey}/game.list/{status}", HttpAccept.Json);
             yield return request;
         }
     }

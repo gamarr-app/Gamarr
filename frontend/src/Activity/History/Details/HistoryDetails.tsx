@@ -13,8 +13,8 @@ import {
   GrabbedHistoryData,
   HistoryData,
   HistoryEventType,
-  MovieFileDeletedHistory,
-  MovieFileRenamedHistory,
+  GameFileDeletedHistory,
+  GameFileRenamedHistory,
 } from 'typings/History';
 import formatDateTime from 'Utilities/Date/formatDateTime';
 import formatAge from 'Utilities/Number/formatAge';
@@ -41,7 +41,7 @@ function HistoryDetails(props: HistoryDetailsProps) {
     const {
       indexer,
       releaseGroup,
-      movieMatchType,
+      gameMatchType,
       releaseSource,
       customFormatScore,
       nzbInfoUrl,
@@ -108,11 +108,11 @@ function HistoryDetails(props: HistoryDetailsProps) {
           />
         ) : null}
 
-        {movieMatchType ? (
+        {gameMatchType ? (
           <DescriptionListItem
             descriptionClassName={styles.description}
-            title={translate('MovieMatchType')}
-            data={movieMatchType}
+            title={translate('GameMatchType')}
+            data={gameMatchType}
           />
         ) : null}
 
@@ -244,8 +244,8 @@ function HistoryDetails(props: HistoryDetailsProps) {
     );
   }
 
-  if (eventType === 'movieFileDeleted') {
-    const { reason, customFormatScore, size } = data as MovieFileDeletedHistory;
+  if (eventType === 'gameFileDeleted') {
+    const { reason, customFormatScore, size } = data as GameFileDeletedHistory;
 
     let reasonMessage = '';
 
@@ -254,7 +254,7 @@ function HistoryDetails(props: HistoryDetailsProps) {
         reasonMessage = translate('DeletedReasonManual');
         break;
       case 'MissingFromDisk':
-        reasonMessage = translate('DeletedReasonMovieMissingFromDisk');
+        reasonMessage = translate('DeletedReasonGameMissingFromDisk');
         break;
       case 'Upgrade':
         reasonMessage = translate('DeletedReasonUpgrade');
@@ -286,9 +286,9 @@ function HistoryDetails(props: HistoryDetailsProps) {
     );
   }
 
-  if (eventType === 'movieFileRenamed') {
+  if (eventType === 'gameFileRenamed') {
     const { sourcePath, sourceRelativePath, path, relativePath } =
-      data as MovieFileRenamedHistory;
+      data as GameFileRenamedHistory;
 
     return (
       <DescriptionList>

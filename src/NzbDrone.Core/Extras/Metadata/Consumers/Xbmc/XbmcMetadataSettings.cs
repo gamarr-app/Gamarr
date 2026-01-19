@@ -16,31 +16,31 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
         public XbmcMetadataSettings()
         {
-            MovieMetadata = true;
-            UseMovieNfo = false;
-            MovieMetadataLanguage = (int)Language.English;
-            MovieMetadataURL = false;
+            GameMetadata = true;
+            UseGameNfo = false;
+            GameMetadataLanguage = (int)Language.English;
+            GameMetadataURL = false;
             AddCollectionName = true;
-            MovieImages = true;
+            GameImages = true;
         }
 
-        [FieldDefinition(0, Label = "MetadataSettingsMovieMetadata", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsMovieMetadataHelpText")]
-        public bool MovieMetadata { get; set; }
+        [FieldDefinition(0, Label = "MetadataSettingsGameMetadata", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataHelpText")]
+        public bool GameMetadata { get; set; }
 
-        [FieldDefinition(1, Label = "MetadataSettingsMovieMetadataNfo", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsMovieMetadataNfoHelpText")]
-        public bool UseMovieNfo { get; set; }
+        [FieldDefinition(1, Label = "MetadataSettingsGameMetadataNfo", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataNfoHelpText")]
+        public bool UseGameNfo { get; set; }
 
-        [FieldDefinition(2, Label = "MetadataSettingsMovieMetadataLanguage", Type = FieldType.Select, SelectOptions = typeof(RealLanguageFieldConverter), Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsMovieMetadataLanguageHelpText")]
-        public int MovieMetadataLanguage { get; set; }
+        [FieldDefinition(2, Label = "MetadataSettingsGameMetadataLanguage", Type = FieldType.Select, SelectOptions = typeof(RealLanguageFieldConverter), Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataLanguageHelpText")]
+        public int GameMetadataLanguage { get; set; }
 
-        [FieldDefinition(3, Label = "MetadataSettingsMovieMetadataUrl", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsMovieMetadataUrlHelpText", Advanced = true)]
-        public bool MovieMetadataURL { get; set; }
+        [FieldDefinition(3, Label = "MetadataSettingsGameMetadataUrl", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataUrlHelpText", Advanced = true)]
+        public bool GameMetadataURL { get; set; }
 
-        [FieldDefinition(4, Label = "MetadataSettingsMovieMetadataCollectionName", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsMovieMetadataCollectionNameHelpText", Advanced = true)]
+        [FieldDefinition(4, Label = "MetadataSettingsGameMetadataCollectionName", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataCollectionNameHelpText", Advanced = true)]
         public bool AddCollectionName { get; set; }
 
-        [FieldDefinition(5, Label = "MetadataSettingsMovieImages", Type = FieldType.Checkbox, Section = MetadataSectionType.Image, HelpText = "fanart.jpg, poster.jpg")]
-        public bool MovieImages { get; set; }
+        [FieldDefinition(5, Label = "MetadataSettingsGameImages", Type = FieldType.Checkbox, Section = MetadataSectionType.Image, HelpText = "fanart.jpg, poster.jpg")]
+        public bool GameImages { get; set; }
 
         public bool IsValid => true;
 

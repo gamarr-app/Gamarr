@@ -4,26 +4,26 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.HistoryTests
 {
     [TestFixture]
-    public class HistoryRepositoryFixture : DbTest<HistoryRepository, MovieHistory>
+    public class HistoryRepositoryFixture : DbTest<HistoryRepository, GameHistory>
     {
-        private Movie _movie1;
-        private Movie _movie2;
+        private Game _game1;
+        private Game _game2;
 
         [SetUp]
         public void Setup()
         {
-            _movie1 = Builder<Movie>.CreateNew()
+            _game1 = Builder<Game>.CreateNew()
                                     .With(s => s.Id = 7)
                                     .Build();
 
-            _movie2 = Builder<Movie>.CreateNew()
+            _game2 = Builder<Game>.CreateNew()
                                     .With(s => s.Id = 8)
                                     .Build();
         }
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.HistoryTests
         [Test]
         public void should_read_write_dictionary()
         {
-            var history = Builder<MovieHistory>.CreateNew()
+            var history = Builder<GameHistory>.CreateNew()
                 .With(c => c.Quality = new QualityModel())
                 .With(c => c.Languages = new List<Language>())
                 .BuildNew();
@@ -47,18 +47,18 @@ namespace NzbDrone.Core.Test.HistoryTests
         [Test]
         public void should_get_download_history()
         {
-            var historyBluray = Builder<MovieHistory>.CreateNew()
+            var historyBluray = Builder<GameHistory>.CreateNew()
                 .With(c => c.Quality = new QualityModel(Quality.Bluray1080p))
                 .With(c => c.Languages = new List<Language> { Language.English })
-                .With(c => c.MovieId = 12)
-                .With(c => c.EventType = MovieHistoryEventType.Grabbed)
+                .With(c => c.GameId = 12)
+                .With(c => c.EventType = GameHistoryEventType.Grabbed)
                 .BuildNew();
 
-            var historyDvd = Builder<MovieHistory>.CreateNew()
+            var historyDvd = Builder<GameHistory>.CreateNew()
                 .With(c => c.Quality = new QualityModel(Quality.DVD))
                 .With(c => c.Languages = new List<Language> { Language.English })
-                .With(c => c.MovieId = 12)
-                .With(c => c.EventType = MovieHistoryEventType.Grabbed)
+                .With(c => c.GameId = 12)
+                .With(c => c.EventType = GameHistoryEventType.Grabbed)
              .BuildNew();
 
             Subject.Insert(historyBluray);

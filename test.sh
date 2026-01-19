@@ -4,7 +4,7 @@ TYPE=$2
 COVERAGE=$3
 WHERE="Category!=ManualTest"
 TEST_PATTERN="*Test.dll"
-FILES=( "Radarr.Api.Test.dll" "Radarr.Automation.Test.dll" "Radarr.Common.Test.dll" "Radarr.Core.Test.dll" "Radarr.Host.Test.dll" "Radarr.Integration.Test.dll" "Radarr.Libraries.Test.dll" "Radarr.Mono.Test.dll" "Radarr.Update.Test.dll" "Radarr.Windows.Test.dll" )
+FILES=( "Gamarr.Api.Test.dll" "Gamarr.Automation.Test.dll" "Gamarr.Common.Test.dll" "Gamarr.Core.Test.dll" "Gamarr.Host.Test.dll" "Gamarr.Integration.Test.dll" "Gamarr.Libraries.Test.dll" "Gamarr.Mono.Test.dll" "Gamarr.Update.Test.dll" "Gamarr.Windows.Test.dll" )
 ASSMEBLIES=""
 TEST_LOG_FILE="TestLog.txt"
 
@@ -20,7 +20,7 @@ fi
 rm -f "$TEST_LOG_FILE"
 
 # Uncomment to log test output to a file instead of the console
-export RADARR_TESTS_LOG_OUTPUT="File"
+export GAMARR_TESTS_LOG_OUTPUT="File"
 
 VSTEST_PARAMS="--logger:nunit;LogFilePath=TestResult.xml"
 
@@ -35,13 +35,13 @@ if [ "$PLATFORM" = "Mac" ]; then
 fi
 
 if [ "$PLATFORM" = "Windows" ]; then
-  mkdir -p "$ProgramData/Radarr"
+  mkdir -p "$ProgramData/Gamarr"
   WHERE="$WHERE&Category!=LINUX"
 elif [ "$PLATFORM" = "Linux" ]; then
-  mkdir -p ~/.config/Radarr
+  mkdir -p ~/.config/Gamarr
   WHERE="$WHERE&Category!=WINDOWS"
 elif  [ "$PLATFORM" = "Mac" ]; then
-  mkdir -p ~/Library/Application\ Support/Radarr
+  mkdir -p ~/Library/Application\ Support/Gamarr
   WHERE="$WHERE&Category!=WINDOWS"
 else
   echo "Platform must be provided as first argument: Windows, Linux or Mac"

@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MovieCategory = ""
+                GameCategory = ""
             };
 
             Subject.Definition = new DownloadClientDefinition();
@@ -113,14 +113,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
                   .Returns(() => Json.Deserialize<TransmissionConfig>(_transmissionConfigItems.ToJson()));
         }
 
-        protected void GivenMovieCategory()
+        protected void GivenGameCategory()
         {
-            _settings.MovieCategory = "radarr";
+            _settings.GameCategory = "gamarr";
         }
 
-        protected void GivenMovieDirectory()
+        protected void GivenGameDirectory()
         {
-            _settings.MovieDirectory = @"C:/Downloads/Finished/radarr";
+            _settings.GameDirectory = @"C:/Downloads/Finished/gamarr";
         }
 
         protected void GivenFailedDownload()

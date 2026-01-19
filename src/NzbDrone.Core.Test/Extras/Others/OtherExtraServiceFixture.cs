@@ -7,7 +7,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Others;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -17,50 +17,50 @@ namespace NzbDrone.Core.Test.Extras.Others
     [TestFixture]
     public class OtherExtraServiceFixture : CoreTest<OtherExtraService>
     {
-        private Movie _movie;
-        private MovieFile _movieFile;
-        private LocalMovie _localMovie;
+        private Game _game;
+        private GameFile _gameFile;
+        private LocalGame _localGame;
 
-        private string _movieFolder;
+        private string _gameFolder;
         private string _releaseFolder;
 
         [SetUp]
         public void Setup()
         {
-            _movieFolder = @"C:\Test\Movies\Movie Title".AsOsAgnostic();
-            _releaseFolder = @"C:\Test\Unsorted Movies\Movie.Title.2022".AsOsAgnostic();
+            _gameFolder = @"C:\Test\Games\Game Title".AsOsAgnostic();
+            _releaseFolder = @"C:\Test\Unsorted Games\Game.Title.2022".AsOsAgnostic();
 
-            _movie = Builder<Movie>.CreateNew()
-                                     .With(s => s.Path = _movieFolder)
+            _game = Builder<Game>.CreateNew()
+                                     .With(s => s.Path = _gameFolder)
                                      .Build();
 
-            _movieFile = Builder<MovieFile>.CreateNew()
-                                               .With(f => f.Path = Path.Combine(_movie.Path, "Movie Title - 2022.mkv").AsOsAgnostic())
-                                               .With(f => f.RelativePath = @"Movie Title - 2022.mkv")
+            _gameFile = Builder<GameFile>.CreateNew()
+                                               .With(f => f.Path = Path.Combine(_game.Path, "Game Title - 2022.mkv").AsOsAgnostic())
+                                               .With(f => f.RelativePath = @"Game Title - 2022.mkv")
                                                .Build();
 
-            _localMovie = Builder<LocalMovie>.CreateNew()
-                                                 .With(l => l.Movie = _movie)
-                                                 .With(l => l.Path = Path.Combine(_releaseFolder, "Movie.Title.2022.mkv").AsOsAgnostic())
-                                                 .With(l => l.FileMovieInfo = new ParsedMovieInfo
+            _localGame = Builder<LocalGame>.CreateNew()
+                                                 .With(l => l.Game = _game)
+                                                 .With(l => l.Path = Path.Combine(_releaseFolder, "Game.Title.2022.mkv").AsOsAgnostic())
+                                                 .With(l => l.FileGameInfo = new ParsedGameInfo
                                                  {
-                                                     MovieTitles = new List<string> { "Movie Title" },
+                                                     GameTitles = new List<string> { "Game Title" },
                                                      Year = 2022
                                                  })
                                                  .Build();
         }
 
         [Test]
-        [TestCase("Movie Title - 2022.nfo", "Movie Title - 2022.nfo")]
-        [TestCase("Movie.Title.2022.nfo", "Movie Title - 2022.nfo")]
-        [TestCase("Movie Title 2022.nfo", "Movie Title - 2022.nfo")]
-        [TestCase("Movie_Title_2022.nfo", "Movie Title - 2022.nfo")]
-        [TestCase(@"Movie.Title.2022\thumb.jpg", "Movie Title - 2022.jpg")]
+        [TestCase("Game Title - 2022.nfo", "Game Title - 2022.nfo")]
+        [TestCase("Game.Title.2022.nfo", "Game Title - 2022.nfo")]
+        [TestCase("Game Title 2022.nfo", "Game Title - 2022.nfo")]
+        [TestCase("Game_Title_2022.nfo", "Game Title - 2022.nfo")]
+        [TestCase(@"Game.Title.2022\thumb.jpg", "Game Title - 2022.jpg")]
         public void should_import_matching_file(string filePath, string expectedOutputPath)
         {
             var files = new List<string> { Path.Combine(_releaseFolder, filePath).AsOsAgnostic() };
 
-            var results = Subject.ImportFiles(_localMovie, _movieFile, files, true).ToList();
+            var results = Subject.ImportFiles(_localGame, _gameFile, files, true).ToList();
 
             results.Count.Should().Be(1);
 
@@ -72,11 +72,11 @@ namespace NzbDrone.Core.Test.Extras.Others
         {
             var files = new List<string>
             {
-                Path.Combine(_releaseFolder, "Movie.Title.2022.nfo").AsOsAgnostic(),
-                Path.Combine(_releaseFolder, "Movie_Title_2022.nfo").AsOsAgnostic(),
+                Path.Combine(_releaseFolder, "Game.Title.2022.nfo").AsOsAgnostic(),
+                Path.Combine(_releaseFolder, "Game_Title_2022.nfo").AsOsAgnostic(),
             };
 
-            var results = Subject.ImportFiles(_localMovie, _movieFile, files, true).ToList();
+            var results = Subject.ImportFiles(_localGame, _gameFile, files, true).ToList();
 
             results.Count.Should().Be(1);
         }

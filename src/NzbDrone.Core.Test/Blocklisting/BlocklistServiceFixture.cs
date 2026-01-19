@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.Blocklisting
         {
             _event = new DownloadFailedEvent
             {
-                MovieId = 69,
+                GameId = 69,
                 Quality = new QualityModel(),
                 SourceTitle = "series.title.s01e01",
                 DownloadClient = "SabnzbdClient",
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             Subject.Handle(_event);
 
             Mocker.GetMock<IBlocklistRepository>()
-                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.MovieId == _event.MovieId)), Times.Once());
+                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.GameId == _event.GameId)), Times.Once());
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             _event.Data.Remove("protocol");
 
             Mocker.GetMock<IBlocklistRepository>()
-                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.MovieId == _event.MovieId)), Times.Once());
+                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.GameId == _event.GameId)), Times.Once());
         }
     }
 }

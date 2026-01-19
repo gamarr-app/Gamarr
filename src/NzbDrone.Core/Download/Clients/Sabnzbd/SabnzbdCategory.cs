@@ -25,8 +25,8 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         public string complete_dir { get; set; }
         public string[] tv_categories { get; set; }
         public bool enable_tv_sorting { get; set; }
-        public string[] movie_categories { get; set; }
-        public bool enable_movie_sorting { get; set; }
+        public string[] game_categories { get; set; }
+        public bool enable_game_sorting { get; set; }
         [JsonConverter(typeof(SabnzbdStringArrayConverter))]
         public string[] date_categories { get; set; }
         public bool enable_date_sorting { get; set; }

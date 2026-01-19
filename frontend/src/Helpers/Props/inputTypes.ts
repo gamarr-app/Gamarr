@@ -4,7 +4,7 @@ export const CAPTCHA = 'captcha';
 export const CHECK = 'check';
 export const DEVICE = 'device';
 export const KEY_VALUE_LIST = 'keyValueList';
-export const MONITOR_MOVIES_SELECT = 'monitorMoviesSelect';
+export const MONITOR_GAMES_SELECT = 'monitorGamesSelect';
 export const FLOAT = 'float';
 export const NUMBER = 'number';
 export const OAUTH = 'oauth';
@@ -17,7 +17,7 @@ export const INDEXER_FLAGS_SELECT = 'indexerFlagsSelect';
 export const LANGUAGE_SELECT = 'languageSelect';
 export const DOWNLOAD_CLIENT_SELECT = 'downloadClientSelect';
 export const SELECT = 'select';
-export const MOVIE_TAG = 'movieTag';
+export const GAME_TAG = 'gameTag';
 export const DYNAMIC_SELECT = 'dynamicSelect';
 export const TAG = 'tag';
 export const TEXT = 'text';
@@ -33,7 +33,7 @@ export const all = [
   CHECK,
   DEVICE,
   KEY_VALUE_LIST,
-  MONITOR_MOVIES_SELECT,
+  MONITOR_GAMES_SELECT,
   FLOAT,
   NUMBER,
   OAUTH,
@@ -46,7 +46,7 @@ export const all = [
   INDEXER_FLAGS_SELECT,
   LANGUAGE_SELECT,
   SELECT,
-  MOVIE_TAG,
+  GAME_TAG,
   DYNAMIC_SELECT,
   TAG,
   TEXT,
@@ -64,7 +64,7 @@ export type InputType =
   | 'date'
   | 'device'
   | 'keyValueList'
-  | 'monitorMoviesSelect'
+  | 'monitorGamesSelect'
   | 'file'
   | 'float'
   | 'number'
@@ -78,7 +78,7 @@ export type InputType =
   | 'downloadClientSelect'
   | 'rootFolderSelect'
   | 'select'
-  | 'movieTag'
+  | 'gameTag'
   | 'dynamicSelect'
   | 'tag'
   | 'text'

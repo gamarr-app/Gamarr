@@ -7,7 +7,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -15,12 +15,12 @@ namespace NzbDrone.Core.CustomFormats
 {
     public interface ICustomFormatCalculationService
     {
-        List<CustomFormat> ParseCustomFormat(RemoteMovie remoteMovie, long size);
-        List<CustomFormat> ParseCustomFormat(MovieFile movieFile, Movie movie);
-        List<CustomFormat> ParseCustomFormat(MovieFile movieFile);
-        List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Movie movie);
-        List<CustomFormat> ParseCustomFormat(MovieHistory history, Movie movie);
-        List<CustomFormat> ParseCustomFormat(LocalMovie localMovie);
+        List<CustomFormat> ParseCustomFormat(RemoteGame remoteGame, long size);
+        List<CustomFormat> ParseCustomFormat(GameFile gameFile, Game game);
+        List<CustomFormat> ParseCustomFormat(GameFile gameFile);
+        List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Game game);
+        List<CustomFormat> ParseCustomFormat(GameHistory history, Game game);
+        List<CustomFormat> ParseCustomFormat(LocalGame localGame);
     }
 
     public class CustomFormatCalculationService : ICustomFormatCalculationService
@@ -34,37 +34,37 @@ namespace NzbDrone.Core.CustomFormats
             _logger = logger;
         }
 
-        public List<CustomFormat> ParseCustomFormat(RemoteMovie remoteMovie, long size)
+        public List<CustomFormat> ParseCustomFormat(RemoteGame remoteGame, long size)
         {
             var input = new CustomFormatInput
             {
-                MovieInfo = remoteMovie.ParsedMovieInfo,
-                Movie = remoteMovie.Movie,
+                GameInfo = remoteGame.ParsedGameInfo,
+                Game = remoteGame.Game,
                 Size = size,
-                Languages = remoteMovie.Languages,
-                IndexerFlags = remoteMovie.Release?.IndexerFlags ?? 0
+                Languages = remoteGame.Languages,
+                IndexerFlags = remoteGame.Release?.IndexerFlags ?? 0
             };
 
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(MovieFile movieFile, Movie movie)
+        public List<CustomFormat> ParseCustomFormat(GameFile gameFile, Game game)
         {
-            return ParseCustomFormat(movieFile, movie, _formatService.All());
+            return ParseCustomFormat(gameFile, game, _formatService.All());
         }
 
-        public List<CustomFormat> ParseCustomFormat(MovieFile movieFile)
+        public List<CustomFormat> ParseCustomFormat(GameFile gameFile)
         {
-            return ParseCustomFormat(movieFile, movieFile.Movie, _formatService.All());
+            return ParseCustomFormat(gameFile, gameFile.Game, _formatService.All());
         }
 
-        public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Movie movie)
+        public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Game game)
         {
-            var parsed = Parser.Parser.ParseMovieTitle(blocklist.SourceTitle);
+            var parsed = Parser.Parser.ParseGameTitle(blocklist.SourceTitle);
 
-            var movieInfo = new ParsedMovieInfo
+            var gameInfo = new ParsedGameInfo
             {
-                MovieTitles = new List<string>() { movie.Title },
+                GameTitles = new List<string>() { game.Title },
                 SimpleReleaseTitle = parsed?.SimpleReleaseTitle ?? blocklist.SourceTitle.SimplifyReleaseTitle(),
                 ReleaseTitle = parsed?.ReleaseTitle ?? blocklist.SourceTitle,
                 Edition = parsed?.Edition,
@@ -75,8 +75,8 @@ namespace NzbDrone.Core.CustomFormats
 
             var input = new CustomFormatInput
             {
-                MovieInfo = movieInfo,
-                Movie = movie,
+                GameInfo = gameInfo,
+                Game = game,
                 Size = blocklist.Size ?? 0,
                 Languages = blocklist.Languages,
                 IndexerFlags = blocklist.IndexerFlags
@@ -85,16 +85,16 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(MovieHistory history, Movie movie)
+        public List<CustomFormat> ParseCustomFormat(GameHistory history, Game game)
         {
-            var parsed = Parser.Parser.ParseMovieTitle(history.SourceTitle);
+            var parsed = Parser.Parser.ParseGameTitle(history.SourceTitle);
 
             long.TryParse(history.Data.GetValueOrDefault("size"), out var size);
             Enum.TryParse(history.Data.GetValueOrDefault("indexerFlags"), true, out IndexerFlags indexerFlags);
 
-            var movieInfo = new ParsedMovieInfo
+            var gameInfo = new ParsedGameInfo
             {
-                MovieTitles = new List<string>() { movie.Title },
+                GameTitles = new List<string>() { game.Title },
                 SimpleReleaseTitle = parsed?.SimpleReleaseTitle ?? history.SourceTitle.SimplifyReleaseTitle(),
                 ReleaseTitle = parsed?.ReleaseTitle ?? history.SourceTitle,
                 Edition = parsed?.Edition,
@@ -105,8 +105,8 @@ namespace NzbDrone.Core.CustomFormats
 
             var input = new CustomFormatInput
             {
-                MovieInfo = movieInfo,
-                Movie = movie,
+                GameInfo = gameInfo,
+                Game = game,
                 Size = size,
                 Languages = history.Languages,
                 IndexerFlags = indexerFlags
@@ -115,27 +115,27 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(LocalMovie localMovie)
+        public List<CustomFormat> ParseCustomFormat(LocalGame localGame)
         {
-            var movieInfo = new ParsedMovieInfo
+            var gameInfo = new ParsedGameInfo
             {
-                MovieTitles = new List<string>() { localMovie.Movie.Title },
-                SimpleReleaseTitle = localMovie.SceneName.IsNotNullOrWhiteSpace() ? localMovie.SceneName.SimplifyReleaseTitle() : Path.GetFileName(localMovie.Path).SimplifyReleaseTitle(),
-                ReleaseTitle = localMovie.SceneName,
-                Quality = localMovie.Quality,
-                Edition = localMovie.Edition,
-                Languages = localMovie.Languages,
-                ReleaseGroup = localMovie.ReleaseGroup
+                GameTitles = new List<string>() { localGame.Game.Title },
+                SimpleReleaseTitle = localGame.SceneName.IsNotNullOrWhiteSpace() ? localGame.SceneName.SimplifyReleaseTitle() : Path.GetFileName(localGame.Path).SimplifyReleaseTitle(),
+                ReleaseTitle = localGame.SceneName,
+                Quality = localGame.Quality,
+                Edition = localGame.Edition,
+                Languages = localGame.Languages,
+                ReleaseGroup = localGame.ReleaseGroup
             };
 
             var input = new CustomFormatInput
             {
-                MovieInfo = movieInfo,
-                Movie = localMovie.Movie,
-                Size = localMovie.Size,
-                Languages = localMovie.Languages,
-                IndexerFlags = localMovie.IndexerFlags,
-                Filename = Path.GetFileName(localMovie.Path)
+                GameInfo = gameInfo,
+                Game = localGame.Game,
+                Size = localGame.Size,
+                Languages = localGame.Languages,
+                IndexerFlags = localGame.IndexerFlags,
+                Filename = Path.GetFileName(localGame.Path)
             };
 
             return ParseCustomFormat(input);
@@ -169,44 +169,44 @@ namespace NzbDrone.Core.CustomFormats
             return matches.OrderBy(x => x.Name).ToList();
         }
 
-        private List<CustomFormat> ParseCustomFormat(MovieFile movieFile, Movie movie, List<CustomFormat> allCustomFormats)
+        private List<CustomFormat> ParseCustomFormat(GameFile gameFile, Game game, List<CustomFormat> allCustomFormats)
         {
             var releaseTitle = string.Empty;
 
-            if (movieFile.SceneName.IsNotNullOrWhiteSpace())
+            if (gameFile.SceneName.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace("Using scene name for release title: {0}", movieFile.SceneName);
-                releaseTitle = movieFile.SceneName;
+                _logger.Trace("Using scene name for release title: {0}", gameFile.SceneName);
+                releaseTitle = gameFile.SceneName;
             }
-            else if (movieFile.OriginalFilePath.IsNotNullOrWhiteSpace())
+            else if (gameFile.OriginalFilePath.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace("Using original file path for release title: {0}", Path.GetFileName(movieFile.OriginalFilePath));
-                releaseTitle = Path.GetFileName(movieFile.OriginalFilePath);
+                _logger.Trace("Using original file path for release title: {0}", Path.GetFileName(gameFile.OriginalFilePath));
+                releaseTitle = Path.GetFileName(gameFile.OriginalFilePath);
             }
-            else if (movieFile.RelativePath.IsNotNullOrWhiteSpace())
+            else if (gameFile.RelativePath.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace("Using relative path for release title: {0}", Path.GetFileName(movieFile.RelativePath));
-                releaseTitle = Path.GetFileName(movieFile.RelativePath);
+                _logger.Trace("Using relative path for release title: {0}", Path.GetFileName(gameFile.RelativePath));
+                releaseTitle = Path.GetFileName(gameFile.RelativePath);
             }
 
-            var movieInfo = new ParsedMovieInfo
+            var gameInfo = new ParsedGameInfo
             {
-                MovieTitles = new List<string>() { movie.Title },
+                GameTitles = new List<string>() { game.Title },
                 SimpleReleaseTitle = releaseTitle.SimplifyReleaseTitle(),
-                Quality = movieFile.Quality,
-                Languages = movieFile.Languages,
-                ReleaseGroup = movieFile.ReleaseGroup,
-                Edition = movieFile.Edition
+                Quality = gameFile.Quality,
+                Languages = gameFile.Languages,
+                ReleaseGroup = gameFile.ReleaseGroup,
+                Edition = gameFile.Edition
             };
 
             var input = new CustomFormatInput
             {
-                MovieInfo = movieInfo,
-                Movie = movie,
-                Size = movieFile.Size,
-                Languages = movieFile.Languages,
-                IndexerFlags = movieFile.IndexerFlags,
-                Filename = Path.GetFileName(movieFile.RelativePath)
+                GameInfo = gameInfo,
+                Game = game,
+                Size = gameFile.Size,
+                Languages = gameFile.Languages,
+                IndexerFlags = gameFile.IndexerFlags,
+                Filename = Path.GetFileName(gameFile.RelativePath)
             };
 
             return ParseCustomFormat(input, allCustomFormats);

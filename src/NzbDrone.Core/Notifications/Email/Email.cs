@@ -9,7 +9,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http.Dispatchers;
 using NzbDrone.Core.Localization;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications.Email
 {
@@ -34,35 +34,35 @@ namespace NzbDrone.Core.Notifications.Email
         {
             var body = $"{grabMessage.Message} sent to queue.";
 
-            SendEmail(Settings, MOVIE_GRABBED_TITLE_BRANDED, body);
+            SendEmail(Settings, GAME_GRABBED_TITLE_BRANDED, body);
         }
 
         public override void OnDownload(DownloadMessage message)
         {
             var body = $"{message.Message} Downloaded and sorted.";
 
-            SendEmail(Settings, MOVIE_DOWNLOADED_TITLE_BRANDED, body);
+            SendEmail(Settings, GAME_DOWNLOADED_TITLE_BRANDED, body);
         }
 
-        public override void OnMovieAdded(Movie movie)
+        public override void OnGameAdded(Game game)
         {
-            var body = $"{movie.Title} added to library.";
+            var body = $"{game.Title} added to library.";
 
-            SendEmail(Settings, MOVIE_ADDED_TITLE_BRANDED, body);
+            SendEmail(Settings, GAME_ADDED_TITLE_BRANDED, body);
         }
 
-        public override void OnMovieFileDelete(MovieFileDeleteMessage deleteMessage)
+        public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
         {
             var body = $"{deleteMessage.Message} deleted.";
 
-            SendEmail(Settings, MOVIE_FILE_DELETED_TITLE_BRANDED, body);
+            SendEmail(Settings, GAME_FILE_DELETED_TITLE_BRANDED, body);
         }
 
-        public override void OnMovieDelete(MovieDeleteMessage deleteMessage)
+        public override void OnGameDelete(GameDeleteMessage deleteMessage)
         {
             var body = $"{deleteMessage.Message}";
 
-            SendEmail(Settings, MOVIE_DELETED_TITLE_BRANDED, body);
+            SendEmail(Settings, GAME_DELETED_TITLE_BRANDED, body);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck message)
@@ -176,7 +176,7 @@ namespace NzbDrone.Core.Notifications.Email
 
             try
             {
-                SendEmail(settings, "Radarr - Test Notification", body);
+                SendEmail(settings, "Gamarr - Test Notification", body);
             }
             catch (Exception ex)
             {

@@ -1,5 +1,5 @@
 using FluentValidation;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.AutoTagging.Specifications
@@ -15,9 +15,9 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         public override int Order => 1;
         public override string ImplementationName => "Monitored";
 
-        protected override bool IsSatisfiedByWithoutNegate(Movie movie)
+        protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return movie.Monitored;
+            return game.Monitored;
         }
 
         public override NzbDroneValidationResult Validate()

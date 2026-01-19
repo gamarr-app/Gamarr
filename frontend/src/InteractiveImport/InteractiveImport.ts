@@ -1,6 +1,6 @@
 import ModelBase from 'App/ModelBase';
 import Language from 'Language/Language';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import { QualityModel } from 'Quality/Quality';
 import CustomFormat from 'typings/CustomFormat';
 import Rejection from 'typings/Rejection';
@@ -8,13 +8,13 @@ import Rejection from 'typings/Rejection';
 export interface InteractiveImportCommandOptions {
   path: string;
   folderName: string;
-  movieId: number;
+  gameId: number;
   releaseGroup?: string;
   quality: QualityModel;
   languages: Language[];
   indexerFlags: number;
   downloadId?: string;
-  movieFileId?: number;
+  gameFileId?: number;
 }
 
 interface InteractiveImport extends ModelBase {
@@ -26,12 +26,12 @@ interface InteractiveImport extends ModelBase {
   releaseGroup: string;
   quality: QualityModel;
   languages: Language[];
-  movie?: Movie;
+  game?: Game;
   qualityWeight: number;
   customFormats: CustomFormat[];
   indexerFlags: number;
   rejections: Rejection[];
-  movieFileId?: number;
+  gameFileId?: number;
 }
 
 export default InteractiveImport;

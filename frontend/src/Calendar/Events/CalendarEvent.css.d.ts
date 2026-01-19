@@ -9,8 +9,8 @@ interface CssExports {
   'info': string;
   'missingMonitored': string;
   'missingUnmonitored': string;
-  'movieInfo': string;
-  'movieTitle': string;
+  'gameInfo': string;
+  'gameTitle': string;
   'overlay': string;
   'queue': string;
   'statusContainer': string;

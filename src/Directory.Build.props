@@ -1,5 +1,5 @@
 <Project>
-  <!-- Common to all Radarr Projects -->
+  <!-- Common to all Gamarr Projects -->
   <PropertyGroup>
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -10,22 +10,22 @@
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
-    <RadarrRootDir>$(MSBuildThisFileDirectory)..\</RadarrRootDir>
+    <GamarrRootDir>$(MSBuildThisFileDirectory)..\</GamarrRootDir>
 
     <!-- Specifies the type of output -->
-    <RadarrOutputType>Library</RadarrOutputType>
-    <RadarrOutputType Condition="$(MSBuildProjectName.Contains('.Test'))">Test</RadarrOutputType>
-    <RadarrOutputType Condition="'$(MSBuildProjectName)'=='ServiceInstall'">Exe</RadarrOutputType>
-    <RadarrOutputType Condition="'$(MSBuildProjectName)'=='ServiceUninstall'">Exe</RadarrOutputType>
-    <RadarrOutputType Condition="'$(MSBuildProjectName)'=='Radarr'">Exe</RadarrOutputType>
-    <RadarrOutputType Condition="'$(MSBuildProjectName)'=='Radarr.Console'">Exe</RadarrOutputType>
-    <RadarrOutputType Condition="'$(MSBuildProjectName)'=='Radarr.Update'">Update</RadarrOutputType>
+    <GamarrOutputType>Library</GamarrOutputType>
+    <GamarrOutputType Condition="$(MSBuildProjectName.Contains('.Test'))">Test</GamarrOutputType>
+    <GamarrOutputType Condition="'$(MSBuildProjectName)'=='ServiceInstall'">Exe</GamarrOutputType>
+    <GamarrOutputType Condition="'$(MSBuildProjectName)'=='ServiceUninstall'">Exe</GamarrOutputType>
+    <GamarrOutputType Condition="'$(MSBuildProjectName)'=='Gamarr'">Exe</GamarrOutputType>
+    <GamarrOutputType Condition="'$(MSBuildProjectName)'=='Gamarr.Console'">Exe</GamarrOutputType>
+    <GamarrOutputType Condition="'$(MSBuildProjectName)'=='Gamarr.Update'">Update</GamarrOutputType>
 
     <!-- Specifies whether it's one of our own libraries -->
-    <RadarrProject>false</RadarrProject>
-    <RadarrProject Condition="$(MSBuildProjectName.StartsWith('Radarr'))">true</RadarrProject>
-    <RadarrProject Condition="$(MSBuildProjectName.StartsWith('ServiceInstall'))">true</RadarrProject>
-    <RadarrProject Condition="$(MSBuildProjectName.StartsWith('ServiceUninstall'))">true</RadarrProject>
+    <GamarrProject>false</GamarrProject>
+    <GamarrProject Condition="$(MSBuildProjectName.StartsWith('Gamarr'))">true</GamarrProject>
+    <GamarrProject Condition="$(MSBuildProjectName.StartsWith('ServiceInstall'))">true</GamarrProject>
+    <GamarrProject Condition="$(MSBuildProjectName.StartsWith('ServiceUninstall'))">true</GamarrProject>
 
     <!-- A test project gets the test sdk packages automatically added -->
     <TestProject>false</TestProject>
@@ -36,20 +36,20 @@
     <!--
         CS1591: Missing XML comment for publicly visible type or member 'Type_or_Member'
     -->
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;SA1210</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
     <!-- Centralize intermediate and default outputs -->
-    <BaseIntermediateOutputPath>$(RadarrRootDir)_temp\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(RadarrRootDir)_temp\obj\$(MSBuildProjectName)\$(Configuration)\</IntermediateOutputPath>
-    <OutputPath>$(RadarrRootDir)_temp\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <BaseIntermediateOutputPath>$(GamarrRootDir)_temp\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(GamarrRootDir)_temp\obj\$(MSBuildProjectName)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>$(GamarrRootDir)_temp\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
 
     <!-- Output to _output and _tests respectively -->
-    <OutputPath Condition="'$(RadarrProject)'=='true'">$(RadarrRootDir)_output\</OutputPath>
-    <OutputPath Condition="'$(RadarrOutputType)'=='Test'">$(RadarrRootDir)_tests\</OutputPath>
-    <OutputPath Condition="'$(RadarrOutputType)'=='Update'">$(RadarrRootDir)_output\Radarr.Update\</OutputPath>
+    <OutputPath Condition="'$(GamarrProject)'=='true'">$(GamarrRootDir)_output\</OutputPath>
+    <OutputPath Condition="'$(GamarrOutputType)'=='Test'">$(GamarrRootDir)_tests\</OutputPath>
+    <OutputPath Condition="'$(GamarrOutputType)'=='Update'">$(GamarrRootDir)_output\Gamarr.Update\</OutputPath>
 
     <!-- Paths relative to project file for better readability -->
     <EnableBaseIntermediateOutputPathMismatchWarning>false</EnableBaseIntermediateOutputPathMismatchWarning>
@@ -61,17 +61,17 @@
   </PropertyGroup>
   
   <!-- Test projects need bindingRedirects -->
-  <PropertyGroup Condition="'$(RadarrOutputType)'=='Test'">
+  <PropertyGroup Condition="'$(GamarrOutputType)'=='Test'">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <SelfContained>false</SelfContained>
   </PropertyGroup>
 
   <!-- Set the Product and Version info for our own projects -->
-  <PropertyGroup Condition="'$(RadarrProject)'=='true'">
-    <Product>Radarr</Product>
-    <Company>radarr.video</Company>
-    <Copyright>Copyright 2014-$([System.DateTime]::Now.ToString('yyyy')) radarr.video (GNU General Public v3)</Copyright>
+  <PropertyGroup Condition="'$(GamarrProject)'=='true'">
+    <Product>Gamarr</Product>
+    <Company>gamarr.video</Company>
+    <Copyright>Copyright 2014-$([System.DateTime]::Now.ToString('yyyy')) gamarr.video (GNU General Public v3)</Copyright>
     
     <!-- Should be replaced by CI -->
     <AssemblyVersion>10.0.0.*</AssemblyVersion>
@@ -88,7 +88,7 @@
   </PropertyGroup>
 
   <!-- Set the AssemblyConfiguration attribute for projects -->
-  <ItemGroup Condition="'$(RadarrProject)'=='true'">
+  <ItemGroup Condition="'$(GamarrProject)'=='true'">
     <AssemblyAttribute Include="System.Reflection.AssemblyConfigurationAttribute">
       <_Parameter1>$(AssemblyConfiguration)</_Parameter1>
     </AssemblyAttribute>
@@ -96,7 +96,7 @@
 
   <PropertyGroup>
     <!-- For now keep the NzbDrone namespace -->
-    <RootNamespace Condition="'$(RadarrProject)'=='true'">$(MSBuildProjectName.Replace('Radarr','NzbDrone'))</RootNamespace>
+    <RootNamespace Condition="'$(GamarrProject)'=='true'">$(MSBuildProjectName.Replace('Gamarr','NzbDrone'))</RootNamespace>
   </PropertyGroup>
 
   <!-- Sentry specific configuration: Only in Release mode -->
@@ -130,13 +130,13 @@
     <PackageReference Include="NunitXml.TestLogger" Version="3.1.20" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(RadarrProject)'=='true' and '$(EnableAnalyzers)'=='false'">
+  <PropertyGroup Condition="'$(GamarrProject)'=='true' and '$(EnableAnalyzers)'=='false'">
     <!-- FXCop Built into Net5 SDK now as NETAnalyzers, Enabled by default on net5 projects -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
   </PropertyGroup>
 
   <!-- Set up stylecop -->
-  <ItemGroup Condition="'$(RadarrProject)'=='true' and '$(EnableAnalyzers)'!='false'">
+  <ItemGroup Condition="'$(GamarrProject)'=='true' and '$(EnableAnalyzers)'!='false'">
     <!-- StyleCop analysis -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>

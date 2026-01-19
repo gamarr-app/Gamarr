@@ -7,7 +7,7 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Profiles.Releases;
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Tags
         private readonly IImportListFactory _importListFactory;
         private readonly INotificationFactory _notificationFactory;
         private readonly IReleaseProfileService _releaseProfileService;
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly IIndexerFactory _indexerService;
         private readonly IAutoTaggingService _autoTaggingService;
         private readonly IDownloadClientFactory _downloadClientFactory;
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Tags
                           IImportListFactory importListFactory,
                           INotificationFactory notificationFactory,
                           IReleaseProfileService releaseProfileService,
-                          IMovieService movieService,
+                          IGameService gameService,
                           IIndexerFactory indexerService,
                           IAutoTaggingService autoTaggingService,
                           IDownloadClientFactory downloadClientFactory)
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Tags
             _importListFactory = importListFactory;
             _notificationFactory = notificationFactory;
             _releaseProfileService = releaseProfileService;
-            _movieService = movieService;
+            _gameService = gameService;
             _indexerService = indexerService;
             _autoTaggingService = autoTaggingService;
             _downloadClientFactory = downloadClientFactory;
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Tags
             var importLists = _importListFactory.AllForTag(tagId);
             var notifications = _notificationFactory.AllForTag(tagId);
             var releaseProfiles = _releaseProfileService.AllForTag(tagId);
-            var movies = _movieService.AllMovieTags().Where(x => x.Value.Contains(tagId)).Select(x => x.Key).ToList();
+            var games = _gameService.AllGameTags().Where(x => x.Value.Contains(tagId)).Select(x => x.Key).ToList();
             var indexers = _indexerService.AllForTag(tagId);
             var autoTags = _autoTaggingService.AllForTag(tagId);
             var downloadClients = _downloadClientFactory.AllForTag(tagId);
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Tags
                 ImportListIds = importLists.Select(c => c.Id).ToList(),
                 NotificationIds = notifications.Select(c => c.Id).ToList(),
                 ReleaseProfileIds = releaseProfiles.Select(c => c.Id).ToList(),
-                MovieIds = movies,
+                GameIds = games,
                 IndexerIds = indexers.Select(c => c.Id).ToList(),
                 AutoTagIds = autoTags.Select(c => c.Id).ToList(),
                 DownloadClientIds = downloadClients.Select(c => c.Id).ToList()
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Tags
             var importLists = _importListFactory.All();
             var notifications = _notificationFactory.All();
             var releaseProfiles = _releaseProfileService.All();
-            var movies = _movieService.AllMovieTags();
+            var games = _gameService.AllGameTags();
             var indexers = _indexerService.All();
             var autoTags = _autoTaggingService.All();
             var downloadClients = _downloadClientFactory.All();
@@ -136,7 +136,7 @@ namespace NzbDrone.Core.Tags
                     ImportListIds = importLists.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     NotificationIds = notifications.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     ReleaseProfileIds = releaseProfiles.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
-                    MovieIds = movies.Where(c => c.Value.Contains(tag.Id)).Select(c => c.Key).ToList(),
+                    GameIds = games.Where(c => c.Value.Contains(tag.Id)).Select(c => c.Key).ToList(),
                     IndexerIds = indexers.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     AutoTagIds = GetAutoTagIds(tag, autoTags),
                     DownloadClientIds = downloadClients.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),

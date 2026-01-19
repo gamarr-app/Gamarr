@@ -173,82 +173,82 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         }
 
         [Test]
-        public void should_return_ok_on_movie_imported_event()
+        public void should_return_ok_on_game_imported_event()
         {
             GivenFolderExists(_downloadRootPath);
-            var importEvent = new MovieFileImportedEvent(new LocalMovie(), new MovieFile(), new List<DeletedMovieFile>(), true, new DownloadClientItem());
+            var importEvent = new GameFileImportedEvent(new LocalGame(), new GameFile(), new List<DeletedGameFile>(), true, new DownloadClientItem());
 
             Subject.Check(importEvent).ShouldBeOk();
         }
 
         [Test]
-        public void should_return_permissions_error_on_movie_import_failed_event_if_file_exists()
+        public void should_return_permissions_error_on_game_import_failed_event_if_file_exists()
         {
-            var localMovie = new LocalMovie
+            var localGame = new LocalGame
             {
                 Path = Path.Combine(_downloadItemPath, "file.mkv")
             };
-            GivenFileExists(localMovie.Path);
+            GivenFileExists(localGame.Path);
 
-            var importEvent = new MovieImportFailedEvent(new Exception(), localMovie, true, new DownloadClientItem());
+            var importEvent = new GameImportFailedEvent(new Exception(), localGame, true, new DownloadClientItem());
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }
 
         [Test]
-        public void should_return_permissions_error_on_movie_import_failed_event_if_folder_exists()
+        public void should_return_permissions_error_on_game_import_failed_event_if_folder_exists()
         {
             GivenFolderExists(_downloadItemPath);
 
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }
 
         [Test]
-        public void should_return_permissions_error_on_movie_import_failed_event_for_local_client_if_folder_does_not_exist()
+        public void should_return_permissions_error_on_game_import_failed_event_for_local_client_if_folder_does_not_exist()
         {
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }
 
         [Test]
-        public void should_return_mapping_error_on_movie_import_failed_event_for_remote_client_if_folder_does_not_exist()
+        public void should_return_mapping_error_on_game_import_failed_event_for_remote_client_if_folder_does_not_exist()
         {
             _clientStatus.IsLocalhost = false;
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "bad-remote-path-mapping");
         }
 
         [Test]
-        public void should_return_mapping_error_on_movie_import_failed_event_for_remote_client_if_path_invalid()
+        public void should_return_mapping_error_on_game_import_failed_event_for_remote_client_if_path_invalid()
         {
             _clientStatus.IsLocalhost = false;
             _downloadItem.OutputPath = new OsPath("an invalid path");
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "bad-remote-path-mapping");
         }
 
         [Test]
-        public void should_return_download_client_error_on_movie_import_failed_event_for_remote_client_if_path_invalid()
+        public void should_return_download_client_error_on_game_import_failed_event_for_remote_client_if_path_invalid()
         {
             _clientStatus.IsLocalhost = true;
             _downloadItem.OutputPath = new OsPath("an invalid path");
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "bad-download-client-settings");
         }
 
         [Test]
-        public void should_return_docker_mapping_error_on_movie_import_failed_event_inside_docker_if_folder_does_not_exist()
+        public void should_return_docker_mapping_error_on_game_import_failed_event_inside_docker_if_folder_does_not_exist()
         {
             GivenDocker();
 
             _clientStatus.IsLocalhost = false;
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "docker-bad-remote-path-mapping");
         }
@@ -260,7 +260,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             _downloadClient.Setup(s => s.GetStatus())
                 .Throws(ex);
 
-            var importEvent = new MovieImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeOk();
 

@@ -25,15 +25,15 @@ $fullColorGradient: rgba(244, 245, 246, 0.2);
 }
 
 .info,
-.movieInfo {
+.gameInfo {
   display: flex;
 }
 
-.movieInfo {
+.gameInfo {
   color: var(--calendarTextDim);
 }
 
-.movieTitle,
+.gameTitle,
 .genres,
 .eventType {
   @add-mixin truncate;
@@ -41,7 +41,7 @@ $fullColorGradient: rgba(244, 245, 246, 0.2);
   margin-right: 10px;
 }
 
-.movieTitle {
+.gameTitle {
   color: var(--calendarTextDimAlternate);
   font-size: $defaultFontSize;
 }

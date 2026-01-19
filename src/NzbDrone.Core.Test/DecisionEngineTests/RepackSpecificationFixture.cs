@@ -4,7 +4,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -14,50 +14,50 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class RepackSpecificationFixture : CoreTest<RepackSpecification>
     {
-        private ParsedMovieInfo _parsedMovieInfo;
-        private Movie _movie;
+        private ParsedGameInfo _parsedGameInfo;
+        private Game _game;
 
         [SetUp]
         public void Setup()
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _parsedMovieInfo = Builder<ParsedMovieInfo>.CreateNew()
+            _parsedGameInfo = Builder<ParsedGameInfo>.CreateNew()
                                                            .With(p => p.Quality = new QualityModel(Quality.SDTV,
                                                                new Revision(2, 0, false)))
-                                                           .With(p => p.ReleaseGroup = "Radarr")
+                                                           .With(p => p.ReleaseGroup = "Gamarr")
                                                            .Build();
 
-            _movie = Builder<Movie>.CreateNew()
-                                        .With(e => e.MovieFileId = 0)
+            _game = Builder<Game>.CreateNew()
+                                        .With(e => e.GameFileId = 0)
                                         .Build();
         }
 
         [Test]
         public void should_return_true_if_it_is_not_a_repack()
         {
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeTrue();
         }
 
         [Test]
-        public void should_return_true_if_there_are_is_no_movie_file()
+        public void should_return_true_if_there_are_is_no_game_file()
         {
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -66,19 +66,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_is_a_repack_for_a_different_quality()
         {
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                                 .With(e => e.Quality = new QualityModel(Quality.DVD))
-                                                                .With(e => e.ReleaseGroup = "Radarr")
+                                                                .With(e => e.ReleaseGroup = "Gamarr")
                                                                 .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -87,19 +87,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_is_a_repack_for_existing_file()
         {
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
-                                                 .With(e => e.ReleaseGroup = "Radarr")
+                                                 .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -108,19 +108,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_is_a_repack_for_a_different_file()
         {
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
-                                                 .With(e => e.ReleaseGroup = "NotRadarr")
+                                                 .With(e => e.ReleaseGroup = "NotGamarr")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -129,19 +129,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_release_group_for_existing_file_is_unknown()
         {
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
                                                  .With(e => e.ReleaseGroup = "")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -150,21 +150,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_release_group_for_release_is_unknown()
         {
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _parsedMovieInfo.ReleaseGroup = null;
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _parsedGameInfo.ReleaseGroup = null;
 
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
-                                                 .With(e => e.ReleaseGroup = "Radarr")
+                                                 .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -177,19 +177,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
-                                                 .With(e => e.ReleaseGroup = "Radarr")
+                                                 .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -202,19 +202,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.PreferAndUpgrade);
 
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
-                                                 .With(e => e.ReleaseGroup = "Radarr")
+                                                 .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -227,19 +227,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _parsedMovieInfo.Quality.Revision.IsRepack = true;
-            _movie.MovieFileId = 1;
-            _movie.MovieFile = Builder<MovieFile>.CreateNew()
+            _parsedGameInfo.Quality.Revision.IsRepack = true;
+            _game.GameFileId = 1;
+            _game.GameFile = Builder<GameFile>.CreateNew()
                                                  .With(e => e.Quality = new QualityModel(Quality.SDTV))
-                                                 .With(e => e.ReleaseGroup = "Radarr")
+                                                 .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
-            var remoteMovie = Builder<RemoteMovie>.CreateNew()
-                                                      .With(e => e.ParsedMovieInfo = _parsedMovieInfo)
-                                                      .With(e => e.Movie = _movie)
+            var remoteGame = Builder<RemoteGame>.CreateNew()
+                                                      .With(e => e.ParsedGameInfo = _parsedGameInfo)
+                                                      .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteMovie, null)
+            Subject.IsSatisfiedBy(remoteGame, null)
                    .Accepted
                    .Should()
                    .BeTrue();

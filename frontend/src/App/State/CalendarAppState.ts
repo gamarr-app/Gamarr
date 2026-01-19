@@ -6,7 +6,7 @@ import { CalendarView } from 'Calendar/calendarViews';
 import { CalendarItem } from 'typings/Calendar';
 
 interface CalendarOptions {
-  showMovieInformation: boolean;
+  showGameInformation: boolean;
   showCinemaRelease: boolean;
   showDigitalRelease: boolean;
   showPhysicalRelease: boolean;

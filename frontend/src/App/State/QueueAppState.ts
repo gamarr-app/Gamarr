@@ -37,7 +37,7 @@ interface QueueAppState {
   details: QueueDetailsAppState;
   paged: QueuePagedAppState;
   options: {
-    includeUnknownMovieItems: boolean;
+    includeUnknownGameItems: boolean;
   };
 }
 

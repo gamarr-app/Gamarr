@@ -35,9 +35,9 @@ namespace NzbDrone.Core.Datastore.Migration
 
                     var link = settings.Value<string>("link");
 
-                    if (link.IsNotNullOrWhiteSpace() && link.StartsWith("https://s3.amazonaws.com/popular-movies"))
+                    if (link.IsNotNullOrWhiteSpace() && link.StartsWith("https://s3.amazonaws.com/popular-games"))
                     {
-                        settings["link"] = "https://popular-movies-data.stevenlu.com/movies.json";
+                        settings["link"] = "https://popular-games-data.stevenlu.com/games.json";
                     }
 
                     updated.Add(new

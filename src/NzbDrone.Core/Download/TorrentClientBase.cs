@@ -45,23 +45,23 @@ namespace NzbDrone.Core.Download
 
         public virtual bool PreferTorrentFile => false;
 
-        protected abstract string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink);
-        protected abstract string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent);
+        protected abstract string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink);
+        protected abstract string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent);
 
-        public override async Task<string> Download(RemoteMovie remoteMovie, IIndexer indexer)
+        public override async Task<string> Download(RemoteGame remoteGame, IIndexer indexer)
         {
-            var torrentInfo = remoteMovie.Release as TorrentInfo;
+            var torrentInfo = remoteGame.Release as TorrentInfo;
 
             string magnetUrl = null;
             string torrentUrl = null;
 
-            if (remoteMovie.Release.DownloadUrl.IsNotNullOrWhiteSpace() && remoteMovie.Release.DownloadUrl.StartsWith("magnet:"))
+            if (remoteGame.Release.DownloadUrl.IsNotNullOrWhiteSpace() && remoteGame.Release.DownloadUrl.StartsWith("magnet:"))
             {
-                magnetUrl = remoteMovie.Release.DownloadUrl;
+                magnetUrl = remoteGame.Release.DownloadUrl;
             }
             else
             {
-                torrentUrl = remoteMovie.Release.DownloadUrl;
+                torrentUrl = remoteGame.Release.DownloadUrl;
             }
 
             if (torrentInfo != null && !torrentInfo.MagnetUrl.IsNullOrWhiteSpace())
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Download
                 {
                     try
                     {
-                        return await DownloadFromWebUrl(remoteMovie, indexer, torrentUrl);
+                        return await DownloadFromWebUrl(remoteGame, indexer, torrentUrl);
                     }
                     catch (Exception ex)
                     {
@@ -92,11 +92,11 @@ namespace NzbDrone.Core.Download
                 {
                     try
                     {
-                        return DownloadFromMagnetUrl(remoteMovie, indexer, magnetUrl);
+                        return DownloadFromMagnetUrl(remoteGame, indexer, magnetUrl);
                     }
                     catch (NotSupportedException ex)
                     {
-                        throw new ReleaseDownloadException(remoteMovie.Release, "Magnet not supported by download client. ({0})", ex.Message);
+                        throw new ReleaseDownloadException(remoteGame.Release, "Magnet not supported by download client. ({0})", ex.Message);
                     }
                 }
             }
@@ -106,13 +106,13 @@ namespace NzbDrone.Core.Download
                 {
                     try
                     {
-                        return DownloadFromMagnetUrl(remoteMovie, indexer, magnetUrl);
+                        return DownloadFromMagnetUrl(remoteGame, indexer, magnetUrl);
                     }
                     catch (NotSupportedException ex)
                     {
                         if (torrentUrl.IsNullOrWhiteSpace())
                         {
-                            throw new ReleaseDownloadException(remoteMovie.Release, "Magnet not supported by download client. ({0})", ex.Message);
+                            throw new ReleaseDownloadException(remoteGame.Release, "Magnet not supported by download client. ({0})", ex.Message);
                         }
 
                         _logger.Debug("Magnet not supported by download client, trying torrent. ({0})", ex.Message);
@@ -121,21 +121,21 @@ namespace NzbDrone.Core.Download
 
                 if (torrentUrl.IsNotNullOrWhiteSpace())
                 {
-                    return await DownloadFromWebUrl(remoteMovie, indexer, torrentUrl);
+                    return await DownloadFromWebUrl(remoteGame, indexer, torrentUrl);
                 }
             }
 
             return null;
         }
 
-        private async Task<string> DownloadFromWebUrl(RemoteMovie remoteMovie, IIndexer indexer, string torrentUrl)
+        private async Task<string> DownloadFromWebUrl(RemoteGame remoteGame, IIndexer indexer, string torrentUrl)
         {
             byte[] torrentFile = null;
 
             try
             {
                 var request = indexer?.GetDownloadRequest(torrentUrl) ?? new HttpRequest(torrentUrl);
-                request.RateLimitKey = remoteMovie?.Release?.IndexerId.ToString();
+                request.RateLimitKey = remoteGame?.Release?.IndexerId.ToString();
                 request.Headers.Accept = "application/x-bittorrent";
                 request.AllowAutoRedirect = false;
 
@@ -155,12 +155,12 @@ namespace NzbDrone.Core.Download
                     {
                         if (locationHeader.StartsWith("magnet:"))
                         {
-                            return DownloadFromMagnetUrl(remoteMovie, indexer, locationHeader);
+                            return DownloadFromMagnetUrl(remoteGame, indexer, locationHeader);
                         }
 
                         request.Url += new HttpUri(locationHeader);
 
-                        return await DownloadFromWebUrl(remoteMovie, indexer, request.Url.ToString());
+                        return await DownloadFromWebUrl(remoteGame, indexer, request.Url.ToString());
                     }
 
                     throw new WebException("Remote website tried to redirect without providing a location.");
@@ -168,14 +168,14 @@ namespace NzbDrone.Core.Download
 
                 torrentFile = response.ResponseData;
 
-                _logger.Debug("Downloading torrent for movie '{0}' finished ({1} bytes from {2})", remoteMovie.Release.Title, torrentFile.Length, torrentUrl);
+                _logger.Debug("Downloading torrent for game '{0}' finished ({1} bytes from {2})", remoteGame.Release.Title, torrentFile.Length, torrentUrl);
             }
             catch (HttpException ex)
             {
                 if (ex.Response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
                 {
-                    _logger.Error(ex, "Downloading torrent file for movie '{0}' failed since it no longer exists ({1})", remoteMovie.Release.Title, torrentUrl);
-                    throw new ReleaseUnavailableException(remoteMovie.Release, "Downloading torrent failed", ex);
+                    _logger.Error(ex, "Downloading torrent file for game '{0}' failed since it no longer exists ({1})", remoteGame.Release.Title, torrentUrl);
+                    throw new ReleaseUnavailableException(remoteGame.Release, "Downloading torrent failed", ex);
                 }
 
                 if ((int)ex.Response.StatusCode == 429)
@@ -184,37 +184,37 @@ namespace NzbDrone.Core.Download
                 }
                 else
                 {
-                    _logger.Error(ex, "Downloading torrent file for movie '{0}' failed ({1})", remoteMovie.Release.Title, torrentUrl);
+                    _logger.Error(ex, "Downloading torrent file for game '{0}' failed ({1})", remoteGame.Release.Title, torrentUrl);
                 }
 
-                throw new ReleaseDownloadException(remoteMovie.Release, "Downloading torrent failed", ex);
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed", ex);
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Downloading torrent file for movie '{0}' failed ({1})", remoteMovie.Release.Title, torrentUrl);
+                _logger.Error(ex, "Downloading torrent file for game '{0}' failed ({1})", remoteGame.Release.Title, torrentUrl);
 
-                throw new ReleaseDownloadException(remoteMovie.Release, "Downloading torrent failed", ex);
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed", ex);
             }
 
-            var filename = string.Format("{0}.torrent", FileNameBuilder.CleanFileName(remoteMovie.Release.Title));
+            var filename = string.Format("{0}.torrent", FileNameBuilder.CleanFileName(remoteGame.Release.Title));
             var hash = _torrentFileInfoReader.GetHashFromTorrentFile(torrentFile);
 
-            EnsureReleaseIsNotBlocklisted(remoteMovie, indexer, hash);
+            EnsureReleaseIsNotBlocklisted(remoteGame, indexer, hash);
 
-            var actualHash = AddFromTorrentFile(remoteMovie, hash, filename, torrentFile);
+            var actualHash = AddFromTorrentFile(remoteGame, hash, filename, torrentFile);
 
             if (actualHash.IsNotNullOrWhiteSpace() && hash != actualHash)
             {
                 _logger.Debug(
-                    "{0} did not return the expected InfoHash for '{1}', Radarr could potentially lose track of the download in progress.",
+                    "{0} did not return the expected InfoHash for '{1}', Gamarr could potentially lose track of the download in progress.",
                     Definition.Implementation,
-                    remoteMovie.Release.DownloadUrl);
+                    remoteGame.Release.DownloadUrl);
             }
 
             return actualHash;
         }
 
-        private string DownloadFromMagnetUrl(RemoteMovie remoteMovie, IIndexer indexer, string magnetUrl)
+        private string DownloadFromMagnetUrl(RemoteGame remoteGame, IIndexer indexer, string magnetUrl)
         {
             string hash = null;
             string actualHash = null;
@@ -225,31 +225,31 @@ namespace NzbDrone.Core.Download
             }
             catch (FormatException ex)
             {
-                throw new ReleaseDownloadException(remoteMovie.Release, "Failed to parse magnetlink for movie '{0}': '{1}'", ex, remoteMovie.Release.Title, magnetUrl);
+                throw new ReleaseDownloadException(remoteGame.Release, "Failed to parse magnetlink for game '{0}': '{1}'", ex, remoteGame.Release.Title, magnetUrl);
             }
 
             if (hash != null)
             {
-                EnsureReleaseIsNotBlocklisted(remoteMovie, indexer, hash);
+                EnsureReleaseIsNotBlocklisted(remoteGame, indexer, hash);
 
-                actualHash = AddFromMagnetLink(remoteMovie, hash, magnetUrl);
+                actualHash = AddFromMagnetLink(remoteGame, hash, magnetUrl);
             }
 
             if (actualHash.IsNotNullOrWhiteSpace() && hash != actualHash)
             {
                 _logger.Debug(
-                    "{0} did not return the expected InfoHash for '{1}', Radarr could potentially lose track of the download in progress.",
+                    "{0} did not return the expected InfoHash for '{1}', Gamarr could potentially lose track of the download in progress.",
                     Definition.Implementation,
-                    remoteMovie.Release.DownloadUrl);
+                    remoteGame.Release.DownloadUrl);
             }
 
             return actualHash;
         }
 
-        private void EnsureReleaseIsNotBlocklisted(RemoteMovie remoteMovie, IIndexer indexer, string hash)
+        private void EnsureReleaseIsNotBlocklisted(RemoteGame remoteGame, IIndexer indexer, string hash)
         {
             var indexerSettings = indexer?.Definition?.Settings as ITorrentIndexerSettings;
-            var torrentInfo = remoteMovie.Release as TorrentInfo;
+            var torrentInfo = remoteGame.Release as TorrentInfo;
             var torrentInfoHash = torrentInfo?.InfoHash;
 
             // If the release didn't come from an interactive search,
@@ -262,11 +262,11 @@ namespace NzbDrone.Core.Download
                 // If the hash isn't known from parsing we set it here so it can be used for blocklisting.
                 torrentInfo.InfoHash = hash;
 
-                if (remoteMovie.ReleaseSource != ReleaseSourceType.InteractiveSearch &&
+                if (remoteGame.ReleaseSource != ReleaseSourceType.InteractiveSearch &&
                     indexerSettings?.RejectBlocklistedTorrentHashesWhileGrabbing == true &&
-                    _blocklistService.BlocklistedTorrentHash(remoteMovie.Movie.Id, hash))
+                    _blocklistService.BlocklistedTorrentHash(remoteGame.Game.Id, hash))
                 {
-                    throw new ReleaseBlockedException(remoteMovie.Release, "Release previously added to blocklist");
+                    throw new ReleaseBlockedException(remoteGame.Release, "Release previously added to blocklist");
                 }
             }
         }

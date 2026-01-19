@@ -12,7 +12,7 @@ using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Others;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Extras.Metadata
@@ -57,14 +57,14 @@ namespace NzbDrone.Core.Extras.Metadata
 
         public override int Order => 0;
 
-        public override IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Movie movie)
+        public override IEnumerable<ExtraFile> CreateAfterMediaCoverUpdate(Game game)
         {
-            var metadataFiles = _metadataFileService.GetFilesByMovie(movie.Id);
-            _cleanMetadataService.Clean(movie);
+            var metadataFiles = _metadataFileService.GetFilesByGame(game.Id);
+            _cleanMetadataService.Clean(game);
 
-            if (!_diskProvider.FolderExists(movie.Path))
+            if (!_diskProvider.FolderExists(game.Path))
             {
-                _logger.Info("Movie folder does not exist, skipping metadata image creation");
+                _logger.Info("Game folder does not exist, skipping metadata image creation");
                 return Enumerable.Empty<MetadataFile>();
             }
 
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Extras.Metadata
             {
                 var consumerFiles = GetMetadataFilesForConsumer(consumer, metadataFiles);
 
-                files.AddRange(ProcessMovieImages(consumer, movie, consumerFiles));
+                files.AddRange(ProcessGameImages(consumer, game, consumerFiles));
             }
 
             _metadataFileService.Upsert(files);
@@ -82,14 +82,14 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieScan(Movie movie, List<MovieFile> movieFiles)
+        public override IEnumerable<ExtraFile> CreateAfterGameScan(Game game, List<GameFile> gameFiles)
         {
-            var metadataFiles = _metadataFileService.GetFilesByMovie(movie.Id);
-            _cleanMetadataService.Clean(movie);
+            var metadataFiles = _metadataFileService.GetFilesByGame(game.Id);
+            _cleanMetadataService.Clean(game);
 
-            if (!_diskProvider.FolderExists(movie.Path))
+            if (!_diskProvider.FolderExists(game.Path))
             {
-                _logger.Info("Movie folder does not exist, skipping metadata creation");
+                _logger.Info("Game folder does not exist, skipping metadata creation");
                 return Enumerable.Empty<MetadataFile>();
             }
 
@@ -99,11 +99,11 @@ namespace NzbDrone.Core.Extras.Metadata
             {
                 var consumerFiles = GetMetadataFilesForConsumer(consumer, metadataFiles);
 
-                files.AddRange(ProcessMovieImages(consumer, movie, consumerFiles));
+                files.AddRange(ProcessGameImages(consumer, game, consumerFiles));
 
-                foreach (var movieFile in movieFiles)
+                foreach (var gameFile in gameFiles)
                 {
-                    files.AddIfNotNull(ProcessMovieMetadata(consumer, movie, movieFile, consumerFiles));
+                    files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, consumerFiles));
                 }
             }
 
@@ -112,13 +112,13 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieImport(Movie movie, MovieFile movieFile)
+        public override IEnumerable<ExtraFile> CreateAfterGameImport(Game game, GameFile gameFile)
         {
             var files = new List<MetadataFile>();
 
             foreach (var consumer in _metadataFactory.Enabled())
             {
-                files.AddIfNotNull(ProcessMovieMetadata(consumer, movie, movieFile, new List<MetadataFile>()));
+                files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, new List<MetadataFile>()));
             }
 
             _metadataFileService.Upsert(files);
@@ -126,11 +126,11 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterMovieFolder(Movie movie, string movieFolder)
+        public override IEnumerable<ExtraFile> CreateAfterGameFolder(Game game, string gameFolder)
         {
-            var metadataFiles = _metadataFileService.GetFilesByMovie(movie.Id);
+            var metadataFiles = _metadataFileService.GetFilesByGame(game.Id);
 
-            if (movieFolder.IsNullOrWhiteSpace())
+            if (gameFolder.IsNullOrWhiteSpace())
             {
                 return Array.Empty<MetadataFile>();
             }
@@ -141,9 +141,9 @@ namespace NzbDrone.Core.Extras.Metadata
             {
                 var consumerFiles = GetMetadataFilesForConsumer(consumer, metadataFiles);
 
-                if (movieFolder.IsNotNullOrWhiteSpace())
+                if (gameFolder.IsNotNullOrWhiteSpace())
                 {
-                    files.AddRange(ProcessMovieImages(consumer, movie, consumerFiles));
+                    files.AddRange(ProcessGameImages(consumer, game, consumerFiles));
                 }
             }
 
@@ -152,30 +152,30 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Movie movie, List<MovieFile> movieFiles)
+        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Game game, List<GameFile> gameFiles)
         {
-            var metadataFiles = _metadataFileService.GetFilesByMovie(movie.Id);
+            var metadataFiles = _metadataFileService.GetFilesByGame(game.Id);
             var movedFiles = new List<MetadataFile>();
 
             // TODO: Move EpisodeImage and EpisodeMetadata metadata files, instead of relying on consumers to do it
             // (Xbmc's EpisodeImage is more than just the extension)
             foreach (var consumer in _metadataFactory.GetAvailableProviders())
             {
-                foreach (var movieFile in movieFiles)
+                foreach (var gameFile in gameFiles)
                 {
-                    var metadataFilesForConsumer = GetMetadataFilesForConsumer(consumer, metadataFiles).Where(m => m.MovieFileId == movieFile.Id).ToList();
+                    var metadataFilesForConsumer = GetMetadataFilesForConsumer(consumer, metadataFiles).Where(m => m.GameFileId == gameFile.Id).ToList();
 
                     foreach (var metadataFile in metadataFilesForConsumer)
                     {
-                        var newFileName = consumer.GetFilenameAfterMove(movie, movieFile, metadataFile);
-                        var existingFileName = Path.Combine(movie.Path, metadataFile.RelativePath);
+                        var newFileName = consumer.GetFilenameAfterMove(game, gameFile, metadataFile);
+                        var existingFileName = Path.Combine(game.Path, metadataFile.RelativePath);
 
                         if (newFileName.PathNotEquals(existingFileName))
                         {
                             try
                             {
                                 _diskProvider.MoveFile(existingFileName, newFileName);
-                                metadataFile.RelativePath = movie.Path.GetRelativePath(newFileName);
+                                metadataFile.RelativePath = game.Path.GetRelativePath(newFileName);
                                 movedFiles.Add(metadataFile);
                             }
                             catch (Exception ex)
@@ -192,57 +192,57 @@ namespace NzbDrone.Core.Extras.Metadata
             return movedFiles;
         }
 
-        public override bool CanImportFile(LocalMovie localMovie, MovieFile movieFile, string path, string extension, bool readOnly)
+        public override bool CanImportFile(LocalGame localGame, GameFile gameFile, string path, string extension, bool readOnly)
         {
             return false;
         }
 
-        public override IEnumerable<ExtraFile> ImportFiles(LocalMovie localMovie, MovieFile movieFile, List<string> files, bool isReadOnly)
+        public override IEnumerable<ExtraFile> ImportFiles(LocalGame localGame, GameFile gameFile, List<string> files, bool isReadOnly)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        private List<MetadataFile> GetMetadataFilesForConsumer(IMetadata consumer, List<MetadataFile> movieMetadata)
+        private List<MetadataFile> GetMetadataFilesForConsumer(IMetadata consumer, List<MetadataFile> gameMetadata)
         {
-            return movieMetadata.Where(c => c.Consumer == consumer.GetType().Name).ToList();
+            return gameMetadata.Where(c => c.Consumer == consumer.GetType().Name).ToList();
         }
 
-        private MetadataFile ProcessMovieMetadata(IMetadata consumer, Movie movie, MovieFile movieFile, List<MetadataFile> existingMetadataFiles)
+        private MetadataFile ProcessGameMetadata(IMetadata consumer, Game game, GameFile gameFile, List<MetadataFile> existingMetadataFiles)
         {
-            var movieFileMetadata = consumer.MovieMetadata(movie, movieFile);
+            var gameFileMetadata = consumer.GameMetadata(game, gameFile);
 
-            if (movieFileMetadata == null)
+            if (gameFileMetadata == null)
             {
                 return null;
             }
 
-            var fullPath = Path.Combine(movie.Path, movieFileMetadata.RelativePath);
+            var fullPath = Path.Combine(game.Path, gameFileMetadata.RelativePath);
 
-            _otherExtraFileRenamer.RenameOtherExtraFile(movie, fullPath);
+            _otherExtraFileRenamer.RenameOtherExtraFile(game, fullPath);
 
-            var existingMetadata = GetMetadataFile(movie, existingMetadataFiles, c => c.Type == MetadataType.MovieMetadata &&
-                                                                                  c.MovieFileId == movieFile.Id);
+            var existingMetadata = GetMetadataFile(game, existingMetadataFiles, c => c.Type == MetadataType.GameMetadata &&
+                                                                                  c.GameFileId == gameFile.Id);
 
             if (existingMetadata != null)
             {
-                var existingFullPath = Path.Combine(movie.Path, existingMetadata.RelativePath);
+                var existingFullPath = Path.Combine(game.Path, existingMetadata.RelativePath);
                 if (fullPath.PathNotEquals(existingFullPath))
                 {
                     _diskTransferService.TransferFile(existingFullPath, fullPath, TransferMode.Move);
-                    existingMetadata.RelativePath = movieFileMetadata.RelativePath;
+                    existingMetadata.RelativePath = gameFileMetadata.RelativePath;
                 }
             }
 
-            var hash = movieFileMetadata.Contents.SHA256Hash();
+            var hash = gameFileMetadata.Contents.SHA256Hash();
 
             var metadata = existingMetadata ??
                            new MetadataFile
                            {
-                               MovieId = movie.Id,
-                               MovieFileId = movieFile.Id,
+                               GameId = game.Id,
+                               GameFileId = gameFile.Id,
                                Consumer = consumer.GetType().Name,
-                               Type = MetadataType.MovieMetadata,
-                               RelativePath = movieFileMetadata.RelativePath,
+                               Type = MetadataType.GameMetadata,
+                               RelativePath = gameFileMetadata.RelativePath,
                                Extension = Path.GetExtension(fullPath)
                            };
 
@@ -251,42 +251,42 @@ namespace NzbDrone.Core.Extras.Metadata
                 return null;
             }
 
-            _logger.Debug("Writing Movie File Metadata to: {0}", fullPath);
-            SaveMetadataFile(fullPath, movieFileMetadata.Contents);
+            _logger.Debug("Writing Game File Metadata to: {0}", fullPath);
+            SaveMetadataFile(fullPath, gameFileMetadata.Contents);
 
             metadata.Hash = hash;
 
             return metadata;
         }
 
-        private List<MetadataFile> ProcessMovieImages(IMetadata consumer, Movie movie, List<MetadataFile> existingMetadataFiles)
+        private List<MetadataFile> ProcessGameImages(IMetadata consumer, Game game, List<MetadataFile> existingMetadataFiles)
         {
             var result = new List<MetadataFile>();
 
-            foreach (var image in consumer.MovieImages(movie))
+            foreach (var image in consumer.GameImages(game))
             {
-                var fullPath = Path.Combine(movie.Path, image.RelativePath);
+                var fullPath = Path.Combine(game.Path, image.RelativePath);
 
                 if (_diskProvider.FileExists(fullPath))
                 {
-                    _logger.Debug("Movie image already exists: {0}", fullPath);
+                    _logger.Debug("Game image already exists: {0}", fullPath);
                     continue;
                 }
 
-                _otherExtraFileRenamer.RenameOtherExtraFile(movie, fullPath);
+                _otherExtraFileRenamer.RenameOtherExtraFile(game, fullPath);
 
-                var metadata = GetMetadataFile(movie, existingMetadataFiles, c => c.Type == MetadataType.MovieImage &&
+                var metadata = GetMetadataFile(game, existingMetadataFiles, c => c.Type == MetadataType.GameImage &&
                                                                                    c.RelativePath == image.RelativePath) ??
                                new MetadataFile
                                {
-                                   MovieId = movie.Id,
+                                   GameId = game.Id,
                                    Consumer = consumer.GetType().Name,
-                                   Type = MetadataType.MovieImage,
+                                   Type = MetadataType.GameImage,
                                    RelativePath = image.RelativePath,
                                    Extension = Path.GetExtension(fullPath)
                                };
 
-                DownloadImage(movie, image);
+                DownloadImage(game, image);
 
                 result.Add(metadata);
             }
@@ -294,9 +294,9 @@ namespace NzbDrone.Core.Extras.Metadata
             return result;
         }
 
-        private void DownloadImage(Movie movie, ImageFileResult image)
+        private void DownloadImage(Game game, ImageFileResult image)
         {
-            var fullPath = Path.Combine(movie.Path, image.RelativePath);
+            var fullPath = Path.Combine(game.Path, image.RelativePath);
             var downloaded = true;
 
             try
@@ -321,15 +321,15 @@ namespace NzbDrone.Core.Extras.Metadata
             }
             catch (HttpException ex)
             {
-                _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, movie, ex.Message);
+                _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
             catch (WebException ex)
             {
-                _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, movie, ex.Message);
+                _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Couldn't download image {0} for {1}. {2}", image.Url, movie, ex.Message);
+                _logger.Error(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
         }
 
@@ -339,7 +339,7 @@ namespace NzbDrone.Core.Extras.Metadata
             _mediaFileAttributeService.SetFilePermissions(path);
         }
 
-        private MetadataFile GetMetadataFile(Movie movie, List<MetadataFile> existingMetadataFiles, Func<MetadataFile, bool> predicate)
+        private MetadataFile GetMetadataFile(Game game, List<MetadataFile> existingMetadataFiles, Func<MetadataFile, bool> predicate)
         {
             var matchingMetadataFiles = existingMetadataFiles.Where(predicate).ToList();
 
@@ -351,7 +351,7 @@ namespace NzbDrone.Core.Extras.Metadata
             // Remove duplicate metadata files from DB and disk
             foreach (var file in matchingMetadataFiles.Skip(1))
             {
-                var path = Path.Combine(movie.Path, file.RelativePath);
+                var path = Path.Combine(game.Path, file.RelativePath);
 
                 _logger.Debug("Removing duplicate Metadata file: {0}", path);
 

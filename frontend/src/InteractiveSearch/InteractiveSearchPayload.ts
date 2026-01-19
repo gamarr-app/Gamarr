@@ -1,7 +1,7 @@
-interface MovieSearchPayload {
-  movieId: number;
+interface GameSearchPayload {
+  gameId: number;
 }
 
-type InteractiveSearchPayload = MovieSearchPayload;
+type InteractiveSearchPayload = GameSearchPayload;
 
 export default InteractiveSearchPayload;

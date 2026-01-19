@@ -9,14 +9,14 @@ namespace NzbDrone.Core.ImportLists.TMDb.Company
 {
     public class TMDbCompanyImport : TMDbImportListBase<TMDbCompanySettings>
     {
-        public TMDbCompanyImport(IRadarrCloudRequestBuilder requestBuilder,
+        public TMDbCompanyImport(IGamarrCloudRequestBuilder requestBuilder,
                                  IHttpClient httpClient,
                                  IImportListStatusService importListStatusService,
                                  IConfigService configService,
                                  IParsingService parsingService,
-                                 ISearchForNewMovie searchForNewMovie,
+                                 ISearchForNewGame searchForNewGame,
                                  Logger logger)
-        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewMovie, logger)
+        : base(requestBuilder, httpClient, importListStatusService, configService, parsingService, searchForNewGame, logger)
         {
         }
 

@@ -22,7 +22,7 @@ namespace NzbDrone.Core.ImportLists.Rss
 
         public override ImportListFetchResult Fetch()
         {
-            return FetchMovies(g => g.GetMovies());
+            return FetchGames(g => g.GetGames());
         }
 
         public override IParseImportListResponse GetParser()

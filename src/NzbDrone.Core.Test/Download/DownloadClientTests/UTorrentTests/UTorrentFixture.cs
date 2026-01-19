@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MovieCategory = "movie"
+                GameCategory = "game"
             };
 
             _queued = new UTorrentTorrent
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
                 Size = 1000,
                 Remaining = 1000,
                 Progress = 0,
-                Label = "movie",
+                Label = "game",
                 DownloadUrl = _downloadUrl,
                 RootDownloadPath = "somepath"
             };
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
                 Size = 1000,
                 Remaining = 100,
                 Progress = 0.9,
-                Label = "movie",
+                Label = "game",
                 DownloadUrl = _downloadUrl,
                 RootDownloadPath = "somepath"
             };
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
                 Size = 1000,
                 Remaining = 100,
                 Progress = 0.9,
-                Label = "movie",
+                Label = "game",
                 DownloadUrl = _downloadUrl,
                 RootDownloadPath = "somepath"
             };
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
                 Size = 1000,
                 Remaining = 0,
                 Progress = 1.0,
-                Label = "movie",
+                Label = "game",
                 DownloadUrl = _downloadUrl,
                 RootDownloadPath = "somepath"
             };
@@ -108,7 +108,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
         protected void GivenRedirectToTorrent()
         {
             var httpHeader = new HttpHeader();
-            httpHeader["Location"] = "http://test.radarr.video/not-a-real-torrent.torrent";
+            httpHeader["Location"] = "http://test.gamarr.video/not-a-real-torrent.torrent";
 
             Mocker.GetMock<IHttpClient>()
                   .Setup(s => s.Get(It.Is<HttpRequest>(h => h.Url.ToString() == _downloadUrl)))
@@ -233,9 +233,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -257,10 +257,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
         {
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
-            remoteMovie.Release.DownloadUrl = magnetUrl;
+            var remoteGame = CreateRemoteGame();
+            remoteGame.Release.DownloadUrl = magnetUrl;
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().Be(expectedHash);
         }
@@ -333,7 +333,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
 
             result.IsLocalhost.Should().BeTrue();
             result.OutputRootFolders.Should().NotBeNull();
-            result.OutputRootFolders.First().Should().Be(@"C:\Downloads\Finished\utorrent\movie".AsOsAgnostic());
+            result.OutputRootFolders.First().Should().Be(@"C:\Downloads\Finished\utorrent\game".AsOsAgnostic());
         }
 
         [Test]
@@ -356,9 +356,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
             GivenRedirectToMagnet();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -369,9 +369,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
             GivenRedirectToTorrent();
             GivenSuccessfulDownload();
 
-            var remoteMovie = CreateRemoteMovie();
+            var remoteGame = CreateRemoteGame();
 
-            var id = await Subject.Download(remoteMovie, CreateIndexer());
+            var id = await Subject.Download(remoteGame, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }

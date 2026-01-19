@@ -21,18 +21,18 @@ import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { align, icons, kinds } from 'Helpers/Props';
-import Movie from 'Movie/Movie';
+import Game from 'Game/Game';
 import { executeCommand } from 'Store/Actions/commandActions';
 import {
-  clearMovieFiles,
-  fetchMovieFiles,
-} from 'Store/Actions/movieFileActions';
+  clearGameFiles,
+  fetchGameFiles,
+} from 'Store/Actions/gameFileActions';
 import {
   clearQueueDetails,
   fetchQueueDetails,
 } from 'Store/Actions/queueActions';
 import {
-  batchToggleCutoffUnmetMovies,
+  batchToggleCutoffUnmetGames,
   clearCutoffUnmet,
   fetchCutoffUnmet,
   gotoCutoffUnmetPage,
@@ -82,11 +82,11 @@ function CutoffUnmet() {
     totalRecords = 0,
   } = useSelector((state: AppState) => state.wanted.cutoffUnmet);
 
-  const isSearchingForAllMovies = useSelector(
-    createCommandExecutingSelector(commandNames.CUTOFF_UNMET_MOVIES_SEARCH)
+  const isSearchingForAllGames = useSelector(
+    createCommandExecutingSelector(commandNames.CUTOFF_UNMET_GAMES_SEARCH)
   );
-  const isSearchingForSelectedMovies = useSelector(
-    createCommandExecutingSelector(commandNames.MOVIE_SEARCH)
+  const isSearchingForSelectedGames = useSelector(
+    createCommandExecutingSelector(commandNames.GAME_SEARCH)
   );
 
   const [selectState, setSelectState] = useSelectState();
@@ -117,8 +117,8 @@ function CutoffUnmet() {
 
   const itemsSelected = !!selectedIds.length;
   const isShowingMonitored = getMonitoredValue(filters, selectedFilterKey);
-  const isSearchingForMovies =
-    isSearchingForAllMovies || isSearchingForSelectedMovies;
+  const isSearchingForGames =
+    isSearchingForAllGames || isSearchingForSelectedGames;
 
   const previousItems = usePrevious(items);
 
@@ -145,8 +145,8 @@ function CutoffUnmet() {
   const handleSearchSelectedPress = useCallback(() => {
     dispatch(
       executeCommand({
-        name: commandNames.MOVIE_SEARCH,
-        movieIds: selectedIds,
+        name: commandNames.GAME_SEARCH,
+        gameIds: selectedIds,
         commandFinished: () => {
           dispatch(fetchCutoffUnmet());
         },
@@ -165,7 +165,7 @@ function CutoffUnmet() {
   const handleSearchAllCutoffUnmetConfirmed = useCallback(() => {
     dispatch(
       executeCommand({
-        name: commandNames.CUTOFF_UNMET_MOVIES_SEARCH,
+        name: commandNames.CUTOFF_UNMET_GAMES_SEARCH,
         commandFinished: () => {
           dispatch(fetchCutoffUnmet());
         },
@@ -177,8 +177,8 @@ function CutoffUnmet() {
 
   const handleToggleSelectedPress = useCallback(() => {
     dispatch(
-      batchToggleCutoffUnmetMovies({
-        movieIds: selectedIds,
+      batchToggleCutoffUnmetGames({
+        gameIds: selectedIds,
         monitored: !isShowingMonitored,
       })
     );
@@ -219,7 +219,7 @@ function CutoffUnmet() {
     return () => {
       dispatch(clearCutoffUnmet());
       dispatch(clearQueueDetails());
-      dispatch(clearMovieFiles());
+      dispatch(clearGameFiles());
     };
   }, [requestCurrentPage, dispatch]);
 
@@ -229,9 +229,9 @@ function CutoffUnmet() {
     };
 
     registerPagePopulator(repopulate, [
-      'movieUpdated',
-      'movieFileUpdated',
-      'movieFileDeleted',
+      'gameUpdated',
+      'gameFileUpdated',
+      'gameFileDeleted',
     ]);
 
     return () => {
@@ -241,15 +241,15 @@ function CutoffUnmet() {
 
   useEffect(() => {
     if (!previousItems || hasDifferentItems(items, previousItems)) {
-      const movieIds = selectUniqueIds<Movie, number>(items, 'id');
-      const movieFileIds = selectUniqueIds<Movie, number>(items, 'movieFileId');
+      const gameIds = selectUniqueIds<Game, number>(items, 'id');
+      const gameFileIds = selectUniqueIds<Game, number>(items, 'gameFileId');
 
-      if (movieIds.length) {
-        dispatch(fetchQueueDetails({ movieIds }));
+      if (gameIds.length) {
+        dispatch(fetchQueueDetails({ gameIds }));
       }
 
-      if (movieFileIds.length) {
-        dispatch(fetchMovieFiles({ movieFileIds }));
+      if (gameFileIds.length) {
+        dispatch(fetchGameFiles({ gameFileIds }));
       }
     }
   }, [items, previousItems, dispatch]);
@@ -265,8 +265,8 @@ function CutoffUnmet() {
                 : translate('SearchAll')
             }
             iconName={icons.SEARCH}
-            isDisabled={isSearchingForMovies}
-            isSpinning={isSearchingForMovies}
+            isDisabled={isSearchingForGames}
+            isSpinning={isSearchingForGames}
             onPress={
               itemsSelected ? handleSearchSelectedPress : handleSearchAllPress
             }
@@ -364,11 +364,11 @@ function CutoffUnmet() {
             <ConfirmModal
               isOpen={isConfirmSearchAllModalOpen}
               kind={kinds.DANGER}
-              title={translate('SearchForCutoffUnmetMovies')}
+              title={translate('SearchForCutoffUnmetGames')}
               message={
                 <div>
                   <div>
-                    {translate('SearchForCutoffUnmetMoviesConfirmationCount', {
+                    {translate('SearchForCutoffUnmetGamesConfirmationCount', {
                       totalRecords,
                     })}
                   </div>

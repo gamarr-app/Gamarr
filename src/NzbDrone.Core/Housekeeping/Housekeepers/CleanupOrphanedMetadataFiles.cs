@@ -14,42 +14,42 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 
         public void Clean()
         {
-            DeleteOrphanedByMovie();
-            DeleteOrphanedByMovieFile();
-            DeleteWhereMovieFileIsZero();
+            DeleteOrphanedByGame();
+            DeleteOrphanedByGameFile();
+            DeleteWhereGameFileIsZero();
         }
 
-        private void DeleteOrphanedByMovie()
+        private void DeleteOrphanedByGame()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""
                              WHERE ""Id"" IN (
                              SELECT ""MetadataFiles"".""Id"" FROM ""MetadataFiles""
-                             LEFT OUTER JOIN ""Movies""
-                             ON ""MetadataFiles"".""MovieId"" = ""Movies"".""Id""
-                             WHERE ""Movies"".""Id"" IS NULL)");
+                             LEFT OUTER JOIN ""Games""
+                             ON ""MetadataFiles"".""GameId"" = ""Games"".""Id""
+                             WHERE ""Games"".""Id"" IS NULL)");
         }
 
-        private void DeleteOrphanedByMovieFile()
+        private void DeleteOrphanedByGameFile()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""
                              WHERE ""Id"" IN (
                              SELECT ""MetadataFiles"".""Id"" FROM ""MetadataFiles""
-                             LEFT OUTER JOIN ""MovieFiles""
-                             ON ""MetadataFiles"".""MovieFileId"" = ""MovieFiles"".""Id""
-                             WHERE ""MetadataFiles"".""MovieFileId"" > 0
-                             AND ""MovieFiles"".""Id"" IS NULL)");
+                             LEFT OUTER JOIN ""GameFiles""
+                             ON ""MetadataFiles"".""GameFileId"" = ""GameFiles"".""Id""
+                             WHERE ""MetadataFiles"".""GameFileId"" > 0
+                             AND ""GameFiles"".""Id"" IS NULL)");
         }
 
-        private void DeleteWhereMovieFileIsZero()
+        private void DeleteWhereGameFileIsZero()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""
                              WHERE ""Id"" IN (
                              SELECT ""Id"" FROM ""MetadataFiles""
                              WHERE ""Type"" IN (1, 2)
-                             AND ""MovieFileId"" = 0)");
+                             AND ""GameFileId"" = 0)");
         }
     }
 }

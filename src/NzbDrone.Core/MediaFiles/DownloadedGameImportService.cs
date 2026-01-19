@@ -1,0 +1,408 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using NLog;
+using NzbDrone.Common.Disk;
+using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Download;
+using NzbDrone.Core.History;
+using NzbDrone.Core.MediaFiles.GameImport;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Parser;
+using NzbDrone.Core.Parser.Model;
+
+namespace NzbDrone.Core.MediaFiles
+{
+    public interface IDownloadedGameImportService
+    {
+        List<ImportResult> ProcessRootFolder(DirectoryInfo directoryInfo);
+        List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Game game = null, DownloadClientItem downloadClientItem = null);
+        bool ShouldDeleteFolder(DirectoryInfo directoryInfo, Game game);
+    }
+
+    public class DownloadedGameImportService : IDownloadedGameImportService
+    {
+        private readonly IDiskProvider _diskProvider;
+        private readonly IDiskScanService _diskScanService;
+        private readonly IGameService _gameService;
+        private readonly IParsingService _parsingService;
+        private readonly IMakeImportDecision _importDecisionMaker;
+        private readonly IImportApprovedGame _importApprovedGame;
+        private readonly IDetectSample _detectSample;
+        private readonly IRuntimeInfo _runtimeInfo;
+        private readonly IConfigService _config;
+        private readonly IHistoryService _historyService;
+        private readonly Logger _logger;
+
+        public DownloadedGameImportService(IDiskProvider diskProvider,
+                                               IDiskScanService diskScanService,
+                                               IGameService gameService,
+                                               IParsingService parsingService,
+                                               IMakeImportDecision importDecisionMaker,
+                                               IImportApprovedGame importApprovedGame,
+                                               IDetectSample detectSample,
+                                               IRuntimeInfo runtimeInfo,
+                                               IConfigService config,
+                                               IHistoryService historyService,
+                                               Logger logger)
+        {
+            _diskProvider = diskProvider;
+            _diskScanService = diskScanService;
+            _gameService = gameService;
+            _parsingService = parsingService;
+            _importDecisionMaker = importDecisionMaker;
+            _importApprovedGame = importApprovedGame;
+            _detectSample = detectSample;
+            _runtimeInfo = runtimeInfo;
+            _config = config;
+            _historyService = historyService;
+            _logger = logger;
+        }
+
+        public List<ImportResult> ProcessRootFolder(DirectoryInfo directoryInfo)
+        {
+            var results = new List<ImportResult>();
+
+            foreach (var subFolder in _diskProvider.GetDirectories(directoryInfo.FullName))
+            {
+                var folderResults = ProcessFolder(new DirectoryInfo(subFolder), ImportMode.Auto, null);
+                results.AddRange(folderResults);
+            }
+
+            foreach (var videoFile in _diskScanService.GetVideoFiles(directoryInfo.FullName, false))
+            {
+                var fileResults = ProcessFile(new FileInfo(videoFile), ImportMode.Auto, null);
+                results.AddRange(fileResults);
+            }
+
+            return results;
+        }
+
+        public List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Game game = null, DownloadClientItem downloadClientItem = null)
+        {
+            _logger.Debug("Processing path: {0}", path);
+
+            if (_diskProvider.FolderExists(path))
+            {
+                var directoryInfo = new DirectoryInfo(path);
+
+                if (game == null)
+                {
+                    return ProcessFolder(directoryInfo, importMode, downloadClientItem);
+                }
+
+                return ProcessFolder(directoryInfo, importMode, game, downloadClientItem);
+            }
+
+            if (_diskProvider.FileExists(path))
+            {
+                var fileInfo = new FileInfo(path);
+
+                if (game == null)
+                {
+                    return ProcessFile(fileInfo, importMode, downloadClientItem);
+                }
+
+                return ProcessFile(fileInfo, importMode, game, downloadClientItem);
+            }
+
+            LogInaccessiblePathError(path);
+            return new List<ImportResult>();
+        }
+
+        public bool ShouldDeleteFolder(DirectoryInfo directoryInfo, Game game)
+        {
+            try
+            {
+                var videoFiles = _diskScanService.GetVideoFiles(directoryInfo.FullName);
+                var rarFiles = _diskProvider.GetFiles(directoryInfo.FullName, true).Where(f =>
+                    Path.GetExtension(f).Equals(".rar",
+                        StringComparison.OrdinalIgnoreCase));
+
+                foreach (var videoFile in videoFiles)
+                {
+                    var gameParseResult =
+                        Parser.Parser.ParseGameTitle(Path.GetFileName(videoFile));
+
+                    if (gameParseResult == null)
+                    {
+                        _logger.Warn("Unable to parse file on import: [{0}]", videoFile);
+                        return false;
+                    }
+
+                    if (_detectSample.IsSample(game.GameMetadata, videoFile) != DetectSampleResult.Sample)
+                    {
+                        _logger.Warn("Non-sample file detected: [{0}]", videoFile);
+                        return false;
+                    }
+                }
+
+                if (rarFiles.Any(f => _diskProvider.GetFileSize(f) > 10.Megabytes()))
+                {
+                    _logger.Warn("RAR file detected, will require manual cleanup");
+                    return false;
+                }
+
+                return true;
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                _logger.Debug(e, "Folder {0} has already been removed", directoryInfo.FullName);
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.Debug(e, "Unable to determine whether folder {0} should be removed", directoryInfo.FullName);
+                return false;
+            }
+        }
+
+        private List<ImportResult> ProcessFolder(DirectoryInfo directoryInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
+        {
+            var cleanedUpName = GetCleanedUpFolderName(directoryInfo.Name);
+            var game = _parsingService.GetGame(cleanedUpName);
+
+            if (game == null)
+            {
+                _logger.Debug("Unknown Game {0}", cleanedUpName);
+
+                return new List<ImportResult>
+                       {
+                           UnknownGameResult("Unknown Game")
+                       };
+            }
+
+            return ProcessFolder(directoryInfo, importMode, game, downloadClientItem);
+        }
+
+        private List<ImportResult> ProcessFolder(DirectoryInfo directoryInfo, ImportMode importMode, Game game, DownloadClientItem downloadClientItem)
+        {
+            if (_gameService.GamePathExists(directoryInfo.FullName))
+            {
+                _logger.Warn("Unable to process folder that is mapped to an existing game");
+                return new List<ImportResult>
+                {
+                    RejectionResult(ImportRejectionReason.GameFolder, "Import path is mapped to a game folder")
+                };
+            }
+
+            var cleanedUpName = GetCleanedUpFolderName(directoryInfo.Name);
+            var historyItems = _historyService.FindByDownloadId(downloadClientItem?.DownloadId ?? "");
+            var firstHistoryItem = historyItems?.OrderByDescending(h => h.Date).FirstOrDefault();
+            var folderInfo = Parser.Parser.ParseGameTitle(cleanedUpName);
+
+            if (folderInfo != null)
+            {
+                _logger.Debug("{0} folder quality: {1}", cleanedUpName, folderInfo.Quality);
+            }
+
+            var videoFiles = _diskScanService.FilterPaths(directoryInfo.FullName, _diskScanService.GetVideoFiles(directoryInfo.FullName));
+
+            if (downloadClientItem == null)
+            {
+                foreach (var videoFile in videoFiles)
+                {
+                    if (_diskProvider.IsFileLocked(videoFile))
+                    {
+                        return new List<ImportResult>
+                               {
+                                   FileIsLockedResult(videoFile)
+                               };
+                    }
+                }
+            }
+
+            var decisions = _importDecisionMaker.GetImportDecisions(videoFiles.ToList(), game, downloadClientItem, folderInfo, true);
+            var importResults = _importApprovedGame.Import(decisions, true, downloadClientItem, importMode);
+
+            if (importMode == ImportMode.Auto)
+            {
+                importMode = (downloadClientItem == null || downloadClientItem.CanMoveFiles) ? ImportMode.Move : ImportMode.Copy;
+            }
+
+            if (importMode == ImportMode.Move &&
+                importResults.Any(i => i.Result == ImportResultType.Imported) &&
+                ShouldDeleteFolder(directoryInfo, game))
+            {
+                _logger.Debug("Deleting folder after importing valid files");
+
+                try
+                {
+                    _diskProvider.DeleteFolder(directoryInfo.FullName, true);
+                }
+                catch (IOException e)
+                {
+                    _logger.Debug(e, "Unable to delete folder after importing: {0}", e.Message);
+                }
+            }
+            else if (importResults.Empty())
+            {
+                importResults.AddIfNotNull(CheckEmptyResultForIssue(directoryInfo.FullName));
+            }
+
+            return importResults;
+        }
+
+        private List<ImportResult> ProcessFile(FileInfo fileInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
+        {
+            var game = _parsingService.GetGame(Path.GetFileNameWithoutExtension(fileInfo.Name));
+
+            if (game == null)
+            {
+                _logger.Debug("Unknown Game for file: {0}", fileInfo.Name);
+
+                return new List<ImportResult>
+                       {
+                           UnknownGameResult(string.Format("Unknown Game for file: {0}", fileInfo.Name), fileInfo.FullName)
+                       };
+            }
+
+            return ProcessFile(fileInfo, importMode, game, downloadClientItem);
+        }
+
+        private List<ImportResult> ProcessFile(FileInfo fileInfo, ImportMode importMode, Game game, DownloadClientItem downloadClientItem)
+        {
+            if (Path.GetFileNameWithoutExtension(fileInfo.Name).StartsWith("._"))
+            {
+                _logger.Debug("[{0}] starts with '._', skipping", fileInfo.FullName);
+
+                return new List<ImportResult>
+                       {
+                           new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName }, new ImportRejection(ImportRejectionReason.InvalidFilePath, "Invalid video file, filename starts with '._'")), "Invalid video file, filename starts with '._'")
+                       };
+            }
+
+            var extension = Path.GetExtension(fileInfo.Name);
+
+            if (FileExtensions.DangerousExtensions.Contains(extension))
+            {
+                return new List<ImportResult>
+                {
+                    new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
+                            new ImportRejection(ImportRejectionReason.DangerousFile, $"Caution: Found potentially dangerous file with extension: {extension}")),
+                        $"Caution: Found potentially dangerous file with extension: {extension}")
+                };
+            }
+
+            if (FileExtensions.ExecutableExtensions.Contains(extension))
+            {
+                return new List<ImportResult>
+                {
+                    new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
+                            new ImportRejection(ImportRejectionReason.ExecutableFile, $"Caution: Found executable file with extension: '{extension}'")),
+                        $"Caution: Found executable file with extension: '{extension}'")
+                };
+            }
+
+            if (extension.IsNullOrWhiteSpace() || !MediaFileExtensions.Extensions.Contains(extension))
+            {
+                _logger.Debug("[{0}] has an unsupported extension: '{1}'", fileInfo.FullName, extension);
+
+                return new List<ImportResult>
+                       {
+                           new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
+                               new ImportRejection(ImportRejectionReason.UnsupportedExtension, $"Invalid video file, unsupported extension: '{extension}'")),
+                               $"Invalid video file, unsupported extension: '{extension}'")
+                       };
+            }
+
+            if (downloadClientItem == null)
+            {
+                if (_diskProvider.IsFileLocked(fileInfo.FullName))
+                {
+                    return new List<ImportResult>
+                           {
+                               FileIsLockedResult(fileInfo.FullName)
+                           };
+                }
+            }
+
+            var decisions = _importDecisionMaker.GetImportDecisions(new List<string>() { fileInfo.FullName }, game, downloadClientItem, null, true);
+
+            return _importApprovedGame.Import(decisions, true, downloadClientItem, importMode);
+        }
+
+        private string GetCleanedUpFolderName(string folder)
+        {
+            folder = folder.Replace("_UNPACK_", "")
+                           .Replace("_FAILED_", "");
+
+            return folder;
+        }
+
+        private ImportResult FileIsLockedResult(string videoFile)
+        {
+            _logger.Debug("[{0}] is currently locked by another process, skipping", videoFile);
+            return new ImportResult(new ImportDecision(new LocalGame { Path = videoFile }, new ImportRejection(ImportRejectionReason.FileLocked, "Locked file, try again later")), "Locked file, try again later");
+        }
+
+        private ImportResult UnknownGameResult(string message, string videoFile = null)
+        {
+            var localGame = videoFile == null ? null : new LocalGame { Path = videoFile };
+
+            return new ImportResult(new ImportDecision(localGame, new ImportRejection(ImportRejectionReason.UnknownGame, "Unknown Game")), message);
+        }
+
+        private ImportResult RejectionResult(ImportRejectionReason reason, string message)
+        {
+            return new ImportResult(new ImportDecision(null, new ImportRejection(reason, message)), message);
+        }
+
+        private ImportResult CheckEmptyResultForIssue(string folder)
+        {
+            var files = _diskProvider.GetFiles(folder, true);
+
+            if (files.Any(file => FileExtensions.DangerousExtensions.Contains(Path.GetExtension(file))))
+            {
+                return RejectionResult(ImportRejectionReason.DangerousFile, "Caution: Found potentially dangerous file");
+            }
+
+            if (files.Any(file => FileExtensions.ExecutableExtensions.Contains(Path.GetExtension(file))))
+            {
+                return RejectionResult(ImportRejectionReason.ExecutableFile, "Caution: Found executable file");
+            }
+
+            if (files.Any(file => FileExtensions.ArchiveExtensions.Contains(Path.GetExtension(file))))
+            {
+                return RejectionResult(ImportRejectionReason.ArchiveFile, "Found archive file, might need to be extracted");
+            }
+
+            return null;
+        }
+
+        private void LogInaccessiblePathError(string path)
+        {
+            if (_runtimeInfo.IsWindowsService)
+            {
+                var mounts = _diskProvider.GetMounts();
+                var mount = mounts.FirstOrDefault(m => m.RootDirectory == Path.GetPathRoot(path));
+
+                if (mount == null)
+                {
+                    _logger.Error("Import failed, path does not exist or is not accessible by Gamarr: {0}. Unable to find a volume mounted for the path. If you're using a mapped network drive see the FAQ for more info", path);
+                    return;
+                }
+
+                if (mount.DriveType == DriveType.Network)
+                {
+                    _logger.Error("Import failed, path does not exist or is not accessible by Gamarr: {0}. It's recommended to avoid mapped network drives when running as a Windows service. See the FAQ for more info", path);
+                    return;
+                }
+            }
+
+            if (OsInfo.IsWindows)
+            {
+                if (path.StartsWith(@"\\"))
+                {
+                    _logger.Error("Import failed, path does not exist or is not accessible by Gamarr: {0}. Ensure the user running Gamarr has access to the network share", path);
+                    return;
+                }
+            }
+
+            _logger.Error("Import failed, path does not exist or is not accessible by Gamarr: {0}. Ensure the path exists and the user running Gamarr has the correct permissions to access this file/folder", path);
+        }
+    }
+}

@@ -81,7 +81,7 @@ function Settings() {
         </Link>
 
         <div className={styles.summary}>
-          {translate('MetadataSettingsMovieSummary')}
+          {translate('MetadataSettingsGameSummary')}
         </div>
 
         <Link className={styles.link} to="/settings/tags">

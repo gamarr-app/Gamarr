@@ -3,52 +3,52 @@ using System.Collections.Generic;
 using System.IO;
 using NLog;
 using NzbDrone.Common;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.MediaFiles
 {
     public interface IMediaFileTableCleanupService
     {
-        void Clean(Movie movie, List<string> filesOnDisk);
+        void Clean(Game game, List<string> filesOnDisk);
     }
 
     public class MediaFileTableCleanupService : IMediaFileTableCleanupService
     {
         private readonly IMediaFileService _mediaFileService;
-        private readonly IMovieService _movieService;
+        private readonly IGameService _gameService;
         private readonly Logger _logger;
 
         public MediaFileTableCleanupService(IMediaFileService mediaFileService,
-                                            IMovieService movieService,
+                                            IGameService gameService,
                                             Logger logger)
         {
             _mediaFileService = mediaFileService;
-            _movieService = movieService;
+            _gameService = gameService;
             _logger = logger;
         }
 
-        public void Clean(Movie movie, List<string> filesOnDisk)
+        public void Clean(Game game, List<string> filesOnDisk)
         {
-            var movieFiles = _mediaFileService.GetFilesByMovie(movie.Id);
+            var gameFiles = _mediaFileService.GetFilesByGame(game.Id);
 
             var filesOnDiskKeys = new HashSet<string>(filesOnDisk, PathEqualityComparer.Instance);
 
-            foreach (var movieFile in movieFiles)
+            foreach (var gameFile in gameFiles)
             {
-                var movieFilePath = Path.Combine(movie.Path, movieFile.RelativePath);
+                var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
 
                 try
                 {
-                    if (!filesOnDiskKeys.Contains(movieFilePath))
+                    if (!filesOnDiskKeys.Contains(gameFilePath))
                     {
-                        _logger.Debug("File [{0}] no longer exists on disk, removing from db", movieFilePath);
-                        _mediaFileService.Delete(movieFile, DeleteMediaFileReason.MissingFromDisk);
+                        _logger.Debug("File [{0}] no longer exists on disk, removing from db", gameFilePath);
+                        _mediaFileService.Delete(gameFile, DeleteMediaFileReason.MissingFromDisk);
                         continue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    var errorMessage = string.Format("Unable to cleanup MovieFile in DB: {0}", movieFile.Id);
+                    var errorMessage = string.Format("Unable to cleanup GameFile in DB: {0}", gameFile.Id);
                     _logger.Error(ex, errorMessage);
                 }
             }

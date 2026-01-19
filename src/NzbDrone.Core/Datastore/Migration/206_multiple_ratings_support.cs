@@ -28,24 +28,24 @@ namespace NzbDrone.Core.Datastore.Migration
 
         protected override void MainDbUpgrade()
         {
-            Execute.Sql("UPDATE \"CustomFilters\" SET \"Filters\" = Replace(\"Filters\", 'ratings', 'tmdbRating') WHERE \"Type\" = 'discoverMovie';");
-            Execute.Sql("UPDATE \"CustomFilters\" SET \"Filters\" = Replace(\"Filters\", 'ratings', 'tmdbRating') WHERE \"Type\" = 'movieIndex';");
+            Execute.Sql("UPDATE \"CustomFilters\" SET \"Filters\" = Replace(\"Filters\", 'ratings', 'igdbRating') WHERE \"Type\" = 'discoverGame';");
+            Execute.Sql("UPDATE \"CustomFilters\" SET \"Filters\" = Replace(\"Filters\", 'ratings', 'igdbRating') WHERE \"Type\" = 'gameIndex';");
 
-            Execute.WithConnection((conn, tran) => FixRatings(conn, tran, "Movies"));
-            Execute.WithConnection((conn, tran) => FixRatings(conn, tran, "ImportListMovies"));
+            Execute.WithConnection((conn, tran) => FixRatings(conn, tran, "Games"));
+            Execute.WithConnection((conn, tran) => FixRatings(conn, tran, "ImportListGames"));
         }
 
         private void FixRatings(IDbConnection conn, IDbTransaction tran, string table)
         {
-            var rows = conn.Query<Movie205>($"SELECT \"Id\", \"Ratings\" FROM \"{table}\"");
+            var rows = conn.Query<Game205>($"SELECT \"Id\", \"Ratings\" FROM \"{table}\"");
 
-            var corrected = new List<Movie206>();
+            var corrected = new List<Game206>();
 
             foreach (var row in rows)
             {
                 var newRatings = new Ratings206
                 {
-                    Tmdb = new RatingChild206
+                    Igdb = new RatingChild206
                     {
                         Votes = 0,
                         Value = 0,
@@ -57,11 +57,11 @@ namespace NzbDrone.Core.Datastore.Migration
                 {
                     var oldRatings = JsonSerializer.Deserialize<Ratings205>(row.Ratings, _serializerSettings);
 
-                    newRatings.Tmdb.Votes = oldRatings.Votes;
-                    newRatings.Tmdb.Value = oldRatings.Value;
+                    newRatings.Igdb.Votes = oldRatings.Votes;
+                    newRatings.Igdb.Value = oldRatings.Value;
                 }
 
-                corrected.Add(new Movie206
+                corrected.Add(new Game206
                 {
                     Id = row.Id,
                     Ratings = JsonSerializer.Serialize(newRatings, _serializerSettings)
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Datastore.Migration
             conn.Execute(updateSql, corrected, transaction: tran);
         }
 
-        private class Movie205
+        private class Game205
         {
             public int Id { get; set; }
             public string Ratings { get; set; }
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Datastore.Migration
             public decimal Value { get; set; }
         }
 
-        private class Movie206
+        private class Game206
         {
             public int Id { get; set; }
             public string Ratings { get; set; }
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Datastore.Migration
 
         private class Ratings206
         {
-            public RatingChild206 Tmdb { get; set; }
+            public RatingChild206 Igdb { get; set; }
             public RatingChild206 Imdb { get; set; }
             public RatingChild206 Metacritic { get; set; }
             public RatingChild206 RottenTomatoes { get; set; }

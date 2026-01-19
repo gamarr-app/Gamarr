@@ -4,7 +4,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Releases;
 using NzbDrone.Core.Test.Framework;
@@ -14,14 +14,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class ReleaseRestrictionsSpecificationFixture : CoreTest<ReleaseRestrictionsSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         [SetUp]
         public void Setup()
         {
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
-                Movie = new Movie
+                Game = new Game
                 {
                     Tags = new HashSet<int>()
                 },
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.EnabledForTags(It.IsAny<HashSet<int>>(), It.IsAny<int>()))
                   .Returns(new List<ReleaseProfile>());
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string> { "WEBRip" }, new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string> { "doesnt", "exist" }, new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string>(), new List<string> { "ignored" });
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string>(), new List<string> { "edited" });
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [TestCase("EdiTED")]
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(required.Split(',').ToList(), new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [TestCase("EdiTED")]
@@ -109,13 +109,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string>(), ignored.Split(',').ToList());
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_be_false_when_release_contains_one_restricted_word_and_one_required_word()
         {
-            _remoteMovie.Release.Title = "[ www.Speed.cd ] -Whose.Line.is.it.Anyway.US.S10E24.720p.HDTV.x264-BAJSKORV";
+            _remoteGame.Release.Title = "[ www.Speed.cd ] -Whose.Line.is.it.Anyway.US.S10E24.720p.HDTV.x264-BAJSKORV";
 
             Mocker.GetMock<IReleaseProfileService>()
                   .Setup(s => s.EnabledForTags(It.IsAny<HashSet<int>>(), It.IsAny<int>()))
@@ -128,7 +128,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                }
                            });
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }
 
         [TestCase("/WEB/", true)]
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(pattern.Split(',').ToList(), new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteMovie, null).Accepted.Should().Be(expected);
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().Be(expected);
         }
     }
 }
