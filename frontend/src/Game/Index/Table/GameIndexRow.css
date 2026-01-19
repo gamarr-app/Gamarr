@@ -91,10 +91,8 @@
   flex: 0 0 120px;
 }
 
-.imdbRating,
 .igdbRating,
-.rottenTomatoesRating,
-.traktRating {
+.metacriticRating {
   composes: cell;
 
   flex: 0 0 80px;

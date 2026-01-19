@@ -38,9 +38,7 @@ function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions)
     detailedProgressBar,
     showTitle,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating
+    showMetacriticRating
   } = posterOptions;
 
   const heights = [
@@ -57,15 +55,7 @@ function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions)
     heights.push(19);
   }
 
-  if (showImdbRating) {
-    heights.push(19);
-  }
-
-  if (showRottenTomatoesRating) {
-    heights.push(19);
-  }
-
-  if (showTraktRating) {
+  if (showMetacriticRating) {
     heights.push(19);
   }
 
@@ -83,18 +73,8 @@ function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions)
         heights.push(19);
       }
       break;
-    case 'imdbRating':
-      if (!showImdbRating) {
-        heights.push(19);
-      }
-      break;
-    case 'rottenTomatoesRating':
-      if (!showRottenTomatoesRating) {
-        heights.push(19);
-      }
-      break;
-    case 'traktRating':
-      if (!showTraktRating) {
+    case 'metacriticRating':
+      if (!showMetacriticRating) {
         heights.push(19);
       }
       break;
@@ -228,9 +208,7 @@ class DiscoverGamePosters extends Component {
     const {
       showTitle,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating
+      showMetacriticRating
     } = posterOptions;
 
     const gameIdx = rowIndex * columnCount + columnIndex;
@@ -257,9 +235,7 @@ class DiscoverGamePosters extends Component {
           posterHeight={posterHeight}
           showTitle={showTitle}
           showIgdbRating={showIgdbRating}
-          showImdbRating={showImdbRating}
-          showRottenTomatoesRating={showRottenTomatoesRating}
-          showTraktRating={showTraktRating}
+          showMetacriticRating={showMetacriticRating}
           showRelativeDates={showRelativeDates}
           shortDateFormat={shortDateFormat}
           timeFormat={timeFormat}
