@@ -7,6 +7,7 @@ $hoverScale: 1.05;
 
 .poster {
   position: relative;
+  object-fit: cover;
 }
 
 .editorSelect {
