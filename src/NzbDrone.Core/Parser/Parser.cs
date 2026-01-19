@@ -57,7 +57,14 @@ namespace NzbDrone.Core.Parser
             new Regex(@"^(?<title>(?![(\[]).+?)?(?:(?:[-_\W](?<![)!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|\d+|\W\d+)))+(\W+|_|$)(?!\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // As a last resort for games that have ( or [ in their title.
-            new Regex(@"^(?<title>.+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|\d+|\]|\W\d+)))+(\W+|_|$)(?!\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)
+            new Regex(@"^(?<title>.+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|\d+|\]|\W\d+)))+(\W+|_|$)(?!\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Game releases without year - match title up to release group or version terminator
+            // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, PROPHET, TiNYiSO, RUNE, etc.
+            // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
+            // Store rips: GOG, Steam-RIP, etc.
+            // Version numbers: v1.0, v2.1.5, etc.
+            new Regex(@"^(?<title>(?![(\[]).+?)[-_. ](?:(?:CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|P2P|HI2U|TENOKE|I_KnoW|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|REPACK)(?:[-_. ]|$)|v\d+(?:\.\d+)*[-_. ])", RegexOptions.IgnoreCase | RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]

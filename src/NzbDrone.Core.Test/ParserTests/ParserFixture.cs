@@ -280,6 +280,34 @@ namespace NzbDrone.Core.Test.ParserTests
             Parser.Parser.ParseGameTitle(postTitle).HardcodedSubs.Should().Be(sub);
         }
 
-        // IMDb tests removed - IMDb support deprecated in favor of IGDB
+        [TestCase("Elden.Ring-CODEX", "Elden Ring")]
+        [TestCase("DOOM.Eternal-CODEX", "DOOM Eternal")]
+        [TestCase("Starfield-RUNE", "Starfield")]
+        [TestCase("Half.Life.Alyx-VREX", "Half Life Alyx")]
+        [TestCase("Baldurs.Gate.3-GOG", "Baldurs Gate 3")]
+        [TestCase("Red.Dead.Redemption.2-EMPRESS", "Red Dead Redemption 2")]
+        [TestCase("Grand.Theft.Auto.V-RELOADED", "Grand Theft Auto V")]
+        [TestCase("The.Witcher.3.Wild.Hunt-GOG", "The Witcher 3 Wild Hunt")]
+        [TestCase("God.of.War-CODEX", "God of War")]
+        [TestCase("Cyberpunk.2077-CODEX", "Cyberpunk 2077")]
+        [TestCase("God.of.War-FitGirl.Repack", "God of War")]
+        [TestCase("Hogwarts.Legacy.Deluxe.Edition-DODI", "Hogwarts Legacy Deluxe Edition")]
+        [TestCase("Elden.Ring-XATAB", "Elden Ring")]
+        [TestCase("Starfield-Elamigos", "Starfield")]
+        [TestCase("Diablo.IV-REPACK", "Diablo IV")]
+        [TestCase("Hades.v1.38290-GOG", "Hades")]
+        [TestCase("The.Last.of.Us.Part.I.v1.0.5-P2P", "The Last of Us Part I")]
+        [TestCase("Grand.Theft.Auto.V.v1.68-RELOADED", "Grand Theft Auto V")]
+        [TestCase("Forza.Horizon.5.Premium.Edition.v1.607.765.0-P2P", "Forza Horizon 5 Premium Edition")]
+        [TestCase("Cyberpunk.2077.v2.1-CODEX", "Cyberpunk 2077")]
+        [TestCase("Disco.Elysium.The.Final.Cut-GOG", "Disco Elysium The Final Cut")]
+        [TestCase("Hollow.Knight-GOG", "Hollow Knight")]
+        [TestCase("Hades-Steam-Rip", "Hades")]
+        public void should_parse_game_release_without_year(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
     }
 }
