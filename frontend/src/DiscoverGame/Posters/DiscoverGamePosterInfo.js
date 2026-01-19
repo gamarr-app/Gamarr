@@ -2,9 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
-import TraktRating from 'Components/TraktRating';
+import MetacriticRating from 'Components/MetacriticRating';
 import getGameStatusDetails from 'Game/getGameStatusDetails';
 import { icons } from 'Helpers/Props';
 import formatRuntime from 'Utilities/Date/formatRuntime';
@@ -28,9 +26,7 @@ function DiscoverGamePosterInfo(props) {
     timeFormat,
     gameRuntimeFormat,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating
+    showMetacriticRating
   } = props;
 
   if (sortKey === 'status' && status) {
@@ -121,26 +117,10 @@ function DiscoverGamePosterInfo(props) {
     );
   }
 
-  if (!showImdbRating && sortKey === 'imdbRating' && !!ratings.imdb) {
+  if (!showMetacriticRating && sortKey === 'metacriticRating' && !!ratings.metacritic) {
     return (
       <div className={styles.info}>
-        <ImdbRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (!showRottenTomatoesRating && sortKey === 'rottenTomatoesRating' && !!ratings.rottenTomatoes) {
-    return (
-      <div className={styles.info}>
-        <RottenTomatoRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (!showTraktRating && sortKey === 'traktRating' && !!ratings.trakt) {
-    return (
-      <div className={styles.info}>
-        <TraktRating ratings={ratings} iconSize={12} />
+        <MetacriticRating ratings={ratings} iconSize={12} />
       </div>
     );
   }
@@ -163,9 +143,7 @@ DiscoverGamePosterInfo.propTypes = {
   timeFormat: PropTypes.string.isRequired,
   gameRuntimeFormat: PropTypes.string.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showTraktRating: PropTypes.bool.isRequired
+  showMetacriticRating: PropTypes.bool.isRequired
 };
 
 export default DiscoverGamePosterInfo;

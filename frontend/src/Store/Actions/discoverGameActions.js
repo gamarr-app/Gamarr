@@ -60,9 +60,7 @@ export const defaultState = {
     size: 'large',
     showTitle: false,
     showIgdbRating: false,
-    showImdbRating: false,
-    showRottenTomatoesRating: false,
-    showTraktRating: false
+    showMetacriticRating: false
   },
 
   overviewOptions: {
@@ -71,7 +69,7 @@ export const defaultState = {
     showStudio: true,
     showGenres: true,
     showIgdbRating: false,
-    showImdbRating: false,
+    showMetacriticRating: false,
     showCertification: true
   },
 

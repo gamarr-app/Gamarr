@@ -5,16 +5,14 @@ import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import IconButton from 'Components/Link/IconButton';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
+import MetacriticRating from 'Components/MetacriticRating';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import Column from 'Components/Table/Column';
 import Tooltip from 'Components/Tooltip/Tooltip';
-import TraktRating from 'Components/TraktRating';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import EditGameModal from 'Game/Edit/EditGameModal';
@@ -381,28 +379,12 @@ function GameIndexRow(props: GameIndexRowProps) {
           );
         }
 
-        if (name === 'imdbRating') {
+        if (name === 'metacriticRating') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.imdb ? <ImdbRating ratings={ratings} /> : null}
-            </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'rottenTomatoesRating') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.rottenTomatoes ? (
-                <RottenTomatoRating ratings={ratings} />
+              {ratings.metacritic ? (
+                <MetacriticRating ratings={ratings} />
               ) : null}
-            </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'traktRating') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.trakt ? <TraktRating ratings={ratings} /> : null}
             </VirtualTableRowCell>
           );
         }
