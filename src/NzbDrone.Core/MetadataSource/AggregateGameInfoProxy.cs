@@ -46,25 +46,22 @@ namespace NzbDrone.Core.MetadataSource
 
         public Tuple<GameMetadata, List<Credit>> GetGameInfo(int gameId)
         {
-            // Try RAWG first if configured
-            if (HasRawgCredentials)
+            // Try Steam first - the ID might be a Steam App ID
+            try
             {
-                try
+                var result = _steamProxy.GetGameInfo(gameId);
+                if (result?.Item1 != null)
                 {
-                    var result = _rawgProxy.GetGameInfo(gameId);
-                    if (result?.Item1 != null)
-                    {
-                        _logger.Debug("Got game info from RAWG for ID {0}", gameId);
-                        return result;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to get game info from RAWG for ID {0}, trying IGDB", gameId);
+                    _logger.Debug("Got game info from Steam for ID {0}", gameId);
+                    return result;
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "ID {0} not found in Steam, trying IGDB", gameId);
+            }
 
-            // Fall back to IGDB
+            // Try IGDB (preferred secondary source)
             if (HasIgdbCredentials)
             {
                 try
@@ -78,7 +75,25 @@ namespace NzbDrone.Core.MetadataSource
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to get game info from IGDB for ID {0}", gameId);
+                    _logger.Warn(ex, "Failed to get game info from IGDB for ID {0}, trying RAWG", gameId);
+                }
+            }
+
+            // Fall back to RAWG
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var result = _rawgProxy.GetGameInfo(gameId);
+                    if (result?.Item1 != null)
+                    {
+                        _logger.Debug("Got game info from RAWG for ID {0}", gameId);
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to get game info from RAWG for ID {0}", gameId);
                 }
             }
 
@@ -188,34 +203,68 @@ namespace NzbDrone.Core.MetadataSource
         public List<GameMetadata> GetBulkGameInfo(List<int> gameIds)
         {
             var results = new List<GameMetadata>();
+            var remainingIds = new List<int>(gameIds);
 
-            // Try RAWG first
-            if (HasRawgCredentials)
+            // Try Steam first for each ID (no API key needed)
+            // Limit to avoid too many API calls
+            foreach (var id in gameIds.Take(20))
             {
                 try
                 {
-                    results = _rawgProxy.GetBulkGameInfo(gameIds);
-                    if (results.Any())
+                    var steamResult = _steamProxy.GetGameBySteamAppId(id);
+                    if (steamResult != null)
                     {
-                        return results;
+                        results.Add(steamResult);
+                        remainingIds.Remove(id);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to get bulk game info from RAWG, trying IGDB");
+                    _logger.Debug(ex, "ID {0} not found in Steam", id);
                 }
             }
 
-            // Fall back to IGDB
+            if (!remainingIds.Any())
+            {
+                return results;
+            }
+
+            // Try IGDB for remaining IDs (preferred secondary source)
             if (HasIgdbCredentials)
             {
                 try
                 {
-                    results = _igdbProxy.GetBulkGameInfo(gameIds);
+                    var igdbResults = _igdbProxy.GetBulkGameInfo(remainingIds);
+                    results.AddRange(igdbResults);
+
+                    // Remove found IDs
+                    foreach (var game in igdbResults)
+                    {
+                        remainingIds.Remove(game.IgdbId);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to get bulk game info from IGDB");
+                    _logger.Warn(ex, "Failed to get bulk game info from IGDB, trying RAWG");
+                }
+            }
+
+            if (!remainingIds.Any())
+            {
+                return results;
+            }
+
+            // Fall back to RAWG for any remaining
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var rawgResults = _rawgProxy.GetBulkGameInfo(remainingIds);
+                    results.AddRange(rawgResults);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to get bulk game info from RAWG");
                 }
             }
 
@@ -225,30 +274,17 @@ namespace NzbDrone.Core.MetadataSource
         public List<GameMetadata> GetTrendingGames()
         {
             var allResults = new List<GameMetadata>();
+            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Get from both sources and merge
-            if (HasRawgCredentials)
-            {
-                try
-                {
-                    allResults.AddRange(_rawgProxy.GetTrendingGames());
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to get trending games from RAWG");
-                }
-            }
-
+            // Try IGDB first (preferred secondary source)
             if (HasIgdbCredentials)
             {
                 try
                 {
                     var igdbResults = _igdbProxy.GetTrendingGames();
-
-                    // Add IGDB results that aren't already in the list (by title match)
                     foreach (var game in igdbResults)
                     {
-                        if (!allResults.Any(r => r.Title.Equals(game.Title, StringComparison.OrdinalIgnoreCase)))
+                        if (seenTitles.Add(game.Title))
                         {
                             allResults.Add(game);
                         }
@@ -260,26 +296,35 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
+            // Add RAWG results that aren't already in the list
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var rawgResults = _rawgProxy.GetTrendingGames();
+                    foreach (var game in rawgResults)
+                    {
+                        if (seenTitles.Add(game.Title))
+                        {
+                            allResults.Add(game);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to get trending games from RAWG");
+                }
+            }
+
             return allResults.Take(20).ToList();
         }
 
         public List<GameMetadata> GetPopularGames()
         {
             var allResults = new List<GameMetadata>();
+            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Get from both sources and merge
-            if (HasRawgCredentials)
-            {
-                try
-                {
-                    allResults.AddRange(_rawgProxy.GetPopularGames());
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to get popular games from RAWG");
-                }
-            }
-
+            // Try IGDB first (preferred secondary source)
             if (HasIgdbCredentials)
             {
                 try
@@ -287,7 +332,7 @@ namespace NzbDrone.Core.MetadataSource
                     var igdbResults = _igdbProxy.GetPopularGames();
                     foreach (var game in igdbResults)
                     {
-                        if (!allResults.Any(r => r.Title.Equals(game.Title, StringComparison.OrdinalIgnoreCase)))
+                        if (seenTitles.Add(game.Title))
                         {
                             allResults.Add(game);
                         }
@@ -296,6 +341,26 @@ namespace NzbDrone.Core.MetadataSource
                 catch (Exception ex)
                 {
                     _logger.Warn(ex, "Failed to get popular games from IGDB");
+                }
+            }
+
+            // Add RAWG results that aren't already in the list
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var rawgResults = _rawgProxy.GetPopularGames();
+                    foreach (var game in rawgResults)
+                    {
+                        if (seenTitles.Add(game.Title))
+                        {
+                            allResults.Add(game);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to get popular games from RAWG");
                 }
             }
 
@@ -351,29 +416,7 @@ namespace NzbDrone.Core.MetadataSource
                 _logger.Warn(ex, "Failed to search Steam for '{0}'", title);
             }
 
-            // Search RAWG if configured
-            if (HasRawgCredentials)
-            {
-                try
-                {
-                    var rawgResults = _rawgProxy.SearchForNewGame(title);
-                    foreach (var game in rawgResults)
-                    {
-                        if (seenTitles.Add(game.Title))
-                        {
-                            allResults.Add(game);
-                        }
-                    }
-
-                    _logger.Debug("Found {0} additional games from RAWG for '{1}'", rawgResults.Count, title);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to search RAWG for '{0}'", title);
-                }
-            }
-
-            // Also search IGDB to get additional results
+            // Search IGDB next (preferred secondary source)
             if (HasIgdbCredentials)
             {
                 try
@@ -395,6 +438,28 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
+            // Also search RAWG for additional coverage
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var rawgResults = _rawgProxy.SearchForNewGame(title);
+                    foreach (var game in rawgResults)
+                    {
+                        if (seenTitles.Add(game.Title))
+                        {
+                            allResults.Add(game);
+                        }
+                    }
+
+                    _logger.Debug("Found {0} additional games from RAWG for '{1}'", rawgResults.Count, title);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to search RAWG for '{0}'", title);
+                }
+            }
+
             if (!allResults.Any())
             {
                 _logger.Warn("No results found for '{0}' from any metadata source", title);
@@ -405,7 +470,24 @@ namespace NzbDrone.Core.MetadataSource
 
         public GameMetadata MapGameToIgdbGame(GameMetadata game)
         {
-            // Try RAWG first
+            // Try IGDB first (preferred secondary source)
+            if (HasIgdbCredentials)
+            {
+                try
+                {
+                    var result = _igdbProxy.MapGameToIgdbGame(game);
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to map game via IGDB");
+                }
+            }
+
+            // Fall back to RAWG
             if (HasRawgCredentials)
             {
                 try
@@ -419,19 +501,6 @@ namespace NzbDrone.Core.MetadataSource
                 catch (Exception ex)
                 {
                     _logger.Warn(ex, "Failed to map game via RAWG");
-                }
-            }
-
-            // Fall back to IGDB
-            if (HasIgdbCredentials)
-            {
-                try
-                {
-                    return _igdbProxy.MapGameToIgdbGame(game);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to map game via IGDB");
                 }
             }
 
