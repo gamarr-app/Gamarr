@@ -265,6 +265,11 @@ namespace NzbDrone.Core.Organizer
         {
             name = FileNameCleanupRegex.Replace(name, match => match.Captures[0].Value[0].ToString());
 
+            // Remove empty brackets (e.g., when year is missing)
+            name = Regex.Replace(name, @"\s*\(\s*\)", string.Empty);
+            name = Regex.Replace(name, @"\s*\[\s*\]", string.Empty);
+            name = Regex.Replace(name, @"\s*\{\s*\}", string.Empty);
+
             return name.Trim(' ', '.');
         }
 
