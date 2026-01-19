@@ -40,7 +40,8 @@ namespace NzbDrone.Core.HealthCheck
 
         public override HealthCheck Check()
         {
-            return _cache.Get("ServerChecks", RetrieveServerChecks, TimeSpan.FromHours(2));
+            // Disabled: gamarr.servarr.com doesn't exist for this fork
+            return new HealthCheck(GetType());
         }
 
         private HealthCheck RetrieveServerChecks()
