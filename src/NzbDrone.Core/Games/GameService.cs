@@ -26,6 +26,7 @@ namespace NzbDrone.Core.Games
         List<Game> AddGames(List<Game> newGames);
         Game FindByImdbId(string imdbid);
         Game FindByIgdbId(int igdbid);
+        Game FindBySteamAppId(int steamAppId);
         Game FindByTitle(string title);
         Game FindByTitle(string title, int year);
         Game FindByTitle(List<string> titles, int? year, List<string> otherTitles, List<Game> candidates);
@@ -195,6 +196,11 @@ namespace NzbDrone.Core.Games
         public Game FindByIgdbId(int igdbid)
         {
             return _gameRepository.FindByIgdbId(igdbid);
+        }
+
+        public Game FindBySteamAppId(int steamAppId)
+        {
+            return _gameRepository.FindBySteamAppId(steamAppId);
         }
 
         public Game FindByPath(string path)
