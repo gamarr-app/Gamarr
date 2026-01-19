@@ -15,7 +15,7 @@ namespace NzbDrone.Automation.Test
     {
         private NzbDroneRunner _runner;
         protected List<string> ConsoleErrors { get; private set; } = new();
-        protected const string BaseUrl = "http://localhost:7878";
+        protected const string BaseUrl = "http://localhost:6767";
 
         public AutomationTest()
         {

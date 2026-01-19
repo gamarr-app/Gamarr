@@ -139,7 +139,7 @@ namespace NzbDrone.Host
             var config = GetConfiguration(context);
 
             var bindAddress = config.GetValue<string>($"Gamarr:Server:{nameof(ServerOptions.BindAddress)}") ?? config.GetValue(nameof(ConfigFileProvider.BindAddress), "*");
-            var port = config.GetValue<int?>($"Gamarr:Server:{nameof(ServerOptions.Port)}") ?? config.GetValue(nameof(ConfigFileProvider.Port), 7878);
+            var port = config.GetValue<int?>($"Gamarr:Server:{nameof(ServerOptions.Port)}") ?? config.GetValue(nameof(ConfigFileProvider.Port), 6767);
             var sslPort = config.GetValue<int?>($"Gamarr:Server:{nameof(ServerOptions.SslPort)}") ?? config.GetValue(nameof(ConfigFileProvider.SslPort), 8787);
             var enableSsl = config.GetValue<bool?>($"Gamarr:Server:{nameof(ServerOptions.EnableSsl)}") ?? config.GetValue(nameof(ConfigFileProvider.EnableSsl), false);
             var sslCertPath = config.GetValue<string>($"Gamarr:Server:{nameof(ServerOptions.SslCertPath)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslCertPath));
