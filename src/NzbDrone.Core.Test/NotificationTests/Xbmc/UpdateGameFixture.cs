@@ -1,4 +1,3 @@
-﻿#pragma warning disable CS0618
 using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
@@ -14,7 +13,7 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
     [TestFixture]
     public class UpdateGameFixture : CoreTest<XbmcService>
     {
-        private const string IMDB_ID = "tt67890";
+        private const int IGDB_ID = 12345;
         private XbmcSettings _settings;
         private List<XbmcGame> _xbmcGames;
 
@@ -26,7 +25,7 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
 
             _xbmcGames = Builder<XbmcGame>.CreateListOfSize(3)
                                             .TheFirst(1)
-                                            .With(s => s.ImdbNumber = IMDB_ID)
+                                            .With(s => s.IgdbId = IGDB_ID)
                                             .Build()
                                             .ToList();
 
@@ -43,8 +42,10 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
         public void should_update_using_game_path()
         {
             var game = Builder<Game>.CreateNew()
-                                      .With(s => s.ImdbId = IMDB_ID)
+                                      .With(s => s.GameMetadataId = 1)
                                       .Build();
+
+            game.GameMetadata = new GameMetadata { IgdbId = IGDB_ID };
 
             Subject.Update(_settings, game);
 
@@ -56,9 +57,11 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
         public void should_update_all_paths_when_game_path_not_found()
         {
             var fakeGame = Builder<Game>.CreateNew()
-                                          .With(s => s.ImdbId = "tt01000")
+                                          .With(s => s.GameMetadataId = 1)
                                           .With(s => s.Title = "Not A Real Game")
                                           .Build();
+
+            fakeGame.GameMetadata = new GameMetadata { IgdbId = 99999 };
 
             Subject.Update(_settings, fakeGame);
 

@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
@@ -14,7 +13,7 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
     [TestFixture]
     public class GetGamePathFixture : CoreTest<XbmcService>
     {
-        private const string IMDB_ID = "tt67890";
+        private const int IGDB_ID = 12345;
         private XbmcSettings _settings;
         private Game _game;
         private List<XbmcGame> _xbmcGames;
@@ -27,9 +26,9 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
 
             _xbmcGames = Builder<XbmcGame>.CreateListOfSize(3)
                                             .All()
-                                            .With(s => s.ImdbNumber = "tt00000")
+                                            .With(s => s.IgdbId = 0)
                                             .TheFirst(1)
-                                            .With(s => s.ImdbNumber = IMDB_ID)
+                                            .With(s => s.IgdbId = IGDB_ID)
                                             .Build()
                                             .ToList();
 
@@ -38,45 +37,48 @@ namespace NzbDrone.Core.Test.NotificationTests.Xbmc
                   .Returns(_xbmcGames);
         }
 
-        private void GivenMatchingImdbId()
+        private void GivenMatchingIgdbId()
         {
             _game = new Game
             {
-                ImdbId = IMDB_ID,
+                GameMetadataId = 1,
                 Title = "Game"
             };
+            _game.GameMetadata = new GameMetadata { IgdbId = IGDB_ID };
         }
 
         private void GivenMatchingTitle()
         {
             _game = new Game
             {
-                ImdbId = "tt01000",
+                GameMetadataId = 1,
                 Title = _xbmcGames.First().Label
             };
+            _game.GameMetadata = new GameMetadata { IgdbId = 99999 };
         }
 
-        private void GivenMatchingGame()
+        private void GivenNoMatchingGame()
         {
             _game = new Game
             {
-                ImdbId = "tt01000",
+                GameMetadataId = 1,
                 Title = "Does not exist"
             };
+            _game.GameMetadata = new GameMetadata { IgdbId = 99999 };
         }
 
         [Test]
         public void should_return_null_when_game_is_not_found()
         {
-            GivenMatchingGame();
+            GivenNoMatchingGame();
 
             Subject.GetGamePath(_settings, _game).Should().BeNull();
         }
 
         [Test]
-        public void should_return_path_when_tvdbId_matches()
+        public void should_return_path_when_igdbId_matches()
         {
-            GivenMatchingImdbId();
+            GivenMatchingIgdbId();
 
             Subject.GetGamePath(_settings, _game).Should().Be(_xbmcGames.First().File);
         }

@@ -36,25 +36,19 @@ namespace NzbDrone.Core.Test.ImportList
             _existingGames = Builder<Game>.CreateListOfSize(3)
                 .TheFirst(1)
                 .With(s => s.IgdbId = 6)
-                .With(s => s.ImdbId = "6")
                 .TheNext(1)
                 .With(s => s.IgdbId = 7)
-                .With(s => s.ImdbId = "7")
                 .TheNext(1)
                 .With(s => s.IgdbId = 8)
-                .With(s => s.ImdbId = "8")
                 .Build().ToList();
 
             _list2Games = Builder<ImportListGame>.CreateListOfSize(3)
                 .TheFirst(1)
                 .With(s => s.IgdbId = 6)
-                .With(s => s.ImdbId = "6")
                 .TheNext(1)
                 .With(s => s.IgdbId = 7)
-                .With(s => s.ImdbId = "7")
                 .TheNext(1)
                 .With(s => s.IgdbId = 8)
-                .With(s => s.ImdbId = "8")
                 .Build().ToList();
 
             _importListFetch = new ImportListFetchResult
@@ -231,30 +225,6 @@ namespace NzbDrone.Core.Test.ImportList
         {
             _importListFetch.Games.ForEach(m => m.ListId = 1);
             _importListFetch.Games[0].IgdbId = 6;
-
-            GivenList(1, true);
-            GivenCleanLevel("keepAndUnmonitor");
-
-            Mocker.GetMock<IGameService>()
-                  .Setup(v => v.GetAllGames())
-                  .Returns(_existingGames);
-
-            Mocker.GetMock<IImportListGameService>()
-                .Setup(v => v.GetAllListGames())
-                .Returns(_list1Games);
-
-            Subject.Execute(_commandAll);
-
-            Mocker.GetMock<IGameService>()
-                  .Verify(v => v.UpdateGame(It.Is<List<Game>>(s => s.Count == 2 && s.All(m => !m.Monitored)), true), Times.Once());
-        }
-
-        [Test]
-        public void should_fallback_to_imdbid_on_clean_library_if_igdb_not_found()
-        {
-            _importListFetch.Games.ForEach(m => m.ListId = 1);
-            _importListFetch.Games[0].IgdbId = 0;
-            _importListFetch.Games[0].ImdbId = "6";
 
             GivenList(1, true);
             GivenCleanLevel("keepAndUnmonitor");

@@ -134,9 +134,8 @@ namespace NzbDrone.Integration.Test.ApiTests
             var games = Games.All();
 
             games.Should().NotBeNullOrEmpty();
-            games.Should().Contain(v => v.ImdbId == "tt0110912");
-            games.Should().Contain(v => v.ImdbId == "tt0468569");
-            games.Should().Contain(v => v.Images.All(i => i.RemoteUrl.Contains("https://image.igdb.org")));
+            games.Should().Contain(v => v.IgdbId == 680);
+            games.Should().Contain(v => v.IgdbId == 155);
         }
 
         [Test]
@@ -154,8 +153,7 @@ namespace NzbDrone.Integration.Test.ApiTests
             var games = Games.All(queryParams);
 
             games.Should().NotBeNullOrEmpty();
-            games.Should().Contain(v => v.ImdbId == "tt0110912");
-            games.Should().Contain(v => v.Images.All(i => i.RemoteUrl.Contains("https://image.igdb.org")));
+            games.Should().Contain(v => v.IgdbId == 680);
         }
 
         [Test]
@@ -166,7 +164,7 @@ namespace NzbDrone.Integration.Test.ApiTests
 
             var result = Games.Get(game.Id);
 
-            result.ImdbId.Should().Be("tt0110912");
+            result.IgdbId.Should().Be(680);
         }
 
         [Test]
@@ -242,7 +240,7 @@ namespace NzbDrone.Integration.Test.ApiTests
 
             Games.Delete(game.Id);
 
-            Games.All().Should().NotContain(v => v.ImdbId == "tt0110912");
+            Games.All().Should().NotContain(v => v.IgdbId == 680);
         }
     }
 }

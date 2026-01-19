@@ -72,20 +72,6 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
-        public void should_update_imdb_id_if_changed()
-        {
-            var newGameInfo = _game.JsonClone();
-            newGameInfo.ImdbId = _game.ImdbId + 1;
-
-            GivenNewGameInfo(newGameInfo);
-
-            Subject.Execute(new RefreshGameCommand(new List<int> { _game.Id }));
-
-            Mocker.GetMock<IGameMetadataService>()
-                .Verify(v => v.Upsert(It.Is<GameMetadata>(s => s.ImdbId == newGameInfo.ImdbId)));
-        }
-
-        [Test]
         public void should_log_error_if_igdb_id_not_found()
         {
             Subject.Execute(new RefreshGameCommand(new List<int> { _game.Id }));

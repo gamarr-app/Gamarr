@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedGameInfo>(i => i.PrimaryGameTitle == "A Game"), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Setup(s => s.Map(It.Is<ParsedGameInfo>(i => i.PrimaryGameTitle == "A Game"), It.IsAny<int>(), It.IsAny<int>(), null))
                   .Returns(remoteGame);
 
             var client = new DownloadClientDefinition()
@@ -128,7 +128,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             };
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), null))
                 .Returns(remoteEpisode);
 
             var client = new DownloadClientDefinition()
@@ -174,7 +174,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), null))
                   .Returns(remoteGame);
 
             Mocker.GetMock<IHistoryService>()
@@ -204,7 +204,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), null))
                   .Returns(default(RemoteGame));
 
             Subject.Handle(new GamesDeletedEvent(new List<Game> { remoteGame.Game }, false, false));
@@ -231,7 +231,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), null))
                   .Returns(default(RemoteGame));
 
             Mocker.GetMock<IHistoryService>()
@@ -261,7 +261,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), null))
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), null))
                   .Returns(default(RemoteGame));
 
             Subject.Handle(new GamesDeletedEvent(new List<Game> { remoteGame.Game }, false, false));

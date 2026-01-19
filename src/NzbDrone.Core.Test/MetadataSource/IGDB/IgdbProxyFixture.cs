@@ -94,17 +94,6 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             ExceptionVerification.IgnoreErrors();
         }
 
-        [Test]
-        public void should_return_null_for_imdb_id_lookup()
-        {
-            // IGDB doesn't support IMDb ID lookup directly
-            var result = Subject.GetGameByImdbId("tt0000000");
-
-            result.Should().BeNull();
-
-            ExceptionVerification.IgnoreWarns();
-        }
-
         private void ValidateGame(GameMetadata game)
         {
             game.Should().NotBeNull();
