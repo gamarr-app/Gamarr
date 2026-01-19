@@ -6,6 +6,9 @@ namespace Gamarr.Api.V3.Config
     public class MetadataConfigResource : RestResource
     {
         public CountryCode CertificationCountry { get; set; }
+        public string IgdbClientId { get; set; }
+        public string IgdbClientSecret { get; set; }
+        public string RawgApiKey { get; set; }
     }
 
     public static class MetadataConfigResourceMapper
@@ -15,6 +18,9 @@ namespace Gamarr.Api.V3.Config
             return new MetadataConfigResource
             {
                 CertificationCountry = model.CertificationCountry,
+                IgdbClientId = model.IgdbClientId,
+                IgdbClientSecret = model.IgdbClientSecret,
+                RawgApiKey = model.RawgApiKey,
             };
         }
     }
