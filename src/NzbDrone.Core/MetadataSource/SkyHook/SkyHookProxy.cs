@@ -214,6 +214,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             var altTitles = new List<AlternativeTitle>();
 
             game.IgdbId = resource.IgdbId;
+
             // IMDb ID is no longer populated - IMDb is a movie database, not applicable for games
             // game.ImdbId = resource.ImdbId;
             game.Title = resource.Title;
@@ -342,6 +343,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                     newGame = GetGameInfo(game.IgdbId).Item1;
                 }
+
                 // IMDb lookup removed - IMDb is a movie database, not applicable for games
                 // else if (game.ImdbId.IsNotNullOrWhiteSpace())
                 // {

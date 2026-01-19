@@ -1,3 +1,4 @@
+#pragma warning disable CS0618
 using NLog;
 using NzbDrone.Common.Cloud;
 using NzbDrone.Common.Http;

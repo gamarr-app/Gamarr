@@ -123,6 +123,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             // IGDB is the primary metadata source for games
             var includeIgdbSearch = SupportsIgdbSearch && searchCriteria.Game.GameMetadata.Value.IgdbId > 0;
+
             // IMDb search removed - IMDb is a movie database and doesn't apply to games
 
             if (includeIgdbSearch)

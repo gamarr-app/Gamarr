@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable CS0618
+using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
 using Moq;

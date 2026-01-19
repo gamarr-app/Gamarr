@@ -1,3 +1,5 @@
+#pragma warning disable CS0618
+
 using System.Xml.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;

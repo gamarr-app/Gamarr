@@ -47,6 +47,7 @@ namespace NzbDrone.Core.Notifications
         private string GetMessage(Game game, QualityModel quality)
         {
             var qualityString = quality.Quality.ToString();
+
             // IGDB - Internet Game Database (primary metadata source for games)
             var igdbUrl = "https://www.igdb.com/games/" + game.GameMetadata.Value.IgdbId;
 
