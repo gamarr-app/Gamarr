@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Parser
                                                                             (?<brazilian>\b(dublado|pt-BR)\b)|
                                                                             (?<greek>greek)|
                                                                             (?<french>\b(?:FR|VO|VF|VFF|VFQ|VFI|VF2|TRUEFRENCH|FRENCH|FRE|FRA)\b)|
-                                                                            (?<russian>\b(?:rus|ru)\b|\[RUS\])|
+                                                                            (?<russian>\bRUS\b|\b(?:rus|ru)\b|\[RUS\])|
                                                                             (?<hungarian>\b(?:HUNDUB|HUN)\b)|
                                                                             (?<hebrew>\b(?:HebDub|HebDubbed)\b)|
                                                                             (?<polish>\b(?:PL\W?DUB|DUB\W?PL|LEK\W?PL|PL\W?LEK)\b)|

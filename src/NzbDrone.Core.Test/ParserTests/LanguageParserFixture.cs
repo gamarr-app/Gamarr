@@ -166,6 +166,8 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game Title (2020) WEB-DL (720p) Rus-Eng")]
         [TestCase("[DL] Allora and the Broken Portal [P] [RUS] (2011, Quest) [P2P]")]
         [TestCase("Game Title 2023 [RUS] REPACK")]
+        [TestCase("[DL] Portal 2 [P] [RUS + ENG + 25 / RUS + ENG] (2011, Puzzle) (Build 11097438) [Portable]")]
+        [TestCase("[CD] Half-Life 2 [P] [RUS + ENG / ENG] (2004, FPS) (1.0.1.0) [Tycoon]")]
         public void should_parse_language_russian(string postTitle)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle, true);
