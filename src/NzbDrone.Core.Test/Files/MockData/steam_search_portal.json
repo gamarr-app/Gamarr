@@ -1,0 +1,20 @@
+{
+  "total": 1,
+  "items": [
+    {
+      "id": 400,
+      "type": "app",
+      "name": "Portal",
+      "price": {
+        "currency": "USD",
+        "initial": 999,
+        "final": 999
+      },
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      }
+    }
+  ]
+}

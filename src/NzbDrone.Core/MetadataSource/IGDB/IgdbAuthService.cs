@@ -40,10 +40,17 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             _logger = logger;
         }
 
-        public string ClientId => _configService.IgdbClientId;
+        public string ClientId => IsMockMode() ? "mock_client_id" : _configService.IgdbClientId;
 
         public string GetAccessToken()
         {
+            // In mock mode, return a fake token to allow mock data to be used
+            if (IsMockMode())
+            {
+                _logger.Debug("Mock mode enabled, returning fake IGDB access token");
+                return "mock_access_token";
+            }
+
             var cachedToken = _tokenCache.Find("igdb_token");
 
             if (cachedToken != null && !cachedToken.IsExpired)
@@ -61,6 +68,14 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
             _logger.Error("Failed to obtain IGDB access token");
             return null;
+        }
+
+        private static bool IsMockMode()
+        {
+            var envValue = Environment.GetEnvironmentVariable("GAMARR_MOCK_METADATA");
+            return !string.IsNullOrEmpty(envValue) &&
+                   (envValue.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                    envValue.Equals("1", StringComparison.OrdinalIgnoreCase));
         }
 
         private IgdbToken FetchNewToken()

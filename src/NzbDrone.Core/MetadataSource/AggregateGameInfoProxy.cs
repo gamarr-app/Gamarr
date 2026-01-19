@@ -396,6 +396,22 @@ namespace NzbDrone.Core.MetadataSource
         {
             var allResults = new List<Game>();
             var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var lowerTitle = title?.ToLowerInvariant()?.Trim() ?? string.Empty;
+
+            // Handle direct IGDB ID lookups - these bypass normal search and credentials check
+            if (lowerTitle.StartsWith("igdb:") || lowerTitle.StartsWith("igdbid:"))
+            {
+                try
+                {
+                    var igdbResults = _igdbProxy.SearchForNewGame(title);
+                    return igdbResults;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to lookup IGDB game for '{0}'", title);
+                    return new List<Game>();
+                }
+            }
 
             // Search Steam first (no API key needed - works out of the box!)
             try
