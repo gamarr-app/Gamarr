@@ -30,6 +30,7 @@ namespace NzbDrone.Core.Games
         }
 
         public int IgdbId { get; set; }
+        public int SteamAppId { get; set; }
 
         public List<MediaCover.MediaCover> Images { get; set; }
         public List<string> Genres { get; set; }

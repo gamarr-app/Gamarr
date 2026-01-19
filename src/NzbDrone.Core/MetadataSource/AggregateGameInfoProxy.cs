@@ -8,32 +8,38 @@ using NzbDrone.Core.Games.Collections;
 using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.MetadataSource.IGDB;
 using NzbDrone.Core.MetadataSource.RAWG;
+using NzbDrone.Core.MetadataSource.Steam;
 
 namespace NzbDrone.Core.MetadataSource
 {
     /// <summary>
-    /// Aggregates game metadata from multiple sources (RAWG and IGDB).
-    /// Uses RAWG as primary (simpler API key auth) and IGDB as fallback/enrichment.
+    /// Aggregates game metadata from multiple sources (Steam, RAWG, and IGDB).
+    /// Steam works out of the box (no API key required!).
+    /// RAWG and IGDB provide additional coverage with API keys.
     /// </summary>
     public class AggregateGameInfoProxy : IProvideGameInfo, ISearchForNewGame
     {
+        private readonly SteamStoreProxy _steamProxy;
         private readonly RawgProxy _rawgProxy;
         private readonly IgdbProxy _igdbProxy;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public AggregateGameInfoProxy(
+            SteamStoreProxy steamProxy,
             RawgProxy rawgProxy,
             IgdbProxy igdbProxy,
             IConfigService configService,
             Logger logger)
         {
+            _steamProxy = steamProxy;
             _rawgProxy = rawgProxy;
             _igdbProxy = igdbProxy;
             _configService = configService;
             _logger = logger;
         }
 
+        // Steam works out of the box - no credentials needed!
         private bool HasRawgCredentials => !string.IsNullOrEmpty(_configService.RawgApiKey);
         private bool HasIgdbCredentials => !string.IsNullOrEmpty(_configService.IgdbClientId) &&
                                            !string.IsNullOrEmpty(_configService.IgdbClientSecret);
@@ -77,6 +83,28 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             _logger.Warn("No metadata source available or all sources failed for game ID {0}", gameId);
+            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+        }
+
+        /// <summary>
+        /// Get game info by Steam App ID (no API key required).
+        /// </summary>
+        public Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId)
+        {
+            try
+            {
+                var result = _steamProxy.GetGameInfo(steamAppId);
+                if (result?.Item1 != null)
+                {
+                    _logger.Debug("Got game info from Steam for App ID {0}", steamAppId);
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Failed to get game info from Steam for App ID {0}", steamAppId);
+            }
+
             return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
         }
 
@@ -263,7 +291,26 @@ namespace NzbDrone.Core.MetadataSource
             var allResults = new List<Game>();
             var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Search RAWG first (primary)
+            // Search Steam first (no API key needed - works out of the box!)
+            try
+            {
+                var steamResults = _steamProxy.SearchForNewGame(title);
+                foreach (var game in steamResults)
+                {
+                    if (seenTitles.Add(game.Title))
+                    {
+                        allResults.Add(game);
+                    }
+                }
+
+                _logger.Debug("Found {0} games from Steam for '{1}'", steamResults.Count, title);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Failed to search Steam for '{0}'", title);
+            }
+
+            // Search RAWG if configured
             if (HasRawgCredentials)
             {
                 try
@@ -277,7 +324,7 @@ namespace NzbDrone.Core.MetadataSource
                         }
                     }
 
-                    _logger.Debug("Found {0} games from RAWG for '{1}'", rawgResults.Count, title);
+                    _logger.Debug("Found {0} additional games from RAWG for '{1}'", rawgResults.Count, title);
                 }
                 catch (Exception ex)
                 {
@@ -309,7 +356,7 @@ namespace NzbDrone.Core.MetadataSource
 
             if (!allResults.Any())
             {
-                _logger.Warn("No metadata sources available or all searches failed for '{0}'", title);
+                _logger.Warn("No results found for '{0}' from any metadata source", title);
             }
 
             return allResults;

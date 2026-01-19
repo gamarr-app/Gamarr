@@ -21,6 +21,7 @@ namespace NzbDrone.Core.Games
         Game FindByImdbId(string imdbid);
         Game FindByIgdbId(int igdbid);
         List<Game> FindByIgdbId(List<int> igdbids);
+        Game FindBySteamAppId(int steamAppId);
         List<Game> GamesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored);
         PagingSpec<Game> GamesWithoutFiles(PagingSpec<Game> pagingSpec);
         List<Game> GetGamesByFileId(int fileId);
@@ -223,6 +224,11 @@ namespace NzbDrone.Core.Games
         public List<Game> FindByIgdbId(List<int> igdbids)
         {
             return Query(x => igdbids.Contains(x.IgdbId));
+        }
+
+        public Game FindBySteamAppId(int steamAppId)
+        {
+            return Query(x => x.GameMetadata.Value.SteamAppId == steamAppId).FirstOrDefault();
         }
 
         public List<Game> GetGamesByFileId(int fileId)
