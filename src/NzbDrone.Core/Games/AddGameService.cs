@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Games
             }
             catch (GameNotFoundException)
             {
-                _logger.Error("IgdbId {0} was not found, it may have been removed from TMDb. Path: {1}", newGame.IgdbId, newGame.Path);
+                _logger.Error("IgdbId {0} was not found, it may have been removed from IGDB. Path: {1}", newGame.IgdbId, newGame.Path);
 
                 throw new ValidationException(new List<ValidationFailure>
                                               {
