@@ -228,12 +228,11 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 Platforms = MapPlatforms(item.Platforms)
             };
 
-            // Use Steam's library poster image (600x900) - much better quality than tiny search result
-            var posterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/library_600x900.jpg";
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, posterUrl));
-
-            // Also add header image as fanart
+            // Use header.jpg as primary poster for search results - it exists for all Steam items including DLC
+            // library_600x900.jpg is higher quality but doesn't exist for DLC/expansions
             var headerUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/header.jpg";
+
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, headerUrl));
             game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, headerUrl));
 
             // Add Metacritic rating if available
