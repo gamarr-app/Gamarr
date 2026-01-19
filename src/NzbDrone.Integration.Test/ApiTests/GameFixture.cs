@@ -19,7 +19,7 @@ namespace NzbDrone.Integration.Test.ApiTests
             EnsureNoGame(680, "Pulp Fiction");
             var tag = EnsureTag("abc");
 
-            var game = Games.Lookup("imdb:tt0110912").Single();
+            var game = Games.Lookup("igdb:680").Single();
 
             game.QualityProfileId = 1;
             game.Path = Path.Combine(GameRootFolder, game.Title);
@@ -37,7 +37,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void add_game_should_trigger_autotag()
         {
             var tag = EnsureTag("autotag-test");
-            var game = Games.Lookup("imdb:tt0110912").Single();
+            var game = Games.Lookup("igdb:680").Single();
             game.Genres = new List<string> { "Thriller" };
 
             var item = AutoTagging.Post(new AutoTaggingResource
@@ -85,7 +85,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             EnsureNoGame(680, "Pulp Fiction");
 
-            var game = Games.Lookup("imdb:tt0110912").Single();
+            var game = Games.Lookup("igdb:680").Single();
 
             game.Path = Path.Combine(GameRootFolder, game.Title);
 
@@ -98,7 +98,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             EnsureNoGame(680, "Pulp Fiction");
 
-            var game = Games.Lookup("imdb:tt0110912").Single();
+            var game = Games.Lookup("igdb:680").Single();
 
             game.QualityProfileId = 1;
 
@@ -111,7 +111,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             EnsureNoGame(680, "Pulp Fiction");
 
-            var game = Games.Lookup("imdb:tt0110912").Single();
+            var game = Games.Lookup("igdb:680").Single();
 
             game.QualityProfileId = 1;
             game.Path = Path.Combine(GameRootFolder, game.Title);

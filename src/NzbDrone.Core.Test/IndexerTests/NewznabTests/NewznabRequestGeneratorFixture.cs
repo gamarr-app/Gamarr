@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { Title = "Star Wars", Year = 1977, IgdbId = 11 },
+                Game = new Games.Game { SteamAppId = 76759, Title = "Star Wars", Year = 1977, IgdbId = 11 },
                 SceneTitles = new List<string> { "Star Wars" }
             };
 
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
-            results.GetAllTiers().Should().HaveCount(2);
+            results.GetAllTiers().Should().HaveCount(3);
 
             var pages = results.GetAllTiers().First().Take(3).ToList();
 
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
-            results.GetAllTiers().Should().HaveCount(2);
+            results.GetAllTiers().Should().HaveCount(3);
 
             var pages = results.GetAllTiers().First().Take(500).ToList();
 
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_not_search_by_igdbid_if_not_supported()
+        public void should_not_search_by_steamappid_if_not_supported()
         {
             _capabilities.SupportedGameSearchParameters = new[] { "q" };
 
@@ -101,8 +101,21 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().NotContain("igdbid=");
+            page.Url.Query.Should().NotContain("steamappid=76759");
             page.Url.Query.Should().Contain("q=Star");
+        }
+
+        [Test]
+        public void should_search_by_steamappid_if_supported()
+        {
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid" };
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+            results.GetTier(0).Should().HaveCount(1);
+
+            var page = results.GetAllTiers().First().First();
+
+            page.Url.Query.Should().Contain("steamappid=76759");
         }
 
         [Test]
@@ -119,9 +132,22 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_use_igdbid_search_when_supported()
+        public void should_prefer_search_by_steamappid_over_igdbid()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+            results.GetTier(0).Should().HaveCount(1);
+
+            var page = results.GetAllTiers().First().First();
+
+            page.Url.Query.Should().Contain("steamappid=76759");
+        }
+
+        [Test]
+        public void should_use_aggregrated_id_search_if_supported()
+        {
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
             _capabilities.SupportsAggregateIdSearch = true;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
@@ -129,7 +155,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("igdbid=11");
+            page.Url.Query.Should().Contain("steamappid=76759");
         }
 
         [Test]
@@ -150,10 +176,10 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_not_use_aggregrated_id_search_if_no_ids_are_known()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid" };
             _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
 
-            _gameSearchCriteria.Game.IgdbId = 0;
+            _gameSearchCriteria.Game.SteamAppId = 0;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
@@ -165,16 +191,17 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_fallback_to_q()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid" };
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
             _capabilities.SupportsAggregateIdSearch = true;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.Tiers.Should().Be(2);
+            results.Tiers.Should().Be(3);
 
-            var pageTier2 = results.GetTier(1).First().First();
+            var pageTier3 = results.GetTier(2).First().First();
 
-            pageTier2.Url.Query.Should().NotContain("igdbid=11");
-            pageTier2.Url.Query.Should().Contain("q=");
+            pageTier3.Url.Query.Should().NotContain("steamappid=76759");
+            pageTier3.Url.Query.Should().NotContain("igdbid=11");
+            pageTier3.Url.Query.Should().Contain("q=");
         }
 
         [Test]
