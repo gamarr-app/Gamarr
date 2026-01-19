@@ -13,7 +13,6 @@ using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.IGDB.Resource;
-using NzbDrone.Core.MetadataSource.SkyHook;
 using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.MetadataSource.IGDB
@@ -234,7 +233,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error searching for game: {0}", title);
-                throw new SkyHookException("Search for '{0}' failed: {1}", ex, title, ex.Message);
+                throw new Exceptions.SearchFailedException($"Search for '{title}' failed: {ex.Message}");
             }
         }
 
