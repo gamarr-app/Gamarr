@@ -169,21 +169,8 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 }
             }
 
-            // Set ratings
+            // Set ratings - only Metacritic since Steam doesn't have IGDB ratings
             game.Ratings = new Ratings();
-
-            if (data.Recommendations != null && data.Recommendations.Total > 0)
-            {
-                var normalizedRating = Math.Min(10, Math.Log10(Math.Max(1, data.Recommendations.Total)) * 2);
-                game.Ratings.Igdb = new RatingChild
-                {
-                    Value = (decimal)normalizedRating,
-                    Votes = data.Recommendations.Total,
-                    Type = RatingType.User
-                };
-                game.AggregatedRating = normalizedRating * 10;
-                game.AggregatedRatingCount = data.Recommendations.Total;
-            }
 
             if (data.Metacritic != null && data.Metacritic.Score > 0)
             {

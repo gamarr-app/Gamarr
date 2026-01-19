@@ -78,6 +78,7 @@ class DiscoverGamePoster extends Component {
   render() {
     const {
       igdbId,
+      steamAppId,
       imdbId,
       youTubeTrailerId,
       title,
@@ -107,7 +108,9 @@ class DiscoverGamePoster extends Component {
       isExcludeGameModalOpen
     } = this.state;
 
-    const linkProps = isExisting ? { to: `/game/${igdbId}` } : { onPress: this.onPress };
+    // Use steamAppId for slug if available, otherwise igdbId
+    const titleSlug = steamAppId > 0 ? steamAppId : igdbId;
+    const linkProps = isExisting ? { to: `/game/${titleSlug}` } : { onPress: this.onPress };
 
     const elementStyle = {
       width: `${posterWidth}px`,
@@ -251,6 +254,7 @@ class DiscoverGamePoster extends Component {
 
 DiscoverGamePoster.propTypes = {
   igdbId: PropTypes.number.isRequired,
+  steamAppId: PropTypes.number,
   imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,

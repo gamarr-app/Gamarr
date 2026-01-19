@@ -60,6 +60,7 @@ class DiscoverGameRow extends Component {
     const {
       status,
       igdbId,
+      steamAppId,
       imdbId,
       youTubeTrailerId,
       title,
@@ -95,7 +96,9 @@ class DiscoverGameRow extends Component {
       isExcludeGameModalOpen
     } = this.state;
 
-    const linkProps = isExisting ? { to: `/game/${igdbId}` } : { onPress: this.onAddGamePress };
+    // Use steamAppId for slug if available, otherwise igdbId
+    const titleSlug = steamAppId > 0 ? steamAppId : igdbId;
+    const linkProps = isExisting ? { to: `/game/${titleSlug}` } : { onPress: this.onAddGamePress };
 
     return (
       <>
@@ -443,6 +446,7 @@ class DiscoverGameRow extends Component {
 
 DiscoverGameRow.propTypes = {
   igdbId: PropTypes.number.isRequired,
+  steamAppId: PropTypes.number,
   imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   status: PropTypes.string.isRequired,
