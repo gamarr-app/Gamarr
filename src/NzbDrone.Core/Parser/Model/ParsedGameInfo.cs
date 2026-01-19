@@ -28,6 +28,7 @@ namespace NzbDrone.Core.Parser.Model
         public PlatformFamily Platform { get; set; }
         public string PlatformString { get; set; }
         public GameVersion GameVersion { get; set; }
+        public ReleaseContentType ContentType { get; set; }
 
         public string GameTitle => PrimaryGameTitle;
 
