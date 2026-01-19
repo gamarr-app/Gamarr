@@ -195,7 +195,7 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void enum_in_list()
         {
-            var allowed = new List<GameStatusType> { GameStatusType.Announced, GameStatusType.InDevelopment };
+            var allowed = new List<GameStatusType> { GameStatusType.Announced, GameStatusType.EarlyAccess };
             _subject = WhereMeta(x => allowed.Contains(x.Status));
 
             _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" IN @Clause1_P1)");
@@ -204,7 +204,7 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void enum_in_array()
         {
-            var allowed = new GameStatusType[] { GameStatusType.Announced, GameStatusType.InDevelopment };
+            var allowed = new GameStatusType[] { GameStatusType.Announced, GameStatusType.EarlyAccess };
             _subject = WhereMeta(x => allowed.Contains(x.Status));
 
             _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" IN @Clause1_P1)");

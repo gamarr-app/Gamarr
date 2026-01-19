@@ -36,12 +36,12 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.HDTV720p.Id,
+                Cutoff = Quality.Uplay.Id,
                 Items = new List<QualityProfileQualityItem>
                                    {
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.HDTV720p },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.WEBDL720p },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Bluray720p }
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Uplay },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Epic },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Repack }
                                    },
             };
 
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
             _parsedGameInfo = Builder<ParsedGameInfo>.CreateNew().Build();
-            _parsedGameInfo.Quality = new QualityModel(Quality.HDTV720p);
+            _parsedGameInfo.Quality = new QualityModel(Quality.Uplay);
 
             _remoteGame = new RemoteGame();
 

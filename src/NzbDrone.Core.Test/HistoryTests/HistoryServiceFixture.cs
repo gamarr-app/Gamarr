@@ -26,8 +26,8 @@ namespace NzbDrone.Core.Test.HistoryTests
         [SetUp]
         public void Setup()
         {
-            _profile = new QualityProfile { Cutoff = Quality.WEBDL720p.Id, Items = QualityFixture.GetDefaultQualities() };
-            _profileCustom = new QualityProfile { Cutoff = Quality.WEBDL720p.Id, Items = QualityFixture.GetDefaultQualities(Quality.DVD) };
+            _profile = new QualityProfile { Cutoff = Quality.Epic.Id, Items = QualityFixture.GetDefaultQualities() };
+            _profileCustom = new QualityProfile { Cutoff = Quality.Epic.Id, Items = QualityFixture.GetDefaultQualities(Quality.Scene) };
         }
 
         [Test]
@@ -47,11 +47,11 @@ namespace NzbDrone.Core.Test.HistoryTests
         {
             Mocker.GetMock<IHistoryRepository>()
                 .Setup(v => v.GetBestQualityInHistory(2))
-                .Returns(new List<QualityModel> { new QualityModel(Quality.DVD), new QualityModel(Quality.Bluray1080p) });
+                .Returns(new List<QualityModel> { new QualityModel(Quality.Scene), new QualityModel(Quality.GOG) });
 
             var quality = Subject.GetBestQualityInHistory(_profile, 2);
 
-            quality.Should().Be(new QualityModel(Quality.Bluray1080p));
+            quality.Should().Be(new QualityModel(Quality.GOG));
         }
 
         [Test]
@@ -59,11 +59,11 @@ namespace NzbDrone.Core.Test.HistoryTests
         {
             Mocker.GetMock<IHistoryRepository>()
                 .Setup(v => v.GetBestQualityInHistory(2))
-                .Returns(new List<QualityModel> { new QualityModel(Quality.DVD), new QualityModel(Quality.Bluray1080p) });
+                .Returns(new List<QualityModel> { new QualityModel(Quality.Scene), new QualityModel(Quality.GOG) });
 
             var quality = Subject.GetBestQualityInHistory(_profileCustom, 2);
 
-            quality.Should().Be(new QualityModel(Quality.DVD));
+            quality.Should().Be(new QualityModel(Quality.Scene));
         }
 
         [Test]

@@ -61,7 +61,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 case FileDateType.Cinemas:
                     {
-                        var airDate = game.GameMetadata.Value.InDevelopment;
+                        var airDate = game.GameMetadata.Value.EarlyAccess;
 
                         if (airDate.HasValue == false)
                         {

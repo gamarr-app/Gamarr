@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
-            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.Uplay), ReleaseGroup = "GamarrTest" };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(Moq.It.IsAny<Quality>()))

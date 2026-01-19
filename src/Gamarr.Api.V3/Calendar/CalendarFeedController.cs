@@ -78,7 +78,7 @@ namespace Gamarr.Api.V3.Calendar
 
         private void CreateEvent(Ical.Net.Calendar calendar, GameMetadata game, string releaseType)
         {
-            var date = game.InDevelopment;
+            var date = game.EarlyAccess;
             var eventType = "_cinemas";
             var summaryText = "(Theatrical Release)";
 

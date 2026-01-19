@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_download_report_if_game_was_not_already_downloaded()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));
@@ -86,7 +86,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_only_download_game_once()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));
@@ -100,10 +100,10 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_not_download_if_any_game_was_already_downloaded()
         {
             var remoteGame1 = GetRemoteGame(
-                                                    new QualityModel(Quality.HDTV720p));
+                                                    new QualityModel(Quality.Uplay));
 
             var remoteGame2 = GetRemoteGame(
-                                                    new QualityModel(Quality.HDTV720p));
+                                                    new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame1));
@@ -116,7 +116,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_return_downloaded_reports()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));
@@ -129,9 +129,9 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_return_all_downloaded_reports()
         {
-            var remoteGame1 = GetRemoteGame(new QualityModel(Quality.HDTV720p), GetGame(1));
+            var remoteGame1 = GetRemoteGame(new QualityModel(Quality.Uplay), GetGame(1));
 
-            var remoteGame2 = GetRemoteGame(new QualityModel(Quality.HDTV720p), GetGame(2));
+            var remoteGame2 = GetRemoteGame(new QualityModel(Quality.Uplay), GetGame(2));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame1));
@@ -146,15 +146,15 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_only_return_downloaded_reports()
         {
             var remoteGame1 = GetRemoteGame(
-                                                    new QualityModel(Quality.HDTV720p),
+                                                    new QualityModel(Quality.Uplay),
                                                     GetGame(1));
 
             var remoteGame2 = GetRemoteGame(
-                                                    new QualityModel(Quality.HDTV720p),
+                                                    new QualityModel(Quality.Uplay),
                                                     GetGame(2));
 
             var remoteGame3 = GetRemoteGame(
-                                                    new QualityModel(Quality.HDTV720p),
+                                                    new QualityModel(Quality.Uplay),
                                                     GetGame(2));
 
             var decisions = new List<DownloadDecision>();
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_downloaded_list_when_download_fails()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));
@@ -198,7 +198,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_grab_if_pending()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
@@ -210,7 +210,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_pending_if_game_was_grabbed()
         {
-            var removeGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var removeGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(removeGame));
@@ -223,7 +223,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_pending_even_if_already_added_to_pending()
         {
-            var remoteEpisode = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteEpisode = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteEpisode, new DownloadRejection(DownloadRejectionReason.Unknown, "Failure!", RejectionType.Temporary)));
@@ -236,7 +236,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_failed_if_already_failed_for_that_protocol()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));
@@ -252,8 +252,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_failed_if_failed_for_a_different_protocol()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p), null, DownloadProtocol.Usenet);
-            var remoteGame2 = GetRemoteGame(new QualityModel(Quality.HDTV720p), null, DownloadProtocol.Torrent);
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay), null, DownloadProtocol.Usenet);
+            var remoteGame2 = GetRemoteGame(new QualityModel(Quality.Uplay), null, DownloadProtocol.Torrent);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));
@@ -270,7 +270,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_rejected_if_release_unavailable_on_indexer()
         {
-            var remoteGame = GetRemoteGame(new QualityModel(Quality.HDTV720p));
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteGame));

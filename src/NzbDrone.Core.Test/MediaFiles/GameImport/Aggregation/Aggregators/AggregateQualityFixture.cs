@@ -37,13 +37,13 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
             _mediaInfoAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>())).Returns(AugmentQualityResult.ResolutionOnly((int)Resolution.R1080p, Confidence.MediaInfo));
 
             _fileExtensionAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                                   .Returns(new AugmentQualityResult(QualitySource.TV, Confidence.Fallback, (int)Resolution.R720p, Confidence.Fallback, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Fallback));
+                                   .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Fallback, (int)Resolution.R720p, Confidence.Fallback, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Fallback));
 
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.TV, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Default));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Default));
 
             _releaseNameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                                 .Returns(AugmentQualityResult.SourceOnly(QualitySource.WEBDL, Confidence.MediaInfo));
+                                 .Returns(AugmentQualityResult.SourceOnly(QualitySource.STEAM, Confidence.MediaInfo));
         }
 
         private void GivenAugmenters(params Mock<IAugmentQuality>[] mocks)
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
             result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Extension);
-            result.Quality.Quality.Should().Be(Quality.HDTV720p);
+            result.Quality.Quality.Should().Be(Quality.Uplay);
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
             result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
-            result.Quality.Quality.Should().Be(Quality.SDTV);
+            result.Quality.Quality.Should().Be(Quality.Scene);
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
             result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
-            result.Quality.Quality.Should().Be(Quality.HDTV1080p);
+            result.Quality.Quality.Should().Be(Quality.Origin);
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
             result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
-            result.Quality.Quality.Should().Be(Quality.HDTV1080p);
+            result.Quality.Quality.Should().Be(Quality.Origin);
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
             result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
-            result.Quality.Quality.Should().Be(Quality.WEBDL480p);
+            result.Quality.Quality.Should().Be(Quality.Scene);
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         public void should_return_version_2_when_name_indicates_proper()
         {
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.TV, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
 
             GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
 
@@ -144,7 +144,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         public void should_return_version_0_when_file_name_indicates_v0()
         {
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.TV, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
 
             GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
 
@@ -158,10 +158,10 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         public void should_return_version_2_when_file_name_indicates_v0_and_release_name_indicates_v2()
         {
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.TV, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
 
             _releaseNameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                                 .Returns(new AugmentQualityResult(QualitySource.TV, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
+                                 .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
 
             GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
 

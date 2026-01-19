@@ -15,77 +15,77 @@ namespace NzbDrone.Core.Test.ParserTests
             {
                 @"C:\Test\Some.Hashed.Release.2018.720p.WEB-DL.AAC2.0.H.264-Mercury\0e895c37245186812cb08aab1529cf8ee389dd05.mkv".AsOsAgnostic(),
                 "Some Hashed Release",
-                Quality.WEBDL720p,
+                Quality.Epic,
                 "Mercury"
             },
             new object[]
             {
                 @"C:\Test\0e895c37245186812cb08aab1529cf8ee389dd05\Some.Hashed.Release.2018.720p.WEB-DL.AAC2.0.H.264-Mercury.mkv".AsOsAgnostic(),
                 "Some Hashed Release",
-                Quality.WEBDL720p,
+                Quality.Epic,
                 "Mercury"
             },
             new object[]
             {
                 @"C:\Test\Game.2018.DVDRip.XviD-GAMARR\AHFMZXGHEWD660.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.DVD,
+                Quality.Scene,
                 "GAMARR"
             },
             new object[]
             {
                 @"C:\Test\Game.2018.1080p.BluRay.x264-GAMARR\Backup_72023S02-12.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.Bluray1080p,
+                Quality.GOG,
                 "GAMARR"
             },
             new object[]
             {
                 @"C:\Test\Game.2018.1080p.BluRay.x264\Backup_72023S02-12.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.Bluray1080p,
+                Quality.GOG,
                 null
             },
             new object[]
             {
                 @"C:\Test\Game 2018 720p WEB-DL DD5 1 H 264-ECI\123.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.WEBDL720p,
+                Quality.Epic,
                 "ECI"
             },
             new object[]
             {
                 @"C:\Test\Game 2018 720p WEB-DL DD5 1 H 264-ECI\abc.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.WEBDL720p,
+                Quality.Epic,
                 "ECI"
             },
             new object[]
             {
                 @"C:\Test\Game 2018 720p WEB-DL DD5 1 H 264-ECI\b00bs.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.WEBDL720p,
+                Quality.Epic,
                 "ECI"
             },
             new object[]
             {
                 @"C:\Test\Game.Title.2018.720p.HDTV.x264-NZBgeek/cgajsofuejsa501.mkv".AsOsAgnostic(),
                 "Game Title",
-                Quality.HDTV720p,
+                Quality.Uplay,
                 "NZBgeek"
             },
             new object[]
             {
                 @"C:\Test\Game.2018.1080p.WEB-DL.DD5.1.H264-RARBG\170424_26.mkv".AsOsAgnostic(),
                 "Game",
-                Quality.WEBDL1080p,
+                Quality.Steam,
                 "RARBG"
             },
             new object[]
             {
                 @"C:\Test\Game.Title.2018.720p.HDTV.H.264\abc.xyz.af6021c37f7852.mkv".AsOsAgnostic(),
                 "Game Title",
-                Quality.HDTV720p,
+                Quality.Uplay,
                 null
             }
         };

@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Datastore.Migration
             Alter.Table("MetadataFiles").AlterColumn("Added").AsDateTimeOffset().Nullable();
             Alter.Table("GameFiles").AlterColumn("DateAdded").AsDateTimeOffset().NotNullable();
             Alter.Table("GameMetadata").AlterColumn("DigitalRelease").AsDateTimeOffset().Nullable();
-            Alter.Table("GameMetadata").AlterColumn("InDevelopment").AsDateTimeOffset().Nullable();
+            Alter.Table("GameMetadata").AlterColumn("EarlyAccess").AsDateTimeOffset().Nullable();
             Alter.Table("GameMetadata").AlterColumn("LastInfoSync").AsDateTimeOffset().Nullable();
             Alter.Table("GameMetadata").AlterColumn("PhysicalRelease").AsDateTimeOffset().Nullable();
             Alter.Table("Games").AlterColumn("Added").AsDateTimeOffset().Nullable();

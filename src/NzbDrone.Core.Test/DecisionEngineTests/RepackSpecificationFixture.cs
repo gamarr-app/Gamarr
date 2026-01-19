@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Mocker.Resolve<UpgradableSpecification>();
 
             _parsedGameInfo = Builder<ParsedGameInfo>.CreateNew()
-                                                           .With(p => p.Quality = new QualityModel(Quality.SDTV,
+                                                           .With(p => p.Quality = new QualityModel(Quality.Scene,
                                                                new Revision(2, 0, false)))
                                                            .With(p => p.ReleaseGroup = "Gamarr")
                                                            .Build();
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                                .With(e => e.Quality = new QualityModel(Quality.DVD))
+                                                                .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                                 .With(e => e.ReleaseGroup = "Gamarr")
                                                                 .Build();
 
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "NotGamarr")
                                                  .Build();
 
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "")
                                                  .Build();
 
@@ -155,7 +155,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
@@ -180,7 +180,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
@@ -205,7 +205,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 
@@ -230,7 +230,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedGameInfo.Quality.Revision.IsRepack = true;
             _game.GameFileId = 1;
             _game.GameFile = Builder<GameFile>.CreateNew()
-                                                 .With(e => e.Quality = new QualityModel(Quality.SDTV))
+                                                 .With(e => e.Quality = new QualityModel(Quality.Scene))
                                                  .With(e => e.ReleaseGroup = "Gamarr")
                                                  .Build();
 

@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var fakeSeries = Builder<Game>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
-                    Cutoff = Quality.Bluray1080p.Id,
+                    Cutoff = Quality.GOG.Id,
                     MinFormatScore = 1
                 })
                 .Build();
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame = new RemoteGame
             {
                 Game = fakeSeries,
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene, new Revision(version: 2)) },
             };
 
             CustomFormatsTestHelpers.GivenCustomFormats(_format1, _format2);

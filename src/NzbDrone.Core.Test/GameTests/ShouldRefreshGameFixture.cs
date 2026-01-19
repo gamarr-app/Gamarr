@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.GameTests
         public void Setup()
         {
             _game = Builder<GameMetadata>.CreateNew()
-                                     .With(v => v.Status = GameStatusType.InDevelopment)
+                                     .With(v => v.Status = GameStatusType.EarlyAccess)
                                      .With(m => m.PhysicalRelease = DateTime.Today.AddDays(-100))
                                      .Build();
         }

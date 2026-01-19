@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.MetadataSource.SkyHook
             game.CleanTitle.Should().Be(Parser.Parser.CleanGameTitle(game.Title));
             game.SortTitle.Should().Be(GameTitleNormalizer.Normalize(game.Title, game.IgdbId));
             game.Overview.Should().NotBeNullOrWhiteSpace();
-            game.InDevelopment.Should().HaveValue();
+            game.EarlyAccess.Should().HaveValue();
             game.Images.Should().NotBeEmpty();
             game.ImdbId.Should().NotBeNullOrWhiteSpace();
             game.Studio.Should().NotBeNullOrWhiteSpace();

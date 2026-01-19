@@ -251,7 +251,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             game.OriginalLanguage = IsoLanguages.Find(resource.OriginalLanguage.ToLower())?.Language ?? Language.English;
 
             game.Website = resource.Homepage;
-            game.InDevelopment = resource.InCinema;
+            game.EarlyAccess = resource.InCinema;
             game.PhysicalRelease = resource.PhysicalRelease;
             game.DigitalRelease = resource.DigitalRelease;
 
@@ -302,7 +302,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
             if (resource.InCinema.HasValue && now > resource.InCinema)
             {
-                game.Status = GameStatusType.InDevelopment;
+                game.Status = GameStatusType.EarlyAccess;
 
                 if (!resource.PhysicalRelease.HasValue && !resource.DigitalRelease.HasValue && now > resource.InCinema.Value.AddDays(90))
                 {

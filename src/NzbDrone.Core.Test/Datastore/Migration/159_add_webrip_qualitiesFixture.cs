@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Id = 0,
                     Name = "SDTV",
                     Cutoff = 1,
-                    Items = $"[{GenerateQualityJson(1, true)}, {GenerateQualityJson((int)Quality.WEBRip480p, false)}, {GenerateQualityJson((int)Quality.WEBRip720p, false)}, {GenerateQualityJson((int)Quality.WEBRip1080p, false)}, {GenerateQualityJson((int)Quality.WEBRip2160p, false)}]"
+                    Items = $"[{GenerateQualityJson(1, true)}, {GenerateQualityJson((int)Quality.Scene, false)}, {GenerateQualityJson((int)Quality.Epic, false)}, {GenerateQualityJson((int)Quality.Steam, false)}, {GenerateQualityJson((int)Quality.RepackAllDLC, false)}]"
                 });
             });
 
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Id = 0,
                     Name = "SDTV",
                     Cutoff = 1,
-                    Items = $"[{GenerateQualityJson(1, true)}, {GenerateQualityJson((int)Quality.WEBRip480p, false)}, {GenerateQualityJson((int)Quality.WEBRip720p, false)}, {GenerateQualityJson((int)Quality.WEBRip1080p, false)}]"
+                    Items = $"[{GenerateQualityJson(1, true)}, {GenerateQualityJson((int)Quality.Scene, false)}, {GenerateQualityJson((int)Quality.Epic, false)}, {GenerateQualityJson((int)Quality.Steam, false)}]"
                 });
             });
 
@@ -100,24 +100,24 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                     Id = 0,
                     Name = "SDTV",
                     Cutoff = 1,
-                    Items = $"[{GenerateQualityJson(1, true)}, {GenerateQualityJson((int)Quality.WEBRip480p, false)}, {GenerateQualityJson((int)Quality.WEBRip720p, false)}, {GenerateQualityJson((int)Quality.WEBRip1080p, false)}, {GenerateQualityJson((int)Quality.WEBRip2160p, false)}]"
+                    Items = $"[{GenerateQualityJson(1, true)}, {GenerateQualityJson((int)Quality.Scene, false)}, {GenerateQualityJson((int)Quality.Epic, false)}, {GenerateQualityJson((int)Quality.Steam, false)}, {GenerateQualityJson((int)Quality.RepackAllDLC, false)}]"
                 });
             });
 
             var profiles = db.Query<Profile159>("SELECT \"Items\" FROM \"Profiles\" LIMIT 1");
             var items = profiles.First().Items;
 
-            items[1].Items.First().Quality.Should().Be((int)Quality.WEBRip480p);
-            items[1].Items.Last().Quality.Should().Be((int)Quality.WEBDL480p);
+            items[1].Items.First().Quality.Should().Be((int)Quality.Scene);
+            items[1].Items.Last().Quality.Should().Be((int)Quality.Scene);
 
-            items[2].Items.First().Quality.Should().Be((int)Quality.WEBRip720p);
-            items[2].Items.Last().Quality.Should().Be((int)Quality.WEBDL720p);
+            items[2].Items.First().Quality.Should().Be((int)Quality.Epic);
+            items[2].Items.Last().Quality.Should().Be((int)Quality.Epic);
 
-            items[3].Items.First().Quality.Should().Be((int)Quality.WEBRip1080p);
-            items[3].Items.Last().Quality.Should().Be((int)Quality.WEBDL1080p);
+            items[3].Items.First().Quality.Should().Be((int)Quality.Steam);
+            items[3].Items.Last().Quality.Should().Be((int)Quality.Steam);
 
-            items[4].Items.First().Quality.Should().Be((int)Quality.WEBRip2160p);
-            items[4].Items.Last().Quality.Should().Be((int)Quality.WEBDL2160p);
+            items[4].Items.First().Quality.Should().Be((int)Quality.RepackAllDLC);
+            items[4].Items.Last().Quality.Should().Be((int)Quality.RepackAllDLC);
         }
     }
 }

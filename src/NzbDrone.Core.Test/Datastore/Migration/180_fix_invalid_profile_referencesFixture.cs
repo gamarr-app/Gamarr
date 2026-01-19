@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     {
         private void AddDefaultProfile(fix_invalid_profile_references m, string name, int profileId)
         {
-            var allowed = new Quality[] { Quality.WEBDL720p };
+            var allowed = new Quality[] { Quality.Epic };
 
             var items = Quality.DefaultQualityDefinitions
                 .OrderBy(v => v.Weight)
@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 Id = profileId,
                 Name = name,
                 FormatItems = new List<ProfileFormatItem>().ToJson(),
-                Cutoff = (int)Quality.WEBDL720p,
+                Cutoff = (int)Quality.Epic,
                 Items = items.ToJson(),
                 Language = (int)Language.English,
                 MinFormatScore = 0,

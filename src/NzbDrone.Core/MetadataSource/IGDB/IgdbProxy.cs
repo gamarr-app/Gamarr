@@ -530,9 +530,9 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return igdbStatus switch
             {
                 0 => GameStatusType.Released,
-                2 => GameStatusType.InDevelopment,
-                3 => GameStatusType.InDevelopment,
-                4 => GameStatusType.InDevelopment,
+                2 => GameStatusType.EarlyAccess,
+                3 => GameStatusType.EarlyAccess,
+                4 => GameStatusType.EarlyAccess,
                 5 => GameStatusType.Released,
                 6 => GameStatusType.Deleted,
                 7 => GameStatusType.Announced,

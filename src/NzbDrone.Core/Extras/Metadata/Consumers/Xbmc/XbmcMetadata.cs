@@ -315,9 +315,9 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     }
                 }
 
-                if (game.GameMetadata.Value.InDevelopment.HasValue)
+                if (game.GameMetadata.Value.EarlyAccess.HasValue)
                 {
-                    details.Add(new XElement("premiered", game.GameMetadata.Value.InDevelopment.Value.ToString("yyyy-MM-dd")));
+                    details.Add(new XElement("premiered", game.GameMetadata.Value.EarlyAccess.Value.ToString("yyyy-MM-dd")));
                 }
 
                 details.Add(new XElement("year", game.Year));

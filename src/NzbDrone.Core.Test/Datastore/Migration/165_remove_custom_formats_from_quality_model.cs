@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             json.Should().NotContain("customFormats");
 
             var pending = db.Query<ParsedGameInfo>("SELECT \"ParsedGameInfo\" FROM \"PendingReleases\"").First();
-            pending.Quality.Quality.Should().Be(Quality.Bluray1080p);
+            pending.Quality.Quality.Should().Be(Quality.GOG);
             pending.Languages.Should().BeEmpty();
         }
 
@@ -138,7 +138,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             json.Should().NotContain("resolution");
 
             var pending = db.Query<ParsedGameInfo>("SELECT \"ParsedGameInfo\" FROM \"PendingReleases\"").First();
-            pending.Quality.Quality.Should().Be(Quality.Bluray1080p);
+            pending.Quality.Quality.Should().Be(Quality.GOG);
             pending.Languages.Should().BeEquivalentTo(new List<Language> { Language.English });
         }
     }

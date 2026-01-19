@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
         public void Setup()
         {
             _localGame = Builder<LocalGame>.CreateNew()
-                                                 .With(l => l.Quality = new QualityModel(Quality.Bluray720p))
+                                                 .With(l => l.Quality = new QualityModel(Quality.Repack))
                                                  .Build();
 
             _downloadClientItem = Builder<DownloadClientItem>.CreateNew()
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
             var history = Builder<GameHistory>.CreateListOfSize(1)
                                                   .All()
                                                   .With(h => h.EventType = GameHistoryEventType.Grabbed)
-                                                  .With(h => h.Quality = new QualityModel(Quality.HDTV720p))
+                                                  .With(h => h.Quality = new QualityModel(Quality.Uplay))
                                                   .BuildList();
 
             GivenHistory(history);

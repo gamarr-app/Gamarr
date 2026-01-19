@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Qualities
         {
         }
 
-        private Quality(int id, string name, QualitySource source, int resolution, Modifier modifier = Modifier.NONE)
+        private Quality(int id, string name, QualitySource source, int resolution = 0, Modifier modifier = Modifier.NONE)
         {
             Id = id;
             Name = name;
@@ -77,86 +77,55 @@ namespace NzbDrone.Core.Qualities
         }
 
         // Unable to determine
-        public static Quality Unknown => new Quality(0, "Unknown", QualitySource.UNKNOWN, 0);
+        public static Quality Unknown => new Quality(0, "Unknown", QualitySource.UNKNOWN);
 
-        // Pre-release
-        public static Quality WORKPRINT => new Quality(24, "WORKPRINT", QualitySource.WORKPRINT, 0); // new
-        public static Quality CAM => new Quality(25, "CAM", QualitySource.CAM, 0); // new
-        public static Quality TELESYNC => new Quality(26, "TELESYNC", QualitySource.TELESYNC, 0); // new
-        public static Quality TELECINE => new Quality(27, "TELECINE", QualitySource.TELECINE, 0); // new
-        public static Quality DVDSCR => new Quality(28, "DVDSCR", QualitySource.DVD, 480, Modifier.SCREENER); // new
-        public static Quality REGIONAL => new Quality(29, "REGIONAL", QualitySource.DVD, 480, Modifier.REGIONAL); // new
+        // Scene Releases (most common game releases)
+        public static Quality Scene => new Quality(1, "Scene", QualitySource.SCENE);
+        public static Quality SceneCracked => new Quality(2, "Scene Cracked", QualitySource.SCENE, 0, Modifier.CRACKED);
 
-        // SD
-        public static Quality SDTV => new Quality(1, "SDTV", QualitySource.TV, 480);
-        public static Quality DVD => new Quality(2, "DVD", QualitySource.DVD, 0);
-        public static Quality DVDR => new Quality(23, "DVD-R", QualitySource.DVD, 480, Modifier.REMUX); // new
+        // Store Rips (DRM-free or extracted from stores)
+        public static Quality GOG => new Quality(3, "GOG", QualitySource.GOG, 0, Modifier.DRM_FREE);
+        public static Quality Steam => new Quality(4, "Steam", QualitySource.STEAM);
+        public static Quality Epic => new Quality(5, "Epic", QualitySource.EPIC);
+        public static Quality Origin => new Quality(6, "Origin", QualitySource.ORIGIN);
+        public static Quality Uplay => new Quality(7, "Uplay", QualitySource.UPLAY);
 
-        // HDTV
-        public static Quality HDTV720p => new Quality(4, "HDTV-720p", QualitySource.TV, 720);
-        public static Quality HDTV1080p => new Quality(9, "HDTV-1080p", QualitySource.TV, 1080);
-        public static Quality HDTV2160p => new Quality(16, "HDTV-2160p", QualitySource.TV, 2160);
+        // Repacks (compressed releases - FitGirl, DODI, etc.)
+        public static Quality Repack => new Quality(8, "Repack", QualitySource.REPACK);
+        public static Quality RepackAllDLC => new Quality(9, "Repack All DLC", QualitySource.REPACK, 0, Modifier.ALL_DLC);
 
-        // Web-DL
-        public static Quality WEBDL480p => new Quality(8, "WEBDL-480p", QualitySource.WEBDL, 480);
-        public static Quality WEBDL720p => new Quality(5, "WEBDL-720p", QualitySource.WEBDL, 720);
-        public static Quality WEBDL1080p => new Quality(3, "WEBDL-1080p", QualitySource.WEBDL, 1080);
-        public static Quality WEBDL2160p => new Quality(18, "WEBDL-2160p", QualitySource.WEBDL, 2160);
+        // ISO/Retail (full uncompressed or physical media)
+        public static Quality ISO => new Quality(10, "ISO", QualitySource.ISO);
+        public static Quality Retail => new Quality(11, "Retail", QualitySource.RETAIL);
 
-        // Bluray
-        public static Quality Bluray480p => new Quality(20, "Bluray-480p", QualitySource.BLURAY, 480); // new
-        public static Quality Bluray576p => new Quality(21, "Bluray-576p", QualitySource.BLURAY, 576); // new
-        public static Quality Bluray720p => new Quality(6, "Bluray-720p", QualitySource.BLURAY, 720);
-        public static Quality Bluray1080p => new Quality(7, "Bluray-1080p", QualitySource.BLURAY, 1080);
-        public static Quality Bluray2160p => new Quality(19, "Bluray-2160p", QualitySource.BLURAY, 2160);
+        // Portable (no-install versions)
+        public static Quality Portable => new Quality(12, "Portable", QualitySource.PORTABLE);
 
-        public static Quality Remux1080p => new Quality(30, "Remux-1080p", QualitySource.BLURAY, 1080, Modifier.REMUX);
-        public static Quality Remux2160p => new Quality(31, "Remux-2160p", QualitySource.BLURAY, 2160, Modifier.REMUX);
-
-        public static Quality BRDISK => new Quality(22, "BR-DISK", QualitySource.BLURAY, 1080, Modifier.BRDISK); // new
-
-        // Others
-        public static Quality RAWHD => new Quality(10, "Raw-HD", QualitySource.TV, 1080, Modifier.RAWHD);
-
-        public static Quality WEBRip480p => new Quality(12, "WEBRip-480p", QualitySource.WEBRIP, 480);
-        public static Quality WEBRip720p => new Quality(14, "WEBRip-720p", QualitySource.WEBRIP, 720);
-        public static Quality WEBRip1080p => new Quality(15, "WEBRip-1080p", QualitySource.WEBRIP, 1080);
-        public static Quality WEBRip2160p => new Quality(17, "WEBRip-2160p", QualitySource.WEBRIP, 2160);
+        // Special versions
+        public static Quality Preload => new Quality(13, "Preload", QualitySource.SCENE, 0, Modifier.PRELOAD);
+        public static Quality UpdateOnly => new Quality(14, "Update Only", QualitySource.SCENE, 0, Modifier.UPDATE_ONLY);
+        public static Quality MultiLang => new Quality(15, "Multi-Language", QualitySource.SCENE, 0, Modifier.MULTI_LANG);
 
         static Quality()
         {
             All = new List<Quality>
             {
                 Unknown,
-                WORKPRINT,
-                CAM,
-                TELESYNC,
-                TELECINE,
-                DVDSCR,
-                REGIONAL,
-                SDTV,
-                DVD,
-                DVDR,
-                HDTV720p,
-                HDTV1080p,
-                HDTV2160p,
-                WEBDL480p,
-                WEBDL720p,
-                WEBDL1080p,
-                WEBDL2160p,
-                WEBRip480p,
-                WEBRip720p,
-                WEBRip1080p,
-                WEBRip2160p,
-                Bluray480p,
-                Bluray576p,
-                Bluray720p,
-                Bluray1080p,
-                Bluray2160p,
-                Remux1080p,
-                Remux2160p,
-                BRDISK,
-                RAWHD
+                Scene,
+                SceneCracked,
+                GOG,
+                Steam,
+                Epic,
+                Origin,
+                Uplay,
+                Repack,
+                RepackAllDLC,
+                ISO,
+                Retail,
+                Portable,
+                Preload,
+                UpdateOnly,
+                MultiLang
             };
 
             AllLookup = new Quality[All.Select(v => v.Id).Max() + 1];
@@ -167,41 +136,22 @@ namespace NzbDrone.Core.Qualities
 
             DefaultQualityDefinitions = new HashSet<QualityDefinition>
             {
-                new QualityDefinition(Quality.Unknown)     { Weight = 1,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.WORKPRINT)   { Weight = 2,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.CAM)         { Weight = 3,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.TELESYNC)    { Weight = 4,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.TELECINE)    { Weight = 5,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.REGIONAL)    { Weight = 6,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.DVDSCR)      { Weight = 7,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.SDTV)        { Weight = 8,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.DVD)         { Weight = 9,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.DVDR)        { Weight = 10,  MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-
-                new QualityDefinition(Quality.WEBDL480p)   { Weight = 11, MinSize = 0, MaxSize = 100, PreferredSize = 95, GroupName = "WEB 480p" },
-                new QualityDefinition(Quality.WEBRip480p)   { Weight = 11, MinSize = 0, MaxSize = 100, PreferredSize = 95, GroupName = "WEB 480p" },
-                new QualityDefinition(Quality.Bluray480p)  { Weight = 12, MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.Bluray576p)  { Weight = 13, MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-
-                new QualityDefinition(Quality.HDTV720p)    { Weight = 14, MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.WEBDL720p)   { Weight = 15, MinSize = 0, MaxSize = 100, PreferredSize = 95, GroupName = "WEB 720p" },
-                new QualityDefinition(Quality.WEBRip720p)   { Weight = 15, MinSize = 0, MaxSize = 100, PreferredSize = 95, GroupName = "WEB 720p" },
-                new QualityDefinition(Quality.Bluray720p)  { Weight = 16, MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-
-                new QualityDefinition(Quality.HDTV1080p)   { Weight = 17, MinSize = 0, MaxSize = 100, PreferredSize = 95 },
-                new QualityDefinition(Quality.WEBDL1080p)  { Weight = 18, MinSize = 0, MaxSize = 100, PreferredSize = 95, GroupName = "WEB 1080p" },
-                new QualityDefinition(Quality.WEBRip1080p)   { Weight = 18, MinSize = 0, MaxSize = 100, PreferredSize = 95, GroupName = "WEB 1080p" },
-                new QualityDefinition(Quality.Bluray1080p) { Weight = 19, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Remux1080p)  { Weight = 20, MinSize = 0, MaxSize = null, PreferredSize = null },
-
-                new QualityDefinition(Quality.HDTV2160p)   { Weight = 21, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.WEBDL2160p)  { Weight = 22, MinSize = 0, MaxSize = null, PreferredSize = null, GroupName = "WEB 2160p" },
-                new QualityDefinition(Quality.WEBRip2160p)  { Weight = 22, MinSize = 0, MaxSize = null, PreferredSize = null, GroupName = "WEB 2160p" },
-                new QualityDefinition(Quality.Bluray2160p) { Weight = 23, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Remux2160p)  { Weight = 24, MinSize = 0, MaxSize = null, PreferredSize = null },
-
-                new QualityDefinition(Quality.BRDISK)      { Weight = 25, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.RAWHD)       { Weight = 26, MinSize = 0, MaxSize = null, PreferredSize = null }
+                new QualityDefinition(Quality.Unknown)      { Weight = 1,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Preload)      { Weight = 2,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.UpdateOnly)   { Weight = 3,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Scene)        { Weight = 4,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.SceneCracked) { Weight = 5,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Repack)       { Weight = 6,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.RepackAllDLC) { Weight = 7,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.GOG)          { Weight = 8,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Steam)        { Weight = 9,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Epic)         { Weight = 10, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Origin)       { Weight = 11, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Uplay)        { Weight = 12, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.ISO)          { Weight = 13, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Retail)       { Weight = 14, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Portable)     { Weight = 15, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.MultiLang)    { Weight = 16, MinSize = 0, MaxSize = null, PreferredSize = null }
             };
         }
 
@@ -210,6 +160,7 @@ namespace NzbDrone.Core.Qualities
         public static readonly Quality[] AllLookup;
 
         public static readonly HashSet<QualityDefinition> DefaultQualityDefinitions;
+
         public static Quality FindById(int id)
         {
             if (id == 0)

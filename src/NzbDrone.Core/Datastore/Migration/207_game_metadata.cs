@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Status").AsInt32()
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("Runtime").AsInt32()
-                .WithColumn("InDevelopment").AsDateTime().Nullable()
+                .WithColumn("EarlyAccess").AsDateTime().Nullable()
                 .WithColumn("PhysicalRelease").AsDateTime().Nullable()
                 .WithColumn("DigitalRelease").AsDateTime().Nullable()
                 .WithColumn("Year").AsInt32().Nullable()
@@ -38,13 +38,13 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Popularity").AsFloat().Nullable();
 
             // Transfer metadata from Games to GameMetadata
-            Execute.Sql(@"INSERT INTO ""GameMetadata"" (""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""CleanTitle"", ""OriginalTitle"", ""CleanOriginalTitle"", ""OriginalLanguage"", ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""InDevelopment"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", ""SecondaryYear"", ""Recommendations"", ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website"")
-                          SELECT ""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""CleanTitle"", ""OriginalTitle"", ""CleanTitle"", ""OriginalLanguage"", ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""InDevelopment"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", ""SecondaryYear"", ""Recommendations"", ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website""
+            Execute.Sql(@"INSERT INTO ""GameMetadata"" (""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""CleanTitle"", ""OriginalTitle"", ""CleanOriginalTitle"", ""OriginalLanguage"", ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""EarlyAccess"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", ""SecondaryYear"", ""Recommendations"", ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website"")
+                          SELECT ""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""CleanTitle"", ""OriginalTitle"", ""CleanTitle"", ""OriginalLanguage"", ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""EarlyAccess"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", ""SecondaryYear"", ""Recommendations"", ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website""
                           FROM ""Games""");
 
             // Transfer metadata from ImportListGames to GameMetadata if not already in
-            Execute.Sql(@"INSERT INTO ""GameMetadata"" (""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""CleanTitle"", ""OriginalTitle"", ""CleanOriginalTitle"", ""OriginalLanguage"", ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""InDevelopment"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", ""Recommendations"", ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website"")
-                          SELECT ""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""Title"", ""OriginalTitle"", ""OriginalTitle"", 1, ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""InDevelopment"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", '[]', ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website""
+            Execute.Sql(@"INSERT INTO ""GameMetadata"" (""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""CleanTitle"", ""OriginalTitle"", ""CleanOriginalTitle"", ""OriginalLanguage"", ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""EarlyAccess"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", ""Recommendations"", ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website"")
+                          SELECT ""IgdbId"", ""ImdbId"", ""Title"", ""SortTitle"", ""Title"", ""OriginalTitle"", ""OriginalTitle"", 1, ""Overview"", ""Status"", ""LastInfoSync"", ""Images"", ""Genres"", ""Ratings"", ""Runtime"", ""EarlyAccess"", ""PhysicalRelease"", ""DigitalRelease"", ""Year"", '[]', ""Certification"", ""YouTubeTrailerId"", ""Studio"", ""Collection"", ""Website""
                           FROM ""ImportListGames""
                           WHERE ""ImportListGames"".""IgdbId"" NOT IN ( SELECT ""GameMetadata"".""IgdbId"" FROM ""GameMetadata"" )
                           AND ""ImportListGames"".""Id"" IN ( SELECT MIN(""Id"") FROM ""ImportListGames"" GROUP BY ""IgdbId"" )");
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .Column("Genres")
                 .Column("Ratings")
                 .Column("Runtime")
-                .Column("InDevelopment")
+                .Column("EarlyAccess")
                 .Column("PhysicalRelease")
                 .Column("DigitalRelease")
                 .Column("Year")
@@ -136,7 +136,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .Column("Genres")
                 .Column("Ratings")
                 .Column("Runtime")
-                .Column("InDevelopment")
+                .Column("EarlyAccess")
                 .Column("PhysicalRelease")
                 .Column("DigitalRelease")
                 .Column("Year")

@@ -7,58 +7,58 @@ namespace NzbDrone.Core.Test.Qualities
     [TestFixture]
     public class QualityFinderFixture
     {
-        [TestCase(QualitySource.CAM, 480, Modifier.NONE)]
-        [TestCase(QualitySource.CAM, 1080, Modifier.NONE)]
-        [TestCase(QualitySource.CAM, 0, Modifier.NONE)]
-        public void should_return_CAM(QualitySource source, int resolution, Modifier modifier)
+        [TestCase(QualitySource.PRELOAD, 480, Modifier.NONE)]
+        [TestCase(QualitySource.PRELOAD, 1080, Modifier.NONE)]
+        [TestCase(QualitySource.PRELOAD, 0, Modifier.NONE)]
+        public void should_return_Preload(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.CAM);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Preload);
         }
 
-        [TestCase(QualitySource.CAM, 1080, Modifier.SCREENER)]
-        [TestCase(QualitySource.CAM, 0, Modifier.SCREENER)]
+        [TestCase(QualitySource.PRELOAD, 1080, Modifier.CRACKED)]
+        [TestCase(QualitySource.PRELOAD, 0, Modifier.CRACKED)]
         public void should_return_Unknown(QualitySource source, int resolution, Modifier modifier)
         {
             QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Unknown);
         }
 
-        [TestCase(QualitySource.DVD, 480, Modifier.REMUX)]
-        public void should_return_DVD_Remux(QualitySource source, int resolution, Modifier modifier)
+        [TestCase(QualitySource.SCENE, 480, Modifier.DRM_FREE)]
+        public void should_return_SceneCracked(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.DVDR);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.SceneCracked);
         }
 
-        [TestCase(QualitySource.DVD, 480, Modifier.NONE)]
-        [TestCase(QualitySource.DVD, 576, Modifier.NONE)]
-        public void should_return_DVD(QualitySource source, int resolution, Modifier modifier)
+        [TestCase(QualitySource.SCENE, 480, Modifier.NONE)]
+        [TestCase(QualitySource.SCENE, 576, Modifier.NONE)]
+        public void should_return_Scene(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.DVD);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Scene);
         }
 
-        [TestCase(QualitySource.TV, 480, Modifier.NONE)]
-        public void should_return_SDTV(QualitySource source, int resolution, Modifier modifier)
+        [TestCase(QualitySource.STEAM, 480, Modifier.NONE)]
+        public void should_return_Scene_Steam(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.SDTV);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Scene);
         }
 
-        [TestCase(QualitySource.TV, 720, Modifier.NONE)]
+        [TestCase(QualitySource.STEAM, 720, Modifier.NONE)]
         [TestCase(QualitySource.UNKNOWN, 720, Modifier.NONE)]
-        public void should_return_HDTV_720p(QualitySource source, int resolution, Modifier modifier)
+        public void should_return_Uplay(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.HDTV720p);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Uplay);
         }
 
-        [TestCase(QualitySource.TV, 1080, Modifier.NONE)]
+        [TestCase(QualitySource.STEAM, 1080, Modifier.NONE)]
         [TestCase(QualitySource.UNKNOWN, 1080, Modifier.NONE)]
-        public void should_return_HDTV_1080p(QualitySource source, int resolution, Modifier modifier)
+        public void should_return_Origin(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.HDTV1080p);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Origin);
         }
 
-        [TestCase(QualitySource.BLURAY, 720, Modifier.NONE)]
-        public void should_return_Bluray720p(QualitySource source, int resolution, Modifier modifier)
+        [TestCase(QualitySource.GOG, 720, Modifier.NONE)]
+        public void should_return_Repack(QualitySource source, int resolution, Modifier modifier)
         {
-            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Bluray720p);
+            QualityFinder.FindBySourceAndResolution(source, resolution, modifier).Should().Be(Quality.Repack);
         }
     }
 }

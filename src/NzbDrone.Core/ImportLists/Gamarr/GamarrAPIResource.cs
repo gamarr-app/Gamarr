@@ -11,7 +11,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
         public string Overview { get; set; }
         public List<MediaCover.MediaCover> Images { get; set; }
         public bool Monitored { get; set; }
-        public DateTime InDevelopment { get; set; }
+        public DateTime EarlyAccess { get; set; }
         public DateTime PhysicalRelease { get; set; }
         public int Year { get; set; }
         public string TitleSlug { get; set; }

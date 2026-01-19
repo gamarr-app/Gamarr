@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _remoteGame = Builder<RemoteGame>.CreateNew()
                 .With(r => r.Game = _game)
-                .With(r => r.ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD) })
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene) })
                 .With(x => x.CustomFormats = new List<CustomFormat>())
                 .Build();
 
@@ -105,13 +105,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_when_quality_in_queue_is_lower()
         {
-            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.GOG.Id;
 
             var remoteGame = Builder<RemoteGame>.CreateNew()
                 .With(r => r.Game = _game)
                 .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
-                    Quality = new QualityModel(Quality.SDTV)
+                    Quality = new QualityModel(Quality.Scene)
                 })
                 .With(x => x.CustomFormats = new List<CustomFormat>())
                 .Build();
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Game = _game)
                                                       .With(r => r.ParsedGameInfo = new ParsedGameInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.DVD)
+                                                          Quality = new QualityModel(Quality.Scene)
                                                       })
                                                       .Build();
 
@@ -138,13 +138,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_when_quality_in_queue_is_better()
         {
-            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.GOG.Id;
 
             var remoteGame = Builder<RemoteGame>.CreateNew()
                                                       .With(r => r.Game = _game)
                                                       .With(r => r.ParsedGameInfo = new ParsedGameInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.HDTV720p)
+                                                          Quality = new QualityModel(Quality.Uplay)
                                                       })
                                                       .Build();
 
@@ -161,7 +161,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Game = _game)
                                                       .With(r => r.ParsedGameInfo = new ParsedGameInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.HDTV720p)
+                                                          Quality = new QualityModel(Quality.Uplay)
                                                       })
                                                       .Build();
 
@@ -173,14 +173,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_when_quality_is_better_and_upgrade_allowed_is_false_for_quality_profile()
         {
-            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.GOG.Id;
             _game.QualityProfile.UpgradeAllowed = false;
 
             var remoteGame = Builder<RemoteGame>.CreateNew()
                 .With(r => r.Game = _game)
                 .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
-                    Quality = new QualityModel(Quality.Bluray1080p)
+                    Quality = new QualityModel(Quality.GOG)
                 })
                 .Build();
 
@@ -191,13 +191,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_everything_is_the_same_for_failed_pending()
         {
-            _game.QualityProfile.Cutoff = Quality.Bluray1080p.Id;
+            _game.QualityProfile.Cutoff = Quality.GOG.Id;
 
             var remoteGame = Builder<RemoteGame>.CreateNew()
                 .With(r => r.Game = _game)
                 .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
-                    Quality = new QualityModel(Quality.DVD)
+                    Quality = new QualityModel(Quality.Scene)
                 })
                 .With(r => r.Release = _releaseInfo)
                 .Build();
@@ -210,7 +210,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_same_quality_non_proper_in_queue_and_download_propers_is_do_not_upgrade()
         {
-            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.HDTV720p, new Revision(2));
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Uplay, new Revision(2));
             _game.QualityProfile.Cutoff = _remoteGame.ParsedGameInfo.Quality.Quality.Id;
 
             Mocker.GetMock<IConfigService>()
@@ -221,7 +221,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(r => r.Game = _game)
                 .With(r => r.ParsedGameInfo = new ParsedGameInfo
                 {
-                    Quality = new QualityModel(Quality.HDTV720p),
+                    Quality = new QualityModel(Quality.Uplay),
                     Languages = new List<Language> { Language.English }
                 })
                 .With(r => r.Release = _releaseInfo)

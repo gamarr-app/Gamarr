@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
 
             result.Should().NotBe(null);
             result.Resolution.Should().Be(1080);
-            result.Source.Should().Be(QualitySource.WEBDL);
+            result.Source.Should().Be(QualitySource.STEAM);
         }
 
         [Test]

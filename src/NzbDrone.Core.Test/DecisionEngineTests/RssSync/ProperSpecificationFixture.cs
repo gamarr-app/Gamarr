@@ -28,30 +28,30 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _firstFile = new GameFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1)), DateAdded = DateTime.Now };
-            _secondFile = new GameFile { Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _firstFile = new GameFile { Quality = new QualityModel(Quality.GOG, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _secondFile = new GameFile { Quality = new QualityModel(Quality.GOG, new Revision(version: 1)), DateAdded = DateTime.Now };
 
             var fakeSeries = Builder<Game>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Bluray1080p.Id })
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.GOG.Id })
                          .With(c => c.GameFile = _firstFile)
                          .Build();
 
             _parseResultSingle = new RemoteGame
             {
                 Game = fakeSeries,
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene, new Revision(version: 2)) },
             };
         }
 
         private void WithFirstFileUpgradable()
         {
-            _firstFile.Quality = new QualityModel(Quality.SDTV);
+            _firstFile.Quality = new QualityModel(Quality.Scene);
         }
 
         [Test]
         public void should_return_false_when_gameFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.DVD;
+            _firstFile.Quality.Quality = Quality.Scene;
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            _firstFile.Quality.Quality = Quality.DVD;
+            _firstFile.Quality.Quality = Quality.Scene;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.PreferAndUpgrade);
 
-            _firstFile.Quality.Quality = Quality.DVD;
+            _firstFile.Quality.Quality = Quality.Scene;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
@@ -107,7 +107,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _firstFile.Quality.Quality = Quality.DVD;
+            _firstFile.Quality.Quality = Quality.Scene;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();

@@ -29,21 +29,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _qualityType = Builder<QualityDefinition>.CreateNew()
                 .With(q => q.MinSize = 2)
                 .With(q => q.MaxSize = 10)
-                .With(q => q.Quality = Quality.SDTV)
+                .With(q => q.Quality = Quality.Scene)
                 .Build();
 
             _remoteGame = new RemoteGame
             {
                 Game = _game,
                 Release = new ReleaseInfo(),
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.SDTV, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene, new Revision(version: 2)) },
             };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(It.IsAny<Quality>()))
                 .Returns<Quality>(v => Quality.DefaultQualityDefinitions.First(c => c.Quality == v));
 
-            Mocker.GetMock<IQualityDefinitionService>().Setup(s => s.Get(Quality.SDTV)).Returns(_qualityType);
+            Mocker.GetMock<IQualityDefinitionService>().Setup(s => s.Get(Quality.Scene)).Returns(_qualityType);
         }
 
         [TestCase(30, 50, false)]

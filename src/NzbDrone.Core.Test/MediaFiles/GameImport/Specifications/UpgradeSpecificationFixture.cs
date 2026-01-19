@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
             _localGame = new LocalGame()
             {
                 Path = @"C:\Test\30 Rock\30.rock.s01e01.avi",
-                Quality = new QualityModel(Quality.HDTV720p, new Revision(version: 1)),
+                Quality = new QualityModel(Quality.Uplay, new Revision(version: 1)),
                 Game = _game
             };
         }
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
             _localGame.Game.GameFile =
                     new GameFile
                     {
-                        Quality = new QualityModel(Quality.SDTV, new Revision(version: 1))
+                        Quality = new QualityModel(Quality.Scene, new Revision(version: 1))
                     };
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
             _localGame.Game.GameFile =
                 new GameFile
                 {
-                    Quality = new QualityModel(Quality.Bluray720p, new Revision(version: 1))
+                    Quality = new QualityModel(Quality.Repack, new Revision(version: 1))
                 };
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeFalse();
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
             _localGame.Game.GameFile =
                 new GameFile
                 {
-                    Quality = new QualityModel(Quality.HDTV720p, new Revision(version: 2))
+                    Quality = new QualityModel(Quality.Uplay, new Revision(version: 2))
                 };
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeFalse();
@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
             _localGame.Game.GameFile =
                 new GameFile
                 {
-                    Quality = new QualityModel(Quality.HDTV720p, new Revision(version: 2))
+                    Quality = new QualityModel(Quality.Uplay, new Revision(version: 2))
                 };
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
@@ -112,13 +112,13 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _localGame.Quality = new QualityModel(Quality.Bluray1080p);
+            _localGame.Quality = new QualityModel(Quality.GOG);
 
             _localGame.Game.GameFileId = 1;
             _localGame.Game.GameFile =
                 new GameFile
                 {
-                    Quality = new QualityModel(Quality.Bluray1080p, new Revision(version: 2))
+                    Quality = new QualityModel(Quality.GOG, new Revision(version: 2))
                 };
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
 
             var gameFile = new GameFile
             {
-                Quality = new QualityModel(Quality.Bluray1080p)
+                Quality = new QualityModel(Quality.GOG)
             };
 
             _game.QualityProfile.FormatItems = gameFileCustomFormats.Select(c => new ProfileFormatItem
@@ -158,7 +158,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                 .Setup(s => s.ParseCustomFormat(gameFile))
                 .Returns(gameFileCustomFormats);
 
-            _localGame.Quality = new QualityModel(Quality.Bluray1080p);
+            _localGame.Quality = new QualityModel(Quality.GOG);
             _localGame.CustomFormats = Builder<CustomFormat>.CreateListOfSize(1).Build().ToList();
             _localGame.CustomFormatScore = 20;
 
@@ -175,7 +175,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
 
             var gameFile = new GameFile
             {
-                Quality = new QualityModel(Quality.Bluray720p)
+                Quality = new QualityModel(Quality.Repack)
             };
 
             _game.QualityProfile.FormatItems = gameFileCustomFormats.Select(c => new ProfileFormatItem
@@ -193,7 +193,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                 .Setup(s => s.ParseCustomFormat(gameFile))
                 .Returns(gameFileCustomFormats);
 
-            _localGame.Quality = new QualityModel(Quality.Bluray1080p);
+            _localGame.Quality = new QualityModel(Quality.GOG);
             _localGame.CustomFormats = Builder<CustomFormat>.CreateListOfSize(1).Build().ToList();
             _localGame.CustomFormatScore = 20;
 
@@ -210,7 +210,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
 
             var gameFile = new GameFile
             {
-                Quality = new QualityModel(Quality.Bluray1080p)
+                Quality = new QualityModel(Quality.GOG)
             };
 
             _game.QualityProfile.FormatItems = gameFileCustomFormats.Select(c => new ProfileFormatItem
@@ -228,7 +228,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                 .Setup(s => s.ParseCustomFormat(gameFile))
                 .Returns(gameFileCustomFormats);
 
-            _localGame.Quality = new QualityModel(Quality.Bluray1080p);
+            _localGame.Quality = new QualityModel(Quality.GOG);
             _localGame.CustomFormats = Builder<CustomFormat>.CreateListOfSize(1).Build().ToList();
             _localGame.CustomFormatScore = 20;
 

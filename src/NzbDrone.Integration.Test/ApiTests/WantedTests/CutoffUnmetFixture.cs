@@ -12,9 +12,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void cutoff_should_have_monitored_items()
         {
-            EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
+            EnsureQualityProfileCutoff(1, Quality.Uplay, true);
             var game = EnsureGame(680, "Pulp Fiction", true);
-            EnsureGameFile(game, Quality.SDTV);
+            EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
@@ -25,9 +25,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void cutoff_should_not_have_unmonitored_items()
         {
-            EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
+            EnsureQualityProfileCutoff(1, Quality.Uplay, true);
             var game = EnsureGame(680, "Pulp Fiction", false);
-            EnsureGameFile(game, Quality.SDTV);
+            EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
@@ -38,9 +38,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(1)]
         public void cutoff_should_have_series()
         {
-            EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
+            EnsureQualityProfileCutoff(1, Quality.Uplay, true);
             var game = EnsureGame(680, "Pulp Fiction", true);
-            EnsureGameFile(game, Quality.SDTV);
+            EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc");
 
@@ -51,9 +51,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void cutoff_should_have_unmonitored_items()
         {
-            EnsureQualityProfileCutoff(1, Quality.HDTV720p, true);
+            EnsureQualityProfileCutoff(1, Quality.Uplay, true);
             var game = EnsureGame(680, "Pulp Fiction", false);
-            EnsureGameFile(game, Quality.SDTV);
+            EnsureGameFile(game, Quality.Scene);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "gameMetadata.year", "desc", "monitored", false);
 

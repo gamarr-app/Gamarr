@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Test.Qualities
 
         private void GivenCustomProfile()
         {
-            Subject = new QualityModelComparer(new QualityProfile { Items = QualityFixture.GetDefaultQualities(Quality.Bluray720p, Quality.DVD) });
+            Subject = new QualityModelComparer(new QualityProfile { Items = QualityFixture.GetDefaultQualities(Quality.GOG, Quality.Repack) });
         }
 
         private void GivenGroupedProfile()
@@ -36,12 +36,12 @@ namespace NzbDrone.Core.Test.Qualities
                                           new QualityProfileQualityItem
                                           {
                                               Allowed = false,
-                                              Quality = Quality.SDTV
+                                              Quality = Quality.Scene
                                           },
                                           new QualityProfileQualityItem
                                           {
                                               Allowed = false,
-                                              Quality = Quality.DVD
+                                              Quality = Quality.Repack
                                           },
                                           new QualityProfileQualityItem
                                           {
@@ -51,19 +51,19 @@ namespace NzbDrone.Core.Test.Qualities
                                                           new QualityProfileQualityItem
                                                           {
                                                               Allowed = true,
-                                                              Quality = Quality.HDTV720p
+                                                              Quality = Quality.Steam
                                                           },
                                                           new QualityProfileQualityItem
                                                           {
                                                               Allowed = true,
-                                                              Quality = Quality.WEBDL720p
+                                                              Quality = Quality.Epic
                                                           }
                                                       }
                                           },
                                           new QualityProfileQualityItem
                                           {
                                               Allowed = true,
-                                              Quality = Quality.Bluray720p
+                                              Quality = Quality.GOG
                                           }
                                       }
             };
@@ -76,8 +76,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.Bluray1080p);
-            var second = new QualityModel(Quality.DVD);
+            var first = new QualityModel(Quality.GOG);
+            var second = new QualityModel(Quality.Repack);
 
             var compare = Subject.Compare(first, second);
 
@@ -89,8 +89,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.DVD);
-            var second = new QualityModel(Quality.Bluray1080p);
+            var first = new QualityModel(Quality.Repack);
+            var second = new QualityModel(Quality.GOG);
 
             var compare = Subject.Compare(first, second);
 
@@ -102,8 +102,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.Bluray1080p, new Revision(version: 2));
-            var second = new QualityModel(Quality.Bluray1080p, new Revision(version: 1));
+            var first = new QualityModel(Quality.GOG, new Revision(version: 2));
+            var second = new QualityModel(Quality.GOG, new Revision(version: 1));
 
             var compare = Subject.Compare(first, second);
 
@@ -115,8 +115,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenCustomProfile();
 
-            var first = new QualityModel(Quality.DVD);
-            var second = new QualityModel(Quality.Bluray720p);
+            var first = new QualityModel(Quality.Repack);
+            var second = new QualityModel(Quality.GOG);
 
             var compare = Subject.Compare(first, second);
 
@@ -128,8 +128,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenGroupedProfile();
 
-            var first = new QualityModel(Quality.HDTV720p);
-            var second = new QualityModel(Quality.WEBDL720p);
+            var first = new QualityModel(Quality.Steam);
+            var second = new QualityModel(Quality.Epic);
 
             var compare = Subject.Compare(first, second);
 
@@ -141,8 +141,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenGroupedProfile();
 
-            var first = new QualityModel(Quality.HDTV720p);
-            var second = new QualityModel(Quality.WEBDL720p);
+            var first = new QualityModel(Quality.Steam);
+            var second = new QualityModel(Quality.Epic);
 
             var compare = Subject.Compare(first, second, true);
 

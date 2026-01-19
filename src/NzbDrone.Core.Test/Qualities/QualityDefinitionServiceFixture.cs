@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.Qualities
                   .Setup(s => s.All())
                   .Returns(new List<QualityDefinition>
                       {
-                              new QualityDefinition(Quality.SDTV) { Weight = 1, MinSize = 0, MaxSize = 100, Id = 20 }
+                              new QualityDefinition(Quality.Scene) { Weight = 1, MinSize = 0, MaxSize = 100, Id = 20 }
                       });
 
             Subject.Handle(new ApplicationStartedEvent());
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.Qualities
                   .Setup(s => s.All())
                   .Returns(new List<QualityDefinition>
                       {
-                              new QualityDefinition(Quality.SDTV) { Weight = 1, MinSize = 0, MaxSize = 100, Id = 20 }
+                              new QualityDefinition(Quality.Scene) { Weight = 1, MinSize = 0, MaxSize = 100, Id = 20 }
                       });
 
             Subject.Handle(new ApplicationStartedEvent());

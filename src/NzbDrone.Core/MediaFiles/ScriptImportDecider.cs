@@ -141,7 +141,7 @@ namespace NzbDrone.Core.MediaFiles
             environmentVariables.Add("Gamarr_Game_Genres", string.Join("|", game.GameMetadata.Value.Genres));
             environmentVariables.Add("Gamarr_Game_Tags", string.Join("|", game.Tags.Select(t => _tagRepository.Get(t).Label)));
 
-            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.InDevelopment.ToString() ?? string.Empty);
+            environmentVariables.Add("Gamarr_Game_In_Cinemas_Date", game.GameMetadata.Value.EarlyAccess.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
             environmentVariables.Add("Gamarr_GameFile_Id", gameFile.Id.ToString());

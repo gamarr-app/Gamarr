@@ -18,29 +18,29 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         public static object[] AllowedTestCases =
         {
-            new object[] { Quality.DVD },
-            new object[] { Quality.HDTV720p },
-            new object[] { Quality.Bluray1080p }
+            new object[] { Quality.Scene },
+            new object[] { Quality.Uplay },
+            new object[] { Quality.GOG }
         };
 
         public static object[] DeniedTestCases =
         {
-            new object[] { Quality.SDTV },
-            new object[] { Quality.WEBDL720p },
-            new object[] { Quality.Bluray720p }
+            new object[] { Quality.Scene },
+            new object[] { Quality.Epic },
+            new object[] { Quality.Repack }
         };
 
         [SetUp]
         public void Setup()
         {
             var fakeSeries = Builder<Game>.CreateNew()
-                .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Bluray1080p.Id })
+                .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.GOG.Id })
                          .Build();
 
             _remoteGame = new RemoteGame
             {
                 Game = fakeSeries,
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.Scene, new Revision(version: 2)) },
             };
         }
 
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_allow_if_quality_is_defined_in_profile(Quality qualityType)
         {
             _remoteGame.ParsedGameInfo.Quality.Quality = qualityType;
-            _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.DVD, Quality.HDTV720p, Quality.Bluray1080p);
+            _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Scene, Quality.Uplay, Quality.GOG);
 
             Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_allow_if_quality_is_not_defined_in_profile(Quality qualityType)
         {
             _remoteGame.ParsedGameInfo.Quality.Quality = qualityType;
-            _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.DVD, Quality.HDTV720p, Quality.Bluray1080p);
+            _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Scene, Quality.Uplay, Quality.GOG);
 
             Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
         }

@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             {
                 Game = game,
                 Path = Path.Combine(game.Path, "Game Title - 2022 - Episode Title.mkv"),
-                Quality = new QualityModel(Quality.Bluray720p),
+                Quality = new QualityModel(Quality.Repack),
                 ReleaseGroup = "DRONE"
             };
         }

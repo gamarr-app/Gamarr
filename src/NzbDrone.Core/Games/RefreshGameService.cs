@@ -116,7 +116,7 @@ namespace NzbDrone.Core.Games
             gameMetadata.Genres = gameInfo.Genres;
             gameMetadata.Keywords = gameInfo.Keywords;
             gameMetadata.Certification = gameInfo.Certification;
-            gameMetadata.InDevelopment = gameInfo.InDevelopment;
+            gameMetadata.EarlyAccess = gameInfo.EarlyAccess;
             gameMetadata.Website = gameInfo.Website;
 
             gameMetadata.Year = gameInfo.Year;
