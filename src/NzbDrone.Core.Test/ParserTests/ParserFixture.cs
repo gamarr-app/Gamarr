@@ -85,6 +85,20 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("[DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]", "The Witness")]
         [TestCase("[CD] Half-Life 2 [P] [RUS + ENG / ENG] (2004, FPS) (1.0.1.0) [Tycoon]", "Half-Life 2")]
         [TestCase("[DL] Elden Ring [P] [RUS + ENG + 12 / ENG] (2022, RPG) (1.16.0 + 6 DLC) [Portable]", "Elden Ring")]
+
+        // Public tracker formats with versions
+        [TestCase("ELDEN RING Deluxe Edition v1.03.2", "ELDEN RING")]
+        [TestCase("ELDEN RING v1 04 1-FLT", "ELDEN RING")]
+        [TestCase("Elden Ring Deluxe Edition v 1 03 2", "Elden Ring")]
+
+        // Repack formats
+        [TestCase("ELDEN RING Shadow of the Erdtree Deluxe Edition v1 12 v1 12 1 9 DLCs Bonuses Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING Shadow of the Erdtree")]
+        [TestCase("ELDEN RING Deluxe Edition v1 10 1 DLC Bonus Content Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING")]
+        [TestCase("Elden Ring Nightreign Deluxe Edition v1 03 All DLCs Bonus Content MULTi15 From 20 2 GB DODI-Repack", "Elden Ring Nightreign")]
+
+        // Scene releases with hyphenated groups
+        [TestCase("ELDEN RING-PLAZA", "ELDEN RING")]
+        [TestCase("ELDEN RING Shadow of the Erdtree-RUNE", "ELDEN RING Shadow of the Erdtree")]
         public void should_parse_game_title(string postTitle, string title)
         {
             Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Be(title);
