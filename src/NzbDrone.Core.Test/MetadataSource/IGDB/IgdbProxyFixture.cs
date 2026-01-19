@@ -77,6 +77,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             var result = Subject.GetTrendingGames();
 
             result.Should().NotBeNull();
+
             // Trending games may be empty if no games match the criteria
         }
 
