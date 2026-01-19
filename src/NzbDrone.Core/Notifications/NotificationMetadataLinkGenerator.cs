@@ -24,14 +24,16 @@ public static class NotificationMetadataLinkGenerator
                 links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
             }
 
-            // IMDb links are deprecated for games - IMDb is a movie database
-            // Keeping for backwards compatibility but not generating links
-            // if (linkType == MetadataLinkType.Imdb) { /* Deprecated - no-op */ }
-
-            // Trakt link for games
-            if (linkType == MetadataLinkType.Trakt && game.IgdbId > 0)
+            // Steam Store link
+            if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamId > 0)
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Trakt, "Trakt", $"https://trakt.tv/search/igdb/{game.IgdbId}?id_type=game"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Steam, "Steam", $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId}"));
+            }
+
+            // RAWG link
+            if (linkType == MetadataLinkType.Rawg && game.GameMetadata?.Value?.RawgId > 0)
+            {
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Rawg, "RAWG", $"https://rawg.io/games/{game.GameMetadata.Value.RawgId}"));
             }
         }
 

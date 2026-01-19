@@ -5,11 +5,8 @@ namespace NzbDrone.Core.Games
 {
     public class Ratings : MemberwiseEquatable<Ratings>, IEmbeddedDocument
     {
-        public RatingChild Imdb { get; set; }
         public RatingChild Igdb { get; set; }
         public RatingChild Metacritic { get; set; }
-        public RatingChild RottenTomatoes { get; set; }
-        public RatingChild Trakt { get; set; }
     }
 
     public class RatingChild : MemberwiseEquatable<RatingChild>
