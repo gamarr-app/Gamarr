@@ -9,15 +9,16 @@
 
 .poster {
   flex: 0 0 170px;
+  width: 170px;
   margin-right: 20px;
   height: 250px;
   overflow: hidden;
 }
 
 .poster img {
-  object-fit: cover;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .info {
