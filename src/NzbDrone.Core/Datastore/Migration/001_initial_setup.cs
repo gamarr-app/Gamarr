@@ -157,7 +157,7 @@ namespace NzbDrone.Core.Datastore.Migration
 
             Create.TableForModel("NamingConfig")
                 .WithColumn("MultiEpisodeStyle").AsInt32()
-                .WithColumn("RenameEpisodes").AsBoolean().Nullable() // Set a default - Check Lidarr
+                .WithColumn("RenameEpisodes").AsBoolean().Nullable()
                 .WithColumn("StandardEpisodeFormat").AsString().Nullable()
                 .WithColumn("DailyEpisodeFormat").AsString().Nullable()
                 .WithColumn("SeriesFolderFormat").AsString().Nullable()

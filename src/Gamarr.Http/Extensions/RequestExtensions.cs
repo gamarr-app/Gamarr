@@ -9,7 +9,7 @@ namespace Gamarr.Http.Extensions
 {
     public static class RequestExtensions
     {
-        // See src/Readarr.Api.V1/Queue/QueueModule.cs
+        // Valid sort keys for queue module
         private static readonly HashSet<string> VALID_SORT_KEYS = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "games.sortname", // Workaround authors table properties not being added on isValidSortKey call

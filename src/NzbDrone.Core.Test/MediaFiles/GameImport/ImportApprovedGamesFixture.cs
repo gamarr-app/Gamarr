@@ -38,11 +38,11 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             _rejectedDecisions = new List<ImportDecision>();
             _approvedDecisions = new List<ImportDecision>();
 
-            var outputPath = @"C:\Test\Unsorted\TV\30.Rock.S01E01".AsOsAgnostic();
+            var outputPath = @"C:\Test\Unsorted\Games\Portal.2".AsOsAgnostic();
 
             var game = Builder<Game>.CreateNew()
                 .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
-                .With(s => s.Path = @"C:\Test\TV\30 Rock".AsOsAgnostic())
+                .With(s => s.Path = @"C:\Test\Games\Portal 2".AsOsAgnostic())
                 .Build();
 
             _rejectedDecisions.Add(new ImportDecision(new LocalGame(), new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")));
@@ -53,9 +53,9 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                                        new LocalGame
                                        {
                                            Game = game,
-                                           Path = Path.Combine(game.Path, "30 Rock - S01E01 - Pilot.avi"),
+                                           Path = Path.Combine(game.Path, "Portal 2 Setup.exe"),
                                            Quality = new QualityModel(),
-                                           ReleaseGroup = "DRONE"
+                                           ReleaseGroup = "GAMARR"
                                        }));
 
             Mocker.GetMock<IUpgradeMediaFiles>()
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                 new LocalGame
                 {
                     Game = fileDecision.LocalGame.Game,
-                    Path = @"C:\Test\TV\30 Rock\30 Rock - 2017 - Pilot.avi".AsOsAgnostic(),
+                    Path = @"C:\Test\Games\Portal 2\Portal 2 Patch.exe".AsOsAgnostic(),
                     Quality = new QualityModel(),
                     Size = 80.Megabytes()
                 });
@@ -191,7 +191,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         public void should_copy_when_cannot_move_files_downloads()
         {
             GivenNewDownload();
-            _downloadClientItem.Title = "30.Rock.S01E01";
+            _downloadClientItem.Title = "Portal.2.v1.0";
             _downloadClientItem.CanMoveFiles = false;
 
             Subject.Import(new List<ImportDecision> { _approvedDecisions.First() }, true, _downloadClientItem);
@@ -204,7 +204,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         public void should_use_override_importmode()
         {
             GivenNewDownload();
-            _downloadClientItem.Title = "30.Rock.S01E01";
+            _downloadClientItem.Title = "Portal.2.v1.0";
             _downloadClientItem.CanMoveFiles = false;
 
             Subject.Import(new List<ImportDecision> { _approvedDecisions.First() }, true, _downloadClientItem, ImportMode.Move);
@@ -216,8 +216,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         [Test]
         public void should_use_file_name_only_for_download_client_item_without_a_job_folder()
         {
-            var fileName = "Series.Title.S01E01.720p.HDTV.x264-Sonarr.mkv";
-            var path = Path.Combine(@"C:\Test\Unsorted\TV\".AsOsAgnostic(), fileName);
+            var fileName = "Game.Title.v1.0.x264-Gamarr.zip";
+            var path = Path.Combine(@"C:\Test\Unsorted\Games\".AsOsAgnostic(), fileName);
 
             _downloadClientItem.OutputPath = new OsPath(path);
             _approvedDecisions.First().LocalGame.Path = path;
@@ -230,29 +230,29 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         [Test]
         public void should_use_folder_and_file_name_only_for_download_client_item_with_a_job_folder()
         {
-            var name = "Series.Title.S01E01.720p.HDTV.x264-Sonarr";
-            var outputPath = Path.Combine(@"C:\Test\Unsorted\TV\".AsOsAgnostic(), name);
+            var name = "Game.Title.v1.0.x264-Gamarr";
+            var outputPath = Path.Combine(@"C:\Test\Unsorted\Games\".AsOsAgnostic(), name);
 
             _downloadClientItem.OutputPath = new OsPath(outputPath);
-            _approvedDecisions.First().LocalGame.Path = Path.Combine(outputPath, name + ".mkv");
+            _approvedDecisions.First().LocalGame.Path = Path.Combine(outputPath, name + ".zip");
 
             Subject.Import(new List<ImportDecision> { _approvedDecisions.First() }, true, _downloadClientItem);
 
-            Mocker.GetMock<IMediaFileService>().Verify(v => v.Add(It.Is<GameFile>(c => c.OriginalFilePath == $"{name}\\{name}.mkv".AsOsAgnostic())));
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Add(It.Is<GameFile>(c => c.OriginalFilePath == $"{name}\\{name}.zip".AsOsAgnostic())));
         }
 
         [Test]
         public void should_include_intermediate_folders_for_download_client_item_with_a_job_folder()
         {
-            var name = "Series.Title.S01E01.720p.HDTV.x264-Sonarr";
-            var outputPath = Path.Combine(@"C:\Test\Unsorted\TV\".AsOsAgnostic(), name);
+            var name = "Game.Title.v1.0.x264-Gamarr";
+            var outputPath = Path.Combine(@"C:\Test\Unsorted\Games\".AsOsAgnostic(), name);
 
             _downloadClientItem.OutputPath = new OsPath(outputPath);
-            _approvedDecisions.First().LocalGame.Path = Path.Combine(outputPath, "subfolder", name + ".mkv");
+            _approvedDecisions.First().LocalGame.Path = Path.Combine(outputPath, "subfolder", name + ".zip");
 
             Subject.Import(new List<ImportDecision> { _approvedDecisions.First() }, true, _downloadClientItem);
 
-            Mocker.GetMock<IMediaFileService>().Verify(v => v.Add(It.Is<GameFile>(c => c.OriginalFilePath == $"{name}\\subfolder\\{name}.mkv".AsOsAgnostic())));
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Add(It.Is<GameFile>(c => c.OriginalFilePath == $"{name}\\subfolder\\{name}.zip".AsOsAgnostic())));
         }
 
         [Test]
