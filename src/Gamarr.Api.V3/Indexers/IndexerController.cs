@@ -17,7 +17,7 @@ namespace Gamarr.Api.V3.Indexers
             DownloadClientExistsValidator downloadClientExistsValidator)
             : base(signalRBroadcaster, indexerFactory, "indexer", ResourceMapper, BulkResourceMapper)
         {
-            SharedValidator.RuleFor(c => c.Priority).InclusiveBetween(1, 50);
+            SharedValidator.RuleFor(c => c.Priority).InclusiveBetween(0, 50);
             SharedValidator.RuleFor(c => c.DownloadClientId).SetValidator(downloadClientExistsValidator);
         }
     }
