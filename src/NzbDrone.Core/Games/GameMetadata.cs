@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Equ;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Games.AlternativeTitles;
@@ -19,6 +20,11 @@ namespace NzbDrone.Core.Games
             OriginalLanguage = Language.English;
             Recommendations = new List<int>();
             Ratings = new Ratings();
+            Platforms = new List<GamePlatform>();
+            GameModes = new List<string>();
+            Themes = new List<string>();
+            DlcIds = new List<int>();
+            GameType = GameType.MainGame;
         }
 
         public int IgdbId { get; set; }
@@ -57,6 +63,102 @@ namespace NzbDrone.Core.Games
         public Language OriginalLanguage { get; set; }
         public List<int> Recommendations { get; set; }
         public float Popularity { get; set; }
+
+        /// <summary>
+        /// Type of game content (Main game, DLC, Expansion, etc.)
+        /// </summary>
+        public GameType GameType { get; set; }
+
+        /// <summary>
+        /// IGDB ID of the parent game (for DLCs/expansions)
+        /// </summary>
+        public int? ParentGameId { get; set; }
+
+        /// <summary>
+        /// List of IGDB IDs for DLCs/expansions of this game
+        /// </summary>
+        public List<int> DlcIds { get; set; }
+
+        /// <summary>
+        /// Platforms this game is available on
+        /// </summary>
+        public List<GamePlatform> Platforms { get; set; }
+
+        /// <summary>
+        /// Game modes (Single player, Multiplayer, Co-op, etc.)
+        /// </summary>
+        public List<string> GameModes { get; set; }
+
+        /// <summary>
+        /// Game themes (Fantasy, Sci-fi, Horror, etc.)
+        /// </summary>
+        public List<string> Themes { get; set; }
+
+        /// <summary>
+        /// Developer companies
+        /// </summary>
+        public string Developer { get; set; }
+
+        /// <summary>
+        /// Publisher companies
+        /// </summary>
+        public string Publisher { get; set; }
+
+        /// <summary>
+        /// Game engine used
+        /// </summary>
+        public string GameEngine { get; set; }
+
+        /// <summary>
+        /// IGDB aggregated rating (0-100)
+        /// </summary>
+        public double? AggregatedRating { get; set; }
+
+        /// <summary>
+        /// Number of ratings used for aggregated rating
+        /// </summary>
+        public int? AggregatedRatingCount { get; set; }
+
+        /// <summary>
+        /// Returns true if this game is DLC/expansion content
+        /// </summary>
+        [MemberwiseEqualityIgnore]
+        public bool IsDlc => GameType.IsDlc();
+
+        /// <summary>
+        /// Returns true if this game is available on PC (Windows/Linux/Mac)
+        /// </summary>
+        [MemberwiseEqualityIgnore]
+        public bool IsOnPc => Platforms?.Any(p =>
+            p.Family == PlatformFamily.PC ||
+            p.Family == PlatformFamily.Linux ||
+            p.Family == PlatformFamily.Mac ||
+            p.IgdbId == GamePlatform.CommonPlatforms.Windows ||
+            p.IgdbId == GamePlatform.CommonPlatforms.Linux ||
+            p.IgdbId == GamePlatform.CommonPlatforms.Mac) ?? false;
+
+        /// <summary>
+        /// Gets the primary platform family (PC prioritized)
+        /// </summary>
+        [MemberwiseEqualityIgnore]
+        public PlatformFamily PrimaryPlatformFamily
+        {
+            get
+            {
+                if (Platforms == null || !Platforms.Any())
+                {
+                    return PlatformFamily.Unknown;
+                }
+
+                // Prioritize PC
+                if (IsOnPc)
+                {
+                    return PlatformFamily.PC;
+                }
+
+                return Platforms.FirstOrDefault()?.Family ?? PlatformFamily.Unknown;
+            }
+        }
 
         [MemberwiseEqualityIgnore]
         public bool IsRecentGame

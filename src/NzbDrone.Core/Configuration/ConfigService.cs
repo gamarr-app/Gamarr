@@ -135,6 +135,20 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("CertificationCountry", value); }
         }
 
+        // IGDB API Settings
+        // TODO: Add UI for configuring these in Settings -> General -> Metadata
+        public string IgdbClientId
+        {
+            get { return GetValue("IgdbClientId", string.Empty); }
+            set { SetValue("IgdbClientId", value); }
+        }
+
+        public string IgdbClientSecret
+        {
+            get { return GetValue("IgdbClientSecret", string.Empty); }
+            set { SetValue("IgdbClientSecret", value); }
+        }
+
         public int MaximumSize
         {
             get { return GetValueInt("MaximumSize", 0); }
