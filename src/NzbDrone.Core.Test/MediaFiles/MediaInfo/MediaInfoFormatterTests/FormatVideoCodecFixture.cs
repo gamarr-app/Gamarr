@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaInfo.MediaInfoFormatterTests
     [TestFixture]
     public class FormatVideoCodecFixture : TestBase
     {
-        [TestCase("mpeg2video, ", "Droned.S01E02.1080i.HDTV.DD5.1.MPEG2-NTb", "MPEG2")]
+        [TestCase("mpeg2video, ", "Cyberpunk.2077.1080p.MPEG2-RELOADED", "MPEG2")]
         [TestCase("mpeg2video, ", "", "MPEG2")]
         [TestCase("mpeg1video, ", "The.Series.S13E04.INTERNAL-ANiVCD.mpg", "MPEG")]
         [TestCase("vc1, WVC1", "T.N.S04E18.720p.WEB-DL", "VC1")]
@@ -16,8 +16,8 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaInfo.MediaInfoFormatterTests
         [TestCase("vc1, WMV3", "Series Title S09E13 The Gamarr's RevengeHDTV.XviD-2HD.avi", "VC1")]
         [TestCase("h264, V.MPEG4/ISO/AVC", "Series.2015.S03E08.720p.iP.WEBRip.AAC2.0.H264-BTW", "h264")]
         [TestCase("h264, V_MPEG4/ISO/AVC", "Serie.2019.S01E03.1080p.RTE.WEB-DL.AAC2.0.x264-RTN", "x264")]
-        [TestCase("wmv1, WMV1", "Droned.wmv", "WMV")]
-        [TestCase("wmv2, WMV2", "Droned.wmv", "WMV")]
+        [TestCase("wmv1, WMV1", "Cyberpunk.2077.wmv", "WMV")]
+        [TestCase("wmv2, WMV2", "Cyberpunk.2077.wmv", "WMV")]
         [TestCase("mpeg4, XVID", "", "XviD")]
         [TestCase("mpeg4, DIVX", "", "DivX")]
         [TestCase("mpeg4, divx", "", "DivX")]

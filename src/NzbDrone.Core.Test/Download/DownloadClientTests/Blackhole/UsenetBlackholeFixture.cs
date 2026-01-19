@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
 
             _downloadClientItem = Builder<DownloadClientItem>
                                   .CreateNew()
-                                  .With(d => d.DownloadId = "_Droned.S01E01.Pilot.1080p.WEB-DL-DRONE_0")
+                                  .With(d => d.DownloadId = "_Elden.Ring.v1.10-CODEX_0")
                                   .With(d => d.OutputPath = new OsPath(Path.Combine(_completedDownloadFolder, _title)))
                                   .Build();
 

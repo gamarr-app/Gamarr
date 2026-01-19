@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 Mocker.Resolve<Logger>());
 
             _downloadClientItem = Builder<DownloadClientItem>
-                                  .CreateNew().With(d => d.DownloadId = "_Droned.S01E01.Pilot.1080p.WEB-DL-DRONE_0")
+                                  .CreateNew().With(d => d.DownloadId = "_Elden.Ring.v1.10-CODEX_0")
                                   .Build();
 
             Subject.Definition = new DownloadClientDefinition();
