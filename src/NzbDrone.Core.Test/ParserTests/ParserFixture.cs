@@ -280,23 +280,6 @@ namespace NzbDrone.Core.Test.ParserTests
             Parser.Parser.ParseGameTitle(postTitle).HardcodedSubs.Should().Be(sub);
         }
 
-        [TestCase("That Italian Game 2008 [tt1234567] 720p BluRay X264", "tt1234567")]
-        [TestCase("That Italian Game 2008 [tt12345678] 720p BluRay X264", "tt12345678")]
-        public void should_parse_imdb_in_title(string postTitle, string imdb)
-        {
-            var parsed = Parser.Parser.ParseGameTitle(postTitle, true);
-            parsed.ImdbId.Should().Be(imdb);
-        }
-
-        [TestCase("asfd", null)]
-        [TestCase("123", "tt0000123")]
-        [TestCase("1234567", "tt1234567")]
-        [TestCase("tt1234567", "tt1234567")]
-        [TestCase("tt12345678", "tt12345678")]
-        [TestCase("12345678", "tt12345678")]
-        public void should_normalize_imdbid(string imdbid, string normalized)
-        {
-            Parser.Parser.NormalizeImdbId(imdbid).Should().BeEquivalentTo(normalized);
-        }
+        // IMDb tests removed - IMDb support deprecated in favor of IGDB
     }
 }

@@ -55,9 +55,9 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
             Subject.AugmentQuality(_localGame, _downloadClientItem).Should().BeNull();
         }
 
-        [TestCase("Series.Title.S01E01.1080p.WEB.x264", QualitySource.STEAM, Confidence.Tag, 1080, Confidence.Tag)]
-        [TestCase("Series.Title.S01E01.WEB.x264", QualitySource.STEAM, Confidence.Tag, 480, Confidence.Fallback)]
-        [TestCase("Series.Title.S01E01.720p.x264", QualitySource.SCENE, Confidence.Fallback, 720, Confidence.Tag)]
+        [TestCase("Game.Title-CODEX", QualitySource.SCENE, Confidence.Tag, 0, Confidence.Fallback)]
+        [TestCase("Game.Title.GOG", QualitySource.GOG, Confidence.Tag, 0, Confidence.Fallback)]
+        [TestCase("Game.Title-FitGirl", QualitySource.REPACK, Confidence.Tag, 0, Confidence.Fallback)]
         public void should_return_augmented_quality(string title, QualitySource source, Confidence sourceConfidence, int resolution, Confidence resolutionConfidence)
         {
             Mocker.GetMock<IDownloadHistoryService>()

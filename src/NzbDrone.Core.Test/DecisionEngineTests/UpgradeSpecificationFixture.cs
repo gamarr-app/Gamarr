@@ -41,8 +41,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             new object[] { Quality.Scene, 1, new List<CustomFormat> { CustomFormat1 }, Quality.Scene, 1, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.CustomFormatCutoff },
             new object[] { Quality.Scene, 1, new List<CustomFormat> { CustomFormat2 }, Quality.Scene, 1, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.CustomFormatScore },
 
-            new object[] { Quality.Epic, 1, new List<CustomFormat>(), Quality.Uplay, 2, new List<CustomFormat>(), UpgradeableRejectReason.BetterQuality },
-            new object[] { Quality.Epic, 1, new List<CustomFormat>(), Quality.Uplay, 2, new List<CustomFormat>(), UpgradeableRejectReason.BetterQuality },
+            // Quality upgrade: Epic to Uplay (higher quality) with version bump should be allowed
+            new object[] { Quality.Epic, 1, new List<CustomFormat>(), Quality.Uplay, 2, new List<CustomFormat>(), UpgradeableRejectReason.None },
             new object[] { Quality.Epic, 1, new List<CustomFormat>(), Quality.Epic, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore },
             new object[] { Quality.Steam, 1, new List<CustomFormat>(), Quality.Steam, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore }
         };
