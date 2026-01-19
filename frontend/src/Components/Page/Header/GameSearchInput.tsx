@@ -17,9 +17,9 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
+import Game from 'Game/Game';
 import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 import { icons } from 'Helpers/Props';
-import Game from 'Game/Game';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import createDeepEqualSelector from 'Store/Selectors/createDeepEqualSelector';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
@@ -113,10 +113,7 @@ function createUnoptimizedSelector() {
 }
 
 function createGamesSelector() {
-  return createDeepEqualSelector(
-    createUnoptimizedSelector(),
-    (games) => games
-  );
+  return createDeepEqualSelector(createUnoptimizedSelector(), (games) => games);
 }
 
 function GameSearchInput() {

@@ -14,9 +14,9 @@ import TableBody from 'Components/Table/TableBody';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import TablePager from 'Components/Table/TablePager';
 import usePaging from 'Components/Table/usePaging';
+import createGamesFetchingSelector from 'Game/createGamesFetchingSelector';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import { align, icons, kinds } from 'Helpers/Props';
-import createGamesFetchingSelector from 'Game/createGamesFetchingSelector';
 import {
   clearHistory,
   fetchHistory,

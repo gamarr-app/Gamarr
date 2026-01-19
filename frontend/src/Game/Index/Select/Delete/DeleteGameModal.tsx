@@ -13,10 +13,7 @@ function DeleteGameModal(props: DeleteGameModalProps) {
 
   return (
     <Modal isOpen={isOpen} onModalClose={onModalClose}>
-      <DeleteGameModalContent
-        gameIds={gameIds}
-        onModalClose={onModalClose}
-      />
+      <DeleteGameModalContent gameIds={gameIds} onModalClose={onModalClose} />
     </Modal>
   );
 }

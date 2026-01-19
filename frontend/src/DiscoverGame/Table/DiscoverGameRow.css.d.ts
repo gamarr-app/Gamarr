@@ -11,6 +11,7 @@ interface CssExports {
   'exclusionIcon': string;
   'externalLinks': string;
   'genres': string;
+  'igdbRating': string;
   'imdbRating': string;
   'inCinemas': string;
   'isPopular': string;
@@ -26,7 +27,6 @@ interface CssExports {
   'status': string;
   'statusIcon': string;
   'studio': string;
-  'igdbRating': string;
   'traktRating': string;
   'year': string;
 }

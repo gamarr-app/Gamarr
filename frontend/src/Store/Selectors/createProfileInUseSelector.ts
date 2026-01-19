@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import Game from 'Game/Game';
-import ImportList from 'typings/ImportList';
 import GameCollection from 'typings/GameCollection';
+import ImportList from 'typings/ImportList';
 import createAllGamesSelector from './createAllGamesSelector';
 
 function createProfileInUseSelector(profileProp: string) {
@@ -20,8 +20,7 @@ function createProfileInUseSelector(profileProp: string) {
         games.some((m) => m[profileProp as keyof Game] === id) ||
         lists.some((list) => list[profileProp as keyof ImportList] === id) ||
         collections.some(
-          (collection) =>
-            collection[profileProp as keyof GameCollection] === id
+          (collection) => collection[profileProp as keyof GameCollection] === id
         )
       );
     }

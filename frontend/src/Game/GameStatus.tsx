@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux';
 import QueueDetails from 'Activity/Queue/QueueDetails';
 import Icon from 'Components/Icon';
 import ProgressBar from 'Components/ProgressBar';
-import { icons, kinds, sizes } from 'Helpers/Props';
 import Game from 'Game/Game';
 import useGame, { GameEntity } from 'Game/useGame';
 import useGameFile from 'GameFile/useGameFile';
+import { icons, kinds, sizes } from 'Helpers/Props';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
 import translate from 'Utilities/String/translate';
 import GameQuality from './GameQuality';
@@ -19,11 +19,7 @@ interface GameStatusProps {
 }
 
 function GameStatus({ gameId, gameFileId }: GameStatusProps) {
-  const {
-    isAvailable,
-    monitored,
-    grabbed = false,
-  } = useGame(gameId) as Game;
+  const { isAvailable, monitored, grabbed = false } = useGame(gameId) as Game;
 
   const queueItem = useSelector(createQueueItemSelectorForHook(gameId));
   const gameFile = useGameFile(gameFileId);
@@ -55,10 +51,7 @@ function GameStatus({ gameId, gameFileId }: GameStatusProps) {
   if (grabbed) {
     return (
       <div className={styles.center}>
-        <Icon
-          name={icons.DOWNLOADING}
-          title={translate('GameIsDownloading')}
-        />
+        <Icon name={icons.DOWNLOADING} title={translate('GameIsDownloading')} />
       </div>
     );
   }

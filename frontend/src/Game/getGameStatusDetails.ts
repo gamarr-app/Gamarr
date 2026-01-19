@@ -1,5 +1,5 @@
-import { icons } from 'Helpers/Props';
 import { GameStatus } from 'Game/Game';
+import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 
 export default function getGameStatusDetails(status: GameStatus) {

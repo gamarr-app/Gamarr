@@ -6,12 +6,13 @@ interface CssExports {
   'certification': string;
   'collection': string;
   'digitalRelease': string;
+  'gameStatus': string;
   'genres': string;
+  'igdbRating': string;
   'imdbRating': string;
   'inCinemas': string;
   'keywords': string;
   'minimumAvailability': string;
-  'gameStatus': string;
   'originalLanguage': string;
   'originalTitle': string;
   'path': string;
@@ -27,7 +28,6 @@ interface CssExports {
   'status': string;
   'studio': string;
   'tags': string;
-  'igdbRating': string;
   'traktRating': string;
   'year': string;
 }

@@ -31,10 +31,7 @@ function createUnoptimizedSelector() {
 }
 
 function createGameSelector() {
-  return createDeepEqualSelector(
-    createUnoptimizedSelector(),
-    (games) => games
-  );
+  return createDeepEqualSelector(createUnoptimizedSelector(), (games) => games);
 }
 
 export default function GameIndexFooter() {

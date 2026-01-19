@@ -7,18 +7,18 @@ import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
 import Popover from 'Components/Tooltip/Popover';
-import { icons, kinds, tooltipPositions } from 'Helpers/Props';
-import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
-import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
-import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
-import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
-import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
-import Language from 'Language/Language';
-import IndexerFlags from 'Game/IndexerFlags';
 import Game from 'Game/Game';
 import GameFormats from 'Game/GameFormats';
 import GameLanguages from 'Game/GameLanguages';
 import GameQuality from 'Game/GameQuality';
+import IndexerFlags from 'Game/IndexerFlags';
+import { icons, kinds, tooltipPositions } from 'Helpers/Props';
+import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
+import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
+import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
+import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
+import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
+import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import {
   reprocessInteractiveImportItems,

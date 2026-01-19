@@ -1,6 +1,6 @@
 import ModelBase from 'App/ModelBase';
-import Language from 'Language/Language';
 import { GameFile } from 'GameFile/GameFile';
+import Language from 'Language/Language';
 
 export type GameMonitor = 'gameOnly' | 'gameAndCollection' | 'none';
 

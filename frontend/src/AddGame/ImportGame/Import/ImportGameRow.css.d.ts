@@ -2,9 +2,9 @@
 // Please do not change this file!
 interface CssExports {
   'folder': string;
+  'game': string;
   'minimumAvailability': string;
   'monitor': string;
-  'game': string;
   'qualityProfile': string;
   'selectInput': string;
 }

@@ -10,9 +10,7 @@ interface GameIndexSelectModeMenuItemProps {
   onPress: () => void;
 }
 
-function GameIndexSelectModeMenuItem(
-  props: GameIndexSelectModeMenuItemProps
-) {
+function GameIndexSelectModeMenuItem(props: GameIndexSelectModeMenuItemProps) {
   const { label, iconName, isSelectMode, onPress } = props;
   const [, selectDispatch] = useSelect();
 

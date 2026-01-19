@@ -40,8 +40,7 @@ const gameEditorSelector = createSelector(
 );
 
 function GameIndexSelectFooter() {
-  const { isSaving, isDeleting, deleteError } =
-    useSelector(gameEditorSelector);
+  const { isSaving, isDeleting, deleteError } = useSelector(gameEditorSelector);
 
   const isOrganizingGames = useSelector(
     createCommandExecutingSelector(RENAME_GAME)

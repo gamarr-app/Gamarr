@@ -12,9 +12,7 @@ function GameDetailsPage() {
   const { titleSlug } = useParams<{ titleSlug: string }>();
   const history = useHistory();
 
-  const gameIndex = allGames.findIndex(
-    (game) => game.titleSlug === titleSlug
-  );
+  const gameIndex = allGames.findIndex((game) => game.titleSlug === titleSlug);
 
   const previousIndex = usePrevious(gameIndex);
 

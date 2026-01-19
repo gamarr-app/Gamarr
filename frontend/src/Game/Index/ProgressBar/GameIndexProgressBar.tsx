@@ -1,12 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import ProgressBar from 'Components/ProgressBar';
-import { sizes } from 'Helpers/Props';
+import { GameStatus } from 'Game/Game';
 import createGameQueueItemsDetailsSelector, {
   GameQueueDetails,
 } from 'Game/Index/createGameQueueDetailsSelector';
-import { GameStatus } from 'Game/Game';
 import { GameFile } from 'GameFile/GameFile';
+import { sizes } from 'Helpers/Props';
 import getProgressBarKind from 'Utilities/Game/getProgressBarKind';
 import translate from 'Utilities/String/translate';
 import styles from './GameIndexProgressBar.css';

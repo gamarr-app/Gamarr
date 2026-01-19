@@ -2,10 +2,10 @@
 // Please do not change this file!
 interface CssExports {
   'danger': string;
-  'info': string;
   'game': string;
   'gameStatus': string;
   'gameTitle': string;
+  'info': string;
   'primary': string;
   'purple': string;
   'queue': string;

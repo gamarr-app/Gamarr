@@ -13,13 +13,8 @@ interface ParseResultProps {
 
 function ParseResult(props: ParseResultProps) {
   const { item } = props;
-  const {
-    customFormats,
-    customFormatScore,
-    languages,
-    parsedGameInfo,
-    game,
-  } = item;
+  const { customFormats, customFormatScore, languages, parsedGameInfo, game } =
+    item;
 
   const {
     releaseTitle,

@@ -5,7 +5,7 @@ import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import withScrollPosition from 'Components/withScrollPosition';
 import { executeCommand } from 'Store/Actions/commandActions';
-import { addImportListExclusions, addGames, clearAddGame, fetchDiscoverGames, setListGameFilter, setListGameSort, setListGameTableOption, setListGameView } from 'Store/Actions/discoverGameActions';
+import { addGames, addImportListExclusions, clearAddGame, fetchDiscoverGames, setListGameFilter, setListGameSort, setListGameTableOption, setListGameView } from 'Store/Actions/discoverGameActions';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import scrollPositions from 'Store/scrollPositions';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';

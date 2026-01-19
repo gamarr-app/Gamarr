@@ -27,9 +27,7 @@ interface GameIndexFilterModalProps {
   isOpen: boolean;
 }
 
-export default function GameIndexFilterModal(
-  props: GameIndexFilterModalProps
-) {
+export default function GameIndexFilterModal(props: GameIndexFilterModalProps) {
   const sectionItems = useSelector(createGameSelector());
   const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
   const customFilterType = 'gameIndex';

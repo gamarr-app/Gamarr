@@ -12,6 +12,8 @@ interface CssExports {
   'detailsLabel': string;
   'errorMessage': string;
   'filterIcon': string;
+  'gameNavigationButton': string;
+  'gameNavigationButtons': string;
   'genres': string;
   'header': string;
   'headerContent': string;
@@ -19,8 +21,6 @@ interface CssExports {
   'innerContentBody': string;
   'links': string;
   'monitorToggleButton': string;
-  'gameNavigationButton': string;
-  'gameNavigationButtons': string;
   'originalLanguage': string;
   'overview': string;
   'path': string;

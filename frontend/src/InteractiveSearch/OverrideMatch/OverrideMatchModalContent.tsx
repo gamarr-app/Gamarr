@@ -9,14 +9,14 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import DownloadProtocol from 'DownloadClient/DownloadProtocol';
-import usePrevious from 'Helpers/Hooks/usePrevious';
-import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
-import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
-import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
-import Language from 'Language/Language';
 import Game from 'Game/Game';
 import GameLanguages from 'Game/GameLanguages';
 import GameQuality from 'Game/GameQuality';
+import usePrevious from 'Helpers/Hooks/usePrevious';
+import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
+import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
+import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
+import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import { grabRelease } from 'Store/Actions/releaseActions';
 import { fetchDownloadClients } from 'Store/Actions/settingsActions';
@@ -27,12 +27,7 @@ import SelectDownloadClientModal from './DownloadClient/SelectDownloadClientModa
 import OverrideMatchData from './OverrideMatchData';
 import styles from './OverrideMatchModalContent.css';
 
-type SelectType =
-  | 'select'
-  | 'game'
-  | 'quality'
-  | 'language'
-  | 'downloadClient';
+type SelectType = 'select' | 'game' | 'quality' | 'language' | 'downloadClient';
 
 interface OverrideMatchModalContentProps {
   indexerId: number;
@@ -70,9 +65,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
   const previousIsGrabbing = usePrevious(isGrabbing);
 
   const dispatch = useDispatch();
-  const game: Game | undefined = useSelector(
-    createGameSelectorForHook(gameId)
-  );
+  const game: Game | undefined = useSelector(createGameSelectorForHook(gameId));
   const { items: downloadClients } = useSelector(
     createEnabledDownloadClientsSelector(protocol)
   );

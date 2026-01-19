@@ -14,6 +14,7 @@ import * as commandNames from 'Commands/commandNames';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
+import IgdbRating from 'Components/IgdbRating';
 import ImdbRating from 'Components/ImdbRating';
 import InfoLabel from 'Components/InfoLabel';
 import IconButton from 'Components/Link/IconButton';
@@ -26,10 +27,21 @@ import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import RottenTomatoRating from 'Components/RottenTomatoRating';
-import IgdbRating from 'Components/IgdbRating';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import TraktRating from 'Components/TraktRating';
+import DeleteGameModal from 'Game/Delete/DeleteGameModal';
+import EditGameModal from 'Game/Edit/EditGameModal';
+import { Image, Statistics } from 'Game/Game';
+import GameCollectionLabel from 'Game/GameCollectionLabel';
+import GameGenres from 'Game/GameGenres';
+import GamePoster from 'Game/GamePoster';
+import getGameStatusDetails from 'Game/getGameStatusDetails';
+import GameHistoryModal from 'Game/History/GameHistoryModal';
+import GameInteractiveSearchModal from 'Game/Search/GameInteractiveSearchModal';
+import useGame from 'Game/useGame';
+import GameFileEditorTable from 'GameFile/Editor/GameFileEditorTable';
+import ExtraFileTable from 'GameFile/Extras/ExtraFileTable';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
@@ -40,18 +52,6 @@ import {
   tooltipPositions,
 } from 'Helpers/Props';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
-import DeleteGameModal from 'Game/Delete/DeleteGameModal';
-import EditGameModal from 'Game/Edit/EditGameModal';
-import getGameStatusDetails from 'Game/getGameStatusDetails';
-import GameHistoryModal from 'Game/History/GameHistoryModal';
-import { Image, Statistics } from 'Game/Game';
-import GameCollectionLabel from 'Game/GameCollectionLabel';
-import GameGenres from 'Game/GameGenres';
-import GamePoster from 'Game/GamePoster';
-import GameInteractiveSearchModal from 'Game/Search/GameInteractiveSearchModal';
-import useGame from 'Game/useGame';
-import GameFileEditorTable from 'GameFile/Editor/GameFileEditorTable';
-import ExtraFileTable from 'GameFile/Extras/ExtraFileTable';
 import OrganizePreviewModal from 'Organize/OrganizePreviewModal';
 import QualityProfileName from 'Settings/Profiles/Quality/QualityProfileName';
 import { executeCommand } from 'Store/Actions/commandActions';
@@ -64,10 +64,7 @@ import {
   clearGameCredits,
   fetchGameCredits,
 } from 'Store/Actions/gameCreditsActions';
-import {
-  clearGameFiles,
-  fetchGameFiles,
-} from 'Store/Actions/gameFileActions';
+import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
   clearQueueDetails,
   fetchQueueDetails,

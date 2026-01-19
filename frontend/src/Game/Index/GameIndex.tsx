@@ -22,10 +22,10 @@ import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import withScrollPosition from 'Components/withScrollPosition';
+import NoGame from 'Game/NoGame';
 import { align, icons, kinds } from 'Helpers/Props';
 import { DESCENDING } from 'Helpers/Props/sortDirections';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
-import NoGame from 'Game/NoGame';
 import { executeCommand } from 'Store/Actions/commandActions';
 import { fetchGames } from 'Store/Actions/gameActions';
 import {
@@ -40,13 +40,13 @@ import createCommandExecutingSelector from 'Store/Selectors/createCommandExecuti
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createGameClientSideCollectionItemsSelector from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import translate from 'Utilities/String/translate';
-import GameIndexFilterMenu from './Menus/GameIndexFilterMenu';
-import GameIndexSortMenu from './Menus/GameIndexSortMenu';
-import GameIndexViewMenu from './Menus/GameIndexViewMenu';
 import GameIndexFooter from './GameIndexFooter';
 import GameIndexRefreshGameButton from './GameIndexRefreshGameButton';
 import GameIndexSearchButton from './GameIndexSearchButton';
 import GameIndexSearchMenuItem from './GameIndexSearchMenuItem';
+import GameIndexFilterMenu from './Menus/GameIndexFilterMenu';
+import GameIndexSortMenu from './Menus/GameIndexSortMenu';
+import GameIndexViewMenu from './Menus/GameIndexViewMenu';
 import GameIndexOverviews from './Overview/GameIndexOverviews';
 import GameIndexOverviewOptionsModal from './Overview/Options/GameIndexOverviewOptionsModal';
 import GameIndexPosters from './Posters/GameIndexPosters';

@@ -5,12 +5,12 @@ interface CssExports {
   'downloaded': string;
   'event': string;
   'eventType': string;
+  'gameInfo': string;
+  'gameTitle': string;
   'genres': string;
   'info': string;
   'missingMonitored': string;
   'missingUnmonitored': string;
-  'gameInfo': string;
-  'gameTitle': string;
   'overlay': string;
   'queue': string;
   'statusContainer': string;

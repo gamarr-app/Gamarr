@@ -15,6 +15,8 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Popover from 'Components/Tooltip/Popover';
+import MoveGameModal from 'Game/MoveGame/MoveGameModal';
+import useGame from 'Game/useGame';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
   icons,
@@ -23,8 +25,6 @@ import {
   sizes,
   tooltipPositions,
 } from 'Helpers/Props';
-import MoveGameModal from 'Game/MoveGame/MoveGameModal';
-import useGame from 'Game/useGame';
 import { saveGame, setGameValue } from 'Store/Actions/gameActions';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';

@@ -1,8 +1,8 @@
 import React from 'react';
 import Label from 'Components/Label';
 import Link from 'Components/Link/Link';
-import { kinds, sizes } from 'Helpers/Props';
 import Game from 'Game/Game';
+import { kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './GameDetailsLinks.css';
 

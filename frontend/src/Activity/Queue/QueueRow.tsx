@@ -12,14 +12,14 @@ import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import DownloadProtocol from 'DownloadClient/DownloadProtocol';
-import { icons, kinds, tooltipPositions } from 'Helpers/Props';
-import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
-import Language from 'Language/Language';
 import GameFormats from 'Game/GameFormats';
 import GameLanguages from 'Game/GameLanguages';
 import GameQuality from 'Game/GameQuality';
 import GameTitleLink from 'Game/GameTitleLink';
 import useGame from 'Game/useGame';
+import { icons, kinds, tooltipPositions } from 'Helpers/Props';
+import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
+import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import { grabQueueItem, removeQueueItem } from 'Store/Actions/queueActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
@@ -189,10 +189,7 @@ function QueueRow(props: QueueRowProps) {
           return (
             <TableRowCell key={name}>
               {game ? (
-                <GameTitleLink
-                  titleSlug={game.titleSlug}
-                  title={game.title}
-                />
+                <GameTitleLink titleSlug={game.titleSlug} title={game.title} />
               ) : (
                 title
               )}

@@ -21,8 +21,7 @@ function createGameIndexItemSelector(gameId: number) {
 
       const isSearchingGame = executingCommands.some((command) => {
         return (
-          command.name === GAME_SEARCH &&
-          command.body.gameIds?.includes(gameId)
+          command.name === GAME_SEARCH && command.body.gameIds?.includes(gameId)
         );
       });
 

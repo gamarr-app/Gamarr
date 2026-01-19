@@ -41,10 +41,7 @@ function ErrorPage(props: ErrorPageProps) {
       'Failed to load translations from API'
     );
   } else if (gamesError) {
-    errorMessage = getErrorMessage(
-      gamesError,
-      'Failed to load game from API'
-    );
+    errorMessage = getErrorMessage(gamesError, 'Failed to load game from API');
   } else if (customFiltersError) {
     errorMessage = getErrorMessage(
       customFiltersError,

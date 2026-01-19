@@ -6,6 +6,7 @@ interface CssExports {
   'collection': string;
   'digitalRelease': string;
   'genres': string;
+  'igdbRating': string;
   'imdbRating': string;
   'inCinemas': string;
   'isPopular': string;
@@ -20,7 +21,6 @@ interface CssExports {
   'sortTitle': string;
   'status': string;
   'studio': string;
-  'igdbRating': string;
   'traktRating': string;
   'year': string;
 }

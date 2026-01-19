@@ -1,5 +1,5 @@
-import { kinds } from 'Helpers/Props';
 import { GameStatus } from 'Game/Game';
+import { kinds } from 'Helpers/Props';
 
 function getProgressBarKind(
   status: GameStatus,

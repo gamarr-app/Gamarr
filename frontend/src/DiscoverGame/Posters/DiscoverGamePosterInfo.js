@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import Icon from 'Components/Icon';
+import IgdbRating from 'Components/IgdbRating';
 import ImdbRating from 'Components/ImdbRating';
 import RottenTomatoRating from 'Components/RottenTomatoRating';
-import IgdbRating from 'Components/IgdbRating';
 import TraktRating from 'Components/TraktRating';
-import { icons } from 'Helpers/Props';
 import getGameStatusDetails from 'Game/getGameStatusDetails';
+import { icons } from 'Helpers/Props';
 import formatRuntime from 'Utilities/Date/formatRuntime';
 import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import translate from 'Utilities/String/translate';
