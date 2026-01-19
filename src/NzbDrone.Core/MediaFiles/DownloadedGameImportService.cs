@@ -231,23 +231,13 @@ namespace NzbDrone.Core.MediaFiles
                 _logger.Debug("Release structure validated as {0}", structureValidation.DetectedGroup);
             }
 
-            var videoFiles = _diskScanService.FilterPaths(directoryInfo.FullName, _diskScanService.GetVideoFiles(directoryInfo.FullName));
+            // For games, we import the entire folder as a unit, not individual files
+            // The folder path becomes the "file" path for the game
+            var folderPath = directoryInfo.FullName;
 
-            if (downloadClientItem == null)
-            {
-                foreach (var videoFile in videoFiles)
-                {
-                    if (_diskProvider.IsFileLocked(videoFile))
-                    {
-                        return new List<ImportResult>
-                               {
-                                   FileIsLockedResult(videoFile)
-                               };
-                    }
-                }
-            }
+            _logger.Debug("Importing game folder: {0}", folderPath);
 
-            var decisions = _importDecisionMaker.GetImportDecisions(videoFiles.ToList(), game, downloadClientItem, folderInfo, true);
+            var decisions = _importDecisionMaker.GetImportDecisions(new List<string> { folderPath }, game, downloadClientItem, folderInfo, true);
             var importResults = _importApprovedGame.Import(decisions, true, downloadClientItem, importMode);
 
             if (importMode == ImportMode.Auto)

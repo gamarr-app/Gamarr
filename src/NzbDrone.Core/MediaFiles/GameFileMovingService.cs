@@ -72,31 +72,99 @@ namespace NzbDrone.Core.MediaFiles
 
         public GameFile MoveGameFile(GameFile gameFile, LocalGame localGame)
         {
-            var newFileName = _buildFileNames.BuildFileName(localGame.Game, gameFile, null, localGame.CustomFormats);
-            var filePath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, Path.GetExtension(localGame.Path));
+            var sourcePath = localGame.Path;
+            var isFolder = _diskProvider.FolderExists(sourcePath);
 
-            EnsureGameFolder(gameFile, localGame, filePath);
+            string destinationPath;
+            if (isFolder)
+            {
+                // For folders, move to game's root path with folder name
+                var folderName = new DirectoryInfo(sourcePath).Name;
+                destinationPath = Path.Combine(localGame.Game.Path, folderName);
+            }
+            else
+            {
+                var newFileName = _buildFileNames.BuildFileName(localGame.Game, gameFile, null, localGame.CustomFormats);
+                destinationPath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, Path.GetExtension(localGame.Path));
+                EnsureGameFolder(gameFile, localGame, destinationPath);
+            }
 
-            _logger.Debug("Moving game file: {0} to {1}", gameFile.Path, filePath);
+            _logger.Debug("Moving game {0}: {1} to {2}", isFolder ? "folder" : "file", sourcePath, destinationPath);
 
-            return TransferFile(gameFile, localGame.Game, filePath, TransferMode.Move, localGame);
+            return TransferGamePath(gameFile, localGame.Game, sourcePath, destinationPath, TransferMode.Move, isFolder, localGame);
         }
 
         public GameFile CopyGameFile(GameFile gameFile, LocalGame localGame)
         {
-            var newFileName = _buildFileNames.BuildFileName(localGame.Game, gameFile, null, localGame.CustomFormats);
-            var filePath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, Path.GetExtension(localGame.Path));
+            var sourcePath = localGame.Path;
+            var isFolder = _diskProvider.FolderExists(sourcePath);
 
-            EnsureGameFolder(gameFile, localGame, filePath);
-
-            if (_configService.CopyUsingHardlinks)
+            string destinationPath;
+            if (isFolder)
             {
-                _logger.Debug("Attempting to hardlink game file: {0} to {1}", gameFile.Path, filePath);
-                return TransferFile(gameFile, localGame.Game, filePath, TransferMode.HardLinkOrCopy, localGame);
+                // For folders, copy to game's root path with folder name
+                var folderName = new DirectoryInfo(sourcePath).Name;
+                destinationPath = Path.Combine(localGame.Game.Path, folderName);
+            }
+            else
+            {
+                var newFileName = _buildFileNames.BuildFileName(localGame.Game, gameFile, null, localGame.CustomFormats);
+                destinationPath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, Path.GetExtension(localGame.Path));
+                EnsureGameFolder(gameFile, localGame, destinationPath);
             }
 
-            _logger.Debug("Copying game file: {0} to {1}", gameFile.Path, filePath);
-            return TransferFile(gameFile, localGame.Game, filePath, TransferMode.Copy, localGame);
+            if (_configService.CopyUsingHardlinks && !isFolder)
+            {
+                _logger.Debug("Attempting to hardlink game file: {0} to {1}", sourcePath, destinationPath);
+                return TransferGamePath(gameFile, localGame.Game, sourcePath, destinationPath, TransferMode.HardLinkOrCopy, isFolder, localGame);
+            }
+
+            _logger.Debug("Copying game {0}: {1} to {2}", isFolder ? "folder" : "file", sourcePath, destinationPath);
+            return TransferGamePath(gameFile, localGame.Game, sourcePath, destinationPath, TransferMode.Copy, isFolder, localGame);
+        }
+
+        private GameFile TransferGamePath(GameFile gameFile, Game game, string sourcePath, string destinationPath, TransferMode mode, bool isFolder, LocalGame localGame = null)
+        {
+            Ensure.That(gameFile, () => gameFile).IsNotNull();
+            Ensure.That(game, () => game).IsNotNull();
+            Ensure.That(destinationPath, () => destinationPath).IsValidPath(PathValidationType.CurrentOs);
+
+            if (isFolder)
+            {
+                if (!_diskProvider.FolderExists(sourcePath))
+                {
+                    throw new DirectoryNotFoundException($"Game folder path does not exist: {sourcePath}");
+                }
+
+                if (sourcePath == destinationPath)
+                {
+                    throw new SameFilenameException("Folder not moved, source and destination are the same", sourcePath);
+                }
+
+                // Ensure parent directory exists
+                var parentDir = Path.GetDirectoryName(destinationPath);
+                if (!_diskProvider.FolderExists(parentDir))
+                {
+                    _diskProvider.CreateFolder(parentDir);
+                }
+
+                // Move or copy the folder using DiskTransferService
+                _diskTransferService.TransferFolder(sourcePath, destinationPath, mode);
+
+                gameFile.RelativePath = game.Path.GetRelativePath(destinationPath);
+
+                if (localGame is not null)
+                {
+                    localGame.FileNameBeforeRename = gameFile.RelativePath;
+                }
+
+                _updateGameFileService.ChangeFileDateForFile(gameFile, game);
+
+                return gameFile;
+            }
+
+            // Original file-based logic
+            return TransferFile(gameFile, game, destinationPath, mode, localGame);
         }
 
         private GameFile TransferFile(GameFile gameFile, Game game, string destinationFilePath, TransferMode mode, LocalGame localGame = null)
