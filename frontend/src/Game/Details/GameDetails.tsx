@@ -87,8 +87,6 @@ import {
   unregisterPagePopulator,
 } from 'Utilities/pagePopulator';
 import translate from 'Utilities/String/translate';
-import GameCastPosters from './Credits/Cast/GameCastPosters';
-import GameCrewPosters from './Credits/Crew/GameCrewPosters';
 import GameDetailsLinks from './GameDetailsLinks';
 import GameReleaseDates from './GameReleaseDates';
 import GameStatusLabel from './GameStatusLabel';
@@ -895,14 +893,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
             <GameFileEditorTable gameId={id} />
 
             <ExtraFileTable gameId={id} />
-          </FieldSet>
-
-          <FieldSet legend={translate('Cast')}>
-            <GameCastPosters isSmallScreen={isSmallScreen} />
-          </FieldSet>
-
-          <FieldSet legend={translate('Crew')}>
-            <GameCrewPosters isSmallScreen={isSmallScreen} />
           </FieldSet>
 
           <FieldSet legend={translate('Titles')}>

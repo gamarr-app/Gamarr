@@ -197,19 +197,18 @@ namespace NzbDrone.Core.MetadataSource.Steam
             // Set images
             game.Images = new List<MediaCover.MediaCover>();
 
-            if (!string.IsNullOrEmpty(data.Header_Image))
-            {
-                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Header_Image));
-            }
+            // Use Steam's library poster image (600x900) - proper vertical poster format
+            var posterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{data.Steam_Appid}/library_600x900.jpg";
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, posterUrl));
 
-            if (!string.IsNullOrEmpty(data.Capsule_Imagev5))
-            {
-                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Capsule_Imagev5));
-            }
-
+            // Use header image as secondary fanart if no background
             if (!string.IsNullOrEmpty(data.Background_Raw ?? data.Background))
             {
                 game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, data.Background_Raw ?? data.Background));
+            }
+            else if (!string.IsNullOrEmpty(data.Header_Image))
+            {
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, data.Header_Image));
             }
 
             if (data.Screenshots != null)

@@ -15,6 +15,9 @@ namespace NzbDrone.Core.Parser
     {
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(LanguageParser));
 
+        // Detect Cyrillic characters (Russian, Ukrainian, Bulgarian, etc.)
+        private static readonly Regex CyrillicRegex = new Regex(@"[\u0400-\u04FF]", RegexOptions.Compiled);
+
         private static readonly Regex LanguageRegex = new Regex(@"(?:\W|_|^)(?<english>\beng\b)|
                                                                             (?<italian>\b(?:ita|italian)\b)|
                                                                             (?<german>(?:swiss)?german\b|videomann|ger[. ]dub|\bger\b)|
@@ -448,6 +451,13 @@ namespace NzbDrone.Core.Parser
                 {
                     languages.Add(Language.Original);
                 }
+            }
+
+            // Detect Cyrillic characters - indicates Russian/Ukrainian/Bulgarian release
+            if (!languages.Any() && CyrillicRegex.IsMatch(title))
+            {
+                Logger.Trace("Detected Cyrillic characters in title, assuming Russian language");
+                languages.Add(Language.Russian);
             }
 
             if (!languages.Any())
