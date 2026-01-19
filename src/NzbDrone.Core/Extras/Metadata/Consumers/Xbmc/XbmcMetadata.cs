@@ -158,7 +158,9 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0)
                     {
                         var setRateIgdb = new XElement("rating", new XAttribute("name", "igdb"), new XAttribute("max", "10"), new XAttribute("default", "true"));
-                        setRateIgdb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Igdb.Value));
+
+                        // Convert from 0-100 scale to 0-10 for XBMC/Kodi
+                        setRateIgdb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Igdb.Value / 10));
                         setRateIgdb.Add(new XElement("votes", game.GameMetadata.Value.Ratings.Igdb.Votes));
 
                         defaultRatingSet = true;
@@ -183,7 +185,8 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                 if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0)
                 {
-                    details.Add(new XElement("rating", game.GameMetadata.Value.Ratings.Igdb.Value));
+                    // Convert from 0-100 scale to 0-10 for XBMC/Kodi
+                    details.Add(new XElement("rating", game.GameMetadata.Value.Ratings.Igdb.Value / 10));
                 }
 
                 if (game.GameMetadata.Value.Ratings?.Metacritic?.Value > 0)

@@ -355,13 +355,13 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 game.Year = releaseDate.Year;
             }
 
-            // Ratings
+            // Ratings - IGDB returns 0-100 scale, keep it as-is for display
             game.Ratings = new Ratings();
             if (resource.TotalRating.HasValue)
             {
                 game.Ratings.Igdb = new RatingChild
                 {
-                    Value = (decimal)(resource.TotalRating.Value / 10),
+                    Value = (decimal)resource.TotalRating.Value,
                     Votes = resource.TotalRatingCount ?? 0
                 };
             }
