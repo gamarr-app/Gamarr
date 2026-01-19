@@ -2,9 +2,7 @@ import React from 'react';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
-import TraktRating from 'Components/TraktRating';
+import MetacriticRating from 'Components/MetacriticRating';
 import { Ratings } from 'Game/Game';
 import { icons } from 'Helpers/Props';
 import Language from 'Language/Language';
@@ -43,9 +41,7 @@ interface GameIndexPosterInfoProps {
   longDateFormat: string;
   timeFormat: string;
   showIgdbRating: boolean;
-  showImdbRating: boolean;
-  showRottenTomatoesRating: boolean;
-  showTraktRating: boolean;
+  showMetacriticRating: boolean;
   showTags: boolean;
 }
 
@@ -77,9 +73,7 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     longDateFormat,
     timeFormat,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating,
+    showMetacriticRating,
     showTags,
   } = props;
 
@@ -229,30 +223,14 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     );
   }
 
-  if (!showImdbRating && sortKey === 'imdbRating' && !!ratings.imdb) {
-    return (
-      <div className={styles.info}>
-        <ImdbRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
   if (
-    !showRottenTomatoesRating &&
-    sortKey === 'rottenTomatoesRating' &&
-    !!ratings.rottenTomatoes
+    !showMetacriticRating &&
+    sortKey === 'metacriticRating' &&
+    !!ratings.metacritic
   ) {
     return (
       <div className={styles.info}>
-        <RottenTomatoRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (!showTraktRating && sortKey === 'traktRating' && !!ratings.trakt) {
-    return (
-      <div className={styles.info}>
-        <TraktRating ratings={ratings} iconSize={12} />
+        <MetacriticRating ratings={ratings} iconSize={12} />
       </div>
     );
   }

@@ -15,10 +15,10 @@ import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import InfoLabel from 'Components/InfoLabel';
 import IconButton from 'Components/Link/IconButton';
 import Marquee from 'Components/Marquee';
+import MetacriticRating from 'Components/MetacriticRating';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
@@ -26,10 +26,8 @@ import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
-import TraktRating from 'Components/TraktRating';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import EditGameModal from 'Game/Edit/EditGameModal';
 import { Image, Statistics } from 'Game/Game';
@@ -764,19 +762,9 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     <IgdbRating ratings={ratings} iconSize={20} />
                   </span>
                 ) : null}
-                {ratings.imdb ? (
+                {ratings.metacritic ? (
                   <span className={styles.rating}>
-                    <ImdbRating ratings={ratings} iconSize={20} />
-                  </span>
-                ) : null}
-                {ratings.rottenTomatoes ? (
-                  <span className={styles.rating}>
-                    <RottenTomatoRating ratings={ratings} iconSize={20} />
-                  </span>
-                ) : null}
-                {ratings.trakt ? (
-                  <span className={styles.rating}>
-                    <TraktRating ratings={ratings} iconSize={20} />
+                    <MetacriticRating ratings={ratings} iconSize={20} />
                   </span>
                 ) : null}
               </div>
