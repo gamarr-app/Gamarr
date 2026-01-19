@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Notifications;

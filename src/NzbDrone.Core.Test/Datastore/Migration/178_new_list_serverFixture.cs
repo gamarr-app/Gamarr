@@ -1,3 +1,4 @@
+#pragma warning disable CS0618
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FizzWare.NBuilder;

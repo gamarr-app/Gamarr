@@ -1,4 +1,5 @@
-﻿using System.Linq;
+#pragma warning disable CS0618
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;

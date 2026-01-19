@@ -1,3 +1,4 @@
+#pragma warning disable CS0618
 using System.Collections.Generic;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.Games;

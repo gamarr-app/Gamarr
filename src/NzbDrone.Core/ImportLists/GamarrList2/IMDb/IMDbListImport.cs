@@ -23,6 +23,7 @@ namespace NzbDrone.Core.ImportLists.GamarrList2.IMDbList
 
         public override ImportListType ListType => ImportListType.Other;
         public override TimeSpan MinRefreshInterval => TimeSpan.FromHours(12);
+
         // Disabled by default since IMDb doesn't apply to games
         public override bool Enabled => false;
         public override bool EnableAuto => false;

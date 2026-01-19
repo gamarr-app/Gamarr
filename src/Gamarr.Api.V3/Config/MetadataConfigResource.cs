@@ -1,3 +1,4 @@
+#pragma warning disable CS0618
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using Gamarr.Http.REST;

@@ -133,7 +133,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 Quality.MultiLang,
                 Quality.Scene,
                 Quality.Scene,
-                Quality.SceneR,
+                Quality.Scene,
                 Quality.Uplay,
                 Quality.Origin,
                 Quality.ISO,
