@@ -137,14 +137,12 @@ namespace NzbDrone.Core.Notifications.Telegram
                     links.Add(new TelegramLink("IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
                 }
 
-                if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamId > 0)
+                if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamAppId > 0)
                 {
-                    links.Add(new TelegramLink("Steam", $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId}"));
+                    links.Add(new TelegramLink("Steam", $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamAppId}"));
                 }
 
-                if (linkType == MetadataLinkType.Rawg && game.GameMetadata?.Value?.RawgId > 0)
                 {
-                    links.Add(new TelegramLink("RAWG", $"https://rawg.io/games/{game.GameMetadata.Value.RawgId}"));
                 }
             }
 

@@ -14,6 +14,7 @@ using NzbDrone.Core.Indexers.Exceptions;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.Indexers
 {
@@ -360,7 +361,10 @@ namespace NzbDrone.Core.Indexers
 
                 if (releases.Empty())
                 {
-                    return new ValidationFailure(string.Empty, "Query successful, but no results in the configured categories were returned from your indexer. This may be an issue with the indexer or your indexer category settings.");
+                    return new NzbDroneValidationFailure(string.Empty, "Query successful, but no results in the configured categories were returned from your indexer. This may be an issue with the indexer or your indexer category settings.")
+                    {
+                        IsWarning = true
+                    };
                 }
             }
             catch (ApiKeyException ex)

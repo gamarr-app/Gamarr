@@ -151,48 +151,33 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                 details.Add(new XElement("sorttitle", Parser.Parser.NormalizeTitle(metadataTitle)));
 
-                if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0 || game.GameMetadata.Value.Ratings?.Imdb?.Votes > 0 || game.GameMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
+                if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0 || game.GameMetadata.Value.Ratings?.Metacritic?.Value > 0)
                 {
                     var setRating = new XElement("ratings");
 
                     var defaultRatingSet = false;
 
-                    if (game.GameMetadata.Value.Ratings?.Imdb?.Votes > 0)
-                    {
-                        var setRateImdb = new XElement("rating", new XAttribute("name", "imdb"), new XAttribute("max", "10"), new XAttribute("default", "true"));
-                        setRateImdb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Imdb.Value));
-                        setRateImdb.Add(new XElement("votes", game.GameMetadata.Value.Ratings.Imdb.Votes));
-
-                        defaultRatingSet = true;
-                        setRating.Add(setRateImdb);
-                    }
-
                     if (game.GameMetadata.Value.Ratings?.Igdb?.Votes > 0)
                     {
-                        var setRateTheGameDb = new XElement("rating", new XAttribute("name", "thegamedb"), new XAttribute("max", "10"));
-                        setRateTheGameDb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Igdb.Value));
-                        setRateTheGameDb.Add(new XElement("votes", game.GameMetadata.Value.Ratings.Igdb.Votes));
+                        var setRateIgdb = new XElement("rating", new XAttribute("name", "igdb"), new XAttribute("max", "10"), new XAttribute("default", "true"));
+                        setRateIgdb.Add(new XElement("value", game.GameMetadata.Value.Ratings.Igdb.Value));
+                        setRateIgdb.Add(new XElement("votes", game.GameMetadata.Value.Ratings.Igdb.Votes));
 
-                        if (!defaultRatingSet)
-                        {
-                            defaultRatingSet = true;
-                            setRateTheGameDb.SetAttributeValue("default", "true");
-                        }
-
-                        setRating.Add(setRateTheGameDb);
+                        defaultRatingSet = true;
+                        setRating.Add(setRateIgdb);
                     }
 
-                    if (game.GameMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
+                    if (game.GameMetadata.Value.Ratings?.Metacritic?.Value > 0)
                     {
-                        var setRateRottenTomatoes = new XElement("rating", new XAttribute("name", "tomatometerallcritics"), new XAttribute("max", "100"));
-                        setRateRottenTomatoes.Add(new XElement("value", game.GameMetadata.Value.Ratings.RottenTomatoes.Value));
+                        var setRateMetacritic = new XElement("rating", new XAttribute("name", "metacritic"), new XAttribute("max", "100"));
+                        setRateMetacritic.Add(new XElement("value", game.GameMetadata.Value.Ratings.Metacritic.Value));
 
                         if (!defaultRatingSet)
                         {
-                            setRateRottenTomatoes.SetAttributeValue("default", "true");
+                            setRateMetacritic.SetAttributeValue("default", "true");
                         }
 
-                        setRating.Add(setRateRottenTomatoes);
+                        setRating.Add(setRateMetacritic);
                     }
 
                     details.Add(setRating);
@@ -203,9 +188,9 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                     details.Add(new XElement("rating", game.GameMetadata.Value.Ratings.Igdb.Value));
                 }
 
-                if (game.GameMetadata.Value.Ratings?.RottenTomatoes?.Value > 0)
+                if (game.GameMetadata.Value.Ratings?.Metacritic?.Value > 0)
                 {
-                    details.Add(new XElement("criticrating", game.GameMetadata.Value.Ratings.RottenTomatoes.Value));
+                    details.Add(new XElement("criticrating", game.GameMetadata.Value.Ratings.Metacritic.Value));
                 }
 
                 details.Add(new XElement("userrating"));

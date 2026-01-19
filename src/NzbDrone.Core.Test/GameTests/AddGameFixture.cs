@@ -116,7 +116,7 @@ namespace NzbDrone.Core.Test.GameTests
 
             Mocker.GetMock<IProvideGameInfo>()
                   .Setup(s => s.GetGameInfo(newGame.IgdbId))
-                  .Throws(new GameNotFoundException("Game Not Found"));
+                  .Throws(new GameNotFoundException(newGame.IgdbId));
 
             Mocker.GetMock<IAddGameValidator>()
                   .Setup(s => s.Validate(It.IsAny<Game>()))
