@@ -76,8 +76,9 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.GOG);
-            var second = new QualityModel(Quality.Repack);
+            // In default order: Scene < GOG < Repack < ISO < Retail
+            var first = new QualityModel(Quality.Repack);
+            var second = new QualityModel(Quality.Scene);
 
             var compare = Subject.Compare(first, second);
 
@@ -89,8 +90,9 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.Repack);
-            var second = new QualityModel(Quality.GOG);
+            // In default order: Scene < GOG < Repack < ISO < Retail
+            var first = new QualityModel(Quality.Scene);
+            var second = new QualityModel(Quality.Repack);
 
             var compare = Subject.Compare(first, second);
 

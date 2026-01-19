@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
             var mediaInfo = Builder<MediaInfoModel>.CreateNew()
                 .With(m => m.Width = 1920)
                 .With(m => m.Height = 1080)
-                .With(m => m.Title = "Game.Title.2008.WEB.x264-Gamarr")
+                .With(m => m.Title = "Game.Title.2008.GOG")
                 .Build();
 
             var localGame = Builder<LocalGame>.CreateNew()
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
 
             result.Should().NotBe(null);
             result.Resolution.Should().Be(1080);
-            result.Source.Should().Be(QualitySource.STEAM);
+            result.Source.Should().Be(QualitySource.GOG);
         }
 
         [Test]

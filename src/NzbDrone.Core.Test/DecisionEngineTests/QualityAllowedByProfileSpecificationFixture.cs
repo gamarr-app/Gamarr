@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         public static object[] DeniedTestCases =
         {
-            new object[] { Quality.Scene },
+            new object[] { Quality.Steam },
             new object[] { Quality.Epic },
             new object[] { Quality.Repack }
         };

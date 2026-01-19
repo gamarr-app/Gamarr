@@ -6,7 +6,6 @@ using NUnit.Framework;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators.Augmenters.Quality;
-using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -16,7 +15,6 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
     [TestFixture]
     public class AggregateQualityFixture : CoreTest<AggregateQuality>
     {
-        private Mock<IAugmentQuality> _mediaInfoAugmenter;
         private Mock<IAugmentQuality> _fileExtensionAugmenter;
         private Mock<IAugmentQuality> _nameAugmenter;
         private Mock<IAugmentQuality> _releaseNameAugmenter;
@@ -24,26 +22,24 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         [SetUp]
         public void Setup()
         {
-            _mediaInfoAugmenter = new Mock<IAugmentQuality>();
             _fileExtensionAugmenter = new Mock<IAugmentQuality>();
             _nameAugmenter = new Mock<IAugmentQuality>();
             _releaseNameAugmenter = new Mock<IAugmentQuality>();
 
             _fileExtensionAugmenter.SetupGet(s => s.Order).Returns(1);
             _nameAugmenter.SetupGet(s => s.Order).Returns(2);
-            _mediaInfoAugmenter.SetupGet(s => s.Order).Returns(4);
             _releaseNameAugmenter.SetupGet(s => s.Order).Returns(5);
 
-            _mediaInfoAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>())).Returns(AugmentQualityResult.ResolutionOnly((int)Resolution.R1080p, Confidence.MediaInfo));
-
+            // For games, resolution is always 0 (not applicable)
             _fileExtensionAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                                   .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Fallback, (int)Resolution.R720p, Confidence.Fallback, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Fallback));
+                                   .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Fallback, 0, Confidence.Fallback, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Fallback));
 
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Default));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 0, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(), Confidence.Default));
 
+            // Steam source without modifier
             _releaseNameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                                 .Returns(AugmentQualityResult.SourceOnly(QualitySource.STEAM, Confidence.MediaInfo));
+                                 .Returns(new AugmentQualityResult(QualitySource.STEAM, Confidence.Tag, 0, Confidence.Fallback, Modifier.NONE, Confidence.Fallback, new Revision(), Confidence.Fallback));
         }
 
         private void GivenAugmenters(params Mock<IAugmentQuality>[] mocks)
@@ -52,7 +48,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         }
 
         [Test]
-        public void should_return_HDTV720_from_extension_when_other_augments_are_null()
+        public void should_return_Scene_from_extension_when_other_augments_are_null()
         {
             var nullMock = new Mock<IAugmentQuality>();
             nullMock.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
@@ -63,56 +59,29 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
             var result = Subject.Aggregate(new LocalGame(), null);
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
-            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Extension);
-            result.Quality.Quality.Should().Be(Quality.Uplay);
+            result.Quality.Quality.Should().Be(Quality.Scene);
         }
 
         [Test]
-        public void should_return_SDTV_when_HDTV720_came_from_extension()
+        public void should_return_Scene_when_name_indicates_scene()
         {
             GivenAugmenters(_fileExtensionAugmenter, _nameAugmenter);
 
             var result = Subject.Aggregate(new LocalGame(), null);
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
-            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
             result.Quality.Quality.Should().Be(Quality.Scene);
         }
 
         [Test]
-        public void should_return_HDTV1080p_when_HDTV720_came_from_extension_and_mediainfo_indicates_1080()
+        public void should_return_Steam_when_release_name_indicates_steam()
         {
-            GivenAugmenters(_fileExtensionAugmenter, _mediaInfoAugmenter);
-
-            var result = Subject.Aggregate(new LocalGame(), null);
-
-            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
-            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
-            result.Quality.Quality.Should().Be(Quality.Origin);
-        }
-
-        [Test]
-        public void should_return_HDTV1080p_when_SDTV_came_from_name_and_mediainfo_indicates_1080()
-        {
-            GivenAugmenters(_nameAugmenter, _mediaInfoAugmenter);
-
-            var result = Subject.Aggregate(new LocalGame(), null);
-
-            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
-            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
-            result.Quality.Quality.Should().Be(Quality.Origin);
-        }
-
-        [Test]
-        public void should_return_WEBDL480p_when_file_name_has_HDTV480p_but_release_name_indicates_webdl_source()
-        {
-            GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
+            GivenAugmenters(_fileExtensionAugmenter, _releaseNameAugmenter);
 
             var result = Subject.Aggregate(new LocalGame(), new DownloadClientItem());
 
             result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
-            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
-            result.Quality.Quality.Should().Be(Quality.Scene);
+            result.Quality.Quality.Should().Be(Quality.Steam);
         }
 
         [Test]
@@ -130,7 +99,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         public void should_return_version_2_when_name_indicates_proper()
         {
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 0, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
 
             GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
 
@@ -144,7 +113,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         public void should_return_version_0_when_file_name_indicates_v0()
         {
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 0, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
 
             GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
 
@@ -158,10 +127,10 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         public void should_return_version_2_when_file_name_indicates_v0_and_release_name_indicates_v2()
         {
             _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
+                          .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 0, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(0), Confidence.Tag));
 
             _releaseNameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
-                                 .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 480, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
+                                 .Returns(new AugmentQualityResult(QualitySource.SCENE, Confidence.Default, 0, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(2), Confidence.Tag));
 
             GivenAugmenters(_nameAugmenter, _releaseNameAugmenter);
 
@@ -169,6 +138,32 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             result.Quality.Revision.Version.Should().Be(2);
             result.Quality.RevisionDetectionSource.Should().Be(QualityDetectionSource.Name);
+        }
+
+        [Test]
+        public void should_return_Repack_when_source_is_repack()
+        {
+            _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
+                          .Returns(new AugmentQualityResult(QualitySource.REPACK, Confidence.Default, 0, Confidence.Default, Modifier.NONE, Confidence.Default, new Revision(), Confidence.Default));
+
+            GivenAugmenters(_fileExtensionAugmenter, _nameAugmenter);
+
+            var result = Subject.Aggregate(new LocalGame(), null);
+
+            result.Quality.Quality.Should().Be(Quality.Repack);
+        }
+
+        [Test]
+        public void should_return_RepackAllDLC_when_source_is_repack_with_all_dlc_modifier()
+        {
+            _nameAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()))
+                          .Returns(new AugmentQualityResult(QualitySource.REPACK, Confidence.Default, 0, Confidence.Default, Modifier.ALL_DLC, Confidence.Default, new Revision(), Confidence.Default));
+
+            GivenAugmenters(_fileExtensionAugmenter, _nameAugmenter);
+
+            var result = Subject.Aggregate(new LocalGame(), null);
+
+            result.Quality.Quality.Should().Be(Quality.RepackAllDLC);
         }
     }
 }

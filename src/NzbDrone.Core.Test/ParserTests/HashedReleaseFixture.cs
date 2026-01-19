@@ -13,80 +13,45 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             new object[]
             {
-                @"C:\Test\Some.Hashed.Release.2018.720p.WEB-DL.AAC2.0.H.264-Mercury\0e895c37245186812cb08aab1529cf8ee389dd05.mkv".AsOsAgnostic(),
-                "Some Hashed Release",
-                Quality.Epic,
-                "Mercury"
-            },
-            new object[]
-            {
-                @"C:\Test\0e895c37245186812cb08aab1529cf8ee389dd05\Some.Hashed.Release.2018.720p.WEB-DL.AAC2.0.H.264-Mercury.mkv".AsOsAgnostic(),
-                "Some Hashed Release",
-                Quality.Epic,
-                "Mercury"
-            },
-            new object[]
-            {
-                @"C:\Test\Game.2018.DVDRip.XviD-GAMARR\AHFMZXGHEWD660.mkv".AsOsAgnostic(),
-                "Game",
+                @"C:\Test\Game.Title.2018-CODEX\0e895c37245186812cb08aab1529cf8ee389dd05.exe".AsOsAgnostic(),
+                "Game Title",
                 Quality.Scene,
-                "GAMARR"
+                "CODEX"
             },
             new object[]
             {
-                @"C:\Test\Game.2018.1080p.BluRay.x264-GAMARR\Backup_72023S02-12.mkv".AsOsAgnostic(),
-                "Game",
-                Quality.GOG,
-                "GAMARR"
+                @"C:\Test\0e895c37245186812cb08aab1529cf8ee389dd05\Game.Title.2018-PLAZA.exe".AsOsAgnostic(),
+                "Game Title",
+                Quality.Scene,
+                "PLAZA"
             },
             new object[]
             {
-                @"C:\Test\Game.2018.1080p.BluRay.x264\Backup_72023S02-12.mkv".AsOsAgnostic(),
-                "Game",
+                @"C:\Test\Game.Title.2018.GOG\AHFMZXGHEWD660.exe".AsOsAgnostic(),
+                "Game Title",
                 Quality.GOG,
                 null
             },
             new object[]
             {
-                @"C:\Test\Game 2018 720p WEB-DL DD5 1 H 264-ECI\123.mkv".AsOsAgnostic(),
-                "Game",
-                Quality.Epic,
-                "ECI"
-            },
-            new object[]
-            {
-                @"C:\Test\Game 2018 720p WEB-DL DD5 1 H 264-ECI\abc.mkv".AsOsAgnostic(),
-                "Game",
-                Quality.Epic,
-                "ECI"
-            },
-            new object[]
-            {
-                @"C:\Test\Game 2018 720p WEB-DL DD5 1 H 264-ECI\b00bs.mkv".AsOsAgnostic(),
-                "Game",
-                Quality.Epic,
-                "ECI"
-            },
-            new object[]
-            {
-                @"C:\Test\Game.Title.2018.720p.HDTV.x264-NZBgeek/cgajsofuejsa501.mkv".AsOsAgnostic(),
+                @"C:\Test\Game.Title.2018-FitGirl.Repack\Backup_72023S02-12.bin".AsOsAgnostic(),
                 "Game Title",
-                Quality.Uplay,
-                "NZBgeek"
+                Quality.Repack,
+                "FitGirl"
             },
             new object[]
             {
-                @"C:\Test\Game.2018.1080p.WEB-DL.DD5.1.H264-RARBG\170424_26.mkv".AsOsAgnostic(),
-                "Game",
-                Quality.Steam,
-                "RARBG"
-            },
-            new object[]
-            {
-                @"C:\Test\Game.Title.2018.720p.HDTV.H.264\abc.xyz.af6021c37f7852.mkv".AsOsAgnostic(),
+                @"C:\Test\Game.Title.2018-SKIDROW\123.exe".AsOsAgnostic(),
                 "Game Title",
-                Quality.Uplay,
-                null
+                Quality.Scene,
+                "SKIDROW"
+            },
+            new object[]
+            {
+                @"C:\Test\Game.Title.2018-DODI\abc.exe".AsOsAgnostic(),
+                "Game Title",
+                Quality.Repack,
+                "DODI"
             }
         };
 
