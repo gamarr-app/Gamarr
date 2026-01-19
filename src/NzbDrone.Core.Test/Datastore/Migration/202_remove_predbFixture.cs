@@ -86,4 +86,10 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         public int Id { get; set; }
         public int MinimumAvailability { get; set; }
     }
+
+    public class GamarrListSettings169
+    {
+        public string APIURL { get; set; }
+        public string Path { get; set; }
+    }
 }
