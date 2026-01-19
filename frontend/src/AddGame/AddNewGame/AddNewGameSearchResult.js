@@ -58,7 +58,6 @@ class AddNewGameSearchResult extends Component {
     const {
       igdbId,
       steamAppId,
-      imdbId,
       youTubeTrailerId,
       title,
       titleSlug,
@@ -274,8 +273,8 @@ class AddNewGameSearchResult extends Component {
                 }
                 tooltip={
                   <GameDetailsLinks
+                    steamAppId={steamAppId}
                     igdbId={igdbId}
-                    imdbId={imdbId}
                     youTubeTrailerId={youTubeTrailerId}
                   />
                 }
@@ -322,7 +321,6 @@ class AddNewGameSearchResult extends Component {
 AddNewGameSearchResult.propTypes = {
   igdbId: PropTypes.number.isRequired,
   steamAppId: PropTypes.number,
-  imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
