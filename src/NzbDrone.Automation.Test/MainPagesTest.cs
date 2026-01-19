@@ -6,8 +6,6 @@ namespace NzbDrone.Automation.Test
     [TestFixture]
     public class MainPagesTest : AutomationTest
     {
-        #region Main Navigation Pages
-
         [Test]
         public async Task Games_Index_Page_Loads_Without_Errors()
         {
@@ -31,9 +29,9 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Activity");
 
-            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Queue" })).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "History" })).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Blocklist" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Queue" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "History" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" })).ToBeVisibleAsync();
             await TakeScreenshotAsync("activity_queue");
         }
 
@@ -60,8 +58,8 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Wanted");
 
-            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Missing" })).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Cutoff Unmet" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Missing" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" })).ToBeVisibleAsync();
             await TakeScreenshotAsync("wanted_missing");
         }
 
@@ -83,15 +81,11 @@ namespace NzbDrone.Automation.Test
             await TakeScreenshotAsync("system_status");
         }
 
-        #endregion
-
-        #region Add Game Pages
-
         [Test]
         public async Task Add_New_Game_Page_Loads_Without_Errors()
         {
             await ClickNavLinkAsync("Games");
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Add New" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Add New" }).ClickAsync();
             await WaitForNoSpinner();
 
             await Expect(Page.Locator("input[class*='searchInput']")).ToBeVisibleAsync();
@@ -125,10 +119,6 @@ namespace NzbDrone.Automation.Test
             await WaitForNoSpinner();
             await TakeScreenshotAsync("collections");
         }
-
-        #endregion
-
-        #region Settings Pages
 
         [Test]
         public async Task Settings_Main_Page_Loads_Without_Errors()
@@ -238,10 +228,6 @@ namespace NzbDrone.Automation.Test
             await TakeScreenshotAsync("settings_ui");
         }
 
-        #endregion
-
-        #region System Pages
-
         [Test]
         public async Task System_Tasks_Page_Loads_Without_Errors()
         {
@@ -286,7 +272,5 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='LogFiles']")).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_logfiles");
         }
-
-        #endregion
     }
 }

@@ -56,7 +56,9 @@ namespace NzbDrone.Core.Indexers.Newznab
         public NewznabSettings()
         {
             ApiPath = "/api";
-            Categories = new[] { 2000, 2010, 2020, 2030, 2040, 2045, 2050, 2060 };
+
+            // Default to game categories: Console (1000) and PC (4000) with common subcategories
+            Categories = new[] { 1000, 1080, 1140, 1150, 1180, 1190, 4000, 4050 };
             MultiLanguages = Array.Empty<int>();
             FailDownloads = Array.Empty<int>();
         }

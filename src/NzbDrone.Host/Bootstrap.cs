@@ -24,6 +24,7 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Options;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Datastore.Extensions;
+using NzbDrone.Core.MetadataSource;
 using PostgresOptions = NzbDrone.Core.Datastore.PostgresOptions;
 
 namespace NzbDrone.Host
@@ -90,8 +91,13 @@ namespace NzbDrone.Host
                                 c.AutoAddServices(Bootstrap.ASSEMBLIES)
                                     .AddNzbDroneLogger()
                                     .AddDatabase()
-                                    .AddStartupContext(startupContext)
-                                    .Resolve<UtilityModeRouter>()
+                                    .AddStartupContext(startupContext);
+
+                                // Register AggregateGameInfoProxy to use both RAWG and IGDB
+                                c.Register<ISearchForNewGame, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                                c.Register<IProvideGameInfo, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+
+                                c.Resolve<UtilityModeRouter>()
                                     .Route(appMode);
 
                                 if (config.GetValue(nameof(ConfigFileProvider.LogDbEnabled), true))
@@ -162,6 +168,10 @@ namespace NzbDrone.Host
                         .AddNzbDroneLogger()
                         .AddDatabase()
                         .AddStartupContext(context);
+
+                    // Register AggregateGameInfoProxy to use both RAWG and IGDB
+                    c.Register<ISearchForNewGame, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                    c.Register<IProvideGameInfo, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
 
                     if (logDbEnabled)
                     {

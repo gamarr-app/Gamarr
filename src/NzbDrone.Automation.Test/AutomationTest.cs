@@ -14,7 +14,7 @@ namespace NzbDrone.Automation.Test
     public abstract class AutomationTest : PageTest
     {
         private NzbDroneRunner _runner;
-        protected List<string> ConsoleErrors { get; private set; } = new();
+        protected List<string> ConsoleErrors { get; private set; } = new ();
         protected const string BaseUrl = "http://localhost:6767";
 
         public AutomationTest()
@@ -133,7 +133,7 @@ namespace NzbDrone.Automation.Test
 
         protected async Task ClickNavLinkAsync(string text)
         {
-            await Page.GetByRole(AriaRole.Link, new() { Name = text }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = text }).ClickAsync();
             await WaitForNoSpinner();
         }
 
