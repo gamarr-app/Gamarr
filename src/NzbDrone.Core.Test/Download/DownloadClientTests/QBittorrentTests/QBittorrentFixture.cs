@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Cyberpunk.2077.v2.1-GOG.mkv",
+                Name = @"Cyberpunk.2077.v2.1-CODEX.mkv",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -310,7 +310,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var file = new QBittorrentTorrentFile
             {
-                Name = "Cyberpunk.2077.v2.1-GOG.mkv"
+                Name = "Cyberpunk.2077.v2.1-CODEX.mkv"
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });
@@ -332,7 +332,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Cyberpunk.2077.v2.1-GOG",
+                Name = @"Cyberpunk.2077.v2.1-CODEX",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -343,7 +343,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var file = new QBittorrentTorrentFile
             {
-                Name = "Folder/Cyberpunk.2077.v2.1-GOG.mkv"
+                Name = "Folder/Cyberpunk.2077.v2.1-CODEX.mkv"
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });

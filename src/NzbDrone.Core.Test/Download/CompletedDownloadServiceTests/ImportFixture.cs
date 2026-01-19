@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.Download
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Witcher3.GOTY.v4.0-GOG")
+                                                    .With(h => h.Title = "Witcher3.GOTY.v4.0-CODEX")
                                                     .Build();
 
             var remoteGame = BuildRemoteGame();
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Download
                   .Returns(new GameHistory());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetGame("Witcher3.GOTY.v4.0-GOG"))
+                  .Setup(s => s.GetGame("Witcher3.GOTY.v4.0-CODEX"))
                   .Returns(remoteGame.Game);
 
             Mocker.GetMock<IHistoryService>()

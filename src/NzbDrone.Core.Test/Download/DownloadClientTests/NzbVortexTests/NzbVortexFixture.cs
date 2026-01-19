@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 DownloadedSize = 1000,
                 TotalDownloadSize = 10,
                 GroupName = "tv",
-                UiTitle = "Cyberpunk.2077.v2.1-GOG"
+                UiTitle = "Cyberpunk.2077.v2.1-CODEX"
             };
 
             _failed = new NzbVortexQueueItem
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 DownloadedSize = 1000,
                 TotalDownloadSize = 1000,
                 GroupName = "tv",
-                UiTitle = "Cyberpunk.2077.v2.1-GOG",
+                UiTitle = "Cyberpunk.2077.v2.1-CODEX",
                 DestinationPath = "somedirectory",
                 State = NzbVortexStateType.UncompressFailed,
             };
@@ -61,8 +61,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 DownloadedSize = 1000,
                 TotalDownloadSize = 1000,
                 GroupName = "tv",
-                UiTitle = "Cyberpunk.2077.v2.1-GOG",
-                DestinationPath = "/remote/mount/tv/Cyberpunk.2077.v2.1-GOG",
+                UiTitle = "Cyberpunk.2077.v2.1-CODEX",
+                DestinationPath = "/remote/mount/tv/Cyberpunk.2077.v2.1-CODEX",
                 State = NzbVortexStateType.Done
             };
         }
@@ -239,13 +239,13 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                   .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                  .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic()));
+                  .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic()));
 
             GivenQueue(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic());
         }
 
         [Test]
@@ -257,14 +257,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
 
             Mocker.GetMock<INzbVortexProxy>()
                   .Setup(s => s.GetFiles(It.IsAny<int>(), It.IsAny<NzbVortexSettings>()))
-                  .Returns(new List<NzbVortexFile> { new NzbVortexFile { FileName = "Cyberpunk.2077.v2.1-GOG.mkv" } });
+                  .Returns(new List<NzbVortexFile> { new NzbVortexFile { FileName = "Cyberpunk.2077.v2.1-CODEX.mkv" } });
 
             _completed.State = NzbVortexStateType.Done;
             GivenQueue(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-GOG.mkv".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX.mkv".AsOsAgnostic());
         }
 
         [Test]
@@ -278,8 +278,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                   .Setup(s => s.GetFiles(It.IsAny<int>(), It.IsAny<NzbVortexSettings>()))
                   .Returns(new List<NzbVortexFile>
                            {
-                               new NzbVortexFile { FileName = "Cyberpunk.2077.v2.1-GOG.mkv" },
-                               new NzbVortexFile { FileName = "Cyberpunk.2077.v2.1-GOG.nfo" }
+                               new NzbVortexFile { FileName = "Cyberpunk.2077.v2.1-CODEX.mkv" },
+                               new NzbVortexFile { FileName = "Cyberpunk.2077.v2.1-CODEX.nfo" }
                            });
 
             _completed.State = NzbVortexStateType.Done;

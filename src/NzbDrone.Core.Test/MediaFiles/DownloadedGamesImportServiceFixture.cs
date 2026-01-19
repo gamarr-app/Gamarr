@@ -292,7 +292,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(It.IsAny<string>()))
                   .Returns(true);
 
-            var fileName = @"C:\folder\file.mkv".AsOsAgnostic();
+            var fileName = @"C:\folder\file.iso".AsOsAgnostic();
 
             var result = Subject.ProcessPath(fileName);
 
@@ -347,8 +347,8 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
-            var folderName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]".AsOsAgnostic();
-            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].mkv".AsOsAgnostic();
+            var folderName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Elden.Ring.v1.10-CODEX".AsOsAgnostic();
+            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Elden.Ring.v1.10-CODEX\Elden.Ring.v1.10-CODEX.iso".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(folderName))
                   .Returns(true);
@@ -372,7 +372,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
-            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Torrents\[HorribleSubs] 47 Ronin (2013) [720p].mkv".AsOsAgnostic();
+            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Torrents\Cyberpunk.2077.v2.1-CODEX.iso".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(fileName))
                   .Returns(false);
@@ -394,7 +394,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_process_if_file_and_folder_do_not_exist()
         {
-            var folderName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] 47 Ronin (2013) [720p]".AsOsAgnostic();
+            var folderName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(folderName))
                   .Returns(false);
@@ -448,7 +448,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
-            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].mkv".AsOsAgnostic();
+            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Elden.Ring.v1.10-CODEX\Elden.Ring.v1.10-CODEX.iso".AsOsAgnostic();
             var imported = new List<ImportDecision>();
 
             Mocker.GetMock<IMakeImportDecision>()
@@ -474,7 +474,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
-            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].mkv".AsOsAgnostic();
+            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Elden.Ring.v1.10-CODEX\Elden.Ring.v1.10-CODEX.iso".AsOsAgnostic();
             var imported = new List<ImportDecision>();
 
             Mocker.GetMock<IMakeImportDecision>()

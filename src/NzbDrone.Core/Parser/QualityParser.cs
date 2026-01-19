@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Cracked indicators
-        private static readonly Regex CrackedRegex = new (@"\b(?<cracked>CRACKED|CRACK[._-]?ONLY|CRACK[._-]?FIX|NO[._-]?DRM)\b",
+        private static readonly Regex CrackedRegex = new (@"\b(?<cracked>CRACKED|CRACK[\s._-]?ONLY|CRACK[\s._-]?FIX|NO[\s._-]?DRM)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // GOG releases
@@ -23,44 +23,44 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Steam releases
-        private static readonly Regex SteamRegex = new (@"\b(?<steam>STEAM[._-]?RIP|STEAM[._-]?UNLOCKED)\b",
+        private static readonly Regex SteamRegex = new (@"\b(?<steam>STEAM[\s._-]?RIP|STEAM[\s._-]?UNLOCKED)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Epic Games releases
-        private static readonly Regex EpicRegex = new (@"\b(?<epic>EPIC[._-]?(?:GAMES)?[._-]?RIP)\b",
+        private static readonly Regex EpicRegex = new (@"\b(?<epic>EPIC[\s._-]?(?:GAMES)?[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Origin/EA releases
-        private static readonly Regex OriginRegex = new (@"\b(?<origin>ORIGIN[._-]?RIP|EA[._-]?(?:APP)?[._-]?RIP)\b",
+        private static readonly Regex OriginRegex = new (@"\b(?<origin>ORIGIN[\s._-]?RIP|EA[\s._-]?(?:APP)?[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Uplay/Ubisoft Connect releases
-        private static readonly Regex UplayRegex = new (@"\b(?<uplay>UPLAY[._-]?RIP|UBISOFT[._-]?CONNECT[._-]?RIP)\b",
+        private static readonly Regex UplayRegex = new (@"\b(?<uplay>UPLAY[\s._-]?RIP|UBISOFT[\s._-]?CONNECT[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Repack releases (FitGirl, DODI, XATAB, etc.)
-        private static readonly Regex RepackRegex = new (@"\b(?<repack>REPACK|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|MR[._-]?DJ|KAOS|DARCK[._-]?REPACKS?|MASQUERADE|R\.?G[._-]?(?:MECHANICS|CATALYST|FREEDOM|STEAMGAMES))\b",
+        private static readonly Regex RepackRegex = new (@"\b(?<repack>REPACK|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|MR[\s._-]?DJ|KAOS|DARCK[\s._-]?REPACKS?|MASQUERADE|R[\s.]?G[\s._-]?(?:MECHANICS|CATALYST|FREEDOM|STEAMGAMES))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // ISO/Retail releases
-        private static readonly Regex ISORegex = new (@"\b(?<iso>ISO|DISC[._-]?IMAGE)\b",
+        private static readonly Regex ISORegex = new (@"\b(?<iso>ISO|DISC[\s._-]?IMAGE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex RetailRegex = new (@"\b(?<retail>RETAIL|DVD[._-]?RIP|BD[._-]?RIP)\b",
+        private static readonly Regex RetailRegex = new (@"\b(?<retail>RETAIL|DVD[\s._-]?RIP|BD[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Portable releases
-        private static readonly Regex PortableRegex = new (@"\b(?<portable>PORTABLE|NO[._-]?INSTALL)\b",
+        private static readonly Regex PortableRegex = new (@"\b(?<portable>PORTABLE|NO[\s._-]?INSTALL)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Special modifiers
-        private static readonly Regex PreloadRegex = new (@"\b(?<preload>PRELOAD|PRE[._-]?RELEASE)\b",
+        private static readonly Regex PreloadRegex = new (@"\b(?<preload>PRELOAD|PRE[\s._-]?RELEASE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex UpdateOnlyRegex = new (@"\b(?<update>UPDATE[._-]?(?:ONLY)?|PATCH[._-]?(?:ONLY)?|V\d+[._]\d+(?:[._]\d+)*[._-]?(?:UPDATE|PATCH)?)\b",
+        private static readonly Regex UpdateOnlyRegex = new (@"\b(?<update>UPDATE[\s._-]?(?:ONLY)?|PATCH[\s._-]?(?:ONLY)?|V\d+[._]\d+(?:[._]\d+)*[\s._-]?(?:UPDATE|PATCH)?)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex DLCRegex = new (@"\b(?<dlc>(?:INCL(?:UDES?)?[._-]?)?(?:ALL[._-]?)?DLC[sS]?|DLC[._-]?(?:PACK|UNLOCKER)|COMPLETE[._-]?(?:EDITION|PACK)|ULTIMATE[._-]?EDITION|GOTY|GAME[._-]?OF[._-]?THE[._-]?YEAR)\b",
+        private static readonly Regex DLCRegex = new (@"\b(?<dlc>(?:INCL(?:UDES?)?[\s._-]?)?(?:ALL[\s._-]?)?DLC[sS]?|DLC[\s._-]?(?:PACK|UNLOCKER)|COMPLETE[\s._-]?(?:EDITION|PACK)|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex MultiLangRegex = new (@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",

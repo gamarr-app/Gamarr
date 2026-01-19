@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail2"));
             _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail3"));
 
-            _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Trolls.2016.720p.WEB-DL.DD5.1.H264-FGT" } };
+            _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" } };
             _remoteEpisode = new RemoteGame
             {
                 Game = new Game(),
@@ -171,9 +171,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _reports = new List<ReleaseInfo>
                 {
-                    new ReleaseInfo { Title = "Trolls.2016.720p.WEB-DL.DD5.1.H264-FGT" },
-                    new ReleaseInfo { Title = "Trolls.2016.720p.WEB-DL.DD5.1.H264-FGT" },
-                    new ReleaseInfo { Title = "Trolls.2016.720p.WEB-DL.DD5.1.H264-FGT" }
+                    new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" },
+                    new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" },
+                    new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" }
                 };
 
             Subject.GetRssDecision(_reports);
@@ -234,7 +234,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _reports = new List<ReleaseInfo>
                 {
-                    new ReleaseInfo { Title = "Trolls.2016.720p.WEB-DL.DD5.1.H264-FGT" },
+                    new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" },
                 };
 
             Subject.GetRssDecision(_reports).Should().HaveCount(1);

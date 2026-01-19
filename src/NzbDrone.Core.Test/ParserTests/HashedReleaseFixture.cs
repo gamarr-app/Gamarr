@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.ParserTests
             new object[]
             {
                 @"C:\Test\0e895c37245186812cb08aab1529cf8ee389dd05\Game.Title.2018-PLAZA.exe".AsOsAgnostic(),
-                "Game Title",
+                "Game Title 2018",
                 Quality.Scene,
                 "PLAZA"
             },

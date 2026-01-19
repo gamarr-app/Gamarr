@@ -22,8 +22,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
     public abstract class DownloadClientFixtureBase<TSubject> : CoreTest<TSubject>
         where TSubject : class, IDownloadClient
     {
-        protected readonly string _title = "Cyberpunk.2077.v2.1-GOG";
-        protected readonly string _downloadUrl = "http://somewhere.com/Cyberpunk.2077.v2.1-GOG.ext";
+        protected readonly string _title = "Cyberpunk.2077.v2.1-CODEX";
+        protected readonly string _downloadUrl = "http://somewhere.com/Cyberpunk.2077.v2.1-CODEX.ext";
 
         [SetUp]
         public void SetupBase()

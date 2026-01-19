@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Timeleft = TimeSpan.FromSeconds(10),
                             Category = "game",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Cyberpunk.2077.v2.1-GOG"
+                            Title = "Cyberpunk.2077.v2.1-CODEX"
                         }
                     }
             };
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Category = "game",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Cyberpunk.2077.v2.1-GOG"
+                            Title = "Cyberpunk.2077.v2.1-CODEX"
                         }
                     }
             };
@@ -84,8 +84,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Category = "game",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Cyberpunk.2077.v2.1-GOG",
-                            Storage = "/remote/mount/vv/Cyberpunk.2077.v2.1-GOG"
+                            Title = "Cyberpunk.2077.v2.1-CODEX",
+                            Storage = "/remote/mount/vv/Cyberpunk.2077.v2.1-CODEX"
                         }
                     }
             };
@@ -373,10 +373,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                   .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()), Times.Once());
         }
 
-        [TestCase(@"Cyberpunk.2077.v2.1-GOG", @"Cyberpunk.2077_v2.1-GOG.mkv")]
-        [TestCase(@"Cyberpunk.2077.v2.1-GOG", @"SubDir\Cyberpunk.2077_v2.1-GOG.mkv")]
-        [TestCase(@"Cyberpunk.2077.v2.1-GOG.mkv", @"SubDir\Cyberpunk.2077_v2.1-GOG.mkv")]
-        [TestCase(@"Cyberpunk.2077.v2.1-GOG.mkv", @"SubDir\SubDir\Cyberpunk.2077_v2.1-GOG.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-CODEX", @"Cyberpunk.2077_v2.1-CODEX.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-CODEX", @"SubDir\Cyberpunk.2077_v2.1-CODEX.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-CODEX.mkv", @"SubDir\Cyberpunk.2077_v2.1-CODEX.mkv")]
+        [TestCase(@"Cyberpunk.2077.v2.1-CODEX.mkv", @"SubDir\SubDir\Cyberpunk.2077_v2.1-CODEX.mkv")]
         public void should_return_path_to_jobfolder(string title, string storage)
         {
             _completed.Items.First().Title = title;
@@ -395,14 +395,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                 .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic()));
+                .Returns(new OsPath(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic()));
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-GOG".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Cyberpunk.2077.v2.1-CODEX".AsOsAgnostic());
         }
 
         [Test]
