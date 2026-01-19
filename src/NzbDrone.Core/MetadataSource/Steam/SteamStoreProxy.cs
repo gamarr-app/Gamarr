@@ -242,12 +242,13 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 Platforms = MapPlatforms(item.Platforms)
             };
 
-            // Add image from search result
-            var imageUrl = item.LargeCapsuleImage ?? item.SmallCapsuleImage ?? item.TinyImage;
-            if (!string.IsNullOrEmpty(imageUrl))
-            {
-                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, imageUrl));
-            }
+            // Use Steam's library poster image (600x900) - much better quality than tiny search result
+            var posterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/library_600x900.jpg";
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, posterUrl));
+
+            // Also add header image as fanart
+            var headerUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/header.jpg";
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, headerUrl));
 
             // Add Metacritic rating if available
             if (!string.IsNullOrEmpty(item.Metascore) && int.TryParse(item.Metascore, out var metascore) && metascore > 0)

@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.ImportLists.ImportListGames;
-using NzbDrone.Core.ImportLists.TMDb;
 
 namespace NzbDrone.Core.ImportLists.GamarrList
 {
