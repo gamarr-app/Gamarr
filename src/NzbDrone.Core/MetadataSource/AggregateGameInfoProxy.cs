@@ -108,21 +108,69 @@ namespace NzbDrone.Core.MetadataSource
             return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
         }
 
-        public GameMetadata GetGameByImdbId(string imdbId)
+        /// <summary>
+        /// Get game by Steam App ID - primary identifier, no API key required.
+        /// </summary>
+        public GameMetadata GetGameBySteamAppId(int steamAppId)
         {
-            // RAWG doesn't support IMDb lookup, try IGDB
+            // Try Steam first (no API key needed!)
+            try
+            {
+                var result = _steamProxy.GetGameBySteamAppId(steamAppId);
+                if (result != null)
+                {
+                    _logger.Debug("Got game info from Steam for App ID {0}", steamAppId);
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Failed to get game from Steam for App ID {0}", steamAppId);
+            }
+
+            // Try IGDB to cross-reference
             if (HasIgdbCredentials)
             {
                 try
                 {
-                    return _igdbProxy.GetGameByImdbId(imdbId);
+                    var result = _igdbProxy.GetGameBySteamAppId(steamAppId);
+                    if (result != null)
+                    {
+                        _logger.Debug("Got game info from IGDB for Steam App ID {0}", steamAppId);
+                        return result;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to get game by IMDb ID from IGDB: {0}", imdbId);
+                    _logger.Warn(ex, "Failed to get game from IGDB for Steam App ID {0}", steamAppId);
                 }
             }
 
+            // Try RAWG as last resort
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var result = _rawgProxy.GetGameBySteamAppId(steamAppId);
+                    if (result != null)
+                    {
+                        _logger.Debug("Got game info from RAWG for Steam App ID {0}", steamAppId);
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to get game from RAWG for Steam App ID {0}", steamAppId);
+                }
+            }
+
+            return null;
+        }
+
+        public GameMetadata GetGameByImdbId(string imdbId)
+        {
+            // IMDb is not applicable to games
+            _logger.Warn("IMDb lookup is not applicable to games. Use Steam App ID or IGDB ID instead.");
             return null;
         }
 

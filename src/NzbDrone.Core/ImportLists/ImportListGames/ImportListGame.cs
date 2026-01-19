@@ -23,10 +23,31 @@ namespace NzbDrone.Core.ImportLists.ImportListGames
             set { GameMetadata.Value.Title = value; }
         }
 
+        /// <summary>
+        /// Primary identifier - Steam App ID
+        /// </summary>
+        public int SteamAppId
+        {
+            get { return GameMetadata.Value.SteamAppId; }
+            set { GameMetadata.Value.SteamAppId = value; }
+        }
+
+        /// <summary>
+        /// Secondary identifier - IGDB ID (for metadata enrichment)
+        /// </summary>
         public int IgdbId
         {
             get { return GameMetadata.Value.IgdbId; }
             set { GameMetadata.Value.IgdbId = value; }
+        }
+
+        /// <summary>
+        /// Secondary identifier - RAWG ID (for metadata enrichment)
+        /// </summary>
+        public int RawgId
+        {
+            get { return GameMetadata.Value.RawgId; }
+            set { GameMetadata.Value.RawgId = value; }
         }
 
         /// <summary>

@@ -70,6 +70,48 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             return new Tuple<GameMetadata, List<Credit>>(game, new List<Credit>());
         }
 
+        public GameMetadata GetGameBySteamAppId(int steamAppId)
+        {
+            // RAWG can search by stores parameter with Steam ID
+            var apiKey = _configService.RawgApiKey;
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                _logger.Warn("RAWG API key not configured.");
+                return null;
+            }
+
+            // Search RAWG by Steam store ID
+            var request = new HttpRequestBuilder($"{RawgApiBaseUrl}games")
+                .AddQueryParam("key", apiKey)
+                .AddQueryParam("stores", "1") // Steam store ID in RAWG
+                .AddQueryParam("search", steamAppId.ToString())
+                .AddQueryParam("page_size", 5)
+                .Accept(HttpAccept.Json)
+                .Build();
+
+            try
+            {
+                var response = _httpClient.Get<RawgSearchResult>(request);
+                var game = response.Resource?.Results?.FirstOrDefault();
+
+                if (game == null)
+                {
+                    _logger.Debug("No RAWG game found for Steam App ID {0}", steamAppId);
+                    return null;
+                }
+
+                var metadata = MapRawgGame(game);
+                metadata.SteamAppId = steamAppId;
+                return metadata;
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Failed to lookup Steam App ID {0} in RAWG", steamAppId);
+                return null;
+            }
+        }
+
         public GameMetadata GetGameByImdbId(string imdbId)
         {
             _logger.Warn("RAWG does not support IMDb ID lookup.");

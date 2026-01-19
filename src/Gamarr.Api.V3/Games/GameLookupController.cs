@@ -53,6 +53,22 @@ namespace Gamarr.Api.V3.Games
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Lookup game by Steam App ID (primary identifier)
+        /// </summary>
+        [HttpGet("steam")]
+        [Produces("application/json")]
+        public GameResource SearchBySteamAppId(int steamAppId)
+        {
+            var availDelay = _configService.AvailabilityDelay;
+            var result = new Game { GameMetadata = _gameInfo.GetGameBySteamAppId(steamAppId) };
+            var translation = result.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
+            return result.ToResource(availDelay, translation);
+        }
+
+        /// <summary>
+        /// Lookup game by IGDB ID (secondary identifier)
+        /// </summary>
         [HttpGet("igdb")]
         [Produces("application/json")]
         public GameResource SearchByIgdbId(int igdbId)
@@ -65,6 +81,7 @@ namespace Gamarr.Api.V3.Games
 
         [HttpGet("imdb")]
         [Produces("application/json")]
+        [Obsolete("IMDb lookup is not applicable to games")]
         public GameResource SearchByImdbId(string imdbId)
         {
             var result = new Game { GameMetadata = _gameInfo.GetGameByImdbId(imdbId) };
@@ -106,7 +123,10 @@ namespace Gamarr.Api.V3.Games
 
                 resource.Folder = _fileNameBuilder.GetGameFolder(currentGame, namingConfig);
 
-                resource.IsExcluded = listExclusions.Any(e => e.IgdbId == resource.IgdbId);
+                // Check if excluded by Steam App ID (primary) or IGDB ID (secondary)
+                resource.IsExcluded = listExclusions.Any(e =>
+                    (resource.SteamAppId > 0 && e.SteamAppId == resource.SteamAppId) ||
+                    (resource.IgdbId > 0 && e.IgdbId == resource.IgdbId));
 
                 yield return resource;
             }
