@@ -53,6 +53,14 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     _logger.Debug($"Skipping sample check for DVD/BR image file '{path}'");
                     return DetectSampleResult.NotSample;
                 }
+
+                // Skip sample check for game files - they're not video files
+                var gameExtensions = new string[] { ".exe", ".msi", ".doi", ".bin", ".dat", ".gog", ".zip", ".rar", ".7z" };
+                if (gameExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+                {
+                    _logger.Debug("Skipping sample check for game file: {0}", path);
+                    return DetectSampleResult.NotSample;
+                }
             }
 
             // TODO: Use MediaInfo from the import process, no need to re-process the file again here

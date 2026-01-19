@@ -106,7 +106,7 @@ BuildDev()
     rid=${RID:-$defaultRid}
 
     # Incremental build - no clean, Debug config, single platform
-    dotnet build $slnFile -c Debug -p:Platform=$platform --no-incremental=false
+    dotnet build $slnFile -c Debug -p:Platform=$platform
 
     # Publish only if needed (first time or explicit request)
     if [ ! -d "$outputFolder/net8.0/$rid/publish" ] || [ "$PUBLISH" = "YES" ]; then
