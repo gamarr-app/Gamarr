@@ -74,6 +74,10 @@ namespace NzbDrone.Core.Configuration
         string IgdbClientId { get; set; }
         string IgdbClientSecret { get; set; }
 
+        // RAWG API Settings
+        // Register at https://rawg.io/apidocs to get a free API key
+        string RawgApiKey { get; set; }
+
         // UI
         int FirstDayOfWeek { get; set; }
         string CalendarWeekColumnHeader { get; set; }

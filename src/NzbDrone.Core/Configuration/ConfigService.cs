@@ -151,6 +151,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("IgdbClientSecret", value); }
         }
 
+        // RAWG API Settings
+        public string RawgApiKey
+        {
+            get { return GetValue("RawgApiKey", string.Empty); }
+            set { SetValue("RawgApiKey", value); }
+        }
+
         public int MaximumSize
         {
             get { return GetValueInt("MaximumSize", 0); }

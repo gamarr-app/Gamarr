@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Steam releases
-        private static readonly Regex SteamRegex = new (@"\b(?<steam>STEAM[._\s-]?RIP|STEAMRIP|STEAM[._\s-]?UNLOCKED)\b",
+        private static readonly Regex SteamRegex = new (@"\b(?<steam>STEAM[._-]?RIP|STEAM[._-]?UNLOCKED)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Epic Games releases
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Parser
             var result = ParseQualityModifiers(name, normalizedName);
 
             // Check for preload (incomplete/pre-release)
-            if (PreloadRegex.IsMatch(name))
+            if (PreloadRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Preload;
@@ -105,12 +105,12 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for update/patch only
-            if (UpdateOnlyRegex.IsMatch(name) && !DLCRegex.IsMatch(name))
+            if (UpdateOnlyRegex.IsMatch(normalizedName) && !DLCRegex.IsMatch(normalizedName))
             {
                 // Make sure it's update-only and not a full game with version
                 if (normalizedName.ContainsIgnoreCase("update only") ||
                     normalizedName.ContainsIgnoreCase("patch only") ||
-                    Regex.IsMatch(name, @"\bupdate\b.*\bv\d+", RegexOptions.IgnoreCase))
+                    Regex.IsMatch(normalizedName, @"\bupdate\b.*\bv\d+", RegexOptions.IgnoreCase))
                 {
                     result.SourceDetectionSource = QualityDetectionSource.Name;
                     result.Quality = Quality.UpdateOnly;
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for GOG releases (DRM-free)
-            if (GOGRegex.IsMatch(name))
+            if (GOGRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.GOG;
@@ -127,12 +127,12 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for repack releases
-            if (RepackRegex.IsMatch(name))
+            if (RepackRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
 
                 // Check if it includes all DLC
-                if (DLCRegex.IsMatch(name))
+                if (DLCRegex.IsMatch(normalizedName))
                 {
                     result.Quality = Quality.RepackAllDLC;
                 }
@@ -145,7 +145,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for portable releases
-            if (PortableRegex.IsMatch(name))
+            if (PortableRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Portable;
@@ -153,7 +153,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for Steam rips
-            if (SteamRegex.IsMatch(name))
+            if (SteamRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Steam;
@@ -161,7 +161,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for Epic rips
-            if (EpicRegex.IsMatch(name))
+            if (EpicRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Epic;
@@ -169,7 +169,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for Origin rips
-            if (OriginRegex.IsMatch(name))
+            if (OriginRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Origin;
@@ -177,7 +177,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for Uplay rips
-            if (UplayRegex.IsMatch(name))
+            if (UplayRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Uplay;
@@ -185,7 +185,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for ISO/disc image releases
-            if (ISORegex.IsMatch(name))
+            if (ISORegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.ISO;
@@ -193,31 +193,40 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check for retail releases
-            if (RetailRegex.IsMatch(name))
+            if (RetailRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Retail;
                 return result;
             }
 
-            // Check for cracked releases (check BEFORE scene groups so CRACK.ONLY-CODEX matches cracked)
-            if (CrackedRegex.IsMatch(name))
+            // Check for scene releases (with or without crack)
+            if (SceneGroupRegex.IsMatch(normalizedName))
+            {
+                result.SourceDetectionSource = QualityDetectionSource.Name;
+
+                if (CrackedRegex.IsMatch(normalizedName))
+                {
+                    result.Quality = Quality.SceneCracked;
+                }
+                else
+                {
+                    result.Quality = Quality.Scene;
+                }
+
+                return result;
+            }
+
+            // Check for cracked releases without scene group
+            if (CrackedRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.SceneCracked;
                 return result;
             }
 
-            // Check for scene releases
-            if (SceneGroupRegex.IsMatch(name))
-            {
-                result.SourceDetectionSource = QualityDetectionSource.Name;
-                result.Quality = Quality.Scene;
-                return result;
-            }
-
             // Check for multi-language indicator
-            if (MultiLangRegex.IsMatch(name))
+            if (MultiLangRegex.IsMatch(normalizedName))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.MultiLang;
@@ -225,7 +234,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Default to scene if nothing else matches but has common game release patterns
-            if (Regex.IsMatch(name, @"[-_.](?:x86|x64|win(?:32|64)?|pc)[-_.]", RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(normalizedName, @"[-_.](?:x86|x64|win(?:32|64)?|pc)[-_.]", RegexOptions.IgnoreCase))
             {
                 result.SourceDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.Scene;
@@ -263,17 +272,5 @@ namespace NzbDrone.Core.Parser
 
             return result;
         }
-    }
-
-    public enum Resolution
-    {
-        Unknown,
-        R360p = 360,
-        R480p = 480,
-        R540p = 540,
-        R576p = 576,
-        R720p = 720,
-        R1080p = 1080,
-        R2160p = 2160
     }
 }

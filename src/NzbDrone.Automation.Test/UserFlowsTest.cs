@@ -6,8 +6,6 @@ namespace NzbDrone.Automation.Test
     [TestFixture]
     public class UserFlowsTest : AutomationTest
     {
-        #region Navigation Flows
-
         [Test]
         public async Task Navigate_Through_All_Main_Sections()
         {
@@ -45,17 +43,17 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='Queue']")).ToBeVisibleAsync();
 
             // History tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "History" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "History" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='History']")).ToBeVisibleAsync();
 
             // Blocklist tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Blocklist" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Blocklist']")).ToBeVisibleAsync();
 
             // Back to Queue
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Queue" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Queue" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Queue']")).ToBeVisibleAsync();
         }
@@ -69,12 +67,12 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='Missing']")).ToBeVisibleAsync();
 
             // Cutoff Unmet tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Cutoff Unmet" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='CutoffUnmet']")).ToBeVisibleAsync();
 
             // Back to Missing
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Missing" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Missing" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Missing']")).ToBeVisibleAsync();
         }
@@ -88,34 +86,30 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='Health']")).ToBeVisibleAsync();
 
             // Tasks tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Tasks" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Tasks" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Tasks']")).ToBeVisibleAsync();
 
             // Backup tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Backup" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Backup" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Backups']")).ToBeVisibleAsync();
 
             // Updates tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Updates" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Updates" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Updates']")).ToBeVisibleAsync();
 
             // Events tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Events" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Events" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='LogsTable']")).ToBeVisibleAsync();
 
             // Log Files tab
-            await Page.GetByRole(AriaRole.Link, new() { Name = "Log Files" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Log Files" }).ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='LogFiles']")).ToBeVisibleAsync();
         }
-
-        #endregion
-
-        #region Settings Navigation
 
         [Test]
         public async Task Navigate_Through_All_Settings_Pages()
@@ -140,15 +134,11 @@ namespace NzbDrone.Automation.Test
 
             foreach (var (linkText, expectedClass) in settingsLinks)
             {
-                await Page.GetByRole(AriaRole.Link, new() { Name = linkText, Exact = true }).ClickAsync();
+                await Page.GetByRole(AriaRole.Link, new () { Name = linkText, Exact = true }).ClickAsync();
                 await WaitForNoSpinner();
                 await Expect(Page.Locator($"div[class*='{expectedClass}']")).ToBeVisibleAsync();
             }
         }
-
-        #endregion
-
-        #region Add Game Flow
 
         [Test]
         public async Task Add_Game_Search_Interface_Works()
@@ -177,10 +167,6 @@ namespace NzbDrone.Automation.Test
             await TakeScreenshotAsync("add_game_elements");
         }
 
-        #endregion
-
-        #region Calendar Flow
-
         [Test]
         public async Task Calendar_View_Modes_Work()
         {
@@ -203,10 +189,6 @@ namespace NzbDrone.Automation.Test
             await TakeScreenshotAsync("calendar_navigation");
         }
 
-        #endregion
-
-        #region Games Index View Modes
-
         [Test]
         public async Task Games_Index_Has_View_Options()
         {
@@ -218,10 +200,6 @@ namespace NzbDrone.Automation.Test
 
             await TakeScreenshotAsync("games_index_toolbar");
         }
-
-        #endregion
-
-        #region Modal Dialogs
 
         [Test]
         public async Task Settings_Profile_Modal_Opens()
@@ -247,10 +225,6 @@ namespace NzbDrone.Automation.Test
             }
         }
 
-        #endregion
-
-        #region Error Handling
-
         [Test]
         public async Task Invalid_Route_Shows_Not_Found()
         {
@@ -259,10 +233,6 @@ namespace NzbDrone.Automation.Test
             // Should show a not found page or redirect
             await TakeScreenshotAsync("not_found_page");
         }
-
-        #endregion
-
-        #region Responsive Layout
 
         [Test]
         public async Task Page_Renders_At_Different_Viewports()
@@ -287,7 +257,5 @@ namespace NzbDrone.Automation.Test
             // Reset to desktop
             await Page.SetViewportSizeAsync(1920, 1080);
         }
-
-        #endregion
     }
 }
