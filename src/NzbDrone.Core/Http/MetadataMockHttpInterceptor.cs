@@ -23,11 +23,13 @@ namespace NzbDrone.Core.Http
         private readonly string _mockDataPath;
         private readonly bool _mockEnabled;
         private readonly Dictionary<string, string> _mockDataCache;
+        private readonly Dictionary<string, string> _requestBodyCache;
 
         public MetadataMockHttpInterceptor(Logger logger)
         {
             _logger = logger;
             _mockDataCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _requestBodyCache = new Dictionary<string, string>();
             _mockEnabled = IsMockEnabled();
 
             // Try to find mock data directory
@@ -45,7 +47,17 @@ namespace NzbDrone.Core.Http
             // mark the request so PostResponse can intercept it
             if (_mockEnabled && CanMockRequest(request))
             {
+                var requestId = Guid.NewGuid().ToString();
                 request.Headers.Add("X-Gamarr-Mock", "true");
+                request.Headers.Add("X-Gamarr-Mock-Id", requestId);
+
+                // Cache the request body since it may be cleared after the HTTP request
+                if (request.ContentData != null && request.ContentData.Length > 0)
+                {
+                    var body = Encoding.UTF8.GetString(request.ContentData);
+                    _requestBodyCache[requestId] = body;
+                    _logger.Debug("Cached request body for {0}: {1} bytes", request.Url.Host, body.Length);
+                }
             }
 
             return request;
@@ -59,7 +71,15 @@ namespace NzbDrone.Core.Http
                 return response;
             }
 
-            var mockData = GetMockData(response.Request);
+            // Get the cached request body
+            var requestId = response.Request.Headers.Get("X-Gamarr-Mock-Id");
+            string cachedBody = null;
+            if (!string.IsNullOrEmpty(requestId) && _requestBodyCache.TryGetValue(requestId, out cachedBody))
+            {
+                _requestBodyCache.Remove(requestId); // Clean up
+            }
+
+            var mockData = GetMockData(response.Request, cachedBody);
 
             if (mockData != null)
             {
@@ -89,7 +109,7 @@ namespace NzbDrone.Core.Http
             return host.Contains(IgdbApiHost) || host.Contains(SteamApiHost);
         }
 
-        private string GetMockData(HttpRequest request)
+        private string GetMockData(HttpRequest request, string cachedBody)
         {
             if (string.IsNullOrEmpty(_mockDataPath))
             {
@@ -100,7 +120,7 @@ namespace NzbDrone.Core.Http
 
             if (host.Contains(IgdbApiHost))
             {
-                return GetIgdbMockData(request);
+                return GetIgdbMockData(request, cachedBody);
             }
 
             if (host.Contains(SteamApiHost))
@@ -111,44 +131,55 @@ namespace NzbDrone.Core.Http
             return null;
         }
 
-        private string GetIgdbMockData(HttpRequest request)
+        private string GetIgdbMockData(HttpRequest request, string cachedBody)
         {
-            var url = request.Url.ToString();
-            var requestBody = request.ContentData != null
-                ? Encoding.UTF8.GetString(request.ContentData)
-                : string.Empty;
+            // Use cached body if available, otherwise try to get from request
+            var requestBody = cachedBody;
+            if (string.IsNullOrEmpty(requestBody) && request.ContentData != null)
+            {
+                requestBody = Encoding.UTF8.GetString(request.ContentData);
+            }
+
+            requestBody = requestBody ?? string.Empty;
+            _logger.Debug("IGDB request body length: {0} (from cache: {1})", requestBody.Length, !string.IsNullOrEmpty(cachedBody));
 
             // Parse the IGDB query to determine what data to return
             // Check for ID lookups: "where id = X" or "where id = (X, Y, Z)"
-            var idMatch = Regex.Match(requestBody, @"where\s+id\s*=\s*(\d+)", RegexOptions.IgnoreCase);
+            var idMatch = Regex.Match(requestBody, @"where\s+id\s*=\s*(\d+)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
             if (idMatch.Success)
             {
                 var igdbId = idMatch.Groups[1].Value;
+                _logger.Debug("IGDB ID lookup detected: {0}", igdbId);
                 return LoadMockFile($"igdb_game_{igdbId}.json");
             }
 
-            // Check for search queries
-            var searchMatch = Regex.Match(requestBody, @"search\s+""([^""]+)""", RegexOptions.IgnoreCase);
+            // Check for search queries - handle various quote types
+            var searchMatch = Regex.Match(requestBody, @"search\s+[""\""]([^""\""\n]+)[""\""]", RegexOptions.IgnoreCase | RegexOptions.Singleline);
             if (searchMatch.Success)
             {
-                var searchTerm = searchMatch.Groups[1].Value.ToLowerInvariant()
+                var rawSearchTerm = searchMatch.Groups[1].Value;
+                var searchTerm = rawSearchTerm.ToLowerInvariant()
                     .Replace(" ", "")
                     .Replace("-", "");
+
+                _logger.Debug("IGDB search detected: raw='{0}', normalized='{1}'", rawSearchTerm, searchTerm);
 
                 // Try to find a matching search mock file
                 var searchFile = $"igdb_search_{searchTerm}.json";
                 var data = LoadMockFile(searchFile);
 
-                if (data == null)
+                if (data == null && !string.IsNullOrEmpty(_mockDataPath))
                 {
                     // Try partial matches
                     var files = Directory.GetFiles(_mockDataPath, "igdb_search_*.json");
+                    _logger.Debug("Looking for partial matches in {0} files", files.Length);
                     foreach (var file in files)
                     {
                         var fileName = Path.GetFileNameWithoutExtension(file);
                         var fileTerm = fileName.Replace("igdb_search_", "").ToLowerInvariant();
                         if (searchTerm.Contains(fileTerm) || fileTerm.Contains(searchTerm))
                         {
+                            _logger.Debug("Found partial match: {0}", file);
                             data = LoadMockFile(Path.GetFileName(file));
                             break;
                         }
@@ -158,13 +189,15 @@ namespace NzbDrone.Core.Http
                 return data;
             }
 
-            _logger.Debug("Could not parse IGDB request body: {0}", requestBody);
+            _logger.Debug("Could not parse IGDB request body (first 200 chars): {0}",
+                requestBody.Length > 200 ? requestBody.Substring(0, 200) : requestBody);
             return null;
         }
 
         private string GetSteamMockData(HttpRequest request)
         {
             var url = request.Url.ToString();
+            _logger.Debug("Steam URL to parse: {0}", url);
 
             // Check for app details endpoint
             if (url.Contains("appdetails"))
@@ -173,6 +206,7 @@ namespace NzbDrone.Core.Http
                 if (appIdMatch.Success)
                 {
                     var appId = appIdMatch.Groups[1].Value;
+                    _logger.Debug("Steam appdetails detected for appId: {0}", appId);
                     return LoadMockFile($"steam_app_{appId}.json");
                 }
             }
@@ -183,10 +217,13 @@ namespace NzbDrone.Core.Http
                 var termMatch = Regex.Match(url, @"term=([^&]+)", RegexOptions.IgnoreCase);
                 if (termMatch.Success)
                 {
-                    var searchTerm = Uri.UnescapeDataString(termMatch.Groups[1].Value)
+                    var rawTerm = termMatch.Groups[1].Value;
+                    var searchTerm = Uri.UnescapeDataString(rawTerm)
                         .ToLowerInvariant()
                         .Replace(" ", "")
                         .Replace("-", "");
+
+                    _logger.Debug("Steam search detected: raw='{0}', normalized='{1}'", rawTerm, searchTerm);
 
                     var searchFile = $"steam_search_{searchTerm}.json";
                     var data = LoadMockFile(searchFile);
