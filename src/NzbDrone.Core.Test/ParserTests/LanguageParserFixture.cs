@@ -164,11 +164,22 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game.Title.1994.Russian.1080p.XviD-LOL")]
         [TestCase("Game.Title.2020.WEB-DLRip.AVC.AC3.EN.RU.ENSub.RUSub-LOL")]
         [TestCase("Game Title (2020) WEB-DL (720p) Rus-Eng")]
+        [TestCase("[DL] Allora and the Broken Portal [P] [RUS] (2011, Quest) [P2P]")]
+        [TestCase("Game Title 2023 [RUS] REPACK")]
         public void should_parse_language_russian(string postTitle)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle, true);
 
             result.Languages.Should().Contain(Language.Russian);
+        }
+
+        [TestCase("Аллора и Сломанный Портал 2011")]
+        [TestCase("Game Title / Название Игры 2023")]
+        public void should_parse_language_russian_from_cyrillic(string postTitle)
+        {
+            var result = LanguageParser.ParseLanguages(postTitle);
+
+            result.Should().Contain(Language.Russian);
         }
 
         [TestCase("Game.Title.1994.Romanian.1080p.XviD-LOL")]
