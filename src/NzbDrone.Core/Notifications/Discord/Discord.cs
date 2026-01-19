@@ -619,14 +619,12 @@ namespace NzbDrone.Core.Notifications.Discord
                 $"[IGDB](https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId})"
             };
 
-            if (game.GameMetadata.Value.SteamId > 0)
+            if (game.GameMetadata.Value.SteamAppId > 0)
             {
-                links.Add($"[Steam](https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId})");
+                links.Add($"[Steam](https://store.steampowered.com/app/{game.GameMetadata.Value.SteamAppId})");
             }
 
-            if (game.GameMetadata.Value.RawgId > 0)
             {
-                links.Add($"[RAWG](https://rawg.io/games/{game.GameMetadata.Value.RawgId})");
             }
 
             if (game.GameMetadata.Value.YouTubeTrailerId.IsNotNullOrWhiteSpace())

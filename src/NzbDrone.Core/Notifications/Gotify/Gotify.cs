@@ -167,16 +167,14 @@ namespace NzbDrone.Core.Notifications.Gotify
                             linkUrl = $"https://www.igdb.com/games/{game.IgdbId}";
                         }
 
-                        if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamId > 0)
+                        if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamAppId > 0)
                         {
                             linkText = "Steam";
-                            linkUrl = $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId}";
+                            linkUrl = $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamAppId}";
                         }
 
-                        if (linkType == MetadataLinkType.Rawg && game.GameMetadata?.Value?.RawgId > 0)
                         {
                             linkText = "RAWG";
-                            linkUrl = $"https://rawg.io/games/{game.GameMetadata.Value.RawgId}";
                         }
 
                         if (linkText.Length > 0 && linkUrl.Length > 0)

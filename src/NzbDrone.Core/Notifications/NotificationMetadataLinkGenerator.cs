@@ -25,15 +25,13 @@ public static class NotificationMetadataLinkGenerator
             }
 
             // Steam Store link
-            if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamId > 0)
+            if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamAppId > 0)
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Steam, "Steam", $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamId}"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Steam, "Steam", $"https://store.steampowered.com/app/{game.GameMetadata.Value.SteamAppId}"));
             }
 
             // RAWG link
-            if (linkType == MetadataLinkType.Rawg && game.GameMetadata?.Value?.RawgId > 0)
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Rawg, "RAWG", $"https://rawg.io/games/{game.GameMetadata.Value.RawgId}"));
             }
         }
 
