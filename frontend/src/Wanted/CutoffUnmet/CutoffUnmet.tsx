@@ -17,16 +17,13 @@ import TableBody from 'Components/Table/TableBody';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import TablePager from 'Components/Table/TablePager';
 import usePaging from 'Components/Table/usePaging';
+import Game from 'Game/Game';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { align, icons, kinds } from 'Helpers/Props';
-import Game from 'Game/Game';
 import { executeCommand } from 'Store/Actions/commandActions';
-import {
-  clearGameFiles,
-  fetchGameFiles,
-} from 'Store/Actions/gameFileActions';
+import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
   clearQueueDetails,
   fetchQueueDetails,

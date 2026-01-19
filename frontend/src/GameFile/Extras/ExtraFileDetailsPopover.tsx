@@ -1,8 +1,8 @@
 import React from 'react';
 import IconButton from 'Components/Link/IconButton';
 import Popover from 'Components/Tooltip/Popover';
-import { icons, tooltipPositions } from 'Helpers/Props';
 import { ExtraFileType } from 'GameFile/ExtraFile';
+import { icons, tooltipPositions } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 
 interface ExtraFileDetailsPopoverProps {

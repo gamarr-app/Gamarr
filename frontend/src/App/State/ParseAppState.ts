@@ -1,7 +1,7 @@
 import ModelBase from 'App/ModelBase';
 import { AppSectionItemState } from 'App/State/AppSectionState';
-import Language from 'Language/Language';
 import Game from 'Game/Game';
+import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import CustomFormat from 'typings/CustomFormat';
 

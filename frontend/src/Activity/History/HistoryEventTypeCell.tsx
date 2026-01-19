@@ -3,10 +3,10 @@ import Icon from 'Components/Icon';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import { icons, kinds } from 'Helpers/Props';
 import {
+  GameFileDeletedHistory,
   GrabbedHistoryData,
   HistoryData,
   HistoryEventType,
-  GameFileDeletedHistory,
 } from 'typings/History';
 import translate from 'Utilities/String/translate';
 import styles from './HistoryEventTypeCell.css';

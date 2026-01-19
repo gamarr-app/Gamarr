@@ -1,13 +1,13 @@
 import React from 'react';
-import Icon from 'Components/Icon';
-import ImdbRating from 'Components/ImdbRating';
 import GameTagList from 'Components/GameTagList';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
+import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
+import ImdbRating from 'Components/ImdbRating';
+import RottenTomatoRating from 'Components/RottenTomatoRating';
 import TraktRating from 'Components/TraktRating';
+import { Ratings } from 'Game/Game';
 import { icons } from 'Helpers/Props';
 import Language from 'Language/Language';
-import { Ratings } from 'Game/Game';
 import QualityProfile from 'typings/QualityProfile';
 import formatDate from 'Utilities/Date/formatDate';
 import formatDateTime from 'Utilities/Date/formatDateTime';

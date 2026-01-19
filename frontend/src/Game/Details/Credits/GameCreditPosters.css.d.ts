@@ -2,8 +2,8 @@
 // Please do not change this file!
 interface CssExports {
   'container': string;
-  'grid': string;
   'game': string;
+  'grid': string;
   'sliderContainer': string;
 }
 export const cssExports: CssExports;

@@ -22,23 +22,27 @@ import ModalHeader from 'Components/Modal/ModalHeader';
 import Column from 'Components/Table/Column';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
+import Game from 'Game/Game';
+import { GameFile } from 'GameFile/GameFile';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { align, icons, kinds, scrollDirections } from 'Helpers/Props';
+import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
 import ImportMode from 'InteractiveImport/ImportMode';
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
 import InteractiveImport, {
   InteractiveImportCommandOptions,
 } from 'InteractiveImport/InteractiveImport';
 import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
-import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
 import Language from 'Language/Language';
-import Game from 'Game/Game';
-import { GameFile } from 'GameFile/GameFile';
 import { QualityModel } from 'Quality/Quality';
 import { executeCommand } from 'Store/Actions/commandActions';
+import {
+  deleteGameFiles,
+  updateGameFiles,
+} from 'Store/Actions/gameFileActions';
 import {
   clearInteractiveImport,
   fetchInteractiveImportItems,
@@ -47,10 +51,6 @@ import {
   setInteractiveImportSort,
   updateInteractiveImportItems,
 } from 'Store/Actions/interactiveImportActions';
-import {
-  deleteGameFiles,
-  updateGameFiles,
-} from 'Store/Actions/gameFileActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import { SortCallback } from 'typings/callbacks';
 import { CheckInputChanged } from 'typings/inputs';

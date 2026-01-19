@@ -9,6 +9,7 @@ namespace NzbDrone.Core.Test.MetadataSource.SkyHook
 {
     [TestFixture]
     [IntegrationTest]
+#pragma warning disable CS0618 // SkyHookProxy is obsolete but kept for testing legacy functionality
     public class SkyHookProxySearchFixture : CoreTest<SkyHookProxy>
     {
         [SetUp]

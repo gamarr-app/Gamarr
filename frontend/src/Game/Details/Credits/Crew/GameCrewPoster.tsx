@@ -7,13 +7,13 @@ import Link from 'Components/Link/Link';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import Popover from 'Components/Tooltip/Popover';
+import GameHeadshot from 'Game/GameHeadshot';
 import useModalOpenState from 'Helpers/Hooks/useModalOpenState';
 import { icons, kinds, sizes } from 'Helpers/Props';
-import GameHeadshot from 'Game/GameHeadshot';
 import EditImportListModal from 'Settings/ImportLists/ImportLists/EditImportListModal';
 import { deleteImportList } from 'Store/Actions/Settings/importLists';
-import ImportList from 'typings/ImportList';
 import GameCredit from 'typings/GameCredit';
+import ImportList from 'typings/ImportList';
 import translate from 'Utilities/String/translate';
 import styles from '../GameCreditPoster.css';
 

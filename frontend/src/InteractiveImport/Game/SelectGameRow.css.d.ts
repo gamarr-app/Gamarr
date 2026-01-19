@@ -2,9 +2,9 @@
 // Please do not change this file!
 interface CssExports {
   'cell': string;
+  'igdbId': string;
   'imdbId': string;
   'title': string;
-  'igdbId': string;
   'year': string;
 }
 export const cssExports: CssExports;

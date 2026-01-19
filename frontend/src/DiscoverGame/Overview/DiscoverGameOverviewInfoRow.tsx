@@ -8,9 +8,7 @@ interface DiscoverGameOverviewInfoRowProps {
   label: string | null;
 }
 
-function DiscoverGameOverviewInfoRow(
-  props: DiscoverGameOverviewInfoRowProps
-) {
+function DiscoverGameOverviewInfoRow(props: DiscoverGameOverviewInfoRowProps) {
   const { title, iconName, label } = props;
 
   return (

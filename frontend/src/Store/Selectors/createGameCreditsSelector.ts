@@ -7,9 +7,7 @@ function createGameCreditsSelector(gameCreditType: GameCreditType) {
   return createSelector(
     (state: AppState) => state.gameCredits.items,
     (gameCredits) => {
-      const credits = gameCredits.filter(
-        ({ type }) => type === gameCreditType
-      );
+      const credits = gameCredits.filter(({ type }) => type === gameCreditType);
 
       const sortedCredits = credits.sort((a, b) => a.order - b.order);
 

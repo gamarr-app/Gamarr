@@ -2,9 +2,9 @@
 // Please do not change this file!
 interface CssExports {
   'freeSpace': string;
+  'gameFolder': string;
   'isMissing': string;
   'isMobile': string;
-  'gameFolder': string;
   'optionText': string;
   'value': string;
 }

@@ -7,12 +7,12 @@ interface CssExports {
   'details': string;
   'detailsLabel': string;
   'editorSelect': string;
+  'game': string;
+  'gamesContainer': string;
   'genres': string;
   'info': string;
   'labelsContainer': string;
   'monitorToggleButton': string;
-  'game': string;
-  'gamesContainer': string;
   'navigationButtons': string;
   'overview': string;
   'path': string;

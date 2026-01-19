@@ -3,8 +3,8 @@ import AppSectionState, {
   AppSectionSaveState,
 } from 'App/State/AppSectionState';
 import Column from 'Components/Table/Column';
-import { SortDirection } from 'Helpers/Props/sortDirections';
 import Game from 'Game/Game';
+import { SortDirection } from 'Helpers/Props/sortDirections';
 import { Filter, FilterBuilderProp } from './AppState';
 
 export interface GameIndexAppState {

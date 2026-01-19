@@ -1,9 +1,9 @@
 import React from 'react';
 import Modal from 'Components/Modal/Modal';
-import { sizes } from 'Helpers/Props';
 import GameHistoryModalContent, {
   GameHistoryModalContentProps,
 } from 'Game/History/GameHistoryModalContent';
+import { sizes } from 'Helpers/Props';
 
 interface GameHistoryModalProps extends GameHistoryModalContentProps {
   isOpen: boolean;

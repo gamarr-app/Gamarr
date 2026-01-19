@@ -9,9 +9,7 @@ interface GameCastPostersProps {
 }
 
 function GameCastPosters({ isSmallScreen }: GameCastPostersProps) {
-  const { items: castCredits } = useSelector(
-    createGameCreditsSelector('cast')
-  );
+  const { items: castCredits } = useSelector(createGameCreditsSelector('cast'));
 
   return (
     <GameCreditPosters

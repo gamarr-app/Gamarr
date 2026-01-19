@@ -5,10 +5,10 @@ import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
-import { scrollDirections } from 'Helpers/Props';
-import InteractiveSearch from 'InteractiveSearch/InteractiveSearch';
 import Game from 'Game/Game';
 import useGame from 'Game/useGame';
+import { scrollDirections } from 'Helpers/Props';
+import InteractiveSearch from 'InteractiveSearch/InteractiveSearch';
 import { clearGameBlocklist } from 'Store/Actions/gameBlocklistActions';
 import { clearGameHistory } from 'Store/Actions/gameHistoryActions';
 import {

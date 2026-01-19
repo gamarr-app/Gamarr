@@ -6,10 +6,10 @@ interface CssExports {
   'downloaded': string;
   'event': string;
   'eventWrapper': string;
+  'gameTitle': string;
   'genres': string;
   'missingMonitored': string;
   'missingUnmonitored': string;
-  'gameTitle': string;
   'overlay': string;
   'queue': string;
   'releaseIcon': string;

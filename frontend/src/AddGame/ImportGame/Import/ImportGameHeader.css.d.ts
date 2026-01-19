@@ -3,9 +3,9 @@
 interface CssExports {
   'detailsIcon': string;
   'folder': string;
+  'game': string;
   'minimumAvailability': string;
   'monitor': string;
-  'game': string;
   'qualityProfile': string;
 }
 export const cssExports: CssExports;

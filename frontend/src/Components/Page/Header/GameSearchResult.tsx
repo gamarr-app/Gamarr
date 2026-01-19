@@ -1,8 +1,8 @@
 import React from 'react';
 import { Tag } from 'App/State/TagsAppState';
 import Label from 'Components/Label';
-import { kinds } from 'Helpers/Props';
 import GamePoster from 'Game/GamePoster';
+import { kinds } from 'Helpers/Props';
 import { SuggestedGame } from './GameSearchInput';
 import styles from './GameSearchResult.css';
 

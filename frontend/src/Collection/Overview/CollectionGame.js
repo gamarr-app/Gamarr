@@ -4,8 +4,8 @@ import AddNewGameCollectionGameModal from 'Collection/AddNewGameCollectionGameMo
 import Link from 'Components/Link/Link';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import EditGameModal from 'Game/Edit/EditGameModal';
-import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
 import GamePoster from 'Game/GamePoster';
+import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
 import translate from 'Utilities/String/translate';
 import styles from './CollectionGame.css';
 

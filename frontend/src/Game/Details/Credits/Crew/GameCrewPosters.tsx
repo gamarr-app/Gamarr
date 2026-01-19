@@ -9,9 +9,7 @@ interface GameCrewPostersProps {
 }
 
 function GameCrewPosters({ isSmallScreen }: GameCrewPostersProps) {
-  const { items: crewCredits } = useSelector(
-    createGameCreditsSelector('crew')
-  );
+  const { items: crewCredits } = useSelector(createGameCreditsSelector('crew'));
 
   return (
     <GameCreditPosters

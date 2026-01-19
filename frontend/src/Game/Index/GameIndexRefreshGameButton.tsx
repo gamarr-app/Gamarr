@@ -17,9 +17,7 @@ interface GameIndexRefreshGameButtonProps {
   selectedFilterKey: string;
 }
 
-function GameIndexRefreshGameButton(
-  props: GameIndexRefreshGameButtonProps
-) {
+function GameIndexRefreshGameButton(props: GameIndexRefreshGameButtonProps) {
   const isRefreshing = useSelector(
     createCommandExecutingSelector(REFRESH_GAME)
   );

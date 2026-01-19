@@ -10,11 +10,11 @@ import {
   DownloadFailedHistory,
   DownloadFolderImportedHistory,
   DownloadIgnoredHistory,
+  GameFileDeletedHistory,
+  GameFileRenamedHistory,
   GrabbedHistoryData,
   HistoryData,
   HistoryEventType,
-  GameFileDeletedHistory,
-  GameFileRenamedHistory,
 } from 'typings/History';
 import formatDateTime from 'Utilities/Date/formatDateTime';
 import formatAge from 'Utilities/Number/formatAge';

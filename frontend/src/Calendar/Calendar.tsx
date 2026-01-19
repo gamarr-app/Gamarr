@@ -4,19 +4,16 @@ import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
+import Game from 'Game/Game';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { kinds } from 'Helpers/Props';
-import Game from 'Game/Game';
 import {
   clearCalendar,
   fetchCalendar,
   gotoCalendarToday,
 } from 'Store/Actions/calendarActions';
-import {
-  clearGameFiles,
-  fetchGameFiles,
-} from 'Store/Actions/gameFileActions';
+import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
   clearQueueDetails,
   fetchQueueDetails,

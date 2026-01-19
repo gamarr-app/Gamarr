@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import Label from 'Components/Label';
+import { GameStatus } from 'Game/Game';
 import { kinds, sizes } from 'Helpers/Props';
 import { Kind } from 'Helpers/Props/kinds';
-import { GameStatus } from 'Game/Game';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
 import Queue from 'typings/Queue';
 import getQueueStatusText from 'Utilities/Game/getQueueStatusText';

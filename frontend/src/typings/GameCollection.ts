@@ -1,5 +1,5 @@
 import ModelBase from 'App/ModelBase';
-import Game, { Image, GameAvailability } from 'Game/Game';
+import Game, { GameAvailability, Image } from 'Game/Game';
 
 interface GameCollection extends ModelBase {
   igdbId: number;

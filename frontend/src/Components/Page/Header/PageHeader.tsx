@@ -7,8 +7,8 @@ import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 import { icons } from 'Helpers/Props';
 import { setIsSidebarVisible } from 'Store/Actions/appActions';
 import translate from 'Utilities/String/translate';
-import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import GameSearchInput from './GameSearchInput';
+import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import PageHeaderActionsMenu from './PageHeaderActionsMenu';
 import styles from './PageHeader.css';
 
