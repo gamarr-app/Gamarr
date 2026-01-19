@@ -61,7 +61,6 @@ class DiscoverGameRow extends Component {
       status,
       igdbId,
       steamAppId,
-      imdbId,
       youTubeTrailerId,
       title,
       originalLanguage,
@@ -399,8 +398,8 @@ class DiscoverGameRow extends Component {
                       title={translate('Links')}
                       body={
                         <GameDetailsLinks
+                          steamAppId={steamAppId}
                           igdbId={igdbId}
-                          imdbId={imdbId}
                           youTubeTrailerId={youTubeTrailerId}
                         />
                       }
@@ -447,7 +446,6 @@ class DiscoverGameRow extends Component {
 DiscoverGameRow.propTypes = {
   igdbId: PropTypes.number.isRequired,
   steamAppId: PropTypes.number,
-  imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   status: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,

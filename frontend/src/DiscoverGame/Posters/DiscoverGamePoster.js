@@ -79,7 +79,6 @@ class DiscoverGamePoster extends Component {
     const {
       igdbId,
       steamAppId,
-      imdbId,
       youTubeTrailerId,
       title,
       year,
@@ -150,8 +149,8 @@ class DiscoverGamePoster extends Component {
                 title={translate('Links')}
                 body={
                   <GameDetailsLinks
+                    steamAppId={steamAppId}
                     igdbId={igdbId}
-                    imdbId={imdbId}
                     youTubeTrailerId={youTubeTrailerId}
                   />
                 }
@@ -255,7 +254,6 @@ class DiscoverGamePoster extends Component {
 DiscoverGamePoster.propTypes = {
   igdbId: PropTypes.number.isRequired,
   steamAppId: PropTypes.number,
-  imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,

@@ -81,10 +81,10 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         }
 
         [Test]
-        public void should_not_use_imdbId()
+        public void should_not_use_imdb_prefix_as_release_group()
         {
-            var fileGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) [imdb-tt0120735][Bluray-1080p][8bit][x264][DTS-HD MA 5.1]-FraMeSToR", false);
-            var folderGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) {imdb-tt0120735}", false);
+            var fileGameInfo = Parser.Parser.ParseGameTitle("Elden Ring (2022) [imdb-tt0120735][Repack]-FraMeSToR", false);
+            var folderGameInfo = Parser.Parser.ParseGameTitle("Elden Ring (2022) {imdb-tt0120735}", false);
             var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
             var localGame = new LocalGame
             {
@@ -101,10 +101,10 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         }
 
         [Test]
-        public void should_not_use_igdbbId()
+        public void should_not_use_igdb_prefix_as_release_group()
         {
-            var fileGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) [igdb-100][Bluray-1080p][8bit][x264][DTS-HD MA 5.1]-FraMeSToR", false);
-            var folderGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) {igdb-100}", false);
+            var fileGameInfo = Parser.Parser.ParseGameTitle("Elden Ring (2022) [igdb-119133][Repack]-FraMeSToR", false);
+            var folderGameInfo = Parser.Parser.ParseGameTitle("Elden Ring (2022) {igdb-119133}", false);
             var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
             var localGame = new LocalGame
             {

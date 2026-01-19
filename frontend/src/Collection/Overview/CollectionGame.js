@@ -212,7 +212,6 @@ CollectionGame.propTypes = {
   isExcluded: PropTypes.bool,
   igdbId: PropTypes.number.isRequired,
   steamAppId: PropTypes.number,
-  imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   onMonitorTogglePress: PropTypes.func.isRequired
 };

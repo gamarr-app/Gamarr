@@ -83,7 +83,6 @@ class DiscoverGameOverview extends Component {
     const {
       igdbId,
       steamAppId,
-      imdbId,
       youTubeTrailerId,
       title,
       folder,
@@ -193,8 +192,8 @@ class DiscoverGameOverview extends Component {
                     title={translate('Links')}
                     body={
                       <GameDetailsLinks
+                        steamAppId={steamAppId}
                         igdbId={igdbId}
-                        imdbId={imdbId}
                         youTubeTrailerId={youTubeTrailerId}
                       />
                     }
@@ -296,7 +295,6 @@ class DiscoverGameOverview extends Component {
 DiscoverGameOverview.propTypes = {
   igdbId: PropTypes.number.isRequired,
   steamAppId: PropTypes.number,
-  imdbId: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,
   folder: PropTypes.string.isRequired,
