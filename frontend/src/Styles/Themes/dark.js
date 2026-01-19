@@ -1,239 +1,247 @@
-const gamarrYellow = '#ffc230';
-const gamarrAlternateYellow = '#2193b5';
-const darkGray = '#888';
-const mediumGray = '#999';
-const gray = '#adadad';
+// Ocean Sunset Dark Theme
+// Midnight blues and sunlit gold meet fiery oranges
+
+// Ocean Sunset Palette
+const inkBlack = '#001219';
+const darkTeal = '#005F73';
+const darkCyan = '#0A9396';
+const pearlAqua = '#94D2BD';
+const wheat = '#E9D8A6';
+const goldenOrange = '#EE9B00';
+const burntCaramel = '#CA6702';
+const rustySpice = '#BB3E03';
+const oxidizedIron = '#AE2012';
+const brownRed = '#9B2226';
+
+// Supporting colors
 const black = '#000';
 const white = '#fff';
 const offWhite = '#f5f7fa';
-const purple = '#7a43b6';
-const pink = '#ff69b4';
-const lightGray = '#ddd';
 
 module.exports = {
-  textColor: '#ccc',
-  defaultColor: '#ccc',
-  disabledColor: '#999',
-  dimColor: '#555',
+  textColor: wheat,
+  defaultColor: wheat,
+  disabledColor: pearlAqua,
+  dimColor: darkCyan,
   black,
   white,
   offWhite,
-  primaryColor: '#5d9cec',
-  selectedColor: '#f9be03',
-  successColor: '#00853d',
-  dangerColor: '#f05050',
-  warningColor: '#ffa500',
-  infoColor: '#5d9cec',
-  queueColor: '#7a43b6',
-  purple,
-  pink,
-  gamarrYellow,
-  helpTextColor: '#909293',
-  darkGray,
-  gray,
-  lightGray,
-  mediumGray,
+  primaryColor: darkCyan,
+  selectedColor: goldenOrange,
+  successColor: pearlAqua,
+  dangerColor: oxidizedIron,
+  warningColor: burntCaramel,
+  infoColor: darkCyan,
+  queueColor: darkTeal,
+  purple: darkTeal,
+  pink: rustySpice,
+  gamarrYellow: goldenOrange,
+  helpTextColor: pearlAqua,
+  darkGray: darkTeal,
+  gray: pearlAqua,
+  lightGray: wheat,
+  mediumGray: darkCyan,
 
   // Theme Colors
 
-  themeBlue: gamarrYellow,
-  themeAlternateYellow: gamarrAlternateYellow,
-  themeRed: '#c4273c',
-  themeDarkColor: '#494949',
-  themeLightColor: '#595959',
-  pageBackground: '#202020',
-  pageFooterBackgroud: 'rgba(0, 0, 0, .25)',
+  themeBlue: goldenOrange,
+  themeAlternateYellow: darkCyan,
+  themeRed: oxidizedIron,
+  themeDarkColor: darkTeal,
+  themeLightColor: darkCyan,
+  pageBackground: inkBlack,
+  pageFooterBackgroud: 'rgba(0, 18, 25, 0.8)',
 
-  torrentColor: '#00853d',
-  usenetColor: '#17b1d9',
+  torrentColor: pearlAqua,
+  usenetColor: darkCyan,
 
   // Labels
-  inverseLabelColor: '#ddd',
-  inverseLabelTextColor: '#333',
-  disabledLabelColor: '#838383',
-  infoTextColor: white,
+  inverseLabelColor: wheat,
+  inverseLabelTextColor: inkBlack,
+  disabledLabelColor: darkCyan,
+  infoTextColor: inkBlack,
 
   // Links
-  defaultLinkHoverColor: '#fff',
-  linkColor: '#5d9cec',
-  linkHoverColor: '#1b72e2',
+  defaultLinkHoverColor: goldenOrange,
+  linkColor: darkCyan,
+  linkHoverColor: pearlAqua,
 
   // Header
-  pageHeaderBackgroundColor: '#2a2a2a',
+  pageHeaderBackgroundColor: darkTeal,
 
   // Sidebar
 
-  sidebarColor: '#e1e2e3',
-  sidebarBackgroundColor: '#2a2a2a',
-  sidebarActiveBackgroundColor: '#333333',
+  sidebarColor: wheat,
+  sidebarBackgroundColor: darkTeal,
+  sidebarActiveBackgroundColor: darkCyan,
 
   // Toolbar
-  toolbarColor: '#e1e2e3',
-  toolbarBackgroundColor: '#262626',
-  toolbarMenuItemBackgroundColor: '#303030',
-  toolbarMenuItemHoverBackgroundColor: '#515151',
-  toolbarLabelColor: '#e1e2e3',
+  toolbarColor: wheat,
+  toolbarBackgroundColor: '#003544',
+  toolbarMenuItemBackgroundColor: darkTeal,
+  toolbarMenuItemHoverBackgroundColor: darkCyan,
+  toolbarLabelColor: wheat,
 
   // Accents
-  borderColor: '#858585',
-  inputBorderColor: '#dde6e9',
-  inputBoxShadowColor: 'rgba(0, 0, 0, 0.075)',
-  inputFocusBorderColor: '#66afe9',
-  inputFocusBoxShadowColor: 'rgba(102, 175, 233, 0.6)',
-  inputErrorBorderColor: '#f05050',
-  inputErrorBoxShadowColor: 'rgba(240, 80, 80, 0.6)',
-  inputWarningBorderColor: '#ffa500',
-  inputWarningBoxShadowColor: 'rgba(255, 165, 0, 0.6)',
-  colorImpairedGradient: '#707070',
-  colorImpairedGradientDark: '#424242',
-  colorImpairedDangerGradient: '#d84848',
-  colorImpairedWarningGradient: '#e59400',
-  colorImpairedPrimaryGradient: '#538cd4',
-  colorImpairedGrayGradient: '#9b9b9b',
+  borderColor: darkCyan,
+  inputBorderColor: darkCyan,
+  inputBoxShadowColor: 'rgba(0, 95, 115, 0.2)',
+  inputFocusBorderColor: goldenOrange,
+  inputFocusBoxShadowColor: 'rgba(238, 155, 0, 0.4)',
+  inputErrorBorderColor: oxidizedIron,
+  inputErrorBoxShadowColor: 'rgba(174, 32, 18, 0.4)',
+  inputWarningBorderColor: burntCaramel,
+  inputWarningBoxShadowColor: 'rgba(202, 103, 2, 0.4)',
+  colorImpairedGradient: darkCyan,
+  colorImpairedGradientDark: darkTeal,
+  colorImpairedDangerGradient: oxidizedIron,
+  colorImpairedWarningGradient: burntCaramel,
+  colorImpairedPrimaryGradient: darkCyan,
+  colorImpairedGrayGradient: pearlAqua,
 
   //
   // Buttons
 
-  defaultButtonTextColor: '#eee',
-  defaultBackgroundColor: '#333',
-  defaultBorderColor: '#393f45',
-  defaultHoverBackgroundColor: '#444',
-  defaultHoverBorderColor: '#5a6265',
+  defaultButtonTextColor: wheat,
+  defaultBackgroundColor: darkTeal,
+  defaultBorderColor: darkCyan,
+  defaultHoverBackgroundColor: darkCyan,
+  defaultHoverBorderColor: pearlAqua,
 
-  primaryBackgroundColor: '#5d9cec',
-  primaryBorderColor: '#5899eb',
-  primaryHoverBackgroundColor: '#4b91ea',
-  primaryHoverBorderColor: '#3483e7',
+  primaryBackgroundColor: darkCyan,
+  primaryBorderColor: darkTeal,
+  primaryHoverBackgroundColor: pearlAqua,
+  primaryHoverBorderColor: darkCyan,
 
-  successBackgroundColor: '#27c24c',
-  successBorderColor: '#26be4a',
-  successHoverBackgroundColor: '#24b145',
-  successHoverBorderColor: '#1f9c3d',
+  successBackgroundColor: pearlAqua,
+  successBorderColor: darkCyan,
+  successHoverBackgroundColor: '#7ac4aa',
+  successHoverBorderColor: pearlAqua,
 
-  warningBackgroundColor: '#ff902b',
-  warningBorderColor: '#ff8d26',
-  warningHoverBackgroundColor: '#ff8517',
-  warningHoverBorderColor: '#fc7800',
+  warningBackgroundColor: goldenOrange,
+  warningBorderColor: burntCaramel,
+  warningHoverBackgroundColor: burntCaramel,
+  warningHoverBorderColor: rustySpice,
 
-  dangerBackgroundColor: '#f05050',
-  dangerBorderColor: '#f04b4b',
-  dangerHoverBackgroundColor: '#ee3d3d',
-  dangerHoverBorderColor: '#ec2626',
+  dangerBackgroundColor: oxidizedIron,
+  dangerBorderColor: brownRed,
+  dangerHoverBackgroundColor: brownRed,
+  dangerHoverBorderColor: '#7a1a1d',
 
-  iconButtonDisabledColor: '#7a7a7a',
-  iconButtonHoverColor: '#666',
-  iconButtonHoverLightColor: '#ccc',
+  iconButtonDisabledColor: darkCyan,
+  iconButtonHoverColor: pearlAqua,
+  iconButtonHoverLightColor: wheat,
 
   //
   // Modal
 
-  modalBackdropBackgroundColor: 'rgba(0, 0, 0, 0.6)',
-  modalBackgroundColor: '#2a2a2a',
-  modalCloseButtonHoverColor: '#888',
+  modalBackdropBackgroundColor: 'rgba(0, 18, 25, 0.85)',
+  modalBackgroundColor: '#002633',
+  modalCloseButtonHoverColor: goldenOrange,
 
   //
   // Menu
-  menuItemColor: '#e1e2e3',
-  menuItemHoverColor: gamarrYellow,
-  menuItemHoverBackgroundColor: '#606060',
+  menuItemColor: wheat,
+  menuItemHoverColor: goldenOrange,
+  menuItemHoverBackgroundColor: darkCyan,
 
   //
   // Toolbar
 
-  toobarButtonHoverColor: '#ffc230',
-  toobarButtonSelectedColor: '#ffc230',
+  toobarButtonHoverColor: goldenOrange,
+  toobarButtonSelectedColor: goldenOrange,
 
   //
   // Scroller
 
-  scrollbarBackgroundColor: '#707070',
-  scrollbarHoverBackgroundColor: '#606060',
+  scrollbarBackgroundColor: darkCyan,
+  scrollbarHoverBackgroundColor: pearlAqua,
 
   //
   // Card
 
-  cardBackgroundColor: '#333333',
-  cardShadowColor: '#111',
-  cardAlternateBackgroundColor: '#333333',
-  cardCenterBackgroundColor: '#2a2a2a',
+  cardBackgroundColor: darkTeal,
+  cardShadowColor: inkBlack,
+  cardAlternateBackgroundColor: '#003544',
+  cardCenterBackgroundColor: '#002633',
 
   //
   // Alert
 
-  alertDangerBorderColor: '#a94442',
-  alertDangerBackgroundColor: 'rgba(255,0,0,0.1)',
-  alertDangerColor: '#ccc',
+  alertDangerBorderColor: oxidizedIron,
+  alertDangerBackgroundColor: 'rgba(174, 32, 18, 0.15)',
+  alertDangerColor: wheat,
 
-  alertInfoBorderColor: '#31708f',
-  alertInfoBackgroundColor: 'rgba(0,0,255,0.1)',
-  alertInfoColor: '#ccc',
+  alertInfoBorderColor: darkCyan,
+  alertInfoBackgroundColor: 'rgba(10, 147, 150, 0.15)',
+  alertInfoColor: wheat,
 
-  alertSuccessBorderColor: '#3c763d',
-  alertSuccessBackgroundColor: 'rgba(0,255,0,0.1)',
-  alertSuccessColor: '#ccc',
+  alertSuccessBorderColor: pearlAqua,
+  alertSuccessBackgroundColor: 'rgba(148, 210, 189, 0.15)',
+  alertSuccessColor: wheat,
 
-  alertWarningBorderColor: '#8a6d3b',
-  alertWarningBackgroundColor: 'rgba(255,255,0,0.1)',
-  alertWarningColor: '#ccc',
+  alertWarningBorderColor: burntCaramel,
+  alertWarningBackgroundColor: 'rgba(202, 103, 2, 0.15)',
+  alertWarningColor: wheat,
 
   //
   // Slider
 
-  sliderAccentColor: '#5d9cec',
+  sliderAccentColor: goldenOrange,
 
   //
   // Form
 
-  inputBackgroundColor: '#333',
-  inputReadOnlyBackgroundColor: '#222',
-  inputHoverBackgroundColor: 'rgba(255, 255, 255, 0.20)',
-  inputSelectedBackgroundColor: 'rgba(255, 255, 255, 0.05)',
-  advancedFormLabelColor: '#ff902b',
-  disabledCheckInputColor: '#ddd',
-  disabledInputColor: '#808080',
+  inputBackgroundColor: '#002633',
+  inputReadOnlyBackgroundColor: inkBlack,
+  inputHoverBackgroundColor: 'rgba(148, 210, 189, 0.1)',
+  inputSelectedBackgroundColor: 'rgba(238, 155, 0, 0.15)',
+  advancedFormLabelColor: goldenOrange,
+  disabledCheckInputColor: darkCyan,
+  disabledInputColor: darkCyan,
 
   //
   // Popover
 
-  popoverTitleBackgroundColor: '#424242',
-  popoverTitleBorderColor: '#2a2a2a',
-  popoverBodyBackgroundColor: '#2a2a2a',
-  popoverShadowColor: 'rgba(0, 0, 0, 0.2)',
-  popoverArrowBorderColor: '#2a2a2a',
+  popoverTitleBackgroundColor: darkTeal,
+  popoverTitleBorderColor: darkCyan,
+  popoverBodyBackgroundColor: '#002633',
+  popoverShadowColor: 'rgba(0, 18, 25, 0.4)',
+  popoverArrowBorderColor: '#002633',
 
-  popoverTitleBackgroundInverseColor: '#595959',
-  popoverTitleBorderInverseColor: '#707070',
-  popoverShadowInverseColor: 'rgba(0, 0, 0, 0.2)',
-  popoverArrowBorderInverseColor: 'rgba(58, 63, 81, 0.75)',
+  popoverTitleBackgroundInverseColor: darkCyan,
+  popoverTitleBorderInverseColor: pearlAqua,
+  popoverShadowInverseColor: 'rgba(0, 18, 25, 0.4)',
+  popoverArrowBorderInverseColor: 'rgba(0, 95, 115, 0.75)',
 
   //
   // Calendar
 
-  calendarTodayBackgroundColor: '#3e3e3e',
-  calendarBackgroundColor: '#2a2a2a',
-  calendarBorderColor: '#393f45',
-  calendarTextDim: '#eee',
-  calendarTextDimAlternate: '#fff',
+  calendarTodayBackgroundColor: darkCyan,
+  calendarBackgroundColor: '#002633',
+  calendarBorderColor: darkTeal,
+  calendarTextDim: pearlAqua,
+  calendarTextDimAlternate: wheat,
 
-  calendarFullColorFilter: 'grayscale(90%) contrast(200%) saturate(50%)',
+  calendarFullColorFilter: 'saturate(70%) brightness(120%)',
 
   //
   // Table
 
-  tableRowHoverBackgroundColor: 'rgba(255, 255, 255, 0.08)',
+  tableRowHoverBackgroundColor: 'rgba(10, 147, 150, 0.15)',
 
   //
   // Game
 
-  addGameBackgroundColor: '#2a2a2a',
-  gameBackgroundColor: '#2a2a2a',
-  searchIconContainerBackgroundColor: '#2b2b2b',
+  addGameBackgroundColor: '#002633',
+  gameBackgroundColor: '#002633',
+  searchIconContainerBackgroundColor: darkTeal,
 
   //
   // Misc
 
-  progressBarFrontTextColor: white,
-  progressBarBackTextColor: white,
-  progressBarBackgroundColor: '#727070',
-  logEventsBackgroundColor: '#2a2a2a'
+  progressBarFrontTextColor: inkBlack,
+  progressBarBackTextColor: wheat,
+  progressBarBackgroundColor: darkTeal,
+  logEventsBackgroundColor: '#002633'
 };
