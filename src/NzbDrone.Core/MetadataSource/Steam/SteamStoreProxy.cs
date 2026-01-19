@@ -114,6 +114,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
                 return response.Resource.Items
                     .Where(item => item.Type == "app" || item.Type == "game")
+                    .Where(item => !IsNonGameContent(item.Name))
                     .Take(limit)
                     .Select(MapSearchResult)
                     .Where(g => g != null)
@@ -393,6 +394,34 @@ namespace NzbDrone.Core.MetadataSource.Steam
             result = Regex.Replace(result, @"\s+", " ").Trim();
 
             return result;
+        }
+
+        private bool IsNonGameContent(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                return false;
+            }
+
+            var lowerTitle = title.ToLowerInvariant();
+
+            // Filter out soundtracks, artbooks, and other non-game content
+            string[] excludePatterns =
+            {
+                "soundtrack",
+                "original score",
+                "ost",
+                "artbook",
+                "art book",
+                "art of ",
+                "digital artbook",
+                "digital art book",
+                "wallpaper",
+                "strategy guide",
+                "guidebook"
+            };
+
+            return excludePatterns.Any(pattern => lowerTitle.Contains(pattern));
         }
     }
 }

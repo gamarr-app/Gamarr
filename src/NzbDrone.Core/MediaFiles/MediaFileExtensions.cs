@@ -36,6 +36,12 @@ namespace NzbDrone.Core.MediaFiles
                 // Common game archive formats used by repacks
                 { ".bin.001", Quality.Repack },
                 { ".part01.rar", Quality.Repack },
+
+                // DODI Repack format
+                { ".doi", Quality.Repack },
+
+                // FitGirl and other repack installer data
+                { ".dat", Quality.Repack },
             };
         }
 
