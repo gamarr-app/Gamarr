@@ -2,7 +2,6 @@ using System;
 using NLog;
 using NzbDrone.Common.Cloud;
 using NzbDrone.Common.Http;
-using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Localization;
 
 namespace NzbDrone.Core.HealthCheck.Checks
@@ -23,28 +22,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
 
         public override HealthCheck Check()
         {
-            try
-            {
-                var request = _cloudRequestBuilder.Create()
-                    .Resource("/time")
-                    .Build();
-
-                var response = _client.Execute(request);
-                var result = Json.Deserialize<ServiceTimeResponse>(response.Content);
-                var systemTime = DateTime.UtcNow;
-
-                // +/- more than 1 day
-                if (Math.Abs(result.DateTimeUtc.Subtract(systemTime).TotalDays) >= 1)
-                {
-                    _logger.Error("System time mismatch. SystemTime: {0} Expected Time: {1}. Update system time", systemTime, result.DateTimeUtc);
-                    return new HealthCheck(GetType(), HealthCheckResult.Error, _localizationService.GetLocalizedString("SystemTimeHealthCheckMessage"), "#system-time-off");
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Warn(e, "Unable to verify system time");
-            }
-
+            // Disabled: gamarr.servarr.com doesn't exist for this fork
             return new HealthCheck(GetType());
         }
     }
