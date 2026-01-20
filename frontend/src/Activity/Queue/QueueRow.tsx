@@ -59,9 +59,9 @@ interface QueueRowProps {
   downloadClientHasPostImportCategory?: boolean;
   estimatedCompletionTime?: string;
   added?: string;
-  timeleft?: string;
+  timeLeft?: string;
   size: number;
-  sizeleft: number;
+  sizeLeft: number;
   isGrabbing?: boolean;
   grabError?: Error;
   isRemoving?: boolean;
@@ -93,9 +93,9 @@ function QueueRow(props: QueueRowProps) {
     downloadClientHasPostImportCategory,
     estimatedCompletionTime,
     added,
-    timeleft,
+    timeLeft,
     size,
-    sizeleft,
+    sizeLeft,
     isGrabbing = false,
     grabError,
     isRemoving = false,
@@ -150,7 +150,7 @@ function QueueRow(props: QueueRowProps) {
     setIsRemoveQueueItemModalOpen(false);
   }, [setIsRemoveQueueItemModalOpen, onQueueRowModalOpenOrClose]);
 
-  const progress = size ? 100 - (sizeleft / size) * 100 : 0;
+  const progress = size ? 100 - (sizeLeft / size) * 100 : 0;
   const showInteractiveImport =
     status === 'completed' && trackedDownloadStatus === 'warning';
   const isPending =
@@ -276,9 +276,9 @@ function QueueRow(props: QueueRowProps) {
               key={name}
               status={status}
               estimatedCompletionTime={estimatedCompletionTime}
-              timeleft={timeleft}
+              timeLeft={timeLeft}
               size={size}
-              sizeleft={sizeleft}
+              sizeLeft={sizeLeft}
               showRelativeDates={showRelativeDates}
               shortDateFormat={shortDateFormat}
               timeFormat={timeFormat}

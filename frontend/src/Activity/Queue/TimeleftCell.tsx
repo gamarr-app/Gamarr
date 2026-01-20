@@ -12,10 +12,10 @@ import styles from './TimeleftCell.css';
 
 interface TimeleftCellProps {
   estimatedCompletionTime?: string;
-  timeleft?: string;
+  timeLeft?: string;
   status: string;
   size: number;
-  sizeleft: number;
+  sizeLeft: number;
   showRelativeDates: boolean;
   shortDateFormat: string;
   timeFormat: string;
@@ -24,10 +24,10 @@ interface TimeleftCellProps {
 function TimeleftCell(props: TimeleftCellProps) {
   const {
     estimatedCompletionTime,
-    timeleft,
+    timeLeft,
     status,
     size,
-    sizeleft,
+    sizeLeft,
     showRelativeDates,
     shortDateFormat,
     timeFormat,
@@ -77,19 +77,19 @@ function TimeleftCell(props: TimeleftCellProps) {
     );
   }
 
-  if (!timeleft || status === 'completed' || status === 'failed') {
+  if (!timeLeft || status === 'completed' || status === 'failed') {
     return <TableRowCell className={styles.timeleft}>-</TableRowCell>;
   }
 
   const totalSize = formatBytes(size);
-  const remainingSize = formatBytes(sizeleft);
+  const remainingSize = formatBytes(sizeLeft);
 
   return (
     <TableRowCell
       className={styles.timeleft}
       title={`${remainingSize} / ${totalSize}`}
     >
-      {formatTimeSpan(timeleft)}
+      {formatTimeSpan(timeLeft)}
     </TableRowCell>
   );
 }

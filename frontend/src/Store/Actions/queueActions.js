@@ -51,7 +51,7 @@ export const defaultState = {
     isFetching: false,
     isPopulated: false,
     pageSize: 20,
-    sortKey: 'timeleft',
+    sortKey: 'timeLeft',
     sortDirection: sortDirections.ASCENDING,
     error: null,
     items: [],
@@ -212,7 +212,7 @@ export const defaultState = {
   },
   sortPredicates: {
     estimatedCompletionTime: function(item, direction) {
-      return moment.duration(item.timeleft).asMilliseconds();
+      return moment.duration(item.timeLeft).asMilliseconds();
     }
   }
 };
