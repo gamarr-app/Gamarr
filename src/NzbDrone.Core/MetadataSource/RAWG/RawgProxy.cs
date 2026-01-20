@@ -143,12 +143,21 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
         public List<GameMetadata> GetTrendingGames()
         {
-            return SearchGames("", ordering: "-added", pageSize: 20);
+            // Get recently released games sorted by popularity/additions
+            // RAWG "dates" param filters by release date range
+            var threeMonthsAgo = DateTime.UtcNow.AddMonths(-3).ToString("yyyy-MM-dd");
+            var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+            return SearchGamesWithDates($"{threeMonthsAgo},{today}", ordering: "-added", pageSize: 20);
         }
 
         public List<GameMetadata> GetPopularGames()
         {
-            return SearchGames("", ordering: "-rating", pageSize: 20);
+            // Get highly rated games from the last 2 years
+            var twoYearsAgo = DateTime.UtcNow.AddYears(-2).ToString("yyyy-MM-dd");
+            var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+            return SearchGamesWithDates($"{twoYearsAgo},{today}", ordering: "-rating", pageSize: 20);
         }
 
         public HashSet<int> GetChangedGames(DateTime startTime)
@@ -194,6 +203,11 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
         private List<GameMetadata> SearchGames(string query, string ordering = null, int pageSize = 10)
         {
+            return SearchGamesWithDates(null, query, ordering, pageSize);
+        }
+
+        private List<GameMetadata> SearchGamesWithDates(string dates, string query = null, string ordering = null, int pageSize = 10)
+        {
             var apiKey = _configService.RawgApiKey;
 
             if (string.IsNullOrEmpty(apiKey))
@@ -211,6 +225,11 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             {
                 requestBuilder.AddQueryParam("search", query);
                 requestBuilder.AddQueryParam("search_precise", "true");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dates))
+            {
+                requestBuilder.AddQueryParam("dates", dates);
             }
 
             if (!string.IsNullOrWhiteSpace(ordering))
