@@ -39,8 +39,7 @@ function GameStatus({ gameId, gameFileId }: GameStatusProps) {
           progressBar={
             <ProgressBar
               progress={progress}
-              kind={kinds.PURPLE}
-              size={sizes.MEDIUM}
+              title={`${progress.toFixed(1)}%`}
             />
           }
         />
