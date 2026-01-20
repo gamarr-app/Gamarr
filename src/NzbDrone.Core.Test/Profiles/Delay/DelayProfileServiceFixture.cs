@@ -107,5 +107,75 @@ namespace NzbDrone.Core.Test.Profiles.Delay
 
             afterMove.Order.Should().BeLessThan(afterOrder);
         }
+
+        [Test]
+        public void should_return_all_profiles()
+        {
+            Subject.All().Should().HaveCount(4);
+        }
+
+        [Test]
+        public void should_return_profiles_in_order()
+        {
+            var profiles = Subject.All();
+
+            profiles.Should().BeInAscendingOrder(p => p.Order);
+        }
+
+        [Test]
+        public void should_get_profile_by_id()
+        {
+            Mocker.GetMock<IDelayProfileRepository>()
+                  .Setup(s => s.Get(2))
+                  .Returns(_first);
+
+            Subject.Get(2).Should().Be(_first);
+        }
+
+        [Test]
+        public void should_get_best_for_tags_returns_default_when_no_match()
+        {
+            // All tags should match the default profile (order = int.MaxValue)
+            var result = Subject.BestForTags(new HashSet<int> { 999 });
+
+            result.Order.Should().Be(int.MaxValue);
+        }
+
+        [Test]
+        public void should_add_profile()
+        {
+            var newProfile = new DelayProfile
+            {
+                PreferredProtocol = Indexers.DownloadProtocol.Usenet,
+                Tags = new HashSet<int>()
+            };
+
+            Mocker.GetMock<IDelayProfileRepository>()
+                  .Setup(s => s.Insert(newProfile))
+                  .Returns(newProfile);
+
+            Subject.Add(newProfile);
+
+            Mocker.GetMock<IDelayProfileRepository>()
+                  .Verify(s => s.Insert(newProfile), Moq.Times.Once());
+        }
+
+        [Test]
+        public void should_update_profile()
+        {
+            Subject.Update(_first);
+
+            Mocker.GetMock<IDelayProfileRepository>()
+                  .Verify(s => s.Update(_first), Moq.Times.Once());
+        }
+
+        [Test]
+        public void should_delete_profile()
+        {
+            Subject.Delete(2);
+
+            Mocker.GetMock<IDelayProfileRepository>()
+                  .Verify(s => s.Delete(2), Moq.Times.Once());
+        }
     }
 }
