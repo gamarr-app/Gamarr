@@ -74,6 +74,7 @@ namespace NzbDrone.Core.Test.ParserTests
 
         // Date-based version formats (common for indie/early access games)
         [TestCase("Hades II v2025.08.03", "Hades II")]
+        [TestCase("The Witness v24.01.2019", "The Witness")] // European date format DD.MM.YYYY
         [TestCase("Vampire Survivors v1.10.103", "Vampire Survivors")]
 
         // Parenthesized version formats
