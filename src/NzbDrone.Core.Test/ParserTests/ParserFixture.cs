@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("MY GAME (2016) [R][Action, Horror][720p.WEB-DL.AVC.8Bit.6ch.AC3].mkv", "MY GAME")]
         [TestCase("R.I.P.D.2013.720p.BluRay.x264-SPARKS", "R.I.P.D.")]
         [TestCase("V.H.S.2.2013.LIMITED.720p.BluRay.x264-GECKOS", "V.H.S. 2")]
-        [TestCase("This Is A Game (1999) [IMDB #] <Genre, Genre, Genre> {ACTORS} !DIRECTOR +MORE_SILLY_STUFF_NO_ONE_NEEDS ?", "This Is A Game")]
+        [TestCase("This Is A Game (1999) [IGDB #12345] <Genre, Genre, Genre> {STUDIO} !DEVELOPER +MORE_SILLY_STUFF_NO_ONE_NEEDS ?", "This Is A Game")]
         [TestCase("We Are the Game!.2013.720p.H264.mkv", "We Are the Game!")]
         [TestCase("(500).Days.Of.Game.(2009).DTS.1080p.BluRay.x264.NLsubs", "(500) Days Of Game")]
         [TestCase("To.Live.and.Game.in.L.A.1985.1080p.BluRay", "To Live and Game in L.A.")]
