@@ -79,5 +79,75 @@ namespace NzbDrone.Core.Test.IndexerTests
 
             VerifyNoUpdate();
         }
+
+        [Test]
+        public void should_return_last_rss_sync_release_info()
+        {
+            var releaseInfo = new Parser.Model.ReleaseInfo { Title = "Test Release" };
+            WithStatus(new IndexerStatus { ProviderId = 1, LastRssSyncReleaseInfo = releaseInfo });
+
+            Subject.GetLastRssSyncReleaseInfo(1).Should().Be(releaseInfo);
+        }
+
+        [Test]
+        public void should_return_null_when_no_last_rss_sync()
+        {
+            WithStatus(new IndexerStatus { ProviderId = 1, LastRssSyncReleaseInfo = null });
+
+            Subject.GetLastRssSyncReleaseInfo(1).Should().BeNull();
+        }
+
+        [Test]
+        public void should_update_rss_sync_status()
+        {
+            WithStatus(new IndexerStatus { ProviderId = 1 });
+            var releaseInfo = new Parser.Model.ReleaseInfo { Title = "Test Release" };
+
+            Subject.UpdateRssSyncStatus(1, releaseInfo);
+
+            VerifyUpdate();
+        }
+
+        [Test]
+        public void should_return_cookies()
+        {
+            var cookies = new System.Collections.Generic.Dictionary<string, string> { { "session", "abc123" } };
+            WithStatus(new IndexerStatus { ProviderId = 1, Cookies = cookies });
+
+            Subject.GetIndexerCookies(1).Should().BeEquivalentTo(cookies);
+        }
+
+        [Test]
+        public void should_update_cookies()
+        {
+            WithStatus(new IndexerStatus { ProviderId = 1 });
+            var cookies = new System.Collections.Generic.Dictionary<string, string> { { "session", "abc123" } };
+            var expiration = DateTime.UtcNow.AddDays(7);
+
+            Subject.UpdateCookies(1, cookies, expiration);
+
+            VerifyUpdate();
+        }
+
+        [Test]
+        public void should_return_default_expiration_when_not_set()
+        {
+            WithStatus(new IndexerStatus { ProviderId = 1, CookiesExpirationDate = null });
+
+            var result = Subject.GetIndexerCookiesExpirationDate(1);
+
+            // Should be approximately 12 days from now
+            result.Should().BeAfter(DateTime.Now.AddDays(11));
+            result.Should().BeBefore(DateTime.Now.AddDays(13));
+        }
+
+        [Test]
+        public void should_return_cookies_expiration_date()
+        {
+            var expiration = DateTime.UtcNow.AddDays(7);
+            WithStatus(new IndexerStatus { ProviderId = 1, CookiesExpirationDate = expiration });
+
+            Subject.GetIndexerCookiesExpirationDate(1).Should().BeCloseTo(expiration, TimeSpan.FromSeconds(1));
+        }
     }
 }
