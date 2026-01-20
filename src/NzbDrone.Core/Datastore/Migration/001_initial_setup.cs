@@ -290,7 +290,7 @@ namespace NzbDrone.Core.Datastore.Migration
             Create.TableForModel("ImportExclusions")
                 .WithColumn("IgdbId").AsInt32().NotNullable().Unique()
                 .WithColumn("GameTitle").AsString().Nullable()
-                .WithColumn("GameYear").AsInt32().WithDefaultValue(0)
+                .WithColumn("GameYear").AsInt32().Nullable().WithDefaultValue(0)
                 .WithColumn("SteamAppId").AsInt32().WithDefaultValue(0);
 
             // ===========================================
