@@ -35,10 +35,6 @@ namespace NzbDrone.Core.Parser.Model
         /// </summary>
         G_Internal = 32,
 
-        // AHD, internal
-        [Obsolete]
-        AHD_Internal = 64,
-
         /// <summary>
         /// The release comes from a scene group
         /// </summary>
@@ -53,10 +49,6 @@ namespace NzbDrone.Core.Parser.Model
         /// Torrent download amount only counts 25%
         /// </summary>
         G_Freeleech25 = 512,
-
-        // AHD, internal
-        [Obsolete]
-        AHD_UserRelease = 1024,
 
         /// <summary>
         /// The release is nuked
