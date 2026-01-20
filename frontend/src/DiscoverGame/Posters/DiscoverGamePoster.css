@@ -28,6 +28,7 @@ $hoverScale: 1.05;
 }
 
 .poster {
+  display: block;
   object-fit: cover;
 }
 
