@@ -34,6 +34,8 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
 
         public string ScannerName => "ClamAV";
 
+        public string DetectedScannerPath => GetClamScanPath();
+
         public bool IsAvailable
         {
             get

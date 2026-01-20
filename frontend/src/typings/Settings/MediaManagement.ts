@@ -23,4 +23,5 @@ export default interface MediaManagement {
   virusScannerArguments: string;
   quarantineInfectedFiles: boolean;
   quarantineFolder: string;
+  detectedVirusScannerPath: string;
 }

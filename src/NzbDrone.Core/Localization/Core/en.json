@@ -2010,6 +2010,8 @@
   "VideoCodec": "Video Codec",
   "VideoDynamicRange": "Video Dynamic Range",
   "VirusScanning": "Virus Scanning",
+  "VirusScannerDetected": "ClamAV detected at: {path}",
+  "VirusScannerNotDetected": "ClamAV not detected. Install ClamAV or specify the path manually below.",
   "EnableVirusScanning": "Enable Virus Scanning",
   "EnableVirusScanningHelpText": "Scan downloaded files for viruses before importing. Uses ClamAV if available.",
   "VirusScannerPath": "Virus Scanner Path",
