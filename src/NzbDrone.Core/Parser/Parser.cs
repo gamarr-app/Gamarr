@@ -24,8 +24,14 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex[] ReportGameTitleRegex = new[]
         {
-            // Game release with version: GameName.v1.2.3-GROUP (must be at beginning to avoid year-like numbers in title being parsed as years)
-            new Regex(@"^(?<title>(?![(\[]).+?)[._]v(?<version>\d+(?:\.\d+)*)[._-](?<releasegroup>[A-Za-z0-9]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Update/Patch releases with version: "Game.Name.Update.v1.2.3-GROUP" - MUST BE BEFORE version regex
+            // Title stops at ".Update." or " Update " - handles both dot and space separated formats
+            new Regex(@"^(?<title>(?![(\[]).+?)[._\s](?:Update|Patch)[._\s]+v[\d.]+.*?-(?<releasegroup>[A-Za-z0-9_]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Game release with version (but NOT Update releases): GameName.v1.2.3-GROUP or GameName.v1.4.0g-GROUP
+            // Negative lookbehind ensures we don't match if title ends with ".Update" or "_Update"
+            // Handles letter suffixes like v1.4.0g, v0.4.2f7
+            new Regex(@"^(?<title>(?![(\[]).+?(?<![._]Update))[._]v(?<version>\d+(?:\.\d+)*[a-z]*\d*)[._-](?<releasegroup>[A-Za-z0-9_]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Game release with date-based version: "Hades II v2025.08.03" or "Game Name v2025.06.18"
             // Must be before year patterns to avoid v2025 being parsed as year
@@ -41,11 +47,37 @@ namespace NzbDrone.Core.Parser
             // r4v3n is a scene-style group, title stops at "r4v3n"
             new Regex(@"^(?<title>(?![(\[]).+?)\s+(?<releasegroup>r4v3n)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            // Update/Patch/Language Pack releases: "Game Update v1.2-CODEX" or "Game Language Pack RUNE"
+            // FitGirl/DODI bracket format: "Game Name (v1.2.3 + DLC, MULTi##) [FitGirl Repack]"
+            // Title stops at opening parenthesis of version info, or before bracket if no parens
+            // Handles multiple parenthetical groups like "(2023) (Build 12345, MULTi13)" before [DODI Repack]
+            new Regex(@"^(?<title>[^(\[]+?)(?:\s*\([^)]*\))*\s*\[(?:FitGirl|DODI)(?:\s+(?:Monkey\s+)?Repack)?(?:,\s*[^\]]+)?\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Simple bracket format without version: "Game Name [FitGirl Repack]" or "Game Name [DODI Repack]"
+            new Regex(@"^(?<title>[^(\[]+?)\s*\[(?:FitGirl|DODI)(?:\s+(?:Monkey\s+)?Repack)?\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // PORTABLE release format: "Game Name (year) [PORTABLE]" or "Game Name (year) + DLC [PORTABLE]"
+            // Title stops at opening parenthesis or before bracket
+            new Regex(@"^(?<title>[^(\[]+?)(?:\s*\((?<year>\d{4})\))?(?:\s*\+[^\[]+)?\s*\[(?:Crack\s*V?\d*\.?\d*\s*)?\]?\s*\[PORTABLE\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // CRACK release format: "Game Name (year)[CRACK 1.1][AMD+Intel]"
+            new Regex(@"^(?<title>[^(\[]+?)(?:\s*\((?<year>\d{4})\))?\s*\[CRACK\s*[\d.]+\]", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // CRACKFIX/PROPER format: "Game Name CRACKFIX-group" or "Game Name PROPER-group"
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+(?:CRACKFIX|PROPER)-(?<releasegroup>\w+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Simple game with version in parentheses: "Manor Lords (v2025.12.21)" or "Palworld (v0.7)"
+            // Title stops at opening parenthesis with version, handles &/+ for DLCs
+            new Regex(@"^(?<title>[^(\[]+?)\s*\(v[\d.]+(?:\s*[&+][^)]+)?\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Simple game with space-separated version: "DuneCrawl v1.01" or "Schedule I v0.4.2f7"
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+v\d+(?:\.\d+)*[a-z]*\d*$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Update/Patch/Language Pack releases: "Game Update v1.2-CODEX" or "Game.Update.v1.2-RUNE"
             // Title stops at Update/Patch/Language Pack keywords, but not if version info comes before
             // Negative lookahead ensures we don't capture title with version info before "Patch"
             // Exclude strings starting with DL (handled by DL prefix pattern) and metadata patterns like "redkit update"
-            new Regex(@"^(?!DL\s)(?<title>(?![(\[])(?:(?!\s+v\d).)+?)\s+(?:Update|Patch|Language[\s._-]?Pack)(?:\s+v|\s*[-_]|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Handles both space-separated (Game Name Update v1.0) and dot-separated (Game.Name.Update.v1.0) formats
+            new Regex(@"^(?!DL\s)(?<title>(?![(\[])(?:(?![\s._]v\d).)+?)[.\s]+(?:Update|Patch|Language[\s._-]?Pack)(?:[.\s]+v|\s*[-_]|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Year-hyphen-repacker format: "Game.Title.2018-FitGirl.Repack" → "Game Title"
             // Title stops at year when followed by hyphen and REPACKER (not scene groups)
@@ -55,7 +87,7 @@ namespace NzbDrone.Core.Parser
             // Scene release ending with space + scene group (no hyphen): "Hogwarts Legacy Deluxe Edition EMPRESS"
             // Must be before flexible version matching to avoid partial matches
             // Note: GOG excluded here - handled by GOG-specific pattern below
-            new Regex(@"^(?<title>.+?)\s+(?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|RUNE|TENOKE)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>.+?)\s+(?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|RUNE|TENOKE|DELiGHT)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Russian repacker format: "Game Name 2016 PC RePack от xatab" or "Game Name v1.0 2022 PC RePack от R.G. Механики"
             // Title stops at version indicator (v followed by digits) or year before PC
@@ -110,16 +142,16 @@ namespace NzbDrone.Core.Parser
             new Regex(@"^(?<title>(?![(\[]).+?)(?:[-_. ]+(?:MULTi\d+|(?:FitGirl|DODI|XATAB|Elamigos|CorePack|KaOs)[-_. ]*Repack))", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Scene group followed by PORTABLE: "ELDEN RING NIGHTREIGN RUNE PORTABLE"
-            new Regex(@"^(?<title>(?![(\[]).+?)\s+(?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|RUNE|HI2U|TENOKE)\s+PORTABLE$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+(?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|RUNE|HI2U|TENOKE|DELiGHT)\s+PORTABLE$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Scene release with hyphenated group: "ELDEN RING-PLAZA" or "Game.Name-CODEX"
             // Match title up to hyphen followed by known scene group
-            new Regex(@"^(?<title>(?![(\[]).+?)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>(?![(\[]).+?)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Game releases without year - match title up to known release group at END of string (must be before year patterns to keep years in game titles)
             // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, etc.
             // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
-            new Regex(@"^(?<title>(?![(\[]).+?)[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|P2P)(?:[-_. ]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>(?![(\[]).+?)[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|P2P)(?:[-_. ]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
             // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
@@ -319,6 +351,12 @@ namespace NzbDrone.Core.Parser
 
                 simpleTitle = CleanQualityBracketsRegex.Replace(simpleTitle, m =>
                 {
+                    // Preserve FitGirl/DODI brackets as they're needed for title parsing
+                    if (Regex.IsMatch(m.Value, @"\b(FitGirl|DODI)\b", RegexOptions.IgnoreCase))
+                    {
+                        return m.Value;
+                    }
+
                     if (QualityParser.ParseQualityName(m.Value).Quality != Qualities.Quality.Unknown)
                     {
                         return string.Empty;

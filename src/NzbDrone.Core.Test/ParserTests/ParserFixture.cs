@@ -493,5 +493,356 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().NotBeNull($"Failed to parse: {postTitle}");
             result.PrimaryGameTitle.Should().Be(title);
         }
+
+        // Real 1337x/scene releases - RUNE group
+        // Note: Single-letter abbreviations after periods are treated as acronyms (e.g., "Z." preserved)
+        [TestCase("Ravenswatch.Hourglass.of.Dreams.Update.v1.04.01.incl.DLC-RUNE", "Ravenswatch Hourglass of Dreams")]
+        [TestCase("Winter.Survival.Update.v51123-RUNE", "Winter Survival")]
+        [TestCase("Trailmakers.Frozen.Tracks.Update.v222.506.298.0-RUNE", "Trailmakers Frozen Tracks")]
+        [TestCase("The.Lord.of.the.Rings.Return.to.Moria.Durins.Folk.Update.v1.6.6.218163-RUNE", "The Lord of the Rings Return to Moria Durins Folk")]
+        [TestCase("Gold.Mining.Simulator.Gems.and.Glory.Update.v1.10.1.8-RUNE", "Gold Mining Simulator Gems and Glory")]
+        [TestCase("Firefighting.Simulator.Ignite.Update.v1.0022-RUNE", "Firefighting Simulator Ignite")]
+        [TestCase("CityDriver.Update.v55184-RUNE", "CityDriver")]
+        [TestCase("Anima.Gate.of.Memories.I.and.II.Remaster.Update.v20251121-RUNE", "Anima Gate of Memories I. and II Remaster")]
+        [TestCase("Achilles.Survivor.Update.v1.3-RUNE", "Achilles Survivor")]
+        [TestCase("Kotama.and.Academy.Citadel-RUNE", "Kotama and Academy Citadel")]
+        [TestCase("Dragon.Ball.Z.Kakarot.DAIMA.Adventure.Through.The.Demon.Realm.Part.2-RUNE", "Dragon Ball Z. Kakarot DAIMA Adventure Through The Demon Realm Part 2")]
+        [TestCase("Voidtrain.Update.v1.04-RUNE", "Voidtrain")]
+        [TestCase("Sacred.2.Remaster.Update.3.0-RUNE", "Sacred 2 Remaster Update 3 0")]
+        [TestCase("Police.Simulator.Patrol.Officers.Contraband.Update.v22.0.4-RUNE", "Police Simulator Patrol Officers Contraband")]
+        [TestCase("NODE.The.Last.Favor.of.the.Antarii.Update.v1.0.12-RUNE", "NODE The Last Favor of the Antarii")]
+        [TestCase("Kingdom.Come.Deliverance.II.Mysteria.Ecclesiae.MULTi15.Update.v1.5.2-RUNE", "Kingdom Come Deliverance II Mysteria Ecclesiae MULTi15")]
+        [TestCase("Kingdom.Come.Deliverance.II.Mysteria.Ecclesiae.Update.v1.5.2-RUNE", "Kingdom Come Deliverance II Mysteria Ecclesiae")]
+        [TestCase("JDM.Japanese.Drift.Master.v1.2.157.1-RUNE", "JDM Japanese Drift Master")]
+        [TestCase("Funko.Fusion.Update.v3.4.1.180665.incl.DLC-RUNE", "Funko Fusion")]
+        [TestCase("Forever.Skies.Echoes-RUNE", "Forever Skies Echoes")]
+        [TestCase("Quarantine.Zone.The.Last.Check-RUNE", "Quarantine Zone The Last Check")]
+        [TestCase("WARNO.SOUTHAG.Update.v178307.incl.DLC-RUNE", "WARNO SOUTHAG")]
+        [TestCase("Pathologic.3-RUNE", "Pathologic 3")]
+        [TestCase("Terra.Invicta-RUNE", "Terra Invicta")]
+        [TestCase("Wartales.The.Curse.of.Rigel.Update.v1.0.45242-RUNE", "Wartales The Curse of Rigel")]
+        [TestCase("Tormented.Souls.2.Update.v1.3.5-RUNE", "Tormented Souls 2")]
+        [TestCase("Shadow.Labyrinth.Update.v1.1.0-RUNE", "Shadow Labyrinth")]
+        [TestCase("Senuas.Saga.Hellblade.II.Enhanced.Update.v20251218-RUNE", "Senuas Saga Hellblade II Enhanced")]
+        [TestCase("Reentry.A.Space.Flight.Simulator.Update.v1.0.21-RUNE", "Reentry A Space Flight Simulator")]
+        [TestCase("Knights.of.the.Crusades.Update.v1.11-RUNE", "Knights of the Crusades")]
+        [TestCase("Dark.Moon.v1.02-RUNE", "Dark Moon")]
+        [TestCase("Chip.n.Clawz.vs.The.Brainioids.v1.0.24500-RUNE", "Chip n. Clawz vs The Brainioids")]
+        public void should_parse_rune_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x/scene releases - TENOKE group
+        // Note: Single-letter abbreviations after periods are treated as acronyms (e.g., "I." preserved)
+        [TestCase("Yao-Guai.Hunter.Update.v1.2.8-TENOKE", "Yao-Guai Hunter")]
+        [TestCase("Sultans.Game.Update.v1.0.17991-TENOKE", "Sultans Game")]
+        [TestCase("Photo.Studio.Simulator.Update.v20260115-TENOKE", "Photo Studio Simulator")]
+        [TestCase("Out.Of.Hands.Update.v1.0.0.202-TENOKE", "Out Of Hands")]
+        [TestCase("DAVE.THE.DIVER.Update.v1.0.5.1781-TENOKE", "DAVE THE DIVER")]
+        [TestCase("SOS.OPS.TRIALS.Update.v20260115-TENOKE", "SOS OPS TRIALS")]
+        [TestCase("Pale.Coins.Update.v1.1.0-TENOKE", "Pale Coins")]
+        [TestCase("Fabledom.Update.v1.083b-TENOKE", "Fabledom")]
+        [TestCase("Cash.Cleaner.Simulator.Update.v1.4.3.808-TENOKE", "Cash Cleaner Simulator")]
+        [TestCase("1998.The.Toll.Keeper.Story.Update.v1.0.8f3-TENOKE", "1998 The Toll Keeper Story")]
+        [TestCase("Streetdog.BMX-TENOKE", "Streetdog BMX")]
+        [TestCase("Napoleons.Eagles.Game.of.the.Napoleonic.Wars.La.Marseillaise-TENOKE", "Napoleons Eagles Game of the Napoleonic Wars La Marseillaise")]
+        [TestCase("hololive.GoroGoro.Mountain.Secret.Society.holoX.Collaboration-TENOKE", "hololive GoroGoro Mountain Secret Society holoX Collaboration")]
+        [TestCase("Hatsune.Miku.Logic.Paint.S.Plus.SNOW.MIKU.Sky.Town-TENOKE", "Hatsune Miku Logic Paint S. Plus SNOW MIKU Sky Town")]
+        [TestCase("Bloodface.Scars.of.the.Past-TENOKE", "Bloodface Scars of the Past")]
+        [TestCase("SIDE.EFFECTS.Update.v1.09-TENOKE", "SIDE EFFECTS")]
+        [TestCase("Sani.Yangs.Laboratory.Update.v20251205-TENOKE", "Sani Yangs Laboratory")]
+        [TestCase("OFF.Update.v1.1-TENOKE", "OFF")]
+        [TestCase("Easy.Red.2.Update.v2.0.2-TENOKE", "Easy Red 2")]
+        [TestCase("Do.No.Harm.Update.v1.2.4-TENOKE", "Do No Harm")]
+        [TestCase("Xenopurge.Update.v20251219-TENOKE", "Xenopurge")]
+        [TestCase("Wretch.Divine.Ascent.Update.v1.1.1-TENOKE", "Wretch Divine Ascent")]
+        [TestCase("WAR.RATS.The.Rat.em.Up.Update.v1.0.7-TENOKE", "WAR RATS The Rat em Up")]
+        [TestCase("Let.Them.Trade.Update.v1.1.4-TENOKE", "Let Them Trade")]
+        [TestCase("Discounty.Update.v1.1.3a-TENOKE", "Discounty")]
+        [TestCase("Log.in-TENOKE", "Log in")]
+        [TestCase("Dream.of.Corpse.Lady-TENOKE", "Dream of Corpse Lady")]
+        [TestCase("Confidential.Killings.A.Detective.Game-TENOKE", "Confidential Killings A Detective Game")]
+        [TestCase("Big.Hops-TENOKE", "Big Hops")]
+        [TestCase("AiliA-TENOKE", "AiliA")]
+        [TestCase("Touhou.Danmaku.Kagura.Phantasia.Lost.Update.v1.12.0-TENOKE", "Touhou Danmaku Kagura Phantasia Lost")]
+        [TestCase("Intravenous.2.Update.v1.4.7-TENOKE", "Intravenous 2")]
+        [TestCase("Demonschool.Update.v20260108-TENOKE", "Demonschool")]
+        [TestCase("Deep.Sleep.Labyrinth.of.the.Forsaken.Update.v1.1.3.1-TENOKE", "Deep Sleep Labyrinth of the Forsaken")]
+        [TestCase("Coral.Island.Update.v1.2b-1245-TENOKE", "Coral Island")]
+        [TestCase("Northgard.Definitive.Edition-TENOKE", "Northgard Definitive Edition")]
+        [TestCase("Monster.Prom.4.Monster.Con.v1.55-TENOKE", "Monster Prom 4 Monster Con")]
+        [TestCase("Just.King.v1.4.0g-TENOKE", "Just King")]
+        [TestCase("Cozy.Caravan-TENOKE", "Cozy Caravan")]
+        [TestCase("Basketboys.Adventure-TENOKE", "Basketboys Adventure")]
+        [TestCase("Ancient.Farm-TENOKE", "Ancient Farm")]
+        [TestCase("Touhou.Makuka.Sai.Fantastic.Danmaku.Festival.Part.III.Update.v20251224-TENOKE", "Touhou Makuka Sai Fantastic Danmaku Festival Part III")]
+        [TestCase("Sea.Fantasy.Update.v2.7.0-TENOKE", "Sea Fantasy")]
+        [TestCase("PATAPON.1.Plus.2.REPLAY.Update.v1.0.9-TENOKE", "PATAPON 1 Plus 2 REPLAY")]
+        [TestCase("Looking.Up.I.See.Only.A.Ceiling.Update.v2.0.0.19-TENOKE", "Looking Up I. See Only A Ceiling")]
+        [TestCase("Artis.Impact.Update.v1.14-TENOKE", "Artis Impact")]
+        [TestCase("Kingdoms.And.Slaves-TENOKE", "Kingdoms And Slaves")]
+        [TestCase("House.Builder.Tiny.Houses-TENOKE", "House Builder Tiny Houses")]
+        [TestCase("Northgard.Gardariki.Clan.of.the.Hippogriff.Update.v4.0.7.43120-TENOKE", "Northgard Gardariki Clan of the Hippogriff")]
+        [TestCase("Granvir.Update.v2.12.2-TENOKE", "Granvir")]
+        [TestCase("Foolish.Mortals.Update.v1.3-TENOKE", "Foolish Mortals")]
+        [TestCase("Deconstruction.Simulator.Update.v1.4.0-TENOKE", "Deconstruction Simulator")]
+        [TestCase("Ancient.Cities.Update.v1.8.26-TENOKE", "Ancient Cities")]
+        [TestCase("Sky.traveler-TENOKE", "Sky traveler")]
+        [TestCase("Feed.the.Reactor-TENOKE", "Feed the Reactor")]
+        [TestCase("DuneCrawl-TENOKE", "DuneCrawl")]
+        [TestCase("Viewfinder.Update.v20251126-TENOKE", "Viewfinder")]
+        [TestCase("The.Salesman.Update.v1.1.0-TENOKE", "The Salesman")]
+        [TestCase("Journey.of.Realm.Dawn.Dew.Update.v20251218-TENOKE", "Journey of Realm Dawn Dew")]
+        [TestCase("Cobalt.Core.Update.v1.2.6-TENOKE", "Cobalt Core")]
+        [TestCase("Battle.Suit.Aces.Update.v1.0.48-TENOKE", "Battle Suit Aces")]
+        [TestCase("Witchy.Business.Update.v1.1.2-TENOKE", "Witchy Business")]
+        [TestCase("Winter.Burrow.Update.v1.1.0-TENOKE", "Winter Burrow")]
+        [TestCase("Million.Depth.Update.v1.08.03-TENOKE", "Million Depth")]
+        [TestCase("Junji.Ito.Maniac.An.Infinite.Gaol.Update.v1.1.2-TENOKE", "Junji Ito Maniac An Infinite Gaol")]
+        [TestCase("Dice.Gambit.Update.v20251126-TENOKE", "Dice Gambit")]
+        public void should_parse_tenoke_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x/scene releases - I_KnoW group
+        [TestCase("Sandwalkers.v2.2.3.MacOS-I_KnoW", "Sandwalkers")]
+        [TestCase("Sandwalkers.v2.2.3.Linux-I_KnoW", "Sandwalkers")]
+        [TestCase("Mato.Anomalies.Digital.Deluxe.Edition.v20251010-I_KnoW", "Mato Anomalies Digital Deluxe Edition")]
+        [TestCase("Sandwalkers.v2.2.3-I_KnoW", "Sandwalkers")]
+        [TestCase("Lust.Theory.Season.3.MacOS-I_KnoW", "Lust Theory Season 3")]
+        [TestCase("GIGASWORD.v1.1.1-I_KnoW", "GIGASWORD")]
+        public void should_parse_i_know_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x/scene releases - RAZOR/Razor1911 group
+        [TestCase("Love_and_Knights_Solitaire-RAZOR", "Love and Knights Solitaire")]
+        [TestCase("Jewel_Match_Solitaire_Fantasy_Collectors_Edition-RAZOR", "Jewel Match Solitaire Fantasy Collectors Edition")]
+        [TestCase("Dark_Town_Secrets_2_The_Last_Burger_Collectors_Edition-RAZOR", "Dark Town Secrets 2 The Last Burger Collectors Edition")]
+        [TestCase("Clear_It_M3-RAZOR", "Clear It M3")]
+        [TestCase("Amandas_Magic_Book_12_The_Islands_of_the_Sleeping_Titans-RAZOR", "Amandas Magic Book 12 The Islands of the Sleeping Titans")]
+        [TestCase("Adventure_Mosaics_Venice_Carnival-RAZOR", "Adventure Mosaics Venice Carnival")]
+        [TestCase("Unforeseen_Incidents_v1.9_MacOS-Razor1911", "Unforeseen Incidents v1 9 MacOS")]
+        [TestCase("Unforeseen_Incidents_Update_v1.9-RazorDOX", "Unforeseen Incidents")]
+        [TestCase("Forgotten_23_MacOS-Razor1911", "Forgotten 23 MacOS")]
+        [TestCase("Cosplayers_Quest-Razor1911", "Cosplayers Quest")]
+        [TestCase("Hidden_Weekend_The_American_Getaway-RAZOR", "Hidden Weekend The American Getaway")]
+        [TestCase("Argonauts_Agency_11_Bronze_Plague-RAZOR", "Argonauts Agency 11 Bronze Plague")]
+        public void should_parse_razor_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x/scene releases - DELiGHT group (GOG releases)
+        [TestCase("Wizordum.v1.2.01.GOG-DELiGHT", "Wizordum")]
+        [TestCase("Wizardry.Proving.Grounds.of.the.Mad.Overlord.v1.1.1.GOG-DELiGHT", "Wizardry Proving Grounds of the Mad Overlord")]
+        [TestCase("Shrines.Legacy.v1.1.2.GOG-DELiGHT", "Shrines Legacy")]
+        [TestCase("Legends.of.Amberland.The.Song.of.Trees.v1.24.GOG-DELiGHT", "Legends of Amberland The Song of Trees")]
+        [TestCase("Legends.of.Amberland.The.forgotten.Crown.v1.31.GOG-DELiGHT", "Legends of Amberland The forgotten Crown")]
+        [TestCase("Breath.of.Fire.IV.v1.0.hotfix5.GOG-DELiGHT", "Breath of Fire IV")]
+        [TestCase("Anodyne.v2.01.GOG-DELiGHT", "Anodyne")]
+        [TestCase("Anodyne.2.Return.to.Dust.v1.5.1.GOG-DELiGHT", "Anodyne 2 Return to Dust")]
+        [TestCase("Travel.to.Thailand.German-DELiGHT", "Travel to Thailand")]
+        [TestCase("Gaslamp.Cases.9.The.Ghost.of.Automaton.City.German-DELiGHT", "Gaslamp Cases 9 The Ghost of Automaton City")]
+        [TestCase("Gaslamp.Cases.8.Quest.for.the.Relic.German-DELiGHT", "Gaslamp Cases 8 Quest for the Relic")]
+        [TestCase("Gaslamp.Cases.7.The.Fait.of.Rasputin.German-DELiGHT", "Gaslamp Cases 7 The Fait of Rasputin")]
+        [TestCase("Gaslamp.Cases.6.Haunted.Waters.German-DELiGHT", "Gaslamp Cases 6 Haunted Waters")]
+        [TestCase("Gaslamp.Cases.5.The.Dreadful.City.German-DELiGHT", "Gaslamp Cases 5 The Dreadful City")]
+        [TestCase("Gaslamp.Cases.4.The.Arcane.Village.German-DELiGHT", "Gaslamp Cases 4 The Arcane Village")]
+        [TestCase("Gaslamp.Cases.3.Ancient.Secrets.German-DELiGHT", "Gaslamp Cases 3 Ancient Secrets")]
+        [TestCase("Gaslamp.Cases.2.The.Haunted.Village.German-DELiGHT", "Gaslamp Cases 2 The Haunted Village")]
+        [TestCase("Dungeon.Antiqua.2.v20260115-DELiGHT", "Dungeon Antiqua 2")]
+        [TestCase("Dungeon.Antiqua.v20251123-DELiGHT", "Dungeon Antiqua")]
+        [TestCase("Fear.and.Hunger.2.Termina.v1.9.1-DELiGHT", "Fear and Hunger 2 Termina")]
+        [TestCase("Philna.Fantasy.v1.0.2-DELiGHT", "Philna Fantasy")]
+        public void should_parse_delight_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x/scene releases - Other groups (TiNYiSO, SKIDROW, DINOByTES, bADkARMA)
+        [TestCase("Journey.Through.The.Undead-TiNYiSO", "Journey Through The Undead")]
+        [TestCase("Meal.Mystery.Escape.Room-TiNYiSO", "Meal Mystery Escape Room")]
+        [TestCase("DeadCore.Redux-SKIDROW", "DeadCore Redux")]
+        [TestCase("Farm.Manager.World.Africa-SKIDROW", "Farm Manager World Africa")]
+        [TestCase("The.Settlers.3.Ultimate.Collection.v1.60.Win11.GOG-DINOByTES", "The Settlers 3 Ultimate Collection v1 60 Win11 GOG")]
+        [TestCase("Esophaguys_The_Neckening-DINOByTES", "Esophaguys The Neckening")]
+        [TestCase("Control_Ultimate_Edition_v1.32-DINOByTES", "Control Ultimate Edition")]
+        [TestCase("Inside_the_Flesh_Engine-bADkARMA", "Inside the Flesh Engine")]
+        [TestCase("Kinsfolk_Linux-bADkARMA", "Kinsfolk Linux")]
+        [TestCase("Kinsfolk-bADkARMA", "Kinsfolk")]
+        [TestCase("Damn_Dolls-bADkARMA", "Damn Dolls")]
+        [TestCase("Stranger_Things_Game-bADkARMA", "Stranger Things Game")]
+        [TestCase("MARVEL.Cosmic.Invasion.Plus.3.Trainer-PLAYMAGiC", "MARVEL Cosmic Invasion Plus 3 Trainer")]
+        public void should_parse_other_scene_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x top 100 releases - FitGirl repacks with parenthesized version
+        [TestCase("Grand Theft Auto V (v1.0.3725.0/1.72 + Bonus Content, MULTi13) [FitGirl Repack, Selective Download - from 53.7 GB]", "Grand Theft Auto V")]
+        [TestCase("Quarantine Zone: The Last Check (v1.0.1176 + 5 DLCs, MULTi14) [FitGirl Repack, Selective Download - from 5.2 GB]", "Quarantine Zone: The Last Check")]
+        [TestCase("Dead Space (2023): Digital Deluxe Edition (Build 10602756 + DLC, MULTi13) [FitGirl Repack]", "Dead Space (2023): Digital Deluxe Edition")]
+        [TestCase("Persona 5 Royal (v1.3B + Bonus OST, MULTi10) [FitGirl Repack, Selective Download - from 18.8 GB]", "Persona 5 Royal")]
+        [TestCase("Call of Duty: Black Ops - Cold War (v1.34.1.15931218 + All DLCs and Modes + Bonus OSTs, MULTi13) [FitGirl Repack]", "Call of Duty: Black Ops - Cold War")]
+        [TestCase("Grand Theft Auto V Enhanced (Build 1013.20/Online 1.72, MULTi13) [FitGirl Repack]", "Grand Theft Auto V Enhanced")]
+        [TestCase("FIFA 22 (v1.0.77.45722, MULTi21) [FitGirl Monkey Repack, Selective Download - from 53.5 GB]", "FIFA 22")]
+        [TestCase("DIRT 5: Year One Edition (v1.2770.47.0/UWP + All DLCs + Multiplayer, MULTi9) [FitGirl Repack]", "DIRT 5: Year One Edition")]
+        [TestCase("Warhammer 40,000: Space Marine 2: 1-Year Anniversary Edition (v11.2.0.1 + 19 DLCs, MULTi16) [FitGirl Repack]", "Warhammer 40,000: Space Marine 2: 1-Year Anniversary Edition")]
+        [TestCase("Gotham Knights: Deluxe Edition (v6.0.21.0 + 11 DLCs + Bonus Soundtrack, MULTi14) [FitGirl Repack]", "Gotham Knights: Deluxe Edition")]
+        [TestCase("Lords of the Fallen: Deluxe Edition (v2.5.220 + 6 DLCs/Bonuses + Multiplayer, MULTi20) [FitGirl Repack]", "Lords of the Fallen: Deluxe Edition")]
+        [TestCase("Sonic Colors: Ultimate - Digital Deluxe Edition (+ 6 DLCs, MULTi10) [FitGirl Repack]", "Sonic Colors: Ultimate - Digital Deluxe Edition")]
+        [TestCase("Total War: Three Kingdoms - Collection (v1.7.8 Build 187 + 10 DLCs, MULTi13) [FitGirl Repack]", "Total War: Three Kingdoms - Collection")]
+        [TestCase("Terra Invicta (v1.0.25, MULTi14) [FitGirl Repack]", "Terra Invicta")]
+        [TestCase("SCUM: Complete Bundle (v1.2.0.1.103760 + 14 DLCs/Bonuses, MULTi13) [FitGirl Repack]", "SCUM: Complete Bundle")]
+        [TestCase("The Spirit of the Samurai: Deluxe Edition (v1.0.15 + Bonus OST, MULTi10) [FitGirl Repack]", "The Spirit of the Samurai: Deluxe Edition")]
+        [TestCase("THE HOUSE OF THE DEAD 2: Remake (v20251217 GOG, MULTi9) [FitGirl Repack]", "THE HOUSE OF THE DEAD 2: Remake")]
+        [TestCase("Phoenix Point: Complete Edition (v1.30 + 6 DLCs + Bonus Content, MULTi8) [FitGirl Repack]", "Phoenix Point: Complete Edition")]
+        [TestCase("ServiceIT: You can do IT (v1.1.1 + DLC, MULTi26) [FitGirl Repack]", "ServiceIT: You can do IT")]
+        [TestCase("Halls of Torment: Tormented Supporter Bundle (v2025-12-04 + 3 DLCs/Bonuses, MULTi9) [FitGirl Repack]", "Halls of Torment: Tormented Supporter Bundle")]
+        [TestCase("Pathologic 3 (v60905 + Supporter Pack DLC, ENG/RUS) [FitGirl Repack]", "Pathologic 3")]
+        [TestCase("Burkina Faso: Radical Insurgency (MULTi14) [FitGirl Repack]", "Burkina Faso: Radical Insurgency")]
+        [TestCase("Northgard: Definitive Edition (v4.0.11.43178 + 17 DLCs/Bonuses, MULTi11) [FitGirl Repack]", "Northgard: Definitive Edition")]
+        [TestCase("Warhammer 40,000: Gladius - Complete Edition (v1.17.0 + 20 DLCs/Bonuses, MULTi6) [FitGirl Repack]", "Warhammer 40,000: Gladius - Complete Edition")]
+        [TestCase("Formula Legends (Build 21082031 + 5 DLCs, MULTi13) [FitGirl Repack]", "Formula Legends")]
+        [TestCase("Tunguska: The Visitation - Final Cut (v1.95-1 + 7 DLCs, MULTi9) [FitGirl Repack]", "Tunguska: The Visitation - Final Cut")]
+        [TestCase("JDM: Japanese Drift Master (v1.2.157.1 + 2 DLCs, MULTi15) [FitGirl Repack, Selective Download - from 10.0 GB]", "JDM: Japanese Drift Master")]
+        [TestCase("Jotunnslayer: Hordes of Hel - Collector's Edition (v1.1.2.91003 + 6 DLCs/Bonuses, MULTi20) [FitGirl Repack]", "Jotunnslayer: Hordes of Hel - Collector's Edition")]
+        [TestCase("Wreckreation (v1.2.0.147169, MULTi12) [FitGirl Repack]", "Wreckreation")]
+        [TestCase("Swordhaven: Iron Conspiracy (v1.0.0 + 4 DLCs/Bonuses, MULTi14) [FitGirl Repack, Selective Download]", "Swordhaven: Iron Conspiracy")]
+        [TestCase("Forever Skies: Deluxe Edition (v1.2.0 #43440 + 8 DLCs/Bonuses, MULTi12) [FitGirl Repack]", "Forever Skies: Deluxe Edition")]
+        [TestCase("Rising Front (v1.0/Release, MULTi30) [FitGirl Repack]", "Rising Front")]
+        [TestCase("Songs of Silence: Complete Edition (v1.6.0-d.9224 + 10 DLCs/Bonuses, MULTi14) [FitGirl Repack]", "Songs of Silence: Complete Edition")]
+        [TestCase("Oddsparks: An Automation Adventure - Ultimate Edition (v1.0.S31386 + 6 DLCs, MULTi9) [FitGirl Repack]", "Oddsparks: An Automation Adventure - Ultimate Edition")]
+        [TestCase("Vampiress: Eternal Duet (ENG/CHS) [FitGirl Repack]", "Vampiress: Eternal Duet")]
+        [TestCase("City Transport Simulator: Bus + Tram Special Bundle (v1.4.0 + 13 DLCs, MULTi9) [FitGirl Repack]", "City Transport Simulator: Bus + Tram Special Bundle")]
+        [TestCase("Pure Badminton (MULTi11) [FitGirl Repack]", "Pure Badminton")]
+        [TestCase("Star Trucker: Deluxe Bundle (v1.0.72.2 + 5 DLCs/Bonuses, MULTi10) [FitGirl Repack]", "Star Trucker: Deluxe Bundle")]
+        [TestCase("The Legend of Heroes: Trails beyond the Horizon - Complete Edition (v1.0.6 r21 + 4 DLCs, MULTi7) [FitGirl Repack]", "The Legend of Heroes: Trails beyond the Horizon - Complete Edition")]
+        [TestCase("Prison Simulator (v1.4.3.29 + 4 DLCs/Bonuses, MULTi18) [FitGirl Repack]", "Prison Simulator")]
+        [TestCase("Onirism (Build 21264271, MULTi8) [FitGirl Repack]", "Onirism")]
+        [TestCase("FRONT MISSION 2: Remake (v1.1.0, MULTi9) [FitGirl Repack]", "FRONT MISSION 2: Remake")]
+        [TestCase("Project Hunt: Hunter's Collection (Build 21226542 + 3 DLCs, MULTi16) [FitGirl Repack]", "Project Hunt: Hunter's Collection")]
+        [TestCase("Barotrauma: Supporter Bundle (v1.11.4.1 + 2 DLCs/Bonuses, MULTi13) [FitGirl Repack]", "Barotrauma: Supporter Bundle")]
+        [TestCase("Spiritfall (v1.6.28 + Bonus Soundtrack, MULTi13) [FitGirl Repack]", "Spiritfall")]
+        [TestCase("Ogu and the Secret Forest: Deluxe Edition (v1.3a + 2 DLCs/Bonuses, MULTi12) [FitGirl Repack]", "Ogu and the Secret Forest: Deluxe Edition")]
+        [TestCase("Tomba! 2: The Evil Swine Return Special Edition (MULTi6) [FitGirl Repack]", "Tomba! 2: The Evil Swine Return Special Edition")]
+        [TestCase("House Builder: Pack and Punch Bundle (Build 07-01-2026 + 9 DLCs, MULTi35) [FitGirl Repack]", "House Builder: Pack and Punch Bundle")]
+        [TestCase("Kamikaze Strike: FPV Drone (MULTi29) [FitGirl Repack]", "Kamikaze Strike: FPV Drone")]
+        [TestCase("Movies Tycoon: Ultimate Edition (v2.3.1 + 2 DLCs, MULTi9) [FitGirl Repack]", "Movies Tycoon: Ultimate Edition")]
+        [TestCase("Taxi Chaos 2 [FitGirl Repack]", "Taxi Chaos 2")]
+        [TestCase("Call of Duty: Black Ops - Cold War (HD Textures Pack, MULTi13) [FitGirl Repack]", "Call of Duty: Black Ops - Cold War")]
+        [TestCase("PBA Pro Bowling 2026 (MULTi6) [FitGirl Repack]", "PBA Pro Bowling 2026")]
+        [TestCase("The Temple of Elemental Evil (Re-release) [FitGirl Repack]", "The Temple of Elemental Evil")]
+        [TestCase("Mutant Football League 2 [FitGirl Repack]", "Mutant Football League 2")]
+        public void should_parse_1337x_fitgirl_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x top 100 releases - DODI repacks
+        // Note: Title is extracted up to the first parenthesis (version/build info)
+        [TestCase("Hytale [DODI Repack]", "Hytale")]
+        [TestCase("Grand Theft Auto V Enhanced: Premium Edition (Build 1013.20 / Online 1.72 / v1.0.3725.0, MULTi13) [DODI Repack]", "Grand Theft Auto V Enhanced: Premium Edition")]
+        [TestCase("Dead Space Remake (2023) Digital Deluxe Edition (Build 10602756 + All DLCs + Bonus, MULTi13) [DODI Repack]", "Dead Space Remake")]
+        [TestCase("StarRupture: Supporter Edition (v0.1.1.112941-S + Supporter Pack + Bonus Content, MULTi9) [DODI Repack]", "StarRupture: Supporter Edition")]
+        [TestCase("Lords of the Fallen: Deluxe Edition (2023) (v2.5.220 - Final Major Update + All DLCs, MULTi20) [DODI Repack]", "Lords of the Fallen: Deluxe Edition")]
+        [TestCase("Palworld (v0.7.0.84578 - Home Sweet Home Update + Bonus Content + MULTi17) (From 17.8 GB) [DODI Repack]", "Palworld")]
+        [TestCase("Grand Theft Auto V Legacy (Build 3725.0 / Online 1.72 / v1.0.3725.0 + All DLCs, MULTi13) [DODI Repack]", "Grand Theft Auto V Legacy")]
+        [TestCase("Persona 5 Royal (v1.03B + Bonus Content + MULTi10) (From 26.6 GB) (Lossless) [DODI Repack]", "Persona 5 Royal")]
+        public void should_parse_1337x_dodi_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x top 100 releases - IGGGAMESCOM simple releases
+        [TestCase("Hytale", "Hytale")]
+        [TestCase("Manor Lords (v2025.12.21)", "Manor Lords")]
+        [TestCase("My Winter Car", "My Winter Car")]
+        [TestCase("StarRupture", "StarRupture")]
+        [TestCase("Project Zomboid (v42.13.1)", "Project Zomboid")]
+        [TestCase("Assetto Corsa Rally (v0.2)", "Assetto Corsa Rally")]
+        [TestCase("Megabonk (v2025.12.30)", "Megabonk")]
+        [TestCase("inZOI (v0.5.0 & All DLCs)", "inZOI")]
+        [TestCase("Witchfire (v0.8.3)", "Witchfire")]
+        [TestCase("My Winter Car (v2026.01.03)", "My Winter Car")]
+        [TestCase("Bellwright (v2025.12.28)", "Bellwright")]
+        [TestCase("BeamNG.drive (v2025.12.30)", "BeamNG.drive")]
+        [TestCase("Wicked Island (v2025.12.21)", "Wicked Island")]
+        [TestCase("Gamblers Table", "Gamblers Table")]
+        [TestCase("DuneCrawl v1.01", "DuneCrawl")]
+        [TestCase("RuneScape: Dragonwilds (v0.10.0.2)", "RuneScape: Dragonwilds")]
+        [TestCase("Alchemy Factory (v0.4.1.3838)", "Alchemy Factory")]
+        [TestCase("Enshrouded (v2025.12.30)", "Enshrouded")]
+        [TestCase("Palworld (v0.7)", "Palworld")]
+        [TestCase("Clair Obscur: Expedition 33 Update v1.5.1", "Clair Obscur: Expedition 33")]
+        [TestCase("Schedule I v0.4.2f7", "Schedule I")]
+        [TestCase("Super Fantasy Kingdom (v2025.12.21)", "Super Fantasy Kingdom")]
+        [TestCase("Dispatch (v1.0.16598)", "Dispatch")]
+        [TestCase("Super Woden: Rally Edge", "Super Woden: Rally Edge")]
+        [TestCase("Farthest Frontier (v1.0.6)", "Farthest Frontier")]
+        public void should_parse_1337x_igggamescom_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x top 100 releases - Scene group releases
+        [TestCase("Quarantine Zone The Last Check-RUNE", "Quarantine Zone The Last Check")]
+        [TestCase("Terra Invicta-RUNE", "Terra Invicta")]
+        [TestCase("Feed the Reactor-TENOKE", "Feed the Reactor")]
+        [TestCase("Dying Light The Beast Update v1 5 0-TENOKE", "Dying Light The Beast")]
+        [TestCase("The Legend of Heroes Trails beyond the Horizon-RUNE", "The Legend of Heroes Trails beyond the Horizon")]
+        public void should_parse_1337x_scene_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x top 100 releases - Portable releases
+        // Note: Year is parsed as metadata, title doesn't include the year
+        [TestCase("Hytale (2026) [PORTABLE]", "Hytale")]
+        [TestCase("Dead Space Remake (2023) + DLC [Crack V1] [PORTABLE]", "Dead Space Remake")]
+        [TestCase("StarRupture (2026) [PORTABLE]", "StarRupture")]
+        public void should_parse_1337x_portable_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Real 1337x top 100 releases - Crack releases
+        // Note: Year is parsed as metadata, title doesn't include the year
+        [TestCase("Dead Space Remake (2023)[CRACK 1.1][AMD+Intel]", "Dead Space Remake")]
+        [TestCase("Dead Space Remake (2023)[CRACK 2.0][Win10+11][AMD+Intel]", "Dead Space Remake")]
+        [TestCase("Dead Space Remake CRACKFIX-voices38", "Dead Space Remake")]
+        [TestCase("Dead Space Remake PROPER-voices38", "Dead Space Remake")]
+        public void should_parse_1337x_crack_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
     }
 }
