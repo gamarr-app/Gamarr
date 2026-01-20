@@ -28,9 +28,9 @@ function GameStatus({ gameId, gameFileId }: GameStatusProps) {
   const isQueued = !!queueItem;
 
   if (isQueued) {
-    const { sizeleft, size } = queueItem;
+    const { sizeLeft, size } = queueItem;
 
-    const progress = size ? 100 - (sizeleft / size) * 100 : 0;
+    const progress = size ? 100 - (sizeLeft / size) * 100 : 0;
 
     return (
       <div className={styles.center}>
