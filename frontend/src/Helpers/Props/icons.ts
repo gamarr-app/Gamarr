@@ -63,7 +63,6 @@ import {
   faFileCircleQuestion as fasFileCircleQuestion,
   faFileExport as fasFileExport,
   faFileInvoice as farFileInvoice,
-  faFilm as fasFilm,
   faFilter as fasFilter,
   faFire as fasFire,
   faFlag as fasFlag,
@@ -163,7 +162,6 @@ export const EXTERNAL_LINK = fasExternalLinkAlt;
 export const FATAL = fasTimesCircle;
 export const FILE = farFile;
 export const FILE_MISSING = fasFileCircleQuestion;
-export const FILM = fasFilm;
 export const FILTER = fasFilter;
 export const FLAG = fasFlag;
 export const FOOTNOTE = fasAsterisk;
