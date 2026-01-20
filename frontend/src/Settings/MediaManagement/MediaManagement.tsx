@@ -461,6 +461,82 @@ function MediaManagement() {
               </FormGroup>
             </FieldSet>
 
+            <FieldSet legend={translate('VirusScanning')}>
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('EnableVirusScanning')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="virusScanEnabled"
+                  helpText={translate('EnableVirusScanningHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.virusScanEnabled}
+                />
+              </FormGroup>
+
+              {settings.virusScanEnabled?.value ? (
+                <>
+                  <FormGroup
+                    advancedSettings={showAdvancedSettings}
+                    isAdvanced={true}
+                  >
+                    <FormLabel>{translate('VirusScannerPath')}</FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.PATH}
+                      includeFiles={true}
+                      name="virusScannerPath"
+                      helpText={translate('VirusScannerPathHelpText')}
+                      onChange={handleInputChange}
+                      {...settings.virusScannerPath}
+                    />
+                  </FormGroup>
+
+                  <FormGroup
+                    advancedSettings={showAdvancedSettings}
+                    isAdvanced={true}
+                  >
+                    <FormLabel>{translate('VirusScannerArguments')}</FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.TEXT}
+                      name="virusScannerArguments"
+                      helpText={translate('VirusScannerArgumentsHelpText')}
+                      onChange={handleInputChange}
+                      {...settings.virusScannerArguments}
+                    />
+                  </FormGroup>
+
+                  <FormGroup size={sizes.MEDIUM}>
+                    <FormLabel>{translate('QuarantineInfectedFiles')}</FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.CHECK}
+                      name="quarantineInfectedFiles"
+                      helpText={translate('QuarantineInfectedFilesHelpText')}
+                      onChange={handleInputChange}
+                      {...settings.quarantineInfectedFiles}
+                    />
+                  </FormGroup>
+
+                  {settings.quarantineInfectedFiles?.value ? (
+                    <FormGroup>
+                      <FormLabel>{translate('QuarantineFolder')}</FormLabel>
+
+                      <FormInputGroup
+                        type={inputTypes.PATH}
+                        includeFiles={false}
+                        name="quarantineFolder"
+                        helpText={translate('QuarantineFolderHelpText')}
+                        onChange={handleInputChange}
+                        {...settings.quarantineFolder}
+                      />
+                    </FormGroup>
+                  ) : null}
+                </>
+              ) : null}
+            </FieldSet>
+
             {showAdvancedSettings && !isWindows ? (
               <FieldSet legend={translate('Permissions')}>
                 <FormGroup
