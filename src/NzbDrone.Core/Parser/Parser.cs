@@ -31,6 +31,9 @@ namespace NzbDrone.Core.Parser
             // Must be before year patterns to avoid v2025 being parsed as year
             new Regex(@"^(?<title>(?![(\[]).+?)\s+v(?<year>\d{4})\.(?<version>\d{2}\.\d{2})$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Game release with European date-based version: "The Witness v24.01.2019" (DD.MM.YYYY format)
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+v(?<version>\d{2}\.\d{2})\.(?<year>\d{4})$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Game release with parenthesized version: "Hades II (v2025.06.18)" or "Game (v1.2.3)"
             new Regex(@"^(?<title>(?![(\[]).+?)\s*\(v(?<version>\d+(?:\.\d+)+)\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
