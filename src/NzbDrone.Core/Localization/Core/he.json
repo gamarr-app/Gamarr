@@ -254,7 +254,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "אינדקסים לא זמינים עקב כשלים במשך יותר משש שעות: {indexerNames}",
   "IndexerStatusCheckAllClientMessage": "כל האינדקסים אינם זמינים עקב כשלים",
   "Level": "רָמָה",
-  "LoadingGameCreditsFailed": "טעינת קרדיטים לסרט נכשלה",
   "LoadingGameExtraFilesFailed": "טעינת הקבצים הנוספים של הסרט נכשלה",
   "LoadingGameFilesFailed": "טעינת קבצי הסרט נכשלה",
   "Local": "מְקוֹמִי",

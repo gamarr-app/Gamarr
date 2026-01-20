@@ -485,7 +485,6 @@
   "IncludeCustomFormatWhenRenaming": "Includeți format personalizat la redenumire",
   "IndexerLongTermStatusCheckAllClientMessage": "Toți indexatorii sunt indisponibili datorită erorilor de mai mult de 6 ore",
   "IndexerLongTermStatusCheckSingleClientMessage": "Indexatori indisponibili datorită erorilor de mai mult de 6 ore: {indexerNames}",
-  "LoadingGameCreditsFailed": "Încărcarea creditelor filmului nu a reușit",
   "LoadingGameExtraFilesFailed": "Încărcarea fișierelor suplimentare ale filmului nu a reușit",
   "LoadingGameFilesFailed": "Încărcarea fișierelor film a eșuat",
   "MarkAsFailed": "Marcați ca nereușită",

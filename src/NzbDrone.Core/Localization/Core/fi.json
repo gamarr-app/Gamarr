@@ -262,7 +262,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "Hakupalvelut eivät ole käytettävissä yli kuusi tuntia kestäneiden virheiden vuoksi: {indexerNames}.",
   "IndexerStatusCheckAllClientMessage": "Hakupalvelut eivät ole virheiden vuoksi käytettävissä.",
   "Level": "Taso",
-  "LoadingGameCreditsFailed": "Elokuvahyvitysten lataaminen epäonnistui",
   "LoadingGameExtraFilesFailed": "Elokuvan oheistiedostojen lataus epäonnistui",
   "LoadingGameFilesFailed": "Elokuvatiedostojen lataus epäonnistui",
   "Location": "Sijainti",

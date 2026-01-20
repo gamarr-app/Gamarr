@@ -395,7 +395,6 @@
   "UnsavedChanges": "Незбережені зміни",
   "Indexers": "Індексатори",
   "ListTagsHelpText": "Теги, які будуть додані при імпорті з цього списку",
-  "LoadingGameCreditsFailed": "Не вдалося завантажити титри фільму",
   "MustContain": "Має містити",
   "PreferUsenet": "Віддавайте перевагу Usenet",
   "SslCertPathHelpText": "Шлях до файлу pfx",

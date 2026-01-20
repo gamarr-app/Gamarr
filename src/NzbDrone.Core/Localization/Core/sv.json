@@ -695,7 +695,6 @@
   "IndexerFlags": "Indexerflaggor",
   "IndexerLongTermStatusCheckAllClientMessage": "Alla indexerare är inte tillgängliga på grund av fel i mer än 6 timmar",
   "IndexerLongTermStatusCheckSingleClientMessage": "Indexatorer är inte tillgängliga på grund av misslyckanden i mer än sex timmar: {indexerNames}",
-  "LoadingGameCreditsFailed": "Det gick inte att ladda filmkrediter",
   "LoadingGameFilesFailed": "Det gick inte att ladda filmfiler",
   "MarkAsFailed": "Markera som misslyckad",
   "MaximumSizeHelpText": "Maximal storlek för att en utgåva ska fångas i MB. Ställ in på noll för att ställa in på obegränsad",

@@ -10,7 +10,6 @@ import * as extraFiles from './extraFileActions';
 import * as games from './gameActions';
 import * as gameBlocklist from './gameBlocklistActions';
 import * as gameCollections from './gameCollectionActions';
-import * as gameCredits from './gameCreditsActions';
 import * as gameFiles from './gameFileActions';
 import * as gameHistory from './gameHistoryActions';
 import * as gameIndex from './gameIndexActions';
@@ -57,7 +56,6 @@ export default [
   gameCollections,
   gameHistory,
   gameIndex,
-  gameCredits,
   settings,
   system,
   tags,

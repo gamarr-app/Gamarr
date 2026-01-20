@@ -556,7 +556,6 @@
   "Local": "Helyi",
   "LoadingGameFilesFailed": "A film fájljainak betöltése sikertelen",
   "LoadingGameExtraFilesFailed": "A film extra fájljainak betöltése nem sikerült",
-  "LoadingGameCreditsFailed": "Stáblista Betöltése Sikertelen",
   "ListSyncLevelHelpText": "A könyvtárban lévő filmeket eltávolítjuk vagy nem figyeljük meg, ha nem szerepelnek a listán",
   "ImportListsSettingsSummary": "Lista Importálása, Kizárások listázása",
   "ImportListSettings": "Listabeállítások importálása",

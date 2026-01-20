@@ -405,7 +405,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "ดัชนีไม่พร้อมใช้งานเนื่องจากความล้มเหลวเป็นเวลานานกว่า 6 ชั่วโมง: {indexerNames}",
   "IndexerStatusCheckAllClientMessage": "ตัวทำดัชนีทั้งหมดไม่พร้อมใช้งานเนื่องจากความล้มเหลว",
   "Level": "ระดับ",
-  "LoadingGameCreditsFailed": "การโหลดเครดิตภาพยนตร์ล้มเหลว",
   "LoadingGameExtraFilesFailed": "การโหลดไฟล์ภาพยนตร์พิเศษล้มเหลว",
   "LoadingGameFilesFailed": "การโหลดไฟล์ภาพยนตร์ล้มเหลว",
   "Local": "ท้องถิ่น",

@@ -201,7 +201,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "6 saatten uzun süren hatalar nedeniyle kullanılamayan indeksleyiciler : {indexerNames}",
   "IndexerStatusCheckAllClientMessage": "Hatalar nedeniyle tüm indeksleyiciler kullanılamıyor",
   "Level": "Seviye",
-  "LoadingGameCreditsFailed": "Film jeneriği yüklenemedi",
   "LoadingGameFilesFailed": "Film dosyaları yüklenemedi",
   "Local": "Yerel",
   "Location": "Klasör Yolu",

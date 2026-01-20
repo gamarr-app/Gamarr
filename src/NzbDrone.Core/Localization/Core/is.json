@@ -302,7 +302,6 @@
   "IndexerFlags": "Indexer fánar",
   "IndexerLongTermStatusCheckAllClientMessage": "Allir verðtryggingaraðilar eru ekki tiltækir vegna bilana í meira en 6 klukkustundir",
   "IndexerLongTermStatusCheckSingleClientMessage": "Vísitölufólk er ekki tiltækt vegna bilana í meira en 6 klukkustundir: {indexerNames}",
-  "LoadingGameCreditsFailed": "Mistókst að hlaða kvikmyndareiningu",
   "ReplaceWithDash": "Skiptu um með Dash",
   "LoadingGameExtraFilesFailed": "Ekki tókst að hlaða auka skrám",
   "LoadingGameFilesFailed": "Ekki tókst að hlaða kvikmyndaskrár",

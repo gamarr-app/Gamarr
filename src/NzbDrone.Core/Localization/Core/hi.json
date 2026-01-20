@@ -443,7 +443,6 @@
   "IndexerFlags": "इंडेक्स फ्लैग",
   "IndexerLongTermStatusCheckSingleClientMessage": "6 घंटे से अधिक समय तक विफलताओं के कारण सूचकांक उपलब्ध नहीं: {indexerNames}",
   "Level": "स्तर",
-  "LoadingGameCreditsFailed": "फिल्म क्रेडिट लोड करना विफल रहा",
   "LoadingGameExtraFilesFailed": "मूवी अतिरिक्त फ़ाइलें लोड करना विफल रहा",
   "LoadingGameFilesFailed": "फिल्म फ़ाइलें लोड करना विफल रहा",
   "Local": "स्थानीय",

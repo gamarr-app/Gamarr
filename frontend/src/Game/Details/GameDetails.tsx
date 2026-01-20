@@ -58,10 +58,6 @@ import {
   fetchExtraFiles,
 } from 'Store/Actions/extraFileActions';
 import { toggleGameMonitored } from 'Store/Actions/gameActions';
-import {
-  clearGameCredits,
-  fetchGameCredits,
-} from 'Store/Actions/gameCreditsActions';
 import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
   clearQueueDetails,
@@ -131,18 +127,6 @@ function createExtraFilesSelector() {
   );
 }
 
-function createGameCreditsSelector() {
-  return createSelector(
-    (state: AppState) => state.gameCredits,
-    ({ isFetching, isPopulated, error }) => {
-      return {
-        isGameCreditsFetching: isFetching,
-        isGameCreditsPopulated: isPopulated,
-        gameCreditsError: error,
-      };
-    }
-  );
-}
 
 interface GameDetailsProps {
   gameId: number;
@@ -160,9 +144,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
   );
   const { isExtraFilesFetching, extraFilesError } = useSelector(
     createExtraFilesSelector()
-  );
-  const { isGameCreditsFetching, gameCreditsError } = useSelector(
-    createGameCreditsSelector()
   );
   const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
   const isSidebarVisible = useSelector(
@@ -455,7 +436,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const populate = useCallback(() => {
     dispatch(fetchGameFiles({ gameId }));
     dispatch(fetchExtraFiles({ gameId }));
-    dispatch(fetchGameCredits({ gameId }));
     dispatch(fetchQueueDetails({ gameId }));
     dispatch(fetchImportListSchema());
   }, [gameId, dispatch]);
@@ -471,7 +451,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
       unregisterPagePopulator(populate);
       dispatch(clearGameFiles());
       dispatch(clearExtraFiles());
-      dispatch(clearGameCredits());
       dispatch(clearQueueDetails());
       dispatch(cancelFetchReleases());
       dispatch(clearReleases());
@@ -545,8 +524,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const statusDetails = getGameStatusDetails(status);
 
   const fanartUrl = getFanartUrl(images);
-  const isFetching =
-    isGameFilesFetching || isExtraFilesFetching || isGameCreditsFetching;
+  const isFetching = isGameFilesFetching || isExtraFilesFetching;
 
   const marqueeWidth = isSmallScreen ? titleWidth : titleWidth - 150;
 
@@ -880,12 +858,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
           {!isFetching && extraFilesError ? (
             <Alert kind={kinds.DANGER}>
               {translate('LoadingGameExtraFilesFailed')}
-            </Alert>
-          ) : null}
-
-          {!isFetching && gameCreditsError ? (
-            <Alert kind={kinds.DANGER}>
-              {translate('LoadingGameCreditsFailed')}
             </Alert>
           ) : null}
 
