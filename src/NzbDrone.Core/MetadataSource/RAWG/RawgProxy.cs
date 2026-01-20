@@ -7,7 +7,6 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Collections;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.RAWG.Resource;
 using NzbDrone.Core.Parser;
@@ -38,13 +37,13 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             _logger = logger;
         }
 
-        public Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId)
+        public GameMetadata GetGameInfoBySteamAppId(int steamAppId)
         {
             // RAWG doesn't support direct Steam lookup; use AggregateGameInfoProxy for Steam games
-            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+            return null;
         }
 
-        public Tuple<GameMetadata, List<Credit>> GetGameInfo(int rawgId)
+        public GameMetadata GetGameInfo(int rawgId)
         {
             var apiKey = _configService.RawgApiKey;
 
@@ -66,8 +65,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 throw new GameNotFoundException(rawgId);
             }
 
-            var game = MapRawgGame(response.Resource);
-            return new Tuple<GameMetadata, List<Credit>>(game, new List<Credit>());
+            return MapRawgGame(response.Resource);
         }
 
         public GameMetadata GetGameBySteamAppId(int steamAppId)
@@ -129,9 +127,9 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 try
                 {
                     var result = GetGameInfo(id);
-                    if (result?.Item1 != null)
+                    if (result != null)
                     {
-                        games.Add(result.Item1);
+                        games.Add(result);
                     }
                 }
                 catch (Exception ex)
@@ -183,7 +181,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
                 try
                 {
-                    return GetGameInfo(game.IgdbId).Item1;
+                    return GetGameInfo(game.IgdbId);
                 }
                 catch
                 {

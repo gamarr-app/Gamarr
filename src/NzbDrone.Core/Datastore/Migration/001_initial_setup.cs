@@ -179,18 +179,6 @@ namespace NzbDrone.Core.Datastore.Migration
 
             Create.Index().OnTable("GameTranslations").OnColumn("Language").Ascending();
 
-            Create.TableForModel("Credits")
-                .WithColumn("CreditIgdbId").AsString().NotNullable().Unique()
-                .WithColumn("PersonIgdbId").AsInt32().NotNullable()
-                .WithColumn("Name").AsString().NotNullable()
-                .WithColumn("Images").AsString().NotNullable()
-                .WithColumn("Character").AsString().Nullable()
-                .WithColumn("Order").AsInt32().NotNullable()
-                .WithColumn("Job").AsString().Nullable()
-                .WithColumn("Department").AsString().Nullable()
-                .WithColumn("Type").AsInt32().NotNullable()
-                .WithColumn("GameMetadataId").AsInt32().NotNullable().Indexed();
-
             Create.TableForModel("Collections")
                 .WithColumn("IgdbId").AsInt32().NotNullable().Unique()
                 .WithColumn("QualityProfileId").AsInt32().NotNullable()
@@ -398,18 +386,6 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Added").AsDateTime().Nullable()
                 .WithColumn("Extension").AsString().NotNullable()
                 .WithColumn("Hash").AsString().Nullable();
-
-            Create.TableForModel("SubtitleFiles")
-                .WithColumn("GameId").AsInt32().NotNullable()
-                .WithColumn("GameFileId").AsInt32().NotNullable()
-                .WithColumn("RelativePath").AsString().NotNullable()
-                .WithColumn("Extension").AsString().NotNullable()
-                .WithColumn("Added").AsDateTime().NotNullable()
-                .WithColumn("LastUpdated").AsDateTime().NotNullable()
-                .WithColumn("Language").AsInt32().NotNullable()
-                .WithColumn("LanguageTags").AsString().Nullable()
-                .WithColumn("Title").AsString().Nullable()
-                .WithColumn("Copy").AsInt32().WithDefaultValue(0);
 
             Create.TableForModel("ExtraFiles")
                 .WithColumn("GameId").AsInt32().NotNullable()

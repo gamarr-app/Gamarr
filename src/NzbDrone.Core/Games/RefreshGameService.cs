@@ -14,7 +14,6 @@ using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Collections;
 using NzbDrone.Core.Games.Commands;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.RootFolders;
@@ -30,7 +29,6 @@ namespace NzbDrone.Core.Games
         private readonly IRootFolderService _folderService;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly IAlternativeTitleService _alternativeTitleService;
-        private readonly ICreditService _creditService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IDiskScanService _diskScanService;
         private readonly ICheckIfGameShouldBeRefreshed _checkIfGameShouldBeRefreshed;
@@ -44,7 +42,6 @@ namespace NzbDrone.Core.Games
                                     IRootFolderService folderService,
                                     IGameTranslationService gameTranslationService,
                                     IAlternativeTitleService alternativeTitleService,
-                                    ICreditService creditService,
                                     IEventAggregator eventAggregator,
                                     IDiskScanService diskScanService,
                                     ICheckIfGameShouldBeRefreshed checkIfGameShouldBeRefreshed,
@@ -58,7 +55,6 @@ namespace NzbDrone.Core.Games
             _folderService = folderService;
             _gameTranslationService = gameTranslationService;
             _alternativeTitleService = alternativeTitleService;
-            _creditService = creditService;
             _eventAggregator = eventAggregator;
             _diskScanService = diskScanService;
             _checkIfGameShouldBeRefreshed = checkIfGameShouldBeRefreshed;
@@ -76,16 +72,13 @@ namespace NzbDrone.Core.Games
             _logger.ProgressInfo("Updating info for {0}", game.Title);
 
             GameMetadata gameInfo;
-            List<Credit> credits;
 
             try
             {
                 // Use SteamAppId if IgdbId is not available (Steam-only games)
                 if (game.IgdbId <= 0 && gameMetadata.SteamAppId > 0)
                 {
-                    var tuple = _gameInfo.GetGameInfoBySteamAppId(gameMetadata.SteamAppId);
-                    gameInfo = tuple.Item1;
-                    credits = tuple.Item2;
+                    gameInfo = _gameInfo.GetGameInfoBySteamAppId(gameMetadata.SteamAppId);
 
                     if (gameInfo == null)
                     {
@@ -95,9 +88,7 @@ namespace NzbDrone.Core.Games
                 }
                 else
                 {
-                    var tuple = _gameInfo.GetGameInfo(game.IgdbId);
-                    gameInfo = tuple.Item1;
-                    credits = tuple.Item2;
+                    gameInfo = _gameInfo.GetGameInfo(game.IgdbId);
                 }
             }
             catch (GameNotFoundException)
@@ -176,7 +167,6 @@ namespace NzbDrone.Core.Games
             gameMetadata.AlternativeTitles = _alternativeTitleService.UpdateTitles(gameInfo.AlternativeTitles, gameMetadata);
 
             _gameTranslationService.UpdateTranslations(gameInfo.Translations, gameMetadata);
-            _creditService.UpdateCredits(credits, gameMetadata);
 
             _gameMetadataService.Upsert(gameMetadata);
 

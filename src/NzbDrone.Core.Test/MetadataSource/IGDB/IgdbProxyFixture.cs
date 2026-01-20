@@ -46,9 +46,8 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             var result = Subject.GetGameInfo(1942);
 
             result.Should().NotBeNull();
-            result.Item1.Should().NotBeNull();
 
-            var game = result.Item1;
+            var game = result;
             ValidateGame(game);
 
             game.Title.Should().Contain("Witcher");

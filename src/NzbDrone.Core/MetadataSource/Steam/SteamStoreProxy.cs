@@ -36,7 +36,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
             _logger = logger;
         }
 
-        public Tuple<GameMetadata, List<Games.Credits.Credit>> GetGameInfo(int steamAppId)
+        public GameMetadata GetGameInfo(int steamAppId)
         {
             _logger.Debug("Fetching Steam game info for App ID {0}", steamAppId);
 
@@ -55,23 +55,22 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 if (appData == null || !appData["success"].Value<bool>())
                 {
                     _logger.Warn("Steam returned no data for App ID {0}", steamAppId);
-                    return new Tuple<GameMetadata, List<Games.Credits.Credit>>(null, new List<Games.Credits.Credit>());
+                    return null;
                 }
 
                 var data = appData["data"].ToObject<SteamGameData>();
                 if (data == null || data.Type != "game")
                 {
                     _logger.Debug("Steam App ID {0} is not a game (type: {1})", steamAppId, data?.Type);
-                    return new Tuple<GameMetadata, List<Games.Credits.Credit>>(null, new List<Games.Credits.Credit>());
+                    return null;
                 }
 
-                var game = MapSteamGame(data);
-                return new Tuple<GameMetadata, List<Games.Credits.Credit>>(game, new List<Games.Credits.Credit>());
+                return MapSteamGame(data);
             }
             catch (HttpException ex)
             {
                 _logger.Error(ex, "Failed to fetch Steam game info for App ID {0}", steamAppId);
-                return new Tuple<GameMetadata, List<Games.Credits.Credit>>(null, new List<Games.Credits.Credit>());
+                return null;
             }
         }
 
@@ -129,8 +128,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
         public GameMetadata GetGameBySteamAppId(int steamAppId)
         {
-            var result = GetGameInfo(steamAppId);
-            return result?.Item1;
+            return GetGameInfo(steamAppId);
         }
 
         public GameMetadata MapGameToIgdbGame(GameMetadata game)

@@ -4,7 +4,6 @@ using System.Linq;
 using NLog;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
-using NzbDrone.Core.Extras.Subtitles;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 
@@ -40,13 +39,6 @@ namespace NzbDrone.Core.Extras.Metadata
 
             foreach (var possibleMetadataFile in filterResult.FilesOnDisk)
             {
-                // Don't process files that have known Subtitle file extensions (saves a bit of unnecessary processing)
-
-                if (SubtitleFileExtensions.Extensions.Contains(Path.GetExtension(possibleMetadataFile)))
-                {
-                    continue;
-                }
-
                 foreach (var consumer in _consumers)
                 {
                     var metadata = consumer.FindMetadataFile(game, possibleMetadataFile);

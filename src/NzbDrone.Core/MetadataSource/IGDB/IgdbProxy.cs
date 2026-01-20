@@ -9,7 +9,6 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Collections;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.IGDB.Resource;
@@ -75,13 +74,13 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             _logger = logger;
         }
 
-        public Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId)
+        public GameMetadata GetGameInfoBySteamAppId(int steamAppId)
         {
             // IGDB doesn't support direct Steam lookup; use AggregateGameInfoProxy for Steam games
-            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+            return null;
         }
 
-        public Tuple<GameMetadata, List<Credit>> GetGameInfo(int igdbId)
+        public GameMetadata GetGameInfo(int igdbId)
         {
             var query = $"{GameFields} where id = {igdbId};";
             var games = ExecuteQuery<IgdbGameResource>("games", query);
@@ -91,12 +90,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 throw new GameNotFoundException(igdbId);
             }
 
-            var game = MapGame(games.First());
-
-            // TODO: IGDB has involved companies but not traditional cast/crew, return empty credits for now
-            var credits = new List<Credit>();
-
-            return new Tuple<GameMetadata, List<Credit>>(game, credits);
+            return MapGame(games.First());
         }
 
         public GameMetadata GetGameBySteamAppId(int steamAppId)
@@ -114,12 +108,12 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
             var igdbId = externalGames.First().Game.Value;
             var result = GetGameInfo(igdbId);
-            if (result?.Item1 != null)
+            if (result != null)
             {
-                result.Item1.SteamAppId = steamAppId;
+                result.SteamAppId = steamAppId;
             }
 
-            return result?.Item1;
+            return result;
         }
 
         public GameCollection GetCollectionInfo(int igdbId)
@@ -208,7 +202,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                     {
                         try
                         {
-                            var gameLookup = GetGameInfo(igdbId).Item1;
+                            var gameLookup = GetGameInfo(igdbId);
                             return gameLookup == null
                                 ? new List<Game>()
                                 : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
@@ -270,7 +264,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                         return existing;
                     }
 
-                    return GetGameInfo(game.IgdbId).Item1;
+                    return GetGameInfo(game.IgdbId);
                 }
 
                 // Search by title

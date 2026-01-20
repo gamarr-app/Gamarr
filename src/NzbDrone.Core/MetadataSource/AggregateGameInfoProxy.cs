@@ -5,7 +5,6 @@ using NLog;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Collections;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.MetadataSource.IGDB;
 using NzbDrone.Core.MetadataSource.RAWG;
 using NzbDrone.Core.MetadataSource.Steam;
@@ -44,13 +43,13 @@ namespace NzbDrone.Core.MetadataSource
         private bool HasIgdbCredentials => !string.IsNullOrEmpty(_configService.IgdbClientId) &&
                                            !string.IsNullOrEmpty(_configService.IgdbClientSecret);
 
-        public Tuple<GameMetadata, List<Credit>> GetGameInfo(int gameId)
+        public GameMetadata GetGameInfo(int gameId)
         {
             // Try Steam first - the ID might be a Steam App ID
             try
             {
                 var result = _steamProxy.GetGameInfo(gameId);
-                if (result?.Item1 != null)
+                if (result != null)
                 {
                     _logger.Debug("Got game info from Steam for ID {0}", gameId);
                     return result;
@@ -67,7 +66,7 @@ namespace NzbDrone.Core.MetadataSource
                 try
                 {
                     var result = _igdbProxy.GetGameInfo(gameId);
-                    if (result?.Item1 != null)
+                    if (result != null)
                     {
                         _logger.Debug("Got game info from IGDB for ID {0}", gameId);
                         return result;
@@ -85,7 +84,7 @@ namespace NzbDrone.Core.MetadataSource
                 try
                 {
                     var result = _rawgProxy.GetGameInfo(gameId);
-                    if (result?.Item1 != null)
+                    if (result != null)
                     {
                         _logger.Debug("Got game info from RAWG for ID {0}", gameId);
                         return result;
@@ -98,18 +97,18 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             _logger.Warn("No metadata source available or all sources failed for game ID {0}", gameId);
-            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+            return null;
         }
 
         /// <summary>
         /// Get game info by Steam App ID (no API key required).
         /// </summary>
-        public Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId)
+        public GameMetadata GetGameInfoBySteamAppId(int steamAppId)
         {
             try
             {
                 var result = _steamProxy.GetGameInfo(steamAppId);
-                if (result?.Item1 != null)
+                if (result != null)
                 {
                     _logger.Debug("Got game info from Steam for App ID {0}", steamAppId);
                     return result;
@@ -120,7 +119,7 @@ namespace NzbDrone.Core.MetadataSource
                 _logger.Warn(ex, "Failed to get game info from Steam for App ID {0}", steamAppId);
             }
 
-            return new Tuple<GameMetadata, List<Credit>>(null, new List<Credit>());
+            return null;
         }
 
         /// <summary>

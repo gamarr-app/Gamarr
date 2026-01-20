@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Collections;
-using NzbDrone.Core.Games.Credits;
 
 namespace NzbDrone.Core.MetadataSource
 {
@@ -10,10 +9,10 @@ namespace NzbDrone.Core.MetadataSource
     {
         // Primary identifier - Steam App ID
         GameMetadata GetGameBySteamAppId(int steamAppId);
-        Tuple<GameMetadata, List<Credit>> GetGameInfoBySteamAppId(int steamAppId);
+        GameMetadata GetGameInfoBySteamAppId(int steamAppId);
 
         // Secondary identifiers
-        Tuple<GameMetadata, List<Credit>> GetGameInfo(int igdbId);
+        GameMetadata GetGameInfo(int igdbId);
         List<GameMetadata> GetBulkGameInfo(List<int> igdbIds);
 
         // Collection info

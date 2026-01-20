@@ -1,5 +1,4 @@
 #pragma warning disable CS0618
-using System;
 using System.Collections.Generic;
 using FizzWare.NBuilder;
 using Moq;
@@ -11,7 +10,6 @@ using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Collections;
 using NzbDrone.Core.Games.Commands;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -68,7 +66,7 @@ namespace NzbDrone.Core.Test.GameTests
         {
             Mocker.GetMock<IProvideGameInfo>()
                   .Setup(s => s.GetGameInfo(_game.IgdbId))
-                  .Returns(new Tuple<GameMetadata, List<Credit>>(game, new List<Credit>()));
+                  .Returns(game);
         }
 
         [Test]
