@@ -214,7 +214,7 @@ namespace NzbDrone.Core.MediaFiles
             @"\.cpl$",           // Control Panel extension
             @"\.jar$",           // Java archive (can contain malware)
             @"readme.*\.exe$",   // Readme as executable
-            @"crack.*\.exe$",    // Crack in root (should be in subfolder for scene)
+            @"^crack[^/\\]*\.exe$",  // Crack exe in root only (subfolders like _crack/ are normal)
             @"keygen.*\.exe$",   // Keygen in unexpected location
             @"password.*\.txt$", // Password file (often indicates archive with malware)
         };
