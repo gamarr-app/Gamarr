@@ -41,7 +41,6 @@ namespace NzbDrone.Core.Parser.Model
         public string FileNameBeforeRename { get; set; }
         public bool ShouldImportExtras { get; set; }
         public List<string> PossibleExtraFiles { get; set; }
-        public SubtitleTitleInfo SubtitleInfo { get; set; }
 
         public override string ToString()
         {

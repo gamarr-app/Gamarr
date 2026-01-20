@@ -88,11 +88,11 @@ const fileNameTokens = [
 
 const gameTokens = [
   { token: '{Game Title}', example: "Game's Title", footNotes: '1' },
-  { token: '{Game Title:DE}', example: 'Titel des Films', footNotes: '1' },
+  { token: '{Game Title:DE}', example: 'Spieltitel', footNotes: '1' },
   { token: '{Game CleanTitle}', example: 'Games Title', footNotes: '1' },
   {
     token: '{Game CleanTitle:DE}',
-    example: 'Titel des Films',
+    example: 'Spieltitel',
     footNotes: '1',
   },
   { token: '{Game TitleThe}', example: "Game's Title, The", footNotes: '1' },
@@ -101,10 +101,10 @@ const gameTokens = [
     example: 'Games Title, The',
     footNotes: '1',
   },
-  { token: '{Game OriginalTitle}', example: 'Τίτλος ταινίας', footNotes: '1' },
+  { token: '{Game OriginalTitle}', example: 'ゲームタイトル', footNotes: '1' },
   {
     token: '{Game CleanOriginalTitle}',
-    example: 'Τίτλος ταινίας',
+    example: 'ゲームタイトル',
     footNotes: '1',
   },
   { token: '{Game TitleFirstCharacter}', example: 'M' },
@@ -124,7 +124,7 @@ const gameTokens = [
     example: 'Games Collection, The',
     footNotes: '1',
   },
-  { token: '{Game Certification}', example: 'R' },
+  { token: '{Game Certification}', example: 'M' },
   { token: '{Release Year}', example: '2009' },
 ];
 

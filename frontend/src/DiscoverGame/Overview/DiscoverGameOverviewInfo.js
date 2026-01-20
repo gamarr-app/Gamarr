@@ -98,7 +98,7 @@ function getInfoRowProps(row, props) {
   if (name === 'certification') {
     return {
       title: translate('Certification'),
-      iconName: icons.FILM,
+      iconName: icons.FLAG,
       label: props.certification
     };
   }
