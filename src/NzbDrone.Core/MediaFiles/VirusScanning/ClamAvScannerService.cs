@@ -140,6 +140,7 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
 
             if (configuredPath.IsNotNullOrWhiteSpace())
             {
+                _logger.Debug("Using configured virus scanner path: {0}", configuredPath);
                 return configuredPath;
             }
 
@@ -153,7 +154,18 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                 @"C:\Program Files (x86)\ClamAV\clamscan.exe"
             };
 
-            return commonPaths.FirstOrDefault(p => _diskProvider.FileExists(p));
+            var detectedPath = commonPaths.FirstOrDefault(p => _diskProvider.FileExists(p));
+
+            if (detectedPath != null)
+            {
+                _logger.Info("Auto-detected ClamAV at: {0}", detectedPath);
+            }
+            else
+            {
+                _logger.Debug("ClamAV not found in common locations");
+            }
+
+            return detectedPath;
         }
 
         private string BuildArguments(string path)
