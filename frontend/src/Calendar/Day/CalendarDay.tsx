@@ -61,7 +61,7 @@ function CalendarDay({ date, isTodaysDate }: CalendarDayProps) {
 
   React.useEffect(() => {
     if (isTodaysDate && view === calendarViews.MONTH && ref.current) {
-      ref.current.scrollIntoView();
+      ref.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
   }, [time, isTodaysDate, view]);
 
