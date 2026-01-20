@@ -317,7 +317,7 @@ namespace NzbDrone.Core.Configuration
 
         public bool VirusScanEnabled
         {
-            get { return GetValueBoolean("VirusScanEnabled", false); }
+            get { return GetValueBoolean("VirusScanEnabled", true); }
 
             set { SetValue("VirusScanEnabled", value); }
         }
