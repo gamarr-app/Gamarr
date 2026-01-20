@@ -315,6 +315,41 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("RescanAfterRefresh", value); }
         }
 
+        public bool VirusScanEnabled
+        {
+            get { return GetValueBoolean("VirusScanEnabled", false); }
+
+            set { SetValue("VirusScanEnabled", value); }
+        }
+
+        public string VirusScannerPath
+        {
+            get { return GetValue("VirusScannerPath", string.Empty); }
+
+            set { SetValue("VirusScannerPath", value); }
+        }
+
+        public string VirusScannerArguments
+        {
+            get { return GetValue("VirusScannerArguments", string.Empty); }
+
+            set { SetValue("VirusScannerArguments", value); }
+        }
+
+        public bool QuarantineInfectedFiles
+        {
+            get { return GetValueBoolean("QuarantineInfectedFiles", true); }
+
+            set { SetValue("QuarantineInfectedFiles", value); }
+        }
+
+        public string QuarantineFolder
+        {
+            get { return GetValue("QuarantineFolder", string.Empty); }
+
+            set { SetValue("QuarantineFolder", value); }
+        }
+
         public bool SetPermissionsLinux
         {
             get { return GetValueBoolean("SetPermissionsLinux", false); }
