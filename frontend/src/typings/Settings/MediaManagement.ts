@@ -18,4 +18,9 @@ export default interface MediaManagement {
   importExtraFiles: boolean;
   extraFileExtensions: string;
   enableMediaInfo: boolean;
+  virusScanEnabled: boolean;
+  virusScannerPath: string;
+  virusScannerArguments: string;
+  quarantineInfectedFiles: boolean;
+  quarantineFolder: string;
 }
