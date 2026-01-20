@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         protected DownloadStationTask _multipleFilesCompleted;
 
         protected string _serialNumber = "SERIALNUMBER";
-        protected string _category = "sonarr";
+        protected string _category = "gamarr";
         protected string _tvDirectory = @"video/Series";
         protected string _defaultDestination = "somepath";
         protected OsPath _physicalPath = new OsPath("/mnt/sdb1/mydata");

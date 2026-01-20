@@ -1,4 +1,5 @@
 using FizzWare.NBuilder;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles.GameImport.Specifications;
 using NzbDrone.Core.Parser.Model;
@@ -23,9 +24,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                                                  .Build();
         }
 
-        // TODO: Decide whether to reimplement this!
-
-        /*[Test]
+        [Test]
         public void should_be_accepted_for_existing_file()
         {
             _localGame.ExistingFile = true;
@@ -34,34 +33,11 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
         }
 
         [Test]
-        public void should_be_accepted_if_folder_name_is_not_parseable()
+        public void should_be_accepted_for_new_file()
         {
-            _localGame.Path = @"C:\Test\Unsorted\Series.Title\S01E01.mkv".AsOsAgnostic();
+            _localGame.ExistingFile = false;
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
         }
-
-        [Test]
-        public void should_should_be_accepted_for_full_season()
-        {
-            _localGame.Path = @"C:\Test\Unsorted\Series.Title.S01\S01E01.mkv".AsOsAgnostic();
-
-            Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
-        }
-
-        [Test]
-        public void should_be_accepted_if_file_and_folder_have_the_same_episode()
-        {
-            _localGame.Path = @"C:\Test\Unsorted\Series.Title.S01E01.720p.HDTV-Sonarr\S01E01.mkv".AsOsAgnostic();
-            Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
-        }
-
-
-        [Test]
-        public void should_be_rejected_if_file_and_folder_do_not_have_same_episode()
-        {
-            _localGame.Path = @"C:\Test\Unsorted\Series.Title.S01E01.720p.HDTV-Sonarr\S01E05.mkv".AsOsAgnostic();
-            Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeFalse();
-        }*/
     }
 }

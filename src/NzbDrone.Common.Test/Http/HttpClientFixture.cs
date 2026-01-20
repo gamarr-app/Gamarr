@@ -400,7 +400,7 @@ namespace NzbDrone.Common.Test.Http
         {
             var file = GetTempFilePath();
 
-            Assert.ThrowsAsync<HttpException>(async () => await Subject.DownloadFileAsync("https://download.sonarr.tv/wrongpath", file));
+            Assert.ThrowsAsync<HttpException>(async () => await Subject.DownloadFileAsync("https://download.gamarr.app/wrongpath", file));
 
             File.Exists(file).Should().BeFalse();
 
