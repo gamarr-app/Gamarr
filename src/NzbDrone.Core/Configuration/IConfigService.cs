@@ -42,6 +42,13 @@ namespace NzbDrone.Core.Configuration
         RescanAfterRefreshType RescanAfterRefresh { get; set; }
         bool AutoRenameFolders { get; set; }
 
+        // Virus Scanning
+        bool VirusScanEnabled { get; set; }
+        string VirusScannerPath { get; set; }
+        string VirusScannerArguments { get; set; }
+        bool QuarantineInfectedFiles { get; set; }
+        string QuarantineFolder { get; set; }
+
         // Permissions (Media Management)
         bool SetPermissionsLinux { get; set; }
         string ChmodFolder { get; set; }

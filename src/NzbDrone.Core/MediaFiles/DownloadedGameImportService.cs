@@ -13,6 +13,7 @@ using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.MediaFiles.VirusScanning;
 
 namespace NzbDrone.Core.MediaFiles
 {
@@ -33,6 +34,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IImportApprovedGame _importApprovedGame;
         private readonly IDetectSample _detectSample;
         private readonly IReleaseStructureValidator _releaseStructureValidator;
+        private readonly IVirusScannerService _virusScanner;
         private readonly IRuntimeInfo _runtimeInfo;
         private readonly IConfigService _config;
         private readonly IHistoryService _historyService;
@@ -46,6 +48,7 @@ namespace NzbDrone.Core.MediaFiles
                                                IImportApprovedGame importApprovedGame,
                                                IDetectSample detectSample,
                                                IReleaseStructureValidator releaseStructureValidator,
+                                               IVirusScannerService virusScanner,
                                                IRuntimeInfo runtimeInfo,
                                                IConfigService config,
                                                IHistoryService historyService,
@@ -59,6 +62,7 @@ namespace NzbDrone.Core.MediaFiles
             _importApprovedGame = importApprovedGame;
             _detectSample = detectSample;
             _releaseStructureValidator = releaseStructureValidator;
+            _virusScanner = virusScanner;
             _runtimeInfo = runtimeInfo;
             _config = config;
             _historyService = historyService;
@@ -229,6 +233,29 @@ namespace NzbDrone.Core.MediaFiles
             if (structureValidation.DetectedGroup != null)
             {
                 _logger.Debug("Release structure validated as {0}", structureValidation.DetectedGroup);
+            }
+
+            // Virus scan if enabled
+            if (_virusScanner.IsAvailable)
+            {
+                var scanResult = _virusScanner.ScanPath(directoryInfo.FullName);
+
+                if (scanResult.ScanCompleted && !scanResult.IsClean)
+                {
+                    var infectedFiles = string.Join(", ", scanResult.InfectedFiles.Select(f => $"{Path.GetFileName(f.FilePath)} ({f.ThreatName})").Take(3));
+                    _logger.Error("Virus detected in release '{0}': {1}", cleanedUpName, infectedFiles);
+
+                    if (_config.QuarantineInfectedFiles && _config.QuarantineFolder.IsNotNullOrWhiteSpace())
+                    {
+                        QuarantineFolder(directoryInfo.FullName, cleanedUpName);
+                    }
+
+                    return new List<ImportResult>
+                    {
+                        RejectionResult(ImportRejectionReason.VirusDetected,
+                            $"Virus detected: {infectedFiles}")
+                    };
+                }
             }
 
             // For games, we import the entire folder as a unit, not individual files
@@ -425,6 +452,30 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             _logger.Error("Import failed, path does not exist or is not accessible by Gamarr: {0}. Ensure the path exists and the user running Gamarr has the correct permissions to access this file/folder", path);
+        }
+
+        private void QuarantineFolder(string sourcePath, string releaseName)
+        {
+            try
+            {
+                var quarantineFolder = _config.QuarantineFolder;
+                var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+                var quarantinePath = Path.Combine(quarantineFolder, $"{releaseName}_{timestamp}");
+
+                _logger.Info("Quarantining infected folder from {0} to {1}", sourcePath, quarantinePath);
+
+                if (!_diskProvider.FolderExists(quarantineFolder))
+                {
+                    _diskProvider.CreateFolder(quarantineFolder);
+                }
+
+                _diskProvider.MoveFolder(sourcePath, quarantinePath);
+                _logger.Info("Successfully quarantined infected folder to {0}", quarantinePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to quarantine infected folder {0}", sourcePath);
+            }
         }
     }
 }
