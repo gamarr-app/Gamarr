@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using FizzWare.NBuilder;
@@ -10,7 +9,6 @@ using NUnit.Framework;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Games;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -36,7 +34,7 @@ namespace NzbDrone.Core.Test.GameTests
         {
             Mocker.GetMock<IProvideGameInfo>()
                   .Setup(s => s.GetGameInfo(igdbId))
-                  .Returns(new Tuple<GameMetadata, List<Credit>>(_fakeGame, new List<Credit>()));
+                  .Returns(_fakeGame);
         }
 
         private void GivenValidPath()

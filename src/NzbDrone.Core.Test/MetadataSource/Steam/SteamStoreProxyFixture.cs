@@ -27,9 +27,8 @@ namespace NzbDrone.Core.Test.MetadataSource.Steam
             var result = Subject.GetGameInfo(steamAppId);
 
             result.Should().NotBeNull();
-            result.Item1.Should().NotBeNull();
 
-            var game = result.Item1;
+            var game = result;
             ValidateGame(game);
 
             game.Title.Should().Contain(expectedTitle.Split(' ')[0]);
@@ -41,8 +40,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Steam
         {
             var result = Subject.GetGameInfo(99999999);
 
-            result.Should().NotBeNull();
-            result.Item1.Should().BeNull();
+            result.Should().BeNull();
 
             ExceptionVerification.IgnoreWarns();
         }
@@ -55,7 +53,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Steam
             var result = Subject.GetGameInfo(323170);
 
             // DLC returns success=false from Steam API
-            result.Item1.Should().BeNull();
+            result.Should().BeNull();
 
             ExceptionVerification.IgnoreWarns();
         }

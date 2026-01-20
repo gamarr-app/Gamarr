@@ -16,7 +16,6 @@ using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Games;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Tags;
 
@@ -28,14 +27,12 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
         private readonly Logger _logger;
         private readonly IDetectXbmcNfo _detectNfo;
         private readonly IDiskProvider _diskProvider;
-        private readonly ICreditService _creditService;
         private readonly ITagRepository _tagRepository;
         private readonly IGameTranslationService _gameTranslationsService;
 
         public XbmcMetadata(IDetectXbmcNfo detectNfo,
                             IDiskProvider diskProvider,
                             IMapCoversToLocal mediaCoverService,
-                            ICreditService creditService,
                             ITagRepository tagRepository,
                             IGameTranslationService gameTranslationsService,
                             Logger logger)
@@ -44,7 +41,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
             _mediaCoverService = mediaCoverService;
             _diskProvider = diskProvider;
             _detectNfo = detectNfo;
-            _creditService = creditService;
             _tagRepository = tagRepository;
             _gameTranslationsService = gameTranslationsService;
         }
@@ -130,8 +126,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 var gameTranslations = _gameTranslationsService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
                 var selectedSettingsLanguage = Language.FindById(gameMetadataLanguage);
                 var gameTranslation = gameTranslations.FirstOrDefault(mt => mt.Language == selectedSettingsLanguage);
-
-                var credits = _creditService.GetAllCreditsForGameMetadata(game.GameMetadataId);
 
                 var watched = GetExistingWatchedStatus(game, gameFile.RelativePath);
 
@@ -280,22 +274,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                 details.Add(new XElement("status", game.GameMetadata.Value.Status));
 
-                foreach (var credit in credits)
-                {
-                    if (credit.Name != null && credit.Job == "Screenplay")
-                    {
-                        details.Add(new XElement("credits", credit.Name));
-                    }
-                }
-
-                foreach (var credit in credits)
-                {
-                    if (credit.Name != null && credit.Job == "Director")
-                    {
-                        details.Add(new XElement("director", credit.Name));
-                    }
-                }
-
                 if (game.GameMetadata.Value.EarlyAccess.HasValue)
                 {
                     details.Add(new XElement("premiered", game.GameMetadata.Value.EarlyAccess.Value.ToString("yyyy-MM-dd")));
@@ -370,27 +348,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                     fileInfo.Add(streamDetails);
                     details.Add(fileInfo);
-
-                    foreach (var credit in credits)
-                    {
-                        if (credit.Name != null && credit.Character != null)
-                        {
-                            var actorElement = new XElement("actor");
-
-                            actorElement.Add(new XElement("name", credit.Name));
-                            actorElement.Add(new XElement("role", credit.Character));
-                            actorElement.Add(new XElement("order", credit.Order));
-
-                            var headshot = credit.Images.FirstOrDefault(m => m.CoverType == MediaCoverTypes.Headshot);
-
-                            if (headshot != null && headshot.RemoteUrl != null)
-                            {
-                                actorElement.Add(new XElement("thumb", headshot.RemoteUrl));
-                            }
-
-                            details.Add(actorElement);
-                        }
-                    }
                 }
 
                 var doc = new XDocument(details)

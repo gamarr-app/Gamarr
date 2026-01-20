@@ -16,7 +16,6 @@ using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Extras.Metadata;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Others;
-using NzbDrone.Core.Extras.Subtitles;
 using NzbDrone.Core.History;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.ImportLists.ImportExclusions;
@@ -30,7 +29,6 @@ using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Collections;
-using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Organizer;
@@ -134,8 +132,6 @@ namespace NzbDrone.Core.Datastore
 
             Mapper.Entity<GameTranslation>("GameTranslations").RegisterModel();
 
-            Mapper.Entity<Credit>("Credits").RegisterModel();
-
             Mapper.Entity<ImportListExclusion>("ImportExclusions").RegisterModel();
 
             Mapper.Entity<QualityDefinition>("QualityDefinitions").RegisterModel()
@@ -149,7 +145,6 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<NamingConfig>("NamingConfig").RegisterModel();
             Mapper.Entity<Blocklist>("Blocklist").RegisterModel();
             Mapper.Entity<MetadataFile>("MetadataFiles").RegisterModel();
-            Mapper.Entity<SubtitleFile>("SubtitleFiles").RegisterModel();
             Mapper.Entity<OtherExtraFile>("ExtraFiles").RegisterModel();
 
             Mapper.Entity<PendingRelease>("PendingReleases").RegisterModel()

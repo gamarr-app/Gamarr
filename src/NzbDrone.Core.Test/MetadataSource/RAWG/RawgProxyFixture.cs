@@ -42,9 +42,8 @@ namespace NzbDrone.Core.Test.MetadataSource.RAWG
             var result = Subject.GetGameInfo(rawgId);
 
             result.Should().NotBeNull();
-            result.Item1.Should().NotBeNull();
 
-            var game = result.Item1;
+            var game = result;
             ValidateGame(game);
 
             game.Title.Should().Be(expectedTitle);
