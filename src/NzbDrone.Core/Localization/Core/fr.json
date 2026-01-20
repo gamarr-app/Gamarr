@@ -521,7 +521,6 @@
   "Local": "Locale",
   "LoadingGameFilesFailed": "Le chargement des fichiers vidéo a échoué",
   "LoadingGameExtraFilesFailed": "Échec du chargement des extra du film",
-  "LoadingGameCreditsFailed": "Échec du chargement des crédits du film",
   "ImportListSettings": "Paramètres liste",
   "HiddenClickToShow": "Masqué, cliquez pour afficher",
   "KeyboardShortcutsFocusSearchBox": "Placer le curseur sur la barre de recherche",

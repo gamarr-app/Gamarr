@@ -296,7 +296,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "6 시간 이상 오류로 인해 인덱서를 사용할 수 없음: {indexerNames}",
   "IndexerStatusCheckAllClientMessage": "오류로 인해 모든 인덱서를 사용할 수 없음",
   "Level": "레벨",
-  "LoadingGameCreditsFailed": "영화 크레딧을 로드하지 못함",
   "LoadingGameExtraFilesFailed": "영화 추가 파일을 로드하지 못함",
   "LoadingGameFilesFailed": "영화 파일을 로드하지 못함",
   "Local": "로컬",

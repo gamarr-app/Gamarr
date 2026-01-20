@@ -690,7 +690,6 @@
   "MaintenanceRelease": "Onderhoudsuitgave: foutoplossingen en andere verbeteringen. Bekijk de GitHub Commit geschiedenis voor meer details",
   "LoadingGameFilesFailed": "Laden van filmbestanden is mislukt",
   "LoadingGameExtraFilesFailed": "Laden van film extra bestanden is mislukt",
-  "LoadingGameCreditsFailed": "Laden van film aftiteling mislukt",
   "LinkHere": "hier",
   "AddNewRestriction": "Voeg nieuwe restrictie toe",
   "FilterGamePlaceholder": "Zoek films",

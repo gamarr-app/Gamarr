@@ -676,7 +676,6 @@
   "MaintenanceRelease": "Lanzamiento de mantenimiento: Corrección de errores y otras mejoras. Ver el historial de commits de Github para más detalles",
   "LoadingGameFilesFailed": "La carga de los archivos de la película ha fallado",
   "LoadingGameExtraFilesFailed": "La carga de los extras de la película ha fallado",
-  "LoadingGameCreditsFailed": "La carga de los créditos de la película ha fallado",
   "LinkHere": "aquí",
   "AddNewRestriction": "Añadir nueva restricción",
   "HaveNotAddedGames": "No has añadido ninguna película aún. ¿Quieres importar todas o algunas de tus películas primero?",

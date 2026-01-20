@@ -991,7 +991,6 @@
   "ListWillRefreshEveryInterval": "List will refresh every {refreshInterval}",
   "Lists": "Lists",
   "Loading": "Loading",
-  "LoadingGameCreditsFailed": "Loading game credits failed",
   "LoadingGameExtraFilesFailed": "Loading game extra files failed",
   "LoadingGameFilesFailed": "Loading game files failed",
   "Local": "Local",

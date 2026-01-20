@@ -1209,7 +1209,6 @@
   "ListTagsHelpText": "將被新增至清單項目的標籤",
   "ListWillRefreshEveryInterval": "清單將每 {refreshInterval} 重新整理一次",
   "Loading": "載入中",
-  "LoadingGameCreditsFailed": "載入電影演職員表失敗",
   "LoadingGameExtraFilesFailed": "載入電影額外檔案失敗",
   "LoadingGameFilesFailed": "載入電影檔案失敗",
   "Local": "本機",

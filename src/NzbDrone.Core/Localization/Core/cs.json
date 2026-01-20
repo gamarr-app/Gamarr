@@ -341,7 +341,6 @@
   "IndexerFlags": "Příznaky indexeru",
   "IndexerLongTermStatusCheckSingleClientMessage": "Indexery nedostupné z důvodu selhání po dobu delší než 6 hodin: {indexerNames}",
   "Level": "Úroveň",
-  "LoadingGameCreditsFailed": "Načítání filmových kreditů se nezdařilo",
   "LoadingGameExtraFilesFailed": "Načítání dalších souborů filmu se nezdařilo",
   "LoadingGameFilesFailed": "Načítání filmových souborů se nezdařilo",
   "Local": "Místní",

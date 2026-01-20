@@ -577,7 +577,6 @@
   "Local": "本地",
   "LoadingGameFilesFailed": "加载电影文件失败",
   "LoadingGameExtraFilesFailed": "加载电影附加文件失败",
-  "LoadingGameCreditsFailed": "加载电影演职员表失败",
   "ListSyncLevelHelpTextWarning": "电影文件将被永久删除，如果您的列表为空，这可能会导致整个资源库被清空",
   "ListSyncLevelHelpText": "如果资源库中的电影从您的列表中移除或从未出现在列表中，将根据您的选择对其进行处理",
   "LastWriteTime": "最后写入时间",

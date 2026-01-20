@@ -409,7 +409,6 @@
   "Local": "Local",
   "LoadingGameFilesFailed": "Falha ao carregar arquivos do filme",
   "LoadingGameExtraFilesFailed": "Falha ao carregar arquivos adicionais do filme",
-  "LoadingGameCreditsFailed": "Falha ao carregar os créditos do filme",
   "ListTagsHelpText": "Etiquetas com as quais os itens de lista serão adicionados",
   "ListSyncLevelHelpTextWarning": "Os arquivos de filme serão excluídos permanentemente, o que pode resultar na limpeza de sua biblioteca se suas listas estiverem vazias",
   "ListSyncLevelHelpText": "Os filmes na biblioteca serão tratados com base na sua seleção se saírem de sua(s) lista(s) ou não aparecerem nela(s)",

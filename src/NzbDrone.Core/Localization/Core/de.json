@@ -674,7 +674,6 @@
   "MaintenanceRelease": "Maintenance Release: Fehlerbehebungen und andere Verbesserungen. Siehe Github Commit Verlauf für weitere Details",
   "LoadingGameFilesFailed": "Laden der Film-Dateien fehlgeschlagen",
   "LoadingGameExtraFilesFailed": "Laden der Extra-Datien fehlgeschlagen",
-  "LoadingGameCreditsFailed": "Laden von FIlmcredits fehlgeschlagen",
   "LinkHere": "hier",
   "AddNewRestriction": "Neue Beschränkung hinzufügen",
   "HaveNotAddedGames": "Es gibt noch keine FIlme in der Bibliothek. Sollen einige oder alles Filme zuerst importiert werden?",

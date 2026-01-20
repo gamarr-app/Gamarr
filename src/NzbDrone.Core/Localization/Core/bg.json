@@ -47,7 +47,6 @@
   "IndexerLongTermStatusCheckAllClientMessage": "Всички индексатори са недостъпни поради грешки за повече от 6 часа",
   "IndexerStatusCheckAllClientMessage": "Всички индексатори са недостъпни поради грешки",
   "Level": "Ниво",
-  "LoadingGameCreditsFailed": "Зареждането на кредити за филми не бе успешно",
   "LoadingGameExtraFilesFailed": "Зареждането на допълнителни файлове за филми не бе успешно",
   "LoadingGameFilesFailed": "Зареждането на филмови файлове не бе успешно",
   "Local": "Местен",

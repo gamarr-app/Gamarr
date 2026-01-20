@@ -509,7 +509,6 @@
   "Local": "Locale",
   "LoadingGameFilesFailed": "Caricamento dei file del Film fallito",
   "LoadingGameExtraFilesFailed": "Caricamento degli Extra del Film fallito",
-  "LoadingGameCreditsFailed": "Caricamento dei crediti del film fallito",
   "ListSyncLevelHelpText": "I Film nella libreria saranno rimossi o non monitorati se non presenti nella tua lista",
   "ImportListSettings": "Impostazioni delle Liste",
   "LinkHere": "qui",

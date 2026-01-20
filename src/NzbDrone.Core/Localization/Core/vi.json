@@ -19,7 +19,6 @@
   "WhatsNew": "Có gì mới?",
   "Uptime": "Thời gian hoạt động",
   "IndexerLongTermStatusCheckAllClientMessage": "Tất cả các trình lập chỉ mục không khả dụng do lỗi trong hơn 6 giờ",
-  "LoadingGameCreditsFailed": "Tải phần ghi công của phim không thành công",
   "MediaManagementSettings": "Cài đặt quản lý phương tiện",
   "MediaManagementSettingsSummary": "Cài đặt đặt tên và quản lý tệp",
   "MinutesSixty": "60 phút: {0}",

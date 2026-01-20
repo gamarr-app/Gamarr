@@ -296,7 +296,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "6時間以上の障害のため、インデクサーを使用できません：{indexerNames}",
   "IndexerStatusCheckAllClientMessage": "障害のため、すべてのインデクサーを使用できません",
   "Level": "レベル",
-  "LoadingGameCreditsFailed": "映画クレジットの読み込みに失敗しました",
   "LoadingGameExtraFilesFailed": "映画の追加ファイルの読み込みに失敗しました",
   "LoadingGameFilesFailed": "動画ファイルの読み込みに失敗しました",
   "Local": "地元",

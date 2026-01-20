@@ -291,7 +291,6 @@
   "IndexerLongTermStatusCheckSingleClientMessage": "Indeksatory niedostępne z powodu błędów przez ponad 6 godzin: {indexerNames}",
   "IndexerStatusCheckAllClientMessage": "Wszystkie indeksatory są niedostępne z powodu błędów",
   "Level": "Poziom",
-  "LoadingGameCreditsFailed": "Ładowanie napisów do filmów nie powiodło się",
   "LoadingGameFilesFailed": "Ładowanie plików filmowych nie powiodło się",
   "Local": "Lokalny",
   "Location": "Lokalizacja",

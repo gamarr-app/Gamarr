@@ -343,7 +343,6 @@
   "IndexerFlags": "Indexer Flag",
   "IndexerLongTermStatusCheckAllClientMessage": "Alle indeksatorer er ikke tilgængelige på grund af fejl i mere end 6 timer",
   "IndexerLongTermStatusCheckSingleClientMessage": "Indeksatorer er ikke tilgængelige på grund af fejl i mere end 6 timer: {indexerNames}",
-  "LoadingGameCreditsFailed": "Indlæsning af filmkreditter mislykkedes",
   "LoadingGameExtraFilesFailed": "Indlæsning af ekstra filfil mislykkedes",
   "LoadingGameFilesFailed": "Indlæsning af filmfiler mislykkedes",
   "Local": "Lokal",

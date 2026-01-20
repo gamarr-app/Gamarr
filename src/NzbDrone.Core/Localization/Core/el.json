@@ -328,7 +328,6 @@
   "IndexerLongTermStatusCheckAllClientMessage": "Όλοι οι δείκτες δεν είναι διαθέσιμοι λόγω αστοχιών για περισσότερο από 6 ώρες",
   "IndexerLongTermStatusCheckSingleClientMessage": "Τα ευρετήρια δεν είναι διαθέσιμα λόγω αστοχιών για περισσότερο από 6 ώρες: {indexerNames}",
   "IndexerStatusCheckAllClientMessage": "Όλοι οι δείκτες δεν είναι διαθέσιμοι λόγω αστοχιών",
-  "LoadingGameCreditsFailed": "Η φόρτωση πιστώσεων ταινίας απέτυχε",
   "LoadingGameExtraFilesFailed": "Η φόρτωση επιπλέον αρχείων ταινίας απέτυχε",
   "LoadingGameFilesFailed": "Η φόρτωση αρχείων ταινίας απέτυχε",
   "Local": "Τοπικός",
