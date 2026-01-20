@@ -30,6 +30,12 @@ namespace Gamarr.Api.V3.Config
         public bool ImportExtraFiles { get; set; }
         public string ExtraFileExtensions { get; set; }
         public bool EnableMediaInfo { get; set; }
+
+        public bool VirusScanEnabled { get; set; }
+        public string VirusScannerPath { get; set; }
+        public string VirusScannerArguments { get; set; }
+        public bool QuarantineInfectedFiles { get; set; }
+        public string QuarantineFolder { get; set; }
     }
 
     public static class MediaManagementConfigResourceMapper
@@ -59,7 +65,13 @@ namespace Gamarr.Api.V3.Config
                 ScriptImportPath = model.ScriptImportPath,
                 ImportExtraFiles = model.ImportExtraFiles,
                 ExtraFileExtensions = model.ExtraFileExtensions,
-                EnableMediaInfo = model.EnableMediaInfo
+                EnableMediaInfo = model.EnableMediaInfo,
+
+                VirusScanEnabled = model.VirusScanEnabled,
+                VirusScannerPath = model.VirusScannerPath,
+                VirusScannerArguments = model.VirusScannerArguments,
+                QuarantineInfectedFiles = model.QuarantineInfectedFiles,
+                QuarantineFolder = model.QuarantineFolder
             };
         }
     }
