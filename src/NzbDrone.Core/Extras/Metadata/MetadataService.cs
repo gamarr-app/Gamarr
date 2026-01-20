@@ -157,8 +157,8 @@ namespace NzbDrone.Core.Extras.Metadata
             var metadataFiles = _metadataFileService.GetFilesByGame(game.Id);
             var movedFiles = new List<MetadataFile>();
 
-            // TODO: Move EpisodeImage and EpisodeMetadata metadata files, instead of relying on consumers to do it
-            // (Xbmc's EpisodeImage is more than just the extension)
+            // TODO: Move GameImage and GameMetadata metadata files, instead of relying on consumers to do it
+            // (Xbmc's GameImage is more than just the extension)
             foreach (var consumer in _metadataFactory.GetAvailableProviders())
             {
                 foreach (var gameFile in gameFiles)
