@@ -50,6 +50,13 @@ public class RejectedImportService : IRejectedImportService
             _logger.Trace("Download '{0}' contains executable file, marking as failed", trackedDownload.DownloadItem.Title);
             trackedDownload.Fail();
         }
+        else if (rejectionReason == ImportRejectionReason.SuspiciousReleaseStructure)
+        {
+            // Block import for suspicious releases - don't retry repeatedly
+            _logger.Debug("Download '{0}' has suspicious release structure, blocking import", trackedDownload.DownloadItem.Title);
+            trackedDownload.Warn(new TrackedDownloadStatusMessage(trackedDownload.DownloadItem.Title, importResult.Errors));
+            trackedDownload.State = TrackedDownloadState.ImportBlocked;
+        }
         else
         {
             trackedDownload.Warn(new TrackedDownloadStatusMessage(trackedDownload.DownloadItem.Title, importResult.Errors));
