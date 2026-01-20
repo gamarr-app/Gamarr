@@ -36,6 +36,7 @@ namespace Gamarr.Api.V3.Config
         public string VirusScannerArguments { get; set; }
         public bool QuarantineInfectedFiles { get; set; }
         public string QuarantineFolder { get; set; }
+        public string DetectedVirusScannerPath { get; set; }
     }
 
     public static class MediaManagementConfigResourceMapper

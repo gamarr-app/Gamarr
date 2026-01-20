@@ -462,6 +462,18 @@ function MediaManagement() {
             </FieldSet>
 
             <FieldSet legend={translate('VirusScanning')}>
+              {settings.detectedVirusScannerPath?.value ? (
+                <Alert kind={kinds.SUCCESS}>
+                  {translate('VirusScannerDetected', {
+                    path: settings.detectedVirusScannerPath.value,
+                  })}
+                </Alert>
+              ) : (
+                <Alert kind={kinds.WARNING}>
+                  {translate('VirusScannerNotDetected')}
+                </Alert>
+              )}
+
               <FormGroup size={sizes.MEDIUM}>
                 <FormLabel>{translate('EnableVirusScanning')}</FormLabel>
 

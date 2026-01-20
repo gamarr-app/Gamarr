@@ -1,6 +1,7 @@
 using FluentValidation;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.MediaFiles.VirusScanning;
 using NzbDrone.Core.Validation;
 using NzbDrone.Core.Validation.Paths;
 using Gamarr.Http;
@@ -10,7 +11,10 @@ namespace Gamarr.Api.V3.Config
     [V3ApiController("config/mediamanagement")]
     public class MediaManagementConfigController : ConfigController<MediaManagementConfigResource>
     {
+        private readonly IVirusScannerService _virusScannerService;
+
         public MediaManagementConfigController(IConfigService configService,
+                                           IVirusScannerService virusScannerService,
                                            PathExistsValidator pathExistsValidator,
                                            FolderChmodValidator folderChmodValidator,
                                            FolderWritableValidator folderWritableValidator,
@@ -21,6 +25,8 @@ namespace Gamarr.Api.V3.Config
                                            RootFolderValidator rootFolderValidator)
             : base(configService)
         {
+            _virusScannerService = virusScannerService;
+
             SharedValidator.RuleFor(c => c.RecycleBinCleanupDays).GreaterThanOrEqualTo(0);
             SharedValidator.RuleFor(c => c.ChmodFolder).SetValidator(folderChmodValidator).When(c => !string.IsNullOrEmpty(c.ChmodFolder) && (OsInfo.IsLinux || OsInfo.IsOsx));
 
@@ -41,7 +47,9 @@ namespace Gamarr.Api.V3.Config
 
         protected override MediaManagementConfigResource ToResource(IConfigService model)
         {
-            return MediaManagementConfigResourceMapper.ToResource(model);
+            var resource = MediaManagementConfigResourceMapper.ToResource(model);
+            resource.DetectedVirusScannerPath = _virusScannerService.DetectedScannerPath;
+            return resource;
         }
     }
 }
