@@ -78,7 +78,7 @@ module.exports = {
 
   // Toolbar
   toolbarColor: wheat,
-  toolbarBackgroundColor: darkCyan,
+  toolbarBackgroundColor: burntCaramel,
   toolbarMenuItemBackgroundColor: darkTeal,
   toolbarMenuItemHoverBackgroundColor: '#004757',
   toolbarLabelColor: wheat,
