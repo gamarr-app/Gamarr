@@ -103,7 +103,7 @@ module.exports = {
   //
   // Buttons
 
-  defaultButtonTextColor: white,
+  defaultButtonTextColor: inkBlack,
   defaultBackgroundColor: white,
   defaultBorderColor: pearlAqua,
   defaultHoverBackgroundColor: lightWheat,
