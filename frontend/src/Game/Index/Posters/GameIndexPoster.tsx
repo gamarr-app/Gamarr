@@ -197,6 +197,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
 
         <Link className={styles.link} style={elementStyle} to={link}>
           <GamePoster
+            className={styles.poster}
             style={elementStyle}
             images={images}
             size={250}

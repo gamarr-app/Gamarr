@@ -6,7 +6,7 @@ import ProgressBar from 'Components/ProgressBar';
 import Game from 'Game/Game';
 import useGame, { GameEntity } from 'Game/useGame';
 import useGameFile from 'GameFile/useGameFile';
-import { icons, kinds, sizes } from 'Helpers/Props';
+import { icons, kinds } from 'Helpers/Props';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
 import translate from 'Utilities/String/translate';
 import GameQuality from './GameQuality';
