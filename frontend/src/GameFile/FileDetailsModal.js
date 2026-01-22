@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import DescriptionList from 'Components/DescriptionList/DescriptionList';
+import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
 import Button from 'Components/Link/Button';
 import Modal from 'Components/Modal/Modal';
 import ModalBody from 'Components/Modal/ModalBody';
@@ -7,21 +9,26 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { sizes } from 'Helpers/Props';
+import formatBytes from 'Utilities/Number/formatBytes';
+import formatDateTime from 'Utilities/Date/formatDateTime';
 import translate from 'Utilities/String/translate';
-import MediaInfo from './Editor/MediaInfo';
 
 function FileDetailsModal(props) {
   const {
     isOpen,
     onModalClose,
-    mediaInfo
+    path,
+    size,
+    dateAdded,
+    sceneName,
+    releaseGroup
   } = props;
 
   return (
     <Modal
       isOpen={isOpen}
       onModalClose={onModalClose}
-      size={sizes.SMALL}
+      size={sizes.MEDIUM}
     >
       <ModalContent
         onModalClose={onModalClose}
@@ -31,7 +38,42 @@ function FileDetailsModal(props) {
         </ModalHeader>
 
         <ModalBody>
-          <MediaInfo {...mediaInfo} />
+          <DescriptionList>
+            {path ? (
+              <DescriptionListItem
+                title={translate('Path')}
+                data={path}
+              />
+            ) : null}
+
+            {size ? (
+              <DescriptionListItem
+                title={translate('Size')}
+                data={formatBytes(size)}
+              />
+            ) : null}
+
+            {dateAdded ? (
+              <DescriptionListItem
+                title={translate('Added')}
+                data={formatDateTime(dateAdded)}
+              />
+            ) : null}
+
+            {sceneName ? (
+              <DescriptionListItem
+                title={translate('SceneName')}
+                data={sceneName}
+              />
+            ) : null}
+
+            {releaseGroup ? (
+              <DescriptionListItem
+                title={translate('ReleaseGroup')}
+                data={releaseGroup}
+              />
+            ) : null}
+          </DescriptionList>
         </ModalBody>
 
         <ModalFooter>
@@ -47,7 +89,11 @@ function FileDetailsModal(props) {
 FileDetailsModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onModalClose: PropTypes.func.isRequired,
-  mediaInfo: PropTypes.object
+  path: PropTypes.string,
+  size: PropTypes.number,
+  dateAdded: PropTypes.string,
+  sceneName: PropTypes.string,
+  releaseGroup: PropTypes.string
 };
 
 export default FileDetailsModal;

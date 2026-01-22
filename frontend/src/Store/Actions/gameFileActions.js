@@ -44,31 +44,6 @@ export const defaultState = {
       isSortable: true
     },
     {
-      name: 'videoCodec',
-      label: () => translate('VideoCodec'),
-      isVisible: true
-    },
-    {
-      name: 'videoDynamicRangeType',
-      label: () => translate('VideoDynamicRange'),
-      isVisible: false
-    },
-    {
-      name: 'audioInfo',
-      label: () => translate('AudioInfo'),
-      isVisible: true
-    },
-    {
-      name: 'audioLanguages',
-      label: () => translate('AudioLanguages'),
-      isVisible: false
-    },
-    {
-      name: 'subtitleLanguages',
-      label: () => translate('SubtitleLanguages'),
-      isVisible: false
-    },
-    {
       name: 'size',
       label: () => translate('Size'),
       isVisible: true,

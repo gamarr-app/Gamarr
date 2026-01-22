@@ -70,19 +70,19 @@ const fileNameTokens = [
     token:
       '{Game Title} ({Release Year}) - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
     example:
-      'The Game - Title (2010) - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
+      'The Game - Title (2010) - Deluxe Edition [Repack][GOG]-EVOLVE',
   },
   {
     token:
       '{Game CleanTitle} {Release Year} - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
     example:
-      'The Game Title 2010 - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
+      'The Game Title 2010 - Deluxe Edition [Repack][GOG]-EVOLVE',
   },
   {
     token:
       '{Game.CleanTitle}{.Release.Year}{.Edition.Tags}{.Custom.Formats}{.Quality.Full}{-Release Group}',
     example:
-      'The.Game.Title.2010.Ultimate.Extended.Edition.Surround.Sound.x264.Bluray-1080p.Proper-EVOLVE',
+      'The.Game.Title.2010.Deluxe.Edition.Repack.GOG-EVOLVE',
   },
 ];
 
@@ -136,31 +136,6 @@ const gameIdTokens = [
 const qualityTokens = [
   { token: '{Quality Full}', example: 'HDTV-720p Proper' },
   { token: '{Quality Title}', example: 'HDTV-720p' },
-];
-
-const mediaInfoTokens = [
-  { token: '{MediaInfo Simple}', example: 'x264 DTS' },
-  { token: '{MediaInfo Full}', example: 'x264 DTS [EN+DE]', footNotes: '1' },
-
-  { token: '{MediaInfo AudioCodec}', example: 'DTS' },
-  { token: '{MediaInfo AudioChannels}', example: '5.1' },
-  {
-    token: '{MediaInfo AudioLanguages}',
-    example: '[EN+DE]',
-    footNotes: '1,2',
-  },
-  {
-    token: '{MediaInfo AudioLanguagesAll}',
-    example: '[EN]',
-    footNotes: '1',
-  },
-  { token: '{MediaInfo SubtitleLanguages}', example: '[DE]', footNotes: '1' },
-
-  { token: '{MediaInfo VideoCodec}', example: 'x264' },
-  { token: '{MediaInfo VideoBitDepth}', example: '10' },
-  { token: '{MediaInfo VideoDynamicRange}', example: 'HDR' },
-  { token: '{MediaInfo VideoDynamicRangeType}', example: 'DV HDR10' },
-  { token: '{MediaInfo 3D}', example: '3D' },
 ];
 
 const releaseGroupTokens = [
@@ -359,34 +334,6 @@ function NamingModal(props: NamingModalProps) {
                       />
                     );
                   })}
-                </div>
-              </FieldSet>
-
-              <FieldSet legend={translate('MediaInfo')}>
-                <div className={styles.groups}>
-                  {mediaInfoTokens.map(({ token, example, footNotes }) => {
-                    return (
-                      <NamingOption
-                        key={token}
-                        token={token}
-                        example={example}
-                        footNotes={footNotes}
-                        tokenSeparator={tokenSeparator}
-                        tokenCase={tokenCase}
-                        onPress={handleOptionPress}
-                      />
-                    );
-                  })}
-                </div>
-
-                <div className={styles.footNote}>
-                  <sup className={styles.identifier}>1</sup>
-                  <InlineMarkdown data={translate('MediaInfoFootNote')} />
-                </div>
-
-                <div className={styles.footNote}>
-                  <sup className={styles.identifier}>2</sup>
-                  <InlineMarkdown data={translate('MediaInfoFootNote2')} />
                 </div>
               </FieldSet>
 
