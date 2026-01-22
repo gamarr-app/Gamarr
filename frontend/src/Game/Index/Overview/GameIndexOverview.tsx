@@ -75,6 +75,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     hasFile,
     isAvailable,
     igdbId,
+    igdbSlug,
     steamAppId,
     studio,
     added,
@@ -189,7 +190,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
                   body={
                     <GameDetailsLinks
                       steamAppId={steamAppId}
-                      igdbId={igdbId}
+                      igdbSlug={igdbSlug}
                       youTubeTrailerId={youTubeTrailerId}
                     />
                   }

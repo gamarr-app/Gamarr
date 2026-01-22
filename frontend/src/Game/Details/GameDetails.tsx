@@ -494,6 +494,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
     id,
     steamAppId,
     igdbId,
+    igdbSlug,
     title,
     originalTitle,
     year,
@@ -714,7 +715,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       tooltip={
                         <GameDetailsLinks
                           steamAppId={steamAppId}
-                          igdbId={igdbId}
+                          igdbSlug={igdbSlug}
                           youTubeTrailerId={youTubeTrailerId}
                         />
                       }
