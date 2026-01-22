@@ -111,13 +111,30 @@ namespace NzbDrone.Core.MetadataSource.Steam
                     return new List<GameMetadata>();
                 }
 
-                return response.Resource.Items
+                var candidates = response.Resource.Items
                     .Where(item => item.Type == "app" || item.Type == "game")
                     .Where(item => !IsNonGameContent(item.Name))
-                    .Take(limit)
-                    .Select(MapSearchResult)
-                    .Where(g => g != null)
+                    .Take(limit * 2) // Take more to account for DLC filtering
                     .ToList();
+
+                // Filter out DLCs and get full metadata for actual games
+                var results = new List<GameMetadata>();
+                foreach (var item in candidates)
+                {
+                    if (results.Count >= limit)
+                    {
+                        break;
+                    }
+
+                    // Get full game info - this filters out DLCs and returns complete metadata
+                    var gameInfo = GetGameInfo(item.Id);
+                    if (gameInfo != null)
+                    {
+                        results.Add(gameInfo);
+                    }
+                }
+
+                return results;
             }
             catch (HttpException ex)
             {
@@ -183,16 +200,12 @@ namespace NzbDrone.Core.MetadataSource.Steam
             // Set images
             game.Images = new List<MediaCover.MediaCover>();
 
-            // Try library_600x900 first (vertical poster format, works for established games)
-            // Falls back to header_image if library image 404s (handled by MediaCoverService)
-            var libraryPosterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{data.Steam_Appid}/library_600x900.jpg";
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, libraryPosterUrl));
-
-            // Add header as secondary poster option (wide format, but always available)
-            if (!string.IsNullOrEmpty(data.Header_Image))
-            {
-                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Header_Image));
-            }
+            // Try multiple CDN URLs for the vertical poster (library_600x900)
+            // New CDN for recent games, old CDN for older games
+            var newCdnPoster = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{data.Steam_Appid}/library_600x900.jpg";
+            var oldCdnPoster = $"https://steamcdn-a.akamaihd.net/steam/apps/{data.Steam_Appid}/library_600x900.jpg";
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, newCdnPoster));
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, oldCdnPoster));
 
             // Use background as fanart
             if (!string.IsNullOrEmpty(data.Background_Raw ?? data.Background))
@@ -206,44 +219,6 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 {
                     game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Screenshot, screenshot.Path_Full));
                 }
-            }
-
-            return game;
-        }
-
-        private GameMetadata MapSearchResult(SteamSearchItem item)
-        {
-            if (item == null)
-            {
-                return null;
-            }
-
-            var game = new GameMetadata
-            {
-                SteamAppId = item.Id,
-                Title = item.Name,
-                CleanTitle = item.Name.CleanGameTitle(),
-                SortTitle = GameTitleNormalizer.Normalize(item.Name, item.Id),
-                Status = GameStatusType.Released,
-                Images = new List<MediaCover.MediaCover>(),
-                Ratings = new Ratings(),
-                Platforms = MapPlatforms(item.Platforms)
-            };
-
-            // Try library_600x900 first (vertical poster), with header as fallback
-            var libraryPosterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/library_600x900.jpg";
-            var headerUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/header.jpg";
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, libraryPosterUrl));
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, headerUrl));
-
-            // Add Metacritic rating if available
-            if (!string.IsNullOrEmpty(item.Metascore) && int.TryParse(item.Metascore, out var metascore) && metascore > 0)
-            {
-                game.Ratings.Metacritic = new RatingChild
-                {
-                    Value = metascore,
-                    Type = RatingType.Critic
-                };
             }
 
             return game;
