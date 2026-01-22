@@ -127,7 +127,6 @@ jobs:
             --filter "Category=IntegrationTest" \
             --logger "trx;LogFileName=integration-test-results.trx" \
             --results-directory ./test-results
-        continue-on-error: true
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4
@@ -145,15 +144,8 @@ jobs:
     steps:
       - name: Check build status
         run: |
-          # Core jobs must pass
-          if [[ "${{ needs.frontend.result }}" == "failure" || "${{ needs.backend.result }}" == "failure" || "${{ needs.test.result }}" == "failure" ]]; then
-            echo "One or more core jobs failed"
+          if [[ "${{ needs.frontend.result }}" == "failure" || "${{ needs.backend.result }}" == "failure" || "${{ needs.test.result }}" == "failure" || "${{ needs.integration-test.result }}" == "failure" ]]; then
+            echo "One or more jobs failed"
             exit 1
           fi
-
-          # Warn if integration tests failed (non-blocking)
-          if [[ "${{ needs.integration-test.result }}" == "failure" ]]; then
-            echo "::warning::Integration tests failed"
-          fi
-
-          echo "All core jobs completed successfully"
+          echo "All jobs completed successfully"
