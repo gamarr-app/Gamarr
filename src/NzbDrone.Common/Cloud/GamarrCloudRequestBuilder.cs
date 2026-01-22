@@ -13,14 +13,19 @@ namespace NzbDrone.Common.Cloud
     {
         public GamarrCloudRequestBuilder()
         {
-            Services = new HttpRequestBuilder("https://gamarr.servarr.com/v1/")
+            // Use GitHub API for update checks
+            Services = new HttpRequestBuilder("https://api.github.com/repos/gamarr-app/Gamarr/")
+                .SetHeader("Accept", "application/vnd.github.v3+json")
+                .SetHeader("User-Agent", "Gamarr")
                 .CreateFactory();
 
             IGDB = new HttpRequestBuilder("https://api.thegamedb.org/{api}/{route}/{id}{secondaryRoute}")
                 .SetHeader("Authorization", $"Bearer {AuthToken}")
                 .CreateFactory();
 
-            GamarrMetadata = new HttpRequestBuilder("https://api.gamarr.video/v1/{route}")
+            GamarrMetadata = new HttpRequestBuilder("https://api.github.com/repos/gamarr-app/Gamarr/")
+                .SetHeader("Accept", "application/vnd.github.v3+json")
+                .SetHeader("User-Agent", "Gamarr")
                 .CreateFactory();
         }
 
