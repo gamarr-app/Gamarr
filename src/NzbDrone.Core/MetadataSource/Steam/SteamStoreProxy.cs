@@ -185,6 +185,13 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 }
             }
 
+            // Set DLC IDs if this is a base game
+            if (data.Dlc != null && data.Dlc.Any())
+            {
+                game.DlcIds = data.Dlc;
+                _logger.Debug("Game {0} has {1} DLCs on Steam", data.Name, data.Dlc.Count);
+            }
+
             // Set ratings - only Metacritic since Steam doesn't have IGDB ratings
             game.Ratings = new Ratings();
 

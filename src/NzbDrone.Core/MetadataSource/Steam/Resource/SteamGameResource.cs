@@ -79,6 +79,18 @@ namespace NzbDrone.Core.MetadataSource.Steam.Resource
         public string Background { get; set; }
         public string Background_Raw { get; set; }
         public SteamContentDescriptors Content_Descriptors { get; set; }
+
+        // DLC parent game info
+        public SteamFullGame Fullgame { get; set; }
+
+        // DLC list (for base games)
+        public List<int> Dlc { get; set; }
+    }
+
+    public class SteamFullGame
+    {
+        public string Appid { get; set; }
+        public string Name { get; set; }
     }
 
     public class SteamPcRequirements
