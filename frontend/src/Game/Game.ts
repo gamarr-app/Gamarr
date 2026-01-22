@@ -26,6 +26,32 @@ export interface Collection {
   title: string;
 }
 
+export type GameType =
+  | 'mainGame'
+  | 'dlcAddon'
+  | 'expansion'
+  | 'bundle'
+  | 'standaloneExpansion'
+  | 'mod'
+  | 'episode'
+  | 'season'
+  | 'remake'
+  | 'remaster'
+  | 'expandedGame'
+  | 'port'
+  | 'fork'
+  | 'pack'
+  | 'update';
+
+export interface GameSummary {
+  id: number;
+  title: string;
+  steamAppId: number;
+  igdbId: number;
+  titleSlug: string;
+  images: Image[];
+}
+
 export interface Statistics {
   gameFileCount: number;
   releaseGroups: string[];
@@ -98,6 +124,15 @@ interface Game extends ModelBase {
   isAvailable: boolean;
   isSaving?: boolean;
   addOptions: GameAddOptions;
+
+  // DLC-related properties
+  gameType: GameType;
+  gameTypeDisplayName: string;
+  isDlc: boolean;
+  parentGameIgdbId?: number;
+  parentGame?: GameSummary;
+  dlcIds: number[];
+  dlcCount: number;
 }
 
 export default Game;

@@ -39,6 +39,12 @@ namespace NzbDrone.Core.Games
         List<int> GetRecommendations();
         bool ExistsByMetadataId(int metadataId);
         HashSet<int> AllGameWithCollectionsIgdbIds();
+
+        // DLC-related methods
+        List<Game> GetDlcsForGame(int parentIgdbId);
+        Game GetParentGame(int parentIgdbId);
+        List<Game> GetAllDlcs();
+        List<Game> GetMainGamesOnly();
     }
 
     public class GameRepository : BasicRepository<Game>, IGameRepository
@@ -414,6 +420,37 @@ namespace NzbDrone.Core.Games
             using var conn = _database.OpenConnection();
 
             return conn.Query<int>("SELECT \"IgdbId\" FROM \"GameMetadata\" JOIN \"Games\" ON (\"Games\".\"GameMetadataId\" = \"GameMetadata\".\"Id\") WHERE \"CollectionIgdbId\" > 0").ToHashSet();
+        }
+
+        public List<Game> GetDlcsForGame(int parentIgdbId)
+        {
+            return Query(x => x.GameMetadata.Value.ParentGameId == parentIgdbId);
+        }
+
+        public Game GetParentGame(int parentIgdbId)
+        {
+            return Query(x => x.GameMetadata.Value.IgdbId == parentIgdbId).FirstOrDefault();
+        }
+
+        public List<Game> GetAllDlcs()
+        {
+            return Query(x =>
+                x.GameMetadata.Value.GameType == GameType.DlcAddon ||
+                x.GameMetadata.Value.GameType == GameType.Expansion ||
+                x.GameMetadata.Value.GameType == GameType.StandaloneExpansion ||
+                x.GameMetadata.Value.GameType == GameType.Episode ||
+                x.GameMetadata.Value.GameType == GameType.Season ||
+                x.GameMetadata.Value.GameType == GameType.Pack);
+        }
+
+        public List<Game> GetMainGamesOnly()
+        {
+            return Query(x =>
+                x.GameMetadata.Value.GameType == GameType.MainGame ||
+                x.GameMetadata.Value.GameType == GameType.Remake ||
+                x.GameMetadata.Value.GameType == GameType.Remaster ||
+                x.GameMetadata.Value.GameType == GameType.ExpandedGame ||
+                x.GameMetadata.Value.GameType == GameType.Port);
         }
     }
 }

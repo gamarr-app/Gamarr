@@ -56,6 +56,12 @@ namespace NzbDrone.Core.Games
         bool UpdateTags(Game game);
         bool ExistsByMetadataId(int metadataId);
         HashSet<int> AllGameWithCollectionsIgdbIds();
+
+        // DLC-related methods
+        List<Game> GetDlcsForGame(int parentIgdbId);
+        Game GetParentGame(int parentIgdbId);
+        List<Game> GetAllDlcs();
+        List<Game> GetMainGamesOnly();
     }
 
     public class GameService : IGameService, IHandle<GameFileAddedEvent>,
@@ -450,6 +456,26 @@ namespace NzbDrone.Core.Games
         public HashSet<int> AllGameWithCollectionsIgdbIds()
         {
             return _gameRepository.AllGameWithCollectionsIgdbIds();
+        }
+
+        public List<Game> GetDlcsForGame(int parentIgdbId)
+        {
+            return _gameRepository.GetDlcsForGame(parentIgdbId);
+        }
+
+        public Game GetParentGame(int parentIgdbId)
+        {
+            return _gameRepository.GetParentGame(parentIgdbId);
+        }
+
+        public List<Game> GetAllDlcs()
+        {
+            return _gameRepository.GetAllDlcs();
+        }
+
+        public List<Game> GetMainGamesOnly()
+        {
+            return _gameRepository.GetMainGamesOnly();
         }
 
         private Game ReturnSingleGameOrThrow(List<Game> games)
