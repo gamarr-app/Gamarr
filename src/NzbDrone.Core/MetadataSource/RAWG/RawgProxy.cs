@@ -173,7 +173,8 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
             return results.Select(metadata =>
             {
-                var existingGame = _gameService.FindByIgdbId(metadata.IgdbId);
+                // Check by RawgId first (since RAWG results have RawgId set)
+                var existingGame = _gameService.FindByRawgId(metadata.RawgId);
                 return existingGame ?? new Game { GameMetadata = metadata };
             }).ToList();
         }
@@ -264,7 +265,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
         {
             var game = new GameMetadata
             {
-                IgdbId = resource.Id, // Using RAWG ID in place of IGDB ID
+                RawgId = resource.Id,
                 Title = resource.Name,
                 CleanTitle = resource.Name.CleanGameTitle(),
                 SortTitle = GameTitleNormalizer.Normalize(resource.Name, resource.Id),
@@ -319,6 +320,8 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             }
 
             // Set images
+            // Note: RAWG only has Background_Image which is landscape-oriented
+            // Don't use it as poster since it will look stretched in vertical poster containers
             game.Images = new List<MediaCover.MediaCover>();
 
             if (!string.IsNullOrEmpty(resource.Background_Image))
@@ -327,13 +330,6 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 {
                     RemoteUrl = resource.Background_Image,
                     CoverType = MediaCoverTypes.Fanart
-                });
-
-                // Also use as poster if no other poster available
-                game.Images.Add(new MediaCover.MediaCover
-                {
-                    RemoteUrl = resource.Background_Image,
-                    CoverType = MediaCoverTypes.Poster
                 });
             }
 
@@ -362,7 +358,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
             var game = new GameMetadata
             {
-                IgdbId = resource.Id,
+                RawgId = resource.Id,
                 Title = resource.Name,
                 CleanTitle = resource.Name.CleanGameTitle(),
                 SortTitle = GameTitleNormalizer.Normalize(resource.Name, resource.Id),
@@ -390,6 +386,8 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 };
             }
 
+            // Note: RAWG only has Background_Image which is landscape-oriented
+            // Use it as fanart, not poster, since it will look stretched in vertical poster containers
             if (!string.IsNullOrEmpty(resource.Background_Image))
             {
                 game.Images = new List<MediaCover.MediaCover>
@@ -397,7 +395,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                     new MediaCover.MediaCover
                     {
                         RemoteUrl = resource.Background_Image,
-                        CoverType = MediaCoverTypes.Poster
+                        CoverType = MediaCoverTypes.Fanart
                     }
                 };
             }

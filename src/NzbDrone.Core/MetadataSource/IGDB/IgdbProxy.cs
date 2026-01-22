@@ -224,10 +224,11 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 var searchTitle = parserResult?.PrimaryGameTitle ?? title;
 
                 // Use IGDB search endpoint
+                // Include null category for games without category set (e.g., Metroid Prime 4)
                 var query = $@"
                     {GameFields}
                     search ""{EscapeQuery(searchTitle)}"";
-                    where category = (0, 2, 4, 8, 9, 10, 11);
+                    where category = null | category = (0, 2, 4, 8, 9, 10, 11);
                     limit 20;
                 ";
 
