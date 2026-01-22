@@ -399,7 +399,7 @@ namespace NzbDrone.Core.MetadataSource
         public List<Game> SearchForNewGame(string title)
         {
             var allResults = new List<Game>();
-            var seenNormalizedTitles = new HashSet<string>(StringComparer.Ordinal);
+            var resultsByNormalizedTitle = new Dictionary<string, Game>(StringComparer.Ordinal);
             var lowerTitle = title?.ToLowerInvariant()?.Trim() ?? string.Empty;
 
             // Handle direct IGDB ID lookups - these bypass normal search and credentials check
@@ -424,10 +424,7 @@ namespace NzbDrone.Core.MetadataSource
                 foreach (var game in steamResults)
                 {
                     var normalizedTitle = NormalizeTitleForComparison(game.Title);
-                    if (seenNormalizedTitles.Add(normalizedTitle))
-                    {
-                        allResults.Add(game);
-                    }
+                    resultsByNormalizedTitle[normalizedTitle] = game;
                 }
 
                 _logger.Debug("Found {0} games from Steam for '{1}'", steamResults.Count, title);
@@ -438,6 +435,7 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             // Search IGDB next (preferred secondary source)
+            // Merge IGDB metadata into existing results to get best of both sources
             if (HasIgdbCredentials)
             {
                 try
@@ -446,13 +444,19 @@ namespace NzbDrone.Core.MetadataSource
                     foreach (var game in igdbResults)
                     {
                         var normalizedTitle = NormalizeTitleForComparison(game.Title);
-                        if (seenNormalizedTitles.Add(normalizedTitle))
+                        if (resultsByNormalizedTitle.TryGetValue(normalizedTitle, out var existing))
                         {
-                            allResults.Add(game);
+                            // Merge IGDB data into existing result
+                            MergeGameMetadata(existing, game);
+                            _logger.Debug("Merged IGDB metadata into existing result for '{0}'", game.Title);
+                        }
+                        else
+                        {
+                            resultsByNormalizedTitle[normalizedTitle] = game;
                         }
                     }
 
-                    _logger.Debug("Found {0} additional games from IGDB for '{1}'", igdbResults.Count, title);
+                    _logger.Debug("Found {0} games from IGDB for '{1}'", igdbResults.Count, title);
                 }
                 catch (Exception ex)
                 {
@@ -461,6 +465,7 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             // Also search RAWG for additional coverage
+            // Merge RAWG metadata into existing results
             if (HasRawgCredentials)
             {
                 try
@@ -469,19 +474,27 @@ namespace NzbDrone.Core.MetadataSource
                     foreach (var game in rawgResults)
                     {
                         var normalizedTitle = NormalizeTitleForComparison(game.Title);
-                        if (seenNormalizedTitles.Add(normalizedTitle))
+                        if (resultsByNormalizedTitle.TryGetValue(normalizedTitle, out var existing))
                         {
-                            allResults.Add(game);
+                            // Merge RAWG data into existing result
+                            MergeGameMetadata(existing, game);
+                            _logger.Debug("Merged RAWG metadata into existing result for '{0}'", game.Title);
+                        }
+                        else
+                        {
+                            resultsByNormalizedTitle[normalizedTitle] = game;
                         }
                     }
 
-                    _logger.Debug("Found {0} additional games from RAWG for '{1}'", rawgResults.Count, title);
+                    _logger.Debug("Found {0} games from RAWG for '{1}'", rawgResults.Count, title);
                 }
                 catch (Exception ex)
                 {
                     _logger.Warn(ex, "Failed to search RAWG for '{0}'", title);
                 }
             }
+
+            allResults = resultsByNormalizedTitle.Values.ToList();
 
             if (!allResults.Any())
             {
@@ -528,6 +541,75 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             return game;
+        }
+
+        /// <summary>
+        /// Merges metadata from a secondary source into an existing game result.
+        /// Takes the best data from each source (e.g., IGDB images, IDs, ratings).
+        /// </summary>
+        private void MergeGameMetadata(Game existing, Game secondary)
+        {
+            var existingMeta = existing.GameMetadata?.Value;
+            var secondaryMeta = secondary.GameMetadata?.Value;
+
+            if (existingMeta == null || secondaryMeta == null)
+            {
+                return;
+            }
+
+            // Add IGDB ID if missing
+            if (existingMeta.IgdbId == 0 && secondaryMeta.IgdbId > 0)
+            {
+                existingMeta.IgdbId = secondaryMeta.IgdbId;
+            }
+
+            // Add IGDB slug if missing
+            if (string.IsNullOrEmpty(existingMeta.IgdbSlug) && !string.IsNullOrEmpty(secondaryMeta.IgdbSlug))
+            {
+                existingMeta.IgdbSlug = secondaryMeta.IgdbSlug;
+            }
+
+            // Merge images - add IGDB images at the front (they're more reliable than Steam CDN)
+            if (secondaryMeta.Images != null && secondaryMeta.Images.Any())
+            {
+                existingMeta.Images ??= new List<MediaCover.MediaCover>();
+
+                // Insert IGDB images at the beginning so they're tried first
+                var insertIndex = 0;
+                foreach (var image in secondaryMeta.Images)
+                {
+                    // Only add if it's from IGDB (has igdb.com in URL)
+                    if (image.RemoteUrl?.Contains("igdb.com") == true)
+                    {
+                        existingMeta.Images.Insert(insertIndex++, image);
+                    }
+                    else if (!existingMeta.Images.Any(i => i.CoverType == image.CoverType))
+                    {
+                        // For non-IGDB images, only add if we don't have this type
+                        existingMeta.Images.Add(image);
+                    }
+                }
+            }
+
+            // Add IGDB rating if missing
+            if (secondaryMeta.Ratings?.Igdb != null && existingMeta.Ratings?.Igdb == null)
+            {
+                existingMeta.Ratings ??= new Ratings();
+                existingMeta.Ratings.Igdb = secondaryMeta.Ratings.Igdb;
+            }
+
+            // Add overview if missing
+            if (string.IsNullOrEmpty(existingMeta.Overview) && !string.IsNullOrEmpty(secondaryMeta.Overview))
+            {
+                existingMeta.Overview = secondaryMeta.Overview;
+            }
+
+            // Add genres if missing
+            if ((existingMeta.Genres == null || !existingMeta.Genres.Any()) &&
+                secondaryMeta.Genres != null && secondaryMeta.Genres.Any())
+            {
+                existingMeta.Genres = secondaryMeta.Genres;
+            }
         }
 
         /// <summary>
