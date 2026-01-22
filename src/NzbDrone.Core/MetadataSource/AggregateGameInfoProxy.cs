@@ -125,17 +125,19 @@ namespace NzbDrone.Core.MetadataSource
 
         /// <summary>
         /// Get game by Steam App ID - primary identifier, no API key required.
+        /// Merges data from all available sources.
         /// </summary>
         public GameMetadata GetGameBySteamAppId(int steamAppId)
         {
+            GameMetadata result = null;
+
             // Try Steam first (no API key needed!)
             try
             {
-                var result = _steamProxy.GetGameBySteamAppId(steamAppId);
+                result = _steamProxy.GetGameBySteamAppId(steamAppId);
                 if (result != null)
                 {
                     _logger.Debug("Got game info from Steam for App ID {0}", steamAppId);
-                    return result;
                 }
             }
             catch (Exception ex)
@@ -143,16 +145,24 @@ namespace NzbDrone.Core.MetadataSource
                 _logger.Warn(ex, "Failed to get game from Steam for App ID {0}", steamAppId);
             }
 
-            // Try IGDB to cross-reference
+            // Also try IGDB to get IGDB ID and enrich metadata
             if (HasIgdbCredentials)
             {
                 try
                 {
-                    var result = _igdbProxy.GetGameBySteamAppId(steamAppId);
-                    if (result != null)
+                    var igdbResult = _igdbProxy.GetGameBySteamAppId(steamAppId);
+                    if (igdbResult != null)
                     {
                         _logger.Debug("Got game info from IGDB for Steam App ID {0}", steamAppId);
-                        return result;
+                        if (result != null)
+                        {
+                            // Merge IGDB data into Steam result
+                            MergeMetadata(result, igdbResult);
+                        }
+                        else
+                        {
+                            result = igdbResult;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -161,16 +171,23 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
-            // Try RAWG as last resort
+            // Also try RAWG for additional data
             if (HasRawgCredentials)
             {
                 try
                 {
-                    var result = _rawgProxy.GetGameBySteamAppId(steamAppId);
-                    if (result != null)
+                    var rawgResult = _rawgProxy.GetGameBySteamAppId(steamAppId);
+                    if (rawgResult != null)
                     {
                         _logger.Debug("Got game info from RAWG for Steam App ID {0}", steamAppId);
-                        return result;
+                        if (result != null)
+                        {
+                            MergeMetadata(result, rawgResult);
+                        }
+                        else
+                        {
+                            result = rawgResult;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -179,7 +196,7 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
-            return null;
+            return result;
         }
 
         public GameCollection GetCollectionInfo(int collectionId)
@@ -541,6 +558,78 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             return game;
+        }
+
+        /// <summary>
+        /// Merges metadata from a secondary source into an existing GameMetadata.
+        /// </summary>
+        private void MergeMetadata(GameMetadata existing, GameMetadata secondary)
+        {
+            if (existing == null || secondary == null)
+            {
+                return;
+            }
+
+            // Add IGDB ID if missing
+            if (existing.IgdbId == 0 && secondary.IgdbId > 0)
+            {
+                existing.IgdbId = secondary.IgdbId;
+            }
+
+            // Add IGDB slug if missing
+            if (string.IsNullOrEmpty(existing.IgdbSlug) && !string.IsNullOrEmpty(secondary.IgdbSlug))
+            {
+                existing.IgdbSlug = secondary.IgdbSlug;
+            }
+
+            // Add parent game ID if missing (for DLC linking)
+            if ((existing.ParentGameId == null || existing.ParentGameId == 0) && secondary.ParentGameId > 0)
+            {
+                existing.ParentGameId = secondary.ParentGameId;
+            }
+
+            // Add DLC IDs if missing
+            if ((existing.DlcIds == null || !existing.DlcIds.Any()) && secondary.DlcIds != null && secondary.DlcIds.Any())
+            {
+                existing.DlcIds = secondary.DlcIds;
+            }
+
+            // Merge images - add IGDB images at the front
+            if (secondary.Images != null && secondary.Images.Any())
+            {
+                existing.Images ??= new List<MediaCover.MediaCover>();
+                var insertIndex = 0;
+                foreach (var image in secondary.Images)
+                {
+                    if (image.RemoteUrl?.Contains("igdb.com") == true)
+                    {
+                        existing.Images.Insert(insertIndex++, image);
+                    }
+                    else if (!existing.Images.Any(i => i.CoverType == image.CoverType))
+                    {
+                        existing.Images.Add(image);
+                    }
+                }
+            }
+
+            // Add IGDB rating if missing
+            if (secondary.Ratings?.Igdb != null && existing.Ratings?.Igdb == null)
+            {
+                existing.Ratings ??= new Ratings();
+                existing.Ratings.Igdb = secondary.Ratings.Igdb;
+            }
+
+            // Add overview if missing
+            if (string.IsNullOrEmpty(existing.Overview) && !string.IsNullOrEmpty(secondary.Overview))
+            {
+                existing.Overview = secondary.Overview;
+            }
+
+            // Add genres if missing
+            if ((existing.Genres == null || !existing.Genres.Any()) && secondary.Genres != null && secondary.Genres.Any())
+            {
+                existing.Genres = secondary.Genres;
+            }
         }
 
         /// <summary>
