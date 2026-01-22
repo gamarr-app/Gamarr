@@ -161,10 +161,11 @@ namespace NzbDrone.Core.Notifications.Gotify
                         var linkUrl = "";
 
                         // IGDB - Internet Game Database (primary link for games)
-                        if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
+                        var igdbSlug = game.GameMetadata?.Value?.IgdbSlug;
+                        if (linkType == MetadataLinkType.Igdb && !string.IsNullOrEmpty(igdbSlug))
                         {
                             linkText = "IGDB";
-                            linkUrl = $"https://www.igdb.com/games/{game.IgdbId}";
+                            linkUrl = $"https://www.igdb.com/games/{igdbSlug}";
                         }
 
                         if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamAppId > 0)

@@ -38,6 +38,11 @@ namespace NzbDrone.Core.Games
         public int IgdbId { get; set; }
 
         /// <summary>
+        /// IGDB slug for URL generation (e.g., "half-life-2")
+        /// </summary>
+        public string IgdbSlug { get; set; }
+
+        /// <summary>
         /// Secondary identifier - RAWG ID (for metadata enrichment)
         /// </summary>
         public int RawgId { get; set; }

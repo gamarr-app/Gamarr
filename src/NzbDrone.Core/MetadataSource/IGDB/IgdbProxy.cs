@@ -337,6 +337,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             var game = new GameMetadata
             {
                 IgdbId = resource.Id,
+                IgdbSlug = resource.Slug,
                 Title = resource.Name,
                 OriginalTitle = resource.Name,
                 CleanTitle = resource.Name.CleanGameTitle(),

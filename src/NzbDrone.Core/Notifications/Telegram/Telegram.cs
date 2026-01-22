@@ -132,9 +132,10 @@ namespace NzbDrone.Core.Notifications.Telegram
                 var linkType = (MetadataLinkType)link;
 
                 // IGDB - Internet Game Database (primary link for games)
-                if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
+                var igdbSlug = game.GameMetadata?.Value?.IgdbSlug;
+                if (linkType == MetadataLinkType.Igdb && !string.IsNullOrEmpty(igdbSlug))
                 {
-                    links.Add(new TelegramLink("IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
+                    links.Add(new TelegramLink("IGDB", $"https://www.igdb.com/games/{igdbSlug}"));
                 }
 
                 if (linkType == MetadataLinkType.Steam && game.GameMetadata?.Value?.SteamAppId > 0)

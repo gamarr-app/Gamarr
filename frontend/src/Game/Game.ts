@@ -57,6 +57,8 @@ interface Game extends ModelBase {
   steamAppId: number;
   /** Secondary identifier - IGDB ID */
   igdbId: number;
+  /** IGDB slug for URL generation */
+  igdbSlug?: string;
   sortTitle: string;
   overview: string;
   youTubeTrailerId?: string;

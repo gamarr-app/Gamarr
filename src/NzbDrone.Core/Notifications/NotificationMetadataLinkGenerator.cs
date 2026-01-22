@@ -19,9 +19,10 @@ public static class NotificationMetadataLinkGenerator
             var linkType = (MetadataLinkType)type;
 
             // IGDB - Internet Game Database (primary link for games)
-            if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
+            var igdbSlug = game.GameMetadata?.Value?.IgdbSlug;
+            if (linkType == MetadataLinkType.Igdb && !string.IsNullOrEmpty(igdbSlug))
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "IGDB", $"https://www.igdb.com/games/{game.IgdbId}"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "IGDB", $"https://www.igdb.com/games/{igdbSlug}"));
             }
 
             // Steam Store link

@@ -47,7 +47,8 @@ namespace NzbDrone.Core.Notifications
             var qualityString = quality.Quality.ToString();
 
             // IGDB - Internet Game Database (primary metadata source for games)
-            var igdbUrl = "https://www.igdb.com/games/" + game.GameMetadata.Value.IgdbId;
+            var igdbSlug = game.GameMetadata.Value.IgdbSlug;
+            var igdbUrl = !string.IsNullOrEmpty(igdbSlug) ? $"https://www.igdb.com/games/{igdbSlug}" : string.Empty;
 
             if (quality.Revision.Version > 1)
             {
