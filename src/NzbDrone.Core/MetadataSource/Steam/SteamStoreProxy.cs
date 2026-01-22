@@ -405,7 +405,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
             var lowerTitle = title.ToLowerInvariant();
 
-            // Filter out soundtracks, artbooks, DLC, and other non-game content
+            // Filter out soundtracks, artbooks, DLC, mods, and other non-game content
             string[] excludePatterns =
             {
                 "soundtrack",
@@ -426,7 +426,10 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 "dlc pack",
                 "bonus content",
                 "pre-order bonus",
-                "preorder bonus"
+                "preorder bonus",
+                " - update",
+                " - mod",
+                "dedicated server"
             };
 
             return excludePatterns.Any(pattern => lowerTitle.Contains(pattern));
