@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import LazyLoad from 'react-lazyload';
 import { CoverType, Image } from './Game';
 
-function findImage(images: Image[], coverType: CoverType) {
-  return images.find((image) => image.coverType === coverType);
+function findImages(images: Image[], coverType: CoverType) {
+  return images.filter((image) => image.coverType === coverType);
 }
 
 function getUrl(image: Image, coverType: CoverType, size: number) {
@@ -44,7 +44,8 @@ function GameImage({
   const [url, setUrl] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(true);
-  const image = useRef<Image | null>(null);
+  const [imageIndex, setImageIndex] = useState(0);
+  const availableImages = useRef<Image[]>([]);
 
   const handleLoad = useCallback(() => {
     setHasError(false);
@@ -53,25 +54,36 @@ function GameImage({
   }, [setHasError, setIsLoaded, onLoad]);
 
   const handleError = useCallback(() => {
-    setHasError(true);
-    setIsLoaded(false);
-    onError?.();
-  }, [setHasError, setIsLoaded, onError]);
+    // Try next image of the same type
+    const nextIndex = imageIndex + 1;
+    if (nextIndex < availableImages.current.length) {
+      setImageIndex(nextIndex);
+      setUrl(getUrl(availableImages.current[nextIndex], coverType, pixelRatio * size));
+    } else {
+      // All images failed, show placeholder
+      setHasError(true);
+      setIsLoaded(false);
+      onError?.();
+    }
+  }, [imageIndex, coverType, size, onError]);
 
   useEffect(() => {
-    const nextImage = findImage(images, coverType);
+    const matchingImages = findImages(images, coverType);
 
-    if (nextImage && (!image.current || nextImage.url !== image.current.url)) {
-      // Don't reset isLoaded, as we want to immediately try to
-      // show the new image, whether an image was shown previously
-      // or the placeholder was shown.
-      image.current = nextImage;
+    if (matchingImages.length > 0) {
+      const currentUrl = availableImages.current[0]?.url;
+      const newUrl = matchingImages[0]?.url;
 
-      setUrl(getUrl(nextImage, coverType, pixelRatio * size));
-      setHasError(false);
-    } else if (!nextImage) {
-      if (image.current) {
-        image.current = null;
+      if (currentUrl !== newUrl) {
+        availableImages.current = matchingImages;
+        setImageIndex(0);
+        setUrl(getUrl(matchingImages[0], coverType, pixelRatio * size));
+        setHasError(false);
+      }
+    } else {
+      if (availableImages.current.length > 0) {
+        availableImages.current = [];
+        setImageIndex(0);
         setUrl(placeholder);
         setHasError(false);
         onError?.();
@@ -80,7 +92,7 @@ function GameImage({
   }, [images, coverType, placeholder, size, onError]);
 
   useEffect(() => {
-    if (!image.current) {
+    if (availableImages.current.length === 0) {
       onError?.();
     }
     // This should only run once when the component mounts,
