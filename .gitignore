@@ -174,3 +174,14 @@ node_modules.nosync
 
 # Ignore Jetbrains IntelliJ Workspace Directories
 .idea/
+
+# Claude Code
+.claude/
+
+# Build artifacts
+_publish/
+build
+Debug
+dotnet
+rebuild.sh
+-c

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
@@ -273,7 +274,7 @@ namespace NzbDrone.Core.MetadataSource
         public List<GameMetadata> GetTrendingGames()
         {
             var allResults = new List<GameMetadata>();
-            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var seenNormalizedTitles = new HashSet<string>(StringComparer.Ordinal);
 
             // Try IGDB first (preferred secondary source)
             if (HasIgdbCredentials)
@@ -283,7 +284,8 @@ namespace NzbDrone.Core.MetadataSource
                     var igdbResults = _igdbProxy.GetTrendingGames();
                     foreach (var game in igdbResults)
                     {
-                        if (seenTitles.Add(game.Title))
+                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                        if (seenNormalizedTitles.Add(normalizedTitle))
                         {
                             allResults.Add(game);
                         }
@@ -303,7 +305,8 @@ namespace NzbDrone.Core.MetadataSource
                     var rawgResults = _rawgProxy.GetTrendingGames();
                     foreach (var game in rawgResults)
                     {
-                        if (seenTitles.Add(game.Title))
+                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                        if (seenNormalizedTitles.Add(normalizedTitle))
                         {
                             allResults.Add(game);
                         }
@@ -321,7 +324,7 @@ namespace NzbDrone.Core.MetadataSource
         public List<GameMetadata> GetPopularGames()
         {
             var allResults = new List<GameMetadata>();
-            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var seenNormalizedTitles = new HashSet<string>(StringComparer.Ordinal);
 
             // Try IGDB first (preferred secondary source)
             if (HasIgdbCredentials)
@@ -331,7 +334,8 @@ namespace NzbDrone.Core.MetadataSource
                     var igdbResults = _igdbProxy.GetPopularGames();
                     foreach (var game in igdbResults)
                     {
-                        if (seenTitles.Add(game.Title))
+                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                        if (seenNormalizedTitles.Add(normalizedTitle))
                         {
                             allResults.Add(game);
                         }
@@ -351,7 +355,8 @@ namespace NzbDrone.Core.MetadataSource
                     var rawgResults = _rawgProxy.GetPopularGames();
                     foreach (var game in rawgResults)
                     {
-                        if (seenTitles.Add(game.Title))
+                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                        if (seenNormalizedTitles.Add(normalizedTitle))
                         {
                             allResults.Add(game);
                         }
@@ -394,7 +399,7 @@ namespace NzbDrone.Core.MetadataSource
         public List<Game> SearchForNewGame(string title)
         {
             var allResults = new List<Game>();
-            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var seenNormalizedTitles = new HashSet<string>(StringComparer.Ordinal);
             var lowerTitle = title?.ToLowerInvariant()?.Trim() ?? string.Empty;
 
             // Handle direct IGDB ID lookups - these bypass normal search and credentials check
@@ -418,7 +423,8 @@ namespace NzbDrone.Core.MetadataSource
                 var steamResults = _steamProxy.SearchForNewGame(title);
                 foreach (var game in steamResults)
                 {
-                    if (seenTitles.Add(game.Title))
+                    var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                    if (seenNormalizedTitles.Add(normalizedTitle))
                     {
                         allResults.Add(game);
                     }
@@ -439,7 +445,8 @@ namespace NzbDrone.Core.MetadataSource
                     var igdbResults = _igdbProxy.SearchForNewGame(title);
                     foreach (var game in igdbResults)
                     {
-                        if (seenTitles.Add(game.Title))
+                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                        if (seenNormalizedTitles.Add(normalizedTitle))
                         {
                             allResults.Add(game);
                         }
@@ -461,7 +468,8 @@ namespace NzbDrone.Core.MetadataSource
                     var rawgResults = _rawgProxy.SearchForNewGame(title);
                     foreach (var game in rawgResults)
                     {
-                        if (seenTitles.Add(game.Title))
+                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                        if (seenNormalizedTitles.Add(normalizedTitle))
                         {
                             allResults.Add(game);
                         }
@@ -520,6 +528,28 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             return game;
+        }
+
+        /// <summary>
+        /// Normalizes a title for comparison by removing punctuation, extra whitespace,
+        /// and converting to lowercase. This helps identify duplicate games across providers
+        /// that may format titles differently (e.g., "ELDEN RING NIGHTREIGN" vs "Elden Ring: Nightreign").
+        /// </summary>
+        private static string NormalizeTitleForComparison(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                return string.Empty;
+            }
+
+            // Remove punctuation and special characters, keep only letters, numbers, and spaces
+            var normalized = Regex.Replace(title, @"[^\p{L}\p{N}\s]", " ");
+
+            // Normalize whitespace (multiple spaces to single space)
+            normalized = Regex.Replace(normalized, @"\s+", " ");
+
+            // Trim and lowercase
+            return normalized.Trim().ToLowerInvariant();
         }
     }
 }
