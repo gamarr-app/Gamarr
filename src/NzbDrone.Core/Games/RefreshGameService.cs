@@ -137,6 +137,18 @@ namespace NzbDrone.Core.Games
             gameMetadata.Recommendations = gameInfo.Recommendations;
             gameMetadata.Popularity = gameInfo.Popularity;
 
+            // Update parent game ID for DLC linking
+            if (gameInfo.ParentGameId > 0)
+            {
+                gameMetadata.ParentGameId = gameInfo.ParentGameId;
+            }
+
+            // Update DLC IDs
+            if (gameInfo.DlcIds != null && gameInfo.DlcIds.Any())
+            {
+                gameMetadata.DlcIds = gameInfo.DlcIds;
+            }
+
             // add collection
             if (gameInfo.CollectionIgdbId > 0)
             {

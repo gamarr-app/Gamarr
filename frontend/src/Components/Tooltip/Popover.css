@@ -6,9 +6,12 @@
 }
 
 .body {
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 400px;
   padding: 10px;
   background-color: var(--popoverBodyBackgroundColor);
+  word-wrap: break-word;
 }
 
 .tooltipBody {

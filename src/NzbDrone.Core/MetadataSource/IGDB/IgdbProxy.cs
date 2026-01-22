@@ -517,10 +517,12 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             // Age rating / Certification
             if (resource.AgeRatings != null)
             {
-                var esrbRating = resource.AgeRatings.FirstOrDefault(ar => ar.Category == 1);
-                var pegiRating = resource.AgeRatings.FirstOrDefault(ar => ar.Category == 2);
+                // Only use known rating organizations (1-7)
+                var knownRatings = resource.AgeRatings.Where(ar => ar.Category >= 1 && ar.Category <= 7).ToList();
+                var esrbRating = knownRatings.FirstOrDefault(ar => ar.Category == 1);
+                var pegiRating = knownRatings.FirstOrDefault(ar => ar.Category == 2);
 
-                var selectedRating = esrbRating ?? pegiRating ?? resource.AgeRatings.FirstOrDefault();
+                var selectedRating = esrbRating ?? pegiRating ?? knownRatings.FirstOrDefault();
                 if (selectedRating != null)
                 {
                     game.Certification = $"{selectedRating.GetRatingOrganization()}-{selectedRating.Rating}";

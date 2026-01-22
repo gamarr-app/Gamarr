@@ -668,6 +668,8 @@ namespace NzbDrone.Core.MetadataSource
                 return;
             }
 
+            _logger.Info("MergeMetadata: Merging {0} with secondary ParentGameId={1}", existing.Title, secondary.ParentGameId);
+
             // Add IGDB ID if missing
             if (existing.IgdbId == 0 && secondary.IgdbId > 0)
             {
@@ -683,6 +685,7 @@ namespace NzbDrone.Core.MetadataSource
             // Add parent game ID if missing (for DLC linking)
             if ((existing.ParentGameId == null || existing.ParentGameId == 0) && secondary.ParentGameId > 0)
             {
+                _logger.Info("MergeMetadata: Setting ParentGameId to {0}", secondary.ParentGameId);
                 existing.ParentGameId = secondary.ParentGameId;
             }
 
