@@ -2,7 +2,6 @@ import ModelBase from 'App/ModelBase';
 import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import CustomFormat from 'typings/CustomFormat';
-import MediaInfo from 'typings/MediaInfo';
 
 export interface GameFile extends ModelBase {
   gameId: number;
@@ -17,6 +16,5 @@ export interface GameFile extends ModelBase {
   customFormats: CustomFormat[];
   customFormatScore: number;
   indexerFlags: number;
-  mediaInfo: MediaInfo;
   qualityCutoffNotMet: boolean;
 }
