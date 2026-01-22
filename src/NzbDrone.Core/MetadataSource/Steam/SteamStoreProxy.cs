@@ -183,18 +183,21 @@ namespace NzbDrone.Core.MetadataSource.Steam
             // Set images
             game.Images = new List<MediaCover.MediaCover>();
 
-            // Use Steam's library poster image (600x900) - proper vertical poster format
-            var posterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{data.Steam_Appid}/library_600x900.jpg";
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, posterUrl));
+            // Try library_600x900 first (vertical poster format, works for established games)
+            // Falls back to header_image if library image 404s (handled by MediaCoverService)
+            var libraryPosterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{data.Steam_Appid}/library_600x900.jpg";
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, libraryPosterUrl));
 
-            // Use header image as secondary fanart if no background
+            // Add header as secondary poster option (wide format, but always available)
+            if (!string.IsNullOrEmpty(data.Header_Image))
+            {
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Header_Image));
+            }
+
+            // Use background as fanart
             if (!string.IsNullOrEmpty(data.Background_Raw ?? data.Background))
             {
                 game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, data.Background_Raw ?? data.Background));
-            }
-            else if (!string.IsNullOrEmpty(data.Header_Image))
-            {
-                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, data.Header_Image));
             }
 
             if (data.Screenshots != null)
@@ -227,13 +230,11 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 Platforms = MapPlatforms(item.Platforms)
             };
 
-            // Use library_600x900.jpg as poster (proper vertical format)
-            // Fall back to header.jpg for fanart (wide format)
-            var posterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/library_600x900.jpg";
+            // Try library_600x900 first (vertical poster), with header as fallback
+            var libraryPosterUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/library_600x900.jpg";
             var headerUrl = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/header.jpg";
-
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, posterUrl));
-            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Fanart, headerUrl));
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, libraryPosterUrl));
+            game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, headerUrl));
 
             // Add Metacritic rating if available
             if (!string.IsNullOrEmpty(item.Metascore) && int.TryParse(item.Metascore, out var metascore) && metascore > 0)
@@ -404,7 +405,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
             var lowerTitle = title.ToLowerInvariant();
 
-            // Filter out soundtracks, artbooks, and other non-game content
+            // Filter out soundtracks, artbooks, DLC, and other non-game content
             string[] excludePatterns =
             {
                 "soundtrack",
@@ -417,7 +418,15 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 "digital art book",
                 "wallpaper",
                 "strategy guide",
-                "guidebook"
+                "guidebook",
+                "upgrade edition",
+                "upgrade pack",
+                "season pass",
+                "expansion pass",
+                "dlc pack",
+                "bonus content",
+                "pre-order bonus",
+                "preorder bonus"
             };
 
             return excludePatterns.Any(pattern => lowerTitle.Contains(pattern));

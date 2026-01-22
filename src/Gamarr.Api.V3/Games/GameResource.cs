@@ -163,7 +163,10 @@ namespace Gamarr.Api.V3.Games
 
                 Runtime = model.GameMetadata.Value.Runtime,
                 CleanTitle = model.GameMetadata.Value.CleanTitle,
-                TitleSlug = model.SteamAppId > 0 ? model.SteamAppId.ToString() : model.IgdbId.ToString(),
+                TitleSlug = model.SteamAppId > 0 ? model.SteamAppId.ToString() :
+                            model.IgdbId > 0 ? model.IgdbId.ToString() :
+                            model.RawgId > 0 ? $"rawg-{model.RawgId}" :
+                            model.Id.ToString(),
                 RootFolderPath = model.RootFolderPath,
                 Certification = model.GameMetadata.Value.Certification,
                 Website = model.GameMetadata.Value.Website,
