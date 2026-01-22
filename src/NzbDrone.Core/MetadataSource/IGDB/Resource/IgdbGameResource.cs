@@ -247,7 +247,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB.Resource
         public IgdbPlatformFamilyResource PlatformFamily { get; set; }
 
         [JsonProperty("platform_logo")]
-        public IgdbImageResource PlatformLogo { get; set; }
+        public int? PlatformLogo { get; set; }
     }
 
     public class IgdbPlatformFamilyResource
