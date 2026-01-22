@@ -76,7 +76,7 @@ function GameIndexRow(props: GameIndexRowProps) {
     certification,
     tags = [],
     steamAppId,
-    igdbId,
+    igdbSlug,
     isAvailable,
     hasFile,
     gameFile,
@@ -436,7 +436,7 @@ function GameIndexRow(props: GameIndexRowProps) {
                   tooltip={
                     <GameDetailsLinks
                       steamAppId={steamAppId}
-                      igdbId={igdbId}
+                      igdbSlug={igdbSlug}
                       youTubeTrailerId={youTubeTrailerId}
                     />
                   }
