@@ -72,7 +72,7 @@ export const setAddGameValue = createAction(SET_ADD_GAME_VALUE, (payload) => {
 export const actionHandlers = handleThunks({
 
   [LOOKUP_GAME]: function(getState, payload, dispatch) {
-    dispatch(set({ section, isFetching: true }));
+    dispatch(set({ section, isFetching: true, items: [], isPopulated: false }));
 
     if (abortCurrentRequest) {
       abortCurrentRequest();

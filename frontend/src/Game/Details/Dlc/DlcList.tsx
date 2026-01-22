@@ -74,7 +74,7 @@ function DlcList({ gameId }: DlcListProps) {
               <GamePoster
                 className={styles.dlcPoster}
                 images={dlc.images}
-                size={60}
+                size={250}
               />
               <div className={styles.dlcInfo}>
                 <h4 className={styles.dlcTitle}>{dlc.title}</h4>
