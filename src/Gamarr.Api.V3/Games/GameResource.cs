@@ -80,6 +80,11 @@ namespace Gamarr.Api.V3.Games
         public int IgdbId { get; set; }
 
         /// <summary>
+        /// IGDB slug for URL generation (e.g., "half-life-2")
+        /// </summary>
+        public string IgdbSlug { get; set; }
+
+        /// <summary>
         /// Secondary identifier - RAWG ID (for metadata enrichment)
         /// </summary>
         public int RawgId { get; set; }
@@ -132,6 +137,7 @@ namespace Gamarr.Api.V3.Games
                 Id = model.Id,
                 SteamAppId = model.SteamAppId,
                 IgdbId = model.IgdbId,
+                IgdbSlug = model.GameMetadata.Value.IgdbSlug,
                 RawgId = model.RawgId,
                 Title = translatedTitle,
                 OriginalTitle = model.GameMetadata.Value.OriginalTitle,
@@ -201,6 +207,7 @@ namespace Gamarr.Api.V3.Games
                 {
                     SteamAppId = resource.SteamAppId,
                     IgdbId = resource.IgdbId,
+                    IgdbSlug = resource.IgdbSlug,
                     RawgId = resource.RawgId,
                     Title = resource.Title,
                     Genres = resource.Genres,

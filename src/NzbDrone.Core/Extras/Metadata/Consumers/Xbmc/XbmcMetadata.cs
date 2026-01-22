@@ -372,8 +372,12 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
             if (Settings.GameMetadataURL)
             {
                 // IGDB - Internet Game Database (primary metadata source for games)
-                xmlResult += "https://www.igdb.com/games/" + game.GameMetadata.Value.IgdbId;
-                xmlResult += Environment.NewLine;
+                var igdbSlug = game.GameMetadata.Value.IgdbSlug;
+                if (!string.IsNullOrEmpty(igdbSlug))
+                {
+                    xmlResult += "https://www.igdb.com/games/" + igdbSlug;
+                    xmlResult += Environment.NewLine;
+                }
 
                 // IMDb URL removed - IMDb is a movie database, not applicable for games
             }

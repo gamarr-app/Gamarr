@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.igdb.com/games/{message.Game.GameMetadata.Value.IgdbId}",
+                Url = !string.IsNullOrEmpty(message.Game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{message.Game.GameMetadata.Value.IgdbSlug}" : null,
                 Description = "Game Grabbed",
                 Title = GetTitle(message.Game),
                 Color = (int)DiscordColors.Standard,
@@ -147,7 +147,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.igdb.com/games/{message.Game.GameMetadata.Value.IgdbId}",
+                Url = !string.IsNullOrEmpty(message.Game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{message.Game.GameMetadata.Value.IgdbSlug}" : null,
                 Description = isUpgrade ? "Game Upgraded" : "Game Imported",
                 Title = GetTitle(message.Game),
                 Color = isUpgrade ? (int)DiscordColors.Upgrade : (int)DiscordColors.Success,
@@ -262,7 +262,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId}",
+                Url = !string.IsNullOrEmpty(game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbSlug}" : null,
                 Title = game.Title,
                 Description = "Game Added",
                 Color = (int)DiscordColors.Success,
@@ -319,7 +319,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId}",
+                Url = !string.IsNullOrEmpty(game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbSlug}" : null,
                 Title = game.Title,
                 Description = deleteMessage.DeletedFilesMessage,
                 Color = (int)DiscordColors.Danger,
@@ -360,7 +360,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId}",
+                Url = !string.IsNullOrEmpty(game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbSlug}" : null,
                 Title = GetTitle(game),
                 Description = "Game File Deleted",
                 Color = (int)DiscordColors.Danger,
@@ -460,7 +460,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = game?.GameMetadata.Value.IgdbId > 0 ? $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId}" : null,
+                Url = !string.IsNullOrEmpty(game?.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{game.GameMetadata.Value.IgdbSlug}" : null,
                 Description = "Manual interaction needed",
                 Title = GetTitle(game),
                 Color = (int)DiscordColors.Standard,
@@ -614,10 +614,12 @@ namespace NzbDrone.Core.Notifications.Discord
             }
 
             // Use IGDB (Internet Game Database) as the primary metadata source for games
-            var links = new List<string>
+            var links = new List<string>();
+
+            if (!string.IsNullOrEmpty(game.GameMetadata.Value.IgdbSlug))
             {
-                $"[IGDB](https://www.igdb.com/games/{game.GameMetadata.Value.IgdbId})"
-            };
+                links.Add($"[IGDB](https://www.igdb.com/games/{game.GameMetadata.Value.IgdbSlug})");
+            }
 
             if (game.GameMetadata.Value.SteamAppId > 0)
             {

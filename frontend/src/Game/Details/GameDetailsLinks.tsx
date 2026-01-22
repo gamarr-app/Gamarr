@@ -6,10 +6,10 @@ import { kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './GameDetailsLinks.css';
 
-type GameDetailsLinksProps = Pick<Game, 'steamAppId' | 'igdbId' | 'youTubeTrailerId'>;
+type GameDetailsLinksProps = Pick<Game, 'steamAppId' | 'igdbId' | 'igdbSlug' | 'youTubeTrailerId'>;
 
 function GameDetailsLinks(props: GameDetailsLinksProps) {
-  const { steamAppId, igdbId, youTubeTrailerId } = props;
+  const { steamAppId, igdbId, igdbSlug, youTubeTrailerId } = props;
 
   return (
     <div className={styles.links}>
@@ -28,10 +28,10 @@ function GameDetailsLinks(props: GameDetailsLinksProps) {
         </Link>
       ) : null}
 
-      {igdbId > 0 ? (
+      {igdbSlug ? (
         <Link
           className={styles.link}
-          to={`https://www.igdb.com/games/${igdbId}`}
+          to={`https://www.igdb.com/games/${igdbSlug}`}
         >
           <Label
             className={styles.linkLabel}
