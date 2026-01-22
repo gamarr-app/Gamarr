@@ -103,24 +103,11 @@ namespace NzbDrone.Core.MetadataSource
 
         /// <summary>
         /// Get game info by Steam App ID (no API key required).
+        /// Queries all available sources (Steam, IGDB, RAWG) and merges results.
         /// </summary>
         public GameMetadata GetGameInfoBySteamAppId(int steamAppId)
         {
-            try
-            {
-                var result = _steamProxy.GetGameInfo(steamAppId);
-                if (result != null)
-                {
-                    _logger.Debug("Got game info from Steam for App ID {0}", steamAppId);
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Warn(ex, "Failed to get game info from Steam for App ID {0}", steamAppId);
-            }
-
-            return null;
+            return QueryAllSourcesBySteamAppId(steamAppId);
         }
 
         /// <summary>
@@ -558,6 +545,117 @@ namespace NzbDrone.Core.MetadataSource
             }
 
             return game;
+        }
+
+        /// <summary>
+        /// Queries all available metadata sources for a Steam App ID and merges results.
+        /// Steam is always queried first (no API key needed), then IGDB and RAWG if credentials exist.
+        /// </summary>
+        private GameMetadata QueryAllSourcesBySteamAppId(int steamAppId)
+        {
+            GameMetadata result = null;
+
+            _logger.Info("QueryAllSourcesBySteamAppId: Fetching metadata for Steam App ID {0}", steamAppId);
+            _logger.Info("QueryAllSourcesBySteamAppId: HasIgdbCredentials={0}, HasRawgCredentials={1}", HasIgdbCredentials, HasRawgCredentials);
+
+            // 1. Steam (always available, no API key)
+            try
+            {
+                result = _steamProxy.GetGameInfo(steamAppId);
+                if (result != null)
+                {
+                    _logger.Info("QueryAllSourcesBySteamAppId: Got game from Steam: {0}", result.Title);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "QueryAllSourcesBySteamAppId: Failed to get game info from Steam for App ID {0}", steamAppId);
+            }
+
+            // 2. IGDB (if credentials available)
+            if (HasIgdbCredentials)
+            {
+                _logger.Info("QueryAllSourcesBySteamAppId: Querying IGDB for Steam App ID {0}", steamAppId);
+                try
+                {
+                    var igdbResult = _igdbProxy.GetGameBySteamAppId(steamAppId);
+                    if (igdbResult != null)
+                    {
+                        _logger.Info("QueryAllSourcesBySteamAppId: Got IGDB data - Title={0}, IgdbId={1}", igdbResult.Title, igdbResult.IgdbId);
+                        if (result != null)
+                        {
+                            MergeMetadata(result, igdbResult);
+                            _logger.Info("QueryAllSourcesBySteamAppId: After merge - IgdbId={0}", result.IgdbId);
+                        }
+                        else
+                        {
+                            result = igdbResult;
+                        }
+                    }
+                    else if (result != null)
+                    {
+                        // Steam App ID not linked in IGDB, try searching by title
+                        _logger.Info("QueryAllSourcesBySteamAppId: IGDB Steam lookup failed, trying title search for '{0}'", result.Title);
+                        var searchResults = _igdbProxy.SearchForNewGame(result.Title);
+                        if (searchResults != null && searchResults.Any())
+                        {
+                            // Find the best match by title
+                            var match = searchResults.FirstOrDefault(g =>
+                                g.Title.Equals(result.Title, StringComparison.OrdinalIgnoreCase) ||
+                                (g.GameMetadata?.Value?.CleanTitle?.Equals(result.CleanTitle, StringComparison.OrdinalIgnoreCase) == true));
+
+                            if (match?.GameMetadata?.Value != null)
+                            {
+                                _logger.Info("QueryAllSourcesBySteamAppId: Found IGDB match by title: {0} (IGDB ID: {1})", match.Title, match.GameMetadata.Value.IgdbId);
+                                MergeMetadata(result, match.GameMetadata.Value);
+                            }
+                            else
+                            {
+                                _logger.Info("QueryAllSourcesBySteamAppId: No exact IGDB title match found for '{0}'", result.Title);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _logger.Info("QueryAllSourcesBySteamAppId: IGDB returned null for Steam App ID {0}", steamAppId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "QueryAllSourcesBySteamAppId: Failed to get IGDB data for Steam App ID {0}", steamAppId);
+                }
+            }
+            else
+            {
+                _logger.Info("QueryAllSourcesBySteamAppId: Skipping IGDB - no credentials");
+            }
+
+            // 3. RAWG (if credentials available)
+            if (HasRawgCredentials)
+            {
+                try
+                {
+                    var rawgResult = _rawgProxy.GetGameBySteamAppId(steamAppId);
+                    if (rawgResult != null)
+                    {
+                        _logger.Debug("Got RAWG data for Steam App ID {0}", steamAppId);
+                        if (result != null)
+                        {
+                            MergeMetadata(result, rawgResult);
+                        }
+                        else
+                        {
+                            result = rawgResult;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Failed to get RAWG data for Steam App ID {0}", steamAppId);
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
