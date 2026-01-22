@@ -39,10 +39,9 @@ function ParentGameInfo({ gameId }: ParentGameInfoProps) {
     return null;
   }
 
-  return (
-    <div className={styles.parentGameInfo}>
-      <span className={styles.gameTypeBadge}>{gameTypeDisplayName}</span>
-      {parentGame ? (
+  const renderParentInfo = () => {
+    if (parentGame) {
+      return (
         <>
           <span className={styles.parentLabel}>{translate('ParentGame')}:</span>
           <Link
@@ -52,11 +51,24 @@ function ParentGameInfo({ gameId }: ParentGameInfoProps) {
             {parentGame.title}
           </Link>
         </>
-      ) : parentIgdbId ? (
+      );
+    }
+
+    if (parentIgdbId) {
+      return (
         <span className={styles.parentLabel}>
           {translate('ParentGameNotInLibrary')}
         </span>
-      ) : null}
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className={styles.parentGameInfo}>
+      <span className={styles.gameTypeBadge}>{gameTypeDisplayName}</span>
+      {renderParentInfo()}
     </div>
   );
 }
