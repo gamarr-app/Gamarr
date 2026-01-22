@@ -292,6 +292,78 @@ namespace Gamarr.Api.V3.Games
             _gamesService.DeleteGame(id, deleteFiles, addImportExclusion);
         }
 
+        /// <summary>
+        /// Get all DLCs/expansions for a specific game
+        /// </summary>
+        [HttpGet("{id}/dlc")]
+        public List<GameResource> GetDlcsForGame(int id)
+        {
+            var game = _gamesService.GetGame(id);
+
+            if (game == null || game.IgdbId <= 0)
+            {
+                return new List<GameResource>();
+            }
+
+            var availDelay = _configService.AvailabilityDelay;
+            var dlcs = _gamesService.GetDlcsForGame(game.IgdbId);
+
+            return dlcs.Select(d => d.ToResource(availDelay, null, _qualityUpgradableSpecification)).ToList();
+        }
+
+        /// <summary>
+        /// Get the parent game for a DLC
+        /// </summary>
+        [HttpGet("{id}/parent")]
+        public ActionResult<GameResource> GetParentGame(int id)
+        {
+            var game = _gamesService.GetGame(id);
+
+            if (game == null || !game.GameMetadata.Value.ParentGameId.HasValue)
+            {
+                return NotFound();
+            }
+
+            var parent = _gamesService.GetParentGame(game.GameMetadata.Value.ParentGameId.Value);
+
+            if (parent == null)
+            {
+                return NotFound();
+            }
+
+            return MapToResource(parent);
+        }
+
+        /// <summary>
+        /// Get all DLCs in the library
+        /// </summary>
+        [HttpGet("dlc")]
+        public List<GameResource> GetAllDlcs()
+        {
+            var availDelay = _configService.AvailabilityDelay;
+            var dlcs = _gamesService.GetAllDlcs();
+
+            var resources = dlcs.Select(d => d.ToResource(availDelay, null, _qualityUpgradableSpecification)).ToList();
+            MapCoversToLocal(resources, _coverMapper.GetCoverFileInfos());
+
+            return resources;
+        }
+
+        /// <summary>
+        /// Get only main games (excluding DLCs)
+        /// </summary>
+        [HttpGet("main")]
+        public List<GameResource> GetMainGamesOnly()
+        {
+            var availDelay = _configService.AvailabilityDelay;
+            var games = _gamesService.GetMainGamesOnly();
+
+            var resources = games.Select(g => g.ToResource(availDelay, null, _qualityUpgradableSpecification)).ToList();
+            MapCoversToLocal(resources, _coverMapper.GetCoverFileInfos());
+
+            return resources;
+        }
+
         private void MapCoversToLocal(GameResource game)
         {
             _coverMapper.ConvertToLocalUrls(game.Id, game.Images);

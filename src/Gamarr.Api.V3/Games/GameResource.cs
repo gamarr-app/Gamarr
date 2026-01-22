@@ -15,6 +15,19 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Gamarr.Api.V3.Games
 {
+    /// <summary>
+    /// Lightweight summary of a game for parent/DLC references
+    /// </summary>
+    public class GameSummaryResource
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public int SteamAppId { get; set; }
+        public int IgdbId { get; set; }
+        public string TitleSlug { get; set; }
+        public List<MediaCover> Images { get; set; }
+    }
+
     public class GameResource : RestResource
     {
         public GameResource()
@@ -105,6 +118,42 @@ namespace Gamarr.Api.V3.Games
         public DateTime? LastSearchTime { get; set; }
         public GameStatisticsResource Statistics { get; set; }
 
+        // DLC-related properties
+        /// <summary>
+        /// Type of game content (MainGame, DLC, Expansion, etc.)
+        /// </summary>
+        public GameType GameType { get; set; }
+
+        /// <summary>
+        /// Display name for the game type
+        /// </summary>
+        public string GameTypeDisplayName { get; set; }
+
+        /// <summary>
+        /// Whether this is DLC/expansion content
+        /// </summary>
+        public bool IsDlc { get; set; }
+
+        /// <summary>
+        /// IGDB ID of the parent game (for DLCs/expansions)
+        /// </summary>
+        public int? ParentGameIgdbId { get; set; }
+
+        /// <summary>
+        /// Parent game info (if this is a DLC)
+        /// </summary>
+        public GameSummaryResource ParentGame { get; set; }
+
+        /// <summary>
+        /// List of IGDB IDs for DLCs/expansions of this game
+        /// </summary>
+        public List<int> DlcIds { get; set; }
+
+        /// <summary>
+        /// Number of known DLCs for this game
+        /// </summary>
+        public int DlcCount { get; set; }
+
         // Hiding this so people don't think its usable (only used to set the initial state)
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         [SwaggerIgnore]
@@ -189,6 +238,14 @@ namespace Gamarr.Api.V3.Games
                 Collection = collection,
                 Popularity = model.GameMetadata.Value.Popularity,
                 LastSearchTime = model.LastSearchTime,
+
+                // DLC properties
+                GameType = model.GameMetadata.Value.GameType,
+                GameTypeDisplayName = model.GameMetadata.Value.GameType.GetDisplayName(),
+                IsDlc = model.GameMetadata.Value.IsDlc,
+                ParentGameIgdbId = model.GameMetadata.Value.ParentGameId,
+                DlcIds = model.GameMetadata.Value.DlcIds ?? new List<int>(),
+                DlcCount = model.GameMetadata.Value.DlcIds?.Count ?? 0,
             };
         }
 
@@ -226,6 +283,9 @@ namespace Gamarr.Api.V3.Games
                     Studio = resource.Studio,
                     Runtime = resource.Runtime,
                     CleanTitle = resource.CleanTitle,
+                    GameType = resource.GameType,
+                    ParentGameId = resource.ParentGameIgdbId,
+                    DlcIds = resource.DlcIds ?? new List<int>(),
                 },
 
                 Path = resource.Path,

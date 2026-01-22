@@ -228,6 +228,12 @@ export const defaultState = {
       isVisible: false
     },
     {
+      name: 'gameTypeDisplayName',
+      label: () => translate('GameType'),
+      isSortable: true,
+      isVisible: false
+    },
+    {
       name: 'actions',
       columnLabel: () => translate('Actions'),
       isVisible: true,
@@ -536,6 +542,34 @@ export const defaultState = {
       label: () => translate('Tags'),
       type: filterBuilderTypes.ARRAY,
       valueType: filterBuilderValueTypes.TAG
+    },
+    {
+      name: 'isDlc',
+      label: () => translate('IsDlc'),
+      type: filterBuilderTypes.EXACT,
+      valueType: filterBuilderValueTypes.BOOL
+    },
+    {
+      name: 'gameTypeDisplayName',
+      label: () => translate('GameType'),
+      type: filterBuilderTypes.EXACT,
+      optionsSelector: function(items) {
+        const gameTypeList = items.reduce((acc, game) => {
+          if (game.gameTypeDisplayName) {
+            const existing = acc.find((a) => a.id === game.gameTypeDisplayName);
+            if (!existing) {
+              acc.push({
+                id: game.gameTypeDisplayName,
+                name: game.gameTypeDisplayName
+              });
+            }
+          }
+
+          return acc;
+        }, []);
+
+        return gameTypeList.sort(sortByProp('name'));
+      }
     }
   ]
 };

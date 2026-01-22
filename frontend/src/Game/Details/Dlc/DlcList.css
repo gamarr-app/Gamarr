@@ -1,0 +1,142 @@
+.container {
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+  background-color: var(--inputBackgroundColor);
+}
+
+.blankpad {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 2em;
+}
+
+.dlcGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+  padding: 15px;
+}
+
+.dlcCard {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+  background-color: var(--inputBackgroundColor);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--gameBackgroundColor);
+  }
+}
+
+.dlcPoster {
+  flex-shrink: 0;
+  width: 60px;
+  height: 80px;
+  margin-right: 12px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dlcInfo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dlcTitle {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dlcTitleLink {
+  color: var(--linkColor);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.dlcType {
+  font-size: 12px;
+  color: var(--textColorMuted);
+}
+
+.dlcStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.monitoredIcon {
+  color: var(--primaryColor);
+}
+
+.unmonitoredIcon {
+  color: var(--textColorMuted);
+}
+
+.hasFile {
+  color: var(--successColor);
+}
+
+.noFile {
+  color: var(--dangerColor);
+}
+
+.parentGameInfo {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background-color: var(--gameBackgroundColor);
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+}
+
+.parentLabel {
+  font-weight: 500;
+  margin-right: 8px;
+  color: var(--textColorMuted);
+}
+
+.parentLink {
+  color: var(--linkColor);
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.dlcBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: var(--purple);
+  color: white;
+  border-radius: 3px;
+}
+
+.gameTypeBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: var(--purple);
+  color: white;
+  border-radius: 3px;
+}
