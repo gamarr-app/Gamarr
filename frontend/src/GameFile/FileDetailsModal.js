@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useSelector } from 'react-redux';
 import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
 import Button from 'Components/Link/Button';
@@ -9,6 +10,7 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { sizes } from 'Helpers/Props';
+import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import formatBytes from 'Utilities/Number/formatBytes';
 import formatDateTime from 'Utilities/Date/formatDateTime';
 import translate from 'Utilities/String/translate';
@@ -23,6 +25,10 @@ function FileDetailsModal(props) {
     sceneName,
     releaseGroup
   } = props;
+
+  const { shortDateFormat, timeFormat } = useSelector(
+    createUISettingsSelector()
+  );
 
   return (
     <Modal
@@ -56,7 +62,7 @@ function FileDetailsModal(props) {
             {dateAdded ? (
               <DescriptionListItem
                 title={translate('Added')}
-                data={formatDateTime(dateAdded)}
+                data={formatDateTime(dateAdded, shortDateFormat, timeFormat)}
               />
             ) : null}
 
