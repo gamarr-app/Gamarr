@@ -59,9 +59,9 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 }
 
                 var data = appData["data"].ToObject<SteamGameData>();
-                if (data == null || data.Type != "game")
+                if (data == null || (data.Type != "game" && data.Type != "dlc"))
                 {
-                    _logger.Debug("Steam App ID {0} is not a game (type: {1})", steamAppId, data?.Type);
+                    _logger.Debug("Steam App ID {0} is not a game or DLC (type: {1})", steamAppId, data?.Type);
                     return null;
                 }
 

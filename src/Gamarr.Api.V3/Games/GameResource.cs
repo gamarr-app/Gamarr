@@ -119,6 +119,7 @@ namespace Gamarr.Api.V3.Games
         public GameStatisticsResource Statistics { get; set; }
 
         // DLC-related properties
+
         /// <summary>
         /// Type of game content (MainGame, DLC, Expansion, etc.)
         /// </summary>
