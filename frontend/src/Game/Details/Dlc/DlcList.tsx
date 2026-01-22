@@ -42,10 +42,17 @@ function DlcList({ gameId }: DlcListProps) {
   const igdbId = game?.igdbId ?? 0;
   const dlcIds = game?.dlcIds ?? [];
   const dlcCount = game?.dlcCount ?? 0;
+  const isDlc = game?.isDlc ?? false;
+  const parentGameIgdbId = game?.parentGameIgdbId;
 
   const { dlcs, isFetching, isPopulated } = useSelector(
     createDlcsSelector(igdbId)
   );
+
+  // Don't show DLC section for games that are DLCs themselves
+  if (isDlc || parentGameIgdbId) {
+    return null;
+  }
 
   if (isFetching) {
     return (

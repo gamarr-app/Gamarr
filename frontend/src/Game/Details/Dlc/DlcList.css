@@ -25,9 +25,16 @@
   border-radius: 4px;
   background-color: var(--inputBackgroundColor);
   transition: background-color 0.2s ease;
+  color: var(--textColor);
+  text-decoration: none;
 
   &:hover {
     background-color: var(--gameBackgroundColor);
+    color: var(--textColor);
+  }
+
+  &:visited {
+    color: var(--textColor);
   }
 }
 
