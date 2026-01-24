@@ -38,7 +38,7 @@ function AddNotificationModalContent({
   }, [onModalClose]);
 
   const handleNotificationSelect = useCallback(
-    ({ implementation, name }: { implementation: string; name: string }) => {
+    ({ implementation, name }: { implementation: string; name?: string }) => {
       dispatch(selectNotificationSchema({ implementation, presetName: name }));
       onModalClose({ notificationSelected: true });
     },
@@ -59,7 +59,7 @@ function AddNotificationModalContent({
         {isSchemaPopulated && !schemaError ? (
           <div>
             <div className={styles.notifications}>
-              {schema.map((notification: { implementation: string }) => {
+              {schema.map((notification: any) => {
                 return (
                   <AddNotificationItem
                     key={notification.implementation}
