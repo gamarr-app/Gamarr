@@ -69,6 +69,7 @@ jobs:
         run: dotnet build src/Gamarr.sln --configuration Release
 
       - name: Run Unit Tests
+        shell: bash
         run: |
           dotnet test src/Gamarr.sln \
             --no-build \
@@ -79,6 +80,7 @@ jobs:
 
       - name: Verify tests ran
         if: always()
+        shell: bash
         run: |
           if [ ! -f ./test-results/test-results.trx ]; then
             echo "::error::No test results found - tests did not run"
