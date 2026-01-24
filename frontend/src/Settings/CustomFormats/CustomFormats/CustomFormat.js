@@ -6,7 +6,7 @@ import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import EditCustomFormatModalConnector from './EditCustomFormatModalConnector';
+import EditCustomFormatModal from './EditCustomFormatModal';
 import ExportCustomFormatModal from './ExportCustomFormatModal';
 import styles from './CustomFormat.css';
 
@@ -135,7 +135,7 @@ class CustomFormat extends Component {
           }
         </div>
 
-        <EditCustomFormatModalConnector
+        <EditCustomFormatModal
           id={id}
           isOpen={this.state.isEditCustomFormatModalOpen}
           onModalClose={this.onEditCustomFormatModalClose}

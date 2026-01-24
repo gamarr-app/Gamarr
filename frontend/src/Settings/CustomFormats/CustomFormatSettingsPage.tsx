@@ -7,7 +7,7 @@ import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import ParseToolbarButton from 'Parse/ParseToolbarButton';
 import SettingsToolbar from 'Settings/SettingsToolbar';
 import translate from 'Utilities/String/translate';
-import CustomFormatsConnector from './CustomFormats/CustomFormatsConnector';
+import CustomFormats from './CustomFormats/CustomFormats';
 import ManageCustomFormatsToolbarButton from './CustomFormats/Manage/ManageCustomFormatsToolbarButton';
 
 function CustomFormatSettingsPage() {
@@ -28,9 +28,7 @@ function CustomFormatSettingsPage() {
 
       <PageContentBody>
         <DndProvider backend={HTML5Backend}>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore */}
-          <CustomFormatsConnector />
+          <CustomFormats />
         </DndProvider>
       </PageContentBody>
     </PageContent>
