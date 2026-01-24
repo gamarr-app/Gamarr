@@ -423,7 +423,7 @@ namespace NzbDrone.Common.Test.Http
 
                 var response = await Subject.GetAsync(request);
 
-                response.StatusCode.Should().Be(HttpStatusCode.Moved);
+                response.HasHttpRedirect.Should().BeTrue();
             }
 
             ExceptionVerification.ExpectedWarns(1);

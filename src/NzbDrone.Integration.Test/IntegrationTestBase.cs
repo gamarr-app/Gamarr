@@ -288,7 +288,7 @@ namespace NzbDrone.Integration.Test
 
             if (result.GameFile == null)
             {
-                var path = Path.Combine(GameRootFolder, game.Title, string.Format("{0} ({1}) - {2}.strm", game.Title, game.Year, quality.Name));
+                var path = Path.Combine(GameRootFolder, game.Title, string.Format("{0} ({1}) - {2}.exe", game.Title, game.Year, quality.Name));
 
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 

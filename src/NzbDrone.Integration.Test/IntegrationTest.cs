@@ -73,7 +73,10 @@ namespace NzbDrone.Integration.Test
             {
                 Path.Combine(testDir, "Files", "MockData"),
                 Path.Combine(testDir, "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
                 Path.Combine(testDir, "..", "..", "src", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "..", "src", "NzbDrone.Core.Test", "Files", "MockData"),
             };
 
             foreach (var path in possiblePaths)

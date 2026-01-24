@@ -1,0 +1,74 @@
+[
+  {
+    "id": 119171,
+    "name": "Elden Ring",
+    "slug": "elden-ring",
+    "summary": "An action RPG developed by FromSoftware in collaboration with George R.R. Martin, set in the Lands Between.",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1645747200,
+    "aggregated_rating": 96.0,
+    "aggregated_rating_count": 60,
+    "rating": 93.5,
+    "rating_count": 5000,
+    "total_rating": 94.8,
+    "total_rating_count": 5060,
+    "hypes": 10000,
+    "follows": 15000,
+    "url": "https://www.igdb.com/games/elden-ring",
+    "cover": {
+      "id": 90020,
+      "image_id": "co4xyz",
+      "width": 264,
+      "height": 352,
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co4xyz.jpg"
+    },
+    "genres": [
+      { "id": 12, "name": "Role-playing (RPG)", "slug": "role-playing-rpg" },
+      { "id": 31, "name": "Adventure", "slug": "adventure" }
+    ],
+    "themes": [
+      { "id": 1, "name": "Action", "slug": "action" },
+      { "id": 17, "name": "Fantasy", "slug": "fantasy" }
+    ],
+    "game_modes": [
+      { "id": 1, "name": "Single player", "slug": "single-player" },
+      { "id": 2, "name": "Multiplayer", "slug": "multiplayer" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 },
+      { "id": 167, "name": "PlayStation 5", "abbreviation": "PS5", "slug": "ps5", "category": 1 },
+      { "id": 169, "name": "Xbox Series X|S", "abbreviation": "Series X", "slug": "series-x", "category": 1 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10020,
+        "developer": true,
+        "publisher": false,
+        "company": { "id": 248, "name": "FromSoftware", "slug": "fromsoftware" }
+      },
+      {
+        "id": 10021,
+        "developer": false,
+        "publisher": true,
+        "company": { "id": 339, "name": "Bandai Namco Entertainment", "slug": "bandai-namco-entertainment" }
+      }
+    ],
+    "release_dates": [
+      {
+        "id": 40020,
+        "date": 1645747200,
+        "human": "Feb 25, 2022",
+        "category": 0,
+        "region": 2,
+        "platform": { "id": 6, "name": "PC (Microsoft Windows)" }
+      }
+    ],
+    "websites": [
+      { "id": 20020, "category": 13, "url": "https://store.steampowered.com/app/1245620/ELDEN_RING/", "trusted": true }
+    ],
+    "external_games": [
+      { "id": 15020, "category": 1, "uid": "1245620", "url": "https://store.steampowered.com/app/1245620" }
+    ]
+  }
+]

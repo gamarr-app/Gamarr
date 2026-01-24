@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
@@ -60,6 +63,8 @@ namespace NzbDrone.Core.MetadataSource.IGDB
         private readonly IGameMetadataService _gameMetadataService;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly Logger _logger;
+        private readonly bool _mockEnabled;
+        private readonly string _mockDataPath;
 
         public IgdbProxy(
             IHttpClient httpClient,
@@ -77,6 +82,13 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             _gameMetadataService = gameMetadataService;
             _gameTranslationService = gameTranslationService;
             _logger = logger;
+            _mockEnabled = IsMockMode();
+            _mockDataPath = _mockEnabled ? FindMockDataPath() : null;
+
+            if (_mockEnabled)
+            {
+                _logger.Info("IgdbProxy: Mock mode enabled. Data path: {0}", _mockDataPath ?? "NOT FOUND");
+            }
         }
 
         public GameMetadata GetGameInfoBySteamAppId(int steamAppId)
@@ -219,6 +231,21 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                     }
                 }
 
+                if (lowerTitle.StartsWith("steam:") || lowerTitle.StartsWith("steamid:"))
+                {
+                    var idStr = lowerTitle.Split(':')[1].Trim();
+                    if (int.TryParse(idStr, out var steamAppId))
+                    {
+                        var gameLookup = GetGameBySteamAppId(steamAppId);
+                        if (gameLookup != null)
+                        {
+                            return new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
+                        }
+
+                        return new List<Game>();
+                    }
+                }
+
                 // Parse the title for year information
                 var parserResult = Parser.Parser.ParseGameTitle(title, true);
                 var searchTitle = parserResult?.PrimaryGameTitle ?? title;
@@ -289,13 +316,16 @@ namespace NzbDrone.Core.MetadataSource.IGDB
         private List<T> ExecuteQuery<T>(string endpoint, string query)
             where T : class
         {
+            if (_mockEnabled)
+            {
+                return LoadMockData<T>(query);
+            }
+
             var accessToken = _authService.GetAccessToken();
 
             if (string.IsNullOrEmpty(accessToken))
             {
                 _logger.Error("No IGDB access token available. Please configure IGDB credentials.");
-
-                // TODO: Return mock data or throw appropriate exception
                 return new List<T>();
             }
 
@@ -330,6 +360,191 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             }
 
             return response.Resource ?? new List<T>();
+        }
+
+        private List<T> LoadMockData<T>(string query)
+            where T : class
+        {
+            if (string.IsNullOrEmpty(_mockDataPath))
+            {
+                _logger.Warn("Mock mode enabled but no mock data path found");
+                return new List<T>();
+            }
+
+            // Parse query for ID lookup: "where id = X" or "where id = (X, Y, Z)"
+            var idMatch = Regex.Match(query, @"where\s+id\s*=\s*(\d+)", RegexOptions.IgnoreCase);
+            if (idMatch.Success)
+            {
+                var igdbId = idMatch.Groups[1].Value;
+                var content = LoadMockFile($"igdb_game_{igdbId}.json");
+                if (content != null)
+                {
+                    _logger.Debug("Mock: Loaded game data for IGDB ID {0}", igdbId);
+                    return JsonConvert.DeserializeObject<List<T>>(content) ?? new List<T>();
+                }
+
+                _logger.Debug("Mock: No data file for IGDB ID {0}", igdbId);
+                return new List<T>();
+            }
+
+            // Parse query for multi-ID lookup: "where id = (X, Y, Z)"
+            var multiIdMatch = Regex.Match(query, @"where\s+id\s*=\s*\(([^)]+)\)", RegexOptions.IgnoreCase);
+            if (multiIdMatch.Success)
+            {
+                var results = new List<T>();
+                var ids = multiIdMatch.Groups[1].Value.Split(',');
+                foreach (var id in ids)
+                {
+                    var trimmedId = id.Trim();
+                    var content = LoadMockFile($"igdb_game_{trimmedId}.json");
+                    if (content != null)
+                    {
+                        var items = JsonConvert.DeserializeObject<List<T>>(content);
+                        if (items != null)
+                        {
+                            results.AddRange(items);
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            // Parse query for search: search "term"
+            var searchMatch = Regex.Match(query, @"search\s+""([^""]+)""", RegexOptions.IgnoreCase);
+            if (searchMatch.Success)
+            {
+                var rawTerm = searchMatch.Groups[1].Value;
+                var searchTerm = rawTerm.ToLowerInvariant().Replace(" ", "").Replace("-", "");
+
+                _logger.Debug("Mock: Search for '{0}' (normalized: '{1}')", rawTerm, searchTerm);
+
+                // Try exact match first
+                var content = LoadMockFile($"igdb_search_{searchTerm}.json");
+                if (content != null)
+                {
+                    return JsonConvert.DeserializeObject<List<T>>(content) ?? new List<T>();
+                }
+
+                // Try partial matches
+                var files = Directory.GetFiles(_mockDataPath, "igdb_search_*.json");
+                foreach (var file in files)
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    var fileTerm = fileName.Replace("igdb_search_", "").ToLowerInvariant();
+                    if (searchTerm.Contains(fileTerm) || fileTerm.Contains(searchTerm))
+                    {
+                        content = File.ReadAllText(file);
+                        return JsonConvert.DeserializeObject<List<T>>(content) ?? new List<T>();
+                    }
+                }
+
+                _logger.Debug("Mock: No search results for '{0}'", rawTerm);
+                return new List<T>();
+            }
+
+            // Parse query for external_games (Steam ID lookup)
+            var uidMatch = Regex.Match(query, @"uid\s*=\s*""(\d+)""", RegexOptions.IgnoreCase);
+            if (uidMatch.Success)
+            {
+                var steamId = uidMatch.Groups[1].Value;
+                var content = LoadMockFile($"igdb_external_{steamId}.json");
+                if (content != null)
+                {
+                    return JsonConvert.DeserializeObject<List<T>>(content) ?? new List<T>();
+                }
+
+                return new List<T>();
+            }
+
+            _logger.Debug("Mock: Could not parse query, returning empty: {0}",
+                query.Length > 100 ? query.Substring(0, 100) : query);
+            return new List<T>();
+        }
+
+        private string LoadMockFile(string fileName)
+        {
+            if (string.IsNullOrEmpty(_mockDataPath))
+            {
+                return null;
+            }
+
+            var filePath = Path.Combine(_mockDataPath, fileName);
+            if (File.Exists(filePath))
+            {
+                return File.ReadAllText(filePath);
+            }
+
+            return null;
+        }
+
+        private static bool IsMockMode()
+        {
+            var envValue = Environment.GetEnvironmentVariable("GAMARR_MOCK_METADATA")
+                        ?? Environment.GetEnvironmentVariable("gamarr_mock_metadata");
+
+            return !string.IsNullOrEmpty(envValue) &&
+                   (envValue.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                    envValue.Equals("1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string FindMockDataPath()
+        {
+            var envPath = Environment.GetEnvironmentVariable("GAMARR_MOCK_DATA_PATH")
+                       ?? Environment.GetEnvironmentVariable("gamarr_mock_data_path");
+
+            if (!string.IsNullOrEmpty(envPath) && Directory.Exists(envPath))
+            {
+                return envPath;
+            }
+
+            var appDir = AppDomain.CurrentDomain.BaseDirectory;
+            var possiblePaths = new[]
+            {
+                Path.Combine(appDir, "MockData"),
+                Path.Combine(appDir, "Files", "MockData"),
+                Path.Combine(appDir, "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(appDir, "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(appDir, "..", "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(appDir, "..", "..", "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(appDir, "..", "..", "..", "..", "src", "NzbDrone.Core.Test", "Files", "MockData")
+            };
+
+            foreach (var path in possiblePaths)
+            {
+                var fullPath = Path.GetFullPath(path);
+                if (Directory.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            // Try to find it from the source root
+            var current = appDir;
+            while (!string.IsNullOrEmpty(current))
+            {
+                if (Directory.Exists(Path.Combine(current, ".git")) ||
+                    File.Exists(Path.Combine(current, "Gamarr.sln")))
+                {
+                    var srcPath = Path.Combine(current, "src", "NzbDrone.Core.Test", "Files", "MockData");
+                    if (Directory.Exists(srcPath))
+                    {
+                        return srcPath;
+                    }
+
+                    break;
+                }
+
+                var parent = Directory.GetParent(current);
+                if (parent == null)
+                {
+                    break;
+                }
+
+                current = parent.FullName;
+            }
+
+            return null;
         }
 
         private GameMetadata MapGame(IgdbGameResource resource)

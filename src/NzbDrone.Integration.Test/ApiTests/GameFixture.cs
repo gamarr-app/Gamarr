@@ -38,7 +38,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             var tag = EnsureTag("autotag-test");
             var game = Games.Lookup("igdb:21").Single();
-            game.Genres = new List<string> { "Thriller" };
+            game.Genres = new List<string> { "Shooter" };
 
             var item = AutoTagging.Post(new AutoTaggingResource
             {
@@ -61,7 +61,7 @@ namespace NzbDrone.Integration.Test.ApiTests
                                 Name = "value",
                                 Label = "Genre(s)",
                                 Type = "tag",
-                                Value = new List<string> { "Thriller" }
+                                Value = new List<string> { "Shooter" }
                             }
                         }
                     }
