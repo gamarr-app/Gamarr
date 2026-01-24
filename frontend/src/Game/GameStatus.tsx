@@ -52,7 +52,7 @@ function GameStatus({
     );
   }
 
-  if (grabbed) {
+  if (grabbed && showMissingStatus) {
     return (
       <div className={styles.center}>
         <Icon name={icons.DOWNLOADING} title={translate('GameIsDownloading')} />

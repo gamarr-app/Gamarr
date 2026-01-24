@@ -212,7 +212,14 @@ function DlcList({ gameId }: DlcListProps) {
       <FieldSet legend={translate('DlcAndExpansions')}>
         <div className={styles.container}>
           <div className={styles.blankpad}>
-            {translate('DlcAvailableCount', { count: dlcCount })}
+            <Link
+              className={styles.parentLink}
+              to={getPathWithUrlBase(
+                `/add/new?term=${encodeURIComponent(game?.title ?? '')}`
+              )}
+            >
+              {translate('DlcAvailableCount', { count: dlcCount })}
+            </Link>
           </div>
         </div>
       </FieldSet>
