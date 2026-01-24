@@ -70,6 +70,14 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./test-results
 
+      - name: Verify tests ran
+        if: always()
+        run: |
+          if [ ! -f ./test-results/test-results.trx ]; then
+            echo "::error::No test results found - tests did not run"
+            exit 1
+          fi
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -101,6 +109,14 @@ jobs:
             --filter "Category=IntegrationTest" \
             --logger "trx;LogFileName=integration-test-results.trx" \
             --results-directory ./test-results
+
+      - name: Verify tests ran
+        if: always()
+        run: |
+          if [ ! -f ./test-results/integration-test-results.trx ]; then
+            echo "::error::No test results found - tests did not run"
+            exit 1
+          fi
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4
