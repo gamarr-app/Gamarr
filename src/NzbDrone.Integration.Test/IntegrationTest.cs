@@ -31,10 +31,10 @@ namespace NzbDrone.Integration.Test
         protected override string ApiKey => _runner.ApiKey;
 
         /// <summary>
-        /// Override this property to enable mock metadata mode for tests.
-        /// When enabled, IGDB and Steam API calls will return mock data instead of making network requests.
+        /// Mock metadata is enabled by default so tests work without IGDB/Steam network access.
+        /// Override to false for tests that specifically need real API responses.
         /// </summary>
-        protected virtual bool UseMockMetadata => false;
+        protected virtual bool UseMockMetadata => true;
 
         /// <summary>
         /// Override this property to specify a custom path to mock data files.

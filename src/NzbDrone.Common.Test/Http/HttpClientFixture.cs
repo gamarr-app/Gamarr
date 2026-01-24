@@ -41,17 +41,16 @@ namespace NzbDrone.Common.Test.Http
         [OneTimeSetUp]
         public void FixtureSetUp()
         {
-            // Always use our server for main tests
-            var mainHost = "httpbin.servarr.com";
+            // Use public httpbin for main tests
+            var mainHost = "httpbin.org";
 
             // Use mirrors for tests that use two hosts
-            var candidates = new[] { "httpbin1.servarr.com" };
+            var candidates = new[] { mainHost, "httpbin.servarr.com" };
 
-            // httpbin.org is broken right now, occasionally redirecting to https if it's unavailable.
-            _httpBinHost = mainHost;
             _httpBinHosts = candidates.Where(IsTestSiteAvailable).ToArray();
+            _httpBinHost = _httpBinHosts.FirstOrDefault();
 
-            TestLogger.Info($"{candidates.Length} TestSites available.");
+            TestLogger.Info($"{_httpBinHosts.Length} TestSites available.");
 
             _httpBinSleep = 10;
         }

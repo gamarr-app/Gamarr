@@ -1,0 +1,71 @@
+{
+  "620": {
+    "success": true,
+    "data": {
+      "type": "game",
+      "name": "Portal 2",
+      "steam_appid": 620,
+      "required_age": 0,
+      "is_free": false,
+      "detailed_description": "Portal 2 draws from the award-winning formula of innovative gameplay, story, and music that earned the original Portal over 70 industry accolades and created a portal for portal gun fans everywhere.",
+      "about_the_game": "The single-player portion of Portal 2 introduces a cast of dynamic new characters, a host of fresh puzzle elements, and a much larger set of devious test chambers.",
+      "short_description": "The sequel to Portal featuring cooperative play and a deeper storyline.",
+      "supported_languages": "English<strong>*</strong>, French<strong>*</strong>, German<strong>*</strong>, Spanish - Spain<strong>*</strong>, Russian<strong>*</strong>",
+      "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/620/header.jpg",
+      "website": "http://www.thinkwithportals.com/",
+      "pc_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 7 / Vista / XP<br></li><li><strong>Processor:</strong> 3.0 GHz P4, Dual Core 2.0<br></li><li><strong>Memory:</strong> 2 GB RAM<br></li><li><strong>Graphics:</strong> Video card must be 128 MB or more<br></li><li><strong>Storage:</strong> 8 GB available space</li></ul>"
+      },
+      "mac_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> MAC OS X 10.6.7 or higher<br></li><li><strong>Processor:</strong> Intel Core Duo Processor (2GHz or better)<br></li><li><strong>Memory:</strong> 2 GB RAM<br></li><li><strong>Graphics:</strong> ATI Radeon 2400 or higher<br></li><li><strong>Storage:</strong> 8 GB available space</li></ul>"
+      },
+      "linux_requirements": {
+        "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Ubuntu 12.04<br></li><li><strong>Processor:</strong> Dual core from Intel or AMD at 2.8 GHz<br></li><li><strong>Memory:</strong> 2 GB RAM<br></li><li><strong>Graphics:</strong> nVidia GeForce 8600/9600GT<br></li><li><strong>Storage:</strong> 8 GB available space</li></ul>"
+      },
+      "developers": ["Valve"],
+      "publishers": ["Valve"],
+      "platforms": {
+        "windows": true,
+        "mac": true,
+        "linux": true
+      },
+      "metacritic": {
+        "score": 95,
+        "url": "https://www.metacritic.com/game/pc/portal-2"
+      },
+      "categories": [
+        { "id": 2, "description": "Single-player" },
+        { "id": 9, "description": "Co-op" },
+        { "id": 22, "description": "Steam Achievements" },
+        { "id": 29, "description": "Steam Trading Cards" }
+      ],
+      "genres": [
+        { "id": "1", "description": "Action" },
+        { "id": "25", "description": "Adventure" }
+      ],
+      "screenshots": [
+        {
+          "id": 0,
+          "path_thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/620/ss_1.600x338.jpg",
+          "path_full": "https://cdn.akamai.steamstatic.com/steam/apps/620/ss_1.1920x1080.jpg"
+        }
+      ],
+      "recommendations": {
+        "total": 278540
+      },
+      "release_date": {
+        "coming_soon": false,
+        "date": "Apr 19, 2011"
+      },
+      "support_info": {
+        "url": "https://help.steampowered.com/",
+        "email": ""
+      },
+      "background": "https://cdn.akamai.steamstatic.com/steam/apps/620/page_bg_generated_v6b.jpg",
+      "content_descriptors": {
+        "ids": [],
+        "notes": null
+      }
+    }
+  }
+}
