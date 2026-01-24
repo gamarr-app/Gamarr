@@ -326,6 +326,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             var outputPath = Path.Combine(@"C:\Test\Unsorted\games\".AsOsAgnostic(), name);
             var localGame = _approvedDecisions.First().LocalGame;
 
+            _downloadClientItem.OutputPath = new OsPath(string.Empty);
             localGame.FolderGameInfo = new ParsedGameInfo { ReleaseTitle = name };
             localGame.Path = Path.Combine(outputPath, "subfolder", name + ".mkv");
 
