@@ -1504,6 +1504,8 @@
   "PreferUsenet": "Prefer Usenet",
   "Preferred": "Preferred",
   "PreferredProtocol": "Preferred Protocol",
+  "PreferredPlatforms": "Preferred Platforms",
+  "PreferredPlatformsHelpText": "Only accept releases matching these platforms. Leave empty to accept all platforms.",
   "PreferredSize": "Preferred Size",
   "Presets": "Presets",
   "PreviewRename": "Preview Rename",

@@ -49,7 +49,8 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("UpgradeAllowed").AsBoolean().Nullable()
                 .WithColumn("MinFormatScore").AsInt32().NotNullable()
                 .WithColumn("CutoffFormatScore").AsInt32().NotNullable()
-                .WithColumn("MinUpgradeFormatScore").AsInt32().WithDefaultValue(1);
+                .WithColumn("MinUpgradeFormatScore").AsInt32().WithDefaultValue(1)
+                .WithColumn("PreferredPlatforms").AsString().Nullable().WithDefaultValue("[]");
 
             Create.TableForModel("DelayProfiles")
                 .WithColumn("EnableUsenet").AsBoolean().NotNullable()
