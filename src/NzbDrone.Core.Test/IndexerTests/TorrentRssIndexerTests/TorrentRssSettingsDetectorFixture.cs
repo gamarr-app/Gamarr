@@ -220,19 +220,6 @@ namespace NzbDrone.Core.Test.IndexerTests.TorrentRssIndexerTests
         }
 
         [Test]
-        [Ignore("Cannot reliably reject unparseable titles")]
-        public void should_reject_rss_settings_for_AwesomeHD()
-        {
-            _indexerSettings.AllowZeroSize = true;
-
-            GivenRecentFeedResponse("TorrentRss/AwesomeHD.xml");
-
-            var settings = Subject.Detect(_indexerSettings);
-
-            settings.Should().BeNull();
-        }
-
-        [Test]
         public void should_detect_rss_settings_for_AnimeTosho_without_size()
         {
             _indexerSettings.AllowZeroSize = true;
