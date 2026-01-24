@@ -110,6 +110,19 @@ $hoverScale: 1.05;
   margin-right: 0.5em;
 }
 
+.gameTypeBadge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: var(--purple);
+  color: white;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
 .queue {
   padding-left: 2px;
   border-left: 4px solid var(--queueColor);

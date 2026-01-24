@@ -7,6 +7,7 @@ interface CssExports {
   'details': string;
   'editorSelect': string;
   'externalLinks': string;
+  'gameTypeBadge': string;
   'info': string;
   'link': string;
   'overview': string;

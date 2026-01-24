@@ -8,6 +8,7 @@ interface CssExports {
   'deleted': string;
   'editorSelect': string;
   'externalLinks': string;
+  'gameTypeBadge': string;
   'link': string;
   'nextAiring': string;
   'overlayTitle': string;
