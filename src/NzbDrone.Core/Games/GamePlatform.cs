@@ -36,6 +36,7 @@ namespace NzbDrone.Core.Games
     public class GamePlatform
     {
         public int IgdbId { get; set; }
+        public int RawgId { get; set; }
         public string Name { get; set; }
         public string Abbreviation { get; set; }
         public string Slug { get; set; }
