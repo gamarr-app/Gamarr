@@ -8,7 +8,7 @@ import TagList from 'Components/TagList';
 import { icons, kinds } from 'Helpers/Props';
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
-import EditDelayProfileModalConnector from './EditDelayProfileModalConnector';
+import EditDelayProfileModal from './EditDelayProfileModal';
 import styles from './DelayProfile.css';
 
 function getDelay(enabled, delay) {
@@ -130,7 +130,7 @@ class DelayProfile extends Component {
           }
         </div>
 
-        <EditDelayProfileModalConnector
+        <EditDelayProfileModal
           id={id}
           isOpen={this.state.isEditDelayProfileModalOpen}
           onModalClose={this.onEditDelayProfileModalClose}

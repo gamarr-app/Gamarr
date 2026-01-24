@@ -7,7 +7,7 @@ import ConfirmModal from 'Components/Modal/ConfirmModal';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import EditQualityProfileModalConnector from './EditQualityProfileModalConnector';
+import EditQualityProfileModal from './EditQualityProfileModal';
 import styles from './QualityProfile.css';
 
 class QualityProfile extends Component {
@@ -151,7 +151,7 @@ class QualityProfile extends Component {
           }
         </div>
 
-        <EditQualityProfileModalConnector
+        <EditQualityProfileModal
           id={id}
           isOpen={this.state.isEditQualityProfileModalOpen}
           onModalClose={this.onEditQualityProfileModalClose}
