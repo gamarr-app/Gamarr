@@ -232,7 +232,7 @@ jobs:
         run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Install Playwright browsers
-        run: pwsh src/NzbDrone.Automation.Test/bin/Debug/net8.0/playwright.ps1 install --with-deps
+        run: pwsh _tests/net8.0/playwright.ps1 install --with-deps
 
       - name: Run Automation Tests
         run: |

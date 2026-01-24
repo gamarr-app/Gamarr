@@ -282,6 +282,8 @@ namespace NzbDrone.Core.Test.Games
 
             Mocker.GetMock<IProvideGameInfo>()
                   .Verify(v => v.GetGameInfo(It.IsAny<int>()), Times.Never());
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]

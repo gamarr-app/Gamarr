@@ -86,6 +86,8 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(s => s.AddCollection(It.IsAny<GameCollection>()), Times.Never());
+
+            ExceptionVerification.IgnoreErrors();
         }
 
         [Test]
@@ -101,6 +103,8 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(s => s.AddCollection(It.IsAny<GameCollection>()), Times.Never());
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]

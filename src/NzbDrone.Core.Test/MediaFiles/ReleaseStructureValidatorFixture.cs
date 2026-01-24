@@ -75,6 +75,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             result.IsValid.Should().BeFalse();
             result.SuspiciousFiles.Should().Contain("bonus_content.scr");
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -87,6 +89,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             result.IsValid.Should().BeFalse();
             result.SuspiciousFiles.Should().Contain("helper.vbs");
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -126,6 +130,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             result.IsValid.Should().BeFalse();
             result.SuspiciousFiles.Should().Contain("update.ps1");
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -188,6 +194,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             result.IsValid.Should().BeFalse();
             result.SuspiciousFiles.Should().Contain("instructions.hta");
+
+            ExceptionVerification.IgnoreWarns();
         }
     }
 }

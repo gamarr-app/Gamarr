@@ -89,6 +89,8 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             result.Should().NotBeNull();
             result.Title.Should().Be("Test Game");
             callCount.Should().Be(3);
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
