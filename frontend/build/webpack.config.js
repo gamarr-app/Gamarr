@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const webpack = require('webpack');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
@@ -14,6 +15,7 @@ module.exports = (env) => {
   const srcFolder = path.join(frontendFolder, 'src');
   const isProduction = !!env.production;
   const isProfiling = isProduction && !!env.profile;
+  const isAnalyze = !!env.analyze;
 
   const distFolder = path.resolve(frontendFolder, '..', '_output', uiFolder);
 
@@ -79,11 +81,24 @@ module.exports = (env) => {
 
     optimization: {
       moduleIds: 'deterministic',
-      chunkIds: isProduction ? 'deterministic' : 'named'
+      chunkIds: isProduction ? 'deterministic' : 'named',
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendor',
+            chunks: 'all',
+            priority: 10
+          }
+        }
+      }
     },
 
     performance: {
-      hints: false
+      hints: isProduction ? 'warning' : false,
+      maxAssetSize: 1024 * 1024,
+      maxEntrypointSize: 1024 * 1024
     },
 
     experiments: {
@@ -262,6 +277,10 @@ module.exports = (env) => {
       ]
     }
   };
+
+  if (isAnalyze) {
+    config.plugins.push(new BundleAnalyzerPlugin());
+  }
 
   if (isProfiling) {
     config.resolve.alias['react-dom$'] = 'react-dom/profiling';
