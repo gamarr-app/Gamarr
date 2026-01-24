@@ -114,8 +114,6 @@ function BlocklistRow(props: BlocklistRowProps) {
         }
 
         if (name === 'date') {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore ts(2739)
           return <RelativeDateCell key={name} date={date} />;
         }
 

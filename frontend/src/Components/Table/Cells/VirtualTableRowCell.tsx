@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { ComponentPropsWithoutRef } from 'react';
 import styles from './VirtualTableRowCell.css';
 
-export interface VirtualTableRowCellProps {
-  className?: string;
-  children?: string | React.ReactNode;
-}
+export type VirtualTableRowCellProps = ComponentPropsWithoutRef<'div'>;
 
 function VirtualTableRowCell({
   className = styles.cell,
   children,
+  ...otherProps
 }: VirtualTableRowCellProps) {
-  return <div className={className}>{children}</div>;
+  return (
+    <div className={className} {...otherProps}>
+      {children}
+    </div>
+  );
 }
 
 export default VirtualTableRowCell;

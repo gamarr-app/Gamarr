@@ -221,11 +221,9 @@ function GameIndexRow(props: GameIndexRowProps) {
 
         if (name === 'added') {
           return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
             <RelativeDateCell
               key={name}
-              className={styles[name]}
+              className={(styles as unknown as Record<string, string>)[name]}
               date={added}
               component={VirtualTableRowCell}
             />
@@ -242,11 +240,9 @@ function GameIndexRow(props: GameIndexRowProps) {
 
         if (name === 'inCinemas') {
           return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
             <RelativeDateCell
               key={name}
-              className={styles[name]}
+              className={(styles as unknown as Record<string, string>)[name]}
               date={inCinemas}
               timeForToday={false}
               component={VirtualTableRowCell}
@@ -256,11 +252,9 @@ function GameIndexRow(props: GameIndexRowProps) {
 
         if (name === 'digitalRelease') {
           return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
             <RelativeDateCell
               key={name}
-              className={styles[name]}
+              className={(styles as unknown as Record<string, string>)[name]}
               date={digitalRelease}
               timeForToday={false}
               component={VirtualTableRowCell}
@@ -270,11 +264,9 @@ function GameIndexRow(props: GameIndexRowProps) {
 
         if (name === 'physicalRelease') {
           return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
             <RelativeDateCell
               key={name}
-              className={styles[name]}
+              className={(styles as unknown as Record<string, string>)[name]}
               date={physicalRelease}
               timeForToday={false}
               component={VirtualTableRowCell}
@@ -284,11 +276,9 @@ function GameIndexRow(props: GameIndexRowProps) {
 
         if (name === 'releaseDate') {
           return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
             <RelativeDateCell
               key={name}
-              className={styles[name]}
+              className={(styles as unknown as Record<string, string>)[name]}
               date={releaseDate}
               timeForToday={false}
               component={VirtualTableRowCell}

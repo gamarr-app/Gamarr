@@ -82,8 +82,7 @@ function NumberInput({
 
   useEffect(() => {
     if (
-      // @ts-expect-error inputValue may be null
-      !isNaN(inputValue) &&
+      !isNaN(Number(inputValue)) &&
       inputValue !== previousValue &&
       !isFocused.current
     ) {
