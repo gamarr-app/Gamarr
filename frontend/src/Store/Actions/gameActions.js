@@ -106,6 +106,28 @@ export const filters = [
         type: filterTypes.EQUAL
       }
     ]
+  },
+  {
+    key: 'mainGamesOnly',
+    label: () => translate('MainGamesOnly'),
+    filters: [
+      {
+        key: 'isDlc',
+        value: false,
+        type: filterTypes.EQUAL
+      }
+    ]
+  },
+  {
+    key: 'dlcOnly',
+    label: () => translate('DlcAndExpansions'),
+    filters: [
+      {
+        key: 'isDlc',
+        value: true,
+        type: filterTypes.EQUAL
+      }
+    ]
   }
 ];
 

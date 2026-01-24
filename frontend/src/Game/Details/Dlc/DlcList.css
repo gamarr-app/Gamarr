@@ -8,6 +8,13 @@
   padding: 15px;
 }
 
+.dlcToolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 15px 0;
+}
+
 .dlcGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
