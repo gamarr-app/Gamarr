@@ -6,6 +6,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games.Collections;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.Games.Collections
 {
