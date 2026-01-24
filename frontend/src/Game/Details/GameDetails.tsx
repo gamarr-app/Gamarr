@@ -86,10 +86,10 @@ import {
 import translate from 'Utilities/String/translate';
 import DlcList from './Dlc/DlcList';
 import GameDetailsLinks from './GameDetailsLinks';
-import RecommendationsList from './Recommendations/RecommendationsList';
 import GameReleaseDates from './GameReleaseDates';
 import GameStatusLabel from './GameStatusLabel';
 import GameTags from './GameTags';
+import RecommendationsList from './Recommendations/RecommendationsList';
 import GameTitlesTable from './Titles/GameTitlesTable';
 import styles from './GameDetails.css';
 
