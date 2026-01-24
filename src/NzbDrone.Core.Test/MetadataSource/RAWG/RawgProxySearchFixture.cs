@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Test.MetadataSource.RAWG
             var result = Subject.SearchForNewGame(query);
 
             result.Should().NotBeEmpty();
-            result[0].Title.Should().Contain(expectedInTitle.Split(' ')[0]);
+            result[0].Title.ToLowerInvariant().Should().Contain(query.ToLowerInvariant());
 
             ExceptionVerification.IgnoreWarns();
         }

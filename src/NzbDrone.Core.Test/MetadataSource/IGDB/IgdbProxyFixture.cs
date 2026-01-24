@@ -1,9 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using FluentAssertions;
-using Moq;
+using Newtonsoft.Json;
 using NUnit.Framework;
-using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
-using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MetadataSource.IGDB;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -15,49 +16,58 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
     [IntegrationTest]
     public class IgdbProxyFixture : CoreTest<IgdbProxy>
     {
-        private Mock<IIgdbAuthService> _authService;
-        private Mock<IConfigService> _configService;
-        private Mock<IGameService> _gameService;
-        private Mock<IGameMetadataService> _gameMetadataService;
-        private Mock<IGameTranslationService> _gameTranslationService;
+        private string _clientId;
+        private string _accessToken;
 
         [SetUp]
         public void Setup()
         {
             UseRealHttp();
 
-            _authService = new Mock<IIgdbAuthService>();
-            _configService = new Mock<IConfigService>();
-            _gameService = new Mock<IGameService>();
-            _gameMetadataService = new Mock<IGameMetadataService>();
-            _gameTranslationService = new Mock<IGameTranslationService>();
+            _clientId = Environment.GetEnvironmentVariable("IGDB_CLIENT_ID");
+            var clientSecret = Environment.GetEnvironmentVariable("IGDB_CLIENT_SECRET");
 
-            // Note: These tests require valid IGDB credentials
-            // Set up mock auth service to return a valid token if available
-            _authService.Setup(s => s.GetAccessToken()).Returns(string.Empty);
-            _authService.Setup(s => s.ClientId).Returns(string.Empty);
+            if (!string.IsNullOrEmpty(_clientId) && !string.IsNullOrEmpty(clientSecret))
+            {
+                _accessToken = FetchAccessToken(_clientId, clientSecret);
+            }
+
+            Mocker.GetMock<IIgdbAuthService>()
+                .Setup(s => s.GetAccessToken())
+                .Returns(_accessToken ?? string.Empty);
+
+            Mocker.GetMock<IIgdbAuthService>()
+                .Setup(s => s.ClientId)
+                .Returns(_clientId ?? string.Empty);
+        }
+
+        private void RequireCredentials()
+        {
+            if (string.IsNullOrEmpty(_accessToken))
+            {
+                Assert.Ignore("IGDB_CLIENT_ID and IGDB_CLIENT_SECRET environment variables not set or token fetch failed.");
+            }
         }
 
         [Test]
-        [Ignore("Requires valid IGDB credentials")]
         public void should_be_able_to_get_game_by_igdb_id()
         {
+            RequireCredentials();
+
             // IGDB ID 1942 is The Witcher 3
             var result = Subject.GetGameInfo(1942);
 
             result.Should().NotBeNull();
-
-            var game = result;
-            ValidateGame(game);
-
-            game.Title.Should().Contain("Witcher");
-            game.IgdbId.Should().Be(1942);
+            ValidateGame(result);
+            result.Title.Should().Contain("Witcher");
+            result.IgdbId.Should().Be(1942);
         }
 
         [Test]
-        [Ignore("Requires valid IGDB credentials")]
         public void should_be_able_to_get_popular_games()
         {
+            RequireCredentials();
+
             var result = Subject.GetPopularGames();
 
             result.Should().NotBeNull();
@@ -70,9 +80,10 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
         }
 
         [Test]
-        [Ignore("Requires valid IGDB credentials")]
         public void should_be_able_to_get_trending_games()
         {
+            RequireCredentials();
+
             var result = Subject.GetTrendingGames();
 
             result.Should().NotBeNull();
@@ -83,7 +94,9 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
         [Test]
         public void should_return_empty_list_when_no_access_token()
         {
-            _authService.Setup(s => s.GetAccessToken()).Returns(string.Empty);
+            Mocker.GetMock<IIgdbAuthService>()
+                .Setup(s => s.GetAccessToken())
+                .Returns(string.Empty);
 
             var result = Subject.GetPopularGames();
 
@@ -99,6 +112,33 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             game.Title.Should().NotBeNullOrWhiteSpace();
             game.CleanTitle.Should().NotBeNullOrWhiteSpace();
             game.IgdbId.Should().BeGreaterThan(0);
+        }
+
+        private static string FetchAccessToken(string clientId, string clientSecret)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("client_id", clientId),
+                    new KeyValuePair<string, string>("client_secret", clientSecret),
+                    new KeyValuePair<string, string>("grant_type", "client_credentials")
+                });
+
+                var response = httpClient.PostAsync("https://id.twitch.tv/oauth2/token", content).Result;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var json = response.Content.ReadAsStringAsync().Result;
+                var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+
+                return tokenResponse?.ContainsKey("access_token") == true
+                    ? tokenResponse["access_token"].ToString()
+                    : null;
+            }
         }
     }
 }

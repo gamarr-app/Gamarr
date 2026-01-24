@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Test.MetadataSource.RAWG
             game.CleanTitle.Should().NotBeNullOrWhiteSpace();
             game.SortTitle.Should().NotBeNullOrWhiteSpace();
             game.Overview.Should().NotBeNullOrWhiteSpace();
-            game.IgdbId.Should().BeGreaterThan(0); // RAWG ID stored in IgdbId field
+            game.RawgId.Should().BeGreaterThan(0);
             game.Images.Should().NotBeEmpty();
             game.Genres.Should().NotBeEmpty();
             game.Platforms.Should().NotBeEmpty();
