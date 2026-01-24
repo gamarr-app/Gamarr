@@ -24,9 +24,7 @@ function QualityDefinition({ id, quality, title }: QualityDefinitionProps) {
 
   useEffect(() => {
     return () => {
-      dispatch(
-        clearPendingChanges({ section: 'settings.qualityDefinitions' })
-      );
+      dispatch(clearPendingChanges({ section: 'settings.qualityDefinitions' }));
     };
   }, [dispatch]);
 

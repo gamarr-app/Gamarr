@@ -2,9 +2,9 @@ import _ from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import FieldSet from 'Components/FieldSet';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import AppState from 'App/State/AppState';
 import {
   fetchQualityDefinitions,
   saveQualityDefinitions,
@@ -21,9 +21,8 @@ function createQualityDefinitionsSelector() {
   return createSelector(
     (state: AppState) => state.settings.qualityDefinitions,
     (qualityDefinitions) => {
-      const items = qualityDefinitions.items.map((item: any) => {
-        const pendingChanges =
-          qualityDefinitions.pendingChanges[item.id] || {};
+      const items = qualityDefinitions.items.map((item) => {
+        const pendingChanges = qualityDefinitions.pendingChanges[item.id] || {};
         return { ...item, ...pendingChanges };
       });
 
@@ -33,7 +32,7 @@ function createQualityDefinitionsSelector() {
         error: qualityDefinitions.error,
         isSaving: qualityDefinitions.isSaving,
         hasPendingChanges: !_.isEmpty(qualityDefinitions.pendingChanges),
-        items
+        items,
       };
     }
   );
@@ -80,7 +79,7 @@ function QualityDefinitions({
         </div>
 
         <div className={styles.definitions}>
-          {items.map((item: any) => {
+          {items.map((item) => {
             return (
               <QualityDefinition
                 key={item.id}

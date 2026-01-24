@@ -74,8 +74,8 @@ function ResetQualityDefinitionsModalContent({
 
         <Button
           kind={kinds.DANGER}
-          onPress={handleResetConfirmed}
           isDisabled={isResettingQualityDefinitions}
+          onPress={handleResetConfirmed}
         >
           {translate('Reset')}
         </Button>

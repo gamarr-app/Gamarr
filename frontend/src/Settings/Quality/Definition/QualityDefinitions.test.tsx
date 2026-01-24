@@ -1,7 +1,8 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import React from 'react';
 import QualityDefinitions from './QualityDefinitions';
+
+import '@testing-library/jest-dom';
 
 const mockDispatch = jest.fn();
 const mockSelector = jest.fn();
@@ -124,8 +125,6 @@ describe('QualityDefinitions', () => {
   });
 
   it('should dispatch fetchQualityDefinitions on mount', () => {
-    const { fetchQualityDefinitions } = require('Store/Actions/settingsActions');
-
     render(
       <QualityDefinitions
         setChildSave={mockSetChildSave}
