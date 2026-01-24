@@ -6,7 +6,7 @@ import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TagList from 'Components/TagList';
 import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import EditNotificationModalConnector from './EditNotificationModalConnector';
+import EditNotificationModal from './EditNotificationModal';
 import styles from './Notification.css';
 
 class Notification extends Component {
@@ -206,7 +206,7 @@ class Notification extends Component {
           tagList={tagList}
         />
 
-        <EditNotificationModalConnector
+        <EditNotificationModal
           id={id}
           isOpen={this.state.isEditNotificationModalOpen}
           onModalClose={this.onEditNotificationModalClose}

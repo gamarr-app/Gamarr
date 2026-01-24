@@ -12,13 +12,17 @@ import EditNotificationModalContent from './EditNotificationModalContent';
 const section = 'settings.notifications';
 
 interface EditNotificationModalProps {
+  id?: number;
   isOpen: boolean;
   onModalClose: () => void;
+  onDeleteNotificationPress?: () => void;
 }
 
 function EditNotificationModal({
+  id,
   isOpen,
   onModalClose,
+  onDeleteNotificationPress,
 }: EditNotificationModalProps) {
   const dispatch = useDispatch();
 
@@ -31,7 +35,11 @@ function EditNotificationModal({
 
   return (
     <Modal size={sizes.MEDIUM} isOpen={isOpen} onModalClose={handleModalClose}>
-      <EditNotificationModalContent onModalClose={handleModalClose} />
+      <EditNotificationModalContent
+        id={id}
+        onModalClose={handleModalClose}
+        onDeleteNotificationPress={onDeleteNotificationPress}
+      />
     </Modal>
   );
 }
