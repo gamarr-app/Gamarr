@@ -4,6 +4,7 @@ import AppSectionState, {
   AppSectionItemState,
   AppSectionSaveState,
   AppSectionSchemaState,
+  Error as AppSectionError,
   PagedAppSectionState,
 } from 'App/State/AppSectionState';
 import Language from 'Language/Language';
@@ -123,6 +124,16 @@ export type IndexerFlagSettingsAppState = AppSectionState<IndexerFlag>;
 export type LanguageSettingsAppState = AppSectionState<Language>;
 export type UiSettingsAppState = AppSectionItemState<UiSettings>;
 
+export interface QualityDefinitionsAppState {
+  isFetching: boolean;
+  isPopulated: boolean;
+  error: AppSectionError | undefined;
+  items: Array<{ id: number; quality: { name: string }; title: string }>;
+  isSaving: boolean;
+  saveError: AppSectionError | undefined;
+  pendingChanges: Record<string, object>;
+}
+
 interface SettingsAppState {
   advancedSettings: boolean;
   autoTaggings: AutoTaggingAppState;
@@ -143,6 +154,7 @@ interface SettingsAppState {
   naming: NamingAppState;
   namingExamples: NamingExamplesAppState;
   notifications: NotificationAppState;
+  qualityDefinitions: QualityDefinitionsAppState;
   qualityProfiles: QualityProfilesAppState;
   releaseProfiles: ReleaseProfilesAppState;
   ui: UiSettingsAppState;
