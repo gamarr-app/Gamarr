@@ -46,37 +46,9 @@ jobs:
           path: _output/UI
           retention-days: 1
 
-  backend:
-    name: Backend
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/Gamarr.sln
-
-      - name: Build
-        run: dotnet build src/Gamarr.sln --no-restore --configuration Release
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: |
-            _output
-            _tests
-          retention-days: 1
-
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: backend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -86,10 +58,8 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-build
+      - name: Build
+        run: dotnet build src/Gamarr.sln --configuration Release
 
       - name: Run Unit Tests
         run: |
@@ -111,7 +81,6 @@ jobs:
   integration-test:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: backend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -121,13 +90,8 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-build
-
-      - name: Make binary executable
-        run: chmod +x _output/net8.0/Gamarr
+      - name: Build
+        run: dotnet build src/Gamarr.sln --configuration Release
 
       - name: Run Integration Tests
         run: |
@@ -149,12 +113,12 @@ jobs:
   build-complete:
     name: Build Complete
     runs-on: ubuntu-latest
-    needs: [frontend, backend, unit-test, integration-test]
+    needs: [frontend, unit-test, integration-test]
     if: always()
     steps:
       - name: Check build status
         run: |
-          if [[ "${{ needs.frontend.result }}" == "failure" || "${{ needs.backend.result }}" == "failure" || "${{ needs.unit-test.result }}" == "failure" || "${{ needs.integration-test.result }}" == "failure" ]]; then
+          if [[ "${{ needs.frontend.result }}" == "failure" || "${{ needs.unit-test.result }}" == "failure" || "${{ needs.integration-test.result }}" == "failure" ]]; then
             echo "One or more jobs failed"
             exit 1
           fi
