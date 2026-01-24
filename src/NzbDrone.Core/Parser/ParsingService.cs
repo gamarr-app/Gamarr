@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.IndexerSearch.Definitions;
@@ -245,6 +247,43 @@ namespace NzbDrone.Core.Parser
                 if (parsedGameInfo.Year < 1800 || possibleGame.GameMetadata.Value.Year == parsedGameInfo.Year || possibleGame.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year)
                 {
                     return new FindGameResult(possibleGame, GameMatchType.Title);
+                }
+            }
+
+            // Fallback: check if ALL significant words from the game title appear in the release title.
+            // This handles cases where DLC/expansion names are inside parentheses and stripped by the parser.
+            // e.g. "Factorio (v2.0.7 + Space Age DLC) [FitGirl Repack]" should match "Factorio: Space Age"
+            if (possibleGame == null && parsedGameInfo.ReleaseTitle.IsNotNullOrWhiteSpace())
+            {
+                var releaseWords = Regex.Split(parsedGameInfo.ReleaseTitle.ToLowerInvariant(), @"[^a-z0-9]+")
+                    .Where(w => w.Length > 0)
+                    .ToHashSet();
+
+                var gameTitlesToCheck = new List<string> { searchCriteria.Game.GameMetadata.Value.Title };
+                if (searchCriteria.Game.GameMetadata.Value.OriginalTitle.IsNotNullOrWhiteSpace())
+                {
+                    gameTitlesToCheck.Add(searchCriteria.Game.GameMetadata.Value.OriginalTitle);
+                }
+
+                foreach (var title in gameTitlesToCheck)
+                {
+                    var titleWords = Regex.Split(title.ToLowerInvariant(), @"[^a-z0-9]+")
+                        .Where(w => w.Length >= 2)
+                        .ToList();
+
+                    if (titleWords.Count >= 2 && titleWords.All(w => releaseWords.Contains(w)))
+                    {
+                        possibleGame = searchCriteria.Game;
+                        break;
+                    }
+                }
+
+                if (possibleGame != null)
+                {
+                    if (parsedGameInfo.Year < 1800 || possibleGame.GameMetadata.Value.Year == parsedGameInfo.Year || possibleGame.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year)
+                    {
+                        return new FindGameResult(possibleGame, GameMatchType.Title);
+                    }
                 }
             }
 
