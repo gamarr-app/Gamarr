@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Download.Extensions;
@@ -26,10 +27,12 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
     public class RTorrentProxy : IRTorrentProxy
     {
         private readonly IHttpClient _httpClient;
+        private readonly Logger _logger;
 
-        public RTorrentProxy(IHttpClient httpClient)
+        public RTorrentProxy(IHttpClient httpClient, Logger logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
         }
 
         public string GetVersion(RTorrentSettings settings)
@@ -157,8 +160,10 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
 
                 return !metaTorrent;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.Debug(ex, "Failed to check for hash {0}, assuming not present", hash);
+
                 return false;
             }
         }

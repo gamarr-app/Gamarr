@@ -184,9 +184,9 @@ namespace NzbDrone.Core.Datastore
                     _diskProvider.DeleteFile(fileName + "-journal");
                     _diskProvider.DeleteFile(fileName);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    Logger.Error("Unable to recreate logging database automatically. It will need to be removed manually.");
+                    Logger.Error(ex, "Unable to recreate logging database automatically. It will need to be removed manually.");
                 }
 
                 _migrationController.Migrate(connectionString, migrationContext, databaseType);
