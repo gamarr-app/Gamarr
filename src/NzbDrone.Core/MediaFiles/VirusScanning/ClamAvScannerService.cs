@@ -199,8 +199,8 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                 args.Add(extraArgs);
             }
 
-            // Quote the path
-            args.Add($"\"{path}\"");
+            // Escape any quotes in the path and wrap in quotes for safe argument passing
+            args.Add($"\"{path.Replace("\"", "\\\"")}\"");
 
             return string.Join(" ", args);
         }
