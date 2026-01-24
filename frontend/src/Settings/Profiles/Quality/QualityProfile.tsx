@@ -1,0 +1,170 @@
+import React, { useCallback, useState } from 'react';
+import Card from 'Components/Card';
+import Label from 'Components/Label';
+import IconButton from 'Components/Link/IconButton';
+import ConfirmModal from 'Components/Modal/ConfirmModal';
+import Tooltip from 'Components/Tooltip/Tooltip';
+import { icons, kinds, tooltipPositions } from 'Helpers/Props';
+import translate from 'Utilities/String/translate';
+import EditQualityProfileModal from './EditQualityProfileModal';
+import styles from './QualityProfile.css';
+
+interface QualityItem {
+  id: number;
+  name: string;
+  quality?: { id: number; name: string };
+  allowed: boolean;
+  items?: Array<{ quality: { id: number; name: string } }>;
+}
+
+interface QualityProfileProps {
+  id: number;
+  name: string;
+  upgradeAllowed: boolean;
+  cutoff: number;
+  items: QualityItem[];
+  isDeleting: boolean;
+  onConfirmDeleteQualityProfile: (id: number) => void;
+  onCloneQualityProfilePress: (id: number) => void;
+  [key: string]: any;
+}
+
+function QualityProfile({
+  id,
+  name,
+  upgradeAllowed,
+  cutoff,
+  items,
+  isDeleting,
+  onConfirmDeleteQualityProfile,
+  onCloneQualityProfilePress,
+}: QualityProfileProps) {
+  const [isEditQualityProfileModalOpen, setIsEditQualityProfileModalOpen] =
+    useState(false);
+  const [isDeleteQualityProfileModalOpen, setIsDeleteQualityProfileModalOpen] =
+    useState(false);
+
+  const handleEditQualityProfilePress = useCallback(() => {
+    setIsEditQualityProfileModalOpen(true);
+  }, []);
+
+  const handleEditQualityProfileModalClose = useCallback(() => {
+    setIsEditQualityProfileModalOpen(false);
+  }, []);
+
+  const handleDeleteQualityProfilePress = useCallback(() => {
+    setIsEditQualityProfileModalOpen(false);
+    setIsDeleteQualityProfileModalOpen(true);
+  }, []);
+
+  const handleDeleteQualityProfileModalClose = useCallback(() => {
+    setIsDeleteQualityProfileModalOpen(false);
+  }, []);
+
+  const handleConfirmDeleteQualityProfile = useCallback(() => {
+    onConfirmDeleteQualityProfile(id);
+  }, [id, onConfirmDeleteQualityProfile]);
+
+  const handleCloneQualityProfilePress = useCallback(() => {
+    onCloneQualityProfilePress(id);
+  }, [id, onCloneQualityProfilePress]);
+
+  return (
+    <Card
+      className={styles.qualityProfile}
+      overlayContent={true}
+      onPress={handleEditQualityProfilePress}
+    >
+      <div className={styles.nameContainer}>
+        <div className={styles.name}>{name}</div>
+
+        <IconButton
+          className={styles.cloneButton}
+          title={translate('CloneProfile')}
+          name={icons.CLONE}
+          onPress={handleCloneQualityProfilePress}
+        />
+      </div>
+
+      <div className={styles.qualities}>
+        {items.map((item) => {
+          if (!item.allowed) {
+            return null;
+          }
+
+          if (item.quality) {
+            const isCutoff = upgradeAllowed && item.quality.id === cutoff;
+
+            return (
+              <Label
+                key={item.quality.id}
+                kind={isCutoff ? kinds.INFO : kinds.DEFAULT}
+                title={
+                  isCutoff
+                    ? translate('UpgradeUntilThisQualityIsMetOrExceeded')
+                    : undefined
+                }
+              >
+                {item.quality.name}
+              </Label>
+            );
+          }
+
+          const isCutoff = upgradeAllowed && item.id === cutoff;
+
+          return (
+            <Tooltip
+              key={item.id}
+              className={styles.tooltipLabel}
+              anchor={
+                <Label
+                  kind={isCutoff ? kinds.INFO : kinds.DEFAULT}
+                  title={isCutoff ? translate('Cutoff') : undefined}
+                >
+                  {item.name}
+                </Label>
+              }
+              tooltip={
+                <div>
+                  {item.items?.map((groupItem) => {
+                    return (
+                      <Label
+                        key={groupItem.quality.id}
+                        kind={isCutoff ? kinds.INFO : kinds.DEFAULT}
+                        title={isCutoff ? translate('Cutoff') : undefined}
+                      >
+                        {groupItem.quality.name}
+                      </Label>
+                    );
+                  })}
+                </div>
+              }
+              kind={kinds.INVERSE}
+              position={tooltipPositions.TOP}
+            />
+          );
+        })}
+      </div>
+
+      <EditQualityProfileModal
+        id={id}
+        isOpen={isEditQualityProfileModalOpen}
+        onModalClose={handleEditQualityProfileModalClose}
+        onDeleteQualityProfilePress={handleDeleteQualityProfilePress}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteQualityProfileModalOpen}
+        kind={kinds.DANGER}
+        title={translate('DeleteQualityProfile')}
+        message={translate('DeleteQualityProfileMessageText', { name })}
+        confirmLabel={translate('Delete')}
+        isSpinning={isDeleting}
+        onConfirm={handleConfirmDeleteQualityProfile}
+        onCancel={handleDeleteQualityProfileModalClose}
+      />
+    </Card>
+  );
+}
+
+export default QualityProfile;

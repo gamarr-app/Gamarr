@@ -78,7 +78,7 @@ function RemotePathMappings() {
         </div>
 
         <div>
-          {items.map((item, index) => {
+          {items.map((item: any, index: number) => {
             return (
               <RemotePathMapping
                 key={item.id}

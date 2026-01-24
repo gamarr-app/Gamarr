@@ -13,6 +13,7 @@ interface EditDownloadClientModalProps {
   id?: number;
   isOpen: boolean;
   onModalClose: () => void;
+  onDeleteDownloadClientPress?: () => void;
 }
 
 function EditDownloadClientModal({

@@ -9,6 +9,7 @@ interface EditRemotePathMappingModalProps {
   id?: number;
   isOpen: boolean;
   onModalClose: () => void;
+  onDeleteRemotePathMappingPress?: () => void;
 }
 
 function EditRemotePathMappingModal({

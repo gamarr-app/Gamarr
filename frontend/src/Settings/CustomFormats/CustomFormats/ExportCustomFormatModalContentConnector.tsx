@@ -31,6 +31,7 @@ function replacer(key: string, value: any) {
 
 interface ExportCustomFormatModalContentConnectorProps {
   id?: number;
+  onContentHeightChange?: (height: number) => void;
   onModalClose: () => void;
 }
 

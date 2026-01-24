@@ -9,6 +9,7 @@ interface EditSpecificationModalProps {
   id?: number;
   isOpen: boolean;
   onModalClose: () => void;
+  onDeleteSpecificationPress?: () => void;
 }
 
 function EditSpecificationModal({

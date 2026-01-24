@@ -9,6 +9,7 @@ interface EditQualityProfileModalProps {
   id?: number;
   isOpen: boolean;
   onModalClose: () => void;
+  onDeleteQualityProfilePress?: () => void;
 }
 
 function EditQualityProfileModal({

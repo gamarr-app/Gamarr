@@ -69,7 +69,7 @@ function DownloadClients() {
         error={error}
       >
         <div className={styles.downloadClients}>
-          {items.map((item: { id: number }) => {
+          {items.map((item: any) => {
             return (
               <DownloadClient
                 key={item.id}
