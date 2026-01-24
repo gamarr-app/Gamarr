@@ -103,6 +103,21 @@ $hoverScale: 1.05;
   color: var(--white);
 }
 
+.gameTypeBadge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: var(--purple);
+  color: white;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
 .editorSelect {
   position: absolute;
   top: 10px;

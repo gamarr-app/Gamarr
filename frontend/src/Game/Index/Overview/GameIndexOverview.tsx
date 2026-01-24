@@ -80,6 +80,8 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     studio,
     added,
     youTubeTrailerId,
+    gameType,
+    gameTypeDisplayName,
   } = game;
 
   const { sizeOnDisk = 0 } = statistics;
@@ -180,6 +182,11 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
           <div className={styles.titleRow}>
             <Link className={styles.title} to={link}>
               {title}
+              {gameType && gameType !== 'mainGame' ? (
+                <span className={styles.gameTypeBadge}>
+                  {gameTypeDisplayName}
+                </span>
+              ) : null}
             </Link>
 
             <div className={styles.actions}>

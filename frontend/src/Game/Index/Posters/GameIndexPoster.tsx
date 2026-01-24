@@ -86,6 +86,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     originalTitle,
     originalLanguage,
     tags = [],
+    gameType,
+    gameTypeDisplayName,
   } = game;
 
   const { sizeOnDisk = 0 } = statistics;
@@ -193,6 +195,12 @@ function GameIndexPoster(props: GameIndexPosterProps) {
 
         {status === 'deleted' ? (
           <div className={styles.deleted} title={translate('Deleted')} />
+        ) : null}
+
+        {gameType && gameType !== 'mainGame' ? (
+          <div className={styles.gameTypeBadge}>
+            {gameTypeDisplayName}
+          </div>
         ) : null}
 
         <Link className={styles.link} style={elementStyle} to={link}>
