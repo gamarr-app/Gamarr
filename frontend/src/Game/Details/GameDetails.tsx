@@ -865,7 +865,11 @@ function GameDetails({ gameId }: GameDetailsProps) {
           ) : null}
 
           <FieldSet legend={translate('Files')}>
-            <GameStatus gameId={id} gameFileId={gameFileId} showMissingStatus={false} />
+            <GameStatus
+              gameId={id}
+              gameFileId={gameFileId}
+              showMissingStatus={false}
+            />
 
             <GameFileEditorTable gameId={id} />
 
