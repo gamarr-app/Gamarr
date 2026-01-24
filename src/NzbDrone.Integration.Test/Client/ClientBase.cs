@@ -127,7 +127,7 @@ namespace NzbDrone.Integration.Test.Client
 
         public TResource Put(TResource body, HttpStatusCode statusCode = HttpStatusCode.Accepted)
         {
-            var request = BuildRequest();
+            var request = BuildRequest(body.Id.ToString());
             request.AddJsonBody(body);
             return Put<TResource>(request, statusCode);
         }

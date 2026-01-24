@@ -71,6 +71,9 @@ namespace NzbDrone.Core.Games
 
                 _logger.ProgressInfo("{0} moved successfully to {1}", game.Title, destinationPath);
 
+                game.Path = destinationPath;
+                _gameService.UpdateGame(game);
+
                 _eventAggregator.PublishEvent(new GameMovedEvent(game, sourcePath, destinationPath));
             }
             catch (IOException ex)

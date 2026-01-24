@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -35,7 +36,6 @@ namespace NzbDrone.Integration.Test.ApiTests
                 }
 
                 Thread.Sleep(1000);
-                i++;
             }
         }
 
@@ -61,7 +61,12 @@ namespace NzbDrone.Integration.Test.ApiTests
             var client = EnsureDownloadClient();
             var directory = client.Fields.First(v => v.Name == "watchFolder").Value as string;
 
-            File.WriteAllText(Path.Combine(directory, "Game.Title.2024.mkv"), "Test Download");
+            var filePath = Path.Combine(directory, "Game.Title.2024.zip");
+            File.WriteAllText(filePath, "Test Download");
+
+            // Backdate the file so it's older than the UsenetBlackhole ScanGracePeriod (30s)
+            File.SetLastWriteTimeUtc(filePath, DateTime.UtcNow.AddMinutes(-5));
+
             RefreshQueue();
 
             var queue = GetFirstPage();
