@@ -198,9 +198,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         ) : null}
 
         {gameType && gameType !== 'mainGame' ? (
-          <div className={styles.gameTypeBadge}>
-            {gameTypeDisplayName}
-          </div>
+          <div className={styles.gameTypeBadge}>{gameTypeDisplayName}</div>
         ) : null}
 
         <Link className={styles.link} style={elementStyle} to={link}>
