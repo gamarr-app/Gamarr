@@ -210,8 +210,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        [Ignore("Series")]
-        public void should_not_allow_download_if_no_episodes_found()
+        public void should_not_allow_download_if_no_game_found()
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
@@ -220,8 +219,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var result = Subject.GetRssDecision(_reports);
 
             result.Should().HaveCount(1);
-
-            // result.First().RemoteGame.DownloadAllowed.Should().BeFalse();
+            result.First().Approved.Should().BeFalse();
         }
 
         [Test]
