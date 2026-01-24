@@ -137,9 +137,10 @@ namespace NzbDrone.Automation.Test
             await WaitForNoSpinner();
         }
 
-        protected async Task AssertNoJavaScriptErrors()
+        protected Task AssertNoJavaScriptErrors()
         {
             Assert.That(ConsoleErrors, Is.Empty, $"JavaScript errors found: {string.Join(", ", ConsoleErrors)}");
+            return Task.CompletedTask;
         }
     }
 }
