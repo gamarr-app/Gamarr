@@ -586,6 +586,7 @@ namespace NzbDrone.Common.Test.Http
             responseCookies.Resource.Cookies.Should().BeEmpty();
 
             ExceptionVerification.IgnoreErrors();
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -605,6 +606,7 @@ namespace NzbDrone.Common.Test.Http
             responseCookies.Resource.Cookies.Should().HaveCount(1).And.Contain("my", "cookie");
 
             ExceptionVerification.IgnoreErrors();
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -640,6 +642,7 @@ namespace NzbDrone.Common.Test.Http
             responseCookies.Resource.Cookies.Should().HaveCount(1).And.Contain("my", "cookie");
 
             ExceptionVerification.IgnoreErrors();
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -692,6 +695,7 @@ namespace NzbDrone.Common.Test.Http
             responseCookies.Resource.Cookies.Should().HaveCount(1).And.Contain("my", "cookie");
 
             ExceptionVerification.IgnoreErrors();
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -722,6 +726,7 @@ namespace NzbDrone.Common.Test.Http
             responseCookies.Resource.Cookies.Should().BeEmpty();
 
             ExceptionVerification.IgnoreErrors();
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
