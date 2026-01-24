@@ -11,8 +11,8 @@ import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { sizes } from 'Helpers/Props';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
-import formatBytes from 'Utilities/Number/formatBytes';
 import formatDateTime from 'Utilities/Date/formatDateTime';
+import formatBytes from 'Utilities/Number/formatBytes';
 import translate from 'Utilities/String/translate';
 
 function FileDetailsModal(props) {

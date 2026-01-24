@@ -82,14 +82,12 @@ function GameImage({
         setUrl(getUrl(matchingImages[0], coverType, pixelRatio * size));
         setHasError(false);
       }
-    } else {
-      if (availableImages.current.length > 0) {
-        availableImages.current = [];
-        setImageIndex(0);
-        setUrl(placeholder);
-        setHasError(false);
-        onError?.();
-      }
+    } else if (availableImages.current.length > 0) {
+      availableImages.current = [];
+      setImageIndex(0);
+      setUrl(placeholder);
+      setHasError(false);
+      onError?.();
     }
   }, [images, coverType, placeholder, size, onError]);
 

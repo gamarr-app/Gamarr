@@ -10,7 +10,12 @@ interface SelectGameRowProps {
   year: number;
 }
 
-function SelectGameRow({ title, year, igdbId, steamAppId }: SelectGameRowProps) {
+function SelectGameRow({
+  title,
+  year,
+  igdbId,
+  steamAppId,
+}: SelectGameRowProps) {
   return (
     <>
       <VirtualTableRowCell className={styles.title}>

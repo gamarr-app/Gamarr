@@ -69,20 +69,17 @@ const fileNameTokens = [
   {
     token:
       '{Game Title} ({Release Year}) - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
-    example:
-      'The Game - Title (2010) - Deluxe Edition [Repack][GOG]-EVOLVE',
+    example: 'The Game - Title (2010) - Deluxe Edition [Repack][GOG]-EVOLVE',
   },
   {
     token:
       '{Game CleanTitle} {Release Year} - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
-    example:
-      'The Game Title 2010 - Deluxe Edition [Repack][GOG]-EVOLVE',
+    example: 'The Game Title 2010 - Deluxe Edition [Repack][GOG]-EVOLVE',
   },
   {
     token:
       '{Game.CleanTitle}{.Release.Year}{.Edition.Tags}{.Custom.Formats}{.Quality.Full}{-Release Group}',
-    example:
-      'The.Game.Title.2010.Deluxe.Edition.Repack.GOG-EVOLVE',
+    example: 'The.Game.Title.2010.Deluxe.Edition.Repack.GOG-EVOLVE',
   },
 ];
 

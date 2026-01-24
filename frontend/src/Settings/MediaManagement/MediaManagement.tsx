@@ -520,7 +520,9 @@ function MediaManagement() {
                   </FormGroup>
 
                   <FormGroup size={sizes.MEDIUM}>
-                    <FormLabel>{translate('QuarantineInfectedFiles')}</FormLabel>
+                    <FormLabel>
+                      {translate('QuarantineInfectedFiles')}
+                    </FormLabel>
 
                     <FormInputGroup
                       type={inputTypes.CHECK}
