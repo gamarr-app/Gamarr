@@ -6,7 +6,7 @@ import Link from 'Components/Link/Link';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import EditRemotePathMappingModalConnector from './EditRemotePathMappingModalConnector';
+import EditRemotePathMappingModal from './EditRemotePathMappingModal';
 import styles from './RemotePathMapping.css';
 
 class RemotePathMapping extends Component {
@@ -78,7 +78,7 @@ class RemotePathMapping extends Component {
           </Link>
         </div>
 
-        <EditRemotePathMappingModalConnector
+        <EditRemotePathMappingModal
           id={id}
           isOpen={this.state.isEditRemotePathMappingModalOpen}
           onModalClose={this.onEditRemotePathMappingModalClose}

@@ -19,7 +19,7 @@ import DiscoverGameConnector from 'DiscoverGame/DiscoverGameConnector';
 import GameDetailsPage from 'Game/Details/GameDetailsPage';
 import GameIndex from 'Game/Index/GameIndex';
 import CustomFormatSettingsPage from 'Settings/CustomFormats/CustomFormatSettingsPage';
-import DownloadClientSettingsConnector from 'Settings/DownloadClients/DownloadClientSettingsConnector';
+import DownloadClientSettings from 'Settings/DownloadClients/DownloadClientSettings';
 import GeneralSettings from 'Settings/General/GeneralSettings';
 import ImportListSettings from 'Settings/ImportLists/ImportListSettings';
 import IndexerSettings from 'Settings/Indexers/IndexerSettings';
@@ -118,7 +118,7 @@ function AppRoutes() {
 
       <Route
         path="/settings/downloadclients"
-        component={DownloadClientSettingsConnector}
+        component={DownloadClientSettings}
       />
 
       <Route path="/settings/importlists" component={ImportListSettings} />

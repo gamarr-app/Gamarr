@@ -19,7 +19,7 @@ import { icons, inputTypes, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import ImportCustomFormatModal from './ImportCustomFormatModal';
 import AddSpecificationModal from './Specifications/AddSpecificationModal';
-import EditSpecificationModalConnector from './Specifications/EditSpecificationModalConnector';
+import EditSpecificationModal from './Specifications/EditSpecificationModal';
 import Specification from './Specifications/Specification';
 import styles from './EditCustomFormatModalContent.css';
 
@@ -189,7 +189,7 @@ class EditCustomFormatModalContent extends Component {
                     onModalClose={this.onAddSpecificationModalClose}
                   />
 
-                  <EditSpecificationModalConnector
+                  <EditSpecificationModal
                     isOpen={isEditSpecificationModalOpen}
                     onModalClose={this.onEditSpecificationModalClose}
                   />

@@ -6,7 +6,7 @@ import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import EditSpecificationModalConnector from './EditSpecificationModal';
+import EditSpecificationModal from './EditSpecificationModal';
 import styles from './Specification.css';
 
 class Specification extends Component {
@@ -104,7 +104,7 @@ class Specification extends Component {
           }
         </div>
 
-        <EditSpecificationModalConnector
+        <EditSpecificationModal
           id={id}
           isOpen={this.state.isEditSpecificationModalOpen}
           onModalClose={this.onEditSpecificationModalClose}

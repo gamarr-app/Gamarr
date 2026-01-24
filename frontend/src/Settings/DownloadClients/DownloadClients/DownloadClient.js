@@ -6,7 +6,7 @@ import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TagList from 'Components/TagList';
 import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import EditDownloadClientModalConnector from './EditDownloadClientModalConnector';
+import EditDownloadClientModal from './EditDownloadClientModal';
 import styles from './DownloadClient.css';
 
 class DownloadClient extends Component {
@@ -102,7 +102,7 @@ class DownloadClient extends Component {
           tagList={tagList}
         />
 
-        <EditDownloadClientModalConnector
+        <EditDownloadClientModal
           id={id}
           isOpen={this.state.isEditDownloadClientModalOpen}
           onModalClose={this.onEditDownloadClientModalClose}
