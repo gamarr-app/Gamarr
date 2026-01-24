@@ -83,55 +83,81 @@ namespace Gamarr.Api.V3.Indexers
     {
         public static ReleaseResource ToResource(this DownloadDecision model)
         {
-            var releaseInfo = model.RemoteGame.Release;
-            var parsedGameInfo = model.RemoteGame.ParsedGameInfo;
-            var remoteGame = model.RemoteGame;
-            var torrentInfo = (model.RemoteGame.Release as TorrentInfo) ?? new TorrentInfo();
-            var indexerFlags = torrentInfo.IndexerFlags.ToString().Split(new[] { ", " }, StringSplitOptions.None).Where(x => x != "0");
+            var resource = new ReleaseResource();
 
-            // TODO: Clean this mess up. don't mix data from multiple classes, use sub-resources instead? (Got a huge Deja Vu, didn't we talk about this already once?)
-            return new ReleaseResource
+            MapFromReleaseInfo(resource, model.RemoteGame.Release);
+            MapFromParsedGameInfo(resource, model.RemoteGame.ParsedGameInfo);
+            MapFromRemoteGame(resource, model.RemoteGame);
+            MapFromDecision(resource, model);
+            MapFromTorrentInfo(resource, model.RemoteGame.Release as TorrentInfo);
+
+            return resource;
+        }
+
+        private static void MapFromReleaseInfo(ReleaseResource resource, ReleaseInfo releaseInfo)
+        {
+            resource.Guid = releaseInfo.Guid;
+            resource.Age = releaseInfo.Age;
+            resource.AgeHours = releaseInfo.AgeHours;
+            resource.AgeMinutes = releaseInfo.AgeMinutes;
+            resource.Size = releaseInfo.Size;
+            resource.IndexerId = releaseInfo.IndexerId;
+            resource.Indexer = releaseInfo.Indexer;
+            resource.Title = releaseInfo.Title;
+            resource.SteamAppId = releaseInfo.SteamAppId;
+            resource.IgdbId = releaseInfo.IgdbId;
+            resource.PublishDate = releaseInfo.PublishDate;
+            resource.CommentUrl = releaseInfo.CommentUrl;
+            resource.DownloadUrl = releaseInfo.DownloadUrl;
+            resource.InfoUrl = releaseInfo.InfoUrl;
+            resource.Protocol = releaseInfo.DownloadProtocol;
+        }
+
+        private static void MapFromParsedGameInfo(ReleaseResource resource, ParsedGameInfo parsedGameInfo)
+        {
+            resource.Quality = parsedGameInfo.Quality;
+            resource.ReleaseGroup = parsedGameInfo.ReleaseGroup;
+            resource.ReleaseHash = parsedGameInfo.ReleaseHash;
+            resource.GameTitles = parsedGameInfo.GameTitles;
+            resource.Edition = parsedGameInfo.Edition;
+        }
+
+        private static void MapFromRemoteGame(ReleaseResource resource, RemoteGame remoteGame)
+        {
+            resource.CustomFormats = remoteGame.CustomFormats.ToResource(false);
+            resource.CustomFormatScore = remoteGame.CustomFormatScore;
+            resource.Languages = remoteGame.Languages;
+            resource.MappedGameId = remoteGame.Game?.Id;
+            resource.GameRequested = remoteGame.GameRequested;
+            resource.DownloadAllowed = remoteGame.DownloadAllowed;
+        }
+
+        private static void MapFromDecision(ReleaseResource resource, DownloadDecision decision)
+        {
+            resource.Approved = decision.Approved;
+            resource.TemporarilyRejected = decision.TemporarilyRejected;
+            resource.Rejected = decision.Rejected;
+            resource.Rejections = decision.Rejections.Select(r => r.Message).ToList();
+        }
+
+        private static void MapFromTorrentInfo(ReleaseResource resource, TorrentInfo torrentInfo)
+        {
+            if (torrentInfo == null)
             {
-                Guid = releaseInfo.Guid,
-                Quality = parsedGameInfo.Quality,
-                CustomFormats = remoteGame.CustomFormats.ToResource(false),
-                CustomFormatScore = remoteGame.CustomFormatScore,
+                return;
+            }
 
-                // QualityWeight
-                Age = releaseInfo.Age,
-                AgeHours = releaseInfo.AgeHours,
-                AgeMinutes = releaseInfo.AgeMinutes,
-                Size = releaseInfo.Size,
-                IndexerId = releaseInfo.IndexerId,
-                Indexer = releaseInfo.Indexer,
-                ReleaseGroup = parsedGameInfo.ReleaseGroup,
-                ReleaseHash = parsedGameInfo.ReleaseHash,
-                Title = releaseInfo.Title,
-                GameTitles = parsedGameInfo.GameTitles,
-                Languages = remoteGame.Languages,
-                MappedGameId = remoteGame.Game?.Id,
-                Approved = model.Approved,
-                TemporarilyRejected = model.TemporarilyRejected,
-                Rejected = model.Rejected,
-                SteamAppId = releaseInfo.SteamAppId,
-                IgdbId = releaseInfo.IgdbId,
-                Rejections = model.Rejections.Select(r => r.Message).ToList(),
-                PublishDate = releaseInfo.PublishDate,
-                CommentUrl = releaseInfo.CommentUrl,
-                DownloadUrl = releaseInfo.DownloadUrl,
-                InfoUrl = releaseInfo.InfoUrl,
-                GameRequested = remoteGame.GameRequested,
-                DownloadAllowed = remoteGame.DownloadAllowed,
-                Edition = parsedGameInfo.Edition,
+            resource.MagnetUrl = torrentInfo.MagnetUrl;
+            resource.InfoHash = torrentInfo.InfoHash;
+            resource.Seeders = torrentInfo.Seeders;
+            resource.Leechers = (torrentInfo.Peers.HasValue && torrentInfo.Seeders.HasValue)
+                ? (torrentInfo.Peers.Value - torrentInfo.Seeders.Value)
+                : null;
 
-                // ReleaseWeight
-                MagnetUrl = torrentInfo.MagnetUrl,
-                InfoHash = torrentInfo.InfoHash,
-                Seeders = torrentInfo.Seeders,
-                Leechers = (torrentInfo.Peers.HasValue && torrentInfo.Seeders.HasValue) ? (torrentInfo.Peers.Value - torrentInfo.Seeders.Value) : (int?)null,
-                Protocol = releaseInfo.DownloadProtocol,
-                IndexerFlags = indexerFlags
-            };
+            var indexerFlags = torrentInfo.IndexerFlags.ToString()
+                .Split(new[] { ", " }, StringSplitOptions.None)
+                .Where(x => x != "0");
+            resource.IndexerFlags = indexerFlags;
         }
 
         public static ReleaseInfo ToModel(this ReleaseResource resource)

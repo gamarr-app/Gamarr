@@ -50,48 +50,55 @@ namespace Gamarr.Api.V3.Config
 
     public static class HostConfigResourceMapper
     {
-        public static HostConfigResource ToResource(this IConfigFileProvider model, IConfigService configService)
+        public static HostConfigResource ToResource(this IConfigFileProvider configFile, IConfigService configService)
         {
-            // TODO: Clean this mess up. don't mix data from multiple classes, use sub-resources instead?
-            return new HostConfigResource
-            {
-                BindAddress = model.BindAddress,
-                Port = model.Port,
-                SslPort = model.SslPort,
-                EnableSsl = model.EnableSsl,
-                LaunchBrowser = model.LaunchBrowser,
-                AuthenticationMethod = model.AuthenticationMethod,
-                AuthenticationRequired = model.AuthenticationRequired,
-                AnalyticsEnabled = model.AnalyticsEnabled,
+            var resource = new HostConfigResource();
 
-                // Username
-                // Password
-                LogLevel = model.LogLevel,
-                LogSizeLimit = model.LogSizeLimit,
-                ConsoleLogLevel = model.ConsoleLogLevel,
-                Branch = model.Branch,
-                ApiKey = model.ApiKey,
-                SslCertPath = model.SslCertPath,
-                SslCertPassword = model.SslCertPassword,
-                UrlBase = model.UrlBase,
-                InstanceName = model.InstanceName,
-                UpdateAutomatically = model.UpdateAutomatically,
-                UpdateMechanism = model.UpdateMechanism,
-                UpdateScriptPath = model.UpdateScriptPath,
-                ProxyEnabled = configService.ProxyEnabled,
-                ProxyType = configService.ProxyType,
-                ProxyHostname = configService.ProxyHostname,
-                ProxyPort = configService.ProxyPort,
-                ProxyUsername = configService.ProxyUsername,
-                ProxyPassword = configService.ProxyPassword,
-                ProxyBypassFilter = configService.ProxyBypassFilter,
-                ProxyBypassLocalAddresses = configService.ProxyBypassLocalAddresses,
-                CertificateValidation = configService.CertificateValidation,
-                BackupFolder = configService.BackupFolder,
-                BackupInterval = configService.BackupInterval,
-                BackupRetention = configService.BackupRetention,
-                ApplicationUrl = configService.ApplicationUrl
-            };
+            MapFromConfigFile(resource, configFile);
+            MapFromConfigService(resource, configService);
+
+            return resource;
+        }
+
+        private static void MapFromConfigFile(HostConfigResource resource, IConfigFileProvider configFile)
+        {
+            resource.BindAddress = configFile.BindAddress;
+            resource.Port = configFile.Port;
+            resource.SslPort = configFile.SslPort;
+            resource.EnableSsl = configFile.EnableSsl;
+            resource.LaunchBrowser = configFile.LaunchBrowser;
+            resource.AuthenticationMethod = configFile.AuthenticationMethod;
+            resource.AuthenticationRequired = configFile.AuthenticationRequired;
+            resource.AnalyticsEnabled = configFile.AnalyticsEnabled;
+            resource.LogLevel = configFile.LogLevel;
+            resource.LogSizeLimit = configFile.LogSizeLimit;
+            resource.ConsoleLogLevel = configFile.ConsoleLogLevel;
+            resource.Branch = configFile.Branch;
+            resource.ApiKey = configFile.ApiKey;
+            resource.SslCertPath = configFile.SslCertPath;
+            resource.SslCertPassword = configFile.SslCertPassword;
+            resource.UrlBase = configFile.UrlBase;
+            resource.InstanceName = configFile.InstanceName;
+            resource.UpdateAutomatically = configFile.UpdateAutomatically;
+            resource.UpdateMechanism = configFile.UpdateMechanism;
+            resource.UpdateScriptPath = configFile.UpdateScriptPath;
+        }
+
+        private static void MapFromConfigService(HostConfigResource resource, IConfigService configService)
+        {
+            resource.ProxyEnabled = configService.ProxyEnabled;
+            resource.ProxyType = configService.ProxyType;
+            resource.ProxyHostname = configService.ProxyHostname;
+            resource.ProxyPort = configService.ProxyPort;
+            resource.ProxyUsername = configService.ProxyUsername;
+            resource.ProxyPassword = configService.ProxyPassword;
+            resource.ProxyBypassFilter = configService.ProxyBypassFilter;
+            resource.ProxyBypassLocalAddresses = configService.ProxyBypassLocalAddresses;
+            resource.CertificateValidation = configService.CertificateValidation;
+            resource.BackupFolder = configService.BackupFolder;
+            resource.BackupInterval = configService.BackupInterval;
+            resource.BackupRetention = configService.BackupRetention;
+            resource.ApplicationUrl = configService.ApplicationUrl;
         }
     }
 }
