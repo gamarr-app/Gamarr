@@ -23,9 +23,28 @@ namespace Gamarr.Api.V3.Profiles.Quality
             dynamic instance = context.ParentContext.InstanceToValidate;
             var items = instance.Items as IList<QualityProfileQualityItemResource>;
 
-            var cutoffItem = items?.SingleOrDefault(i => (i.Quality == null && i.Id == cutoff) || i.Quality?.Id == cutoff);
+            if (items == null || !items.Any())
+            {
+                return false;
+            }
 
-            return cutoffItem is { Allowed: true };
+            var cutoffItem = items.SingleOrDefault(i => (i.Quality == null && i.Id == cutoff) || i.Quality?.Id == cutoff);
+
+            if (cutoffItem == null)
+            {
+                context.MessageFormatter.AppendArgument("ValidationMessage",
+                    $"Cutoff ID '{cutoff}' does not match any quality or group in the profile");
+                return false;
+            }
+
+            if (!cutoffItem.Allowed)
+            {
+                context.MessageFormatter.AppendArgument("ValidationMessage",
+                    $"Cutoff quality/group '{cutoffItem.Name ?? cutoffItem.Quality?.Name ?? cutoff.ToString()}' must be allowed");
+                return false;
+            }
+
+            return true;
         }
     }
 }
