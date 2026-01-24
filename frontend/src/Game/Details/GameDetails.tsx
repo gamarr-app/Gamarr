@@ -881,7 +881,9 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     name={translate('GameModes')}
                     size={sizes.LARGE}
                   >
-                    <span className={styles.studio}>{gameModes.join(', ')}</span>
+                    <span className={styles.studio}>
+                      {gameModes.join(', ')}
+                    </span>
                   </InfoLabel>
                 ) : null}
 
@@ -892,7 +894,9 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     size={sizes.LARGE}
                   >
                     <span className={styles.studio}>
-                      {platforms.map((p) => p.abbreviation || p.name).join(', ')}
+                      {platforms
+                        .map((p) => p.abbreviation || p.name)
+                        .join(', ')}
                     </span>
                   </InfoLabel>
                 ) : null}
@@ -903,9 +907,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     name={translate('Themes')}
                     size={sizes.LARGE}
                   >
-                    <span className={styles.studio}>
-                      {themes.join(', ')}
-                    </span>
+                    <span className={styles.studio}>{themes.join(', ')}</span>
                   </InfoLabel>
                 ) : null}
               </div>
