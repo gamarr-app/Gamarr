@@ -1,15 +1,16 @@
-﻿using System;
+using System.Net;
 
 namespace Gamarr.Http.Exceptions
 {
-    public class InvalidApiKeyException : Exception
+    public class InvalidApiKeyException : ApiException
     {
         public InvalidApiKeyException()
+            : base(HttpStatusCode.Unauthorized)
         {
         }
 
         public InvalidApiKeyException(string message)
-            : base(message)
+            : base(HttpStatusCode.Unauthorized, message)
         {
         }
     }
