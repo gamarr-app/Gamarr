@@ -86,6 +86,7 @@ import {
 import translate from 'Utilities/String/translate';
 import DlcList from './Dlc/DlcList';
 import GameDetailsLinks from './GameDetailsLinks';
+import RecommendationsList from './Recommendations/RecommendationsList';
 import GameReleaseDates from './GameReleaseDates';
 import GameStatusLabel from './GameStatusLabel';
 import GameTags from './GameTags';
@@ -881,6 +882,8 @@ function GameDetails({ gameId }: GameDetailsProps) {
           </FieldSet>
 
           <DlcList gameId={id} />
+
+          <RecommendationsList gameId={id} />
         </div>
 
         <OrganizePreviewModal

@@ -115,6 +115,7 @@ namespace Gamarr.Api.V3.Games
         public GameFileResource GameFile { get; set; }
         public GameCollectionResource Collection { get; set; }
         public float Popularity { get; set; }
+        public List<int> Recommendations { get; set; }
         public DateTime? LastSearchTime { get; set; }
         public GameStatisticsResource Statistics { get; set; }
 
@@ -238,6 +239,7 @@ namespace Gamarr.Api.V3.Games
                 Studio = model.GameMetadata.Value.Studio,
                 Collection = collection,
                 Popularity = model.GameMetadata.Value.Popularity,
+                Recommendations = model.GameMetadata.Value.Recommendations ?? new List<int>(),
                 LastSearchTime = model.LastSearchTime,
 
                 // DLC properties

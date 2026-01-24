@@ -125,6 +125,9 @@ interface Game extends ModelBase {
   isSaving?: boolean;
   addOptions: GameAddOptions;
 
+  // Recommendations (IGDB IDs of similar games)
+  recommendations: number[];
+
   // DLC-related properties
   gameType: GameType;
   gameTypeDisplayName: string;
