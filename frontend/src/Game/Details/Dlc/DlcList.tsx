@@ -1,14 +1,16 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
+import IconButton from 'Components/Link/IconButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import GamePoster from 'Game/GamePoster';
 import useGame from 'Game/useGame';
 import { icons } from 'Helpers/Props';
+import { toggleGameMonitored } from 'Store/Actions/gameActions';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 import translate from 'Utilities/String/translate';
 import styles from './DlcList.css';
@@ -52,6 +54,7 @@ interface DlcListProps {
 }
 
 function DlcList({ gameId }: DlcListProps) {
+  const dispatch = useDispatch();
   const game = useGame(gameId);
 
   const igdbId = game?.igdbId ?? 0;
@@ -65,6 +68,22 @@ function DlcList({ gameId }: DlcListProps) {
   );
 
   const parentGame = useSelector(createParentGameSelector(parentGameIgdbId));
+
+  const handleMonitorAll = useCallback(() => {
+    dlcs.forEach((dlc) => {
+      if (!dlc.monitored) {
+        dispatch(toggleGameMonitored({ gameId: dlc.id, monitored: true }));
+      }
+    });
+  }, [dlcs, dispatch]);
+
+  const handleUnmonitorAll = useCallback(() => {
+    dlcs.forEach((dlc) => {
+      if (dlc.monitored) {
+        dispatch(toggleGameMonitored({ gameId: dlc.id, monitored: false }));
+      }
+    });
+  }, [dlcs, dispatch]);
 
   // This game is a DLC - show parent game
   if (isDlc || parentGameIgdbId) {
@@ -156,6 +175,18 @@ function DlcList({ gameId }: DlcListProps) {
     return (
       <FieldSet legend={translate('DlcAndExpansions')}>
         <div className={styles.container}>
+          <div className={styles.dlcToolbar}>
+            <IconButton
+              name={icons.MONITORED}
+              title={translate('MonitorAll')}
+              onPress={handleMonitorAll}
+            />
+            <IconButton
+              name={icons.UNMONITORED}
+              title={translate('UnmonitorAll')}
+              onPress={handleUnmonitorAll}
+            />
+          </div>
           <div className={styles.dlcGrid}>
             {dlcs.map((dlc) => (
               <Link

@@ -6,6 +6,7 @@ interface CssExports {
   'dlcBadge': string;
   'dlcCard': string;
   'dlcGrid': string;
+  'dlcToolbar': string;
   'dlcInfo': string;
   'dlcPoster': string;
   'dlcStatus': string;
