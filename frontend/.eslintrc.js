@@ -426,8 +426,16 @@ module.exports = {
       env: {
         jest: true
       },
+      parserOptions: {
+        project: null
+      },
       rules: {
-        'react/prop-types': 'off'
+        'react/prop-types': 'off',
+        'prettier/prettier': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
+        'global-require': 'off',
+        'react/jsx-no-bind': 'off'
       }
     },
     {
