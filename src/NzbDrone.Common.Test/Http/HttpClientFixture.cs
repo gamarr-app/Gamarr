@@ -364,28 +364,26 @@ namespace NzbDrone.Common.Test.Http
         }
 
         [Test]
-        [Ignore("Requires gamarr.video domain to be accessible")]
         public async Task should_download_file()
         {
             var file = GetTempFilePath();
 
-            var url = "https://gamarr.video/img/slider/gamedetails.png";
+            var url = $"https://{_httpBinHost}/bytes/1024";
 
             await Subject.DownloadFileAsync(url, file);
 
             var fileInfo = new FileInfo(file);
             fileInfo.Exists.Should().BeTrue();
-            fileInfo.Length.Should().Be(270964);
+            fileInfo.Length.Should().Be(1024);
         }
 
         [Test]
-        [Ignore("Requires gamarr.video domain to be accessible")]
         public async Task should_download_file_with_redirect()
         {
             var file = GetTempFilePath();
 
             var request = new HttpRequestBuilder($"https://{_httpBinHost}/redirect-to")
-                .AddQueryParam("url", $"https://gamarr.video/img/slider/gamedetails.png")
+                .AddQueryParam("url", $"https://{_httpBinHost}/bytes/2048")
                 .Build();
 
             await Subject.DownloadFileAsync(request.Url.FullUri, file);
@@ -394,16 +392,15 @@ namespace NzbDrone.Common.Test.Http
 
             var fileInfo = new FileInfo(file);
             fileInfo.Exists.Should().BeTrue();
-            fileInfo.Length.Should().Be(270964);
+            fileInfo.Length.Should().Be(2048);
         }
 
         [Test]
-        [Ignore("Requires download.gamarr.app domain to be accessible")]
         public void should_not_download_file_with_error()
         {
             var file = GetTempFilePath();
 
-            Assert.ThrowsAsync<HttpException>(async () => await Subject.DownloadFileAsync("https://download.gamarr.app/wrongpath", file));
+            Assert.ThrowsAsync<HttpException>(async () => await Subject.DownloadFileAsync($"https://{_httpBinHost}/status/404", file));
 
             File.Exists(file).Should().BeFalse();
 
