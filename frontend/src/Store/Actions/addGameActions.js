@@ -120,7 +120,7 @@ export const actionHandlers = handleThunks({
     const items = getState().addGame.items;
 
     // Find by igdbId if available, otherwise by steamAppId
-    let foundGame;
+    let foundGame = null;
     if (igdbId > 0) {
       foundGame = _.find(items, { igdbId });
     } else if (steamAppId > 0) {
