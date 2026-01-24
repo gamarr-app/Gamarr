@@ -10,6 +10,8 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.Clients.Sabnzbd;
 using NzbDrone.Core.Download.Clients.Sabnzbd.Responses;
+using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.RemotePathMappings;
 using NzbDrone.Core.Validation;
 using NzbDrone.Test.Common;
@@ -353,19 +355,17 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         }
 
         [Test]
-        [Ignore("Series")]
-        public async Task Download_should_use_sabRecentTvPriority_when_recentEpisode_is_true()
+        public async Task Download_should_use_recentGamePriority_when_game_is_recent()
         {
             Mocker.GetMock<ISabnzbdProxy>()
                     .Setup(s => s.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()))
-                    .Returns(new SabnzbdAddResponse());
+                    .Returns(new SabnzbdAddResponse { Ids = new List<string> { "sabnzbd_nzb12345" } });
 
             var remoteGame = CreateRemoteGame();
-            /*remoteGame.Episodes = Builder<Episode>.CreateListOfSize(1)
-                                                      .All()
-                                                      .With(e => e.AirDate = DateTime.Today.ToString(Episode.AIR_DATE_FORMAT))
-                                                      .Build()
-                                                      .ToList();*/
+            remoteGame.Game.GameMetadata = new LazyLoaded<GameMetadata>(new GameMetadata
+            {
+                DigitalRelease = DateTime.UtcNow
+            });
 
             await Subject.Download(remoteGame, CreateIndexer());
 

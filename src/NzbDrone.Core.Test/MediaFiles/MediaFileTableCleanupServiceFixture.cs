@@ -36,11 +36,6 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Returns(gameFiles.ToList());
         }
 
-        private void GivenFilesAreNotAttachedToEpisode()
-        {
-            _game.GameFileId = 0;
-        }
-
         private List<string> FilesOnDisk(IEnumerable<GameFile> gameFiles)
         {
             return gameFiles.Select(e => Path.Combine(_game.Path, e.RelativePath)).ToList();
@@ -72,34 +67,6 @@ namespace NzbDrone.Core.Test.MediaFiles
             Subject.Clean(_game, FilesOnDisk(gameFiles.Where(e => e.RelativePath != DELETED_PATH)));
 
             Mocker.GetMock<IMediaFileService>().Verify(c => c.Delete(It.Is<GameFile>(e => e.RelativePath == DELETED_PATH), DeleteMediaFileReason.MissingFromDisk), Times.Exactly(2));
-        }
-
-        [Test]
-        [Ignore("idc")]
-        public void should_delete_files_that_dont_belong_to_any_episodes()
-        {
-            var gameFiles = Builder<GameFile>.CreateListOfSize(10)
-                                .Random(10)
-                                .With(c => c.RelativePath = "ExistingPath")
-                                .Build();
-
-            GivenGameFiles(gameFiles);
-            GivenFilesAreNotAttachedToEpisode();
-
-            Subject.Clean(_game, FilesOnDisk(gameFiles));
-
-            Mocker.GetMock<IMediaFileService>().Verify(c => c.Delete(It.IsAny<GameFile>(), DeleteMediaFileReason.NoLinkedEpisodes), Times.Exactly(10));
-        }
-
-        [Test]
-        [Ignore("Idc")]
-        public void should_unlink_episode_when_episodeFile_does_not_exist()
-        {
-            GivenGameFiles(new List<GameFile>());
-
-            Subject.Clean(_game, new List<string>());
-
-            Mocker.GetMock<IGameService>().Verify(c => c.UpdateGame(It.Is<Game>(e => e.GameFileId == 0)), Times.Exactly(10));
         }
 
         [Test]
