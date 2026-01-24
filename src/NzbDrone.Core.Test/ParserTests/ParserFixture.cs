@@ -97,6 +97,11 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("ELDEN RING Deluxe Edition v1 10 1 DLC Bonus Content Windows 7 Fix MULTi14 FitGirl Repack", "ELDEN RING Deluxe Edition")]
         [TestCase("Elden Ring Nightreign Deluxe Edition v1 03 All DLCs Bonus Content MULTi15 From 20 2 GB DODI-Repack", "Elden Ring Nightreign Deluxe Edition")]
 
+        // Parenthesized metadata with bracketed repack group
+        [TestCase("DARQ: Complete Edition (v1.3 + 2 DLCs, MULTi19) [FitGirl Repack]", "DARQ: Complete Edition")]
+        [TestCase("Hollow Knight (v1.5.78 + All DLCs) [DODI Repack]", "Hollow Knight")]
+        [TestCase("Celeste (v1.4.0.0, MULTi15) [FitGirl Repack]", "Celeste")]
+
         // Scene releases with hyphenated groups
         [TestCase("ELDEN RING-PLAZA", "ELDEN RING")]
         [TestCase("ELDEN RING Shadow of the Erdtree-RUNE", "ELDEN RING Shadow of the Erdtree")]
