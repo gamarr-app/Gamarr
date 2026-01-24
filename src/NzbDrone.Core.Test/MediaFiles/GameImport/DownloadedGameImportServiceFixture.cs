@@ -161,6 +161,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
 
             Mocker.GetMock<IMakeImportDecision>()
                   .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>()), Times.Never());
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -182,7 +184,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             result.Should().HaveCount(1);
             result.First().Result.Should().Be(ImportResultType.Rejected);
 
-            ExceptionVerification.ExpectedWarns(1);
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -205,7 +207,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             result.Should().HaveCount(1);
             result.First().Result.Should().Be(ImportResultType.Rejected);
 
-            ExceptionVerification.ExpectedWarns(1);
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]

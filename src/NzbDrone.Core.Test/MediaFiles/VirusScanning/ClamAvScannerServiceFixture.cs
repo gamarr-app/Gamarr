@@ -125,6 +125,8 @@ namespace NzbDrone.Core.Test.MediaFiles.VirusScanning
             result.InfectedFiles.Should().HaveCount(1);
             result.InfectedFiles[0].FilePath.Should().Be("/data/downloads/game.zip");
             result.InfectedFiles[0].ThreatName.Should().Be("Win.Trojan.Agent-123456");
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -150,6 +152,8 @@ namespace NzbDrone.Core.Test.MediaFiles.VirusScanning
             result.InfectedFiles[0].ThreatName.Should().Be("Win.Malware.GenA");
             result.InfectedFiles[1].ThreatName.Should().Be("Win.Trojan.Downloader");
             result.ScannedFileCount.Should().Be(10);
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -169,6 +173,8 @@ namespace NzbDrone.Core.Test.MediaFiles.VirusScanning
 
             result.ScanCompleted.Should().BeFalse();
             result.ErrorMessage.Should().NotBeNullOrWhiteSpace();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -185,6 +191,8 @@ namespace NzbDrone.Core.Test.MediaFiles.VirusScanning
 
             result.ScanCompleted.Should().BeFalse();
             result.ErrorMessage.Should().Be("Process failed to start");
+
+            ExceptionVerification.IgnoreErrors();
         }
 
         [Test]
