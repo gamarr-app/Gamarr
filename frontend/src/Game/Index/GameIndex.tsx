@@ -342,9 +342,11 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
           <PageContentBody
             ref={scrollerRef}
             className={styles.contentBody}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            innerClassName={styles[`${view}InnerContentBody`]}
+            innerClassName={
+              (styles as unknown as Record<string, string>)[
+                `${view}InnerContentBody`
+              ]
+            }
             initialScrollTop={props.initialScrollTop}
             onScroll={onScroll}
           >

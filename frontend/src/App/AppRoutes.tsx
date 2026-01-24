@@ -1,5 +1,11 @@
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
+
+declare module 'react-router-dom' {
+  interface RouteProps {
+    addUrlBase?: boolean;
+  }
+}
 import Blocklist from 'Activity/Blocklist/Blocklist';
 import History from 'Activity/History/History';
 import Queue from 'Activity/Queue/Queue';
@@ -52,8 +58,6 @@ function AppRoutes() {
         <Route
           exact={true}
           path="/"
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
           addUrlBase={false}
           render={RedirectWithUrlBase}
         />

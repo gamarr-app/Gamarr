@@ -160,10 +160,10 @@ function GameIndexOverviewInfo(props: GameIndexOverviewInfoProps) {
     return rows.map((row) => {
       const { name, showProp, valueProp } = row;
 
+      const indexableProps = props as unknown as Record<string, unknown>;
       const isVisible =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore ts(7053)
-        props[valueProp] != null && (props[showProp] || props.sortKey === name);
+        indexableProps[valueProp] != null &&
+        (indexableProps[showProp] || props.sortKey === name);
 
       return {
         ...row,

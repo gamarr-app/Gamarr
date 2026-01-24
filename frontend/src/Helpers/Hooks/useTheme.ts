@@ -49,8 +49,7 @@ export default useTheme;
 
 export const useThemeColor = (color: string) => {
   const theme = useTheme();
-  const themeVariables = themes[theme];
+  const themeVariables = themes[theme] as Record<string, string>;
 
-  // @ts-expect-error - themeVariables is a string indexable type
   return themeVariables[color];
 };

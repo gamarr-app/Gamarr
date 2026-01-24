@@ -93,9 +93,7 @@ function GameIndexTableHeader(props: GameIndexTableHeaderProps) {
           <VirtualTableHeaderCell
             key={name}
             className={classNames(
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              styles[name]
+              (styles as unknown as Record<string, string>)[name]
             )}
             name={name}
             sortKey={sortKey}

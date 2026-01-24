@@ -129,9 +129,7 @@ function GameStatusLabel({
 
   return (
     <span
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      className={styles[statusClass]}
+      className={(styles as unknown as Record<string, string>)[statusClass]}
     >
       {translate(firstCharToUpper(gameStatus))}
     </span>

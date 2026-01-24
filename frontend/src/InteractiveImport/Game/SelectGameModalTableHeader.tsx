@@ -23,11 +23,7 @@ function SelectGameModalTableHeader(props: SelectGameModalTableHeaderProps) {
         return (
           <VirtualTableHeaderCell
             key={name}
-            className={
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              styles[name]
-            }
+            className={(styles as unknown as Record<string, string>)[name]}
             name={name}
           >
             {typeof label === 'function' ? label() : label}
