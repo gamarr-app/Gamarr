@@ -37,10 +37,12 @@ jobs:
               - 'package.json'
               - 'yarn.lock'
               - '.eslintrc.js'
+              - '.github/workflows/**'
             backend:
               - 'src/**'
               - '*.sln'
               - 'Directory.*.props'
+              - '.github/workflows/**'
 
   frontend:
     name: Frontend
