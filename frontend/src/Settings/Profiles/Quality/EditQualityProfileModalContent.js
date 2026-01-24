@@ -22,6 +22,15 @@ import styles from './EditQualityProfileModalContent.css';
 
 const MODAL_BODY_PADDING = parseInt(dimensions.modalBodyPadding);
 
+const platformOptions = [
+  { key: 1, value: 'PC', order: 1 },
+  { key: 8, value: 'Linux', order: 2 },
+  { key: 9, value: 'Mac', order: 3 },
+  { key: 2, value: 'PlayStation', order: 4 },
+  { key: 3, value: 'Xbox', order: 5 },
+  { key: 4, value: 'Nintendo', order: 6 }
+];
+
 function getCustomFormatRender(formatItems, otherProps) {
   return (
     <QualityProfileFormatItems
@@ -128,6 +137,7 @@ class EditQualityProfileModalContent extends Component {
       minUpgradeFormatScore,
       cutoffFormatScore,
       language,
+      preferredPlatforms,
       items,
       formatItems
     } = item;
@@ -281,6 +291,21 @@ class EditQualityProfileModalContent extends Component {
                             value={languageId}
                             helpText={translate('LanguageHelpText')}
                             onChange={onLanguageChange}
+                          />
+                        </FormGroup>
+
+                        <FormGroup size={sizes.EXTRA_SMALL}>
+                          <FormLabel size={sizes.SMALL}>
+                            {translate('PreferredPlatforms')}
+                          </FormLabel>
+
+                          <FormInputGroup
+                            type={inputTypes.TAG_SELECT}
+                            name="preferredPlatforms"
+                            value={preferredPlatforms ? preferredPlatforms.value : []}
+                            values={platformOptions}
+                            helpText={translate('PreferredPlatformsHelpText')}
+                            onChange={onInputChange}
                           />
                         </FormGroup>
 

@@ -18,6 +18,7 @@ interface QualityProfile {
   cutoffFormatScore: number;
   minUpgradeFormatScore: number;
   formatItems: QualityProfileFormatItem[];
+  preferredPlatforms: number[];
   id: number;
 }
 

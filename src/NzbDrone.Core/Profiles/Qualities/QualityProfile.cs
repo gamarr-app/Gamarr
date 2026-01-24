@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Qualities;
 
@@ -12,6 +13,7 @@ namespace NzbDrone.Core.Profiles.Qualities
         public QualityProfile()
         {
             FormatItems = new List<ProfileFormatItem>();
+            PreferredPlatforms = new List<PlatformFamily>();
         }
 
         public string Name { get; set; }
@@ -23,6 +25,7 @@ namespace NzbDrone.Core.Profiles.Qualities
         public List<ProfileFormatItem> FormatItems { get; set; }
         public Language Language { get; set; }
         public bool UpgradeAllowed { get; set; }
+        public List<PlatformFamily> PreferredPlatforms { get; set; }
 
         public Quality FirststAllowedQuality()
         {
