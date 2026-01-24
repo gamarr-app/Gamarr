@@ -102,7 +102,9 @@ function DlcList({ gameId }: DlcListProps) {
                 <h4 className={styles.dlcTitle}>{parentGame.title}</h4>
                 <div className={styles.dlcStatus}>
                   <Icon
-                    name={parentGame.monitored ? icons.MONITORED : icons.UNMONITORED}
+                    name={
+                      parentGame.monitored ? icons.MONITORED : icons.UNMONITORED
+                    }
                     className={
                       parentGame.monitored
                         ? styles.monitoredIcon
@@ -116,7 +118,9 @@ function DlcList({ gameId }: DlcListProps) {
                   />
                   <Icon
                     name={parentGame.hasFile ? icons.CHECK : icons.MISSING}
-                    className={parentGame.hasFile ? styles.hasFile : styles.noFile}
+                    className={
+                      parentGame.hasFile ? styles.hasFile : styles.noFile
+                    }
                     title={
                       parentGame.hasFile
                         ? translate('Downloaded')

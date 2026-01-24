@@ -129,7 +129,6 @@ function createExtraFilesSelector() {
   );
 }
 
-
 interface GameDetailsProps {
   gameId: number;
 }

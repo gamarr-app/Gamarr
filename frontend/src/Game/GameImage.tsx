@@ -58,7 +58,9 @@ function GameImage({
     const nextIndex = imageIndex + 1;
     if (nextIndex < availableImages.current.length) {
       setImageIndex(nextIndex);
-      setUrl(getUrl(availableImages.current[nextIndex], coverType, pixelRatio * size));
+      setUrl(
+        getUrl(availableImages.current[nextIndex], coverType, pixelRatio * size)
+      );
     } else {
       // All images failed, show placeholder
       setHasError(true);
