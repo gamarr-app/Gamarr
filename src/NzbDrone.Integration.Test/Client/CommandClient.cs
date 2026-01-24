@@ -57,7 +57,7 @@ namespace NzbDrone.Integration.Test.Client
 
                 if (result.Status != CommandStatus.Queued && result.Status != CommandStatus.Started)
                 {
-                    Assert.Fail($"Command ended with status {result.Status}: {result.Message ?? result.Exception ?? "Unknown error"}");
+                    Assert.Fail($"Command ended with status {result.Status}: {result.Exception ?? result.Message ?? "Unknown error"}");
                     return result;
                 }
 

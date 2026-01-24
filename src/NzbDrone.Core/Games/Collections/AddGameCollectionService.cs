@@ -69,6 +69,12 @@ namespace NzbDrone.Core.Games.Collections
                 return null;
             }
 
+            if (collection == null)
+            {
+                _logger.Warn("Could not retrieve collection info for IgdbId {0}", newCollection.IgdbId);
+                return null;
+            }
+
             collection.ApplyChanges(newCollection);
 
             return collection;
