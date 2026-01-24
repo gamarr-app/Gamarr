@@ -1,7 +1,8 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import React from 'react';
 import QualityDefinition from './QualityDefinition';
+
+import '@testing-library/jest-dom';
 
 jest.mock('Components/Form/TextInput', () => {
   return function MockTextInput({ name, value, onChange }) {
