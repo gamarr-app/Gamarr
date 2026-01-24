@@ -14,6 +14,11 @@ namespace NzbDrone.Core.Games
 
         public static string Normalize(string title, int igdbId)
         {
+            if (title == null)
+            {
+                return null;
+            }
+
             if (PreComputedTitles.TryGetValue(igdbId, out var value))
             {
                 return value;

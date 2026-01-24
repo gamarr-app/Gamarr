@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("A Stupid/Idiotic Collection", "Stupid Idiotic Collection, A")]
         [TestCase("An Astounding & Amazing Collection", "Astounding and Amazing Collection, An")]
         [TestCase("The Amazing Animal-Hero's Collection (2001)", "Amazing Animal-Heros Collection, The 2001")]
-        [TestCase("A Different Movië (AU)", "Different Game, A AU")]
+        [TestCase("A Different Gamë (AU)", "Different Game, A AU")]
         [TestCase("The Repairër (ZH) (2015)", "Repairer, The ZH 2015")]
         [TestCase("The Eighth Sensë 2 (Thai)", "Eighth Sense 2, The Thai")]
         [TestCase("The Astonishing Jæg (Latin America)", "Astonishing Jaeg, The Latin America")]

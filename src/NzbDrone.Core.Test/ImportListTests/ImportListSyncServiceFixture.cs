@@ -34,6 +34,8 @@ namespace NzbDrone.Core.Test.ImportList
                 .Build().ToList();
 
             _existingGames = Builder<Game>.CreateListOfSize(3)
+                .All()
+                .With(s => s.SteamAppId = 0)
                 .TheFirst(1)
                 .With(s => s.IgdbId = 6)
                 .TheNext(1)
@@ -45,10 +47,13 @@ namespace NzbDrone.Core.Test.ImportList
             _list2Games = Builder<ImportListGame>.CreateListOfSize(3)
                 .TheFirst(1)
                 .With(s => s.IgdbId = 6)
+                .With(s => s.SteamAppId = 60)
                 .TheNext(1)
                 .With(s => s.IgdbId = 7)
+                .With(s => s.SteamAppId = 70)
                 .TheNext(1)
                 .With(s => s.IgdbId = 8)
+                .With(s => s.SteamAppId = 80)
                 .Build().ToList();
 
             _importListFetch = new ImportListFetchResult
@@ -81,6 +86,10 @@ namespace NzbDrone.Core.Test.ImportList
 
             Mocker.GetMock<IGameService>()
                   .Setup(v => v.AllGameIgdbIds())
+                  .Returns(new List<int>());
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(v => v.AllGameSteamAppIds())
                   .Returns(new List<int>());
 
             Mocker.GetMock<IFetchAndParseImportList>()

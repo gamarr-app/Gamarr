@@ -2,6 +2,14 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Core.AutoTagging;
+using NzbDrone.Core.Download;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Notifications;
+using NzbDrone.Core.Profiles.Delay;
+using NzbDrone.Core.Profiles.Releases;
 using NzbDrone.Core.Tags;
 using NzbDrone.Core.Test.Framework;
 
@@ -28,6 +36,66 @@ namespace NzbDrone.Core.Test.Tags
             Mocker.GetMock<ITagRepository>()
                   .Setup(s => s.Get(1))
                   .Returns(_tag);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.AllGameTags())
+                  .Returns(new Dictionary<int, List<int>>());
+
+            Mocker.GetMock<IDelayProfileService>()
+                  .Setup(s => s.All())
+                  .Returns(new List<DelayProfile>());
+
+            Mocker.GetMock<IDelayProfileService>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<DelayProfile>());
+
+            Mocker.GetMock<IImportListFactory>()
+                  .Setup(s => s.All())
+                  .Returns(new List<ImportListDefinition>());
+
+            Mocker.GetMock<IImportListFactory>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<ImportListDefinition>());
+
+            Mocker.GetMock<INotificationFactory>()
+                  .Setup(s => s.All())
+                  .Returns(new List<NotificationDefinition>());
+
+            Mocker.GetMock<INotificationFactory>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<NotificationDefinition>());
+
+            Mocker.GetMock<IReleaseProfileService>()
+                  .Setup(s => s.All())
+                  .Returns(new List<ReleaseProfile>());
+
+            Mocker.GetMock<IReleaseProfileService>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<ReleaseProfile>());
+
+            Mocker.GetMock<IIndexerFactory>()
+                  .Setup(s => s.All())
+                  .Returns(new List<IndexerDefinition>());
+
+            Mocker.GetMock<IIndexerFactory>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<IndexerDefinition>());
+
+            Mocker.GetMock<IAutoTaggingService>()
+                  .Setup(s => s.All())
+                  .Returns(new List<AutoTag>());
+
+            Mocker.GetMock<IAutoTaggingService>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<AutoTag>());
+
+            Mocker.GetMock<IDownloadClientFactory>()
+                  .Setup(s => s.AllForTag(It.IsAny<int>()))
+                  .Returns(new List<DownloadClientDefinition>());
+
+            Mocker.GetMock<IDownloadClientFactory>()
+                  .Setup(s => s.All())
+                  .Returns(new List<DownloadClientDefinition>());
         }
 
         [Test]

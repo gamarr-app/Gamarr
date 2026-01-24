@@ -246,7 +246,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Quality Title}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("HDTV-720p");
+                   .Should().Be("Uplay");
         }
 
         [Test]
@@ -275,7 +275,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}]";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p]");
+                   .Should().Be("South Park [Uplay]");
         }
 
         [Test]
@@ -372,7 +372,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game.Title}.{_Quality.Title_}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park._HDTV-720p");
+                   .Should().Be("South.Park._Uplay");
         }
 
         [Test]
@@ -504,7 +504,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Quality Title} {Quality Proper}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("HDTV-720p");
+                   .Should().Be("Uplay");
         }
 
         [Test]
@@ -515,7 +515,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenProper();
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p] [Proper]");
+                   .Should().Be("South Park [Uplay] [Proper]");
         }
 
         [Test]
@@ -524,7 +524,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}] {[Quality Proper]}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p]");
+                   .Should().Be("South Park [Uplay]");
         }
 
         [Test]
@@ -533,7 +533,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} [{Quality Full}]";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p]");
+                   .Should().Be("South Park [Uplay]");
         }
 
         [Test]
@@ -544,7 +544,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenProper();
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p Proper]");
+                   .Should().Be("South Park [Uplay Proper]");
         }
 
         [Test]
@@ -554,7 +554,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenReal();
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p REAL]");
+                   .Should().Be("South Park [Uplay REAL]");
         }
 
         [TestCase(' ')]
@@ -566,7 +566,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("HDTV-720p");
+                   .Should().Be("Uplay");
         }
 
         [TestCase(' ')]
@@ -578,7 +578,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Game{0}Title}}", separator);
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(string.Format("HDTV-720p{0}South{0}Park", separator));
+                   .Should().Be(string.Format("Uplay{0}South{0}Park", separator));
         }
 
         [TestCase("en-US")]
@@ -596,7 +596,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game CleanTitle} ({Release Year}) [{Quality Title}] [igdb-{IgdbId}] [{MediaInfo AudioCodec}]";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park (2020) [HDTV-720p] [igdb-124578] [DTS]");
+                   .Should().Be("South Park (2020) [Uplay] [igdb-124578] [DTS]");
         }
 
         [Test]

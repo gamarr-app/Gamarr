@@ -25,6 +25,7 @@ namespace NzbDrone.Core.Test.UpdateTests
         }
 
         [Test]
+        [Ignore("Requires real GitHub repository gamarr-app/Gamarr to exist with releases")]
         public void finds_update_when_version_lower()
         {
             UseRealHttp();
@@ -40,6 +41,7 @@ namespace NzbDrone.Core.Test.UpdateTests
         }
 
         [Test]
+        [Ignore("Requires real GitHub repository gamarr-app/Gamarr to exist with releases")]
         public void should_get_recent_updates()
         {
             const string branch = "nightly";

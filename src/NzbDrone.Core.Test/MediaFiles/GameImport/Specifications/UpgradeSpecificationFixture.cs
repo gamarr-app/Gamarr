@@ -175,7 +175,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
 
             var gameFile = new GameFile
             {
-                Quality = new QualityModel(Quality.Repack)
+                Quality = new QualityModel(Quality.GOG)
             };
 
             _game.QualityProfile.FormatItems = gameFileCustomFormats.Select(c => new ProfileFormatItem
@@ -193,7 +193,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                 .Setup(s => s.ParseCustomFormat(gameFile))
                 .Returns(gameFileCustomFormats);
 
-            _localGame.Quality = new QualityModel(Quality.GOG);
+            _localGame.Quality = new QualityModel(Quality.Repack);
             _localGame.CustomFormats = Builder<CustomFormat>.CreateListOfSize(1).Build().ToList();
             _localGame.CustomFormatScore = 20;
 
