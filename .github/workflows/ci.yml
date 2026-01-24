@@ -168,6 +168,56 @@ jobs:
           path: ./test-results
           retention-days: 7
 
+  automation-test:
+    name: Automation Tests
+    runs-on: ubuntu-latest
+    needs: [frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend
+          path: _output/UI
+
+      - name: Build
+        run: dotnet build src/Gamarr.sln --configuration Debug
+
+      - name: Install Playwright browsers
+        run: pwsh src/NzbDrone.Automation.Test/bin/Debug/net8.0/playwright.ps1 install --with-deps
+
+      - name: Run Automation Tests
+        run: |
+          dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
+            --no-build \
+            --configuration Debug \
+            --filter "Category=AutomationTest" \
+            --logger "trx;LogFileName=automation-test-results.trx" \
+            --results-directory ./test-results
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: automation-test-results
+          path: ./test-results
+          retention-days: 7
+
+      - name: Upload error screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: automation-test-screenshots
+          path: ./*_screenshot.png
+          retention-days: 7
+
   release-build:
     name: Release Build
     runs-on: ubuntu-latest
@@ -188,7 +238,7 @@ jobs:
   build-complete:
     name: Build Complete
     runs-on: ubuntu-latest
-    needs: [changes, frontend, unit-test, integration-test, release-build]
+    needs: [changes, frontend, unit-test, integration-test, automation-test, release-build]
     if: always()
     steps:
       - name: Check build status
@@ -197,10 +247,11 @@ jobs:
           frontend_result="${{ needs.frontend.result }}"
           unit_test_result="${{ needs.unit-test.result }}"
           integration_result="${{ needs.integration-test.result }}"
+          automation_result="${{ needs.automation-test.result }}"
           release_result="${{ needs.release-build.result }}"
 
           failed=false
-          for result in "$frontend_result" "$unit_test_result" "$integration_result" "$release_result"; do
+          for result in "$frontend_result" "$unit_test_result" "$integration_result" "$automation_result" "$release_result"; do
             if [[ "$result" == "failure" ]]; then
               failed=true
             fi
