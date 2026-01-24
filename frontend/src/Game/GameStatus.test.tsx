@@ -1,58 +1,61 @@
+import { render } from '@testing-library/react';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import GameStatus from './GameStatus';
+
+import '@testing-library/jest-dom';
 
 // Mock all the hooks and selectors
 jest.mock('react-redux', () => ({
-  useSelector: jest.fn()
+  useSelector: jest.fn(),
 }));
 
 jest.mock('Game/useGame', () => ({
   __esModule: true,
-  default: jest.fn()
+  default: jest.fn(),
 }));
 
 jest.mock('GameFile/useGameFile', () => ({
   __esModule: true,
-  default: jest.fn()
+  default: jest.fn(),
 }));
 
 jest.mock('Store/Selectors/createQueueItemSelector', () => ({
-  createQueueItemSelectorForHook: jest.fn(() => () => null)
+  createQueueItemSelectorForHook: jest.fn(() => () => null),
 }));
 
 jest.mock('Utilities/String/translate', () => ({
   __esModule: true,
-  default: (key: string) => key
+  default: (key: string) => key,
 }));
 
 jest.mock('./GameQuality', () => ({
   __esModule: true,
-  default: ({ quality, isCutoffNotMet, title }: any) => (
+  default: ({ title }: { title: string }) => (
     <span data-testid="game-quality">{title}</span>
-  )
+  ),
 }));
 
 jest.mock('Components/Icon', () => ({
   __esModule: true,
-  default: ({ name, title }: any) => (
-    <span data-testid="icon" data-name={name} data-title={title}>{title}</span>
-  )
+  default: ({ name, title }: { name: string; title: string }) => (
+    <span data-testid="icon" data-name={name} data-title={title}>
+      {title}
+    </span>
+  ),
 }));
 
 jest.mock('Components/ProgressBar', () => ({
   __esModule: true,
-  default: ({ progress, title }: any) => (
+  default: ({ title }: { title: string }) => (
     <div data-testid="progress-bar">{title}</div>
-  )
+  ),
 }));
 
 jest.mock('Activity/Queue/QueueDetails', () => ({
   __esModule: true,
-  default: ({ progressBar, ...props }: any) => (
+  default: ({ progressBar }: { progressBar: React.ReactNode }) => (
     <div data-testid="queue-details">{progressBar}</div>
-  )
+  ),
 }));
 
 import { useSelector } from 'react-redux';
@@ -73,20 +76,16 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
-      grabbed: false
+      grabbed: false,
     });
     mockedUseGameFile.mockReturnValue({
       quality: { quality: { name: 'Repack' } },
       qualityCutoffNotMet: false,
-      size: 1000000
+      size: 1000000,
     });
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={1}
-        showMissingStatus={false}
-      />
+      <GameStatus gameId={1} gameFileId={1} showMissingStatus={false} />
     );
 
     expect(container.innerHTML).toBe('');
@@ -96,20 +95,16 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
-      grabbed: false
+      grabbed: false,
     });
     mockedUseGameFile.mockReturnValue({
       quality: { quality: { name: 'Repack' } },
       qualityCutoffNotMet: false,
-      size: 1000000
+      size: 1000000,
     });
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={1}
-        showMissingStatus={true}
-      />
+      <GameStatus gameId={1} gameFileId={1} showMissingStatus={true} />
     );
 
     expect(container.innerHTML).not.toBe('');
@@ -119,16 +114,12 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
-      grabbed: true
+      grabbed: true,
     });
     mockedUseGameFile.mockReturnValue(undefined);
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={undefined}
-        showMissingStatus={false}
-      />
+      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={false} />
     );
 
     expect(container.innerHTML).toBe('');
@@ -138,16 +129,12 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
-      grabbed: true
+      grabbed: true,
     });
     mockedUseGameFile.mockReturnValue(undefined);
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={undefined}
-        showMissingStatus={true}
-      />
+      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={true} />
     );
 
     expect(container.innerHTML).not.toBe('');
@@ -157,16 +144,12 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
-      grabbed: false
+      grabbed: false,
     });
     mockedUseGameFile.mockReturnValue(undefined);
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={undefined}
-        showMissingStatus={true}
-      />
+      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={true} />
     );
 
     expect(container.innerHTML).not.toBe('');
@@ -176,16 +159,12 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: false,
-      grabbed: false
+      grabbed: false,
     });
     mockedUseGameFile.mockReturnValue(undefined);
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={undefined}
-        showMissingStatus={true}
-      />
+      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={true} />
     );
 
     expect(container.innerHTML).not.toBe('');
@@ -195,16 +174,12 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: false,
-      grabbed: false
+      grabbed: false,
     });
     mockedUseGameFile.mockReturnValue(undefined);
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={undefined}
-        showMissingStatus={false}
-      />
+      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={false} />
     );
 
     expect(container.innerHTML).toBe('');
@@ -214,7 +189,7 @@ describe('GameStatus', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
-      grabbed: false
+      grabbed: false,
     });
     mockedUseGameFile.mockReturnValue(undefined);
     mockedUseSelector.mockReturnValue({
@@ -223,15 +198,11 @@ describe('GameStatus', () => {
       sizeLeft: 500,
       status: 'downloading',
       trackedDownloadStatus: 'ok',
-      trackedDownloadState: 'downloading'
+      trackedDownloadState: 'downloading',
     });
 
     const { container } = render(
-      <GameStatus
-        gameId={1}
-        gameFileId={undefined}
-        showMissingStatus={false}
-      />
+      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={false} />
     );
 
     // Queue progress should always show even with showMissingStatus=false
