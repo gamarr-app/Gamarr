@@ -226,5 +226,191 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
 
             Subject.Map(parsedInfo, 0, 0, searchCriteria).Game.Should().BeNull();
         }
+
+        [Test]
+        public void should_match_by_steam_app_id()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindBySteamAppId(440))
+                  .Returns(_game);
+
+            var result = Subject.Map(_parsedGameInfo, 440, 0, null);
+
+            result.Game.Should().Be(_game);
+            result.GameMatchType.Should().Be(GameMatchType.Id);
+        }
+
+        [Test]
+        public void should_match_by_igdb_id_when_steam_not_found()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindBySteamAppId(It.IsAny<int>()))
+                  .Returns((Game)null);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByIgdbId(1234))
+                  .Returns(_game);
+
+            var result = Subject.Map(_parsedGameInfo, 0, 1234, null);
+
+            result.Game.Should().Be(_game);
+            result.GameMatchType.Should().Be(GameMatchType.Id);
+        }
+
+        [Test]
+        public void should_prefer_steam_id_over_igdb_id()
+        {
+            var otherGame = Builder<Game>.CreateNew()
+                .With(m => m.Title = "Other Game")
+                .With(m => m.Year = 2020)
+                .Build();
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindBySteamAppId(440))
+                  .Returns(_game);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByIgdbId(1234))
+                  .Returns(otherGame);
+
+            var result = Subject.Map(_parsedGameInfo, 440, 1234, null);
+
+            result.Game.Should().Be(_game);
+        }
+
+        [Test]
+        public void should_not_match_by_steam_id_when_year_mismatch()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindBySteamAppId(440))
+                  .Returns(_game);
+
+            var result = Subject.Map(_wrongYearInfo, 440, 0, null);
+
+            result.Game.Should().BeNull();
+        }
+
+        [Test]
+        public void should_match_by_steam_id_when_no_year_in_parsed_info()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindBySteamAppId(440))
+                  .Returns(_game);
+
+            var noYearInfo = new ParsedGameInfo
+            {
+                GameTitles = new List<string> { "Some Title" },
+                Languages = new List<Language> { Language.English },
+                Year = 0
+            };
+
+            var result = Subject.Map(noYearInfo, 440, 0, null);
+
+            result.Game.Should().Be(_game);
+        }
+
+        [Test]
+        public void should_map_by_game_id()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetGame(42))
+                  .Returns(_game);
+
+            var result = Subject.Map(_parsedGameInfo, 42);
+
+            result.Game.Should().Be(_game);
+            result.ParsedGameInfo.Should().Be(_parsedGameInfo);
+        }
+
+        [Test]
+        public void should_set_game_requested_when_search_criteria_matches()
+        {
+            var result = Subject.Map(_parsedGameInfo, 0, 0, _gameSearchCriteria);
+
+            result.GameRequested.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_not_set_game_requested_when_different_game_found()
+        {
+            var otherGame = Builder<Game>.CreateNew()
+                .With(m => m.Id = 999)
+                .With(m => m.Title = "Other Game")
+                .With(m => m.GameMetadata.Value.CleanTitle = "othergame")
+                .With(m => m.Year = 2020)
+                .With(m => m.GameMetadata.Value.AlternativeTitles = new List<AlternativeTitle>())
+                .With(m => m.GameMetadata.Value.Translations = new List<GameTranslation>())
+                .Build();
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindBySteamAppId(440))
+                  .Returns(otherGame);
+
+            // Use a parsedInfo with a non-matching title so search criteria title match
+            // doesn't override the Steam ID lookup. Year=0 allows Steam ID match to succeed.
+            var noMatchInfo = new ParsedGameInfo
+            {
+                GameTitles = new List<string> { "Completely Different" },
+                Languages = new List<Language> { Language.English },
+                Year = 0
+            };
+
+            var result = Subject.Map(noMatchInfo, 440, 0, _gameSearchCriteria);
+
+            result.GameRequested.Should().BeFalse();
+        }
+
+        [Test]
+        public void should_set_languages_from_parsed_info()
+        {
+            var result = Subject.Map(_multiLanguageInfo, 0, 0, _gameSearchCriteria);
+
+            result.Languages.Should().Contain(Language.Original);
+            result.Languages.Should().Contain(Language.French);
+        }
+
+        [Test]
+        public void should_match_by_steam_id_in_search_criteria()
+        {
+            _game.GameMetadata.Value.SteamAppId = 440;
+
+            var noMatchInfo = new ParsedGameInfo
+            {
+                GameTitles = new List<string> { "Completely Different" },
+                Languages = new List<Language> { Language.English },
+                Year = 0
+            };
+
+            var result = Subject.Map(noMatchInfo, 440, 0, _gameSearchCriteria);
+
+            result.Game.Should().Be(_game);
+            result.GameMatchType.Should().Be(GameMatchType.Id);
+        }
+
+        [Test]
+        public void should_match_by_igdb_id_in_search_criteria()
+        {
+            _game.GameMetadata.Value.IgdbId = 5678;
+
+            var noMatchInfo = new ParsedGameInfo
+            {
+                GameTitles = new List<string> { "Completely Different" },
+                Languages = new List<Language> { Language.English },
+                Year = 0
+            };
+
+            var result = Subject.Map(noMatchInfo, 0, 5678, _gameSearchCriteria);
+
+            result.Game.Should().Be(_game);
+            result.GameMatchType.Should().Be(GameMatchType.Id);
+        }
+
+        [Test]
+        public void should_return_null_game_when_no_match_found()
+        {
+            var result = Subject.Map(_wrongTitleInfo, 0, 0, null);
+
+            result.Game.Should().BeNull();
+        }
     }
 }
