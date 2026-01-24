@@ -6,10 +6,12 @@ import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import PageSectionContent from 'Components/Page/PageSectionContent';
 import { icons } from 'Helpers/Props';
-import { deleteNotification, fetchNotifications } from 'Store/Actions/settingsActions';
+import {
+  deleteNotification,
+  fetchNotifications,
+} from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
-import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import AddNotificationModal from './AddNotificationModal';
 import EditNotificationModal from './EditNotificationModal';
@@ -18,7 +20,11 @@ import styles from './Notifications.css';
 
 function createNotificationsSelector() {
   return createSelector(
-    createSortedSectionSelector('settings.notifications', sortByProp('name')),
+    createSortedSectionSelector(
+      'settings.notifications',
+      (a: { id: number; name: string }, b: { id: number; name: string }) =>
+        a.name.localeCompare(b.name)
+    ),
     createTagsSelector(),
     (notifications, tagList) => {
       return {

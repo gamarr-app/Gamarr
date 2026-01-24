@@ -33,11 +33,13 @@ function AddNotificationModalContent({
     dispatch(fetchNotificationSchema());
   }, [dispatch]);
 
+  const handleClosePress = useCallback(() => {
+    onModalClose();
+  }, [onModalClose]);
+
   const handleNotificationSelect = useCallback(
     ({ implementation, name }: { implementation: string; name: string }) => {
-      dispatch(
-        selectNotificationSchema({ implementation, presetName: name })
-      );
+      dispatch(selectNotificationSchema({ implementation, presetName: name }));
       onModalClose({ notificationSelected: true });
     },
     [dispatch, onModalClose]
@@ -51,9 +53,7 @@ function AddNotificationModalContent({
         {isSchemaFetching ? <LoadingIndicator /> : null}
 
         {!isSchemaFetching && !!schemaError ? (
-          <Alert kind={kinds.DANGER}>
-            {translate('AddNotificationError')}
-          </Alert>
+          <Alert kind={kinds.DANGER}>{translate('AddNotificationError')}</Alert>
         ) : null}
 
         {isSchemaPopulated && !schemaError ? (
@@ -63,7 +63,6 @@ function AddNotificationModalContent({
                 return (
                   <AddNotificationItem
                     key={notification.implementation}
-                    implementation={notification.implementation}
                     {...notification}
                     onNotificationSelect={handleNotificationSelect}
                   />
@@ -74,7 +73,7 @@ function AddNotificationModalContent({
         ) : null}
       </ModalBody>
       <ModalFooter>
-        <Button onPress={onModalClose}>{translate('Close')}</Button>
+        <Button onPress={handleClosePress}>{translate('Close')}</Button>
       </ModalFooter>
     </ModalContent>
   );

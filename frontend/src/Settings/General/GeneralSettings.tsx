@@ -105,8 +105,10 @@ function GeneralSettings() {
   useEffect(() => {
     if (!isSaving && !saveError && prevIsSaving.current) {
       const pendingRestart = _.some(requiresRestartKeys, (key) => {
-        const setting = settings[key];
-        const prevSetting = prevSettings.current?.[key];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const setting = (settings as any)[key];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const prevSetting = (prevSettings.current as any)?.[key];
 
         if (!setting || !prevSetting) {
           return false;
@@ -230,7 +232,9 @@ function GeneralSettings() {
         isOpen={isRestartRequiredModalOpen}
         kind={kinds.DANGER}
         title={translate('RestartGamarr')}
-        message={`${translate('RestartRequiredToApplyChanges')} ${isWindowsService ? translate('RestartRequiredWindowsService') : ''}`}
+        message={`${translate('RestartRequiredToApplyChanges')} ${
+          isWindowsService ? translate('RestartRequiredWindowsService') : ''
+        }`}
         cancelLabel={translate('RestartLater')}
         confirmLabel={translate('RestartNow')}
         onConfirm={handleConfirmRestart}

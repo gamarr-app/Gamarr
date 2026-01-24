@@ -75,32 +75,37 @@ export const gameRuntimeFormatOptions = [
 ];
 
 function createFilteredLanguagesSelector() {
-  return createSelector(
-    createLanguagesSelector(),
-    (languages) => {
-      if (!languages || !languages.items) {
-        return { isFetching: false, isPopulated: false, items: [] };
-      }
-
-      const newItems = languages.items
-        .filter((lang: { name: string }) => !FILTER_LANGUAGES.includes(lang.name))
-        .map((item: { id: number; name: string }) => ({
-          key: item.id,
-          value: item.name,
-        }));
-
+  return createSelector(createLanguagesSelector(), (languages) => {
+    if (!languages || !languages.items) {
       return {
-        ...languages,
-        items: newItems,
+        isFetching: false,
+        isPopulated: false,
+        items: [],
+        error: undefined as Error | undefined,
       };
     }
-  );
+
+    const newItems = languages.items
+      .filter((lang: { name: string }) => !FILTER_LANGUAGES.includes(lang.name))
+      .map((item: { id: number; name: string }) => ({
+        key: item.id,
+        value: item.name,
+      }));
+
+    return {
+      ...languages,
+      items: newItems,
+    };
+  });
 }
 
 function UISettings() {
   const dispatch = useDispatch();
 
-  const filteredLanguagesSelector = useMemo(createFilteredLanguagesSelector, []);
+  const filteredLanguagesSelector = useMemo(
+    createFilteredLanguagesSelector,
+    []
+  );
 
   const {
     isFetching: isFetchingSettings,
@@ -157,9 +162,7 @@ function UISettings() {
         {isFetching ? <LoadingIndicator /> : null}
 
         {!isFetching && error ? (
-          <Alert kind={kinds.DANGER}>
-            {translate('UiSettingsLoadError')}
-          </Alert>
+          <Alert kind={kinds.DANGER}>{translate('UiSettingsLoadError')}</Alert>
         ) : null}
 
         {hasSettings && !isFetching && !error ? (
@@ -184,8 +187,8 @@ function UISettings() {
                   type={inputTypes.SELECT}
                   name="calendarWeekColumnHeader"
                   values={weekColumnOptions}
-                  onChange={handleInputChange}
                   helpText={translate('WeekColumnHeaderHelpText')}
+                  onChange={handleInputChange}
                   {...settings.calendarWeekColumnHeader}
                 />
               </FormGroup>

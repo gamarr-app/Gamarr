@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
@@ -64,16 +65,29 @@ const newDelayProfile = {
 
 function createDelayProfileSelector(id: number | undefined) {
   return createSelector(
-    (state: { settings: { delayProfiles: { isFetching: boolean; error: unknown; isSaving: boolean; saveError: unknown; pendingChanges: Record<string, unknown>; items: Array<{ id: number }> } } }) =>
-      state.settings.delayProfiles,
+    (state: {
+      settings: {
+        delayProfiles: {
+          isFetching: boolean;
+          error: AppError | undefined;
+          isSaving: boolean;
+          saveError: AppError | undefined;
+          pendingChanges: Record<string, unknown>;
+          items: Array<{ id: number }>;
+        };
+      };
+    }) => state.settings.delayProfiles,
     (delayProfiles) => {
       const { isFetching, error, isSaving, saveError, pendingChanges, items } =
         delayProfiles;
 
-      const profile = id
-        ? items.find((i) => i.id === id)
-        : newDelayProfile;
-      const settings = selectSettings(profile, pendingChanges, saveError);
+      const profile = id ? items.find((i) => i.id === id) : newDelayProfile;
+      const settings = selectSettings(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        profile as any,
+        pendingChanges,
+        saveError
+      );
 
       const enableUsenet = settings.settings.enableUsenet.value;
       const enableTorrent = settings.settings.enableTorrent.value;
@@ -121,8 +135,16 @@ function EditDelayProfileModalContent({
 }: EditDelayProfileModalContentProps) {
   const dispatch = useDispatch();
 
-  const { isFetching, error, isSaving, saveError, protocol, item, ...otherSettings } =
-    useSelector(createDelayProfileSelector(id));
+  const {
+    isFetching,
+    error,
+    isSaving,
+    saveError,
+    protocol,
+    item,
+    validationErrors,
+    validationWarnings,
+  } = useSelector(createDelayProfileSelector(id));
 
   const prevIsSaving = useRef(isSaving);
 
@@ -161,34 +183,58 @@ function EditDelayProfileModalContent({
         case 'preferUsenet':
           // @ts-expect-error - actions aren't typed
           dispatch(setDelayProfileValue({ name: 'enableUsenet', value: true }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'enableTorrent', value: true }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' }));
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'enableTorrent', value: true })
+          );
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' })
+          );
           break;
         case 'preferTorrent':
           // @ts-expect-error - actions aren't typed
           dispatch(setDelayProfileValue({ name: 'enableUsenet', value: true }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'enableTorrent', value: true }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'preferredProtocol', value: 'torrent' }));
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'enableTorrent', value: true })
+          );
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({
+              name: 'preferredProtocol',
+              value: 'torrent',
+            })
+          );
           break;
         case 'onlyUsenet':
           // @ts-expect-error - actions aren't typed
           dispatch(setDelayProfileValue({ name: 'enableUsenet', value: true }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'enableTorrent', value: false }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' }));
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'enableTorrent', value: false })
+          );
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' })
+          );
           break;
         case 'onlyTorrent':
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'enableUsenet', value: false }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'enableTorrent', value: true }));
-          // @ts-expect-error - actions aren't typed
-          dispatch(setDelayProfileValue({ name: 'preferredProtocol', value: 'torrent' }));
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'enableUsenet', value: false })
+          );
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({ name: 'enableTorrent', value: true })
+          );
+          dispatch(
+            // @ts-expect-error - actions aren't typed
+            setDelayProfileValue({
+              name: 'preferredProtocol',
+              value: 'torrent',
+            })
+          );
           break;
         default:
           throw Error(`Unknown protocol option: ${value}`);
@@ -222,13 +268,14 @@ function EditDelayProfileModalContent({
         {isFetching ? <LoadingIndicator /> : null}
 
         {!isFetching && !!error ? (
-          <Alert kind={kinds.DANGER}>
-            {translate('AddDelayProfileError')}
-          </Alert>
+          <Alert kind={kinds.DANGER}>{translate('AddDelayProfileError')}</Alert>
         ) : null}
 
         {!isFetching && !error ? (
-          <Form {...otherSettings}>
+          <Form
+            validationErrors={validationErrors}
+            validationWarnings={validationWarnings}
+          >
             <FormGroup>
               <FormLabel>{translate('PreferredProtocol')}</FormLabel>
 
@@ -303,9 +350,7 @@ function EditDelayProfileModalContent({
             {bypassIfAboveCustomFormatScore.value ? (
               <FormGroup>
                 <FormLabel>
-                  {translate(
-                    'BypassDelayIfAboveCustomFormatScoreMinimumScore'
-                  )}
+                  {translate('BypassDelayIfAboveCustomFormatScoreMinimumScore')}
                 </FormLabel>
 
                 <FormInputGroup
@@ -353,7 +398,8 @@ function EditDelayProfileModalContent({
 
         <SpinnerErrorButton
           isSpinning={isSaving}
-          error={saveError}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          error={saveError as any}
           onPress={handleSavePress}
         >
           {translate('Save')}

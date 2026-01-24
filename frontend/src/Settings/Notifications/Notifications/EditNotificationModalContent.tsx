@@ -22,7 +22,7 @@ import {
   setNotificationValue,
   testNotification,
 } from 'Store/Actions/settingsActions';
-import createProviderSettingsSelector from 'Store/Selectors/createProviderSettingsSelector';
+import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
 import NotificationEventItems from './NotificationEventItems';
@@ -50,7 +50,7 @@ function EditNotificationModalContent({
     saveError,
     item,
     ...otherSettings
-  } = useSelector(createProviderSettingsSelector('notifications', id));
+  } = useSelector(createProviderSettingsSelectorHook('notifications', id));
 
   const prevIsSaving = useRef(isSaving);
 
@@ -93,13 +93,7 @@ function EditNotificationModalContent({
     dispatch(testNotification({ id }));
   }, [dispatch, id]);
 
-  const {
-    implementationName,
-    name,
-    tags,
-    fields,
-    message,
-  } = item;
+  const { implementationName = '', name, tags, fields, message } = item;
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -113,9 +107,7 @@ function EditNotificationModalContent({
         {isFetching ? <LoadingIndicator /> : null}
 
         {!isFetching && !!error ? (
-          <Alert kind={kinds.DANGER}>
-            {translate('AddNotificationError')}
-          </Alert>
+          <Alert kind={kinds.DANGER}>{translate('AddNotificationError')}</Alert>
         ) : null}
 
         {!isFetching && !error ? (
@@ -154,7 +146,8 @@ function EditNotificationModalContent({
               />
             </FormGroup>
 
-            {fields.map((field: { name: string }) => {
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {(fields ?? []).map((field: any) => {
               return (
                 <ProviderFieldFormGroup
                   key={field.name}
@@ -184,7 +177,7 @@ function EditNotificationModalContent({
         <AdvancedSettingsButton showLabel={false} />
 
         <SpinnerErrorButton
-          isSpinning={isTesting}
+          isSpinning={isTesting ?? false}
           error={saveError}
           onPress={handleTestPress}
         >

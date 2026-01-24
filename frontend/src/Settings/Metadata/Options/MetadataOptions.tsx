@@ -105,8 +105,8 @@ function MetadataOptions({
               type={inputTypes.SELECT}
               name="certificationCountry"
               values={certificationCountryOptions}
-              onChange={handleInputChange}
               helpText={translate('CertificationCountryHelpText')}
+              onChange={handleInputChange}
               {...settings.certificationCountry}
             />
           </FormGroup>
@@ -117,9 +117,9 @@ function MetadataOptions({
             <FormInputGroup
               type={inputTypes.TEXT}
               name="igdbClientId"
-              onChange={handleInputChange}
               helpText="Client ID from IGDB/Twitch Developer Portal. Enables better cover art for DLC and expansions."
               helpTextWarning="Get credentials at https://api-docs.igdb.com/"
+              onChange={handleInputChange}
               {...settings.igdbClientId}
             />
           </FormGroup>
@@ -130,8 +130,8 @@ function MetadataOptions({
             <FormInputGroup
               type={inputTypes.PASSWORD}
               name="igdbClientSecret"
-              onChange={handleInputChange}
               helpText="Client Secret from IGDB/Twitch Developer Portal"
+              onChange={handleInputChange}
               {...settings.igdbClientSecret}
             />
           </FormGroup>
@@ -142,9 +142,9 @@ function MetadataOptions({
             <FormInputGroup
               type={inputTypes.PASSWORD}
               name="rawgApiKey"
-              onChange={handleInputChange}
               helpText="API key from RAWG.io. Provides additional game metadata and cover art."
               helpTextWarning="Get a free key at https://rawg.io/apidocs"
+              onChange={handleInputChange}
               {...settings.rawgApiKey}
             />
           </FormGroup>
