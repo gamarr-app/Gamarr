@@ -55,14 +55,7 @@ namespace NzbDrone.Test.Common
                 consoleExe = "Gamarr";
             }
 
-            if (BuildInfo.IsDebug)
-            {
-                Start(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "_output", "net8.0", consoleExe));
-            }
-            else
-            {
-                Start(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "bin", consoleExe));
-            }
+            Start(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "_output", "net8.0", consoleExe));
 
             while (true)
             {
