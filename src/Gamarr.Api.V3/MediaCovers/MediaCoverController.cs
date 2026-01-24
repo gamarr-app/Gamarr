@@ -25,7 +25,7 @@ namespace Gamarr.Api.V3.MediaCovers
         [HttpGet(@"{gameId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
         public IActionResult GetMediaCover(int gameId, string filename)
         {
-            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", gameId.ToString(), filename);
+            var filePath = Path.Combine(_appFolderInfo.AppDataFolder, "MediaCover", gameId.ToString(), filename);
 
             if (!_diskProvider.FileExists(filePath) || _diskProvider.GetFileSize(filePath) == 0)
             {
