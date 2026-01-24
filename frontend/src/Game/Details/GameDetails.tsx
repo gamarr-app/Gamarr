@@ -85,7 +85,6 @@ import {
 } from 'Utilities/pagePopulator';
 import translate from 'Utilities/String/translate';
 import DlcList from './Dlc/DlcList';
-import ParentGameInfo from './Dlc/ParentGameInfo';
 import GameDetailsLinks from './GameDetailsLinks';
 import GameReleaseDates from './GameReleaseDates';
 import GameStatusLabel from './GameStatusLabel';
@@ -854,8 +853,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
         </div>
 
         <div className={styles.contentContainer}>
-          <ParentGameInfo gameId={id} />
-
           {!isFetching && gameFilesError ? (
             <Alert kind={kinds.DANGER}>
               {translate('LoadingGameFilesFailed')}
@@ -880,9 +877,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
             <GameTitlesTable gameId={id} />
           </FieldSet>
 
-          <FieldSet legend={translate('DlcAndExpansions')}>
-            <DlcList gameId={id} />
-          </FieldSet>
+          <DlcList gameId={id} />
         </div>
 
         <OrganizePreviewModal
