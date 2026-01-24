@@ -101,7 +101,8 @@ namespace NzbDrone.Core.IndexerSearch
             var baseTitles = queryTranslations
                 .Where(t => t.IsNotNullOrWhiteSpace())
                 .Select(t => UpdateSuffixRegex.Replace(t, string.Empty))
-                .Where(t => t.IsNotNullOrWhiteSpace());
+                .Where(t => t.IsNotNullOrWhiteSpace())
+                .ToList();
             queryTranslations.AddRange(baseTitles);
 
             spec.SceneTitles = queryTranslations.Where(t => t.IsNotNullOrWhiteSpace()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();

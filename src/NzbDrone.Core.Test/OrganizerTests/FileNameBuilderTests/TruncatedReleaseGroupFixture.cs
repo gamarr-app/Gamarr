@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
             var result = Subject.BuildFileName(_game, _gameFile);
             result.Length.Should().BeLessOrEqualTo(255);
-            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) Bluray-1080p-IWishIWas...");
+            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) GOG-IWishIWas...");
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
             var result = Subject.BuildFileName(_game, _gameFile);
             result.Length.Should().BeLessOrEqualTo(255);
-            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) Bluray-1080p-...ASixFourImpala");
+            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) GOG-...ASixFourImpala");
         }
     }
 }

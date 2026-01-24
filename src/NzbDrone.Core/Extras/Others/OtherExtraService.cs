@@ -86,7 +86,7 @@ namespace NzbDrone.Core.Extras.Others
             var importedFiles = new List<ExtraFile>();
             var filteredFiles = files.Where(f => CanImportFile(localGame, gameFile, f, Path.GetExtension(f), isReadOnly)).ToList();
             var sourcePath = localGame.Path;
-            var sourceFolder = _diskProvider.GetParentFolder(sourcePath);
+            var sourceFolder = Path.GetDirectoryName(sourcePath);
             var sourceFileName = Path.GetFileNameWithoutExtension(sourcePath);
             var matchingFiles = new List<string>();
             var hasNfo = false;
@@ -111,6 +111,24 @@ namespace NzbDrone.Core.Extras.Others
                     {
                         matchingFiles.Add(file);
                         continue;
+                    }
+
+                    // Subdirectory match - if the file is in a subfolder that matches the game title
+                    var fileParentFolder = Path.GetDirectoryName(file);
+                    if (fileParentFolder != null && !fileParentFolder.PathEquals(sourceFolder))
+                    {
+                        var subfolderName = new DirectoryInfo(fileParentFolder).Name;
+                        var subfolderInfo = Parser.Parser.ParseGameTitle(subfolderName);
+
+                        if (subfolderInfo != null &&
+                            localGame.FileGameInfo != null &&
+                            subfolderInfo.GameTitle != null &&
+                            subfolderInfo.GameTitle == localGame.FileGameInfo.GameTitle &&
+                            subfolderInfo.Year.Equals(localGame.FileGameInfo.Year))
+                        {
+                            matchingFiles.Add(file);
+                            continue;
+                        }
                     }
 
                     // Game match

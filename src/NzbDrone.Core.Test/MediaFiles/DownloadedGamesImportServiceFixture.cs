@@ -9,8 +9,10 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
+using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.GameImport;
+using NzbDrone.Core.MediaFiles.VirusScanning;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
@@ -46,6 +48,23 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IImportApprovedGame>()
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
                   .Returns(new List<ImportResult>());
+
+            Mocker.GetMock<IReleaseStructureValidator>()
+                  .Setup(s => s.ValidateReleaseStructure(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(new ReleaseStructureValidationResult
+                  {
+                      IsValid = true,
+                      SuspiciousFiles = new List<string>(),
+                      Confidence = ReleaseStructureConfidence.Unknown
+                  });
+
+            Mocker.GetMock<IVirusScannerService>()
+                  .Setup(s => s.IsAvailable)
+                  .Returns(false);
+
+            Mocker.GetMock<IHistoryService>()
+                  .Setup(s => s.FindByDownloadId(It.IsAny<string>()))
+                  .Returns(new List<GameHistory>());
 
             var downloadItem = Builder<DownloadClientItem>.CreateNew()
                 .With(v => v.DownloadId = "sab1")
@@ -107,10 +126,18 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
+            var filePath = @"C:\media\Game.Title.v1.0.iso".AsOsAgnostic();
+
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(filePath))
+                  .Returns(false);
+
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(filePath))
+                  .Returns(true);
+
             Mocker.GetMock<IDiskProvider>().Setup(c => c.IsFileLocked(It.IsAny<string>()))
                   .Returns(true);
 
-            Subject.ProcessRootFolder(new DirectoryInfo(_droneFactory));
+            Subject.ProcessPath(filePath);
 
             VerifyNoImport();
         }

@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_attempt_to_map_episode_if_not_parsable()
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
-            _reports[0].Title = "Not parsable";
+            _reports[0].Title = "aXf92kL_mnB4zQ-rT7";
 
             Subject.GetRssDecision(_reports).ToList();
 
@@ -136,7 +136,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_rejected_result_for_unparsable_search()
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
-            _reports[0].Title = "1937 - Snow White and the Seven Dwarves";
+            _reports[0].Title = "aXf92kL_mnB4zQ-rT7";
 
             Subject.GetSearchDecision(_reports, new GameSearchCriteria()).ToList();
 

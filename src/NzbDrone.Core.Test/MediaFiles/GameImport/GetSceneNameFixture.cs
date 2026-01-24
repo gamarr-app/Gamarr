@@ -136,7 +136,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                                .BeNull();
         }
 
-        [TestCase(".mkv")]
+        [TestCase(".iso")]
         [TestCase(".par2")]
         [TestCase(".nzb")]
         public void should_remove_extension_from_nzb_title_for_scene_name(string extension)

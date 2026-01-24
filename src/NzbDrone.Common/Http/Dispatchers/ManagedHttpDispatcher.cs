@@ -227,7 +227,8 @@ namespace NzbDrone.Common.Http.Dispatchers
                         webRequest.Headers.TransferEncoding.ParseAdd(header.Value);
                         break;
                     case "User-Agent":
-                        throw new NotSupportedException("User-Agent other than Gamarr not allowed.");
+                        webRequest.Headers.TryAddWithoutValidation("User-Agent", header.Value);
+                        break;
                     case "Proxy-Connection":
                         throw new NotImplementedException();
                     default:

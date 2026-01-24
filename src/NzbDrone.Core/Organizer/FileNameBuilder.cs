@@ -268,6 +268,10 @@ namespace NzbDrone.Core.Organizer
             name = Regex.Replace(name, @"\s*\[\s*\]", string.Empty);
             name = Regex.Replace(name, @"\s*\{\s*\}", string.Empty);
 
+            // Remove tag-style braces with only a label and no value (e.g., {steam-} or {{steamid-}})
+            // Also handles cases where closing braces were consumed by regex suffix (e.g., {{steam- or {igdb-)
+            name = Regex.Replace(name, @"\s*\{{1,2}[a-z]+-\}{0,2}(?=[\s}]|$)", string.Empty, RegexOptions.IgnoreCase);
+
             return name.Trim(' ', '.');
         }
 
@@ -335,8 +339,8 @@ namespace NzbDrone.Core.Organizer
 
         private void AddIdTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Game game)
         {
-            tokenHandlers["{IgdbId}"] = m => game.GameMetadata.Value.IgdbId.ToString();
-            tokenHandlers["{SteamAppId}"] = m => game.GameMetadata.Value.SteamAppId.ToString();
+            tokenHandlers["{IgdbId}"] = m => game.GameMetadata.Value.IgdbId > 0 ? game.GameMetadata.Value.IgdbId.ToString() : string.Empty;
+            tokenHandlers["{SteamAppId}"] = m => game.GameMetadata.Value.SteamAppId > 0 ? game.GameMetadata.Value.SteamAppId.ToString() : string.Empty;
         }
 
         private void AddGameFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, GameFile gameFile, bool multipleTokens)

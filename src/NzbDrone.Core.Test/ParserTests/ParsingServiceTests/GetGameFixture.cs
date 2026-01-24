@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_use_passed_in_title_when_it_cannot_be_parsed()
         {
-            const string title = "30 Game";
+            const string title = "xK9#mZ2@";
 
             Subject.GetGame(title);
 

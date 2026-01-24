@@ -148,11 +148,11 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "EXTRAS", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Extras", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "EXTRAs", "file3.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "ExTrAs", "file4.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "EXTRAS", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Extras", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "EXTRAs", "file3.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "ExTrAs", "file4.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -171,17 +171,17 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Behind the Scenes", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Deleted Scenes", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "file3.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Interviews", "file4.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Sample", "file5.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Samples", "file6.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Scenes", "file7.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Shorts", "file8.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Trailers", "file9.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Other", "file9.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "The Count of Monte Cristo (2002) (1080p BluRay x265 10bit Tigole).mkv").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Behind the Scenes", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Deleted Scenes", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Featurettes", "file3.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Interviews", "file4.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Sample", "file5.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Samples", "file6.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Scenes", "file7.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Shorts", "file8.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Trailers", "file9.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Other", "file9.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "The Count of Monte Cristo (2002) (1080p BluRay x265 10bit Tigole).iso").AsOsAgnostic(),
                        });
 
             Subject.Scan(_game);
@@ -197,11 +197,11 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Featurettes", "An Epic Reborn.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "Deleted & Alternate Scenes.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "En Garde - Multi-Angle Dailies.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "Layer-By-Layer - Sound Design - Multiple Audio.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "The Count of Monte Cristo (2002) (1080p BluRay x265 10bit Tigole).mkv").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Featurettes", "An Epic Reborn.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Featurettes", "Deleted & Alternate Scenes.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Featurettes", "En Garde - Multi-Angle Dailies.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Featurettes", "Layer-By-Layer - Sound Design - Multiple Audio.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "The Count of Monte Cristo (2002) (1080p BluRay x265 10bit Tigole).iso").AsOsAgnostic(),
                        });
 
             Subject.Scan(_game);
@@ -249,9 +249,9 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, ".AppleDouble", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".appledouble", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, ".AppleDouble", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, ".appledouble", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -269,12 +269,12 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Extras", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".AppleDouble", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e02.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 2", "s02e01.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 2", "s02e02.mkv").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Extras", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, ".AppleDouble", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e02.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 2", "s02e01.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 2", "s02e02.iso").AsOsAgnostic(),
                        });
 
             Subject.Scan(_game);
@@ -290,10 +290,10 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, ".@__thumb", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".@__THUMB", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".hidden", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, ".@__thumb", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, ".@__THUMB", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, ".hidden", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -309,11 +309,11 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Season 1", ".@__thumb", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", ".@__THUMB", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", ".hidden", "file2.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", ".AppleDouble", "s01e01.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "Season 1", ".@__thumb", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", ".@__THUMB", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", ".hidden", "file2.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", ".AppleDouble", "s01e01.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -329,8 +329,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "@eaDir", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "@eaDir", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -346,8 +346,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, ".@__thumb", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, ".@__thumb", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -365,8 +365,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Season 1", "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "Season 1", "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -382,8 +382,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "file1.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "s01e01.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "s01e01.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -399,9 +399,9 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Avatar (2009).mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Deleted Scenes-deleted.mkv").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "The World of Pandora-other.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "Avatar (2009).iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "Deleted Scenes-deleted.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "The World of Pandora-other.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -418,7 +418,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             GivenFiles(new List<string>
                        {
                            Path.Combine(_game.Path, "._24 The Status Quo Combustion.mp4").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "24 The Status Quo Combustion.mkv").AsOsAgnostic()
+                           Path.Combine(_game.Path, "24 The Status Quo Combustion.iso").AsOsAgnostic()
                        });
 
             Subject.Scan(_game);
@@ -437,7 +437,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 Path.Combine(_game.Path, ".DS_Store").AsOsAgnostic(),
                 Path.Combine(_game.Path, ".unmanic").AsOsAgnostic(),
                 Path.Combine(_game.Path, ".unmanic.part").AsOsAgnostic(),
-                Path.Combine(_game.Path, "24 The Status Quo Combustion.mkv").AsOsAgnostic()
+                Path.Combine(_game.Path, "24 The Status Quo Combustion.iso").AsOsAgnostic()
             });
 
             Subject.Scan(_game);

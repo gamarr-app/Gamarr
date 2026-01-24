@@ -17,12 +17,15 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
     public class GameRepositoryFixture : DbTest<GameRepository, Game>
     {
         private IQualityProfileRepository _profileRepository;
+        private IGameMetadataRepository _metadataRepository;
 
         [SetUp]
         public void Setup()
         {
             _profileRepository = Mocker.Resolve<QualityProfileRepository>();
             Mocker.SetConstant<IQualityProfileRepository>(_profileRepository);
+
+            _metadataRepository = Mocker.Resolve<GameMetadataRepository>();
 
             Mocker.GetMock<ICustomFormatService>()
                 .Setup(x => x.All())
@@ -71,37 +74,24 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
             var profile = CreateTestProfile();
 
             // Create parent game
+            var parentMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 1000, Title = "Parent Game", GameType = GameType.MainGame });
             var parentGame = Builder<Game>.CreateNew().BuildNew();
             parentGame.QualityProfileId = profile.Id;
-            parentGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 1000,
-                Title = "Parent Game",
-                GameType = GameType.MainGame
-            };
+            parentGame.GameMetadataId = parentMeta.Id;
             Subject.Insert(parentGame);
 
             // Create DLC game
+            var dlcMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 2000, Title = "DLC Game", GameType = GameType.DlcAddon, ParentGameId = 1000 });
             var dlcGame = Builder<Game>.CreateNew().BuildNew();
             dlcGame.QualityProfileId = profile.Id;
-            dlcGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 2000,
-                Title = "DLC Game",
-                GameType = GameType.DlcAddon,
-                ParentGameId = 1000
-            };
+            dlcGame.GameMetadataId = dlcMeta.Id;
             Subject.Insert(dlcGame);
 
             // Create unrelated game
+            var otherMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 3000, Title = "Other Game", GameType = GameType.MainGame });
             var otherGame = Builder<Game>.CreateNew().BuildNew();
             otherGame.QualityProfileId = profile.Id;
-            otherGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 3000,
-                Title = "Other Game",
-                GameType = GameType.MainGame
-            };
+            otherGame.GameMetadataId = otherMeta.Id;
             Subject.Insert(otherGame);
 
             var dlcs = Subject.GetDlcsForGame(1000);
@@ -115,14 +105,10 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
         {
             var profile = CreateTestProfile();
 
+            var parentMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 1000, Title = "Parent Game", GameType = GameType.MainGame });
             var parentGame = Builder<Game>.CreateNew().BuildNew();
             parentGame.QualityProfileId = profile.Id;
-            parentGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 1000,
-                Title = "Parent Game",
-                GameType = GameType.MainGame
-            };
+            parentGame.GameMetadataId = parentMeta.Id;
             Subject.Insert(parentGame);
 
             var result = Subject.GetParentGame(1000);
@@ -137,36 +123,24 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
             var profile = CreateTestProfile();
 
             // Create main game
+            var mainMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 1000, Title = "Main Game", GameType = GameType.MainGame });
             var mainGame = Builder<Game>.CreateNew().BuildNew();
             mainGame.QualityProfileId = profile.Id;
-            mainGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 1000,
-                Title = "Main Game",
-                GameType = GameType.MainGame
-            };
+            mainGame.GameMetadataId = mainMeta.Id;
             Subject.Insert(mainGame);
 
             // Create DLC
+            var dlcMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 2000, Title = "DLC Game", GameType = GameType.DlcAddon });
             var dlcGame = Builder<Game>.CreateNew().BuildNew();
             dlcGame.QualityProfileId = profile.Id;
-            dlcGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 2000,
-                Title = "DLC Game",
-                GameType = GameType.DlcAddon
-            };
+            dlcGame.GameMetadataId = dlcMeta.Id;
             Subject.Insert(dlcGame);
 
             // Create Expansion
+            var expMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 3000, Title = "Expansion Game", GameType = GameType.Expansion });
             var expansionGame = Builder<Game>.CreateNew().BuildNew();
             expansionGame.QualityProfileId = profile.Id;
-            expansionGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 3000,
-                Title = "Expansion Game",
-                GameType = GameType.Expansion
-            };
+            expansionGame.GameMetadataId = expMeta.Id;
             Subject.Insert(expansionGame);
 
             var dlcs = Subject.GetAllDlcs();
@@ -181,36 +155,24 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
             var profile = CreateTestProfile();
 
             // Create main game
+            var mainMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 1000, Title = "Main Game", GameType = GameType.MainGame });
             var mainGame = Builder<Game>.CreateNew().BuildNew();
             mainGame.QualityProfileId = profile.Id;
-            mainGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 1000,
-                Title = "Main Game",
-                GameType = GameType.MainGame
-            };
+            mainGame.GameMetadataId = mainMeta.Id;
             Subject.Insert(mainGame);
 
             // Create DLC
+            var dlcMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 2000, Title = "DLC Game", GameType = GameType.DlcAddon });
             var dlcGame = Builder<Game>.CreateNew().BuildNew();
             dlcGame.QualityProfileId = profile.Id;
-            dlcGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 2000,
-                Title = "DLC Game",
-                GameType = GameType.DlcAddon
-            };
+            dlcGame.GameMetadataId = dlcMeta.Id;
             Subject.Insert(dlcGame);
 
             // Create Remaster (counts as main game)
+            var remMeta = _metadataRepository.Insert(new GameMetadata { IgdbId = 3000, Title = "Remaster Game", GameType = GameType.Remaster });
             var remasterGame = Builder<Game>.CreateNew().BuildNew();
             remasterGame.QualityProfileId = profile.Id;
-            remasterGame.GameMetadata = new GameMetadata
-            {
-                IgdbId = 3000,
-                Title = "Remaster Game",
-                GameType = GameType.Remaster
-            };
+            remasterGame.GameMetadataId = remMeta.Id;
             Subject.Insert(remasterGame);
 
             var mainGames = Subject.GetMainGamesOnly();

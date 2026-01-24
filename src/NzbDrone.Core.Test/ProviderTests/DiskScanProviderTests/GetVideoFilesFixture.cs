@@ -19,11 +19,11 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
         {
             _fileNames = new[]
                         {
-                            @"30 Rock1.mkv",
-                            @"30 Rock2.avi",
-                            @"30 Rock3.MP4",
-                            @"30 Rock4.wMv",
-                            @"game.exe",
+                            @"Game1.iso",
+                            @"Game2.exe",
+                            @"Game3.rar",
+                            @"Game4.zip",
+                            @"readme.txt",
                             @"game"
                         };
         }
