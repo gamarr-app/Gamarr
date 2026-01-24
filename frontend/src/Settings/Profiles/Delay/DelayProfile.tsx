@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
+import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TagList from 'Components/TagList';
 import { icons, kinds } from 'Helpers/Props';
-import { Tag } from 'App/State/TagsAppState';
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
 import EditDelayProfileModal from './EditDelayProfileModal';

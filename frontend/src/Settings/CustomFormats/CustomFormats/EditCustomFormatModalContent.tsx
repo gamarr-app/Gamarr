@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
 import Alert from 'Components/Alert';
 import Card from 'Components/Card';
