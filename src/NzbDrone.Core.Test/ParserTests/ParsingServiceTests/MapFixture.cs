@@ -170,5 +170,61 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
             Subject.Map(_umlautInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
             Subject.Map(_umlautAltInfo, 0, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
+
+        [Test]
+        public void should_match_by_word_fallback_when_dlc_name_in_parentheses()
+        {
+            var game = Builder<Game>.CreateNew()
+                .With(m => m.Title = "Factorio: Space Age")
+                .With(m => m.GameMetadata.Value.Title = "Factorio: Space Age")
+                .With(m => m.GameMetadata.Value.OriginalTitle = "Factorio: Space Age")
+                .With(m => m.GameMetadata.Value.CleanTitle = "factoriospaceage")
+                .With(m => m.GameMetadata.Value.CleanOriginalTitle = "factoriospaceage")
+                .With(m => m.GameMetadata.Value.AlternativeTitles = new List<AlternativeTitle>())
+                .With(m => m.GameMetadata.Value.Translations = new List<GameTranslation>())
+                .With(m => m.Year = 2024)
+                .Build();
+
+            var searchCriteria = new GameSearchCriteria { Game = game };
+
+            // Parser extracts just "Factorio" but release title has "Space Age" in parentheses
+            var parsedInfo = new ParsedGameInfo
+            {
+                GameTitles = new List<string> { "Factorio" },
+                ReleaseTitle = "Factorio (v2.0.7 + Space Age DLC + Bonus Soundtrack, MULTi41) [FitGirl Repack]",
+                Languages = new List<Language> { Language.English },
+                Year = 0
+            };
+
+            Subject.Map(parsedInfo, 0, 0, searchCriteria).Game.Should().Be(game);
+        }
+
+        [Test]
+        public void should_not_match_by_word_fallback_with_single_word_title()
+        {
+            var game = Builder<Game>.CreateNew()
+                .With(m => m.Title = "Factorio")
+                .With(m => m.GameMetadata.Value.Title = "Factorio")
+                .With(m => m.GameMetadata.Value.OriginalTitle = "Factorio")
+                .With(m => m.GameMetadata.Value.CleanTitle = "factorio")
+                .With(m => m.GameMetadata.Value.CleanOriginalTitle = "factorio")
+                .With(m => m.GameMetadata.Value.AlternativeTitles = new List<AlternativeTitle>())
+                .With(m => m.GameMetadata.Value.Translations = new List<GameTranslation>())
+                .With(m => m.Year = 2020)
+                .Build();
+
+            var searchCriteria = new GameSearchCriteria { Game = game };
+
+            // Single-word title should NOT use word fallback (requires >= 2 words)
+            var parsedInfo = new ParsedGameInfo
+            {
+                GameTitles = new List<string> { "Other Game" },
+                ReleaseTitle = "Other Game with Factorio mod",
+                Languages = new List<Language> { Language.English },
+                Year = 0
+            };
+
+            Subject.Map(parsedInfo, 0, 0, searchCriteria).Game.Should().BeNull();
+        }
     }
 }
