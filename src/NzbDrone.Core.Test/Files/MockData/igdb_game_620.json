@@ -1,0 +1,102 @@
+[
+  {
+    "id": 620,
+    "name": "Portal 2",
+    "slug": "portal-2",
+    "summary": "The sequel to the acclaimed Portal, featuring new puzzle mechanics, cooperative play, and a deeper story set in the Aperture Science facility.",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1303171200,
+    "aggregated_rating": 95.0,
+    "aggregated_rating_count": 55,
+    "rating": 94.5,
+    "rating_count": 3000,
+    "total_rating": 94.8,
+    "total_rating_count": 3055,
+    "hypes": 2000,
+    "follows": 6000,
+    "url": "https://www.igdb.com/games/portal-2",
+    "cover": {
+      "id": 90003,
+      "image_id": "co3def",
+      "width": 264,
+      "height": 352,
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co3def.jpg"
+    },
+    "screenshots": [
+      {
+        "id": 80004,
+        "image_id": "sc3abc",
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "videos": [
+      {
+        "id": 60003,
+        "name": "Launch Trailer",
+        "video_id": "tax4e4hBBZc"
+      }
+    ],
+    "genres": [
+      { "id": 9, "name": "Puzzle", "slug": "puzzle" },
+      { "id": 8, "name": "Platform", "slug": "platform" },
+      { "id": 5, "name": "Shooter", "slug": "shooter" }
+    ],
+    "themes": [
+      { "id": 18, "name": "Science fiction", "slug": "science-fiction" },
+      { "id": 27, "name": "Comedy", "slug": "comedy" }
+    ],
+    "game_modes": [
+      { "id": 1, "name": "Single player", "slug": "single-player" },
+      { "id": 2, "name": "Multiplayer", "slug": "multiplayer" },
+      { "id": 5, "name": "Co-operative", "slug": "co-operative" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 },
+      { "id": 12, "name": "Xbox 360", "abbreviation": "X360", "slug": "xbox360", "category": 1 },
+      { "id": 9, "name": "PlayStation 3", "abbreviation": "PS3", "slug": "ps3", "category": 1 },
+      { "id": 14, "name": "Mac", "abbreviation": "Mac", "slug": "mac", "category": 4 },
+      { "id": 3, "name": "Linux", "abbreviation": "Linux", "slug": "linux", "category": 4 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10004,
+        "developer": true,
+        "publisher": true,
+        "company": { "id": 1, "name": "Valve Corporation", "slug": "valve-corporation" }
+      }
+    ],
+    "game_engines": [
+      { "id": 9, "name": "Source", "slug": "source" }
+    ],
+    "collection": {
+      "id": 100,
+      "name": "Portal",
+      "slug": "portal"
+    },
+    "similar_games": [
+      { "id": 38, "name": "Portal" },
+      { "id": 21, "name": "Half-Life 2" }
+    ],
+    "age_ratings": [
+      { "id": 30003, "category": 1, "rating": 5, "synopsis": "Everyone 10+" }
+    ],
+    "release_dates": [
+      {
+        "id": 40003,
+        "date": 1303171200,
+        "human": "Apr 19, 2011",
+        "category": 0,
+        "region": 2,
+        "platform": { "id": 6, "name": "PC (Microsoft Windows)" }
+      }
+    ],
+    "websites": [
+      { "id": 20004, "category": 13, "url": "https://store.steampowered.com/app/620/Portal_2/", "trusted": true }
+    ],
+    "external_games": [
+      { "id": 15003, "category": 1, "uid": "620", "url": "https://store.steampowered.com/app/620" }
+    ]
+  }
+]

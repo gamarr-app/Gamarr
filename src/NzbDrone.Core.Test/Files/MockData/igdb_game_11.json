@@ -1,0 +1,51 @@
+[
+  {
+    "id": 11,
+    "name": "The Blocklist",
+    "slug": "the-blocklist",
+    "summary": "A test game used for integration testing of blocklist functionality.",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1609459200,
+    "aggregated_rating": 75.0,
+    "aggregated_rating_count": 10,
+    "rating": 70.0,
+    "rating_count": 100,
+    "total_rating": 72.5,
+    "total_rating_count": 110,
+    "url": "https://www.igdb.com/games/the-blocklist",
+    "cover": {
+      "id": 90010,
+      "image_id": "co10abc",
+      "width": 264,
+      "height": 352,
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co10abc.jpg"
+    },
+    "genres": [
+      { "id": 12, "name": "Role-playing (RPG)", "slug": "role-playing-rpg" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10010,
+        "developer": true,
+        "publisher": true,
+        "company": { "id": 100, "name": "Test Studio", "slug": "test-studio" }
+      }
+    ],
+    "release_dates": [
+      {
+        "id": 40010,
+        "date": 1609459200,
+        "human": "Jan 1, 2021",
+        "category": 0,
+        "region": 2,
+        "platform": { "id": 6, "name": "PC (Microsoft Windows)" }
+      }
+    ],
+    "websites": [],
+    "external_games": []
+  }
+]

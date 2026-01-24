@@ -147,7 +147,7 @@ namespace NzbDrone.Integration.Test.ApiTests
 
             var queryParams = new Dictionary<string, object>()
             {
-                { "igdbId", 680 }
+                { "igdbId", 21 }
             };
 
             var games = Games.All(queryParams);
@@ -164,7 +164,7 @@ namespace NzbDrone.Integration.Test.ApiTests
 
             var result = Games.Get(game.Id);
 
-            result.IgdbId.Should().Be(680);
+            result.IgdbId.Should().Be(21);
         }
 
         [Test]

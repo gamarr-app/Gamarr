@@ -1,0 +1,35 @@
+[
+  {
+    "id": 620,
+    "name": "Portal 2",
+    "slug": "portal-2",
+    "summary": "The sequel to Portal featuring cooperative play and a deeper storyline.",
+    "category": 0,
+    "status": 0,
+    "first_release_date": 1303171200,
+    "cover": {
+      "id": 90003,
+      "image_id": "co3def",
+      "width": 264,
+      "height": 352,
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co3def.jpg"
+    },
+    "genres": [
+      { "id": 9, "name": "Puzzle", "slug": "puzzle" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)", "abbreviation": "PC", "slug": "win", "category": 4 }
+    ],
+    "involved_companies": [
+      {
+        "id": 10004,
+        "developer": true,
+        "publisher": true,
+        "company": { "id": 1, "name": "Valve Corporation", "slug": "valve-corporation" }
+      }
+    ],
+    "external_games": [
+      { "id": 15003, "category": 1, "uid": "620", "url": "https://store.steampowered.com/app/620" }
+    ]
+  }
+]
