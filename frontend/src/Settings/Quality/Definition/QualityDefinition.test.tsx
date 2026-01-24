@@ -1,4 +1,4 @@
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import QualityDefinition from './QualityDefinition';
 
@@ -7,15 +7,18 @@ import '@testing-library/jest-dom';
 const mockDispatch = jest.fn();
 
 jest.mock('react-redux', () => ({
-  useDispatch: () => mockDispatch
+  useDispatch: () => mockDispatch,
 }));
 
 jest.mock('Store/Actions/baseActions', () => ({
-  clearPendingChanges: jest.fn((payload) => ({ type: 'CLEAR', payload }))
+  clearPendingChanges: jest.fn((payload) => ({ type: 'CLEAR', payload })),
 }));
 
 jest.mock('Store/Actions/settingsActions', () => ({
-  setQualityDefinitionValue: jest.fn((payload) => ({ type: 'SET_VALUE', payload }))
+  setQualityDefinitionValue: jest.fn((payload) => ({
+    type: 'SET_VALUE',
+    payload,
+  })),
 }));
 
 jest.mock('Components/Form/TextInput', () => {
@@ -61,11 +64,11 @@ describe('QualityDefinition', () => {
   });
 
   it('should dispatch setQualityDefinitionValue on title change', () => {
-    const { setQualityDefinitionValue } = require('Store/Actions/settingsActions');
+    const {
+      setQualityDefinitionValue,
+    } = require('Store/Actions/settingsActions');
 
-    render(
-      <QualityDefinition id={5} quality={{ name: 'GOG' }} title="GOG" />
-    );
+    render(<QualityDefinition id={5} quality={{ name: 'GOG' }} title="GOG" />);
 
     const input = screen.getByTestId('text-input');
     fireEvent.change(input, { target: { value: 'GOG Rip' } });

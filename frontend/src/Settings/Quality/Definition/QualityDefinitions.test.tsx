@@ -9,24 +9,24 @@ const mockSelector = jest.fn();
 
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
-  useSelector: (selector: any) => mockSelector(selector)
+  useSelector: (selector: any) => mockSelector(selector),
 }));
 
 jest.mock('reselect', () => ({
   createSelector: (...args: any[]) => {
     const resultFunc = args[args.length - 1];
     return (state: any) => resultFunc(state);
-  }
+  },
 }));
 
 jest.mock('Store/Actions/settingsActions', () => ({
   fetchQualityDefinitions: jest.fn(() => ({ type: 'FETCH' })),
-  saveQualityDefinitions: jest.fn(() => ({ type: 'SAVE' }))
+  saveQualityDefinitions: jest.fn(() => ({ type: 'SAVE' })),
 }));
 
 jest.mock('Utilities/String/translate', () => ({
   __esModule: true,
-  default: (key: string) => key
+  default: (key: string) => key,
 }));
 
 jest.mock('Components/FieldSet', () => {
