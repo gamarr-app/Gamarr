@@ -12,7 +12,6 @@ import {
   fetchQualityProfiles,
 } from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
-import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import EditQualityProfileModal from './EditQualityProfileModal';
 import QualityProfile from './QualityProfile';
@@ -21,8 +20,13 @@ import styles from './QualityProfiles.css';
 function QualityProfiles() {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, error, items, isDeleting } = useSelector(
-    createSortedSectionSelector('settings.qualityProfiles', sortByProp('name'))
-  );
+    createSortedSectionSelector(
+      'settings.qualityProfiles',
+      (a: { id: number; name: string }, b: { id: number; name: string }) =>
+        a.name.localeCompare(b.name)
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
 
   const [isQualityProfileModalOpen, setIsQualityProfileModalOpen] =
     useState(false);

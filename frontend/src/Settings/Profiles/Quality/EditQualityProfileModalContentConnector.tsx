@@ -8,11 +8,27 @@ import {
   setQualityProfileValue,
 } from 'Store/Actions/settingsActions';
 import createProfileInUseSelector from 'Store/Selectors/createProfileInUseSelector';
-import createProviderSettingsSelector from 'Store/Selectors/createProviderSettingsSelector';
+import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
 import { InputChanged } from 'typings/inputs';
 import EditQualityProfileModalContent from './EditQualityProfileModalContent';
 
-function getQualityItemGroupId(qualityProfile: { items: { value: Array<{ id?: number }> } }) {
+interface QualityItem {
+  id?: number;
+  name?: string;
+  allowed?: boolean;
+  quality?: { id: number; name: string };
+  items?: QualityItem[];
+}
+
+interface FormatItem {
+  id?: number;
+  name?: string;
+  format?: number;
+  score?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getQualityItemGroupId(qualityProfile: any) {
   const ids = _.filter(
     _.map(qualityProfile.items.value, 'id'),
     (i) => i != null
@@ -33,7 +49,7 @@ function parseIndex(index: string): [number | null, number] {
 
 function createQualitiesSelector() {
   return createSelector(
-    createProviderSettingsSelector('qualityProfiles'),
+    createProviderSettingsSelectorHook('qualityProfiles', undefined),
     (qualityProfile) => {
       const items = qualityProfile.item.items;
       if (!items || !items.value) {
@@ -42,11 +58,14 @@ function createQualitiesSelector() {
 
       return _.reduceRight(
         items.value,
-        (result: Array<{ key: number; value: string }>, { allowed, id, name, quality }: any) => {
+        (
+          result: Array<{ key: number; value: string }>,
+          { allowed, id, name, quality }: QualityItem
+        ) => {
           if (allowed) {
             if (id) {
-              result.push({ key: id, value: name });
-            } else {
+              result.push({ key: id, value: name ?? '' });
+            } else if (quality) {
               result.push({ key: quality.id, value: quality.name });
             }
           }
@@ -60,7 +79,7 @@ function createQualitiesSelector() {
 
 function createFormatsSelector() {
   return createSelector(
-    createProviderSettingsSelector('qualityProfiles'),
+    createProviderSettingsSelectorHook('qualityProfiles', undefined),
     (customFormat) => {
       const items = customFormat.item.formatItems;
       if (!items || !items.value) {
@@ -69,11 +88,14 @@ function createFormatsSelector() {
 
       return _.reduceRight(
         items.value,
-        (result: Array<{ key: number; value: string; score: number }>, { id, name, format, score }: any) => {
+        (
+          result: Array<{ key: number; value: string; score: number }>,
+          { id, name, format, score }: FormatItem
+        ) => {
           if (id) {
-            result.push({ key: id, value: name, score });
-          } else {
-            result.push({ key: format, value: name, score });
+            result.push({ key: id, value: name ?? '', score: score ?? 0 });
+          } else if (format != null) {
+            result.push({ key: format, value: name ?? '', score: score ?? 0 });
           }
           return result;
         },
@@ -85,8 +107,9 @@ function createFormatsSelector() {
 
 function createLanguagesSelectorForProfiles() {
   return createSelector(
-    (state: { settings: { languages: { items: Array<{ id: number; name: string }> } } }) =>
-      state.settings.languages,
+    (state: {
+      settings: { languages: { items: Array<{ id: number; name: string }> } };
+    }) => state.settings.languages,
     (languages) => {
       const items = languages.items;
       const filterItems = ['Unknown'];
@@ -103,12 +126,15 @@ function createLanguagesSelectorForProfiles() {
 }
 
 function createMapStateSelector(id: number | undefined) {
+  const profileInUseSelector = createProfileInUseSelector('qualityProfileId');
+
   return createSelector(
-    createProviderSettingsSelector('qualityProfiles', id),
+    createProviderSettingsSelectorHook('qualityProfiles', id),
     createQualitiesSelector(),
     createFormatsSelector(),
     createLanguagesSelectorForProfiles(),
-    createProfileInUseSelector('qualityProfileId'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (state: any) => profileInUseSelector(state, { id: id ?? 0 }),
     (qualityProfile, qualities, customFormats, languages, isInUse) => {
       return {
         qualities,
@@ -168,15 +194,19 @@ function EditQualityProfileModalContentConnector({
   }, [isSaving, saveError, onModalClose]);
 
   const ensureCutoff = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (qualityProfile: any) => {
       const cutoff = qualityProfile.cutoff.value;
 
-      const cutoffItem = _.find(qualityProfile.items.value, (i: any) => {
-        if (!cutoff) {
-          return false;
+      const cutoffItem = _.find(
+        qualityProfile.items.value,
+        (i: QualityItem) => {
+          if (!cutoff) {
+            return false;
+          }
+          return i.id === cutoff || (i.quality && i.quality.id === cutoff);
         }
-        return i.id === cutoff || (i.quality && i.quality.id === cutoff);
-      });
+      ) as QualityItem | undefined;
 
       if (!cutoff || !cutoffItem || !cutoffItem.allowed) {
         const firstAllowed = _.find(qualityProfile.items.value, {
@@ -208,7 +238,7 @@ function EditQualityProfileModalContentConnector({
   const handleCutoffChange = useCallback(
     ({ name, value }: InputChanged) => {
       const numId = parseInt(value as string);
-      const foundItem = _.find(item.items.value, (i: any) => {
+      const foundItem = _.find(item.items.value, (i: QualityItem) => {
         if (i.quality) {
           return i.quality.id === numId;
         }
@@ -225,14 +255,20 @@ function EditQualityProfileModalContentConnector({
   const handleLanguageChange = useCallback(
     ({ name, value }: InputChanged) => {
       const numId = parseInt(value as string);
-      const language = _.find(languages, (lang: { key: number }) => lang.key === numId);
-      // @ts-expect-error - actions aren't typed
-      dispatch(
-        setQualityProfileValue({
-          name,
-          value: { id: language.key, Name: language.value },
-        })
+      const language = _.find(
+        languages,
+        (lang: { key: number }) => lang.key === numId
       );
+
+      if (language) {
+        dispatch(
+          // @ts-expect-error - actions aren't typed
+          setQualityProfileValue({
+            name,
+            value: { id: language.key, Name: language.value },
+          })
+        );
+      }
     },
     [dispatch, languages]
   );
@@ -245,7 +281,10 @@ function EditQualityProfileModalContentConnector({
     (qualityId: number, allowed: boolean) => {
       const qualityProfile = _.cloneDeep(item);
       const items = qualityProfile.items.value;
-      const foundItem = _.find(items, (i: any) => i.quality && i.quality.id === qualityId);
+      const foundItem = _.find(
+        items,
+        (i: QualityItem) => i.quality && i.quality.id === qualityId
+      );
 
       foundItem.allowed = allowed;
 
@@ -260,12 +299,17 @@ function EditQualityProfileModalContentConnector({
     (formatId: number, score: number) => {
       const qualityProfile = _.cloneDeep(item);
       const formatItems = qualityProfile.formatItems.value;
-      const foundItem = _.find(formatItems, (i: any) => i.format === formatId);
+      const foundItem = _.find(
+        formatItems,
+        (i: FormatItem) => i.format === formatId
+      );
 
       foundItem.score = score;
 
-      // @ts-expect-error - actions aren't typed
-      dispatch(setQualityProfileValue({ name: 'formatItems', value: formatItems }));
+      dispatch(
+        // @ts-expect-error - actions aren't typed
+        setQualityProfileValue({ name: 'formatItems', value: formatItems })
+      );
     },
     [dispatch, item]
   );
@@ -274,10 +318,10 @@ function EditQualityProfileModalContentConnector({
     (groupId: number, allowed: boolean) => {
       const qualityProfile = _.cloneDeep(item);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: any) => i.id === groupId);
+      const group = _.find(items, (i: QualityItem) => i.id === groupId);
 
       group.allowed = allowed;
-      group.items.forEach((i: any) => {
+      group.items.forEach((i: QualityItem) => {
         i.allowed = allowed;
       });
 
@@ -292,7 +336,7 @@ function EditQualityProfileModalContentConnector({
     (groupId: number, name: string) => {
       const qualityProfile = _.cloneDeep(item);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: any) => i.id === groupId);
+      const group = _.find(items, (i: QualityItem) => i.id === groupId);
 
       group.name = name;
 
@@ -306,7 +350,10 @@ function EditQualityProfileModalContentConnector({
     (qualityId: number) => {
       const qualityProfile = _.cloneDeep(item);
       const items = qualityProfile.items.value;
-      const foundItem = _.find(items, (i: any) => i.quality && i.quality.id === qualityId);
+      const foundItem = _.find(
+        items,
+        (i: QualityItem) => i.quality && i.quality.id === qualityId
+      );
       const index = items.indexOf(foundItem);
       const groupId = getQualityItemGroupId(qualityProfile);
 
@@ -330,7 +377,7 @@ function EditQualityProfileModalContentConnector({
     (groupId: number) => {
       const qualityProfile = _.cloneDeep(item);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: any) => i.id === groupId);
+      const group = _.find(items, (i: QualityItem) => i.id === groupId);
       const index = items.indexOf(group);
 
       items.splice(index, 1, ...group.items);
@@ -419,7 +466,7 @@ function EditQualityProfileModalContentConnector({
         const [dropGroupIdx, dropItemIdx] = parseIndex(dropQualityIndex);
 
         let draggedItem = null;
-        let dropGroup: any = null;
+        let dropGroup: QualityItem | null = null;
 
         if (dropGroupIdx != null) {
           dropGroup = items[dropGroupIdx];
@@ -438,7 +485,7 @@ function EditQualityProfileModalContentConnector({
 
         if (dropGroupIdx == null) {
           items.splice(dropItemIdx, 0, draggedItem);
-        } else {
+        } else if (dropGroup?.items) {
           dropGroup.items.splice(dropItemIdx, 0, draggedItem);
         }
 
@@ -491,7 +538,9 @@ function EditQualityProfileModalContentConnector({
       onItemGroupNameChange={handleItemGroupNameChange}
       onQualityProfileItemDragMove={handleQualityProfileItemDragMove}
       onQualityProfileItemDragEnd={handleQualityProfileItemDragEnd}
-      onQualityProfileFormatItemScoreChange={handleQualityProfileFormatItemScoreChange}
+      onQualityProfileFormatItemScoreChange={
+        handleQualityProfileFormatItemScoreChange
+      }
       onToggleEditGroupsMode={handleToggleEditGroupsMode}
       {...otherSettings}
     />

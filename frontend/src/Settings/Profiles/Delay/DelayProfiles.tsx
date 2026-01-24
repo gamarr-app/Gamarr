@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import { Error as AppError } from 'App/State/AppSectionState';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
@@ -24,15 +25,22 @@ import styles from './DelayProfiles.css';
 
 function createDelayProfilesSelector() {
   return createSelector(
-    (state: { settings: { delayProfiles: { items: Array<{ id: number; order: number }>; isFetching: boolean; isPopulated: boolean; error: unknown } } }) =>
-      state.settings.delayProfiles,
+    (state: {
+      settings: {
+        delayProfiles: {
+          items: Array<{ id: number; order: number }>;
+          isFetching: boolean;
+          isPopulated: boolean;
+          error: AppError | undefined;
+        };
+      };
+    }) => state.settings.delayProfiles,
     createTagsSelector(),
     (delayProfiles, tagList) => {
       const defaultProfile = _.find(delayProfiles.items, { id: 1 });
-      const items = _.sortBy(
-        _.reject(delayProfiles.items, { id: 1 }),
-        ['order']
-      );
+      const items = _.sortBy(_.reject(delayProfiles.items, { id: 1 }), [
+        'order',
+      ]);
 
       return {
         defaultProfile,
@@ -101,8 +109,10 @@ function DelayProfiles() {
   );
 
   const isDragging = dropIndex !== null;
-  const isDraggingUp = isDragging && dragIndex !== null && dropIndex < dragIndex;
-  const isDraggingDown = isDragging && dragIndex !== null && dropIndex > dragIndex;
+  const isDraggingUp =
+    isDragging && dragIndex !== null && dropIndex < dragIndex;
+  const isDraggingDown =
+    isDragging && dragIndex !== null && dropIndex > dragIndex;
 
   return (
     <Measure onMeasure={handleMeasure}>
@@ -123,12 +133,8 @@ function DelayProfiles() {
                 <div className={styles.column}>
                   {translate('PreferredProtocol')}
                 </div>
-                <div className={styles.column}>
-                  {translate('UsenetDelay')}
-                </div>
-                <div className={styles.column}>
-                  {translate('TorrentDelay')}
-                </div>
+                <div className={styles.column}>{translate('UsenetDelay')}</div>
+                <div className={styles.column}>{translate('TorrentDelay')}</div>
                 <div className={styles.tags}>{translate('Tags')}</div>
               </div>
 

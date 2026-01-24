@@ -25,10 +25,7 @@ function EditDelayProfileModal({
 
   return (
     <Modal size={sizes.MEDIUM} isOpen={isOpen} onModalClose={handleModalClose}>
-      <EditDelayProfileModalContent
-        id={id}
-        onModalClose={handleModalClose}
-      />
+      <EditDelayProfileModalContent id={id} onModalClose={handleModalClose} />
     </Modal>
   );
 }

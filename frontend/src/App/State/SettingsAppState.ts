@@ -22,6 +22,7 @@ import QualityProfile from 'typings/QualityProfile';
 import General from 'typings/Settings/General';
 import IndexerOptions from 'typings/Settings/IndexerOptions';
 import MediaManagement from 'typings/Settings/MediaManagement';
+import MetadataOptions from 'typings/Settings/MetadataOptions';
 import NamingConfig from 'typings/Settings/NamingConfig';
 import NamingExample from 'typings/Settings/NamingExample';
 import ReleaseProfile from 'typings/Settings/ReleaseProfile';
@@ -91,7 +92,9 @@ export interface IndexerAppState
 
 export interface NotificationAppState
   extends AppSectionState<Notification>,
-    AppSectionDeleteState {}
+    AppSectionDeleteState,
+    AppSectionSaveState,
+    AppSectionSchemaState<Notification> {}
 
 export interface QualityProfilesAppState
   extends AppSectionState<QualityProfile>,
@@ -122,7 +125,13 @@ export interface ImportListExclusionsSettingsAppState
 
 export type IndexerFlagSettingsAppState = AppSectionState<IndexerFlag>;
 export type LanguageSettingsAppState = AppSectionState<Language>;
-export type UiSettingsAppState = AppSectionItemState<UiSettings>;
+export interface MetadataOptionsAppState
+  extends AppSectionItemState<MetadataOptions>,
+    AppSectionSaveState {}
+
+export interface UiSettingsAppState
+  extends AppSectionItemState<UiSettings>,
+    AppSectionSaveState {}
 
 export interface QualityDefinitionsAppState {
   isFetching: boolean;
@@ -151,6 +160,7 @@ interface SettingsAppState {
   languages: LanguageSettingsAppState;
   mediaManagement: MediaManagementAppState;
   metadata: MetadataAppState;
+  metadataOptions: MetadataOptionsAppState;
   naming: NamingAppState;
   namingExamples: NamingExamplesAppState;
   notifications: NotificationAppState;
