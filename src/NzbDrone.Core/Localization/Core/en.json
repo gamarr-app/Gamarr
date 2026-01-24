@@ -1179,6 +1179,7 @@
   "GameYearToExcludeHelpText": "The year of the game to exclude",
   "Games": "Games",
   "GamesSelectedInterp": "{count} Game(s) Selected",
+  "GamesWithoutMetadataHealthCheckMessage": "{gameCount} game(s) have no metadata (overview, genres, or year): {gameTitles}. Try refreshing these games to fetch metadata.",
   "MultiLanguage": "Multi-Language",
   "MustContain": "Must Contain",
   "MustContainHelpText": "The release must contain at least one of these terms (case insensitive)",
