@@ -9,7 +9,7 @@ using NzbDrone.Test.Common.Categories;
 namespace NzbDrone.Core.Test.MetadataSource.Steam
 {
     [TestFixture]
-    [IntegrationTest]
+    [ExternalIntegrationTest]
     public class SteamStoreProxyFixture : CoreTest<SteamStoreProxy>
     {
         [SetUp]

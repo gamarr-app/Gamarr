@@ -12,7 +12,7 @@ using NzbDrone.Test.Common.Categories;
 namespace NzbDrone.Core.Test.MetadataSource.IGDB
 {
     [TestFixture]
-    [IntegrationTest]
+    [ExternalIntegrationTest]
     public class IgdbProxySearchFixture : CoreTest<IgdbProxy>
     {
         private string _clientId;

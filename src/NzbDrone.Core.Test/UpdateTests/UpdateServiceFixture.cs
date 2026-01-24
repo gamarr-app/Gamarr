@@ -245,7 +245,7 @@ namespace NzbDrone.Core.Test.UpdateTests
         }
 
         [Test]
-        [IntegrationTest]
+        [ExternalIntegrationTest]
         [Ignore("Requires real download.gamarr.app server")]
         public void Should_download_and_extract_to_temp_folder()
         {

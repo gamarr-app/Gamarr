@@ -67,7 +67,7 @@ jobs:
           dotnet test src/Gamarr.sln \
             --no-build \
             --configuration Debug \
-            --filter "Category!=IntegrationTest&Category!=AutomationTest" \
+            --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./test-results
 

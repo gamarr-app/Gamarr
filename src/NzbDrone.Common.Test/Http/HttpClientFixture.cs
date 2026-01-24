@@ -25,7 +25,7 @@ using HttpClient = NzbDrone.Common.Http.HttpClient;
 
 namespace NzbDrone.Common.Test.Http
 {
-    [IntegrationTest]
+    [ExternalIntegrationTest]
     [TestFixture(typeof(ManagedHttpDispatcher))]
     public class HttpClientFixture<TDispatcher> : TestBase<HttpClient>
         where TDispatcher : IHttpDispatcher

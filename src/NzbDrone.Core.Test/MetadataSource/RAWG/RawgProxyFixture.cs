@@ -11,7 +11,7 @@ using NzbDrone.Test.Common.Categories;
 namespace NzbDrone.Core.Test.MetadataSource.RAWG
 {
     [TestFixture]
-    [IntegrationTest]
+    [ExternalIntegrationTest]
     public class RawgProxyFixture : CoreTest<RawgProxy>
     {
         private string _apiKey;

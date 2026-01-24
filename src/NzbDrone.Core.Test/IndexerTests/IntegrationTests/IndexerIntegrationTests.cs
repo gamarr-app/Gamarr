@@ -11,7 +11,7 @@ using NzbDrone.Test.Common.Categories;
 
 namespace NzbDrone.Core.Test.IndexerTests.IntegrationTests
 {
-    [IntegrationTest]
+    [ExternalIntegrationTest]
     [Ignore("Nyaa is down!")]
     public class IndexerIntegrationTests : CoreTest
     {
