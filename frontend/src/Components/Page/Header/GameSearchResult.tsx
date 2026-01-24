@@ -16,8 +16,16 @@ interface GameSearchResultProps extends SuggestedGame {
 }
 
 function GameSearchResult(props: GameSearchResultProps) {
-  const { match, title, year, images, alternateTitles, steamAppId, igdbId, tags } =
-    props;
+  const {
+    match,
+    title,
+    year,
+    images,
+    alternateTitles,
+    steamAppId,
+    igdbId,
+    tags,
+  } = props;
 
   let alternateTitle = null;
   let tag: Tag | null = null;
