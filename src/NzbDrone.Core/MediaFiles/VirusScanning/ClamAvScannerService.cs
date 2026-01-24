@@ -86,7 +86,7 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                 _logger.Info("Starting ClamAV scan of: {0}", path);
 
                 var processOutput = _processProvider.StartAndCapture(clamScanPath, arguments);
-                var output = string.Join(Environment.NewLine, processOutput.Lines.Select(l => l.Content));
+                var output = string.Join("\n", processOutput.Lines.Select(l => l.Content));
 
                 stopwatch.Stop();
                 result.ScanDurationMs = stopwatch.ElapsedMilliseconds;
