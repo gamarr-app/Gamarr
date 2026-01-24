@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { SteamAppId = 292030, Title = "The Witcher 3 Wild Hunt", Year = 2015, IgdbId = 1942 },
+                Game = new NzbDrone.Core.Games.Game { SteamAppId = 292030, Title = "The Witcher 3 Wild Hunt", Year = 2015, IgdbId = 1942 },
                 SceneTitles = new List<string> { "The Witcher 3 Wild Hunt" }
             };
 
@@ -212,7 +212,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var gameRawSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { Title = "Some Game & Title: Words", Year = 2021, IgdbId = 123 },
+                Game = new NzbDrone.Core.Games.Game { Title = "Some Game & Title: Words", Year = 2021, IgdbId = 123 },
                 SceneTitles = new List<string> { "Some Game & Title: Words" }
             };
 
@@ -233,7 +233,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var gameRawSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { Title = "Some Game & Title: Words", Year = 2021, IgdbId = 123 },
+                Game = new NzbDrone.Core.Games.Game { Title = "Some Game & Title: Words", Year = 2021, IgdbId = 123 },
                 SceneTitles = new List<string> { "Some Game & Title: Words" }
             };
 
