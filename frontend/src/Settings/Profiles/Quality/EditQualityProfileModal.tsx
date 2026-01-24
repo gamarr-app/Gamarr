@@ -35,7 +35,7 @@ function EditQualityProfileModal({
 
   return (
     <Modal
-      style={{ height: height !== 'auto' ? `${height}px` : undefined }}
+      style={{ height: height === 'auto' ? undefined : `${height}px` }}
       isOpen={isOpen}
       size={sizes.EXTRA_LARGE}
       onModalClose={handleModalClose}
