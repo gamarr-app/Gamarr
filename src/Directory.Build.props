@@ -99,6 +99,12 @@
     <RootNamespace Condition="'$(GamarrProject)'=='true'">$(MSBuildProjectName.Replace('Gamarr','NzbDrone'))</RootNamespace>
   </PropertyGroup>
 
+  <!-- Disable Sentry CLI in Debug mode -->
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <SentryUploadSymbols>false</SentryUploadSymbols>
+    <SentryCli>false</SentryCli>
+  </PropertyGroup>
+
   <!-- Sentry specific configuration: Only in Release mode -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <!-- https://docs.sentry.io/platforms/dotnet/configuration/msbuild/ -->
