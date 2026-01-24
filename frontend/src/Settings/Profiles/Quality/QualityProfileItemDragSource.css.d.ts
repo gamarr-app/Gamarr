@@ -5,6 +5,8 @@ interface CssExports {
   'qualityProfileItemPlaceholder': string;
   'qualityProfileItemPlaceholderAfter': string;
   'qualityProfileItemPlaceholderBefore': string;
+  'isDraggingUp': string;
+  'isDraggingDown': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

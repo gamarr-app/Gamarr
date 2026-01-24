@@ -9,6 +9,7 @@ interface EditDelayProfileModalProps {
   id?: number;
   isOpen: boolean;
   onModalClose: () => void;
+  onDeleteDelayProfilePress?: () => void;
 }
 
 function EditDelayProfileModal({

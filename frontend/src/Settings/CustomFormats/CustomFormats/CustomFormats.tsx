@@ -67,7 +67,7 @@ function CustomFormats() {
         error={error}
       >
         <div className={styles.customFormats}>
-          {items.map((item: { id: number }) => {
+          {items.map((item: any) => {
             return (
               <CustomFormat
                 key={item.id}

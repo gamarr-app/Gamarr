@@ -68,7 +68,7 @@ function QualityProfiles() {
         error={error}
       >
         <div className={styles.qualityProfiles}>
-          {items.map((item: { id: number }) => {
+          {items.map((item: any) => {
             return (
               <QualityProfile
                 key={item.id}

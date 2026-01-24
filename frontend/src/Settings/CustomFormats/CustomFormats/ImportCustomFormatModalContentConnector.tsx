@@ -19,6 +19,7 @@ import ImportCustomFormatModalContent from './ImportCustomFormatModalContent';
 
 interface ImportCustomFormatModalContentConnectorProps {
   id?: number;
+  onContentHeightChange?: (height: number) => void;
   onModalClose: () => void;
 }
 

@@ -5,6 +5,8 @@ interface CssExports {
   'delayProfilePlaceholder': string;
   'delayProfilePlaceholderAfter': string;
   'delayProfilePlaceholderBefore': string;
+  'isDraggingUp': string;
+  'isDraggingDown': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

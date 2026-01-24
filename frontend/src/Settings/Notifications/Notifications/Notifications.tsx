@@ -82,7 +82,7 @@ function Notifications() {
         error={error}
       >
         <div className={styles.notifications}>
-          {items.map((item: { id: number }) => {
+          {items.map((item: any) => {
             return (
               <Notification
                 key={item.id}

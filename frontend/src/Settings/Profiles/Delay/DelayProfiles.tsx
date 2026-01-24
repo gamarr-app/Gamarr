@@ -169,7 +169,7 @@ function DelayProfiles() {
                     onConfirmDeleteDelayProfile={
                       handleConfirmDeleteDelayProfile
                     }
-                    {...defaultProfile}
+                    {...(defaultProfile as any)}
                   />
                 </div>
               ) : null}

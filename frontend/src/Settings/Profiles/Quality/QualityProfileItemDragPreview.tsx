@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { DragLayer } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
@@ -9,63 +8,56 @@ import styles from './QualityProfileItemDragPreview.css';
 
 const formGroupExtraSmallWidth = parseInt(dimensions.formGroupExtraSmallWidth);
 const formLabelSmallWidth = parseInt(dimensions.formLabelSmallWidth);
-const formLabelRightMarginWidth = parseInt(dimensions.formLabelRightMarginWidth);
+const formLabelRightMarginWidth = parseInt(
+  dimensions.formLabelRightMarginWidth
+);
 const dragHandleWidth = parseInt(dimensions.dragHandleWidth);
 
-function collectDragLayer(monitor) {
+function collectDragLayer(monitor: any) {
   return {
     item: monitor.getItem(),
     itemType: monitor.getItemType(),
-    currentOffset: monitor.getSourceClientOffset()
+    currentOffset: monitor.getSourceClientOffset(),
   };
 }
 
-class QualityProfileItemDragPreview extends Component {
+interface QualityProfileItemDragPreviewProps {
+  item?: any;
+  itemType?: string;
+  currentOffset?: { x: number; y: number };
+}
 
+class QualityProfileItemDragPreviewComponent extends Component<QualityProfileItemDragPreviewProps> {
   //
   // Render
 
   render() {
-    const {
-      item,
-      itemType,
-      currentOffset
-    } = this.props;
+    const { item, itemType, currentOffset } = this.props;
 
     if (!currentOffset || itemType !== QUALITY_PROFILE_ITEM) {
       return null;
     }
 
-    // The offset is shifted because the drag handle is on the right edge of the
-    // list item and the preview is wider than the drag handle.
-
     const { x, y } = currentOffset;
-    const handleOffset = formGroupExtraSmallWidth - formLabelSmallWidth - formLabelRightMarginWidth - dragHandleWidth;
+    const handleOffset =
+      formGroupExtraSmallWidth -
+      formLabelSmallWidth -
+      formLabelRightMarginWidth -
+      dragHandleWidth;
     const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
 
-    const style = {
+    const style: React.CSSProperties = {
       position: 'absolute',
       WebkitTransform: transform,
       msTransform: transform,
-      transform
+      transform,
     };
 
-    const {
-      editGroups,
-      groupId,
-      qualityId,
-      name,
-      allowed
-    } = item;
-
-    // TODO: Show a different preview for groups
+    const { editGroups, groupId, qualityId, name, allowed } = item;
 
     return (
       <DragPreviewLayer>
-        <div
-          className={styles.dragPreview}
-          style={style}
-        >
+        <div className={styles.dragPreview} style={style}>
           <QualityProfileItem
             editGroups={editGroups}
             isPreview={true}
@@ -80,13 +72,6 @@ class QualityProfileItemDragPreview extends Component {
   }
 }
 
-QualityProfileItemDragPreview.propTypes = {
-  item: PropTypes.object,
-  itemType: PropTypes.string,
-  currentOffset: PropTypes.shape({
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired
-  })
-};
-
-export default DragLayer(collectDragLayer)(QualityProfileItemDragPreview);
+export default DragLayer(collectDragLayer)(
+  QualityProfileItemDragPreviewComponent as any
+) as any;
