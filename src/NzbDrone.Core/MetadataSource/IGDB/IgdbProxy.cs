@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Newtonsoft.Json;
 using NLog;
 using NzbDrone.Common.Http;
@@ -31,6 +32,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
     public class IgdbProxy : IProvideGameInfo, ISearchForNewGame
     {
         private const string IgdbApiBaseUrl = "https://api.igdb.com/v4/";
+        private const int MaxRetries = 3;
 
         private const string GameFields = @"
             fields id, name, slug, summary, storyline, category, status,
@@ -55,6 +57,15 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             age_ratings.*, release_dates.*, release_dates.platform.*,
             websites.*, external_games.*;
         ";
+
+        private static readonly HttpStatusCode[] RetryableStatusCodes =
+        {
+            HttpStatusCode.TooManyRequests,
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.BadGateway,
+            HttpStatusCode.ServiceUnavailable,
+            HttpStatusCode.GatewayTimeout
+        };
 
         private readonly IHttpClient _httpClient;
         private readonly IIgdbAuthService _authService;
@@ -329,37 +340,69 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 return new List<T>();
             }
 
-            var requestBuilder = new HttpRequestBuilder($"{IgdbApiBaseUrl}{endpoint}")
-                .Post()
-                .SetHeader("Client-ID", _authService.ClientId)
-                .SetHeader("Authorization", $"Bearer {accessToken}");
-
-            var request = requestBuilder.Build();
-            request.Headers.ContentType = "text/plain";
-            request.SetContent(query);
-            request.AllowAutoRedirect = true;
-            request.SuppressHttpError = true;
-
-            var response = _httpClient.Post<List<T>>(request);
-
-            if (response.HasHttpError)
+            for (var attempt = 0; attempt <= MaxRetries; attempt++)
             {
-                if (response.StatusCode == HttpStatusCode.NotFound)
+                var requestBuilder = new HttpRequestBuilder($"{IgdbApiBaseUrl}{endpoint}")
+                    .Post()
+                    .SetHeader("Client-ID", _authService.ClientId)
+                    .SetHeader("Authorization", $"Bearer {accessToken}");
+
+                var request = requestBuilder.Build();
+                request.Headers.ContentType = "text/plain";
+                request.SetContent(query);
+                request.AllowAutoRedirect = true;
+                request.SuppressHttpError = true;
+
+                HttpResponse<List<T>> response;
+
+                try
                 {
-                    return new List<T>();
+                    response = _httpClient.Post<List<T>>(request);
+                }
+                catch (Exception ex) when (attempt < MaxRetries && IsTransientException(ex))
+                {
+                    var delay = (int)Math.Pow(2, attempt) * 1000;
+                    _logger.Warn("IGDB request failed (attempt {0}/{1}), retrying in {2}ms: {3}", attempt + 1, MaxRetries + 1, delay, ex.Message);
+                    Thread.Sleep(delay);
+                    continue;
                 }
 
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                if (response.HasHttpError)
                 {
-                    _logger.Error("IGDB authentication failed. Please check your credentials.");
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        return new List<T>();
+                    }
+
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        _logger.Error("IGDB authentication failed. Please check your credentials.");
+                        throw new HttpException(request, response);
+                    }
+
+                    if (attempt < MaxRetries && RetryableStatusCodes.Contains(response.StatusCode))
+                    {
+                        var delay = (int)Math.Pow(2, attempt) * 1000;
+                        _logger.Warn("IGDB API returned {0} (attempt {1}/{2}), retrying in {3}ms", response.StatusCode, attempt + 1, MaxRetries + 1, delay);
+                        Thread.Sleep(delay);
+                        continue;
+                    }
+
+                    _logger.Error("IGDB API error: {0} - {1}", response.StatusCode, response.Content);
                     throw new HttpException(request, response);
                 }
 
-                _logger.Error("IGDB API error: {0} - {1}", response.StatusCode, response.Content);
-                throw new HttpException(request, response);
+                return response.Resource ?? new List<T>();
             }
 
-            return response.Resource ?? new List<T>();
+            return new List<T>();
+        }
+
+        private static bool IsTransientException(Exception ex)
+        {
+            return ex is System.Net.Http.HttpRequestException ||
+                   ex is System.Threading.Tasks.TaskCanceledException ||
+                   ex is TimeoutException;
         }
 
         private List<T> LoadMockData<T>(string query)
