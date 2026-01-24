@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -65,6 +66,12 @@ namespace NzbDrone.Core.IndexerSearch
             return DeDupeDecisions(downloadDecisions);
         }
 
+        // Matches common update/patch suffixes appended by metadata sources (e.g. RAWG)
+        // Examples: "- Thank You Update", "- Patch 1.5.0", "- v1.2.3", "- Update 2", "- Hotfix"
+        private static readonly Regex UpdateSuffixRegex = new Regex(
+            @"\s+-\s+(?:(?:v\d|patch|update|hotfix|build)\b.*|(?:\w+\s+)*update)$",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private TSpec Get<TSpec>(Game game, bool userInvokedSearch, bool interactiveSearch)
             where TSpec : SearchCriteriaBase, new()
         {
@@ -89,6 +96,13 @@ namespace NzbDrone.Core.IndexerSearch
             {
                 queryTranslations.Add(translation.Title);
             }
+
+            // Add base titles with update/patch suffixes stripped (indexers rarely include these)
+            var baseTitles = queryTranslations
+                .Where(t => t.IsNotNullOrWhiteSpace())
+                .Select(t => UpdateSuffixRegex.Replace(t, string.Empty))
+                .Where(t => t.IsNotNullOrWhiteSpace());
+            queryTranslations.AddRange(baseTitles);
 
             spec.SceneTitles = queryTranslations.Where(t => t.IsNotNullOrWhiteSpace()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();
 
