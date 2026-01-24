@@ -56,6 +56,13 @@ namespace NzbDrone.Core.Parser
             // Game release with parenthesized version: "Hades II (v2025.06.18)" or "Game (v1.2.3)"
             new Regex(@"^(?<title>(?![(\[]).+?)\s*\(v(?<version>\d+(?:\.\d+)+)\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Game release with parenthesized metadata and optional bracketed repack group:
+            // "DARQ: Complete Edition (v1.3 + 2 DLCs, MULTi19) [FitGirl Repack]"
+            // "Game Name (v2.0 + All DLCs, MULTi10) [DODI Repack]"
+            // "Game Name (v1.5 + 3 DLCs)"
+            // Note: [FitGirl Repack] may be stripped by CleanQualityBracketsRegex before matching
+            new Regex(@"^(?<title>(?![(\[]).+?)\s*\(v\d+[^)]*\)(?:\s*\[(?:FitGirl|DODI|XATAB|Elamigos|CorePack|KaOs)[-_. ]*(?:Monkey\s+)?Repack\])?\s*$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // r4v3n release group format: "Game Title r4v3n Edition v123"
             // r4v3n is a scene-style group, title stops at "r4v3n"
             new Regex(@"^(?<title>(?![(\[]).+?)\s+(?<releasegroup>r4v3n)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
