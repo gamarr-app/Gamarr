@@ -24,6 +24,7 @@ namespace NzbDrone.Core.MetadataSource
         private readonly IgdbProxy _igdbProxy;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
+        private readonly bool _mockEnabled;
 
         public AggregateGameInfoProxy(
             SteamStoreProxy steamProxy,
@@ -37,15 +38,28 @@ namespace NzbDrone.Core.MetadataSource
             _igdbProxy = igdbProxy;
             _configService = configService;
             _logger = logger;
+            _mockEnabled = IsMockMode();
+
+            if (_mockEnabled)
+            {
+                _logger.Info("AggregateGameInfoProxy: Mock mode enabled, will delegate directly to IGDB proxy");
+            }
         }
 
         // Steam works out of the box - no credentials needed!
         private bool HasRawgCredentials => !string.IsNullOrEmpty(_configService.RawgApiKey);
-        private bool HasIgdbCredentials => !string.IsNullOrEmpty(_configService.IgdbClientId) &&
-                                           !string.IsNullOrEmpty(_configService.IgdbClientSecret);
+        private bool HasIgdbCredentials => _mockEnabled ||
+                                           (!string.IsNullOrEmpty(_configService.IgdbClientId) &&
+                                            !string.IsNullOrEmpty(_configService.IgdbClientSecret));
 
         public GameMetadata GetGameInfo(int gameId)
         {
+            // In mock mode, go directly to IGDB (which uses mock data files)
+            if (_mockEnabled)
+            {
+                return _igdbProxy.GetGameInfo(gameId);
+            }
+
             // Try Steam first - the ID might be a Steam App ID
             try
             {
@@ -116,6 +130,12 @@ namespace NzbDrone.Core.MetadataSource
         /// </summary>
         public GameMetadata GetGameBySteamAppId(int steamAppId)
         {
+            // In mock mode, go directly to IGDB (which uses mock data files)
+            if (_mockEnabled)
+            {
+                return _igdbProxy.GetGameBySteamAppId(steamAppId);
+            }
+
             GameMetadata result = null;
 
             // Try Steam first (no API key needed!)
@@ -402,6 +422,12 @@ namespace NzbDrone.Core.MetadataSource
 
         public List<Game> SearchForNewGame(string title)
         {
+            // In mock mode, delegate all searches to IGDB directly
+            if (_mockEnabled)
+            {
+                return _igdbProxy.SearchForNewGame(title);
+            }
+
             var allResults = new List<Game>();
             var resultsByNormalizedTitle = new Dictionary<string, Game>(StringComparer.Ordinal);
             var lowerTitle = title?.ToLowerInvariant()?.Trim() ?? string.Empty;
@@ -800,6 +826,16 @@ namespace NzbDrone.Core.MetadataSource
             {
                 existingMeta.Genres = secondaryMeta.Genres;
             }
+        }
+
+        private static bool IsMockMode()
+        {
+            var envValue = Environment.GetEnvironmentVariable("GAMARR_MOCK_METADATA")
+                        ?? Environment.GetEnvironmentVariable("gamarr_mock_metadata");
+
+            return !string.IsNullOrEmpty(envValue) &&
+                   (envValue.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                    envValue.Equals("1", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
