@@ -73,6 +73,12 @@ export interface AlternativeTitle extends ModelBase {
   title: string;
 }
 
+export interface GamePlatform {
+  name: string;
+  abbreviation?: string;
+  family: string;
+}
+
 export interface GameAddOptions {
   monitor: GameMonitor;
   searchForGame: boolean;
@@ -124,6 +130,14 @@ interface Game extends ModelBase {
   isAvailable: boolean;
   isSaving?: boolean;
   addOptions: GameAddOptions;
+
+  // Additional metadata
+  developer?: string;
+  publisher?: string;
+  gameEngine?: string;
+  gameModes: string[];
+  themes: string[];
+  platforms: GamePlatform[];
 
   // Recommendations (IGDB IDs of similar games)
   recommendations: number[];

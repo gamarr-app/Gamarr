@@ -510,6 +510,12 @@ function GameDetails({ gameId }: GameDetailsProps) {
     qualityProfileId,
     monitored,
     studio,
+    developer,
+    publisher,
+    gameEngine,
+    gameModes = [],
+    themes = [],
+    platforms = [],
     originalLanguage,
     genres = [],
     collection,
@@ -836,6 +842,70 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     size={sizes.LARGE}
                   >
                     <GameGenres className={styles.genres} genres={genres} />
+                  </InfoLabel>
+                ) : null}
+
+                {developer && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Developer')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>{developer}</span>
+                  </InfoLabel>
+                ) : null}
+
+                {publisher && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Publisher')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>{publisher}</span>
+                  </InfoLabel>
+                ) : null}
+
+                {gameEngine && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('GameEngine')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>{gameEngine}</span>
+                  </InfoLabel>
+                ) : null}
+
+                {gameModes.length > 0 && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('GameModes')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>{gameModes.join(', ')}</span>
+                  </InfoLabel>
+                ) : null}
+
+                {platforms.length > 0 && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Platforms')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>
+                      {platforms.map((p) => p.abbreviation || p.name).join(', ')}
+                    </span>
+                  </InfoLabel>
+                ) : null}
+
+                {themes.length > 0 && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Themes')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>
+                      {themes.join(', ')}
+                    </span>
                   </InfoLabel>
                 ) : null}
               </div>

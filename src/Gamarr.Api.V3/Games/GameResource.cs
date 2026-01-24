@@ -15,6 +15,13 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Gamarr.Api.V3.Games
 {
+    public class GamePlatformResource
+    {
+        public string Name { get; set; }
+        public string Abbreviation { get; set; }
+        public PlatformFamily Family { get; set; }
+    }
+
     /// <summary>
     /// Lightweight summary of a game for parent/DLC references
     /// </summary>
@@ -116,6 +123,12 @@ namespace Gamarr.Api.V3.Games
         public GameCollectionResource Collection { get; set; }
         public float Popularity { get; set; }
         public List<int> Recommendations { get; set; }
+        public string Developer { get; set; }
+        public string Publisher { get; set; }
+        public string GameEngine { get; set; }
+        public List<string> GameModes { get; set; }
+        public List<string> Themes { get; set; }
+        public List<GamePlatformResource> Platforms { get; set; }
         public DateTime? LastSearchTime { get; set; }
         public GameStatisticsResource Statistics { get; set; }
 
@@ -240,6 +253,17 @@ namespace Gamarr.Api.V3.Games
                 Collection = collection,
                 Popularity = model.GameMetadata.Value.Popularity,
                 Recommendations = model.GameMetadata.Value.Recommendations ?? new List<int>(),
+                Developer = model.GameMetadata.Value.Developer,
+                Publisher = model.GameMetadata.Value.Publisher,
+                GameEngine = model.GameMetadata.Value.GameEngine,
+                GameModes = model.GameMetadata.Value.GameModes ?? new List<string>(),
+                Themes = model.GameMetadata.Value.Themes ?? new List<string>(),
+                Platforms = model.GameMetadata.Value.Platforms?.Select(p => new GamePlatformResource
+                {
+                    Name = p.Name,
+                    Abbreviation = p.Abbreviation,
+                    Family = p.Family
+                }).ToList() ?? new List<GamePlatformResource>(),
                 LastSearchTime = model.LastSearchTime,
 
                 // DLC properties
