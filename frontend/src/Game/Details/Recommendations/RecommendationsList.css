@@ -1,0 +1,84 @@
+.container {
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+  background-color: var(--inputBackgroundColor);
+}
+
+.blankpad {
+  padding: 15px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+  padding: 15px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+  background-color: var(--inputBackgroundColor);
+  transition: background-color 0.2s ease;
+  color: var(--textColor);
+  text-decoration: none;
+
+  &:hover {
+    background-color: var(--gameBackgroundColor);
+    color: var(--textColor);
+  }
+
+  &:visited {
+    color: var(--textColor);
+  }
+}
+
+.poster {
+  flex-shrink: 0;
+  width: 60px;
+  height: 80px;
+  margin-right: 12px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.title {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.monitoredIcon {
+  color: var(--primaryColor);
+}
+
+.unmonitoredIcon {
+  color: var(--textColorMuted);
+}
+
+.hasFile {
+  color: var(--successColor);
+}
+
+.noFile {
+  color: var(--dangerColor);
+}
