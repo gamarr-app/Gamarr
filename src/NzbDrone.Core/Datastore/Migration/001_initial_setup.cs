@@ -134,7 +134,8 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Publisher").AsString().Nullable()
                 .WithColumn("GameEngine").AsString().Nullable()
                 .WithColumn("AggregatedRating").AsDouble().Nullable()
-                .WithColumn("AggregatedRatingCount").AsInt32().Nullable();
+                .WithColumn("AggregatedRatingCount").AsInt32().Nullable()
+                .WithColumn("IgdbSlug").AsString().Nullable();
 
             Create.TableForModel("Games")
                 .WithColumn("Path").AsString().NotNullable().Indexed()
