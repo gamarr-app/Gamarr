@@ -195,9 +195,11 @@ namespace NzbDrone.Integration.Test.ApiTests
             // Store the original path
             var originalPath = game.Path;
 
+            // Ensure the source directory exists (it may have been cleaned up between ordered tests)
+            Directory.CreateDirectory(originalPath);
+
             // Move the game to a new location
             var newPath = Path.Combine(_secondRootFolder, game.Title);
-            Directory.CreateDirectory(newPath);
 
             var moveCommand = new MoveGameCommand
             {

@@ -176,9 +176,9 @@ namespace NzbDrone.Core.Games
                 gameMetadata.CollectionTitle = null;
             }
 
-            gameMetadata.AlternativeTitles = _alternativeTitleService.UpdateTitles(gameInfo.AlternativeTitles, gameMetadata);
+            gameMetadata.AlternativeTitles = _alternativeTitleService.UpdateTitles(gameInfo.AlternativeTitles ?? new List<AlternativeTitle>(), gameMetadata);
 
-            _gameTranslationService.UpdateTranslations(gameInfo.Translations, gameMetadata);
+            _gameTranslationService.UpdateTranslations(gameInfo.Translations ?? new List<GameTranslation>(), gameMetadata);
 
             _gameMetadataService.Upsert(gameMetadata);
 
