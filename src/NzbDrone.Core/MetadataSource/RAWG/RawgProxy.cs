@@ -414,7 +414,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 .Where(p => p.Platform != null)
                 .Select(p => new GamePlatform
                 {
-                    IgdbId = p.Platform.Id,
+                    RawgId = p.Platform.Id,
                     Name = p.Platform.Name,
                     Abbreviation = p.Platform.Slug,
                     Family = MapPlatformFamily(p.Platform.Slug)
