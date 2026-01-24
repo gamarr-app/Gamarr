@@ -1,10 +1,8 @@
 using System.IO;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
-using NzbDrone.Common.Extensions;
 using Gamarr.Http;
 
 namespace Gamarr.Api.V3.MediaCovers
@@ -12,8 +10,6 @@ namespace Gamarr.Api.V3.MediaCovers
     [V3ApiController]
     public class MediaCoverController : Controller
     {
-        private static readonly Regex RegexResizedImage = new Regex(@"-\d+\.jpg$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
         private readonly IAppFolderInfo _appFolderInfo;
         private readonly IDiskProvider _diskProvider;
         private readonly IContentTypeProvider _mimeTypeProvider;
@@ -32,15 +28,7 @@ namespace Gamarr.Api.V3.MediaCovers
 
             if (!_diskProvider.FileExists(filePath) || _diskProvider.GetFileSize(filePath) == 0)
             {
-                // Return the full sized image if someone requests a non-existing resized one.
-                // TODO: This code can be removed later once everyone had the update for a while.
-                var basefilePath = RegexResizedImage.Replace(filePath, ".jpg");
-                if (basefilePath == filePath || !_diskProvider.FileExists(basefilePath))
-                {
-                    return NotFound();
-                }
-
-                filePath = basefilePath;
+                return NotFound();
             }
 
             return PhysicalFile(filePath, GetContentType(filePath));
