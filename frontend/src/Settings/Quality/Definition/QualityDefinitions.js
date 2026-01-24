@@ -31,17 +31,6 @@ class QualityDefinitions extends Component {
             <div className={styles.title}>
               {translate('Title')}
             </div>
-            <div className={styles.sizeLimit}>
-              {translate('SizeLimit')}
-            </div>
-
-            {
-              advancedSettings ?
-                <div className={styles.megabytesPerMinute}>
-                  {translate('MegabytesPerMinute')}
-                </div> :
-                null
-            }
           </div>
 
           <div className={styles.definitions}>
@@ -58,11 +47,6 @@ class QualityDefinitions extends Component {
             }
           </div>
 
-          <div className={styles.sizeLimitHelpTextContainer}>
-            <div className={styles.sizeLimitHelpText}>
-              {translate('QualityLimitsGameRuntimeHelpText')}
-            </div>
-          </div>
         </PageSectionContent>
       </FieldSet>
     );

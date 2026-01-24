@@ -60,7 +60,7 @@ function GameStatus({
     );
   }
 
-  if (hasGameFile) {
+  if (hasGameFile && showMissingStatus) {
     const quality = gameFile.quality;
     const isCutoffNotMet = gameFile.qualityCutoffNotMet;
 
