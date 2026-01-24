@@ -19,7 +19,11 @@ interface GameStatusProps {
   showMissingStatus?: boolean;
 }
 
-function GameStatus({ gameId, gameFileId, showMissingStatus = true }: GameStatusProps) {
+function GameStatus({
+  gameId,
+  gameFileId,
+  showMissingStatus = true,
+}: GameStatusProps) {
   const { isAvailable, monitored, grabbed = false } = useGame(gameId) as Game;
 
   const queueItem = useSelector(createQueueItemSelectorForHook(gameId));

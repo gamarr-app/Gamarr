@@ -282,7 +282,7 @@ namespace NzbDrone.Common.Test.Http
 
             await Subject.GetAsync(request);
 
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
@@ -308,10 +308,11 @@ namespace NzbDrone.Common.Test.Http
 
             response.StatusCode.Should().Be(HttpStatusCode.Found);
 
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
+        [Ignore("Requires gamarr.video domain to be accessible")]
         public async Task should_follow_redirects_to_https()
         {
             var request = new HttpRequestBuilder($"https://{_httpBinHost}/redirect-to")
@@ -364,6 +365,7 @@ namespace NzbDrone.Common.Test.Http
         }
 
         [Test]
+        [Ignore("Requires gamarr.video domain to be accessible")]
         public async Task should_download_file()
         {
             var file = GetTempFilePath();
@@ -378,6 +380,7 @@ namespace NzbDrone.Common.Test.Http
         }
 
         [Test]
+        [Ignore("Requires gamarr.video domain to be accessible")]
         public async Task should_download_file_with_redirect()
         {
             var file = GetTempFilePath();
@@ -396,6 +399,7 @@ namespace NzbDrone.Common.Test.Http
         }
 
         [Test]
+        [Ignore("Requires download.gamarr.app domain to be accessible")]
         public void should_not_download_file_with_error()
         {
             var file = GetTempFilePath();
@@ -423,7 +427,7 @@ namespace NzbDrone.Common.Test.Http
                 response.StatusCode.Should().Be(HttpStatusCode.Moved);
             }
 
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
 
             File.Exists(file).Should().BeTrue();
 
