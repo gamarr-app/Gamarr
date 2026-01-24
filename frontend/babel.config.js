@@ -34,6 +34,15 @@ module.exports = {
       plugins: [
         'babel-plugin-transform-react-remove-prop-types'
       ]
+    },
+    test: {
+      presets: [
+        '@babel/preset-react',
+        '@babel/preset-typescript'
+      ],
+      plugins: [
+        '@babel/plugin-transform-modules-commonjs'
+      ]
     }
   }
 };
