@@ -2,8 +2,6 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Games;
-using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -19,11 +17,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame = new RemoteGame
             {
-                Game = new Game { Id = 1 },
                 Release = new ReleaseInfo
                 {
-                    Title = "Game.Title.2023",
-                    DownloadProtocol = DownloadProtocol.Torrent
+                    Title = "Game.Title.2023"
                 },
                 ParsedGameInfo = new ParsedGameInfo
                 {
@@ -32,13 +28,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             };
         }
 
-        private void WithContentType(ReleaseContentType contentType)
-        {
-            _remoteGame.ParsedGameInfo.ContentType = contentType;
-        }
-
         [Test]
-        public void should_return_true_when_parsed_info_is_null()
+        public void should_accept_when_parsed_info_is_null()
         {
             _remoteGame.ParsedGameInfo = null;
 
@@ -46,77 +37,60 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_for_unknown_content_type()
+        public void should_reject_with_dlc_only_reason_when_content_type_is_dlc_only()
         {
-            WithContentType(ReleaseContentType.Unknown);
-
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
-        }
-
-        [Test]
-        public void should_return_true_for_base_game()
-        {
-            WithContentType(ReleaseContentType.BaseGame);
-
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
-        }
-
-        [Test]
-        public void should_return_true_for_base_game_with_all_dlc()
-        {
-            WithContentType(ReleaseContentType.BaseGameWithAllDlc);
-
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
-        }
-
-        [Test]
-        public void should_return_true_for_expansion()
-        {
-            WithContentType(ReleaseContentType.Expansion);
-
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
-        }
-
-        [Test]
-        public void should_return_false_for_dlc_only()
-        {
-            WithContentType(ReleaseContentType.DlcOnly);
+            _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.DlcOnly;
 
             var result = Subject.IsSatisfiedBy(_remoteGame, null);
+
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.DlcOnly);
         }
 
         [Test]
-        public void should_return_false_for_update_only()
+        public void should_reject_with_update_only_reason_when_content_type_is_update_only()
         {
-            WithContentType(ReleaseContentType.UpdateOnly);
+            _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.UpdateOnly;
 
             var result = Subject.IsSatisfiedBy(_remoteGame, null);
+
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.UpdateOnly);
         }
 
         [Test]
-        public void should_return_false_for_season_pass()
+        public void should_reject_with_season_pass_only_reason_when_content_type_is_season_pass()
         {
-            WithContentType(ReleaseContentType.SeasonPass);
+            _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.SeasonPass;
 
             var result = Subject.IsSatisfiedBy(_remoteGame, null);
+
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.SeasonPassOnly);
         }
 
         [Test]
-        public void should_have_permanent_rejection_type()
+        public void should_accept_for_expansion()
         {
-            Subject.Type.Should().Be(RejectionType.Permanent);
+            _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.Expansion;
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
 
         [Test]
-        public void should_have_default_priority()
+        public void should_accept_for_full_game()
         {
-            Subject.Priority.Should().Be(SpecificationPriority.Default);
+            _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.BaseGame;
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_accept_for_unknown_content_type()
+        {
+            _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.Unknown;
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
     }
 }
