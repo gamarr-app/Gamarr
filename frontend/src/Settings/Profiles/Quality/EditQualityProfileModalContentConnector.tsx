@@ -1,0 +1,501 @@
+import _ from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { createSelector } from 'reselect';
+import {
+  fetchQualityProfileSchema,
+  saveQualityProfile,
+  setQualityProfileValue,
+} from 'Store/Actions/settingsActions';
+import createProfileInUseSelector from 'Store/Selectors/createProfileInUseSelector';
+import createProviderSettingsSelector from 'Store/Selectors/createProviderSettingsSelector';
+import { InputChanged } from 'typings/inputs';
+import EditQualityProfileModalContent from './EditQualityProfileModalContent';
+
+function getQualityItemGroupId(qualityProfile: { items: { value: Array<{ id?: number }> } }) {
+  const ids = _.filter(
+    _.map(qualityProfile.items.value, 'id'),
+    (i) => i != null
+  );
+
+  return Math.max(1000, ...ids) + 1;
+}
+
+function parseIndex(index: string): [number | null, number] {
+  const split = index.split('.');
+
+  if (split.length === 1) {
+    return [null, parseInt(split[0]) - 1];
+  }
+
+  return [parseInt(split[0]) - 1, parseInt(split[1]) - 1];
+}
+
+function createQualitiesSelector() {
+  return createSelector(
+    createProviderSettingsSelector('qualityProfiles'),
+    (qualityProfile) => {
+      const items = qualityProfile.item.items;
+      if (!items || !items.value) {
+        return [];
+      }
+
+      return _.reduceRight(
+        items.value,
+        (result: Array<{ key: number; value: string }>, { allowed, id, name, quality }: any) => {
+          if (allowed) {
+            if (id) {
+              result.push({ key: id, value: name });
+            } else {
+              result.push({ key: quality.id, value: quality.name });
+            }
+          }
+          return result;
+        },
+        []
+      );
+    }
+  );
+}
+
+function createFormatsSelector() {
+  return createSelector(
+    createProviderSettingsSelector('qualityProfiles'),
+    (customFormat) => {
+      const items = customFormat.item.formatItems;
+      if (!items || !items.value) {
+        return [];
+      }
+
+      return _.reduceRight(
+        items.value,
+        (result: Array<{ key: number; value: string; score: number }>, { id, name, format, score }: any) => {
+          if (id) {
+            result.push({ key: id, value: name, score });
+          } else {
+            result.push({ key: format, value: name, score });
+          }
+          return result;
+        },
+        []
+      );
+    }
+  );
+}
+
+function createLanguagesSelectorForProfiles() {
+  return createSelector(
+    (state: { settings: { languages: { items: Array<{ id: number; name: string }> } } }) =>
+      state.settings.languages,
+    (languages) => {
+      const items = languages.items;
+      const filterItems = ['Unknown'];
+
+      if (!items) {
+        return [];
+      }
+
+      return items
+        .filter((lang) => !filterItems.includes(lang.name))
+        .map((item) => ({ key: item.id, value: item.name }));
+    }
+  );
+}
+
+function createMapStateSelector(id: number | undefined) {
+  return createSelector(
+    createProviderSettingsSelector('qualityProfiles', id),
+    createQualitiesSelector(),
+    createFormatsSelector(),
+    createLanguagesSelectorForProfiles(),
+    createProfileInUseSelector('qualityProfileId'),
+    (qualityProfile, qualities, customFormats, languages, isInUse) => {
+      return {
+        qualities,
+        customFormats,
+        languages,
+        ...qualityProfile,
+        isInUse,
+      };
+    }
+  );
+}
+
+interface EditQualityProfileModalContentConnectorProps {
+  id?: number;
+  onContentHeightChange: (height: number) => void;
+  onModalClose: () => void;
+}
+
+function EditQualityProfileModalContentConnector({
+  id,
+  onContentHeightChange,
+  onModalClose,
+}: EditQualityProfileModalContentConnectorProps) {
+  const dispatch = useDispatch();
+
+  const {
+    isFetching,
+    isPopulated,
+    isSaving,
+    saveError,
+    item,
+    qualities,
+    customFormats,
+    languages,
+    isInUse,
+    ...otherSettings
+  } = useSelector(createMapStateSelector(id));
+
+  const [dragQualityIndex, setDragQualityIndex] = useState<string | null>(null);
+  const [dropQualityIndex, setDropQualityIndex] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<string | null>(null);
+  const [editGroups, setEditGroups] = useState(false);
+
+  const prevIsSaving = useRef(isSaving);
+
+  useEffect(() => {
+    if (!id && !isPopulated) {
+      dispatch(fetchQualityProfileSchema());
+    }
+  }, [dispatch, id, isPopulated]);
+
+  useEffect(() => {
+    if (prevIsSaving.current && !isSaving && !saveError) {
+      onModalClose();
+    }
+    prevIsSaving.current = isSaving;
+  }, [isSaving, saveError, onModalClose]);
+
+  const ensureCutoff = useCallback(
+    (qualityProfile: any) => {
+      const cutoff = qualityProfile.cutoff.value;
+
+      const cutoffItem = _.find(qualityProfile.items.value, (i: any) => {
+        if (!cutoff) {
+          return false;
+        }
+        return i.id === cutoff || (i.quality && i.quality.id === cutoff);
+      });
+
+      if (!cutoff || !cutoffItem || !cutoffItem.allowed) {
+        const firstAllowed = _.find(qualityProfile.items.value, {
+          allowed: true,
+        });
+        let cutoffId = null;
+
+        if (firstAllowed) {
+          cutoffId = firstAllowed.quality
+            ? firstAllowed.quality.id
+            : firstAllowed.id;
+        }
+
+        // @ts-expect-error - actions aren't typed
+        dispatch(setQualityProfileValue({ name: 'cutoff', value: cutoffId }));
+      }
+    },
+    [dispatch]
+  );
+
+  const handleInputChange = useCallback(
+    ({ name, value }: InputChanged) => {
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name, value }));
+    },
+    [dispatch]
+  );
+
+  const handleCutoffChange = useCallback(
+    ({ name, value }: InputChanged) => {
+      const numId = parseInt(value as string);
+      const foundItem = _.find(item.items.value, (i: any) => {
+        if (i.quality) {
+          return i.quality.id === numId;
+        }
+        return i.id === numId;
+      });
+
+      const cutoffId = foundItem.quality ? foundItem.quality.id : foundItem.id;
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name, value: cutoffId }));
+    },
+    [dispatch, item]
+  );
+
+  const handleLanguageChange = useCallback(
+    ({ name, value }: InputChanged) => {
+      const numId = parseInt(value as string);
+      const language = _.find(languages, (lang: { key: number }) => lang.key === numId);
+      // @ts-expect-error - actions aren't typed
+      dispatch(
+        setQualityProfileValue({
+          name,
+          value: { id: language.key, Name: language.value },
+        })
+      );
+    },
+    [dispatch, languages]
+  );
+
+  const handleSavePress = useCallback(() => {
+    dispatch(saveQualityProfile({ id }));
+  }, [dispatch, id]);
+
+  const handleQualityProfileItemAllowedChange = useCallback(
+    (qualityId: number, allowed: boolean) => {
+      const qualityProfile = _.cloneDeep(item);
+      const items = qualityProfile.items.value;
+      const foundItem = _.find(items, (i: any) => i.quality && i.quality.id === qualityId);
+
+      foundItem.allowed = allowed;
+
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name: 'items', value: items }));
+      ensureCutoff(qualityProfile);
+    },
+    [dispatch, item, ensureCutoff]
+  );
+
+  const handleQualityProfileFormatItemScoreChange = useCallback(
+    (formatId: number, score: number) => {
+      const qualityProfile = _.cloneDeep(item);
+      const formatItems = qualityProfile.formatItems.value;
+      const foundItem = _.find(formatItems, (i: any) => i.format === formatId);
+
+      foundItem.score = score;
+
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name: 'formatItems', value: formatItems }));
+    },
+    [dispatch, item]
+  );
+
+  const handleItemGroupAllowedChange = useCallback(
+    (groupId: number, allowed: boolean) => {
+      const qualityProfile = _.cloneDeep(item);
+      const items = qualityProfile.items.value;
+      const group = _.find(items, (i: any) => i.id === groupId);
+
+      group.allowed = allowed;
+      group.items.forEach((i: any) => {
+        i.allowed = allowed;
+      });
+
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name: 'items', value: items }));
+      ensureCutoff(qualityProfile);
+    },
+    [dispatch, item, ensureCutoff]
+  );
+
+  const handleItemGroupNameChange = useCallback(
+    (groupId: number, name: string) => {
+      const qualityProfile = _.cloneDeep(item);
+      const items = qualityProfile.items.value;
+      const group = _.find(items, (i: any) => i.id === groupId);
+
+      group.name = name;
+
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name: 'items', value: items }));
+    },
+    [dispatch, item]
+  );
+
+  const handleCreateGroupPress = useCallback(
+    (qualityId: number) => {
+      const qualityProfile = _.cloneDeep(item);
+      const items = qualityProfile.items.value;
+      const foundItem = _.find(items, (i: any) => i.quality && i.quality.id === qualityId);
+      const index = items.indexOf(foundItem);
+      const groupId = getQualityItemGroupId(qualityProfile);
+
+      const group = {
+        id: groupId,
+        name: foundItem.quality.name,
+        allowed: foundItem.allowed,
+        items: [foundItem],
+      };
+
+      items.splice(index, 1, group);
+
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name: 'items', value: items }));
+      ensureCutoff(qualityProfile);
+    },
+    [dispatch, item, ensureCutoff]
+  );
+
+  const handleDeleteGroupPress = useCallback(
+    (groupId: number) => {
+      const qualityProfile = _.cloneDeep(item);
+      const items = qualityProfile.items.value;
+      const group = _.find(items, (i: any) => i.id === groupId);
+      const index = items.indexOf(group);
+
+      items.splice(index, 1, ...group.items);
+
+      // @ts-expect-error - actions aren't typed
+      dispatch(setQualityProfileValue({ name: 'items', value: items }));
+      ensureCutoff(qualityProfile);
+    },
+    [dispatch, item, ensureCutoff]
+  );
+
+  const handleQualityProfileItemDragMove = useCallback(
+    (options: {
+      dragQualityIndex: string;
+      dropQualityIndex: string;
+      dropPosition: string;
+    }) => {
+      const {
+        dragQualityIndex: newDragIndex,
+        dropQualityIndex: newDropIndex,
+        dropPosition: newDropPosition,
+      } = options;
+
+      const [dragGroupIndex, dragItemIndex] = parseIndex(newDragIndex);
+      const [dropGroupIndex, dropItemIndex] = parseIndex(newDropIndex);
+
+      if (
+        (newDropPosition === 'below' && dropItemIndex - 1 === dragItemIndex) ||
+        (newDropPosition === 'above' && dropItemIndex + 1 === dragItemIndex)
+      ) {
+        setDragQualityIndex(null);
+        setDropQualityIndex(null);
+        setDropPosition(null);
+        return;
+      }
+
+      let adjustedDropIndex = newDropIndex;
+
+      if (
+        newDropPosition === 'above' &&
+        dragGroupIndex !== dropGroupIndex &&
+        dropGroupIndex != null
+      ) {
+        adjustedDropIndex = `${dropGroupIndex + 1}.${dropItemIndex + 2}`;
+      }
+
+      if (
+        newDropPosition === 'above' &&
+        dragGroupIndex !== dropGroupIndex &&
+        dropGroupIndex == null
+      ) {
+        adjustedDropIndex = `${dropItemIndex + 2}`;
+      }
+
+      if (
+        newDropPosition === 'below' &&
+        dragGroupIndex === dropGroupIndex &&
+        dropGroupIndex != null &&
+        dragItemIndex < dropItemIndex
+      ) {
+        adjustedDropIndex = `${dropGroupIndex + 1}.${dropItemIndex}`;
+      }
+
+      if (
+        newDropPosition === 'below' &&
+        dragGroupIndex === dropGroupIndex &&
+        dropGroupIndex == null &&
+        dragItemIndex < dropItemIndex
+      ) {
+        adjustedDropIndex = `${dropItemIndex}`;
+      }
+
+      setDragQualityIndex(newDragIndex);
+      setDropQualityIndex(adjustedDropIndex);
+      setDropPosition(newDropPosition);
+    },
+    []
+  );
+
+  const handleQualityProfileItemDragEnd = useCallback(
+    (didDrop: boolean) => {
+      if (didDrop && dropQualityIndex != null && dragQualityIndex != null) {
+        const qualityProfile = _.cloneDeep(item);
+        const items = qualityProfile.items.value;
+        const [dragGroupIdx, dragItemIdx] = parseIndex(dragQualityIndex);
+        const [dropGroupIdx, dropItemIdx] = parseIndex(dropQualityIndex);
+
+        let draggedItem = null;
+        let dropGroup: any = null;
+
+        if (dropGroupIdx != null) {
+          dropGroup = items[dropGroupIdx];
+        }
+
+        if (dragGroupIdx == null) {
+          draggedItem = items.splice(dragItemIdx, 1)[0];
+        } else {
+          const group = items[dragGroupIdx];
+          draggedItem = group.items.splice(dragItemIdx, 1)[0];
+
+          if (!group.items.length) {
+            items.splice(dragGroupIdx, 1);
+          }
+        }
+
+        if (dropGroupIdx == null) {
+          items.splice(dropItemIdx, 0, draggedItem);
+        } else {
+          dropGroup.items.splice(dropItemIdx, 0, draggedItem);
+        }
+
+        // @ts-expect-error - actions aren't typed
+        dispatch(setQualityProfileValue({ name: 'items', value: items }));
+        ensureCutoff(qualityProfile);
+      }
+
+      setDragQualityIndex(null);
+      setDropQualityIndex(null);
+      setDropPosition(null);
+    },
+    [dispatch, item, ensureCutoff, dragQualityIndex, dropQualityIndex]
+  );
+
+  const handleToggleEditGroupsMode = useCallback(() => {
+    setEditGroups((prev) => !prev);
+  }, []);
+
+  if (_.isEmpty(item.items) && !isFetching) {
+    return null;
+  }
+
+  return (
+    <EditQualityProfileModalContent
+      dragQualityIndex={dragQualityIndex}
+      dropQualityIndex={dropQualityIndex}
+      dropPosition={dropPosition}
+      editGroups={editGroups}
+      id={id}
+      isFetching={isFetching}
+      isPopulated={isPopulated}
+      isSaving={isSaving}
+      saveError={saveError}
+      item={item}
+      qualities={qualities}
+      customFormats={customFormats}
+      languages={languages}
+      isInUse={isInUse}
+      onContentHeightChange={onContentHeightChange}
+      onModalClose={onModalClose}
+      onSavePress={handleSavePress}
+      onInputChange={handleInputChange}
+      onCutoffChange={handleCutoffChange}
+      onLanguageChange={handleLanguageChange}
+      onCreateGroupPress={handleCreateGroupPress}
+      onDeleteGroupPress={handleDeleteGroupPress}
+      onQualityProfileItemAllowedChange={handleQualityProfileItemAllowedChange}
+      onItemGroupAllowedChange={handleItemGroupAllowedChange}
+      onItemGroupNameChange={handleItemGroupNameChange}
+      onQualityProfileItemDragMove={handleQualityProfileItemDragMove}
+      onQualityProfileItemDragEnd={handleQualityProfileItemDragEnd}
+      onQualityProfileFormatItemScoreChange={handleQualityProfileFormatItemScoreChange}
+      onToggleEditGroupsMode={handleToggleEditGroupsMode}
+      {...otherSettings}
+    />
+  );
+}
+
+export default EditQualityProfileModalContentConnector;

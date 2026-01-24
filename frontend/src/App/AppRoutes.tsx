@@ -20,7 +20,7 @@ import GameDetailsPage from 'Game/Details/GameDetailsPage';
 import GameIndex from 'Game/Index/GameIndex';
 import CustomFormatSettingsPage from 'Settings/CustomFormats/CustomFormatSettingsPage';
 import DownloadClientSettingsConnector from 'Settings/DownloadClients/DownloadClientSettingsConnector';
-import GeneralSettingsConnector from 'Settings/General/GeneralSettingsConnector';
+import GeneralSettings from 'Settings/General/GeneralSettings';
 import ImportListSettings from 'Settings/ImportLists/ImportListSettings';
 import IndexerSettings from 'Settings/Indexers/IndexerSettings';
 import MediaManagement from 'Settings/MediaManagement/MediaManagement';
@@ -30,7 +30,7 @@ import Profiles from 'Settings/Profiles/Profiles';
 import Quality from 'Settings/Quality/Quality';
 import Settings from 'Settings/Settings';
 import TagSettings from 'Settings/Tags/TagSettings';
-import UISettingsConnector from 'Settings/UI/UISettingsConnector';
+import UISettings from 'Settings/UI/UISettings';
 import BackupsConnector from 'System/Backup/BackupsConnector';
 import LogsTableConnector from 'System/Events/LogsTableConnector';
 import Logs from 'System/Logs/Logs';
@@ -129,9 +129,9 @@ function AppRoutes() {
 
       <Route path="/settings/tags" component={TagSettings} />
 
-      <Route path="/settings/general" component={GeneralSettingsConnector} />
+      <Route path="/settings/general" component={GeneralSettings} />
 
-      <Route path="/settings/ui" component={UISettingsConnector} />
+      <Route path="/settings/ui" component={UISettings} />
 
       {/*
         System
