@@ -97,8 +97,7 @@ namespace Gamarr.Api.V3
         [Produces("application/json")]
         public ActionResult<TProviderResource> UpdateProvider([FromRoute] int id, [FromBody] TProviderResource providerResource, [FromQuery] bool forceSave = false)
         {
-            // TODO: Remove fallback to Id from body in next API version bump
-            var existingDefinition = _providerFactory.Find(id) ?? _providerFactory.Find(providerResource.Id);
+            var existingDefinition = _providerFactory.Find(id);
 
             if (existingDefinition == null)
             {
