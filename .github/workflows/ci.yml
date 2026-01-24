@@ -33,24 +33,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT 1 -o lo -j ACCEPT
-          sudo iptables -I OUTPUT 2 -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -A OUTPUT -j REJECT
-
       - name: Lint
-        run: yarn lint
+        run: unshare -rn bash -c "ip link set lo up && yarn lint"
 
       - name: Test
-        run: yarn test
+        run: unshare -rn bash -c "ip link set lo up && yarn test"
 
       - name: Build
-        run: yarn build
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -j REJECT
+        run: unshare -rn bash -c "ip link set lo up && yarn build"
 
   unit-test:
     name: Unit Tests (${{ matrix.os }})
@@ -71,47 +61,20 @@ jobs:
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
 
-      - name: Disable internet (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo iptables -I OUTPUT 1 -o lo -j ACCEPT
-          sudo iptables -I OUTPUT 2 -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -A OUTPUT -j REJECT
-
-      - name: Disable internet (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          sudo bash -c 'echo "block out on ! lo0 all" > /tmp/pf-block.conf'
-          sudo pfctl -ef /tmp/pf-block.conf
-
-      - name: Disable internet (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          New-NetFirewallRule -DisplayName "Block Outbound" -Direction Outbound -Action Block -RemoteAddress "0.0.0.0-126.255.255.255,128.0.0.0-255.255.255.255"
-
       - name: Run Unit Tests
         shell: bash
         run: |
-          dotnet test src/Gamarr.sln \
+          TEST_CMD="dotnet test src/Gamarr.sln \
             --no-build \
             --configuration Debug \
-            --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
-            --logger "trx;LogFileName=test-results.trx" \
-            --results-directory ./test-results
-
-      - name: Re-enable internet (Linux)
-        if: always() && runner.os == 'Linux'
-        run: sudo iptables -D OUTPUT -j REJECT
-
-      - name: Re-enable internet (macOS)
-        if: always() && runner.os == 'macOS'
-        run: sudo pfctl -d
-
-      - name: Re-enable internet (Windows)
-        if: always() && runner.os == 'Windows'
-        shell: powershell
-        run: Remove-NetFirewallRule -DisplayName "Block Outbound"
+            --filter \"Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest\" \
+            --logger \"trx;LogFileName=test-results.trx\" \
+            --results-directory ./test-results"
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            unshare -rn bash -c "ip link set lo up && $TEST_CMD"
+          else
+            eval "$TEST_CMD"
+          fi
 
       - name: Verify tests ran
         if: always()
@@ -145,25 +108,15 @@ jobs:
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT 1 -o lo -j ACCEPT
-          sudo iptables -I OUTPUT 2 -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -A OUTPUT -j REJECT
-
       - name: Run Integration Tests
         shell: bash
         run: |
-          dotnet test src/Gamarr.sln \
+          unshare -rn bash -c "ip link set lo up && dotnet test src/Gamarr.sln \
             --no-build \
             --configuration Debug \
-            --filter "Category=IntegrationTest" \
-            --logger "trx;LogFileName=integration-test-results.trx" \
-            --results-directory ./test-results
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -j REJECT
+            --filter \"Category=IntegrationTest\" \
+            --logger \"trx;LogFileName=integration-test-results.trx\" \
+            --results-directory ./test-results"
 
       - name: Verify tests ran
         if: always()
@@ -244,24 +197,14 @@ jobs:
       - name: Install Playwright browsers
         run: pwsh _tests/net8.0/playwright.ps1 install --with-deps
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT 1 -o lo -j ACCEPT
-          sudo iptables -I OUTPUT 2 -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -A OUTPUT -j REJECT
-
       - name: Run Automation Tests
         run: |
-          dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
+          unshare -rn bash -c "ip link set lo up && dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
             --no-build \
             --configuration Debug \
-            --filter "Category=AutomationTest" \
-            --logger "trx;LogFileName=automation-test-results.trx" \
-            --results-directory ./test-results
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -j REJECT
+            --filter \"Category=AutomationTest\" \
+            --logger \"trx;LogFileName=automation-test-results.trx\" \
+            --results-directory ./test-results"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
