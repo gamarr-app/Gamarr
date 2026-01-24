@@ -55,11 +55,17 @@ namespace NzbDrone.Integration.Test.Client
                     return result;
                 }
 
+                if (result.Status != CommandStatus.Queued && result.Status != CommandStatus.Started)
+                {
+                    Assert.Fail($"Command ended with status {result.Status}: {result.Message ?? result.Exception ?? "Unknown error"}");
+                    return result;
+                }
+
                 Thread.Sleep(500);
                 result = Get(result.Id);
             }
 
-            Assert.Fail("Command failed");
+            Assert.Fail("Command timed out");
             return result;
         }
 
