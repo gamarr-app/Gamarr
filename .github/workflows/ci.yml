@@ -61,6 +61,25 @@ jobs:
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
 
+      - name: Disable internet (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo iptables -I OUTPUT 1 -o lo -j ACCEPT
+          sudo iptables -I OUTPUT 2 -d 127.0.0.0/8 -j ACCEPT
+          sudo iptables -A OUTPUT -j REJECT
+
+      - name: Disable internet (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          sudo bash -c 'echo "block out on ! lo0 all" > /tmp/pf-block.conf'
+          sudo pfctl -ef /tmp/pf-block.conf
+
+      - name: Disable internet (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          New-NetFirewallRule -DisplayName "Block Outbound" -Direction Outbound -Action Block -RemoteAddress "0.0.0.0-126.255.255.255,128.0.0.0-255.255.255.255"
+
       - name: Run Unit Tests
         shell: bash
         run: |
@@ -70,6 +89,19 @@ jobs:
             --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./test-results
+
+      - name: Re-enable internet (Linux)
+        if: always() && runner.os == 'Linux'
+        run: sudo iptables -D OUTPUT -j REJECT
+
+      - name: Re-enable internet (macOS)
+        if: always() && runner.os == 'macOS'
+        run: sudo pfctl -d
+
+      - name: Re-enable internet (Windows)
+        if: always() && runner.os == 'Windows'
+        shell: powershell
+        run: Remove-NetFirewallRule -DisplayName "Block Outbound"
 
       - name: Verify tests ran
         if: always()
@@ -103,6 +135,12 @@ jobs:
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
 
+      - name: Disable internet
+        run: |
+          sudo iptables -I OUTPUT 1 -o lo -j ACCEPT
+          sudo iptables -I OUTPUT 2 -d 127.0.0.0/8 -j ACCEPT
+          sudo iptables -A OUTPUT -j REJECT
+
       - name: Run Integration Tests
         shell: bash
         run: |
@@ -112,6 +150,10 @@ jobs:
             --filter "Category=IntegrationTest" \
             --logger "trx;LogFileName=integration-test-results.trx" \
             --results-directory ./test-results
+
+      - name: Re-enable internet
+        if: always()
+        run: sudo iptables -D OUTPUT -j REJECT
 
       - name: Verify tests ran
         if: always()
