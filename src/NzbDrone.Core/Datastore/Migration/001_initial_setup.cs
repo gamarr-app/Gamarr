@@ -168,8 +168,6 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("SourceType").AsInt32().NotNullable()
                 .WithColumn("GameMetadataId").AsInt32().NotNullable().Indexed();
 
-            Create.Index().OnTable("AlternativeTitles").OnColumn("CleanTitle").Ascending();
-
             Create.TableForModel("GameTranslations")
                 .WithColumn("Title").AsString().Nullable()
                 .WithColumn("CleanTitle").AsString().Nullable().Indexed()
