@@ -16,9 +16,10 @@ interface GameStatusProps {
   gameId: number;
   gameEntity?: GameEntity;
   gameFileId: number | undefined;
+  showMissingStatus?: boolean;
 }
 
-function GameStatus({ gameId, gameFileId }: GameStatusProps) {
+function GameStatus({ gameId, gameFileId, showMissingStatus = true }: GameStatusProps) {
   const { isAvailable, monitored, grabbed = false } = useGame(gameId) as Game;
 
   const queueItem = useSelector(createQueueItemSelectorForHook(gameId));
@@ -69,6 +70,10 @@ function GameStatus({ gameId, gameFileId }: GameStatusProps) {
         />
       </div>
     );
+  }
+
+  if (!showMissingStatus) {
+    return null;
   }
 
   if (!monitored) {

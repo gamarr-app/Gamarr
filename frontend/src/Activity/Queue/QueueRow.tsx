@@ -16,6 +16,7 @@ import GameFormats from 'Game/GameFormats';
 import GameLanguages from 'Game/GameLanguages';
 import GameQuality from 'Game/GameQuality';
 import GameTitleLink from 'Game/GameTitleLink';
+import Link from 'Components/Link/Link';
 import useGame from 'Game/useGame';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
@@ -191,7 +192,9 @@ function QueueRow(props: QueueRowProps) {
               {game ? (
                 <GameTitleLink titleSlug={game.titleSlug} title={game.title} />
               ) : (
-                title
+                <Link to={`/add/new?term=${encodeURIComponent(title)}`}>
+                  {title}
+                </Link>
               )}
             </TableRowCell>
           );
