@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
 import Card from 'Components/Card';
 import Label from 'Components/Label';
@@ -114,7 +115,7 @@ function CustomFormat({
           }
 
           return (
-            <Label className={styles.label} key={index} kind={kind}>
+            <Label key={index} className={styles.label} kind={kind}>
               {item.name}
             </Label>
           );

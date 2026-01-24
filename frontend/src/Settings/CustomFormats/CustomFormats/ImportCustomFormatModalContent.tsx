@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
@@ -91,9 +92,9 @@ function ImportCustomFormatModalContent({
                   type={inputTypes.TEXT_AREA}
                   name="customFormatJson"
                   value={json}
-                  onChange={handleChange}
                   placeholder={'{\n  "name": "Custom Format"\n}'}
                   errors={parseError ? [parseError as any] : []}
+                  onChange={handleChange}
                 />
               </FormGroup>
             </Form>
@@ -103,9 +104,9 @@ function ImportCustomFormatModalContent({
       <ModalFooter>
         <Button onPress={onModalClose}>{translate('Cancel')}</Button>
         <SpinnerErrorButton
-          onPress={handleImportPress}
           isSpinning={isSpinning}
           error={parseError ? parseError.message : undefined}
+          onPress={handleImportPress}
         >
           {translate('Import')}
         </SpinnerErrorButton>

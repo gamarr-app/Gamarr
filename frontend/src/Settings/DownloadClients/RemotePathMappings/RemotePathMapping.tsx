@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import Icon from 'Components/Icon';

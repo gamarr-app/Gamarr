@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
+import { Tag } from 'App/State/TagsAppState';
 import Card from 'Components/Card';
 import Label from 'Components/Label';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TagList from 'Components/TagList';
 import { kinds } from 'Helpers/Props';
-import { Tag } from 'App/State/TagsAppState';
 import translate from 'Utilities/String/translate';
 import EditDownloadClientModal from './EditDownloadClientModal';
 import styles from './DownloadClient.css';

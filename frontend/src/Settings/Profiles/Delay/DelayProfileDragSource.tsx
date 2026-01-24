@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
