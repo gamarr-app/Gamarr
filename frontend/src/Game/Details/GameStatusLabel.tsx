@@ -128,9 +128,7 @@ function GameStatusLabel({
   }
 
   return (
-    <span
-      className={styles[statusClass as keyof typeof styles]}
-    >
+    <span className={styles[statusClass as keyof typeof styles]}>
       {translate(firstCharToUpper(gameStatus))}
     </span>
   );

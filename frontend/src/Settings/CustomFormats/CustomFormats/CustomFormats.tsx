@@ -25,10 +25,7 @@ function CustomFormats() {
     createSortedSectionSelector<
       CustomFormatType,
       AppSectionProviderState<CustomFormatType>
-    >(
-      'settings.customFormats',
-      sortByProp('name')
-    )
+    >('settings.customFormats', sortByProp('name'))
   ) as {
     isFetching: boolean;
     isPopulated: boolean;
