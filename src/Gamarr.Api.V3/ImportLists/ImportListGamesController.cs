@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.ImportLists.ImportExclusions;
@@ -29,6 +31,7 @@ namespace Gamarr.Api.V3.ImportLists
         private readonly INamingConfigService _namingService;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly IConfigService _configService;
+        private readonly Logger _logger;
 
         public ImportListGamesController(IGameService gameService,
                                     IAddGameService addGameService,
@@ -39,7 +42,8 @@ namespace Gamarr.Api.V3.ImportLists
                                     IImportListExclusionService importListExclusionService,
                                     INamingConfigService namingService,
                                     IGameTranslationService gameTranslationService,
-                                    IConfigService configService)
+                                    IConfigService configService,
+                                    Logger logger)
         {
             _gameService = gameService;
             _addGameService = addGameService;
@@ -51,66 +55,100 @@ namespace Gamarr.Api.V3.ImportLists
             _namingService = namingService;
             _gameTranslationService = gameTranslationService;
             _configService = configService;
+            _logger = logger;
         }
 
         [HttpGet]
         public object GetDiscoverGames(bool includeRecommendations = false, bool includeTrending = false, bool includePopular = false)
         {
-            var gameLanguage = (Language)_configService.GameInfoLanguage;
-
             var realResults = new List<ImportListGamesResource>();
-            var listExclusions = _importListExclusionService.All();
-            var existingIgdbIds = _gameService.AllGameIgdbIds();
 
-            if (includeRecommendations)
+            try
             {
-                var recommendedResults = _gameService.GetRecommendedIgdbIds();
+                var gameLanguage = (Language)_configService.GameInfoLanguage;
+                var listExclusions = _importListExclusionService.All();
+                var existingIgdbIds = _gameService.AllGameIgdbIds();
 
-                if (recommendedResults.Count > 0)
+                if (includeRecommendations)
                 {
-                    var mapped = _gameInfo.GetBulkGameInfo(recommendedResults).Select(m => new Game { GameMetadata = m }).ToList();
+                    try
+                    {
+                        var recommendedResults = _gameService.GetRecommendedIgdbIds();
 
-                    realResults.AddRange(MapToResource(mapped.Where(x => x != null), gameLanguage, isRecommendation: true));
+                        if (recommendedResults.Count > 0)
+                        {
+                            var mapped = _gameInfo.GetBulkGameInfo(recommendedResults).Select(m => new Game { GameMetadata = m }).ToList();
+
+                            realResults.AddRange(MapToResource(mapped.Where(x => x != null), gameLanguage, isRecommendation: true));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to get recommended games");
+                    }
                 }
+
+                if (includeTrending)
+                {
+                    try
+                    {
+                        var trendingResults = _gameInfo.GetTrendingGames();
+
+                        realResults.AddRange(MapToResource(trendingResults.Select(m => new Game { GameMetadata = m }).Where(x => x != null), gameLanguage, isTrending: true));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to get trending games");
+                    }
+                }
+
+                if (includePopular)
+                {
+                    try
+                    {
+                        var popularResults = _gameInfo.GetPopularGames();
+
+                        realResults.AddRange(MapToResource(popularResults.Select(m => new Game { GameMetadata = m }).Where(x => x != null), gameLanguage, isPopular: true));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to get popular games");
+                    }
+                }
+
+                // Add List Games
+                try
+                {
+                    var listGames = MapToResource(_listGameService.GetAllForLists(_importListFactory.Enabled().Select(x => x.Definition.Id).ToList()), gameLanguage).ToList();
+
+                    realResults.AddRange(listGames);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to get import list games");
+                }
+
+                var groupedListGames = realResults.GroupBy(x => x.IgdbId);
+
+                // Distinct Games
+                realResults = groupedListGames.Select(x =>
+                {
+                    var game = x.First();
+
+                    game.Lists = x.SelectMany(m => m.Lists).ToHashSet();
+                    game.IsExcluded = listExclusions.Any(e => e.IgdbId == game.IgdbId);
+                    game.IsExisting = existingIgdbIds.Any(e => e == game.IgdbId);
+                    game.IsRecommendation = x.Any(m => m.IsRecommendation);
+                    game.IsPopular = x.Any(m => m.IsPopular);
+                    game.IsTrending = x.Any(m => m.IsTrending);
+
+                    return game;
+                }).ToList();
             }
-
-            if (includeTrending)
+            catch (Exception ex)
             {
-                // Add IGDB Trending
-                var trendingResults = _gameInfo.GetTrendingGames();
-
-                realResults.AddRange(MapToResource(trendingResults.Select(m => new Game { GameMetadata = m }).Where(x => x != null), gameLanguage, isTrending: true));
+                _logger.Error(ex, "Failed to get discover games");
             }
-
-            if (includePopular)
-            {
-                // Add IGDB Popular
-                var popularResults = _gameInfo.GetPopularGames();
-
-                realResults.AddRange(MapToResource(popularResults.Select(m => new Game { GameMetadata = m }).Where(x => x != null), gameLanguage, isPopular: true));
-            }
-
-            // Add List Games
-            var listGames = MapToResource(_listGameService.GetAllForLists(_importListFactory.Enabled().Select(x => x.Definition.Id).ToList()), gameLanguage).ToList();
-
-            realResults.AddRange(listGames);
-
-            var groupedListGames = realResults.GroupBy(x => x.IgdbId);
-
-            // Distinct Games
-            realResults = groupedListGames.Select(x =>
-            {
-                var game = x.First();
-
-                game.Lists = x.SelectMany(m => m.Lists).ToHashSet();
-                game.IsExcluded = listExclusions.Any(e => e.IgdbId == game.IgdbId);
-                game.IsExisting = existingIgdbIds.Any(e => e == game.IgdbId);
-                game.IsRecommendation = x.Any(m => m.IsRecommendation);
-                game.IsPopular = x.Any(m => m.IsPopular);
-                game.IsTrending = x.Any(m => m.IsTrending);
-
-                return game;
-            }).ToList();
 
             return realResults;
         }
