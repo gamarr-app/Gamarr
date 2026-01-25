@@ -57,11 +57,7 @@ function ImportGameRow(props: ImportGameRowProps) {
       </VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.game}>
-        <ImportGameSelectGameConnector
-          // @ts-expect-error - connector exported as any, types not inferred
-          id={id}
-          isExistingGame={isExistingGame}
-        />
+        <ImportGameSelectGameConnector id={id} isExistingGame={isExistingGame} />
       </VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.monitor}>
