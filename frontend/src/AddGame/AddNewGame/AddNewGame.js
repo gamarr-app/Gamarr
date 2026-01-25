@@ -148,7 +148,7 @@ class AddNewGame extends Component {
                   items.map((item) => {
                     return (
                       <AddNewGameSearchResultConnector
-                        key={item.igdbId}
+                        key={item.titleSlug || item.igdbId}
                         {...item}
                       />
                     );
