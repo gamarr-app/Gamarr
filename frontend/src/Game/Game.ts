@@ -153,7 +153,10 @@ interface Game extends ModelBase {
   isDlc: boolean;
   parentGameIgdbId?: number;
   parentGame?: GameSummary;
-  dlcIds: number[];
+  /** IGDB DLC IDs */
+  igdbDlcIds: number[];
+  /** Steam DLC IDs */
+  steamDlcIds: number[];
   dlcReferences: DlcReference[];
   dlcCount: number;
 }

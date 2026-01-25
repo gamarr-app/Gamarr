@@ -109,7 +109,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             List<string> genres = null,
             Ratings ratings = null,
             int? parentGameId = null,
-            List<int> dlcIds = null)
+            List<int> igdbDlcIds = null,
+            List<int> steamDlcIds = null)
         {
             return new GameMetadata
             {
@@ -123,7 +124,8 @@ namespace NzbDrone.Core.Test.MetadataSource
                 Genres = genres ?? new List<string>(),
                 Ratings = ratings ?? new Ratings(),
                 ParentGameId = parentGameId,
-                DlcIds = dlcIds ?? new List<int>()
+                IgdbDlcIds = igdbDlcIds ?? new List<int>(),
+                SteamDlcIds = steamDlcIds ?? new List<int>()
             };
         }
 
@@ -425,28 +427,53 @@ namespace NzbDrone.Core.Test.MetadataSource
         }
 
         [Test]
-        public void merge_metadata_should_add_dlc_ids_when_missing()
+        public void merge_metadata_should_add_igdb_dlc_ids_when_missing()
         {
             var existing = BuildGameMetadata(title: "Test Game");
-            var secondary = BuildGameMetadata(dlcIds: new List<int> { 101, 102, 103 });
+            var secondary = BuildGameMetadata(igdbDlcIds: new List<int> { 101, 102, 103 });
 
             InvokeMergeMetadata(existing, secondary);
 
-            existing.DlcIds.Should().BeEquivalentTo(new List<int> { 101, 102, 103 });
+            existing.IgdbDlcIds.Should().BeEquivalentTo(new List<int> { 101, 102, 103 });
         }
 
         [Test]
-        public void merge_metadata_should_not_overwrite_existing_dlc_ids()
+        public void merge_metadata_should_not_overwrite_existing_igdb_dlc_ids()
         {
             var existing = BuildGameMetadata(
                 title: "Test Game",
-                dlcIds: new List<int> { 50, 51 });
+                igdbDlcIds: new List<int> { 50, 51 });
 
-            var secondary = BuildGameMetadata(dlcIds: new List<int> { 101, 102, 103 });
+            var secondary = BuildGameMetadata(igdbDlcIds: new List<int> { 101, 102, 103 });
 
             InvokeMergeMetadata(existing, secondary);
 
-            existing.DlcIds.Should().BeEquivalentTo(new List<int> { 50, 51 });
+            existing.IgdbDlcIds.Should().BeEquivalentTo(new List<int> { 50, 51 });
+        }
+
+        [Test]
+        public void merge_metadata_should_add_steam_dlc_ids_when_missing()
+        {
+            var existing = BuildGameMetadata(title: "Test Game");
+            var secondary = BuildGameMetadata(steamDlcIds: new List<int> { 100101, 100102, 100103 });
+
+            InvokeMergeMetadata(existing, secondary);
+
+            existing.SteamDlcIds.Should().BeEquivalentTo(new List<int> { 100101, 100102, 100103 });
+        }
+
+        [Test]
+        public void merge_metadata_should_not_overwrite_existing_steam_dlc_ids()
+        {
+            var existing = BuildGameMetadata(
+                title: "Test Game",
+                steamDlcIds: new List<int> { 100050, 100051 });
+
+            var secondary = BuildGameMetadata(steamDlcIds: new List<int> { 100101, 100102, 100103 });
+
+            InvokeMergeMetadata(existing, secondary);
+
+            existing.SteamDlcIds.Should().BeEquivalentTo(new List<int> { 100050, 100051 });
         }
 
         [Test]

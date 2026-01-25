@@ -455,14 +455,33 @@ namespace NzbDrone.Core.MetadataSource
                 {
                     try
                     {
-                        var metadata = _steamProxy.GetGameBySteamAppId(steamAppId);
-                        if (metadata != null)
+                        var gameInfo = _steamProxy.GetGameBySteamAppId(steamAppId);
+                        if (gameInfo != null)
                         {
-                            var game = new Game { GameMetadata = metadata };
+                            _logger.Debug("Found game by Steam App ID {0}: {1}", steamAppId, gameInfo.Title);
+                            var game = new Game { GameMetadata = gameInfo };
+
+                            // Try to enrich with IGDB data
+                            if (HasIgdbCredentials)
+                            {
+                                try
+                                {
+                                    var igdbGame = _igdbProxy.GetGameBySteamAppId(steamAppId);
+                                    if (igdbGame != null)
+                                    {
+                                        MergeMetadata(gameInfo, igdbGame);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.Debug(ex, "Failed to get IGDB data for Steam App ID {0}", steamAppId);
+                                }
+                            }
+
                             return new List<Game> { game };
                         }
 
-                        _logger.Warn("No game found for Steam App ID {0}", steamAppId);
+                        _logger.Debug("No game found for Steam App ID {0}", steamAppId);
                         return new List<Game>();
                     }
                     catch (Exception ex)
@@ -744,10 +763,16 @@ namespace NzbDrone.Core.MetadataSource
                 existing.ParentGameId = secondary.ParentGameId;
             }
 
-            // Add DLC IDs if missing
-            if ((existing.DlcIds == null || !existing.DlcIds.Any()) && secondary.DlcIds != null && secondary.DlcIds.Any())
+            // Add IGDB DLC IDs if missing
+            if ((existing.IgdbDlcIds == null || !existing.IgdbDlcIds.Any()) && secondary.IgdbDlcIds != null && secondary.IgdbDlcIds.Any())
             {
-                existing.DlcIds = secondary.DlcIds;
+                existing.IgdbDlcIds = secondary.IgdbDlcIds;
+            }
+
+            // Add Steam DLC IDs if missing
+            if ((existing.SteamDlcIds == null || !existing.SteamDlcIds.Any()) && secondary.SteamDlcIds != null && secondary.SteamDlcIds.Any())
+            {
+                existing.SteamDlcIds = secondary.SteamDlcIds;
             }
 
             // Add DLC references if missing

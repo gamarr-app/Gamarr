@@ -171,7 +171,12 @@ namespace Gamarr.Api.V3.Games
         /// <summary>
         /// List of IGDB IDs for DLCs/expansions of this game
         /// </summary>
-        public List<int> DlcIds { get; set; }
+        public List<int> IgdbDlcIds { get; set; }
+
+        /// <summary>
+        /// List of Steam App IDs for DLCs of this game
+        /// </summary>
+        public List<int> SteamDlcIds { get; set; }
 
         /// <summary>
         /// List of DLC references with ID and name
@@ -285,13 +290,14 @@ namespace Gamarr.Api.V3.Games
                 GameTypeDisplayName = model.GameMetadata.Value.GameType.GetDisplayName(),
                 IsDlc = model.GameMetadata.Value.IsDlc,
                 ParentGameIgdbId = model.GameMetadata.Value.ParentGameId,
-                DlcIds = model.GameMetadata.Value.DlcIds ?? new List<int>(),
+                IgdbDlcIds = model.GameMetadata.Value.IgdbDlcIds ?? new List<int>(),
+                SteamDlcIds = model.GameMetadata.Value.SteamDlcIds ?? new List<int>(),
                 DlcReferences = model.GameMetadata.Value.DlcReferences?.Select(d => new DlcReferenceResource
                 {
                     Id = d.Id,
                     Name = d.Name
                 }).ToList() ?? new List<DlcReferenceResource>(),
-                DlcCount = model.GameMetadata.Value.DlcIds?.Count ?? 0,
+                DlcCount = (model.GameMetadata.Value.IgdbDlcIds?.Count ?? 0) + (model.GameMetadata.Value.SteamDlcIds?.Count ?? 0),
             };
         }
 
@@ -331,7 +337,8 @@ namespace Gamarr.Api.V3.Games
                     CleanTitle = resource.CleanTitle,
                     GameType = resource.GameType,
                     ParentGameId = resource.ParentGameIgdbId,
-                    DlcIds = resource.DlcIds ?? new List<int>(),
+                    IgdbDlcIds = resource.IgdbDlcIds ?? new List<int>(),
+                    SteamDlcIds = resource.SteamDlcIds ?? new List<int>(),
                     DlcReferences = resource.DlcReferences?.Select(d => new DlcReference(d.Id, d.Name)).ToList() ?? new List<DlcReference>(),
                 },
 
