@@ -1,4 +1,4 @@
-import { Children, ReactElement, ReactNode } from 'react';
+import React, { Children, ReactElement, ReactNode } from 'react';
 import { Switch as RouterSwitch } from 'react-router-dom';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 

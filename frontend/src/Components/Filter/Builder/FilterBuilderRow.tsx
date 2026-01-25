@@ -1,4 +1,4 @@
-import { Component, ComponentType } from 'react';
+import React, { Component, ComponentType } from 'react';
 import { FilterBuilderProp } from 'App/State/AppState';
 import SelectInput from 'Components/Form/SelectInput';
 import IconButton from 'Components/Link/IconButton';
