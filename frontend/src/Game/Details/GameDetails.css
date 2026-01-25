@@ -155,7 +155,8 @@
 .originalLanguage,
 .studio,
 .collection,
-.genres {
+.genres,
+.version {
   font-weight: 300;
   font-size: 17px;
 }

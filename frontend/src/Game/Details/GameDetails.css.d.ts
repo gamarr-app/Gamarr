@@ -39,6 +39,7 @@ interface CssExports {
   'titleContainer': string;
   'titleRow': string;
   'toggleMonitoredContainer': string;
+  'version': string;
   'year': string;
 }
 export const cssExports: CssExports;
