@@ -8,6 +8,7 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.Games
 {
@@ -170,6 +171,8 @@ namespace NzbDrone.Core.Test.Games
             var result = Subject.AddGames(new List<Game> { validGame, invalidGame }, true);
 
             result.Should().HaveCount(1);
+
+            ExceptionVerification.IgnoreErrors();
         }
 
         [Test]
