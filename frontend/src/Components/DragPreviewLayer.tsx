@@ -1,8 +1,9 @@
+import { ReactNode } from 'react';
 import styles from './DragPreviewLayer.css';
 
 interface DragPreviewLayerProps {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function DragPreviewLayer({

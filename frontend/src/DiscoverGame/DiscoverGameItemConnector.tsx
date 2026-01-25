@@ -1,3 +1,4 @@
+import { ComponentType } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -47,7 +48,7 @@ export interface DiscoverGameProps {
 interface OwnProps {
   igdbId: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  component: React.ComponentType<any>;
+  component: ComponentType<any>;
   isSelected?: boolean;
   onSelectedChange?: (options: {
     id: number | string;
@@ -104,4 +105,4 @@ function DiscoverGameItemConnectorWrapper(props: OwnProps & PropsFromRedux) {
 
 export default connector(
   DiscoverGameItemConnectorWrapper
-) as React.ComponentType<OwnProps>;
+) as ComponentType<OwnProps>;

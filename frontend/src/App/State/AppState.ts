@@ -1,6 +1,6 @@
 import { RouterState } from 'connected-react-router';
-import { Error } from './AppSectionState';
 import AddGameAppState from './AddGameAppState';
+import { Error } from './AppSectionState';
 import BlocklistAppState from './BlocklistAppState';
 import CalendarAppState from './CalendarAppState';
 import CaptchaAppState from './CaptchaAppState';

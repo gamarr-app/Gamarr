@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import ErrorBoundary from 'Components/Error/ErrorBoundary';
 import PageContentError from './PageContentError';
@@ -6,7 +7,7 @@ import styles from './PageContent.css';
 interface PageContentProps {
   className?: string;
   title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function PageContent({

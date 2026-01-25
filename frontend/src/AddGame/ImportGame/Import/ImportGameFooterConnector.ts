@@ -24,7 +24,8 @@ function createMapStateToProps() {
   return createSelector(
     (state: AppState) => state.addGame,
     (state: AppState) => state.importGame,
-    (_state: AppState, { selectedIds }: { selectedIds: string[] }) => selectedIds,
+    (_state: AppState, { selectedIds }: { selectedIds: string[] }) =>
+      selectedIds,
     (addGame, importGame, selectedIds) => {
       const {
         monitor: defaultMonitor,

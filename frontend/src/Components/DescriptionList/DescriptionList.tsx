@@ -1,8 +1,9 @@
+import { ReactNode } from 'react';
 import styles from './DescriptionList.css';
 
 interface DescriptionListProps {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function DescriptionList(props: DescriptionListProps) {

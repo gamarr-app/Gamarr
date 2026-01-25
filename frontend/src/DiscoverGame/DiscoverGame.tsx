@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ComponentType, useCallback, useEffect, useRef, useState } from 'react';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -76,7 +76,7 @@ interface DiscoverGameProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ViewComponent = React.ComponentType<any>;
+type ViewComponent = ComponentType<any>;
 
 function getViewComponent(view: string): ViewComponent {
   if (view === 'posters') {

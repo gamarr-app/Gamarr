@@ -1,8 +1,9 @@
+import { HTMLAttributes, ReactNode } from 'react';
 import styles from './TableRow.css';
 
-interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   overlayContent?: boolean;
 }
 

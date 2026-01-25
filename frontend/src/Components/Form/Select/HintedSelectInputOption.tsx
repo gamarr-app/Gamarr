@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { ReactNode } from 'react';
 import EnhancedSelectInputOption, {
   EnhancedSelectInputOptionProps,
 } from './EnhancedSelectInputOption';
@@ -7,7 +8,7 @@ import styles from './HintedSelectInputOption.css';
 interface HintedSelectInputOptionProps
   extends Omit<EnhancedSelectInputOptionProps, 'isSelected'> {
   value: string;
-  hint?: React.ReactNode;
+  hint?: ReactNode;
   dividerAfter?: boolean;
   isSelected?: boolean;
 }

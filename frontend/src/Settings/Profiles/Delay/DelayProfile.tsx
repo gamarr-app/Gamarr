@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { useCallback, useState } from 'react';
+import { Ref, useCallback, useState } from 'react';
 import { ConnectDragSource } from 'react-dnd';
 import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';
@@ -114,7 +114,7 @@ function DelayProfile({
 
         {id !== 1 && (
           <div
-            ref={dragRef as unknown as React.Ref<HTMLDivElement>}
+            ref={dragRef as unknown as Ref<HTMLDivElement>}
             className={styles.dragHandle}
           >
             <Icon className={styles.dragIcon} name={icons.REORDER} />

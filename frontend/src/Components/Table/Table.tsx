@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { ElementType, ReactNode } from 'react';
 import IconButton from 'Components/Link/IconButton';
 import Scroller from 'Components/Scroller/Scroller';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
@@ -19,12 +20,12 @@ interface TableProps {
   allSelected?: boolean;
   allUnselected?: boolean;
   columns: Column[];
-  optionsComponent?: React.ElementType;
+  optionsComponent?: ElementType;
   pageSize?: number;
   canModifyColumns?: boolean;
   sortKey?: string;
   sortDirection?: SortDirection;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onSortPress?: (name: string, sortDirection?: SortDirection) => void;
   onTableOptionChange?: (payload: TableOptionsChangePayload) => void;
   onSelectAllChange?: (change: CheckInputChanged) => void;

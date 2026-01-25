@@ -1,4 +1,10 @@
-import { ComponentType, useCallback, useEffect, useState } from 'react';
+import {
+  ComponentType,
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import ModelBase from 'App/ModelBase';
 import Column from 'Components/Table/Column';
 import VirtualTable from 'Components/Table/VirtualTable';
@@ -26,7 +32,7 @@ interface DiscoverGameItem extends ModelBase {
 interface RowRendererProps {
   key: string;
   rowIndex: number;
-  style: React.CSSProperties;
+  style: CSSProperties;
 }
 
 interface DiscoverGameTableProps {

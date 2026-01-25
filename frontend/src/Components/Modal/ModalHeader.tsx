@@ -1,7 +1,8 @@
+import { HTMLAttributes, ReactNode } from 'react';
 import styles from './ModalHeader.css';
 
-interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  children?: React.ReactNode;
+interface ModalHeaderProps extends HTMLAttributes<HTMLDivElement> {
+  children?: ReactNode;
 }
 
 function ModalHeader({ children, ...otherProps }: ModalHeaderProps) {

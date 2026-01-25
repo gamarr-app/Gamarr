@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import scrollPositions from 'Store/scrollPositions';
 
@@ -12,7 +13,7 @@ interface ScrollPositionProps {
 }
 
 function withScrollPosition(
-  WrappedComponent: React.FC<WrappedComponentProps>,
+  WrappedComponent: FC<WrappedComponentProps>,
   scrollPositionKey: string
 ) {
   function ScrollPosition(props: ScrollPositionProps) {

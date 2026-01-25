@@ -1,3 +1,4 @@
+import { ComponentType } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, { CustomFilter as CustomFilterType } from 'App/State/AppState';
@@ -42,4 +43,4 @@ function CustomFiltersModalContentConnectorWrapper(
 
 export default connector(
   CustomFiltersModalContentConnectorWrapper
-) as React.ComponentType<OwnProps>;
+) as ComponentType<OwnProps>;

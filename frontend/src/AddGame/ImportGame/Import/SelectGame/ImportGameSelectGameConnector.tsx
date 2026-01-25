@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Component } from 'react';
+import { Component, ComponentType } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -101,4 +101,4 @@ class ImportGameSelectGameConnector extends Component<ImportGameSelectGameConnec
 
 export default connector(
   ImportGameSelectGameConnector
-) as unknown as React.ComponentType<OwnProps>;
+) as unknown as ComponentType<OwnProps>;

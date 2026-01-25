@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { ComponentProps } from 'react';
+import { ComponentProps, ReactNode } from 'react';
 import { sizes } from 'Helpers/Props';
 import { Size } from 'Helpers/Props/sizes';
 import styles from './FieldSet.css';
@@ -7,7 +7,7 @@ import styles from './FieldSet.css';
 interface FieldSetProps {
   size?: Size;
   legend?: ComponentProps<'legend'>['children'];
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function FieldSet({ size = sizes.MEDIUM, legend, children }: FieldSetProps) {
