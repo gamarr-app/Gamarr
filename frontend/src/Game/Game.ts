@@ -84,6 +84,11 @@ export interface GameAddOptions {
   searchForGame: boolean;
 }
 
+export interface DlcReference {
+  id: number;
+  name: string;
+}
+
 interface Game extends ModelBase {
   /** Primary identifier - Steam App ID */
   steamAppId: number;
@@ -149,6 +154,7 @@ interface Game extends ModelBase {
   parentGameIgdbId?: number;
   parentGame?: GameSummary;
   dlcIds: number[];
+  dlcReferences: DlcReference[];
   dlcCount: number;
 }
 

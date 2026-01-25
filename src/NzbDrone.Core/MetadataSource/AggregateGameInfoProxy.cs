@@ -721,6 +721,12 @@ namespace NzbDrone.Core.MetadataSource
                 existing.DlcIds = secondary.DlcIds;
             }
 
+            // Add DLC references if missing
+            if ((existing.DlcReferences == null || !existing.DlcReferences.Any()) && secondary.DlcReferences != null && secondary.DlcReferences.Any())
+            {
+                existing.DlcReferences = secondary.DlcReferences;
+            }
+
             // Merge images - add IGDB images at the front
             if (secondary.Images != null && secondary.Images.Any())
             {

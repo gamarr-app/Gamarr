@@ -23,6 +23,15 @@ namespace Gamarr.Api.V3.Games
     }
 
     /// <summary>
+    /// Reference to a DLC with ID and name
+    /// </summary>
+    public class DlcReferenceResource
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    /// <summary>
     /// Lightweight summary of a game for parent/DLC references
     /// </summary>
     public class GameSummaryResource
@@ -165,6 +174,11 @@ namespace Gamarr.Api.V3.Games
         public List<int> DlcIds { get; set; }
 
         /// <summary>
+        /// List of DLC references with ID and name
+        /// </summary>
+        public List<DlcReferenceResource> DlcReferences { get; set; }
+
+        /// <summary>
         /// Number of known DLCs for this game
         /// </summary>
         public int DlcCount { get; set; }
@@ -272,6 +286,11 @@ namespace Gamarr.Api.V3.Games
                 IsDlc = model.GameMetadata.Value.IsDlc,
                 ParentGameIgdbId = model.GameMetadata.Value.ParentGameId,
                 DlcIds = model.GameMetadata.Value.DlcIds ?? new List<int>(),
+                DlcReferences = model.GameMetadata.Value.DlcReferences?.Select(d => new DlcReferenceResource
+                {
+                    Id = d.Id,
+                    Name = d.Name
+                }).ToList() ?? new List<DlcReferenceResource>(),
                 DlcCount = model.GameMetadata.Value.DlcIds?.Count ?? 0,
             };
         }
@@ -313,6 +332,7 @@ namespace Gamarr.Api.V3.Games
                     GameType = resource.GameType,
                     ParentGameId = resource.ParentGameIgdbId,
                     DlcIds = resource.DlcIds ?? new List<int>(),
+                    DlcReferences = resource.DlcReferences?.Select(d => new DlcReference(d.Id, d.Name)).ToList() ?? new List<DlcReference>(),
                 },
 
                 Path = resource.Path,

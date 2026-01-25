@@ -24,6 +24,7 @@ namespace NzbDrone.Core.Games
             GameModes = new List<string>();
             Themes = new List<string>();
             DlcIds = new List<int>();
+            DlcReferences = new List<DlcReference>();
             GameType = GameType.MainGame;
         }
 
@@ -96,6 +97,11 @@ namespace NzbDrone.Core.Games
         /// List of IGDB IDs for DLCs/expansions of this game
         /// </summary>
         public List<int> DlcIds { get; set; }
+
+        /// <summary>
+        /// List of DLC references with ID and name (for display)
+        /// </summary>
+        public List<DlcReference> DlcReferences { get; set; }
 
         /// <summary>
         /// Platforms this game is available on

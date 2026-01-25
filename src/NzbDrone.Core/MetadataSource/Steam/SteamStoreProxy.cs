@@ -185,10 +185,11 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 }
             }
 
-            // Set DLC IDs if this is a base game
+            // Set DLC IDs if this is a base game (Steam doesn't provide DLC names)
             if (data.Dlc != null && data.Dlc.Any())
             {
                 game.DlcIds = data.Dlc;
+                game.DlcReferences = new List<DlcReference>(); // Names will be populated from IGDB
                 _logger.Debug("Game {0} has {1} DLCs on Steam", data.Name, data.Dlc.Count);
             }
 

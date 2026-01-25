@@ -143,10 +143,15 @@ namespace NzbDrone.Core.Games
                 gameMetadata.ParentGameId = gameInfo.ParentGameId;
             }
 
-            // Update DLC IDs
+            // Update DLC IDs and references
             if (gameInfo.DlcIds != null && gameInfo.DlcIds.Any())
             {
                 gameMetadata.DlcIds = gameInfo.DlcIds;
+            }
+
+            if (gameInfo.DlcReferences != null && gameInfo.DlcReferences.Any())
+            {
+                gameMetadata.DlcReferences = gameInfo.DlcReferences;
             }
 
             // add collection
