@@ -25,6 +25,7 @@ export interface StatusMessage {
 interface Queue extends ModelBase {
   languages: Language[];
   quality: QualityModel;
+  version?: string;
   customFormats: CustomFormat[];
   customFormatScore: number;
   size: number;

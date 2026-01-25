@@ -27,6 +27,7 @@ namespace Gamarr.Api.V3.Indexers
         public int IndexerId { get; set; }
         public string Indexer { get; set; }
         public string ReleaseGroup { get; set; }
+        public string Version { get; set; }
         public string SubGroup { get; set; }
         public string ReleaseHash { get; set; }
         public string Title { get; set; }
@@ -117,6 +118,7 @@ namespace Gamarr.Api.V3.Indexers
         {
             resource.Quality = parsedGameInfo.Quality;
             resource.ReleaseGroup = parsedGameInfo.ReleaseGroup;
+            resource.Version = parsedGameInfo.GameVersion?.ToString();
             resource.ReleaseHash = parsedGameInfo.ReleaseHash;
             resource.GameTitles = parsedGameInfo.GameTitles;
             resource.Edition = parsedGameInfo.Edition;

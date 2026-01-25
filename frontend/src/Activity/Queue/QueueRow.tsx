@@ -51,6 +51,7 @@ interface QueueRowProps {
   errorMessage?: string;
   languages: Language[];
   quality: QualityModel;
+  version?: string;
   customFormats?: CustomFormat[];
   customFormatScore: number;
   protocol: DownloadProtocol;
@@ -85,6 +86,7 @@ function QueueRow(props: QueueRowProps) {
     errorMessage,
     languages,
     quality,
+    version,
     customFormats = [],
     customFormatScore,
     protocol,
@@ -218,6 +220,14 @@ function QueueRow(props: QueueRowProps) {
           return (
             <TableRowCell key={name}>
               {quality ? <GameQuality quality={quality} /> : null}
+            </TableRowCell>
+          );
+        }
+
+        if (name === 'version') {
+          return (
+            <TableRowCell key={name} className={styles.version}>
+              {version}
             </TableRowCell>
           );
         }

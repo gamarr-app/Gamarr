@@ -91,6 +91,12 @@ export const defaultState = {
         isVisible: true
       },
       {
+        name: 'version',
+        label: () => translate('Version'),
+        isSortable: false,
+        isVisible: true
+      },
+      {
         name: 'customFormats',
         label: () => translate('Formats'),
         isSortable: false,

@@ -19,6 +19,8 @@ interface Release {
   leechers?: number;
   quality: QualityModel;
   languages: Language[];
+  releaseGroup?: string;
+  version?: string;
   customFormats: CustomFormat[];
   customFormatScore: number;
   mappedGameId?: number;
