@@ -195,26 +195,19 @@ namespace NzbDrone.Core.MediaFiles
             },
         };
 
-        // Suspicious file patterns that warrant extra scrutiny
+        // Suspicious file patterns - only truly suspicious types with no legitimate game use
         private static readonly string[] SuspiciousPatterns = new[]
         {
-            @"\.scr$",           // Screen saver (often malware)
-            @"\.pif$",           // Program Information File (can execute code)
-            @"\.com$",           // DOS executable (often malware)
-            @"\.cmd$",           // Command script
-            @"\.vbs$",           // VBScript
+            @"\.scr$",           // Screen saver (often malware, no game use)
+            @"\.pif$",           // Program Information File (can execute code, obsolete)
+            @"\.vbs$",           // VBScript (rarely legitimate in games)
             @"\.vbe$",           // Encoded VBScript
             @"\.jse$",           // Encoded JavaScript
             @"\.wsf$",           // Windows Script File
-            @"\.wsh$",           // Windows Script Host
-            @"\.ps1$",           // PowerShell script
-            @"\.msi$",           // Windows Installer (unexpected)
-            @"\.hta$",           // HTML Application
+            @"\.wsh$",           // Windows Script Host settings
+            @"\.hta$",           // HTML Application (can run arbitrary code)
             @"\.cpl$",           // Control Panel extension
-            @"readme.*\.exe$",   // Readme as executable
-            @"^crack[^/\\]*\.exe$",  // Crack exe in root only (subfolders like _crack/ are normal)
-            @"keygen.*\.exe$",   // Keygen in unexpected location
-            @"password.*\.txt$", // Password file (often indicates archive with malware)
+            @"readme.*\.exe$",   // Readme as executable is always suspicious
         };
 
         public ReleaseStructureValidator(IDiskProvider diskProvider)
