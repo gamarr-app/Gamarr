@@ -1,4 +1,3 @@
-import React from 'react';
 import Label from 'Components/Label';
 import useGame from 'Game/useGame';
 import { kinds, sizes } from 'Helpers/Props';

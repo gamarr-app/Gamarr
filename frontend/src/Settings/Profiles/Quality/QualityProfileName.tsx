@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { createQualityProfileSelectorForHook } from 'Store/Selectors/createQualityProfileSelector';
 import translate from 'Utilities/String/translate';

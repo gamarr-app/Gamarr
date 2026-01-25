@@ -1,5 +1,5 @@
 import { uniq } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Tag } from 'App/State/TagsAppState';
 import Form from 'Components/Form/Form';

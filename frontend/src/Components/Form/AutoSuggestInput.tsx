@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, {
+import {
   FocusEvent,
   FormEvent,
   KeyboardEvent,
@@ -27,7 +27,7 @@ import styles from './AutoSuggestInput.css';
 
 interface AutoSuggestInputProps<T>
   extends Omit<AutosuggestPropsBase<T>, 'renderInputComponent' | 'inputProps'> {
-  forwardedRef?: MutableRefObject<Autosuggest<T> | null>;
+  ref?: MutableRefObject<Autosuggest<T> | null>;
   className?: string;
   inputContainerClassName?: string;
   name: string;
@@ -58,8 +58,7 @@ interface AutoSuggestInputProps<T>
 
 function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
   const {
-    // TODO: forwaredRef should be replaces with React.forwardRef
-    forwardedRef,
+    ref,
     className = styles.input,
     inputContainerClassName = styles.inputContainer,
     name,
@@ -238,7 +237,7 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
     <Manager>
       <Autosuggest
         {...otherProps}
-        ref={forwardedRef}
+        ref={ref}
         id={name}
         inputProps={inputProps}
         theme={theme}

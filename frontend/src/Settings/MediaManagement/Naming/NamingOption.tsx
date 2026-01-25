@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import Link from 'Components/Link/Link';
 import { Size } from 'Helpers/Props/sizes';
 import TokenCase from './TokenCase';

@@ -1,4 +1,3 @@
-import React from 'react';
 import Label from 'Components/Label';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { kinds, sizes, tooltipPositions } from 'Helpers/Props';

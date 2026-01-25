@@ -1,6 +1,5 @@
 import { IconName } from '@fortawesome/free-regular-svg-icons';
 import classNames from 'classnames';
-import React from 'react';
 import Icon from 'Components/Icon';
 import MenuButton from 'Components/Menu/MenuButton';
 import { icons } from 'Helpers/Props';

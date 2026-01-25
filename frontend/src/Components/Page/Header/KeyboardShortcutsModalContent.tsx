@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { Shortcut, shortcuts } from 'Components/keyboardShortcuts';
 import Button from 'Components/Link/Button';

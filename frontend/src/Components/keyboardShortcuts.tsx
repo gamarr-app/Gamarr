@@ -1,5 +1,5 @@
 import Mousetrap, { MousetrapInstance } from 'mousetrap';
-import React, { Component, ComponentType } from 'react';
+import { Component, ComponentType } from 'react';
 import translate from 'Utilities/String/translate';
 
 export interface Shortcut {

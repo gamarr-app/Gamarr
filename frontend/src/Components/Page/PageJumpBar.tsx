@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import dimensions from 'Styles/Variables/dimensions';
 import PageJumpBarItem, { PageJumpBarItemProps } from './PageJumpBarItem';

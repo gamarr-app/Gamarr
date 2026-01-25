@@ -1,4 +1,3 @@
-import React from 'react';
 import InlineMarkdown from 'Components/Markdown/InlineMarkdown';
 import styles from './UpdateChanges.css';
 

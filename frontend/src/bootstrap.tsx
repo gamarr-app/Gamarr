@@ -1,5 +1,4 @@
 import { createBrowserHistory } from 'history';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import createAppStore from 'Store/createAppStore';
 import App from './App/App';

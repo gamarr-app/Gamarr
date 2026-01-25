@@ -1,4 +1,3 @@
-import React from 'react';
 import QueueDetails from 'Activity/Queue/QueueDetails';
 import CircularProgressBar from 'Components/CircularProgressBar';
 import {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { CommandBody } from 'Commands/Command';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';

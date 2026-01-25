@@ -1,4 +1,3 @@
-import React from 'react';
 import Modal from 'Components/Modal/Modal';
 import Game from 'Game/Game';
 import SelectGameModalContent from './SelectGameModalContent';

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
 import SettingsToolbar from 'Settings/SettingsToolbar';
@@ -11,7 +11,7 @@ import Metadatas from './Metadata/Metadatas';
 import MetadataOptions from './Options/MetadataOptions';
 
 function MetadataSettings() {
-  const saveOptions = useRef<SaveCallback>();
+  const saveOptions = useRef<SaveCallback>(undefined);
   const [isSaving, setIsSaving] = useState(false);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 

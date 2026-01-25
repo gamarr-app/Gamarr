@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Button from 'Components/Link/Button';
 import Link from 'Components/Link/Link';

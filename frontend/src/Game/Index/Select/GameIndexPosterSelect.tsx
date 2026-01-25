@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useCallback } from 'react';
+import { SyntheticEvent, useCallback } from 'react';
 import { useSelect } from 'App/SelectContext';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';

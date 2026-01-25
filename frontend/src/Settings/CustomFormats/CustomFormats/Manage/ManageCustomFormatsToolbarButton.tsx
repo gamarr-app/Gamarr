@@ -1,4 +1,3 @@
-import React from 'react';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import useModalOpenState from 'Helpers/Hooks/useModalOpenState';
 import { icons } from 'Helpers/Props';

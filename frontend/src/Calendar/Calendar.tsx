@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
@@ -37,7 +37,7 @@ const UPDATE_DELAY = 3600000; // 1 hour
 function Calendar() {
   const dispatch = useDispatch();
   const requestCurrentPage = useCurrentPage();
-  const updateTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const updateTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { isFetching, isPopulated, error, items, time, view } = useSelector(
     (state: AppState) => state.calendar

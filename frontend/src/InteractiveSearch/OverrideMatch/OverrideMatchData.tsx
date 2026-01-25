@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React from 'react';
+import { type JSX } from 'react';
 import Link from 'Components/Link/Link';
 import styles from './OverrideMatchData.css';
 

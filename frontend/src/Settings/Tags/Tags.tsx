@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TagsAppState, { Tag as TagModel } from 'App/State/TagsAppState';
 import Alert from 'Components/Alert';

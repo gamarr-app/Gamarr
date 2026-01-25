@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { MessageType } from 'App/State/MessagesAppState';
 import Icon, { IconName } from 'Components/Icon';
@@ -17,7 +17,7 @@ interface MessageProps {
 
 function Message({ id, hideAfter, name, message, type }: MessageProps) {
   const dispatch = useDispatch();
-  const dismissTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const dismissTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const icon: IconName = useMemo(() => {
     switch (name) {

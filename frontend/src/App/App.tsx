@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectedRouter, ConnectedRouterProps } from 'connected-react-router';
-import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';

@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { SyntheticEvent, useCallback, useEffect, useRef } from 'react';
+import { SyntheticEvent, useCallback, useEffect, useRef } from 'react';
 import Icon from 'Components/Icon';
 import { icons } from 'Helpers/Props';
 import { Kind } from 'Helpers/Props/kinds';

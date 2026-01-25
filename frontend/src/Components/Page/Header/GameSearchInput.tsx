@@ -1,6 +1,6 @@
 import { push } from 'connected-react-router';
 import { ExtendedKeyboardEvent } from 'mousetrap';
-import React, {
+import {
   FormEvent,
   KeyboardEvent,
   SyntheticEvent,

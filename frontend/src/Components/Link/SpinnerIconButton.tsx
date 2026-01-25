@@ -1,4 +1,3 @@
-import React from 'react';
 import { IconName } from 'Components/Icon';
 import { icons } from 'Helpers/Props';
 import IconButton, { IconButtonProps } from './IconButton';

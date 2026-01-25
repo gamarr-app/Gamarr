@@ -1,4 +1,4 @@
-import React, { ComponentPropsWithoutRef, useCallback, useRef } from 'react';
+import { ComponentPropsWithoutRef, useCallback, useRef } from 'react';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 import { ScrollDirection } from 'Helpers/Props/scrollDirections';
 import { OnScroll } from './Scroller';

@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
 import { icons, kinds } from 'Helpers/Props';

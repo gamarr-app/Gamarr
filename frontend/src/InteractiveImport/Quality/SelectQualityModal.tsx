@@ -1,4 +1,3 @@
-import React from 'react';
 import Modal from 'Components/Modal/Modal';
 import { QualityModel } from 'Quality/Quality';
 import SelectQualityModalContent from './SelectQualityModalContent';

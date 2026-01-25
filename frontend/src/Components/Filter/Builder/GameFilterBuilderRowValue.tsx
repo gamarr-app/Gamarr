@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import Game from 'Game/Game';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';

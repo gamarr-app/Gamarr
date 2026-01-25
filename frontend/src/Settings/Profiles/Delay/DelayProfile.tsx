@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
+import { ConnectDragSource } from 'react-dnd';
 import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
@@ -37,7 +38,7 @@ interface DelayProfileProps {
   tags: number[];
   tagList: Tag[];
   isDragging: boolean;
-  connectDragSource?: (node: React.ReactElement) => React.ReactElement | null;
+  dragRef?: ConnectDragSource;
   onConfirmDeleteDelayProfile: (id: number) => void;
 }
 
@@ -51,7 +52,7 @@ function DelayProfile({
   tags,
   tagList,
   isDragging,
-  connectDragSource = (node) => node,
+  dragRef,
   onConfirmDeleteDelayProfile,
 }: DelayProfileProps) {
   const [isEditDelayProfileModalOpen, setIsEditDelayProfileModalOpen] =
@@ -111,12 +112,14 @@ function DelayProfile({
           <Icon name={icons.EDIT} />
         </Link>
 
-        {id !== 1 &&
-          connectDragSource(
-            <div className={styles.dragHandle}>
-              <Icon className={styles.dragIcon} name={icons.REORDER} />
-            </div>
-          )}
+        {id !== 1 && (
+          <div
+            ref={dragRef as unknown as React.Ref<HTMLDivElement>}
+            className={styles.dragHandle}
+          >
+            <Icon className={styles.dragIcon} name={icons.REORDER} />
+          </div>
+        )}
       </div>
 
       <EditDelayProfileModal

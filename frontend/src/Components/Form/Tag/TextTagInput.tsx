@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { InputChanged } from 'typings/inputs';
 import split from 'Utilities/String/split';
 import TagInput, { ReplacementTag, TagBase, TagInputProps } from './TagInput';

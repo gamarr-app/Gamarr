@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import HistoryDetailsModal from 'Activity/History/Details/HistoryDetailsModal';
 import HistoryEventTypeCell from 'Activity/History/HistoryEventTypeCell';
 import IconButton from 'Components/Link/IconButton';

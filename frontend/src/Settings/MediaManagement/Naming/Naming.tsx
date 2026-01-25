@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -66,7 +66,7 @@ function Naming() {
     useModalOpenState(false);
   const [namingModalOptions, setNamingModalOptions] =
     useState<NamingModalOptions | null>(null);
-  const namingExampleTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const namingExampleTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     dispatch(fetchNamingSettings());

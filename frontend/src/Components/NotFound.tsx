@@ -1,4 +1,3 @@
-import React from 'react';
 import PageContent from 'Components/Page/PageContent';
 import translate from 'Utilities/String/translate';
 import styles from './NotFound.css';

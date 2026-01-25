@@ -1,4 +1,3 @@
-import React from 'react';
 import MenuContent from 'Components/Menu/MenuContent';
 import SortMenu from 'Components/Menu/SortMenu';
 import SortMenuItem from 'Components/Menu/SortMenuItem';

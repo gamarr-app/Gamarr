@@ -34,7 +34,7 @@ interface QueueItem {
 
 interface Column {
   name: string;
-  label?: (() => string) | React.ReactElement;
+  label?: (() => string) | React.ReactElement<any>;
   columnLabel?: () => string;
   isSortable?: boolean;
   isVisible: boolean;

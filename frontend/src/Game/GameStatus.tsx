@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import QueueDetails from 'Activity/Queue/QueueDetails';
 import Icon from 'Components/Icon';

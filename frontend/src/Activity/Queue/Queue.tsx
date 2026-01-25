@@ -1,4 +1,4 @@
-import React, {
+import {
   ReactElement,
   useCallback,
   useEffect,
@@ -89,7 +89,7 @@ function Queue() {
   );
 
   const shouldBlockRefresh = useRef(false);
-  const currentQueue = useRef<ReactElement | null>(null);
+  const currentQueue = useRef<ReactElement<any> | null>(null);
 
   const [selectState, setSelectState] = useSelectState();
   const { allSelected, allUnselected, selectedState } = selectState;

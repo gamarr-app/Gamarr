@@ -1,4 +1,3 @@
-import React from 'react';
 import Column from 'Components/Table/Column';
 import VirtualTableHeader from 'Components/Table/VirtualTableHeader';
 import VirtualTableHeaderCell from 'Components/Table/VirtualTableHeaderCell';

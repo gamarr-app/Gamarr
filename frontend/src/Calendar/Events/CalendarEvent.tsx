@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import getStatusStyle from 'Calendar/getStatusStyle';

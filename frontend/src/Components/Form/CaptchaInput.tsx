@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';

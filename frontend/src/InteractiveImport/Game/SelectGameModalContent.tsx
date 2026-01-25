@@ -1,5 +1,5 @@
 import { throttle } from 'lodash';
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,

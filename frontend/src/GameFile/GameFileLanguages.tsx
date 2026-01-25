@@ -1,4 +1,3 @@
-import React from 'react';
 import GameLanguages from 'Game/GameLanguages';
 import useGameFile from './useGameFile';
 

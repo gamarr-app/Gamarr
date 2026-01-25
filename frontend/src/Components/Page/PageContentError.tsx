@@ -1,4 +1,3 @@
-import React from 'react';
 import ErrorBoundaryError, {
   ErrorBoundaryErrorProps,
 } from 'Components/Error/ErrorBoundaryError';

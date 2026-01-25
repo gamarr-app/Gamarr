@@ -1,4 +1,3 @@
-import React from 'react';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import {
   QueueTrackedDownloadState,

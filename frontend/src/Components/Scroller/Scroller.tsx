@@ -1,10 +1,9 @@
 import classNames from 'classnames';
 import { throttle } from 'lodash';
-import React, {
+import {
   ComponentProps,
-  ForwardedRef,
-  forwardRef,
   ReactNode,
+  Ref,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -18,6 +17,7 @@ export interface OnScroll {
 }
 
 interface ScrollerProps {
+  ref?: Ref<HTMLDivElement>;
   className?: string;
   scrollDirection?: ScrollDirection;
   autoFocus?: boolean;
@@ -29,23 +29,23 @@ interface ScrollerProps {
   onScroll?: (payload: OnScroll) => void;
 }
 
-const Scroller = forwardRef(
-  (props: ScrollerProps, ref: ForwardedRef<HTMLDivElement>) => {
-    const {
-      className,
-      autoFocus = false,
-      autoScroll = true,
-      scrollDirection = 'vertical',
-      children,
-      scrollTop,
-      initialScrollTop,
-      onScroll,
-      ...otherProps
-    } = props;
+function Scroller(props: ScrollerProps) {
+  const {
+    ref,
+    className,
+    autoFocus = false,
+    autoScroll = true,
+    scrollDirection = 'vertical',
+    children,
+    scrollTop,
+    initialScrollTop,
+    onScroll,
+    ...otherProps
+  } = props;
 
-    const internalRef = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLDivElement>(null);
 
-    useImperativeHandle(ref, () => internalRef.current!, []);
+  useImperativeHandle(ref, () => internalRef.current!, [ref]);
 
     useEffect(() => {
       if (initialScrollTop != null) {
@@ -95,7 +95,6 @@ const Scroller = forwardRef(
         {children}
       </div>
     );
-  }
-);
+}
 
 export default Scroller;

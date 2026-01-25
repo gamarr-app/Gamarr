@@ -1,4 +1,4 @@
-import React, { ComponentPropsWithoutRef } from 'react';
+import { ComponentPropsWithoutRef } from 'react';
 import styles from './VirtualTableRowCell.css';
 
 export type VirtualTableRowCellProps = ComponentPropsWithoutRef<'div'>;

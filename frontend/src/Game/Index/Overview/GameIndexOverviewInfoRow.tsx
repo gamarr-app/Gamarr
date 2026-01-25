@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon, { IconName } from 'Components/Icon';
 import styles from './GameIndexOverviewInfoRow.css';
 

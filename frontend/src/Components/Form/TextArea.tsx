@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, {
+import {
   ChangeEvent,
   SyntheticEvent,
   useCallback,
@@ -39,9 +39,9 @@ function TextArea({
   onSelectionChange,
 }: TextAreaProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const selectionTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const selectionStart = useRef<number | null>();
-  const selectionEnd = useRef<number | null>();
+  const selectionTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const selectionStart = useRef<number | null>(undefined);
+  const selectionEnd = useRef<number | null>(undefined);
   const isMouseTarget = useRef(false);
 
   const selectionChanged = useCallback(() => {

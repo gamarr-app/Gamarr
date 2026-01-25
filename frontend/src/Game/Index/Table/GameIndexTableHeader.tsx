@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
 import IconButton from 'Components/Link/IconButton';

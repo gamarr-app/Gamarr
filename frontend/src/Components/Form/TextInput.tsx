@@ -1,11 +1,12 @@
 import classNames from 'classnames';
-import React, {
+import {
   ChangeEvent,
   FocusEvent,
   SyntheticEvent,
   useCallback,
   useEffect,
   useRef,
+  type JSX,
 } from 'react';
 import { FileInputChanged, InputChanged } from 'typings/inputs';
 import styles from './TextInput.css';
@@ -60,9 +61,9 @@ function TextInput({
   onSelectionChange,
 }: TextInputProps | FileInputProps): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
-  const selectionTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const selectionStart = useRef<number | null>();
-  const selectionEnd = useRef<number | null>();
+  const selectionTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const selectionStart = useRef<number | null>(undefined);
+  const selectionEnd = useRef<number | null>(undefined);
   const isMouseTarget = useRef(false);
 
   const selectionChanged = useCallback(() => {

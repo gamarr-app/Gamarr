@@ -1,5 +1,5 @@
 import { throttle } from 'lodash';
-import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import useMeasure from 'Helpers/Hooks/useMeasure';
@@ -37,7 +37,7 @@ interface GameIndexOverviewsProps {
   sortDirection?: string;
   jumpToCharacter?: string;
   scrollTop?: number;
-  scrollerRef: RefObject<HTMLElement>;
+  scrollerRef: RefObject<HTMLElement | null>;
   isSelectMode: boolean;
   isSmallScreen: boolean;
 }

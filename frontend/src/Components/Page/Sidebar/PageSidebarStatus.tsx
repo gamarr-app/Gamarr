@@ -1,4 +1,3 @@
-import React from 'react';
 import Label from 'Components/Label';
 import { Kind } from 'Helpers/Props/kinds';
 

@@ -21,12 +21,9 @@ function logError(...parameters: unknown[]) {
   const filter = parameters.find((parameter) => {
     return (
       typeof parameter === 'string' &&
-      (parameter.includes(
+      parameter.includes(
         'Support for defaultProps will be removed from function components in a future major release'
-      ) ||
-        parameter.includes(
-          'findDOMNode is deprecated and will be removed in the next major release'
-        ))
+      )
     );
   });
 

@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import formatBytes from 'Utilities/Number/formatBytes';
 import translate from 'Utilities/String/translate';
 import EnhancedSelectInputOption, {

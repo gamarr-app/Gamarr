@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import * as commandNames from 'Commands/commandNames';
 import PageContent from 'Components/Page/PageContent';
@@ -21,7 +21,7 @@ function Quality() {
     createCommandExecutingSelector(commandNames.RESET_QUALITY_DEFINITIONS)
   );
 
-  const saveOptions = useRef<SaveCallback>();
+  const saveOptions = useRef<SaveCallback>(undefined);
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);

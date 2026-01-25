@@ -1,9 +1,9 @@
-import React, { CSSProperties, LegacyRef, useId } from 'react';
+import { CSSProperties, Ref, useId } from 'react';
 import Scroller from 'Components/Scroller/Scroller';
 import styles from './MenuContent.css';
 
 interface MenuContentProps {
-  forwardedRef?: LegacyRef<HTMLDivElement> | undefined;
+  forwardedRef?: Ref<HTMLDivElement> | undefined;
   className?: string;
   id?: string;
   children: React.ReactNode;

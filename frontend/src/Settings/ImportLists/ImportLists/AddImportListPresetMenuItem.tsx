@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import MenuItem, { MenuItemProps } from 'Components/Menu/MenuItem';
 import { selectImportListSchema } from 'Store/Actions/settingsActions';

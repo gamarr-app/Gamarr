@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import { SyntheticEvent } from 'react';
 import TextInput, { TextInputProps } from './TextInput';
 
 // Prevent a user from copying (or cutting) the password from the input

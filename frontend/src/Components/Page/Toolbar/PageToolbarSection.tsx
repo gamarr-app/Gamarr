@@ -35,7 +35,7 @@ function PageToolbarSection({
   const { buttons, buttonCount, overflowItems } = useMemo(() => {
     let buttonCount = 0;
     let separatorCount = 0;
-    const validChildren: ReactElement[] = [];
+    const validChildren: ReactElement<any>[] = [];
 
     React.Children.forEach(children, (child) => {
       if (!child) {

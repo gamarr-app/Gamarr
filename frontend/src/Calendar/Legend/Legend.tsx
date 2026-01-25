@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import { icons, kinds } from 'Helpers/Props';

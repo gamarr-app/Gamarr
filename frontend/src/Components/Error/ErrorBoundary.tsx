@@ -1,6 +1,5 @@
 import * as sentry from '@sentry/browser';
-import React, { Component, ErrorInfo } from 'react';
-
+import { Component, ErrorInfo } from 'react';
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   errorComponent: React.ElementType;

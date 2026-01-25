@@ -1,12 +1,11 @@
 import classNames from 'classnames';
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import ReactDOM from 'react-dom';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
 import QueueStatus from 'Activity/Queue/Status/QueueStatus';
@@ -222,9 +221,9 @@ interface PageSidebarProps {
 function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
   const dispatch = useDispatch();
   const location = useLocation();
-  const sidebarRef = useRef(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>();
+  const touchStartY = useRef<number | null>(undefined);
   const wasSidebarVisible = usePrevious(isSidebarVisible);
 
   const [sidebarTransform, setSidebarTransform] = useState<{
@@ -277,7 +276,7 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
 
   const handleWindowClick = useCallback(
     (event: MouseEvent) => {
-      const sidebar = ReactDOM.findDOMNode(sidebarRef.current);
+      const sidebar = sidebarRef.current;
       const toggleButton = document.getElementById('sidebar-toggle-button');
       const target = event.target;
 

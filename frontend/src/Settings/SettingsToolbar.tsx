@@ -1,5 +1,5 @@
 import { Action, Location, UnregisterCallback } from 'history';
-import React, {
+import {
   ReactElement,
   useCallback,
   useEffect,
@@ -22,7 +22,7 @@ interface SettingsToolbarProps {
   hasPendingChanges?: boolean;
   // TODO: This should do type checking like PageToolbarSectionProps,
   // but this works for the time being.
-  additionalButtons?: ReactElement | null;
+  additionalButtons?: ReactElement<any> | null;
   onSavePress?: () => void;
 }
 
@@ -40,7 +40,7 @@ function SettingsToolbar({
     null
   );
   const hasConfirmed = useRef(false);
-  const unblocker = useRef<UnregisterCallback>();
+  const unblocker = useRef<UnregisterCallback>(undefined);
 
   const handleConfirmNavigation = useCallback(() => {
     if (!nextLocation) {

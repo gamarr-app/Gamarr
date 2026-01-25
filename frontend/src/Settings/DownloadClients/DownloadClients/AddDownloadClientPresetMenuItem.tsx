@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import MenuItem from 'Components/Menu/MenuItem';
 
 interface AddDownloadClientPresetMenuItemProps {

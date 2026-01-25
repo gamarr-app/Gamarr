@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import NumberInput from 'Components/Form/NumberInput';
 import { InputChanged } from 'typings/inputs';
 import styles from './QualityProfileFormatItem.css';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ParseModel } from 'App/State/ParseAppState';
 import FieldSet from 'Components/FieldSet';
 import GameFormats from 'Game/GameFormats';

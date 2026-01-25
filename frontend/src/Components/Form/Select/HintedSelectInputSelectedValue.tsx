@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import Label from 'Components/Label';
 import ArrayElement from 'typings/Helpers/ArrayElement';
 import { EnhancedSelectInputValue } from './EnhancedSelectInput';

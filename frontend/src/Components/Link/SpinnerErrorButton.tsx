@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import Icon, { IconKind, IconName } from 'Components/Icon';
 import SpinnerButton, {
@@ -62,7 +62,7 @@ function SpinnerErrorButton({
   ...otherProps
 }: SpinnerErrorButtonProps) {
   const wasSpinning = usePrevious(isSpinning);
-  const updateTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const updateTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [result, setResult] = useState({
     wasSuccessful: false,

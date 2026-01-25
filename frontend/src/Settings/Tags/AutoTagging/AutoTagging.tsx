@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Tag } from 'App/State/TagsAppState';
 import Card from 'Components/Card';
 import Label from 'Components/Label';

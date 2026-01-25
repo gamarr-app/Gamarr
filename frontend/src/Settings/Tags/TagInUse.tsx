@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface TagInUseProps {
   label: string;
   labelPlural?: string;

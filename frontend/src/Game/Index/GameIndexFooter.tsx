@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { ColorImpairedConsumer } from 'App/ColorImpairedContext';

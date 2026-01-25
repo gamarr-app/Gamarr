@@ -1,4 +1,3 @@
-import React from 'react';
 // @ts-expect-error - no type declarations available
 import { DndProvider } from 'react-dnd-multi-backend';
 // @ts-expect-error - no type declarations available

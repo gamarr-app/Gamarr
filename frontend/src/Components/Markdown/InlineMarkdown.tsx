@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import Link from 'Components/Link/Link';
 
 interface InlineMarkdownProps {
@@ -11,7 +11,7 @@ function InlineMarkdown(props: InlineMarkdownProps) {
   const { className, data, blockClassName } = props;
 
   // For now only replace links or code blocks (not both)
-  const markdownBlocks: (ReactElement | string)[] = [];
+  const markdownBlocks: (ReactElement<any> | string)[] = [];
 
   if (data) {
     const linkRegex = RegExp(/\[(.+?)\]\((.+?)\)/g);
