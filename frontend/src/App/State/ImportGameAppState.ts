@@ -22,11 +22,15 @@ export interface ImportGameItem {
   minimumAvailability?: string;
 }
 
+export interface ImportError {
+  responseJSON?: Array<{ errorMessage: string }> | object;
+}
+
 interface ImportGameAppState {
   isLookingUpGame: boolean;
   isImporting: boolean;
   isImported: boolean;
-  importError: unknown;
+  importError?: ImportError;
   items: ImportGameItem[];
 }
 
