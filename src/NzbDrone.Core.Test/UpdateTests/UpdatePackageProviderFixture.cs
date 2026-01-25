@@ -19,9 +19,9 @@ namespace NzbDrone.Core.Test.UpdateTests
         }
 
         [Test]
+        [Ignore("Uses real GitHub API which hits rate limits in CI")]
         public void no_update_when_version_higher()
         {
-            // Ignore warnings from GitHub API rate limiting
             ExceptionVerification.IgnoreWarns();
             UseRealHttp();
             Subject.GetLatestUpdate("develop", new Version(10, 0)).Should().BeNull();
