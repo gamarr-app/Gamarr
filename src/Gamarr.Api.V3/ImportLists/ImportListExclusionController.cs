@@ -30,14 +30,6 @@ namespace Gamarr.Api.V3.ImportLists
             SharedValidator.RuleFor(c => c.GameYear).GreaterThanOrEqualTo(0);
         }
 
-        [HttpGet]
-        [Produces("application/json")]
-        [Obsolete("Deprecated")]
-        public List<ImportListExclusionResource> GetImportListExclusions()
-        {
-            return _importListExclusionService.All().ToResource();
-        }
-
         protected override ImportListExclusionResource GetResourceById(int id)
         {
             return _importListExclusionService.Get(id).ToResource();

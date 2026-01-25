@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -103,54 +102,6 @@ namespace Gamarr.Api.V3.GameFiles
 
             _mediaFileService.Update(gameFile);
             return Accepted(gameFile.Id);
-        }
-
-        [Obsolete("Use bulk endpoint instead")]
-        [HttpPut("editor")]
-        [Consumes("application/json")]
-        public object SetGameFile([FromBody] GameFileListResource resource)
-        {
-            var gameFiles = _mediaFileService.GetGames(resource.GameFileIds);
-
-            foreach (var gameFile in gameFiles)
-            {
-                if (resource.Quality != null)
-                {
-                    gameFile.Quality = resource.Quality;
-                }
-
-                if (resource.Languages != null)
-                {
-                    // Don't allow user to set files with 'Any' or 'Original' language
-                    gameFile.Languages = resource.Languages.Where(l => l != null && l != Language.Any && l != Language.Original).ToList();
-                }
-
-                if (resource.IndexerFlags != null)
-                {
-                    gameFile.IndexerFlags = (IndexerFlags)resource.IndexerFlags.Value;
-                }
-
-                if (resource.Edition != null)
-                {
-                    gameFile.Edition = resource.Edition;
-                }
-
-                if (resource.ReleaseGroup != null)
-                {
-                    gameFile.ReleaseGroup = resource.ReleaseGroup;
-                }
-
-                if (resource.SceneName != null && SceneChecker.IsSceneTitle(resource.SceneName))
-                {
-                    gameFile.SceneName = resource.SceneName;
-                }
-            }
-
-            _mediaFileService.Update(gameFiles);
-
-            var game = _gameService.GetGame(gameFiles.First().GameId);
-
-            return Accepted(gameFiles.ConvertAll(f => f.ToResource(game, _upgradableSpecification, _formatCalculator)));
         }
 
         [RestDeleteById]
