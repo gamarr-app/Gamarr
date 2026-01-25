@@ -58,7 +58,8 @@ function DlcList({ gameId }: DlcListProps) {
   const game = useGame(gameId);
 
   const igdbId = game?.igdbId ?? 0;
-  const dlcIds = game?.dlcIds ?? [];
+  const igdbDlcIds = game?.igdbDlcIds ?? [];
+  const steamDlcIds = game?.steamDlcIds ?? [];
   const dlcReferences = game?.dlcReferences ?? [];
   const dlcCount = game?.dlcCount ?? 0;
   const isDlc = game?.isDlc ?? false;
@@ -167,7 +168,7 @@ function DlcList({ gameId }: DlcListProps) {
   }
 
   // If there are no DLCs listed and no DLC IDs, don't show anything
-  if (!dlcs.length && !dlcIds.length) {
+  if (!dlcs.length && !igdbDlcIds.length && !steamDlcIds.length) {
     return null;
   }
 
@@ -243,9 +244,18 @@ function DlcList({ gameId }: DlcListProps) {
     // Get the first DLC reference with a name, if available
     const firstDlcRef = dlcReferences.length > 0 ? dlcReferences[0] : null;
 
-    // Use igdb:<id1,id2,id3> for exact DLC search, fall back to parent game title
-    const searchTerm =
-      dlcIds.length > 0 ? `igdb:${dlcIds.join(',')}` : game?.title ?? '';
+    // Use the appropriate field - prefer IGDB IDs (support comma-separated), fall back to Steam
+    let searchTerm: string;
+    if (igdbDlcIds.length > 0) {
+      // IGDB supports comma-separated IDs
+      searchTerm = `igdb:${igdbDlcIds.join(',')}`;
+    } else if (steamDlcIds.length > 0) {
+      // Steam only supports single ID search
+      searchTerm = `steam:${steamDlcIds[0]}`;
+    } else {
+      // Fall back to game title
+      searchTerm = game?.title ?? '';
+    }
 
     // Show DLC name if available and there's only one, otherwise show count
     const displayText =

@@ -186,11 +186,16 @@ namespace NzbDrone.Core.MetadataSource.Steam
             }
 
             // Set DLC IDs if this is a base game (Steam doesn't provide DLC names)
+            // Filter out soundtracks, videos, and other non-game content
             if (data.Dlc != null && data.Dlc.Any())
             {
-                game.DlcIds = data.Dlc;
-                game.DlcReferences = new List<DlcReference>(); // Names will be populated from IGDB
-                _logger.Debug("Game {0} has {1} DLCs on Steam", data.Name, data.Dlc.Count);
+                var filteredDlcIds = FilterGameDlcs(data.Dlc);
+                if (filteredDlcIds.Any())
+                {
+                    game.SteamDlcIds = filteredDlcIds;
+                    game.DlcReferences = new List<DlcReference>(); // Names will be populated from IGDB
+                    _logger.Debug("Game {0} has {1} DLCs on Steam (filtered from {2})", data.Name, filteredDlcIds.Count, data.Dlc.Count);
+                }
             }
 
             // Set ratings - only Metacritic since Steam doesn't have IGDB ratings
@@ -377,6 +382,56 @@ namespace NzbDrone.Core.MetadataSource.Steam
             result = Regex.Replace(result, @"\s+", " ").Trim();
 
             return result;
+        }
+
+        private List<int> FilterGameDlcs(List<int> dlcIds)
+        {
+            // Filter out non-game DLCs (soundtracks, videos, etc.) by checking their type
+            var gameDlcs = new List<int>();
+
+            foreach (var dlcId in dlcIds)
+            {
+                try
+                {
+                    var request = new HttpRequest($"https://store.steampowered.com/api/appdetails?appids={dlcId}")
+                    {
+                        AllowAutoRedirect = true
+                    };
+
+                    var response = _httpClient.Get<Dictionary<string, SteamAppDetailsResponse>>(request);
+                    var appData = response.Resource?.GetValueOrDefault(dlcId.ToString());
+
+                    if (appData?.Success == true && appData.Data != null)
+                    {
+                        var appType = appData.Data.Type?.ToLowerInvariant();
+
+                        // Only include actual game/dlc content, not music, videos, etc.
+                        if (appType == "game" || appType == "dlc")
+                        {
+                            // Also check if the name suggests non-game content
+                            if (!IsNonGameContent(appData.Data.Name))
+                            {
+                                gameDlcs.Add(dlcId);
+                            }
+                            else
+                            {
+                                _logger.Debug("Filtering out DLC {0} ({1}) - name suggests non-game content", dlcId, appData.Data.Name);
+                            }
+                        }
+                        else
+                        {
+                            _logger.Debug("Filtering out DLC {0} ({1}) - type is {2}", dlcId, appData.Data.Name, appType);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to check DLC type for Steam App ID {0}, including it anyway", dlcId);
+                    gameDlcs.Add(dlcId); // Include it if we can't check
+                }
+            }
+
+            return gameDlcs;
         }
 
         private bool IsNonGameContent(string title)

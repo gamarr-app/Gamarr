@@ -35,7 +35,8 @@ namespace NzbDrone.Core.Test.Games
                 .With(m => m.Title = "Test Game")
                 .With(m => m.Status = GameStatusType.Released)
                 .With(m => m.ParentGameId = null)
-                .With(m => m.DlcIds = new List<int>())
+                .With(m => m.IgdbDlcIds = new List<int>())
+                .With(m => m.SteamDlcIds = new List<int>())
                 .With(m => m.AlternativeTitles = new List<AlternativeTitle>())
                 .With(m => m.Translations = new List<GameTranslation>())
                 .With(m => m.CollectionIgdbId = 0)
@@ -55,7 +56,8 @@ namespace NzbDrone.Core.Test.Games
                 .With(m => m.Title = "Test Game")
                 .With(m => m.Status = GameStatusType.Released)
                 .With(m => m.ParentGameId = null)
-                .With(m => m.DlcIds = new List<int>())
+                .With(m => m.IgdbDlcIds = new List<int>())
+                .With(m => m.SteamDlcIds = new List<int>())
                 .With(m => m.AlternativeTitles = new List<AlternativeTitle>())
                 .With(m => m.Translations = new List<GameTranslation>())
                 .With(m => m.CollectionIgdbId = 0)
@@ -134,62 +136,77 @@ namespace NzbDrone.Core.Test.Games
         }
 
         [Test]
-        public void should_set_dlc_ids_when_metadata_has_dlcs()
+        public void should_set_igdb_dlc_ids_when_metadata_has_dlcs()
         {
-            _updatedGameInfo.DlcIds = new List<int> { 200, 201, 202 };
+            _updatedGameInfo.IgdbDlcIds = new List<int> { 200, 201, 202 };
 
             Subject.Execute(CreateCommand(_game.Id));
 
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
-                      m.DlcIds.Count == 3 &&
-                      m.DlcIds.Contains(200) &&
-                      m.DlcIds.Contains(201) &&
-                      m.DlcIds.Contains(202))), Times.Once());
+                      m.IgdbDlcIds.Count == 3 &&
+                      m.IgdbDlcIds.Contains(200) &&
+                      m.IgdbDlcIds.Contains(201) &&
+                      m.IgdbDlcIds.Contains(202))), Times.Once());
         }
 
         [Test]
-        public void should_not_overwrite_dlc_ids_when_metadata_returns_null()
+        public void should_not_overwrite_igdb_dlc_ids_when_metadata_returns_null()
         {
-            _gameMetadata.DlcIds = new List<int> { 300, 301 };
-            _updatedGameInfo.DlcIds = null;
+            _gameMetadata.IgdbDlcIds = new List<int> { 300, 301 };
+            _updatedGameInfo.IgdbDlcIds = null;
 
             Subject.Execute(CreateCommand(_game.Id));
 
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
-                      m.DlcIds.Count == 2 &&
-                      m.DlcIds.Contains(300))), Times.Once());
+                      m.IgdbDlcIds.Count == 2 &&
+                      m.IgdbDlcIds.Contains(300))), Times.Once());
         }
 
         [Test]
-        public void should_not_overwrite_dlc_ids_when_metadata_returns_empty_list()
+        public void should_not_overwrite_igdb_dlc_ids_when_metadata_returns_empty_list()
         {
-            _gameMetadata.DlcIds = new List<int> { 400, 401 };
-            _updatedGameInfo.DlcIds = new List<int>();
+            _gameMetadata.IgdbDlcIds = new List<int> { 400, 401 };
+            _updatedGameInfo.IgdbDlcIds = new List<int>();
 
             Subject.Execute(CreateCommand(_game.Id));
 
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
-                      m.DlcIds.Count == 2 &&
-                      m.DlcIds.Contains(400))), Times.Once());
+                      m.IgdbDlcIds.Count == 2 &&
+                      m.IgdbDlcIds.Contains(400))), Times.Once());
         }
 
         [Test]
-        public void should_update_dlc_ids_when_new_list_has_entries()
+        public void should_update_igdb_dlc_ids_when_new_list_has_entries()
         {
-            _gameMetadata.DlcIds = new List<int> { 300, 301 };
-            _updatedGameInfo.DlcIds = new List<int> { 500, 501, 502 };
+            _gameMetadata.IgdbDlcIds = new List<int> { 300, 301 };
+            _updatedGameInfo.IgdbDlcIds = new List<int> { 500, 501, 502 };
 
             Subject.Execute(CreateCommand(_game.Id));
 
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
-                      m.DlcIds.Count == 3 &&
-                      m.DlcIds.Contains(500) &&
-                      m.DlcIds.Contains(501) &&
-                      m.DlcIds.Contains(502))), Times.Once());
+                      m.IgdbDlcIds.Count == 3 &&
+                      m.IgdbDlcIds.Contains(500) &&
+                      m.IgdbDlcIds.Contains(501) &&
+                      m.IgdbDlcIds.Contains(502))), Times.Once());
+        }
+
+        [Test]
+        public void should_set_steam_dlc_ids_when_metadata_has_steam_dlcs()
+        {
+            _updatedGameInfo.SteamDlcIds = new List<int> { 100200, 100201, 100202 };
+
+            Subject.Execute(CreateCommand(_game.Id));
+
+            Mocker.GetMock<IGameMetadataService>()
+                  .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
+                      m.SteamDlcIds.Count == 3 &&
+                      m.SteamDlcIds.Contains(100200) &&
+                      m.SteamDlcIds.Contains(100201) &&
+                      m.SteamDlcIds.Contains(100202))), Times.Once());
         }
 
         [Test]
@@ -254,7 +271,8 @@ namespace NzbDrone.Core.Test.Games
                     SteamAppId = 12345,
                     Title = "Steam Only Game",
                     Status = GameStatusType.Released,
-                    DlcIds = new List<int>(),
+                    IgdbDlcIds = new List<int>(),
+                    SteamDlcIds = new List<int>(),
                     AlternativeTitles = new List<AlternativeTitle>(),
                     Translations = new List<GameTranslation>(),
                     CollectionIgdbId = 0
@@ -299,7 +317,8 @@ namespace NzbDrone.Core.Test.Games
                     SteamAppId = 99999,
                     Title = "Missing Steam Game",
                     Status = GameStatusType.Released,
-                    DlcIds = new List<int>(),
+                    IgdbDlcIds = new List<int>(),
+                    SteamDlcIds = new List<int>(),
                     AlternativeTitles = new List<AlternativeTitle>(),
                     Translations = new List<GameTranslation>(),
                     CollectionIgdbId = 0

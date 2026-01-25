@@ -791,7 +791,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 dlcReferences.AddRange(resource.StandaloneExpansions.Select(s => new DlcReference(s.Id, s.Name)));
             }
 
-            game.DlcIds = dlcIds;
+            game.IgdbDlcIds = dlcIds;
             game.DlcReferences = dlcReferences;
 
             // Similar games as recommendations

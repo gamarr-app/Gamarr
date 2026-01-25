@@ -23,7 +23,8 @@ namespace NzbDrone.Core.Games
             Platforms = new List<GamePlatform>();
             GameModes = new List<string>();
             Themes = new List<string>();
-            DlcIds = new List<int>();
+            IgdbDlcIds = new List<int>();
+            SteamDlcIds = new List<int>();
             DlcReferences = new List<DlcReference>();
             GameType = GameType.MainGame;
         }
@@ -96,7 +97,12 @@ namespace NzbDrone.Core.Games
         /// <summary>
         /// List of IGDB IDs for DLCs/expansions of this game
         /// </summary>
-        public List<int> DlcIds { get; set; }
+        public List<int> IgdbDlcIds { get; set; }
+
+        /// <summary>
+        /// List of Steam App IDs for DLCs of this game
+        /// </summary>
+        public List<int> SteamDlcIds { get; set; }
 
         /// <summary>
         /// List of DLC references with ID and name (for display)

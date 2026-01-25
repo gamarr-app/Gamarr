@@ -144,9 +144,14 @@ namespace NzbDrone.Core.Games
             }
 
             // Update DLC IDs and references
-            if (gameInfo.DlcIds != null && gameInfo.DlcIds.Any())
+            if (gameInfo.IgdbDlcIds != null && gameInfo.IgdbDlcIds.Any())
             {
-                gameMetadata.DlcIds = gameInfo.DlcIds;
+                gameMetadata.IgdbDlcIds = gameInfo.IgdbDlcIds;
+            }
+
+            if (gameInfo.SteamDlcIds != null && gameInfo.SteamDlcIds.Any())
+            {
+                gameMetadata.SteamDlcIds = gameInfo.SteamDlcIds;
             }
 
             if (gameInfo.DlcReferences != null && gameInfo.DlcReferences.Any())
