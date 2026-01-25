@@ -28,7 +28,6 @@ interface SchemaPayload {
   implementationName: string;
 }
 
-
 const section = 'settings.downloadClients';
 
 export const FETCH_DOWNLOAD_CLIENTS =

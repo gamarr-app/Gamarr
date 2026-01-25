@@ -30,7 +30,7 @@ import ui from './Settings/ui';
 
 export * from './Settings/autoTaggingSpecifications';
 export * from './Settings/autoTaggings';
-export * from './Settings/customFormatSpecifications.js';
+export * from './Settings/customFormatSpecifications';
 export * from './Settings/customFormats';
 export * from './Settings/delayProfiles';
 export * from './Settings/downloadClients';
