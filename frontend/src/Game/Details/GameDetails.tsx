@@ -40,7 +40,6 @@ import GameHistoryModal from 'Game/History/GameHistoryModal';
 import GameInteractiveSearchModal from 'Game/Search/GameInteractiveSearchModal';
 import useGame from 'Game/useGame';
 import GameFileEditorTable from 'GameFile/Editor/GameFileEditorTable';
-import ExtraFileTable from 'GameFile/Extras/ExtraFileTable';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
@@ -54,10 +53,6 @@ import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
 import OrganizePreviewModal from 'Organize/OrganizePreviewModal';
 import QualityProfileName from 'Settings/Profiles/Quality/QualityProfileName';
 import { executeCommand } from 'Store/Actions/commandActions';
-import {
-  clearExtraFiles,
-  fetchExtraFiles,
-} from 'Store/Actions/extraFileActions';
 import { toggleGameMonitored } from 'Store/Actions/gameActions';
 import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
@@ -117,19 +112,6 @@ function createGameFilesSelector() {
   );
 }
 
-function createExtraFilesSelector() {
-  return createSelector(
-    (state: AppState) => state.extraFiles,
-    ({ isFetching, isPopulated, error }) => {
-      return {
-        isExtraFilesFetching: isFetching,
-        isExtraFilesPopulated: isPopulated,
-        extraFilesError: error,
-      };
-    }
-  );
-}
-
 interface GameDetailsProps {
   gameId: number;
 }
@@ -143,9 +125,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
   const { isGameFilesFetching, gameFilesError, hasGameFiles } = useSelector(
     createGameFilesSelector()
-  );
-  const { isExtraFilesFetching, extraFilesError } = useSelector(
-    createExtraFilesSelector()
   );
   const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
   const isSidebarVisible = useSelector(
@@ -437,7 +416,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
   const populate = useCallback(() => {
     dispatch(fetchGameFiles({ gameId }));
-    dispatch(fetchExtraFiles({ gameId }));
     dispatch(fetchQueueDetails({ gameId }));
     dispatch(fetchImportListSchema());
   }, [gameId, dispatch]);
@@ -452,7 +430,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
     return () => {
       unregisterPagePopulator(populate);
       dispatch(clearGameFiles());
-      dispatch(clearExtraFiles());
       dispatch(clearQueueDetails());
       dispatch(cancelFetchReleases());
       dispatch(clearReleases());
@@ -534,7 +511,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const statusDetails = getGameStatusDetails(status);
 
   const fanartUrl = getFanartUrl(images);
-  const isFetching = isGameFilesFetching || isExtraFilesFetching;
+  const isFetching = isGameFilesFetching;
 
   const marqueeWidth = isSmallScreen ? titleWidth : titleWidth - 150;
 
@@ -931,12 +908,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
             </Alert>
           ) : null}
 
-          {!isFetching && extraFilesError ? (
-            <Alert kind={kinds.DANGER}>
-              {translate('LoadingGameExtraFilesFailed')}
-            </Alert>
-          ) : null}
-
           <FieldSet legend={translate('Files')}>
             <GameStatus
               gameId={id}
@@ -945,8 +916,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
             />
 
             <GameFileEditorTable gameId={id} />
-
-            <ExtraFileTable gameId={id} />
           </FieldSet>
 
           <FieldSet legend={translate('Titles')}>

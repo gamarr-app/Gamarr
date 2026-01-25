@@ -50,24 +50,30 @@ export const defaultState = {
       isSortable: true
     },
     {
+      name: 'dateAdded',
+      label: () => translate('Added'),
+      isVisible: true,
+      isSortable: true
+    },
+    {
       name: 'languages',
       label: () => translate('Languages'),
-      isVisible: true
+      isVisible: false
     },
     {
       name: 'quality',
       label: () => translate('Quality'),
-      isVisible: true
+      isVisible: false
     },
     {
       name: 'releaseGroup',
       label: () => translate('ReleaseGroup'),
-      isVisible: true
+      isVisible: false
     },
     {
       name: 'customFormats',
       label: () => translate('Formats'),
-      isVisible: true
+      isVisible: false
     },
     {
       name: 'customFormatScore',
@@ -76,7 +82,7 @@ export const defaultState = {
         name: icons.SCORE,
         title: () => translate('CustomFormatScore')
       }),
-      isVisible: true,
+      isVisible: false,
       isSortable: true
     },
     {
@@ -87,12 +93,6 @@ export const defaultState = {
         title: () => translate('IndexerFlags')
       }),
       isVisible: false
-    },
-    {
-      name: 'dateAdded',
-      label: () => translate('Added'),
-      isVisible: false,
-      isSortable: true
     },
     {
       name: 'actions',
