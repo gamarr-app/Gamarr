@@ -1,6 +1,5 @@
 using System;
 using NLog;
-using NzbDrone.Common.Cloud;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Localization;
@@ -9,15 +8,15 @@ namespace NzbDrone.Core.HealthCheck.Checks
 {
     public class SystemTimeCheck : HealthCheckBase
     {
+        private const string WorldTimeApiUrl = "https://worldtimeapi.org/api/timezone/Etc/UTC";
+
         private readonly IHttpClient _client;
-        private readonly IHttpRequestBuilderFactory _cloudRequestBuilder;
         private readonly Logger _logger;
 
-        public SystemTimeCheck(IHttpClient client, IGamarrCloudRequestBuilder cloudRequestBuilder, Logger logger, ILocalizationService localizationService)
+        public SystemTimeCheck(IHttpClient client, Logger logger, ILocalizationService localizationService)
             : base(localizationService)
         {
             _client = client;
-            _cloudRequestBuilder = cloudRequestBuilder.Services;
             _logger = logger;
         }
 
@@ -25,31 +24,29 @@ namespace NzbDrone.Core.HealthCheck.Checks
         {
             try
             {
-                var request = _cloudRequestBuilder.Create()
-                                                  .Resource("time")
-                                                  .Build();
-
+                var request = new HttpRequest(WorldTimeApiUrl);
                 var response = _client.Execute(request);
-                var result = Json.Deserialize<ServiceTimeResponse>(response.Content);
+                var result = Json.Deserialize<WorldTimeApiResponse>(response.Content);
                 var systemTime = DateTime.UtcNow;
 
-                if (Math.Abs((result.DateTimeUtc - systemTime).TotalDays) >= 1)
+                if (Math.Abs((result.Datetime - systemTime).TotalDays) >= 1)
                 {
-                    _logger.Error("System time mismatch. SystemTime: {0} ApiTime: {1}", systemTime, result.DateTimeUtc);
+                    _logger.Error("System time mismatch. SystemTime: {0} ApiTime: {1}", systemTime, result.Datetime);
                     return new HealthCheck(GetType(), HealthCheckResult.Error, _localizationService.GetLocalizedString("SystemTimeCheckMessage"), "#system-time-off");
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Unable to check system time");
+                // Time check is not critical - if the API is unavailable, just skip the check
+                _logger.Debug(ex, "Unable to check system time against external API");
             }
 
             return new HealthCheck(GetType());
         }
     }
 
-    public class ServiceTimeResponse
+    public class WorldTimeApiResponse
     {
-        public DateTime DateTimeUtc { get; set; }
+        public DateTime Datetime { get; set; }
     }
 }
