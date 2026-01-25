@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import { Kind } from 'Helpers/Props/kinds';
 import styles from './Alert.css';
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { Component, createRef } from 'react';
+import { Component, createRef } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import Alert from 'Components/Alert';

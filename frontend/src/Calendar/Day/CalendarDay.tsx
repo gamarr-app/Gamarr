@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 import moment from 'moment';
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';

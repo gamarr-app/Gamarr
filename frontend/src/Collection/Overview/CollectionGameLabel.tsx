@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import { GameStatus } from 'Game/Game';
 import { GameFile } from 'GameFile/GameFile';

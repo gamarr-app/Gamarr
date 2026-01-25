@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
 import Measure from 'Components/Measure';
 import DiscoverGameItemConnector, {

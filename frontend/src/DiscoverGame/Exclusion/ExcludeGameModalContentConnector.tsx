@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { addImportListExclusions } from 'Store/Actions/discoverGameActions';
 import ExcludeGameModalContent from './ExcludeGameModalContent';

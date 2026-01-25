@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { ContentRect } from 'react-measure';
 import Measure from 'react-measure';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';

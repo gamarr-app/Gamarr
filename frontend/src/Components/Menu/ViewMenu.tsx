@@ -1,4 +1,3 @@
-import React from 'react';
 import Menu from 'Components/Menu/Menu';
 import ToolbarMenuButton, {
   ToolbarMenuButtonProps,

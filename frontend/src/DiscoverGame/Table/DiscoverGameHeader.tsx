@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import Column from 'Components/Table/Column';

@@ -1,4 +1,3 @@
-import React from 'react';
 import GameFileEditorTableContentConnector from './GameFileEditorTableContentConnector';
 import styles from './GameFileEditorTable.css';
 

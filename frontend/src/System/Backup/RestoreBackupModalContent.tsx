@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import TextInput from 'Components/Form/TextInput';
 import Icon, { IconKind, IconProps } from 'Components/Icon';
 import Button from 'Components/Link/Button';

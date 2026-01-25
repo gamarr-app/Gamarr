@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import Link from 'Components/Link/Link';
 import styles from './MenuButton.css';
 

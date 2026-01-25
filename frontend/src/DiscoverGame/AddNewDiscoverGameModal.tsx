@@ -1,4 +1,3 @@
-import React from 'react';
 import Modal from 'Components/Modal/Modal';
 import { Image } from 'Game/Game';
 import AddNewDiscoverGameModalContentConnector from './AddNewDiscoverGameModalContentConnector';

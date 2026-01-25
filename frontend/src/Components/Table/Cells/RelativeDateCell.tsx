@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import formatDateTime from 'Utilities/Date/formatDateTime';

@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
 import MetacriticRating from 'Components/MetacriticRating';

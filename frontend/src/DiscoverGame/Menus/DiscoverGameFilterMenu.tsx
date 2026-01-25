@@ -1,4 +1,3 @@
-import React from 'react';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import DiscoverGameFilterModalConnector from 'DiscoverGame/DiscoverGameFilterModalConnector';

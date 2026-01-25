@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import { ConnectDragSource } from 'react-dnd';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';

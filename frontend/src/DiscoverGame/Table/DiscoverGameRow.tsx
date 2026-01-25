@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
 import ImportListList from 'Components/ImportListList';

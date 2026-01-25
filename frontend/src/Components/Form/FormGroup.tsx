@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { Children, ComponentPropsWithoutRef, ReactNode } from 'react';
+import { Children, ComponentPropsWithoutRef, ReactNode } from 'react';
 import { Size } from 'Helpers/Props/sizes';
 import styles from './FormGroup.css';
 

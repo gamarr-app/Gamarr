@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { FilterBuilderProp } from 'App/State/AppState';
 import TagInput, { TagBase } from 'Components/Form/Tag/TagInput';
 import { DeletedTag } from 'Components/Form/Tag/TagInputTag';

@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './ModalHeader.css';
 
 interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {

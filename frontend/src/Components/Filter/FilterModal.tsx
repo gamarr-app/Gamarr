@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { CustomFilter, Filter, FilterBuilderProp } from 'App/State/AppState';
 import Modal from 'Components/Modal/Modal';
 import FilterBuilderModalContentConnector from './Builder/FilterBuilderModalContentConnector';

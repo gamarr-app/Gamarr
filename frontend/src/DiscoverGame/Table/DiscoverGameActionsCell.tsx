@@ -1,4 +1,3 @@
-import React from 'react';
 import VirtualTableRowCell, {
   VirtualTableRowCellProps,
 } from 'Components/Table/Cells/VirtualTableRowCell';

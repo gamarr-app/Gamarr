@@ -1,4 +1,4 @@
-import React, { Component, CSSProperties } from 'react';
+import { Component, CSSProperties } from 'react';
 import AddNewGameCollectionGameModal from 'Collection/AddNewGameCollectionGameModal';
 import Link from 'Components/Link/Link';
 import MonitorToggleButton from 'Components/MonitorToggleButton';

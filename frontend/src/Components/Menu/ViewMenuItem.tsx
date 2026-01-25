@@ -1,4 +1,3 @@
-import React from 'react';
 import SelectedMenuItem, { SelectedMenuItemProps } from './SelectedMenuItem';
 
 interface ViewMenuItemProps extends Omit<SelectedMenuItemProps, 'isSelected'> {

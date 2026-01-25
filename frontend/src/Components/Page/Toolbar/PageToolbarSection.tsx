@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import Menu from 'Components/Menu/Menu';
 import MenuContent from 'Components/Menu/MenuContent';
 import ToolbarMenuButton from 'Components/Menu/ToolbarMenuButton';

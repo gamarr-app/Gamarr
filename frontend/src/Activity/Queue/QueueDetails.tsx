@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from 'Components/Icon';
 import Popover from 'Components/Tooltip/Popover';
 import { icons, tooltipPositions } from 'Helpers/Props';
