@@ -1,4 +1,4 @@
-import { ElementType, ReactNode } from 'react';
+import React, { ElementType, ReactNode } from 'react';
 import Link from 'Components/Link/Link';
 import { inputTypes } from 'Helpers/Props';
 import { InputType } from 'Helpers/Props/inputTypes';

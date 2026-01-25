@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './CircularProgressBar.css';
 
 interface CircularProgressBarProps {
