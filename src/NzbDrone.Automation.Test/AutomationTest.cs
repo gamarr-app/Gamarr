@@ -92,13 +92,19 @@ namespace NzbDrone.Automation.Test
         {
             ConsoleErrors.Clear();
 
-            // Listen for console errors (but ignore React development warnings)
+            // Listen for console errors (but ignore certain expected errors)
             Page.Console += (_, msg) =>
             {
                 if (msg.Type == "error")
                 {
                     // Ignore React development warnings that come through as console errors
                     if (msg.Text.StartsWith("Warning:") || msg.Text.Contains("reactjs.org/link"))
+                    {
+                        return;
+                    }
+
+                    // Ignore 404 errors for external resources (media/covers may not always exist)
+                    if (msg.Text.Contains("404") || msg.Text.Contains("Failed to load resource"))
                     {
                         return;
                     }

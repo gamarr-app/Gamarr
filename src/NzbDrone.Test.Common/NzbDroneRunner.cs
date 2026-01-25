@@ -132,6 +132,14 @@ namespace NzbDrone.Test.Common
         private void Start(string outputGamarrConsoleExe)
         {
             StringDictionary envVars = new ();
+
+            // Set DOTNET_ROOT if the runtime is in the home directory (common on macOS)
+            var homeDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");
+            if (Directory.Exists(homeDotnet))
+            {
+                envVars.Add("DOTNET_ROOT", homeDotnet);
+            }
+
             if (PostgresOptions?.Host != null)
             {
                 envVars.Add("Gamarr__Postgres__Host", PostgresOptions.Host);
