@@ -13,7 +13,7 @@ using NzbDrone.Core.Queue;
 
 namespace NzbDrone.Core.IndexerSearch
 {
-    public class GameSearchService : IExecute<GamesSearchCommand>, IExecute<MissingGamesSearchCommand>, IExecute<CutoffUnmetGamesSearchCommand>
+    public class GameSearchService : IExecute<GamesSearchCommand>, IExecute<MoviesSearchCommand>, IExecute<MissingGamesSearchCommand>, IExecute<CutoffUnmetGamesSearchCommand>
     {
         private readonly IGameService _gameService;
         private readonly IGameCutoffService _gameCutoffService;
@@ -42,6 +42,21 @@ namespace NzbDrone.Core.IndexerSearch
             var userInvokedSearch = message.Trigger == CommandTrigger.Manual;
 
             var games = _gameService.GetGames(message.GameIds)
+                .Where(m => (m.Monitored && m.IsAvailable()) || userInvokedSearch)
+                .ToList();
+
+            SearchForBulkGames(games, userInvokedSearch).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Radarr-compatible alias for GamesSearchCommand.
+        /// Allows tools like Decluttarr to trigger searches using Radarr's API format.
+        /// </summary>
+        public void Execute(MoviesSearchCommand message)
+        {
+            var userInvokedSearch = message.Trigger == CommandTrigger.Manual;
+
+            var games = _gameService.GetGames(message.MovieIds)
                 .Where(m => (m.Monitored && m.IsAvailable()) || userInvokedSearch)
                 .ToList();
 
