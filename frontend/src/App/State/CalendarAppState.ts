@@ -21,6 +21,7 @@ interface CalendarAppState
   start: moment.Moment;
   end: moment.Moment;
   dates: string[];
+  dayCount: number;
   time: string;
   view: CalendarView;
   options: CalendarOptions;

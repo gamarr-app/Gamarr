@@ -85,7 +85,6 @@ function DownloadClientOptions({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setDownloadClientOptionsValue({ name, value }));
     },
     [dispatch]

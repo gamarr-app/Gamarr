@@ -18,7 +18,7 @@ function StartTime(props: StartTimeProps) {
 
   const { formattedStartTime, uptime } = useMemo(() => {
     return {
-      uptime: formatTimeSpan(moment(time).diff(startTime)),
+      uptime: formatTimeSpan(String(moment(time).diff(startTime))),
       formattedStartTime: formatDateTime(
         startTime,
         longDateFormat,

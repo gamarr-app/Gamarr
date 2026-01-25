@@ -10,6 +10,7 @@ import GameCollectionAppState from './GameCollectionAppState';
 import GameFilesAppState from './GameFilesAppState';
 import GamesAppState, { GameIndexAppState } from './GamesAppState';
 import HistoryAppState, { GameHistoryAppState } from './HistoryAppState';
+import ImportGameAppState from './ImportGameAppState';
 import InteractiveImportAppState from './InteractiveImportAppState';
 import MessagesAppState from './MessagesAppState';
 import OAuthAppState from './OAuthAppState';
@@ -87,6 +88,7 @@ interface AppState {
   customFilters: CustomFiltersAppState;
   extraFiles: ExtraFilesAppState;
   history: HistoryAppState;
+  importGame: ImportGameAppState;
   interactiveImport: InteractiveImportAppState;
   gameBlocklist: GameBlocklistAppState;
   gameCollections: GameCollectionAppState;

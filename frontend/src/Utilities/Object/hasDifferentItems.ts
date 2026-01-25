@@ -1,12 +1,7 @@
-interface ItemWithId {
-  id: number | string;
-}
-
-function hasDifferentItems<T extends ItemWithId>(
-  prevItems: T[],
-  currentItems: T[],
-  idProp: keyof T = 'id' as keyof T
-): boolean {
+function hasDifferentItems<
+  T extends Record<K, unknown>,
+  K extends keyof T = 'id' & keyof T
+>(prevItems: T[], currentItems: T[], idProp: K = 'id' as K): boolean {
   if (prevItems === currentItems) {
     return false;
   }

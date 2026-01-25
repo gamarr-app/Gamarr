@@ -153,7 +153,6 @@ function GeneralSettings() {
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setGeneralSettingsValue(change));
     },
     [dispatch]

@@ -2,8 +2,6 @@ import _ from 'lodash';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 
-type State = Record<string, unknown>;
-
 interface SettingPayload {
   section: string;
   name: string;
@@ -23,7 +21,7 @@ interface PendingChanges {
 }
 
 function createSetSettingValueReducer(section: string) {
-  return (state: State, { payload }: Action): State => {
+  return <T extends object>(state: T, { payload }: Action): T => {
     if (section === payload.section) {
       const { name, value } = payload;
       const newState = getSectionState(state, section);

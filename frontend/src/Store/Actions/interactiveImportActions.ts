@@ -198,7 +198,7 @@ export const setInteractiveImportMode = createAction(
 // Action Handlers
 export const actionHandlers = handleThunks({
   [FETCH_INTERACTIVE_IMPORT_ITEMS]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: FetchPayload,
     dispatch: Dispatch
   ) {
@@ -277,9 +277,9 @@ export const actionHandlers = handleThunks({
       ])
     );
 
-    const items = (getState() as Record<string, InteractiveImportState>)[
-      section
-    ].items;
+    const items = (
+      getState() as unknown as Record<string, InteractiveImportState>
+    )[section].items;
 
     const requestPayload = payload.ids
       .map((id) => {

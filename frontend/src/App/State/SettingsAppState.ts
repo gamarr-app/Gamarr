@@ -9,7 +9,7 @@ import AppSectionState, {
 } from 'App/State/AppSectionState';
 import Language from 'Language/Language';
 import AutoTagging, { AutoTaggingSpecification } from 'typings/AutoTagging';
-import CustomFormat from 'typings/CustomFormat';
+import CustomFormat, { CustomFormatSpecification } from 'typings/CustomFormat';
 import DelayProfile from 'typings/DelayProfile';
 import DownloadClient from 'typings/DownloadClient';
 import ImportList from 'typings/ImportList';
@@ -37,13 +37,21 @@ type Presets<T> = T & {
 export interface AutoTaggingAppState
   extends AppSectionState<AutoTagging>,
     AppSectionDeleteState,
-    AppSectionSaveState {}
+    AppSectionSaveState {
+  pendingChanges: Partial<AutoTagging>;
+}
 
 export interface AutoTaggingSpecificationAppState
   extends AppSectionState<AutoTaggingSpecification>,
     AppSectionDeleteState,
     AppSectionSaveState,
     AppSectionSchemaState<AutoTaggingSpecification> {}
+
+export interface CustomFormatSpecificationAppState
+  extends AppSectionState<CustomFormatSpecification>,
+    AppSectionDeleteState,
+    AppSectionSaveState,
+    AppSectionSchemaState<CustomFormatSpecification> {}
 
 export interface DelayProfileAppState
   extends AppSectionState<DelayProfile>,
@@ -114,7 +122,9 @@ export interface ReleaseProfilesAppState
 export interface CustomFormatAppState
   extends AppSectionState<CustomFormat>,
     AppSectionDeleteState,
-    AppSectionSaveState {}
+    AppSectionSaveState {
+  pendingChanges: Partial<CustomFormat>;
+}
 
 export interface ImportListOptionsSettingsAppState
   extends AppSectionItemState<ImportListOptionsSettings>,
@@ -153,6 +163,7 @@ interface SettingsAppState {
   autoTaggings: AutoTaggingAppState;
   autoTaggingSpecifications: AutoTaggingSpecificationAppState;
   customFormats: CustomFormatAppState;
+  customFormatSpecifications: CustomFormatSpecificationAppState;
   delayProfiles: DelayProfileAppState;
   downloadClients: DownloadClientAppState;
   downloadClientOptions: DownloadClientOptionsAppState;

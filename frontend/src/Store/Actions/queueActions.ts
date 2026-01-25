@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
@@ -12,7 +11,7 @@ import {
   icons,
   sortDirections,
 } from 'Helpers/Props';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
 import translate from 'Utilities/String/translate';
@@ -395,7 +394,7 @@ export const actionHandlers = handleThunks({
   [FETCH_QUEUE_DETAILS]: function (
     getState: () => AppState,
     payload: Record<string, unknown>,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     let params = payload;
 
@@ -428,7 +427,7 @@ export const actionHandlers = handleThunks({
   [GRAB_QUEUE_ITEM]: function (
     _getState: () => AppState,
     payload: GrabPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const id = payload.id;
 
@@ -440,16 +439,13 @@ export const actionHandlers = handleThunks({
     }).request;
 
     promise.done(() => {
+      dispatch(fetchQueue());
       dispatch(
-        batchActions([
-          fetchQueue(),
-
-          set({
-            section: paged,
-            isGrabbing: false,
-            grabError: null,
-          }),
-        ])
+        set({
+          section: paged,
+          isGrabbing: false,
+          grabError: null,
+        })
       );
     });
 
@@ -468,7 +464,7 @@ export const actionHandlers = handleThunks({
   [GRAB_QUEUE_ITEMS]: function (
     _getState: () => AppState,
     payload: GrabItemsPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const ids = payload.ids;
 
@@ -540,7 +536,7 @@ export const actionHandlers = handleThunks({
   [REMOVE_QUEUE_ITEM]: function (
     _getState: () => AppState,
     payload: RemovePayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { id, remove, blocklist, skipRedownload, changeCategory } = payload;
 
@@ -563,7 +559,7 @@ export const actionHandlers = handleThunks({
   [REMOVE_QUEUE_ITEMS]: function (
     _getState: () => AppState,
     payload: RemoveItemsPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { ids, remove, blocklist, skipRedownload, changeCategory } = payload;
 

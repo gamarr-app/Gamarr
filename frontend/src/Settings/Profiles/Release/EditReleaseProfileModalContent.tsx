@@ -84,7 +84,6 @@ function EditReleaseProfileModalContent({
   useEffect(() => {
     if (!id) {
       Object.entries(newReleaseProfile).forEach(([name, value]) => {
-        // @ts-expect-error 'setReleaseProfileValue' isn't typed yet
         dispatch(setReleaseProfileValue({ name, value }));
       });
     }
@@ -102,7 +101,6 @@ function EditReleaseProfileModalContent({
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error 'setReleaseProfileValue' isn't typed yet
       dispatch(setReleaseProfileValue(change));
     },
     [dispatch]

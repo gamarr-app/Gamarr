@@ -3,8 +3,6 @@ import { SortDirection } from 'Helpers/Props/sortDirections';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 
-type State = Record<string, unknown>;
-
 interface SortPayload {
   sortKey?: string;
   sortDirection?: SortDirection;
@@ -15,7 +13,7 @@ interface Action {
 }
 
 function createSetClientSideCollectionSortReducer(section: string) {
-  return (state: State, { payload }: Action): State => {
+  return <T extends object>(state: T, { payload }: Action): T => {
     const newState = getSectionState(state, section);
 
     const sortKey = payload.sortKey || (newState.sortKey as string);

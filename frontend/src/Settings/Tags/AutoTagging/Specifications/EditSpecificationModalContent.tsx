@@ -54,7 +54,6 @@ function EditSpecificationModalContent({
 
   const onInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setAutoTaggingSpecificationValue({ name, value }));
     },
     [dispatch]
@@ -62,7 +61,6 @@ function EditSpecificationModalContent({
 
   const onFieldChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setAutoTaggingSpecificationFieldValue({ name, value }));
     },
     [dispatch]

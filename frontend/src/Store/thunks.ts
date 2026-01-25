@@ -1,11 +1,19 @@
-import { Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import AppState from 'App/State/AppState';
 
-type GetState = () => AppState;
+export type GetState = () => AppState;
+export type AppThunk<ReturnType = unknown> = ThunkAction<
+  ReturnType,
+  AppState,
+  undefined,
+  AnyAction
+>;
+export type AppDispatch = ThunkDispatch<AppState, undefined, AnyAction>;
 type Thunk = (
   getState: GetState,
   identityFn: never,
-  dispatch: Dispatch
+  dispatch: AppDispatch
 ) => unknown;
 
 const thunks: Record<string, Thunk> = {};
@@ -15,8 +23,8 @@ function identity<T, TResult>(payload: T): TResult {
 }
 
 export function createThunk(type: string, identityFunction = identity) {
-  return function <T>(payload?: T) {
-    return function (dispatch: Dispatch, getState: GetState) {
+  return function <T>(payload?: T): AppThunk {
+    return function (dispatch: AppDispatch, getState: GetState) {
       const thunk = thunks[type];
 
       if (thunk) {

@@ -6,7 +6,9 @@ import createBulkEditItemHandler from 'Store/Actions/Creators/createBulkEditItem
 import createBulkRemoveItemHandler from 'Store/Actions/Creators/createBulkRemoveItemHandler';
 import createFetchHandler from 'Store/Actions/Creators/createFetchHandler';
 import createRemoveItemHandler from 'Store/Actions/Creators/createRemoveItemHandler';
-import createSaveProviderHandler from 'Store/Actions/Creators/createSaveProviderHandler';
+import createSaveProviderHandler, {
+  SaveProviderPayload,
+} from 'Store/Actions/Creators/createSaveProviderHandler';
 import createSetClientSideCollectionSortReducer from 'Store/Actions/Creators/Reducers/createSetClientSideCollectionSortReducer';
 import createSetSettingValueReducer from 'Store/Actions/Creators/Reducers/createSetSettingValueReducer';
 import { createThunk } from 'Store/thunks';
@@ -107,7 +109,7 @@ export default {
 
     [SAVE_CUSTOM_FORMAT]: (
       getState: () => AppState,
-      payload: unknown,
+      payload: SaveProviderPayload,
       dispatch: Dispatch
     ) => {
       const state = getState();
@@ -143,7 +145,7 @@ export default {
     [SET_CUSTOM_FORMAT_VALUE]: createSetSettingValueReducer(section),
 
     [CLONE_CUSTOM_FORMAT]: function (
-      state: unknown,
+      state: object,
       { payload }: { payload: IdPayload }
     ) {
       const id = payload.id;
@@ -158,7 +160,7 @@ export default {
       delete pendingChanges.id;
 
       pendingChanges.name = translate('DefaultNameCopiedProfile', {
-        name: pendingChanges.name,
+        name: pendingChanges.name ?? '',
       });
       newState.pendingChanges = pendingChanges;
 

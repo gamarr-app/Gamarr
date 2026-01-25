@@ -88,7 +88,6 @@ function AddNewGameCollectionGameModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error actions aren't typed
       dispatch(setGameCollectionValue({ name, value }));
     },
     [dispatch]

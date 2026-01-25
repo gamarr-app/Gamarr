@@ -257,7 +257,7 @@ export const actionHandlers = handleThunks({
   },
 
   [UPDATE_GAME_FILES]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: UpdateFilesPayload,
     dispatch: Dispatch
   ) {

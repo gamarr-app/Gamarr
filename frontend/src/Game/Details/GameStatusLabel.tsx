@@ -19,8 +19,12 @@ function getGameStatus(
   queueItem: Queue | null = null
 ) {
   if (queueItem) {
-    const queueStatus = queueItem.status;
-    const queueState = queueItem.trackedDownloadStatus;
+    const queueStatus = queueItem.status as Parameters<
+      typeof getQueueStatusText
+    >[0];
+    const queueState = queueItem.trackedDownloadState as Parameters<
+      typeof getQueueStatusText
+    >[1];
     const queueStatusText = getQueueStatusText(queueStatus, queueState);
 
     if (queueStatusText) {

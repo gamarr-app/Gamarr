@@ -122,7 +122,6 @@ function MediaManagement() {
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setMediaManagementSettingsValue(change));
     },
     [dispatch]

@@ -34,8 +34,19 @@ interface SpecificationItem {
   [key: string]: unknown;
 }
 
+interface CustomFormatItem {
+  specifications: SpecificationItem[];
+  [key: string]: unknown;
+}
+
 interface SectionState {
   items: SpecificationItem[];
+  itemMap: Record<number, number>;
+  [key: string]: unknown;
+}
+
+interface CustomFormatsSectionState {
+  items: CustomFormatItem[];
   itemMap: Record<number, number>;
   [key: string]: unknown;
 }
@@ -149,14 +160,12 @@ export default {
           getState(),
           'settings.customFormats',
           true
-        ) as SectionState;
-        const cf = cfState.items[cfState.itemMap[payload.id]] as {
-          specifications: Omit<SpecificationItem, 'id'>[];
-        };
+        ) as CustomFormatsSectionState;
+        const cf = cfState.items[cfState.itemMap[payload.id]];
         tags = cf.specifications.map((tag, i) => {
           return {
-            id: i + 1,
             ...tag,
+            id: i + 1,
           };
         });
       }
@@ -181,15 +190,18 @@ export default {
 
       const saveData = getProviderState(
         { id, ...otherPayload },
-        getState,
+        getState as () => Record<string, unknown>,
         section,
         false
       ) as SpecificationItem;
 
       if (!saveData.id) {
-        saveData.id = getNextId(
-          getState().settings.customFormatSpecifications.items
-        );
+        const items = getState().settings.customFormatSpecifications.items;
+        const itemsWithId = items.map((item, index) => ({
+          ...item,
+          id: (item as SpecificationItem).id ?? index + 1,
+        }));
+        saveData.id = getNextId(itemsWithId);
       }
 
       dispatch(
@@ -246,7 +258,7 @@ export default {
       createSetProviderFieldValueReducer(section),
 
     [SELECT_CUSTOM_FORMAT_SPECIFICATION_SCHEMA]: (
-      state: unknown,
+      state: object,
       { payload }: { payload: SchemaPayload }
     ) => {
       return selectProviderSchema(
@@ -260,7 +272,7 @@ export default {
     },
 
     [CLONE_CUSTOM_FORMAT_SPECIFICATION]: function (
-      state: unknown,
+      state: object,
       { payload }: { payload: IdPayload }
     ) {
       const id = payload.id;

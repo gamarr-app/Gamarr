@@ -1,8 +1,6 @@
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 
-type State = Record<string, unknown>;
-
 interface FilterPayload {
   selectedFilterKey: string;
 }
@@ -12,7 +10,7 @@ interface Action {
 }
 
 function createSetClientSideCollectionFilterReducer(section: string) {
-  return (state: State, { payload }: Action): State => {
+  return <T extends object>(state: T, { payload }: Action): T => {
     const newState = getSectionState(state, section);
 
     newState.selectedFilterKey = payload.selectedFilterKey;

@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState, { CustomFilter } from 'App/State/AppState';
@@ -11,7 +10,7 @@ import {
   filterBuilderValueTypes,
   filterTypes,
 } from 'Helpers/Props';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import findSelectedFilters from 'Utilities/Filter/findSelectedFilters';
 import translate from 'Utilities/String/translate';
@@ -273,7 +272,7 @@ function getPopulatableRange(
 
 function isRangePopulated(
   start: string,
-  end: string,
+  _end: string,
   state: CalendarState
 ): boolean {
   const { start: currentStart, end: currentEnd, view: currentView } = state;
@@ -346,10 +345,10 @@ export const actionHandlers = handleThunks({
   [FETCH_CALENDAR]: function (
     getState: () => AppState,
     payload: FetchCalendarPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const state = getState();
-    const calendar = state.calendar as CalendarState;
+    const calendar = state.calendar as unknown as CalendarState;
     const customFilters = getCustomFilters(state, section);
     const selectedFilters = findSelectedFilters(
       calendar.selectedFilterKey,
@@ -359,7 +358,7 @@ export const actionHandlers = handleThunks({
 
     const { time = calendar.time, view = calendar.view } = payload;
 
-    const dayCount = (state.calendar as CalendarState).dayCount;
+    const dayCount = (state.calendar as unknown as CalendarState).dayCount;
     const settingsState = state.settings as unknown as {
       ui: { item: { firstDayOfWeek: number } };
     };
@@ -373,7 +372,7 @@ export const actionHandlers = handleThunks({
     const isPrePopulated = isRangePopulated(
       start,
       end,
-      state.calendar as CalendarState
+      state.calendar as unknown as CalendarState
     );
 
     const basesAttrs = {
@@ -449,9 +448,12 @@ export const actionHandlers = handleThunks({
   [SET_CALENDAR_DAYS_COUNT]: function (
     getState: () => AppState,
     payload: SetCalendarDaysCountPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
-    if (payload.dayCount === (getState().calendar as CalendarState).dayCount) {
+    if (
+      payload.dayCount ===
+      (getState().calendar as unknown as CalendarState).dayCount
+    ) {
       return;
     }
 
@@ -463,7 +465,7 @@ export const actionHandlers = handleThunks({
     );
 
     const state = getState();
-    const { time, view } = state.calendar as CalendarState;
+    const { time, view } = state.calendar as unknown as CalendarState;
 
     dispatch(fetchCalendar({ time, view }));
   },
@@ -471,7 +473,7 @@ export const actionHandlers = handleThunks({
   [SET_CALENDAR_FILTER]: function (
     getState: () => AppState,
     payload: SetCalendarFilterPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(
       set({
@@ -481,7 +483,7 @@ export const actionHandlers = handleThunks({
     );
 
     const state = getState();
-    const { time, view } = state.calendar as CalendarState;
+    const { time, view } = state.calendar as unknown as CalendarState;
 
     dispatch(fetchCalendar({ time, view }));
   },
@@ -489,14 +491,14 @@ export const actionHandlers = handleThunks({
   [SET_CALENDAR_VIEW]: function (
     getState: () => AppState,
     payload: SetCalendarViewPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const state = getState();
     const view = payload.view;
     const time =
       view === calendarViews.FORECAST || calendarViews.AGENDA
         ? moment()
-        : (state.calendar as CalendarState).time;
+        : (state.calendar as unknown as CalendarState).time;
 
     dispatch(fetchCalendar({ time: time?.toString(), view }));
   },
@@ -504,10 +506,10 @@ export const actionHandlers = handleThunks({
   [GOTO_CALENDAR_TODAY]: function (
     getState: () => AppState,
     _payload: unknown,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const state = getState();
-    const view = (state.calendar as CalendarState).view;
+    const view = (state.calendar as unknown as CalendarState).view;
     const time = moment();
 
     dispatch(fetchCalendar({ time: time.toISOString(), view }));
@@ -516,14 +518,16 @@ export const actionHandlers = handleThunks({
   [GOTO_CALENDAR_PREVIOUS_RANGE]: function (
     getState: () => AppState,
     _payload: unknown,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const state = getState();
 
-    const { view, dayCount } = state.calendar as CalendarState;
+    const { view, dayCount } = state.calendar as unknown as CalendarState;
 
     const amount = view === calendarViews.FORECAST ? dayCount : 1;
-    const time = moment((state.calendar as CalendarState).time).subtract(
+    const time = moment(
+      (state.calendar as unknown as CalendarState).time
+    ).subtract(
       amount,
       viewRanges[view] as moment.unitOfTime.DurationConstructor
     );
@@ -534,14 +538,14 @@ export const actionHandlers = handleThunks({
   [GOTO_CALENDAR_NEXT_RANGE]: function (
     getState: () => AppState,
     _payload: unknown,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const state = getState();
 
-    const { view, dayCount } = state.calendar as CalendarState;
+    const { view, dayCount } = state.calendar as unknown as CalendarState;
 
     const amount = view === calendarViews.FORECAST ? dayCount : 1;
-    const time = moment((state.calendar as CalendarState).time).add(
+    const time = moment((state.calendar as unknown as CalendarState).time).add(
       amount,
       viewRanges[view] as moment.unitOfTime.DurationConstructor
     );
@@ -552,7 +556,7 @@ export const actionHandlers = handleThunks({
   [SEARCH_MISSING]: function (
     _getState: () => AppState,
     payload: SearchMissingPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { gameIds } = payload;
 

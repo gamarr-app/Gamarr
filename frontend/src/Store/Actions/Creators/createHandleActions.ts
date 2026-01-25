@@ -12,7 +12,8 @@ import {
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 
-type State = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type State = Record<string, any>;
 
 interface ItemWithId {
   id: number;

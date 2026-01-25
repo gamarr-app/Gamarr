@@ -1,10 +1,8 @@
-type State = Record<string, unknown>;
-
-function updateSectionState(
-  state: State,
+function updateSectionState<T extends object>(
+  state: T,
   section: string,
-  newState: State
-): State {
+  newState: object
+): T {
   const [, subSection] = section.split('.');
 
   if (subSection) {

@@ -49,7 +49,6 @@ function IndexerOptions({
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setIndexerOptionsValue(change));
     },
     [dispatch]
@@ -57,7 +56,6 @@ function IndexerOptions({
 
   const handleWhitelistedSubtitleChange = useCallback(
     ({ name, value }: InputChanged<string[] | null>) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setIndexerOptionsValue({ name, value: value?.join(',') }));
     },
     [dispatch]

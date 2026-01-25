@@ -78,7 +78,6 @@ function EditImportListExclusionModalContent({
 
   const dispatchSetImportListExclusionValue = useCallback(
     (payload: { name: string; value: string | number }) => {
-      // @ts-expect-error 'setImportListExclusionValue' isn't typed yet
       dispatch(setImportListExclusionValue(payload));
     },
     [dispatch]
@@ -104,7 +103,6 @@ function EditImportListExclusionModalContent({
 
   const onInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error 'setImportListExclusionValue' isn't typed yet
       dispatch(setImportListExclusionValue(change));
     },
     [dispatch]

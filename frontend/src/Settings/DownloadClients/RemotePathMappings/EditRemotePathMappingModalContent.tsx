@@ -154,7 +154,6 @@ function EditRemotePathMappingModalContent({
     if (!id) {
       Object.keys(newRemotePathMapping).forEach((name) => {
         dispatch(
-          // @ts-expect-error - actions aren't typed
           setRemotePathMappingValue({
             name,
             value: newRemotePathMapping[name],
@@ -173,7 +172,6 @@ function EditRemotePathMappingModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setRemotePathMappingValue({ name, value }));
     },
     [dispatch]

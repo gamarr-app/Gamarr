@@ -7,7 +7,7 @@ import createAjaxRequest from 'Utilities/createAjaxRequest';
 import getProviderState from 'Utilities/State/getProviderState';
 import { set, updateItem } from '../baseActions';
 
-interface SaveProviderPayload {
+export interface SaveProviderPayload {
   id?: number;
   queryParams?: Record<string, unknown>;
   [key: string]: unknown;
