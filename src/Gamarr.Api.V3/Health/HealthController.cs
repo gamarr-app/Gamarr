@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.Datastore.Events;
@@ -30,7 +29,7 @@ namespace Gamarr.Api.V3.Health
 
         protected override HealthResource GetResourceById(int id)
         {
-            throw new NotImplementedException();
+            throw new NotFoundException();
         }
 
         [HttpGet]

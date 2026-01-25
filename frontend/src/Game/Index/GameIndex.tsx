@@ -343,9 +343,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
             ref={scrollerRef}
             className={styles.contentBody}
             innerClassName={
-              (styles as unknown as Record<string, string>)[
-                `${view}InnerContentBody`
-              ]
+              styles[`${view}InnerContentBody` as keyof typeof styles]
             }
             initialScrollTop={props.initialScrollTop}
             onScroll={onScroll}

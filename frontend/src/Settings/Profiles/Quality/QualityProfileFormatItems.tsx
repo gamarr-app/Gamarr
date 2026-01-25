@@ -11,7 +11,8 @@ import QualityProfileFormatItem from './QualityProfileFormatItem';
 import styles from './QualityProfileFormatItems.css';
 
 interface FormError {
-  message: string;
+  message?: string;
+  errorMessage?: string;
 }
 
 interface QualityProfileFormatItemsProps {
@@ -92,7 +93,7 @@ function QualityProfileFormatItems({
           return (
             <FormInputHelpText
               key={index}
-              text={error.message}
+              text={error.errorMessage ?? error.message ?? ''}
               isError={true}
               isCheckInput={false}
             />
@@ -103,7 +104,7 @@ function QualityProfileFormatItems({
           return (
             <FormInputHelpText
               key={index}
-              text={warning.message}
+              text={warning.errorMessage ?? warning.message ?? ''}
               isWarning={true}
               isCheckInput={false}
             />

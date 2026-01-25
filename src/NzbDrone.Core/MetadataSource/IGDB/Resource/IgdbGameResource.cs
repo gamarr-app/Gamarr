@@ -477,6 +477,15 @@ namespace NzbDrone.Core.MetadataSource.IGDB.Resource
         }
     }
 
+    /// <summary>
+    /// Minimal resource for queries that only need game ID (e.g., GetChangedGames)
+    /// </summary>
+    public class IgdbGameIdResource
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+    }
+
     public class IgdbExternalGameResource
     {
         [JsonProperty("id")]

@@ -158,7 +158,10 @@ export interface FormInputGroupValues<T> {
 
 // TODO: Remove once all parent components are updated to TSX and we can refactor to a consistent type
 export interface ValidationMessage {
-  message: string;
+  message?: string;
+  errorMessage?: string;
+  infoLink?: string;
+  detailedDescription?: string;
 }
 
 export type FormInputGroupProps<V, C extends InputType> = Omit<
@@ -288,7 +291,7 @@ function FormInputGroup<T, C extends InputType>(
         return (
           <FormInputHelpText
             key={index}
-            text={error.errorMessage}
+            text={error.errorMessage ?? error.message ?? ''}
             link={error.infoLink}
             tooltip={error.detailedDescription}
             isError={true}
@@ -301,7 +304,7 @@ function FormInputGroup<T, C extends InputType>(
         return (
           <FormInputHelpText
             key={index}
-            text={warning.errorMessage}
+            text={warning.errorMessage ?? warning.message ?? ''}
             link={warning.infoLink}
             tooltip={warning.detailedDescription}
             isWarning={true}

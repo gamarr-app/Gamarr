@@ -223,7 +223,7 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <RelativeDateCell
               key={name}
-              className={(styles as unknown as Record<string, string>)[name]}
+              className={styles[name as keyof typeof styles]}
               date={added}
               component={VirtualTableRowCell}
             />
@@ -242,7 +242,7 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <RelativeDateCell
               key={name}
-              className={(styles as unknown as Record<string, string>)[name]}
+              className={styles[name as keyof typeof styles]}
               date={inCinemas}
               timeForToday={false}
               component={VirtualTableRowCell}
@@ -254,7 +254,7 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <RelativeDateCell
               key={name}
-              className={(styles as unknown as Record<string, string>)[name]}
+              className={styles[name as keyof typeof styles]}
               date={digitalRelease}
               timeForToday={false}
               component={VirtualTableRowCell}
@@ -266,7 +266,7 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <RelativeDateCell
               key={name}
-              className={(styles as unknown as Record<string, string>)[name]}
+              className={styles[name as keyof typeof styles]}
               date={physicalRelease}
               timeForToday={false}
               component={VirtualTableRowCell}
@@ -278,7 +278,7 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <RelativeDateCell
               key={name}
-              className={(styles as unknown as Record<string, string>)[name]}
+              className={styles[name as keyof typeof styles]}
               date={releaseDate}
               timeForToday={false}
               component={VirtualTableRowCell}

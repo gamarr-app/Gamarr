@@ -17,7 +17,9 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex EditionRegex = new Regex(@"\(?\b(?<edition>(((Recut.|Extended.|Ultimate.)?(Director.?s|Collector.?s|Theatrical|Ultimate|Extended|Despecialized|(Special|Rouge|Final|Assembly|Imperial|Diamond|Signature|Hunter|Rekall)(?=(.(Cut|Edition|Version)))|\d{2,3}(th)?.Anniversary)(?:.(Cut|Edition|Version))?(.(Extended|Uncensored|Remastered|Unrated|Uncut|Open.?Matte|IMAX|Fan.?Edit))?|((Uncensored|Remastered|Unrated|Uncut|Open?.Matte|IMAX|Fan.?Edit|Restored|((2|3|4)in1))))))\b\)?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex ReportEditionRegex = new Regex(@"^.+?" + EditionRegex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        // Note: Using EditionRegex directly instead of ^.+? prefix to avoid catastrophic backtracking
+        // The old pattern (^.+? + EditionRegex) caused O(n²) or worse performance as the regex engine
+        // tried every possible split point in the string when the edition pattern didn't match early.
 
         private static readonly Regex HardcodedSubsRegex = new Regex(@"\b((?<hcsub>(\w+(?<!SOFT|MULTI|HORRIBLE)SUBS?))|(?<hc>(HC|SUBBED)))\b",
                                                         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
@@ -590,7 +592,9 @@ namespace NzbDrone.Core.Parser
 
         public static string ParseEdition(string languageTitle)
         {
-            var editionMatch = ReportEditionRegex.Match(languageTitle);
+            // Use EditionRegex directly for better performance - it will find the edition anywhere in the string
+            // without the O(n²) backtracking caused by the old ^.+? prefix pattern
+            var editionMatch = EditionRegex.Match(languageTitle);
 
             if (editionMatch.Success && editionMatch.Groups["edition"].Value != null &&
                 editionMatch.Groups["edition"].Value.IsNotNullOrWhiteSpace())

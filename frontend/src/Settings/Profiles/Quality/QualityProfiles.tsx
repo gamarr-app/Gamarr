@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AppSectionProviderState, Error } from 'App/State/AppSectionState';
 import Card from 'Components/Card';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
@@ -17,6 +18,7 @@ import EditQualityProfileModal from './EditQualityProfileModal';
 import QualityProfile from './QualityProfile';
 import styles from './QualityProfiles.css';
 
+// Local interface matching the component's expectations
 interface QualityProfileListItem {
   id: number;
   name: string;
@@ -34,15 +36,17 @@ interface QualityProfileListItem {
 function QualityProfiles() {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, error, items, isDeleting } = useSelector(
-    createSortedSectionSelector(
+    createSortedSectionSelector<
+      QualityProfileListItem,
+      AppSectionProviderState<QualityProfileListItem>
+    >(
       'settings.qualityProfiles',
-      (a: { id: number; name: string }, b: { id: number; name: string }) =>
-        a.name.localeCompare(b.name)
+      (a, b) => a.name.localeCompare(b.name)
     )
-  ) as unknown as {
+  ) as {
     isFetching: boolean;
     isPopulated: boolean;
-    error: import('App/State/AppSectionState').Error | undefined;
+    error: Error | undefined;
     items: QualityProfileListItem[];
     isDeleting: boolean;
   };

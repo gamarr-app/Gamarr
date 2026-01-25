@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AppSectionProviderState, Error } from 'App/State/AppSectionState';
 import Card from 'Components/Card';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
@@ -18,22 +19,21 @@ import CustomFormat from './CustomFormat';
 import EditCustomFormatModal from './EditCustomFormatModal';
 import styles from './CustomFormats.css';
 
-interface CustomFormatListItem extends CustomFormatType {
-  specifications: Array<{ name: string; required: boolean; negate: boolean }>;
-}
-
 function CustomFormats() {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, error, items, isDeleting } = useSelector(
-    createSortedSectionSelector(
+    createSortedSectionSelector<
+      CustomFormatType,
+      AppSectionProviderState<CustomFormatType>
+    >(
       'settings.customFormats',
-      sortByProp('name') as (a: { name: string }, b: { name: string }) => number
+      sortByProp('name')
     )
-  ) as unknown as {
+  ) as {
     isFetching: boolean;
     isPopulated: boolean;
-    error: import('App/State/AppSectionState').Error | undefined;
-    items: CustomFormatListItem[];
+    error: Error | undefined;
+    items: CustomFormatType[];
     isDeleting: boolean;
   };
 

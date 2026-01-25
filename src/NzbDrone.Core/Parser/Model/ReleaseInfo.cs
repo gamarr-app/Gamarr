@@ -53,32 +53,14 @@ namespace NzbDrone.Core.Parser.Model
         [JsonIgnore]
         public PendingReleaseReason? PendingReleaseReason { get; set; }
 
-        public int Age
-        {
-            get { return DateTime.UtcNow.Subtract(PublishDate).Days; }
+        [JsonIgnore]
+        public int Age => DateTime.UtcNow.Subtract(PublishDate).Days;
 
-            // This prevents manually downloading a release from blowing up in mono
-            // TODO: Is there a better way?
-            private set { }
-        }
+        [JsonIgnore]
+        public double AgeHours => DateTime.UtcNow.Subtract(PublishDate).TotalHours;
 
-        public double AgeHours
-        {
-            get { return DateTime.UtcNow.Subtract(PublishDate).TotalHours; }
-
-            // This prevents manually downloading a release from blowing up in mono
-            // TODO: Is there a better way?
-            private set { }
-        }
-
-        public double AgeMinutes
-        {
-            get { return DateTime.UtcNow.Subtract(PublishDate).TotalMinutes; }
-
-            // This prevents manually downloading a release from blowing up in mono
-            // TODO: Is there a better way?
-            private set { }
-        }
+        [JsonIgnore]
+        public double AgeMinutes => DateTime.UtcNow.Subtract(PublishDate).TotalMinutes;
 
         public override string ToString()
         {

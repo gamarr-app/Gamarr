@@ -38,7 +38,7 @@ namespace Gamarr.Api.V3.Queue
 
         protected override QueueStatusResource GetResourceById(int id)
         {
-            throw new NotImplementedException();
+            throw new NotFoundException();
         }
 
         [HttpGet]

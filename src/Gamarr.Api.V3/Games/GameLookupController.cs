@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -49,12 +48,12 @@ namespace Gamarr.Api.V3.Games
         [NonAction]
         public override ActionResult<GameResource> GetResourceByIdWithErrorHandler(int id)
         {
-            throw new NotImplementedException();
+            return base.GetResourceByIdWithErrorHandler(id);
         }
 
         protected override GameResource GetResourceById(int id)
         {
-            throw new NotImplementedException();
+            throw new NotFoundException();
         }
 
         /// <summary>

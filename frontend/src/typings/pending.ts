@@ -4,6 +4,7 @@ export interface ValidationFailure {
   isWarning: boolean;
   propertyName: string;
   errorMessage: string;
+  message?: string;
   infoLink?: string;
   detailedDescription?: string;
   severity: 'error' | 'warning';
@@ -19,6 +20,7 @@ export interface ValidationWarning extends ValidationFailure {
 
 export interface Failure {
   errorMessage: ValidationFailure['errorMessage'];
+  message?: ValidationFailure['message'];
   infoLink: ValidationFailure['infoLink'];
   detailedDescription: ValidationFailure['detailedDescription'];
 }

@@ -83,18 +83,11 @@ function Notifications() {
         error={error}
       >
         <div className={styles.notifications}>
-          {(
-            items as unknown as Array<
-              NotificationType & Record<string, unknown>
-            >
-          ).map((item) => {
+          {(items as NotificationType[]).map((item) => {
             return (
               <Notification
                 key={item.id}
-                {...(item as unknown as Omit<
-                  React.ComponentProps<typeof Notification>,
-                  'tagList' | 'onConfirmDeleteNotification'
-                >)}
+                {...item}
                 tagList={tagList}
                 onConfirmDeleteNotification={handleConfirmDeleteNotification}
               />

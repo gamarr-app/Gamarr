@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { createSelector } from 'reselect';
+import { AppSectionProviderState, Error } from 'App/State/AppSectionState';
 import Card from 'Components/Card';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
@@ -19,20 +21,28 @@ import DownloadClient from './DownloadClient';
 import EditDownloadClientModal from './EditDownloadClientModal';
 import styles from './DownloadClients.css';
 
+function createDownloadClientsSelector() {
+  return createSelector(
+    createSortedSectionSelector<
+      DownloadClientType,
+      AppSectionProviderState<DownloadClientType>
+    >(
+      'settings.downloadClients',
+      sortByProp('name')
+    ),
+    createTagsSelector(),
+    (downloadClients, tagList) => ({
+      ...downloadClients,
+      tagList,
+    })
+  );
+}
+
 function DownloadClients() {
   const dispatch = useDispatch();
-  const { isFetching, isPopulated, error, items } = useSelector(
-    createSortedSectionSelector(
-      'settings.downloadClients',
-      sortByProp('name') as (a: { name: string }, b: { name: string }) => number
-    )
-  ) as unknown as {
-    isFetching: boolean;
-    isPopulated: boolean;
-    error: import('App/State/AppSectionState').Error | undefined;
-    items: DownloadClientType[];
-  };
-  const tagList = useSelector(createTagsSelector());
+  const { isFetching, isPopulated, error, items, tagList } = useSelector(
+    createDownloadClientsSelector()
+  ) as { isFetching: boolean; isPopulated: boolean; error: Error | undefined; items: DownloadClientType[]; tagList: import('App/State/TagsAppState').Tag[] };
 
   const [isAddDownloadClientModalOpen, setIsAddDownloadClientModalOpen] =
     useState(false);

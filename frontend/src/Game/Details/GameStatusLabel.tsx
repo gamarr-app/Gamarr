@@ -129,7 +129,7 @@ function GameStatusLabel({
 
   return (
     <span
-      className={(styles as unknown as Record<string, string>)[statusClass]}
+      className={styles[statusClass as keyof typeof styles]}
     >
       {translate(firstCharToUpper(gameStatus))}
     </span>

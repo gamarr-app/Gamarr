@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.DecisionEngine;
@@ -24,7 +23,7 @@ namespace Gamarr.Api.V3.Indexers
 
         protected override ReleaseResource GetResourceById(int id)
         {
-            throw new NotImplementedException();
+            throw new NotFoundException();
         }
 
         protected virtual List<ReleaseResource> MapDecisions(IEnumerable<DownloadDecision> decisions)

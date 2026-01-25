@@ -9,10 +9,8 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 {
     /// <summary>
     /// Handles Twitch OAuth authentication for IGDB API.
+    /// Tokens are cached and automatically refreshed before expiry.
     /// </summary>
-    /// <remarks>
-    /// TODO: Implement proper OAuth token refresh and caching.
-    /// </remarks>
     public interface IIgdbAuthService
     {
         string GetAccessToken();

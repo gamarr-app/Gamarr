@@ -23,7 +23,7 @@ function SelectGameModalTableHeader(props: SelectGameModalTableHeaderProps) {
         return (
           <VirtualTableHeaderCell
             key={name}
-            className={(styles as unknown as Record<string, string>)[name]}
+            className={styles[name as keyof typeof styles]}
             name={name}
           >
             {typeof label === 'function' ? label() : label}
