@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
@@ -16,6 +17,12 @@ namespace NzbDrone.Core.MetadataSource.RAWG
     public class RawgProxy : IProvideGameInfo, ISearchForNewGame
     {
         private const string RawgApiBaseUrl = "https://api.rawg.io/api/";
+
+        // Conservative rate limit to be a good API citizen (2 requests per second)
+        private const int RateLimitRequestsPerSecond = 2;
+
+        private static readonly Queue<DateTime> RequestTimestamps = new Queue<DateTime>();
+        private static readonly object RateLimitLock = new object();
 
         private readonly IHttpClient _httpClient;
         private readonly IConfigService _configService;
@@ -58,6 +65,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 .Accept(HttpAccept.Json)
                 .Build();
 
+            EnforceRateLimit();
             var response = _httpClient.Get<RawgGameResource>(request);
 
             if (response.Resource == null)
@@ -96,6 +104,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
             try
             {
+                EnforceRateLimit();
                 var response = _httpClient.Get<RawgSearchResult>(request);
                 var game = response.Resource?.Results?.FirstOrDefault();
 
@@ -260,6 +269,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
             try
             {
+                EnforceRateLimit();
                 var response = _httpClient.Get<RawgSearchResult>(request);
 
                 if (response.Resource?.Results == null)
@@ -550,6 +560,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
             try
             {
+                EnforceRateLimit();
                 var response = _httpClient.Get<RawgSearchResult>(request);
 
                 if (response.Resource?.Results == null || !response.Resource.Results.Any())
@@ -595,6 +606,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
             try
             {
+                EnforceRateLimit();
                 var response = _httpClient.Get<RawgSearchResult>(request);
                 var game = response.Resource?.Results?.FirstOrDefault();
                 return game?.Slug;
@@ -603,6 +615,44 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             {
                 _logger.Debug(ex, "Failed to find RAWG slug for '{0}'", title);
                 return null;
+            }
+        }
+
+        private void EnforceRateLimit()
+        {
+            lock (RateLimitLock)
+            {
+                var now = DateTime.UtcNow;
+                var oneSecondAgo = now.AddSeconds(-1);
+
+                // Remove timestamps older than 1 second
+                while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
+                {
+                    RequestTimestamps.Dequeue();
+                }
+
+                // If we've made too many requests, wait
+                if (RequestTimestamps.Count >= RateLimitRequestsPerSecond)
+                {
+                    var oldestRequest = RequestTimestamps.Peek();
+                    var waitTime = oldestRequest.AddSeconds(1) - now;
+                    if (waitTime.TotalMilliseconds > 0)
+                    {
+                        _logger.Debug("RAWG rate limit reached, waiting {0}ms", (int)waitTime.TotalMilliseconds);
+                        Thread.Sleep((int)waitTime.TotalMilliseconds + 10); // Add 10ms buffer
+                    }
+
+                    // Clean up again after waiting
+                    now = DateTime.UtcNow;
+                    oneSecondAgo = now.AddSeconds(-1);
+                    while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
+                    {
+                        RequestTimestamps.Dequeue();
+                    }
+                }
+
+                // Record this request
+                RequestTimestamps.Enqueue(DateTime.UtcNow);
             }
         }
     }
