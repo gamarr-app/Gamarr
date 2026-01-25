@@ -45,7 +45,7 @@ function Scroller(props: ScrollerProps) {
 
   const internalRef = useRef<HTMLDivElement>(null);
 
-  useImperativeHandle(ref, () => internalRef.current!, [ref]);
+  useImperativeHandle(ref, () => internalRef.current!, []);
 
   useEffect(() => {
     if (initialScrollTop != null) {

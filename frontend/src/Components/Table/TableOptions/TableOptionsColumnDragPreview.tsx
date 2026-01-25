@@ -6,6 +6,10 @@ import dimensions from 'Styles/Variables/dimensions';
 import TableOptionsColumn from './TableOptionsColumn';
 import styles from './TableOptionsColumnDragPreview.css';
 
+function noop() {
+  // no-op for drag preview
+}
+
 const formGroupSmallWidth = parseInt(dimensions.formGroupSmallWidth);
 const formLabelLargeWidth = parseInt(dimensions.formLabelLargeWidth);
 const formLabelRightMarginWidth = parseInt(
@@ -70,9 +74,7 @@ class TableOptionsColumnDragPreviewComponent extends Component<TableOptionsColum
           <TableOptionsColumn
             isDragging={false}
             {...item}
-            onVisibleChange={() => {
-              // no-op for preview
-            }}
+            onVisibleChange={noop}
           />
         </div>
       </DragPreviewLayer>

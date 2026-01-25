@@ -40,6 +40,7 @@ interface Game {
 
 interface Column {
   name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   label?: (() => string) | React.ReactElement<any>;
   columnLabel?: () => string;
   isVisible: boolean;

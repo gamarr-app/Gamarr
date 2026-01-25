@@ -125,6 +125,7 @@ function Menu({
   }, []);
 
   const childrenArray = React.Children.toArray(children);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const button = React.cloneElement(childrenArray[0] as ReactElement<any>, {
     onPress: handleMenuButtonPress,
   });
@@ -186,6 +187,7 @@ function Menu({
           {({ ref, style, scheduleUpdate }) => {
             updater.current = scheduleUpdate;
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return React.cloneElement(childrenArray[1] as ReactElement<any>, {
               forwardedRef: ref,
               style: {

@@ -1,6 +1,5 @@
 import { Component } from 'react';
-import { ContentRect } from 'react-measure';
-import Measure from 'react-measure';
+import Measure, { ContentRect } from 'react-measure';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
 import CollectionItemConnector from 'Collection/CollectionItemConnector';
 import { CollectionItem } from 'Store/Selectors/createCollectionClientSideCollectionItemsSelector';
