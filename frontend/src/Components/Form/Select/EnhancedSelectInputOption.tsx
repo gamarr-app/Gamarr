@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { SyntheticEvent, useCallback } from 'react';
+import { ReactNode, SyntheticEvent, useCallback } from 'react';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { icons } from 'Helpers/Props';
@@ -19,7 +19,7 @@ export interface EnhancedSelectInputOptionProps {
   isHidden?: boolean;
   isMultiSelect?: boolean;
   isMobile: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
   onSelect: (...args: unknown[]) => unknown;
 }
 

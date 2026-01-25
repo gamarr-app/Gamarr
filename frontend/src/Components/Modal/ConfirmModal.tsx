@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Button from 'Components/Link/Button';
 import SpinnerButton, {
   SpinnerButtonProps,
@@ -13,7 +13,7 @@ import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 interface ConfirmModalProps extends Omit<ModalProps, 'onModalClose'> {
   kind?: SpinnerButtonProps['kind'];
   title: string;
-  message: React.ReactNode;
+  message: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   hideCancelButton?: boolean;

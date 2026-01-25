@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react';
 import { useDragLayer, XYCoord } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { QUALITY_PROFILE_ITEM } from 'Helpers/dragTypes';
@@ -39,7 +40,7 @@ function QualityProfileItemDragPreview() {
     dragHandleWidth;
   const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
 
-  const style: React.CSSProperties = {
+  const style: CSSProperties = {
     position: 'absolute',
     WebkitTransform: transform,
     msTransform: transform,

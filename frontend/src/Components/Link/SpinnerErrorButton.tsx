@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import Icon, { IconKind, IconName } from 'Components/Icon';
 import SpinnerButton, {
@@ -51,7 +51,7 @@ function getTestResult(error: Error | string | undefined) {
 interface SpinnerErrorButtonProps extends SpinnerButtonProps {
   isSpinning: boolean;
   error?: Error | string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function SpinnerErrorButton({

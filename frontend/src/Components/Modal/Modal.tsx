@@ -1,6 +1,13 @@
 import classNames from 'classnames';
 import elementClass from 'element-class';
-import { MouseEvent, useCallback, useEffect, useId, useRef } from 'react';
+import {
+  MouseEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+} from 'react';
 import ReactDOM from 'react-dom';
 import FocusLock from 'react-focus-lock';
 import ErrorBoundary from 'Components/Error/ErrorBoundary';
@@ -46,7 +53,7 @@ export interface ModalProps {
   style?: object;
   backdropClassName?: string;
   size?: Extract<Size, keyof typeof styles>;
-  children?: React.ReactNode;
+  children?: ReactNode;
   isOpen: boolean;
   closeOnBackgroundClick?: boolean;
   onModalClose: () => void;

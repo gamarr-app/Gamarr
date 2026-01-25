@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { icons, sortDirections } from 'Helpers/Props';
@@ -8,7 +8,7 @@ import styles from './TableHeaderCell.css';
 interface TableHeaderCellProps {
   className?: string;
   name: string;
-  label?: string | (() => string) | React.ReactNode;
+  label?: string | (() => string) | ReactNode;
   columnLabel?: string | (() => string);
   isSortable?: boolean;
   isVisible?: boolean;
@@ -16,7 +16,7 @@ interface TableHeaderCellProps {
   sortKey?: string;
   fixedSortDirection?: SortDirection;
   sortDirection?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onSortPress?: (name: string, sortDirection?: SortDirection) => void;
 }
 

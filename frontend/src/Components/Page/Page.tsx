@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppUpdatedModal from 'App/AppUpdatedModal';
 import ColorImpairedContext from 'App/ColorImpairedContext';
@@ -18,7 +18,7 @@ import PageSidebar from './Sidebar/PageSidebar';
 import styles from './Page.css';
 
 interface PageProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Page({ children }: PageProps) {

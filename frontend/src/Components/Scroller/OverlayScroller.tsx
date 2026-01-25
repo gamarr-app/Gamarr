@@ -1,4 +1,10 @@
-import { ComponentPropsWithoutRef, useCallback, useRef } from 'react';
+import {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactNode,
+  useCallback,
+  useRef,
+} from 'react';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 import { ScrollDirection } from 'Helpers/Props/scrollDirections';
 import { OnScroll } from './Scroller';
@@ -13,12 +19,12 @@ interface OverlayScrollerProps {
   scrollDirection: ScrollDirection;
   autoHide?: boolean;
   autoScroll?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onScroll?: (payload: OnScroll) => void;
 }
 
 interface ScrollbarTrackProps {
-  style: React.CSSProperties;
+  style: CSSProperties;
   props: ComponentPropsWithoutRef<'div'>;
 }
 

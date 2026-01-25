@@ -38,7 +38,7 @@ interface VirtualTableProps<T extends ModelBase> {
   scrollIndex?: number;
   scrollTop?: number;
   scroller: Element;
-  header: React.ReactNode;
+  header: ReactNode;
   headerHeight?: number;
   rowRenderer: (rowProps: GridCellProps) => ReactNode;
   rowHeight?: number;

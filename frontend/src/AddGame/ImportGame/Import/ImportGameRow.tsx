@@ -57,7 +57,10 @@ function ImportGameRow(props: ImportGameRowProps) {
       </VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.game}>
-        <ImportGameSelectGameConnector id={id} isExistingGame={isExistingGame} />
+        <ImportGameSelectGameConnector
+          id={id}
+          isExistingGame={isExistingGame}
+        />
       </VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.monitor}>

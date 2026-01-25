@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { icons, sortDirections } from 'Helpers/Props';
@@ -12,7 +12,7 @@ interface VirtualTableHeaderCellProps {
   sortKey?: string;
   fixedSortDirection?: SortDirection;
   sortDirection?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onSortPress?: (name: string, sortDirection?: SortDirection) => void;
 }
 

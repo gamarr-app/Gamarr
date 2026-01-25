@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { ElementType, useCallback, useState } from 'react';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
@@ -14,8 +14,8 @@ interface FilterMenuProps {
   selectedFilterKey: string | number;
   filters: Filter[];
   customFilters: CustomFilter[];
-  buttonComponent?: React.ElementType;
-  filterModalConnectorComponent?: React.ElementType;
+  buttonComponent?: ElementType;
+  filterModalConnectorComponent?: ElementType;
   filterModalConnectorComponentProps?: object;
   onFilterSelect: (filter: number | string) => void;
 }

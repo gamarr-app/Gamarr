@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import {
+  ElementType,
   KeyboardEvent,
   Ref,
   SyntheticEvent,
@@ -74,7 +75,7 @@ export interface TagInputProps<T extends TagBase> {
   canEdit?: boolean;
   hasError?: boolean;
   hasWarning?: boolean;
-  tagComponent?: React.ElementType;
+  tagComponent?: ElementType;
   onChange?: (change: InputChanged<T['id'][]>) => void;
   onTagAdd: (newTag: T) => void;
   onTagDelete: TagInputTagProps<T>['onDelete'];

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { FocusEvent, useCallback, useState } from 'react';
 import FieldSet from 'Components/FieldSet';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputButton from 'Components/Form/FormInputButton';
@@ -118,7 +118,7 @@ function SecuritySettings({
     authenticationMethod && authenticationMethod.value !== 'none';
 
   const handleApikeyFocus = useCallback(
-    (event: React.FocusEvent<HTMLInputElement>) => {
+    (event: FocusEvent<HTMLInputElement>) => {
       event.target.select();
     },
     []
