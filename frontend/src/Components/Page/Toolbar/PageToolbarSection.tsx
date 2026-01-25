@@ -121,8 +121,9 @@ function PageToolbarSection({
     >
       {isMeasured ? (
         <div className={classNames(styles.section, styles[alignContent])}>
-          {buttons.map((button) => {
-            return button;
+          {buttons.map((button, index) => {
+            const key = button.props.label ?? button.key ?? index;
+            return React.cloneElement(button, { key });
           })}
 
           {overflowItems.length ? (

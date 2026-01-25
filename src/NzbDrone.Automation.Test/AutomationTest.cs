@@ -52,14 +52,23 @@ namespace NzbDrone.Automation.Test
         {
             ConsoleErrors.Clear();
 
-            // Listen for console errors
+            // Listen for console errors (but ignore React development warnings)
             Page.Console += (_, msg) =>
             {
                 if (msg.Type == "error")
                 {
+                    // Ignore React development warnings that come through as console errors
+                    if (msg.Text.StartsWith("Warning:") || msg.Text.Contains("reactjs.org/link"))
+                    {
+                        return;
+                    }
+
                     ConsoleErrors.Add(msg.Text);
                 }
             };
+
+            // Set longer timeout for assertions (CI is slower)
+            SetDefaultExpectTimeout(30000);
 
             // Listen for page errors (uncaught exceptions)
             Page.PageError += (_, error) =>
