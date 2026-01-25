@@ -185,3 +185,4 @@ Debug
 dotnet
 rebuild.sh
 -c
+UI
