@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         public void SetUp()
         {
             _game = Builder<Game>.CreateNew()
-                                     .With(s => s.Path = @"C:\Test\TV\Series".AsOsAgnostic())
+                                     .With(s => s.Path = @"C:\Test\Games\Game Title".AsOsAgnostic())
                                      .Build();
 
             Mocker.GetMock<IDiskProvider>()
