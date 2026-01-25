@@ -11,7 +11,7 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Games");
 
-            await Expect(Page.Locator("div[class*='GameIndex']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='GameIndex']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("games_index");
         }
 
@@ -20,7 +20,7 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Calendar");
 
-            await Expect(Page.Locator("div[class*='CalendarPage']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='CalendarPage']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("calendar");
         }
 
@@ -29,9 +29,9 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Activity");
 
-            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Queue" })).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "History" })).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Queue" }).First).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "History" }).First).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" }).First).ToBeVisibleAsync();
             await TakeScreenshotAsync("activity_queue");
         }
 
@@ -40,7 +40,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/activity/history");
 
-            await Expect(Page.Locator("div[class*='History']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='History']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("activity_history");
         }
 
@@ -49,7 +49,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/activity/blocklist");
 
-            await Expect(Page.Locator("div[class*='Blocklist']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Blocklist']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("activity_blocklist");
         }
 
@@ -58,8 +58,8 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Wanted");
 
-            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Missing" })).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Missing" }).First).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" }).First).ToBeVisibleAsync();
             await TakeScreenshotAsync("wanted_missing");
         }
 
@@ -68,7 +68,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/wanted/cutoffunmet");
 
-            await Expect(Page.Locator("div[class*='CutoffUnmet']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='CutoffUnmet']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("wanted_cutoffunmet");
         }
 
@@ -77,7 +77,7 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("System");
 
-            await Expect(Page.Locator("div[class*='Health']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Health']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_status");
         }
 
@@ -85,10 +85,10 @@ namespace NzbDrone.Automation.Test
         public async Task Add_New_Game_Page_Loads_Without_Errors()
         {
             await ClickNavLinkAsync("Games");
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Add New" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Add New" }).First.ClickAsync();
             await WaitForNoSpinner();
 
-            await Expect(Page.Locator("input[class*='searchInput']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("input[class*='searchInput']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("add_new_game");
         }
 
@@ -97,7 +97,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/add/import");
 
-            await Expect(Page.Locator("div[class*='ImportGame']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='ImportGame']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("import_games");
         }
 
@@ -106,7 +106,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/add/discover");
 
-            await Expect(Page.Locator("div[class*='DiscoverGame']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='DiscoverGame']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("discover_games");
         }
 
@@ -125,7 +125,7 @@ namespace NzbDrone.Automation.Test
         {
             await ClickNavLinkAsync("Settings");
 
-            await Expect(Page.Locator("div[class*='Settings']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Settings']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_main");
         }
 
@@ -134,7 +134,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/mediamanagement");
 
-            await Expect(Page.Locator("div[class*='MediaManagement']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='MediaManagement']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_mediamanagement");
         }
 
@@ -143,7 +143,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/profiles");
 
-            await Expect(Page.Locator("div[class*='Profiles']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Profiles']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_profiles");
         }
 
@@ -152,7 +152,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/quality");
 
-            await Expect(Page.Locator("div[class*='Quality']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Quality']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_quality");
         }
 
@@ -161,7 +161,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/indexers");
 
-            await Expect(Page.Locator("div[class*='Indexers']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Indexers']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_indexers");
         }
 
@@ -170,7 +170,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/downloadclients");
 
-            await Expect(Page.Locator("div[class*='DownloadClients']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='DownloadClients']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_downloadclients");
         }
 
@@ -179,7 +179,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/importlists");
 
-            await Expect(Page.Locator("div[class*='ImportLists']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='ImportLists']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_importlists");
         }
 
@@ -188,7 +188,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/connect");
 
-            await Expect(Page.Locator("div[class*='Notifications']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Notifications']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_connect");
         }
 
@@ -197,7 +197,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/metadata");
 
-            await Expect(Page.Locator("div[class*='Metadata']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Metadata']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_metadata");
         }
 
@@ -206,7 +206,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/tags");
 
-            await Expect(Page.Locator("div[class*='Tags']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Tags']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_tags");
         }
 
@@ -215,7 +215,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/general");
 
-            await Expect(Page.Locator("div[class*='GeneralSettings']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='GeneralSettings']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_general");
         }
 
@@ -224,7 +224,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/ui");
 
-            await Expect(Page.Locator("div[class*='UISettings']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='UISettings']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_ui");
         }
 
@@ -233,7 +233,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/system/tasks");
 
-            await Expect(Page.Locator("div[class*='Tasks']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Tasks']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_tasks");
         }
 
@@ -242,7 +242,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/system/backup");
 
-            await Expect(Page.Locator("div[class*='Backups']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Backups']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_backup");
         }
 
@@ -251,7 +251,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/system/updates");
 
-            await Expect(Page.Locator("div[class*='Updates']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Updates']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_updates");
         }
 
@@ -260,7 +260,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/system/events");
 
-            await Expect(Page.Locator("div[class*='LogsTable']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='LogsTable']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_events");
         }
 
@@ -269,7 +269,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/system/logs/files");
 
-            await Expect(Page.Locator("div[class*='LogFiles']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='LogFiles']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_logfiles");
         }
     }

@@ -133,7 +133,8 @@ namespace NzbDrone.Automation.Test
 
         protected async Task ClickNavLinkAsync(string text)
         {
-            await Page.GetByRole(AriaRole.Link, new () { Name = text }).ClickAsync();
+            // Use First() because sidebar may have parent + child links with same name
+            await Page.GetByRole(AriaRole.Link, new () { Name = text }).First.ClickAsync();
             await WaitForNoSpinner();
         }
 
