@@ -359,7 +359,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_scan_dotHack_folder()
         {
-            _game.Path = @"C:\Test\TV\.hack".AsOsAgnostic();
+            _game.Path = @"C:\Test\Games\.hack".AsOsAgnostic();
 
             GivenGameFolder();
 

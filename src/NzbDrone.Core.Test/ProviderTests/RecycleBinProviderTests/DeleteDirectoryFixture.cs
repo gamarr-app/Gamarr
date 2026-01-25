@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithoutRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock".AsOsAgnostic();
+            var path = @"C:\Test\Games\Elden Ring".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFolder(path);
 
@@ -40,12 +40,12 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock".AsOsAgnostic();
+            var path = @"C:\Test\Games\Elden Ring".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFolder(path);
 
             Mocker.GetMock<IDiskTransferService>()
-                  .Verify(v => v.TransferFolder(path, @"C:\Test\Recycle Bin\30 Rock".AsOsAgnostic(), TransferMode.Move), Times.Once());
+                  .Verify(v => v.TransferFolder(path, @"C:\Test\Recycle Bin\Elden Ring".AsOsAgnostic(), TransferMode.Move), Times.Once());
         }
 
         [Test]
@@ -53,11 +53,11 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock".AsOsAgnostic();
+            var path = @"C:\Test\Games\Elden Ring".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFolder(path);
 
-            Mocker.GetMock<IDiskProvider>().Verify(v => v.FolderSetLastWriteTime(@"C:\Test\Recycle Bin\30 Rock".AsOsAgnostic(), It.IsAny<DateTime>()), Times.Once());
+            Mocker.GetMock<IDiskProvider>().Verify(v => v.FolderSetLastWriteTime(@"C:\Test\Recycle Bin\Elden Ring".AsOsAgnostic(), It.IsAny<DateTime>()), Times.Once());
         }
 
         [Test]
@@ -65,9 +65,9 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WindowsOnly();
             WithRecycleBin();
-            var path = @"C:\Test\TV\30 Rock".AsOsAgnostic();
+            var path = @"C:\Test\Games\Elden Ring".AsOsAgnostic();
 
-            Mocker.GetMock<IDiskProvider>().Setup(s => s.GetFiles(@"C:\Test\Recycle Bin\30 Rock".AsOsAgnostic(), true))
+            Mocker.GetMock<IDiskProvider>().Setup(s => s.GetFiles(@"C:\Test\Recycle Bin\Elden Ring".AsOsAgnostic(), true))
                                            .Returns(new[] { "File1", "File2", "File3" });
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFolder(path);
