@@ -1020,5 +1020,115 @@ namespace NzbDrone.Core.Test.MetadataSource
             existing.Genres.Should().NotContain("Adventure");
             existing.Ratings.Igdb.Value.Should().Be(92);
         }
+
+        // ============================================================
+        // RAWG Prefix Search Tests
+        // ============================================================
+
+        [Test]
+        public void search_with_rawg_prefix_should_return_empty_when_no_credentials()
+        {
+            var result = _subject.SearchForNewGame("rawg:3328");
+
+            result.Should().BeEmpty();
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void search_with_rawgid_prefix_should_return_empty_when_no_credentials()
+        {
+            var result = _subject.SearchForNewGame("rawgid:3328");
+
+            result.Should().BeEmpty();
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        // ============================================================
+        // Recommendations Merge Tests
+        // ============================================================
+
+        [Test]
+        public void merge_metadata_should_preserve_igdb_recommendations_from_secondary()
+        {
+            var existing = BuildGameMetadata(title: "Test Game", steamAppId: 100);
+            existing.IgdbRecommendations = new List<int>();
+
+            var secondary = BuildGameMetadata();
+            secondary.IgdbRecommendations = new List<int> { 1001, 1002, 1003 };
+
+            InvokeMergeMetadata(existing, secondary);
+
+            existing.IgdbRecommendations.Should().BeEquivalentTo(new List<int> { 1001, 1002, 1003 });
+        }
+
+        [Test]
+        public void merge_metadata_should_not_overwrite_existing_igdb_recommendations()
+        {
+            var existing = BuildGameMetadata(title: "Test Game", steamAppId: 100);
+            existing.IgdbRecommendations = new List<int> { 2001, 2002 };
+
+            var secondary = BuildGameMetadata();
+            secondary.IgdbRecommendations = new List<int> { 3001, 3002, 3003 };
+
+            InvokeMergeMetadata(existing, secondary);
+
+            // Should keep existing recommendations
+            existing.IgdbRecommendations.Should().BeEquivalentTo(new List<int> { 2001, 2002 });
+        }
+
+        [Test]
+        public void merge_metadata_should_preserve_rawg_recommendations_from_secondary()
+        {
+            var existing = BuildGameMetadata(title: "Test Game", steamAppId: 100);
+            existing.RawgRecommendations = new List<int>();
+
+            var secondary = BuildGameMetadata();
+            secondary.RawgRecommendations = new List<int> { 4001, 4002, 4003 };
+
+            InvokeMergeMetadata(existing, secondary);
+
+            existing.RawgRecommendations.Should().BeEquivalentTo(new List<int> { 4001, 4002, 4003 });
+        }
+
+        [Test]
+        public void merge_metadata_should_not_overwrite_existing_rawg_recommendations()
+        {
+            var existing = BuildGameMetadata(title: "Test Game", steamAppId: 100);
+            existing.RawgRecommendations = new List<int> { 5001, 5002 };
+
+            var secondary = BuildGameMetadata();
+            secondary.RawgRecommendations = new List<int> { 6001, 6002, 6003 };
+
+            InvokeMergeMetadata(existing, secondary);
+
+            // Should keep existing recommendations
+            existing.RawgRecommendations.Should().BeEquivalentTo(new List<int> { 5001, 5002 });
+        }
+
+        [Test]
+        public void merge_metadata_should_keep_igdb_and_rawg_recommendations_separate()
+        {
+            var existing = BuildGameMetadata(title: "Test Game", steamAppId: 100);
+            existing.IgdbRecommendations = new List<int>();
+            existing.RawgRecommendations = new List<int>();
+
+            var igdbData = BuildGameMetadata();
+            igdbData.IgdbRecommendations = new List<int> { 1001, 1002 };
+            igdbData.RawgRecommendations = new List<int>();
+
+            InvokeMergeMetadata(existing, igdbData);
+
+            var rawgData = BuildGameMetadata();
+            rawgData.IgdbRecommendations = new List<int>();
+            rawgData.RawgRecommendations = new List<int> { 2001, 2002 };
+
+            InvokeMergeMetadata(existing, rawgData);
+
+            // Both should be preserved separately
+            existing.IgdbRecommendations.Should().BeEquivalentTo(new List<int> { 1001, 1002 });
+            existing.RawgRecommendations.Should().BeEquivalentTo(new List<int> { 2001, 2002 });
+        }
     }
 }

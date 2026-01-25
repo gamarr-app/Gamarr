@@ -216,6 +216,18 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return games?.Select(MapGame).ToList() ?? new List<GameMetadata>();
         }
 
+        public List<int> GetSimilarGames(string title, int igdbId)
+        {
+            // Get similar games from IGDB's built-in similar_games field
+            if (igdbId <= 0)
+            {
+                return new List<int>();
+            }
+
+            var gameInfo = GetGameInfo(igdbId);
+            return gameInfo?.IgdbRecommendations ?? new List<int>();
+        }
+
         public List<Game> SearchForNewGame(string title)
         {
             try
@@ -797,7 +809,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             // Similar games as recommendations
             if (resource.SimilarGames != null)
             {
-                game.Recommendations = resource.SimilarGames.Select(s => s.Id).ToList();
+                game.IgdbRecommendations = resource.SimilarGames.Select(s => s.Id).ToList();
             }
 
             // Videos (YouTube trailer)

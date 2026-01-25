@@ -17,9 +17,11 @@ import styles from './RecommendationsList.css';
 
 interface ExternalGame {
   igdbId: number;
+  rawgId?: number;
   title: string;
   year: number;
   images: Image[];
+  source: 'igdb' | 'rawg';
 }
 
 // Stable selector that doesn't depend on recommendations array
@@ -34,75 +36,111 @@ interface RecommendationsListProps {
 
 function RecommendationsList({ gameId }: RecommendationsListProps) {
   const game = useGame(gameId);
-  const gameRecommendations = game?.recommendations;
+  const igdbRecommendations = game?.igdbRecommendations;
+  const rawgRecommendations = game?.rawgRecommendations;
   const allGames = useSelector(gamesSelector);
 
   const [externalGames, setExternalGames] = useState<ExternalGame[]>([]);
   const [isFetching, setIsFetching] = useState(false);
-  const fetchedIdsRef = useRef<Set<number>>(new Set());
+  const fetchedIgdbIdsRef = useRef<Set<number>>(new Set());
+  const fetchedRawgIdsRef = useRef<Set<number>>(new Set());
 
-  const recommendations = useMemo(() => {
-    return gameRecommendations ?? [];
-  }, [gameRecommendations]);
+  const igdbIds = useMemo(() => {
+    return igdbRecommendations ?? [];
+  }, [igdbRecommendations]);
 
-  // Memoize library games that match recommendations
+  const rawgIds = useMemo(() => {
+    return rawgRecommendations ?? [];
+  }, [rawgRecommendations]);
+
+  // Memoize library games that match IGDB recommendations
   const libraryGames = useMemo(() => {
-    if (!recommendations.length) {
+    if (!igdbIds.length) {
       return [];
     }
-    const igdbIdSet = new Set(recommendations);
+    const igdbIdSet = new Set(igdbIds);
     return allGames.filter((g) => igdbIdSet.has(g.igdbId) && !g.isDlc);
-  }, [recommendations, allGames]);
+  }, [igdbIds, allGames]);
 
   // Memoize which IGDB IDs are in the library
   const libraryIgdbIds = useMemo(() => {
     return new Set(allGames.map((g) => g.igdbId));
   }, [allGames]);
 
-  // Find which recommendations are NOT in the library
+  // Find which IGDB recommendations are NOT in the library
   const missingIgdbIds = useMemo(() => {
-    return recommendations.filter((igdbId) => !libraryIgdbIds.has(igdbId));
-  }, [recommendations, libraryIgdbIds]);
+    return igdbIds.filter((igdbId) => !libraryIgdbIds.has(igdbId));
+  }, [igdbIds, libraryIgdbIds]);
 
-  // Fetch external games - only runs once per unique set of missing IDs
+  // Fetch external games from both RAWG and IGDB
   useEffect(() => {
-    if (missingIgdbIds.length === 0) {
-      return;
-    }
+    const igdbIdsToFetch = missingIgdbIds
+      .filter((id) => !fetchedIgdbIdsRef.current.has(id))
+      .slice(0, 4);
 
-    // Check if we already fetched these IDs
-    const idsToFetch = missingIgdbIds
-      .filter((id) => !fetchedIdsRef.current.has(id))
-      .slice(0, 6);
+    const rawgIdsToFetch = rawgIds
+      .filter((id) => !fetchedRawgIdsRef.current.has(id))
+      .slice(0, 4);
 
-    if (idsToFetch.length === 0) {
+    if (igdbIdsToFetch.length === 0 && rawgIdsToFetch.length === 0) {
       return;
     }
 
     // Mark as fetched immediately to prevent re-fetching
-    idsToFetch.forEach((id) => fetchedIdsRef.current.add(id));
+    igdbIdsToFetch.forEach((id) => fetchedIgdbIdsRef.current.add(id));
+    rawgIdsToFetch.forEach((id) => fetchedRawgIdsRef.current.add(id));
 
     setIsFetching(true);
 
     const fetchGames = async () => {
       const fetchedGames: ExternalGame[] = [];
-      const seenIds = new Set<number>();
+      const seenTitles = new Set<string>();
 
+      // Fetch RAWG games first (better recommendations)
       await Promise.all(
-        idsToFetch.map(async (igdbId) => {
+        rawgIdsToFetch.map(async (rawgId) => {
+          try {
+            const { request } = createAjaxRequest({
+              url: `/game/lookup/rawg?rawgId=${rawgId}`,
+            });
+
+            const data = await request;
+            const titleKey = data?.title?.toLowerCase();
+            if (data && data.title && !seenTitles.has(titleKey)) {
+              seenTitles.add(titleKey);
+              fetchedGames.push({
+                igdbId: data.igdbId || 0,
+                rawgId: data.rawgId,
+                title: data.title,
+                year: data.year,
+                images: data.images || [],
+                source: 'rawg',
+              });
+            }
+          } catch {
+            // Ignore failed fetches for individual games
+          }
+        })
+      );
+
+      // Fetch IGDB games
+      await Promise.all(
+        igdbIdsToFetch.map(async (igdbId) => {
           try {
             const { request } = createAjaxRequest({
               url: `/game/lookup/igdb?igdbId=${igdbId}`,
             });
 
             const data = await request;
-            if (data && data.title && !seenIds.has(data.igdbId)) {
-              seenIds.add(data.igdbId);
+            const titleKey = data?.title?.toLowerCase();
+            if (data && data.title && !seenTitles.has(titleKey)) {
+              seenTitles.add(titleKey);
               fetchedGames.push({
                 igdbId: data.igdbId,
                 title: data.title,
                 year: data.year,
                 images: data.images || [],
+                source: 'igdb',
               });
             }
           } catch {
@@ -112,26 +150,28 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
       );
 
       setExternalGames((prev) => {
-        // Merge with existing, avoiding duplicates
-        const existingIds = new Set(prev.map((g) => g.igdbId));
-        const newGames = fetchedGames.filter((g) => !existingIds.has(g.igdbId));
+        // Merge with existing, avoiding duplicates by title
+        const existingTitles = new Set(prev.map((g) => g.title.toLowerCase()));
+        const newGames = fetchedGames.filter(
+          (g) => !existingTitles.has(g.title.toLowerCase())
+        );
         return [...prev, ...newGames];
       });
       setIsFetching(false);
     };
 
     fetchGames();
-  }, [missingIgdbIds]);
+  }, [missingIgdbIds, rawgIds]);
 
-  // Don't show anything if there are no recommendations
-  if (!recommendations.length) {
+  // Don't show anything if there are no recommendations from either source
+  if (!igdbIds.length && !rawgIds.length) {
     return null;
   }
 
   // Check if we're still waiting to fetch external games
-  const hasPendingFetches = missingIgdbIds.some(
-    (id) => !fetchedIdsRef.current.has(id)
-  );
+  const hasPendingFetches =
+    missingIgdbIds.some((id) => !fetchedIgdbIdsRef.current.has(id)) ||
+    rawgIds.some((id) => !fetchedRawgIdsRef.current.has(id));
 
   // Don't show if nothing to display and nothing pending
   if (
@@ -197,9 +237,13 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
             {/* Games NOT in library - with Add link */}
             {externalGames.map((ext) => (
               <Link
-                key={ext.igdbId}
+                key={`${ext.source}-${ext.source === 'rawg' ? ext.rawgId : ext.igdbId}`}
                 className={styles.card}
-                to={getPathWithUrlBase(`/add/new?term=igdb:${ext.igdbId}`)}
+                to={getPathWithUrlBase(
+                  ext.source === 'rawg' && ext.rawgId
+                    ? `/add/new?term=rawg:${ext.rawgId}`
+                    : `/add/new?term=igdb:${ext.igdbId}`
+                )}
               >
                 <GamePoster
                   className={styles.poster}

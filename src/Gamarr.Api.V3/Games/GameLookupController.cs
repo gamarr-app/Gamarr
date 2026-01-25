@@ -7,6 +7,7 @@ using NzbDrone.Core.ImportLists.ImportExclusions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource;
+using NzbDrone.Core.MetadataSource.RAWG;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
 using Gamarr.Http;
@@ -19,6 +20,7 @@ namespace Gamarr.Api.V3.Games
     {
         private readonly ISearchForNewGame _searchProxy;
         private readonly IProvideGameInfo _gameInfo;
+        private readonly RawgProxy _rawgProxy;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly INamingConfigService _namingService;
         private readonly IMapCoversToLocal _coverMapper;
@@ -27,6 +29,7 @@ namespace Gamarr.Api.V3.Games
 
         public GameLookupController(ISearchForNewGame searchProxy,
                                  IProvideGameInfo gameInfo,
+                                 RawgProxy rawgProxy,
                                  IBuildFileNames fileNameBuilder,
                                  INamingConfigService namingService,
                                  IMapCoversToLocal coverMapper,
@@ -35,6 +38,7 @@ namespace Gamarr.Api.V3.Games
         {
             _gameInfo = gameInfo;
             _searchProxy = searchProxy;
+            _rawgProxy = rawgProxy;
             _fileNameBuilder = fileNameBuilder;
             _namingService = namingService;
             _coverMapper = coverMapper;
@@ -82,6 +86,26 @@ namespace Gamarr.Api.V3.Games
         {
             var availDelay = _configService.AvailabilityDelay;
             var metadata = _gameInfo.GetGameInfo(igdbId);
+
+            if (metadata == null)
+            {
+                return null;
+            }
+
+            var result = new Game { GameMetadata = metadata };
+            var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
+            return result.ToResource(availDelay, translation);
+        }
+
+        /// <summary>
+        /// Lookup game by RAWG ID
+        /// </summary>
+        [HttpGet("rawg")]
+        [Produces("application/json")]
+        public GameResource SearchByRawgId(int rawgId)
+        {
+            var availDelay = _configService.AvailabilityDelay;
+            var metadata = _rawgProxy.GetGameInfo(rawgId);
 
             if (metadata == null)
             {

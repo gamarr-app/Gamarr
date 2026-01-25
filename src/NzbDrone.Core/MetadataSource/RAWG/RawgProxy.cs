@@ -65,7 +65,13 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 throw new GameNotFoundException(rawgId);
             }
 
-            return MapRawgGame(response.Resource);
+            var game = MapRawgGame(response.Resource);
+
+            // Fetch suggested games and store as RawgRecommendations
+            var slug = response.Resource.Slug ?? rawgId.ToString();
+            game.RawgRecommendations = GetSuggestedGames(slug, 10);
+
+            return game;
         }
 
         public GameMetadata GetGameBySteamAppId(int steamAppId)
@@ -165,6 +171,18 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             // RAWG doesn't have a changes endpoint
             // Return empty set - games will be refreshed through normal means
             return new HashSet<int>();
+        }
+
+        public List<int> GetSimilarGames(string title, int igdbId)
+        {
+            // For RAWG, get suggested games based on title search
+            var slug = FindGameSlug(title);
+            if (string.IsNullOrEmpty(slug))
+            {
+                return new List<int>();
+            }
+
+            return GetSuggestedGames(slug, 10);
         }
 
         public List<Game> SearchForNewGame(string title)
@@ -508,6 +526,84 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             }
 
             return System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", string.Empty);
+        }
+
+        /// <summary>
+        /// Get suggested/similar games for a game by its RAWG slug or ID.
+        /// Returns a list of RAWG IDs for similar games.
+        /// </summary>
+        public List<int> GetSuggestedGames(string gameSlugOrId, int limit = 10)
+        {
+            var apiKey = _configService.RawgApiKey;
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                _logger.Debug("RAWG API key not configured, skipping suggested games lookup");
+                return new List<int>();
+            }
+
+            var request = new HttpRequestBuilder($"{RawgApiBaseUrl}games/{gameSlugOrId}/suggested")
+                .AddQueryParam("key", apiKey)
+                .AddQueryParam("page_size", limit)
+                .Accept(HttpAccept.Json)
+                .Build();
+
+            try
+            {
+                var response = _httpClient.Get<RawgSearchResult>(request);
+
+                if (response.Resource?.Results == null || !response.Resource.Results.Any())
+                {
+                    _logger.Debug("No suggested games found for '{0}'", gameSlugOrId);
+                    return new List<int>();
+                }
+
+                var suggestedIds = response.Resource.Results
+                    .Select(g => g.Id)
+                    .Take(limit)
+                    .ToList();
+
+                _logger.Debug("Found {0} suggested games for '{1}'", suggestedIds.Count, gameSlugOrId);
+                return suggestedIds;
+            }
+            catch (HttpException ex)
+            {
+                _logger.Debug(ex, "Failed to get suggested games from RAWG for '{0}'", gameSlugOrId);
+                return new List<int>();
+            }
+        }
+
+        /// <summary>
+        /// Search RAWG for a game by title and return its slug for use with other endpoints.
+        /// </summary>
+        public string FindGameSlug(string title)
+        {
+            var apiKey = _configService.RawgApiKey;
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return null;
+            }
+
+            var request = new HttpRequestBuilder($"{RawgApiBaseUrl}games")
+                .AddQueryParam("key", apiKey)
+                .AddQueryParam("search", title)
+                .AddQueryParam("search_precise", "true")
+                .AddQueryParam("page_size", 1)
+                .Accept(HttpAccept.Json)
+                .Build();
+
+            try
+            {
+                var response = _httpClient.Get<RawgSearchResult>(request);
+                var game = response.Resource?.Results?.FirstOrDefault();
+                return game?.Slug;
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Failed to find RAWG slug for '{0}'", title);
+                return null;
+            }
         }
     }
 }

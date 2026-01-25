@@ -106,6 +106,65 @@ namespace NzbDrone.Core.Test.MetadataSource.RAWG
             ExceptionVerification.IgnoreWarns();
         }
 
+        [Test]
+        public void should_get_suggested_games()
+        {
+            // The Witcher 3 slug
+            var result = Subject.GetSuggestedGames("the-witcher-3-wild-hunt", 10);
+
+            result.Should().NotBeEmpty();
+            result.Should().HaveCountGreaterThan(0);
+
+            // Suggested games should be RAWG IDs (positive integers)
+            foreach (var id in result)
+            {
+                id.Should().BeGreaterThan(0);
+            }
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void should_find_game_slug()
+        {
+            var result = Subject.FindGameSlug("The Witcher 3");
+
+            result.Should().NotBeNullOrWhiteSpace();
+            result.Should().Contain("witcher");
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void should_get_similar_games_by_title()
+        {
+            var result = Subject.GetSimilarGames("The Witcher 3: Wild Hunt", 0);
+
+            result.Should().NotBeEmpty();
+            result.Should().HaveCountGreaterThan(0);
+
+            // Similar games should be RAWG IDs
+            foreach (var id in result)
+            {
+                id.Should().BeGreaterThan(0);
+            }
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void should_populate_rawg_recommendations_when_fetching_game_info()
+        {
+            // The Witcher 3 (RAWG ID 3328)
+            var result = Subject.GetGameInfo(3328);
+
+            result.Should().NotBeNull();
+            result.RawgRecommendations.Should().NotBeNull();
+            result.RawgRecommendations.Should().HaveCountGreaterThan(0);
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
         private void ValidateGame(GameMetadata game)
         {
             game.Should().NotBeNull();
