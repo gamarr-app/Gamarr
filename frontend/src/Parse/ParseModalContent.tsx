@@ -48,15 +48,11 @@ function ParseModalContent(props: ParseModalContentProps) {
     dispatch(clear());
   }, [setTitle, dispatch]);
 
-  useEffect(
-    () => {
-      return () => {
-        dispatch(clear());
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    return () => {
+      dispatch(clear());
+    };
+  }, [dispatch]);
 
   return (
     <ModalContent onModalClose={onModalClose}>

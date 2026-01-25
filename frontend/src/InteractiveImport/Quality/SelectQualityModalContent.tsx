@@ -68,13 +68,9 @@ function SelectQualityModalContent(props: SelectQualityModalContentProps) {
   );
   const dispatch = useDispatch();
 
-  useEffect(
-    () => {
-      dispatch(fetchQualityProfileSchema());
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    dispatch(fetchQualityProfileSchema());
+  }, [dispatch]);
 
   const qualityOptions = useMemo(() => {
     return items.map(({ id, name }) => {

@@ -164,24 +164,20 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
     [dispatch]
   );
 
-  useEffect(
-    () => {
-      // Only fetch releases if they are not already being fetched and not yet populated.
+  useEffect(() => {
+    // Only fetch releases if they are not already being fetched and not yet populated.
 
-      if (!isFetching && !isPopulated) {
-        dispatch(fetchReleases(searchPayload));
+    if (!isFetching && !isPopulated) {
+      dispatch(fetchReleases(searchPayload));
 
-        const { gameId } = searchPayload;
+      const { gameId } = searchPayload;
 
-        if (gameId) {
-          dispatch(fetchGameBlocklist({ gameId }));
-          dispatch(fetchGameHistory({ gameId }));
-        }
+      if (gameId) {
+        dispatch(fetchGameBlocklist({ gameId }));
+        dispatch(fetchGameHistory({ gameId }));
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+    }
+  }, [dispatch, isFetching, isPopulated, searchPayload]);
 
   const errorMessage = getErrorMessage(error);
 

@@ -24,7 +24,7 @@ interface QualityProfileItemGroupProps {
   isDragging: boolean;
   isDraggingUp: boolean;
   isDraggingDown: boolean;
-  connectDragSource?: (node: React.ReactElement) => React.ReactElement;
+  connectDragSource?: (node: React.ReactElement) => React.ReactElement | null;
   onItemGroupAllowedChange: (groupId: number, value: boolean) => void;
   onQualityProfileItemAllowedChange: (
     qualityId: number,

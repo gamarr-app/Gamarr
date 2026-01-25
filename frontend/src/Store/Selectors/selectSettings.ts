@@ -68,10 +68,8 @@ function mapFailure(failure: ValidationFailure): Failure {
   };
 }
 
-export interface ModelBaseSetting {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [id: string]: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ModelBaseSetting = Record<string, any>;
 
 function selectSettings<T extends ModelBaseSetting>(
   item: T,
@@ -127,11 +125,9 @@ function selectSettings<T extends ModelBaseSetting>(
         );
 
         if (pendingChanges && 'fields' in pendingChanges) {
-          const pendingChangesFields = pendingChanges.fields as Record<
-            string,
+          const pendingChangesFields =
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            any
-          >;
+            pendingChanges.fields as Record<string, any>;
 
           if (pendingChangesFields.hasOwnProperty(field.name)) {
             field.previousValue = field.value;

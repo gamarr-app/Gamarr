@@ -17,7 +17,7 @@ interface QualityProfileItemProps {
   isDragging: boolean;
   isOverCurrent?: boolean;
   isInGroup?: boolean;
-  connectDragSource?: (node: React.ReactElement) => React.ReactElement;
+  connectDragSource?: (node: React.ReactElement) => React.ReactElement | null;
   onCreateGroupPress?: (qualityId: number) => void;
   onQualityProfileItemAllowedChange?: (
     qualityId: number,

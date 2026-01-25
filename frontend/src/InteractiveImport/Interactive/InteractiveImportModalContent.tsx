@@ -1,5 +1,11 @@
 import { cloneDeep, without } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -257,6 +263,7 @@ function InteractiveImportModalContent(
   const { allSelected, allUnselected, selectedState } = selectState;
   const previousIsDeleting = usePrevious(isDeleting);
   const dispatch = useDispatch();
+  const isInitializedRef = useRef(false);
 
   const columns: Column[] = useMemo(() => {
     const result: Column[] = cloneDeep(COLUMNS);
@@ -321,37 +328,47 @@ function InteractiveImportModalContent(
     return options;
   }, [allowGameChange]);
 
-  useEffect(
-    () => {
-      if (initialSortKey) {
-        const sortProps: { sortKey: string; sortDirection?: string } = {
-          sortKey: initialSortKey,
-        };
+  useEffect(() => {
+    if (isInitializedRef.current) {
+      return;
+    }
 
-        if (initialSortDirection) {
-          sortProps.sortDirection = initialSortDirection;
-        }
+    isInitializedRef.current = true;
 
-        dispatch(setInteractiveImportSort(sortProps));
+    if (initialSortKey) {
+      const sortProps: { sortKey: string; sortDirection?: string } = {
+        sortKey: initialSortKey,
+      };
+
+      if (initialSortDirection) {
+        sortProps.sortDirection = initialSortDirection;
       }
 
-      dispatch(
-        fetchInteractiveImportItems({
-          downloadId,
-          gameId,
-          folder,
-          filterExistingFiles,
-        })
-      );
+      dispatch(setInteractiveImportSort(sortProps));
+    }
 
-      // returned function will be called on component unmount
-      return () => {
-        dispatch(clearInteractiveImport());
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+    dispatch(
+      fetchInteractiveImportItems({
+        downloadId,
+        gameId,
+        folder,
+        filterExistingFiles,
+      })
+    );
+
+    // returned function will be called on component unmount
+    return () => {
+      dispatch(clearInteractiveImport());
+    };
+  }, [
+    dispatch,
+    downloadId,
+    gameId,
+    folder,
+    filterExistingFiles,
+    initialSortKey,
+    initialSortDirection,
+  ]);
 
   useEffect(() => {
     if (!isDeleting && previousIsDeleting && !deleteError) {

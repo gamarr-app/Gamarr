@@ -121,8 +121,7 @@ function DeviceInput({
     return () => {
       dispatch(clearOptions({ section: 'devices' }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, [dispatch, provider, providerData]);
 
   return (
     <div className={className}>

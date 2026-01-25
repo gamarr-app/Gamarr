@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { Placement } from 'popper.js';
 import React, {
   useCallback,
   useEffect,
@@ -96,7 +97,7 @@ function Tooltip(props: TooltipProps) {
   }, []);
 
   const computeMaxSize = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PopperJS modifier callback
     (data: any) => {
       const { top, right, bottom, left } = data.offsets.reference;
 
@@ -152,8 +153,7 @@ function Tooltip(props: TooltipProps) {
 
       <Portal>
         <Popper
-          // @ts-expect-error - PopperJS types are not in sync with our position types.
-          placement={position}
+          placement={position as Placement}
           // Disable events to improve performance when many tooltips
           // are shown (Quality Definitions for example).
           eventsEnabled={false}

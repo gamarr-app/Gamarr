@@ -10,7 +10,6 @@ const selectIndexerFlagsValues = (selectedFlags: number) =>
     (state: AppState) => state.settings.indexerFlags,
     (indexerFlags) => {
       const value = indexerFlags.items.reduce((acc: number[], { id }) => {
-        // eslint-disable-next-line no-bitwise
         if ((selectedFlags & id) === id) {
           acc.push(id);
         }

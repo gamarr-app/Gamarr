@@ -1,36 +1,64 @@
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { DragSource, DropTarget } from 'react-dnd';
+import {
+  ConnectDragSource,
+  ConnectDropTarget,
+  DragSource,
+  DragSourceConnector,
+  DragSourceMonitor,
+  DropTarget,
+  DropTargetConnector,
+  DropTargetMonitor,
+} from 'react-dnd';
 import { findDOMNode } from 'react-dom';
+import { Tag } from 'App/State/TagsAppState';
 import { DELAY_PROFILE } from 'Helpers/dragTypes';
 import DelayProfile from './DelayProfile';
 import styles from './DelayProfileDragSource.css';
 
+interface DragItem {
+  id: number;
+  order: number;
+  [key: string]: unknown;
+}
+
+interface DragSourceProps extends DragItem {
+  onDelayProfileDragEnd: (item: DragItem, didDrop: boolean) => void;
+}
+
 const delayProfileDragSource = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  beginDrag(item: any) {
-    return item;
+  beginDrag(props: DragSourceProps): DragItem {
+    return {
+      id: props.id,
+      order: props.order,
+    };
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  endDrag(props: any, monitor: any) {
+  endDrag(props: DragSourceProps, monitor: DragSourceMonitor<DragItem>) {
     props.onDelayProfileDragEnd(monitor.getItem(), monitor.didDrop());
   },
 };
 
+interface DropTargetProps {
+  order: number;
+  onDelayProfileDragMove: (dragIndex: number, hoverIndex: number) => void;
+}
+
 const delayProfileDropTarget = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hover(props: any, monitor: any, component: any) {
+  hover(
+    props: DropTargetProps,
+    monitor: DropTargetMonitor<DragItem>,
+    component: Component
+  ) {
     const dragIndex = monitor.getItem().order;
     const hoverIndex = props.order;
 
-    // eslint-disable-next-line react/no-find-dom-node
     const hoverBoundingRect = (
       findDOMNode(component) as HTMLElement
     ).getBoundingClientRect();
     const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
     const clientOffset = monitor.getClientOffset();
-    const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+    const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
 
     if (dragIndex === hoverIndex) {
       return;
@@ -44,16 +72,20 @@ const delayProfileDropTarget = {
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function collectDragSource(connect: any, monitor: any) {
+function collectDragSource(
+  connect: DragSourceConnector,
+  monitor: DragSourceMonitor
+) {
   return {
     connectDragSource: connect.dragSource(),
     isDragging: monitor.isDragging(),
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function collectDropTarget(connect: any, monitor: any) {
+function collectDropTarget(
+  connect: DropTargetConnector,
+  monitor: DropTargetMonitor
+) {
   return {
     connectDropTarget: connect.dropTarget(),
     isOver: monitor.isOver(),
@@ -68,18 +100,15 @@ interface DelayProfileDragSourceProps {
   isDraggingUp?: boolean;
   isDraggingDown?: boolean;
   isOver?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  connectDragSource?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  connectDropTarget?: any;
+  connectDragSource?: ConnectDragSource | undefined;
+  connectDropTarget?: ConnectDropTarget | undefined;
   enableUsenet?: boolean;
   enableTorrent?: boolean;
   preferredProtocol?: string;
   usenetDelay?: number;
   torrentDelay?: number;
   tags?: number[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tagList?: any[];
+  tagList?: Tag[];
   onConfirmDeleteDelayProfile?: (id: number) => void;
   onDelayProfileDragMove: (dragIndex: number, hoverIndex: number) => void;
   onDelayProfileDragEnd: (
@@ -108,7 +137,7 @@ class DelayProfileDragSourceComponent extends Component<DelayProfileDragSourcePr
     const isBefore = !isDragging && isDraggingUp && isOver;
     const isAfter = !isDragging && isDraggingDown && isOver;
 
-    return connectDropTarget(
+    return connectDropTarget!(
       <div
         className={classNames(
           styles.delayProfileDragSource,
@@ -132,7 +161,7 @@ class DelayProfileDragSourceComponent extends Component<DelayProfileDragSourcePr
             React.ComponentProps<typeof DelayProfile>,
             'id' | 'isDragging' | 'connectDragSource'
           >)}
-          connectDragSource={connectDragSource}
+          connectDragSource={connectDragSource!}
         />
 
         {isAfter && (
@@ -148,7 +177,6 @@ class DelayProfileDragSourceComponent extends Component<DelayProfileDragSourcePr
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default DropTarget(
   DELAY_PROFILE,
   delayProfileDropTarget,

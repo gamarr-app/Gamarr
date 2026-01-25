@@ -46,6 +46,7 @@ function GameImage({
   const [isLoaded, setIsLoaded] = useState(true);
   const [imageIndex, setImageIndex] = useState(0);
   const availableImages = useRef<Image[]>([]);
+  const hasCheckedInitialImages = useRef(false);
 
   const handleLoad = useCallback(() => {
     setHasError(false);
@@ -92,13 +93,13 @@ function GameImage({
   }, [images, coverType, placeholder, size, onError]);
 
   useEffect(() => {
-    if (availableImages.current.length === 0) {
-      onError?.();
+    if (!hasCheckedInitialImages.current) {
+      hasCheckedInitialImages.current = true;
+      if (availableImages.current.length === 0) {
+        onError?.();
+      }
     }
-    // This should only run once when the component mounts,
-    // so we don't need to include the other dependencies.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onError]);
 
   if (hasError || !url) {
     return <img className={className} style={style} src={placeholder} />;

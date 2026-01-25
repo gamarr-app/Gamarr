@@ -88,8 +88,7 @@ function EditReleaseProfileModalContent({
         dispatch(setReleaseProfileValue({ name, value }));
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id, dispatch]);
 
   useEffect(() => {
     if (previousIsSaving && !isSaving && !saveError) {
