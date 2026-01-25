@@ -174,8 +174,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             result.DetectedGroup.Should().Be("FitGirl");
             result.IsValid.Should().BeTrue();
-            result.Confidence.Should().Be(ReleaseStructureConfidence.High);
-            result.Message.Should().Contain("matches known");
+            result.Confidence.Should().Be(ReleaseStructureConfidence.Medium);
+            result.Message.Should().Contain("Detected as");
             result.Message.Should().Contain("FitGirl");
         }
 
