@@ -1,3 +1,4 @@
+import { ImportGameSelectedGame } from 'App/State/ImportGameAppState';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
@@ -7,22 +8,15 @@ import { SelectStateInputProps } from 'typings/props';
 import ImportGameSelectGameConnector from './SelectGame/ImportGameSelectGameConnector';
 import styles from './ImportGameRow.css';
 
-interface SelectedGame {
-  igdbId: number;
-  title: string;
-  year: number;
-  studio?: string;
-}
-
 interface ImportGameRowProps {
   id: string;
   relativePath: string;
   monitor: string;
   qualityProfileId: number;
   minimumAvailability: string;
-  selectedGame?: SelectedGame;
+  selectedGame?: ImportGameSelectedGame;
   isExistingGame: boolean;
-  items: object[];
+  items: ImportGameSelectedGame[];
   isSelected?: boolean;
   onSelectedChange: (payload: SelectStateInputProps) => void;
   onInputChange: (change: InputChanged<string | number>) => void;

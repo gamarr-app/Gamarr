@@ -4,6 +4,10 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import {
+  ImportGameItem,
+  ImportGameSelectedGame,
+} from 'App/State/ImportGameAppState';
+import {
   queueLookupGame,
   setImportGameValue,
 } from 'Store/Actions/importGameActions';
@@ -11,28 +15,12 @@ import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import { InputChanged } from 'typings/inputs';
 import ImportGameRow from './ImportGameRow';
 
-interface SelectedGame {
-  igdbId: number;
-  title: string;
-  year: number;
-  studio?: string;
-  [key: string]: unknown;
-}
-
-interface ImportGameItem {
-  id: string;
-  selectedGame?: SelectedGame;
-  monitor?: string;
-  items?: object[];
-  [key: string]: unknown;
-}
-
 function createImportGameItemSelector() {
   return createSelector(
     (_state: AppState, { id }: { id: string }) => id,
     (state: AppState) => state.importGame.items,
-    (id, items) => {
-      return (_.find(items, { id }) as unknown as ImportGameItem) || {};
+    (id, items): Partial<ImportGameItem> => {
+      return _.find(items, { id }) || {};
     }
   );
 }
@@ -59,6 +47,17 @@ const mapDispatchToProps = {
   setImportGameValue,
 };
 
+interface SelectStateInputProps {
+  id: string | number;
+  value: boolean;
+  shiftKey: boolean;
+}
+
+interface SetImportGameValuePayload {
+  id: string;
+  [key: string]: unknown;
+}
+
 interface ImportGameRowConnectorProps {
   rootFolderId: number;
   id: string;
@@ -66,19 +65,17 @@ interface ImportGameRowConnectorProps {
   qualityProfileId?: number;
   minimumAvailability?: string;
   relativePath?: string;
-  selectedGame?: SelectedGame;
+  selectedGame?: ImportGameSelectedGame;
   isExistingGame?: boolean;
-  items?: object[];
+  items?: ImportGameSelectedGame[];
   isSelected?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSelectedChange: (payload: any) => void;
+  onSelectedChange: (payload: SelectStateInputProps) => void;
   queueLookupGame: (payload: {
     name: string;
     term: string;
     topOfQueue?: boolean;
   }) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setImportGameValue: (values: any) => void;
+  setImportGameValue: (values: SetImportGameValuePayload) => void;
 }
 
 class ImportGameRowConnector extends Component<ImportGameRowConnectorProps> {

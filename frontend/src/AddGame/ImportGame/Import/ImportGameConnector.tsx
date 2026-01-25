@@ -3,6 +3,8 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
+import { ImportGameItem } from 'App/State/ImportGameAppState';
 import { setAddGameDefault } from 'Store/Actions/addGameActions';
 import {
   clearImportGame,
@@ -30,23 +32,13 @@ interface RootFolderItem {
   [key: string]: unknown;
 }
 
-interface ImportGameItem {
-  id: string;
-  [key: string]: unknown;
-}
-
 function createMapStateToProps() {
   return createSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (_state: any, { match }: RouteComponentProps<MatchParams>) => match,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.rootFolders,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.addGame,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.importGame,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.settings.qualityProfiles,
+    (_state: AppState, { match }: RouteComponentProps<MatchParams>) => match,
+    (state: AppState) => state.rootFolders,
+    (state: AppState) => state.addGame,
+    (state: AppState) => state.importGame,
+    (state: AppState) => state.settings.qualityProfiles,
     (match, rootFolders, addGame, importGameState, qualityProfiles) => {
       const {
         isFetching: rootFoldersFetching,
@@ -74,7 +66,7 @@ function createMapStateToProps() {
         return {
           ...result,
           ...rootFolder,
-          items: importGameState.items as ImportGameItem[],
+          items: importGameState.items,
         };
       }
 
@@ -94,6 +86,20 @@ const mapDispatchToProps = {
   dispatchSetAddGameDefault: setAddGameDefault,
 };
 
+interface SetImportGameValuePayload {
+  id: string;
+  [key: string]: unknown;
+}
+
+interface ImportGamePayload {
+  ids: string[];
+}
+
+interface FetchRootFoldersPayload {
+  id?: number;
+  timeout?: boolean;
+}
+
 interface ImportGameConnectorProps extends RouteComponentProps<MatchParams> {
   rootFolderId: number;
   rootFoldersFetching: boolean;
@@ -101,13 +107,10 @@ interface ImportGameConnectorProps extends RouteComponentProps<MatchParams> {
   qualityProfiles: QualityProfile[];
   defaultQualityProfileId: number;
   items: ImportGameItem[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dispatchSetImportGameValue: (values: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dispatchImportGame: (payload: any) => void;
+  dispatchSetImportGameValue: (values: SetImportGameValuePayload) => void;
+  dispatchImportGame: (payload: ImportGamePayload) => void;
   dispatchClearImportGame: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dispatchFetchRootFolders: (payload: any) => void;
+  dispatchFetchRootFolders: (payload?: FetchRootFoldersPayload) => void;
   dispatchSetAddGameDefault: (defaults: Record<string, unknown>) => void;
 }
 

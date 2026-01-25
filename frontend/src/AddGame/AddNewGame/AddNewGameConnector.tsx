@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import { clearAddGame, lookupGame } from 'Store/Actions/addGameActions';
 import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
@@ -14,12 +15,9 @@ import AddNewGame, { AddNewGameItem } from './AddNewGame';
 
 function createMapStateToProps() {
   return createSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.addGame,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.games.items.length,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.router.location,
+    (state: AppState) => state.addGame,
+    (state: AppState) => state.games.items.length,
+    (state: AppState) => state.router.location,
     (addGame, existingGamesCount, location) => {
       const { params } = parseUrl(location.search);
 

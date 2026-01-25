@@ -1,20 +1,13 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
+import { ImportGameItem } from 'App/State/ImportGameAppState';
 import {
   cancelLookupGame,
   lookupUnsearchedGames,
 } from 'Store/Actions/importGameActions';
 import ImportGameFooter from './ImportGameFooter';
-
-interface ImportGameItem {
-  id: string;
-  monitor?: string;
-  qualityProfileId?: number;
-  minimumAvailability?: string;
-  isPopulated?: boolean;
-  [key: string]: unknown;
-}
 
 function isMixed(
   items: ImportGameItem[],
@@ -29,12 +22,9 @@ function isMixed(
 
 function createMapStateToProps() {
   return createSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.addGame,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.importGame,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (_state: any, { selectedIds }: { selectedIds: string[] }) => selectedIds,
+    (state: AppState) => state.addGame,
+    (state: AppState) => state.importGame,
+    (_state: AppState, { selectedIds }: { selectedIds: string[] }) => selectedIds,
     (addGame, importGame, selectedIds) => {
       const {
         monitor: defaultMonitor,
@@ -45,26 +35,25 @@ function createMapStateToProps() {
       const { isLookingUpGame, isImporting, items, importError } = importGame;
 
       const isMonitorMixed = isMixed(
-        items as ImportGameItem[],
+        items,
         selectedIds,
         defaultMonitor,
         'monitor'
       );
       const isQualityProfileIdMixed = isMixed(
-        items as ImportGameItem[],
+        items,
         selectedIds,
         defaultQualityProfileId,
         'qualityProfileId'
       );
       const isMinimumAvailabilityMixed = isMixed(
-        items as ImportGameItem[],
+        items,
         selectedIds,
         defaultMinimumAvailability,
         'minimumAvailability'
       );
       const hasUnsearchedItems =
-        !isLookingUpGame &&
-        (items as ImportGameItem[]).some((item) => !item.isPopulated);
+        !isLookingUpGame && items.some((item) => !item.isPopulated);
 
       return {
         selectedCount: selectedIds.length,

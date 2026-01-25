@@ -1,4 +1,6 @@
+import { RouterState } from 'connected-react-router';
 import { Error } from './AppSectionState';
+import AddGameAppState from './AddGameAppState';
 import BlocklistAppState from './BlocklistAppState';
 import CalendarAppState from './CalendarAppState';
 import CaptchaAppState from './CaptchaAppState';
@@ -82,6 +84,7 @@ export interface AppSectionState {
 }
 
 interface AppState {
+  addGame: AddGameAppState;
   app: AppSectionState;
   blocklist: BlocklistAppState;
   calendar: CalendarAppState;
@@ -107,6 +110,7 @@ interface AppState {
   queue: QueueAppState;
   releases: ReleasesAppState;
   rootFolders: RootFolderAppState;
+  router: RouterState;
   settings: SettingsAppState;
   system: SystemAppState;
   tags: TagsAppState;
