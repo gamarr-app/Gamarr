@@ -9,9 +9,20 @@ function findImages(images: Image[], coverType: CoverType) {
 function getUrl(image: Image, coverType: CoverType, size: number) {
   const imageUrl = image?.url ?? image?.remoteUrl;
 
-  return imageUrl
-    ? imageUrl.replace(`${coverType}.jpg`, `${coverType}-${size}.jpg`)
-    : null;
+  if (!imageUrl) {
+    return null;
+  }
+
+  // For MediaCoverProxy URLs or external URLs that don't follow our naming convention,
+  // return the URL as-is (the server will handle resizing or it's already sized)
+  if (
+    imageUrl.includes('/MediaCoverProxy/') ||
+    !imageUrl.includes(`${coverType}.jpg`)
+  ) {
+    return imageUrl;
+  }
+
+  return imageUrl.replace(`${coverType}.jpg`, `${coverType}-${size}.jpg`);
 }
 
 export interface GameImageProps {
