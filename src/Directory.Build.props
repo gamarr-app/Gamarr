@@ -7,7 +7,9 @@
 	<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <!-- Pin to 8.0.12 for FreeBSD cross-build compatibility -->
+    <RuntimeFrameworkVersion>8.0.12</RuntimeFrameworkVersion>
+    <TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <GamarrRootDir>$(MSBuildThisFileDirectory)..\</GamarrRootDir>
