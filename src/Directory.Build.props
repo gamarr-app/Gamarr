@@ -74,7 +74,7 @@
     <Copyright>Copyright 2014-$([System.DateTime]::Now.ToString('yyyy')) gamarr.video (GNU General Public v3)</Copyright>
     
     <!-- Should be replaced by CI -->
-    <AssemblyVersion>10.0.0.*</AssemblyVersion>
+    <AssemblyVersion>0.0.1.*</AssemblyVersion>
     <AssemblyConfiguration>$(Configuration)-dev</AssemblyConfiguration>
     <NeutralLanguage>en</NeutralLanguage>
 

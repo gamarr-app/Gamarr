@@ -226,6 +226,35 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 if (lowerTitle.StartsWith("igdb:") || lowerTitle.StartsWith("igdbid:"))
                 {
                     var idStr = lowerTitle.Split(':')[1].Trim();
+
+                    // Support comma-separated IDs like igdb:123,456,789
+                    if (idStr.Contains(','))
+                    {
+                        var results = new List<Game>();
+                        var idParts = idStr.Split(',');
+
+                        foreach (var part in idParts)
+                        {
+                            if (int.TryParse(part.Trim(), out var partId))
+                            {
+                                try
+                                {
+                                    var gameLookup = GetGameInfo(partId);
+                                    if (gameLookup != null)
+                                    {
+                                        results.Add(_gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup });
+                                    }
+                                }
+                                catch (GameNotFoundException)
+                                {
+                                    // Skip games not found
+                                }
+                            }
+                        }
+
+                        return results;
+                    }
+
                     if (int.TryParse(idStr, out var igdbId))
                     {
                         try
