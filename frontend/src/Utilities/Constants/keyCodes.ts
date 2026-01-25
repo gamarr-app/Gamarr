@@ -1,0 +1,11 @@
+export const TAB: number = 9;
+export const ENTER: number = 13;
+export const SHIFT: number = 16;
+export const CONTROL: number = 17;
+export const ESCAPE: number = 27;
+export const HOME: number = 36;
+export const END: number = 35;
+export const UP_ARROW: number = 38;
+export const DOWN_ARROW: number = 40;
+export const LEFT_ARROW: number = 37;
+export const RIGHT_ARROW: number = 39;
