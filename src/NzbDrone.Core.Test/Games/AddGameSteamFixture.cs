@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Games
                     CleanTitle = "dota2",
                     SortTitle = "dota 2"
                 },
-                RootFolderPath = "/games",
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
                 QualityProfileId = 1,
                 Monitored = true,
                 Tags = new HashSet<int>()
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.Games
                     CleanTitle = "dota2",
                     SortTitle = "dota 2"
                 },
-                RootFolderPath = "/games",
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
                 QualityProfileId = 1,
                 Monitored = true,
                 Tags = new HashSet<int>()
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Test.Games
                     CleanTitle = "validgame",
                     SortTitle = "valid game"
                 },
-                RootFolderPath = "/games",
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
                 QualityProfileId = 1,
                 Monitored = true,
                 Tags = new HashSet<int>()
@@ -143,7 +143,7 @@ namespace NzbDrone.Core.Test.Games
                     CleanTitle = "invalidgame",
                     SortTitle = "invalid game"
                 },
-                RootFolderPath = "/games",
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
                 QualityProfileId = 1,
                 Monitored = true,
                 Tags = new HashSet<int>()
@@ -188,7 +188,7 @@ namespace NzbDrone.Core.Test.Games
                     CleanTitle = "invalidgame",
                     SortTitle = "invalid game"
                 },
-                RootFolderPath = "/games",
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
                 QualityProfileId = 1,
                 Tags = new HashSet<int>()
             };
@@ -249,7 +249,7 @@ namespace NzbDrone.Core.Test.Games
 
             var result = Subject.AddGame(_newGame);
 
-            result.Path.Should().Be("/games/Dota 2 (2013)".AsOsAgnostic());
+            result.Path.Should().Be(@"C:\games\Dota 2 (2013)".AsOsAgnostic());
         }
 
         [Test]
@@ -265,7 +265,7 @@ namespace NzbDrone.Core.Test.Games
                     CleanTitle = "cs2",
                     SortTitle = "cs2"
                 },
-                RootFolderPath = "/games",
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
                 QualityProfileId = 1,
                 Monitored = true,
                 Tags = new HashSet<int>()
