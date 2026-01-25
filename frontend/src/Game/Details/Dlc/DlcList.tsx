@@ -242,10 +242,10 @@ function DlcList({ gameId }: DlcListProps) {
   if (dlcCount > 0 && isPopulated) {
     // Get the first DLC reference with a name, if available
     const firstDlcRef = dlcReferences.length > 0 ? dlcReferences[0] : null;
-    const firstDlcId = dlcIds.length > 0 ? dlcIds[0] : null;
 
-    // Use igdb:<id> for exact DLC search, fall back to parent game title
-    const searchTerm = firstDlcId ? `igdb:${firstDlcId}` : game?.title ?? '';
+    // Use igdb:<id1,id2,id3> for exact DLC search, fall back to parent game title
+    const searchTerm =
+      dlcIds.length > 0 ? `igdb:${dlcIds.join(',')}` : game?.title ?? '';
 
     // Show DLC name if available and there's only one, otherwise show count
     const displayText =
