@@ -11,27 +11,27 @@ namespace NzbDrone.Automation.Test
         {
             // Games
             await ClickNavLinkAsync("Games");
-            await Expect(Page.Locator("div[class*='GameIndex']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='GameIndex']").First).ToBeVisibleAsync();
 
             // Calendar
             await ClickNavLinkAsync("Calendar");
-            await Expect(Page.Locator("div[class*='CalendarPage']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='CalendarPage']").First).ToBeVisibleAsync();
 
             // Activity
             await ClickNavLinkAsync("Activity");
-            await Expect(Page.Locator("div[class*='Queue']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Queue']").First).ToBeVisibleAsync();
 
             // Wanted
             await ClickNavLinkAsync("Wanted");
-            await Expect(Page.Locator("div[class*='Missing']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Missing']").First).ToBeVisibleAsync();
 
             // Settings
             await ClickNavLinkAsync("Settings");
-            await Expect(Page.Locator("div[class*='Settings']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Settings']").First).ToBeVisibleAsync();
 
             // System
             await ClickNavLinkAsync("System");
-            await Expect(Page.Locator("div[class*='Health']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Health']").First).ToBeVisibleAsync();
         }
 
         [Test]
@@ -40,22 +40,22 @@ namespace NzbDrone.Automation.Test
             await ClickNavLinkAsync("Activity");
 
             // Queue tab (default)
-            await Expect(Page.Locator("div[class*='Queue']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Queue']").First).ToBeVisibleAsync();
 
             // History tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "History" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "History" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='History']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='History']").First).ToBeVisibleAsync();
 
             // Blocklist tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='Blocklist']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Blocklist']").First).ToBeVisibleAsync();
 
             // Back to Queue
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Queue" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Queue" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='Queue']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Queue']").First).ToBeVisibleAsync();
         }
 
         [Test]
@@ -64,17 +64,17 @@ namespace NzbDrone.Automation.Test
             await ClickNavLinkAsync("Wanted");
 
             // Missing tab (default)
-            await Expect(Page.Locator("div[class*='Missing']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Missing']").First).ToBeVisibleAsync();
 
             // Cutoff Unmet tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='CutoffUnmet']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='CutoffUnmet']").First).ToBeVisibleAsync();
 
             // Back to Missing
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Missing" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Missing" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='Missing']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Missing']").First).ToBeVisibleAsync();
         }
 
         [Test]
@@ -83,32 +83,32 @@ namespace NzbDrone.Automation.Test
             await ClickNavLinkAsync("System");
 
             // Status tab (default)
-            await Expect(Page.Locator("div[class*='Health']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Health']").First).ToBeVisibleAsync();
 
             // Tasks tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Tasks" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Tasks" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='Tasks']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Tasks']").First).ToBeVisibleAsync();
 
             // Backup tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Backup" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Backup" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='Backups']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Backups']").First).ToBeVisibleAsync();
 
             // Updates tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Updates" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Updates" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='Updates']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='Updates']").First).ToBeVisibleAsync();
 
             // Events tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Events" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Events" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='LogsTable']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='LogsTable']").First).ToBeVisibleAsync();
 
             // Log Files tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Log Files" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new () { Name = "Log Files" }).First.ClickAsync();
             await WaitForNoSpinner();
-            await Expect(Page.Locator("div[class*='LogFiles']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='LogFiles']").First).ToBeVisibleAsync();
         }
 
         [Test]
@@ -134,9 +134,9 @@ namespace NzbDrone.Automation.Test
 
             foreach (var (linkText, expectedClass) in settingsLinks)
             {
-                await Page.GetByRole(AriaRole.Link, new () { Name = linkText, Exact = true }).ClickAsync();
+                await Page.GetByRole(AriaRole.Link, new () { Name = linkText, Exact = true }).First.ClickAsync();
                 await WaitForNoSpinner();
-                await Expect(Page.Locator($"div[class*='{expectedClass}']")).ToBeVisibleAsync();
+                await Expect(Page.Locator($"div[class*='{expectedClass}']").First).ToBeVisibleAsync();
             }
         }
 
@@ -187,7 +187,7 @@ namespace NzbDrone.Automation.Test
             await Page.Locator("div[class*='searchResult']").First.ClickAsync();
 
             // Wait for the modal to appear
-            await Page.Locator("div[class*='ModalContent']").WaitForAsync(new LocatorWaitForOptions
+            await Page.Locator("div[class*='ModalContent']").First.WaitForAsync(new LocatorWaitForOptions
             {
                 State = WaitForSelectorState.Visible,
                 Timeout = 10000
@@ -196,7 +196,7 @@ namespace NzbDrone.Automation.Test
             await TakeScreenshotAsync("add_game_modal");
 
             // Verify modal has required elements
-            await Expect(Page.Locator("div[class*='ModalContent']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='ModalContent']").First).ToBeVisibleAsync();
 
             // Click the Add Game button
             var addButton = Page.GetByRole(AriaRole.Button, new () { Name = "Add Game" });
@@ -256,7 +256,7 @@ namespace NzbDrone.Automation.Test
         public async Task Calendar_View_Modes_Work()
         {
             await ClickNavLinkAsync("Calendar");
-            await Expect(Page.Locator("div[class*='CalendarPage']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='CalendarPage']").First).ToBeVisibleAsync();
 
             // Take screenshot of calendar
             await TakeScreenshotAsync("calendar_view");
@@ -268,7 +268,7 @@ namespace NzbDrone.Automation.Test
             await ClickNavLinkAsync("Calendar");
 
             // Look for calendar navigation buttons
-            var header = Page.Locator("div[class*='CalendarHeader']");
+            var header = Page.Locator("div[class*='CalendarHeader']").First;
             await Expect(header).ToBeVisibleAsync();
 
             await TakeScreenshotAsync("calendar_navigation");
@@ -278,10 +278,10 @@ namespace NzbDrone.Automation.Test
         public async Task Games_Index_Has_View_Options()
         {
             await ClickNavLinkAsync("Games");
-            await Expect(Page.Locator("div[class*='GameIndex']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='GameIndex']").First).ToBeVisibleAsync();
 
             // Check for view mode buttons/options in the toolbar
-            await Expect(Page.Locator("div[class*='PageToolbar']")).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='PageToolbar']").First).ToBeVisibleAsync();
 
             await TakeScreenshotAsync("games_index_toolbar");
         }
@@ -299,7 +299,7 @@ namespace NzbDrone.Automation.Test
                 await Task.Delay(500); // Wait for modal animation
 
                 // Check if modal opened
-                var modal = Page.Locator("div[class*='Modal']");
+                var modal = Page.Locator("div[class*='Modal']").First;
                 if (await modal.IsVisibleAsync())
                 {
                     await TakeScreenshotAsync("profile_modal");
