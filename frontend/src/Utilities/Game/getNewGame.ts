@@ -1,6 +1,6 @@
 import Game, { GameAvailability, GameMonitor } from 'Game/Game';
 
-interface NewGamePayload {
+export interface NewGamePayload {
   rootFolderPath: string;
   monitor: GameMonitor;
   qualityProfileId: number;

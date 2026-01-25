@@ -35,7 +35,7 @@ interface CustomFormatsCollectionState {
   isPopulated: boolean;
   isDeleting: boolean;
   isSaving: boolean;
-  error: Error | null;
+  error: Error | undefined;
   items: CustomFormat[];
   sortKey: string;
   sortDirection: SortDirection;
@@ -86,7 +86,7 @@ function ManageCustomFormatsModalContent(
     sortDirection,
   } = useSelector(
     createClientSideCollectionSelector('settings.customFormats')
-  ) as CustomFormatsCollectionState;
+  ) as unknown as CustomFormatsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

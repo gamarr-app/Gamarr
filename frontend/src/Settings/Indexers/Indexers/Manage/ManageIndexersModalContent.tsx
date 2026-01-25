@@ -36,7 +36,7 @@ interface IndexersCollectionState {
   isPopulated: boolean;
   isDeleting: boolean;
   isSaving: boolean;
-  error: Error | null;
+  error: Error | undefined;
   items: Indexer[];
   sortKey: string;
   sortDirection: SortDirection;
@@ -110,7 +110,7 @@ function ManageIndexersModalContent(props: ManageIndexersModalContentProps) {
     sortDirection,
   } = useSelector(
     createClientSideCollectionSelector('settings.indexers')
-  ) as IndexersCollectionState;
+  ) as unknown as IndexersCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

@@ -241,9 +241,9 @@ function InteractiveImportModalContent(
     originalItems,
     sortKey,
     sortDirection,
-  }: InteractiveImportAppState = useSelector(
+  } = useSelector(
     createClientSideCollectionSelector('interactiveImport')
-  );
+  ) as unknown as InteractiveImportAppState;
 
   const { isDeleting, deleteError } = useSelector(gameFilesInfoSelector);
   const importMode = useSelector(importModeSelector);

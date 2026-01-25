@@ -12,17 +12,24 @@ export type AppThunk<ReturnType = unknown> = ThunkAction<
 export type AppDispatch = ThunkDispatch<AppState, undefined, AnyAction>;
 type Thunk = (
   getState: GetState,
-  identityFn: never,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  identityFn: any,
   dispatch: AppDispatch
 ) => unknown;
 
 const thunks: Record<string, Thunk> = {};
 
-function identity<T, TResult>(payload: T): TResult {
-  return payload as unknown as TResult;
+function identity<T>(payload: T): T {
+  return payload;
 }
 
-export function createThunk(type: string, identityFunction = identity) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type IdentityFunction = (payload: any) => any;
+
+export function createThunk(
+  type: string,
+  identityFunction: IdentityFunction = identity
+) {
   return function <T>(payload?: T): AppThunk {
     return function (dispatch: AppDispatch, getState: GetState) {
       const thunk = thunks[type];

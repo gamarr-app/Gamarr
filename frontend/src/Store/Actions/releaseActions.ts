@@ -378,9 +378,12 @@ export const actionHandlers = handleThunks({
       );
     });
 
-    promise.fail((xhr: JQuery.jqXHR & { responseJSON?: { message?: string } }) => {
+    promise.fail((xhr: unknown) => {
+      const xhrWithResponse = xhr as {
+        responseJSON?: { message?: string };
+      };
       const grabError =
-        (xhr.responseJSON && xhr.responseJSON.message) ||
+        (xhrWithResponse.responseJSON && xhrWithResponse.responseJSON.message) ||
         'Failed to add to download queue';
 
       dispatch(

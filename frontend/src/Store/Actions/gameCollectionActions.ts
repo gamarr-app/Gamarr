@@ -13,7 +13,7 @@ import {
 import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import sortByProp from 'Utilities/Array/sortByProp';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
-import getNewGame from 'Utilities/Game/getNewGame';
+import getNewGame, { NewGamePayload } from 'Utilities/Game/getNewGame';
 import translate from 'Utilities/String/translate';
 import { set, update, updateItem } from './baseActions';
 import createHandleActions from './Creators/createHandleActions';
@@ -359,7 +359,7 @@ export const actionHandlers = handleThunks({
 
     const newGame = getNewGame(
       { igdbId, title } as unknown as GameType,
-      payload
+      payload as unknown as NewGamePayload
     );
     newGame.id = 0;
 

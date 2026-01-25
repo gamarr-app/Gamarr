@@ -13,7 +13,7 @@ interface ActionModule {
 const defaultState: Record<string, unknown> = {};
 const reducers: Record<string, Reducer> = {};
 
-(actions as ActionModule[]).forEach((action) => {
+(actions as unknown as ActionModule[]).forEach((action) => {
   const section = action.section;
 
   defaultState[section] = action.defaultState;

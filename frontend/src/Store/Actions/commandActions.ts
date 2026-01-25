@@ -2,7 +2,7 @@ import AppState from 'App/State/AppState';
 import { messageTypes } from 'Helpers/Props';
 import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import { isSameCommand } from 'Utilities/Command';
-import createAjaxRequest from 'Utilities/createAjaxRequest';
+import createAjaxRequest, { AjaxPromise } from 'Utilities/createAjaxRequest';
 import translate from 'Utilities/String/translate';
 import { hideMessage, showMessage } from './appActions';
 import { removeItem, updateItem } from './baseActions';
@@ -149,7 +149,7 @@ function scheduleRemoveCommand(
 export function executeCommandHelper(
   payload: CommandPayload,
   dispatch: AppDispatch
-): Promise<CommandData> | undefined {
+): AjaxPromise | undefined {
   if (lastCommand && isSameCommand(lastCommand, payload)) {
     dispatch(
       showMessage({

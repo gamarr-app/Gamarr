@@ -65,7 +65,9 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
   const previousIsGrabbing = usePrevious(isGrabbing);
 
   const dispatch = useDispatch();
-  const game: Game | undefined = useSelector(createGameSelectorForHook(gameId));
+  const game: Game | undefined = useSelector(
+    createGameSelectorForHook(gameId ?? 0)
+  );
   const { items: downloadClients } = useSelector(
     createEnabledDownloadClientsSelector(protocol)
   );

@@ -199,7 +199,7 @@ export default {
         const items = getState().settings.customFormatSpecifications.items;
         const itemsWithId = items.map((item, index) => ({
           ...item,
-          id: item.id ?? index + 1,
+          id: (item as unknown as { id?: number }).id ?? index + 1,
         }));
         saveData.id = getNextId(itemsWithId);
       }

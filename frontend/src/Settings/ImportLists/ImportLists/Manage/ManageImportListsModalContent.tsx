@@ -33,7 +33,7 @@ interface ImportListsCollectionState {
   isPopulated: boolean;
   isDeleting: boolean;
   isSaving: boolean;
-  error: Error | null;
+  error: Error | undefined;
   items: ImportList[];
 }
 
@@ -111,7 +111,7 @@ function ManageImportListsModalContent(
     items,
   } = useSelector(
     createClientSideCollectionSelector('settings.importLists')
-  ) as ImportListsCollectionState;
+  ) as unknown as ImportListsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

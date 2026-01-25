@@ -3,7 +3,7 @@ import AppState from 'App/State/AppState';
 import { filterTypes, sortDirections } from 'Helpers/Props';
 import { setAppValue } from 'Store/Actions/appActions';
 import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
-import createAjaxRequest from 'Utilities/createAjaxRequest';
+import createAjaxRequest, { AjaxOptions } from 'Utilities/createAjaxRequest';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
 import translate from 'Utilities/String/translate';
 import { pingServer } from './appActions';
@@ -360,7 +360,7 @@ export const actionHandlers = handleThunks({
       })
     );
 
-    let ajaxOptions: Record<string, unknown> | null = null;
+    let ajaxOptions: AjaxOptions | null = null;
 
     if (id) {
       ajaxOptions = {

@@ -201,7 +201,10 @@ export const actionHandlers = handleThunks({
       return;
     }
 
-    const newGame = getNewGame(_.cloneDeep(foundGame) as Parameters<typeof getNewGame>[0], payload) as {
+    const newGame = getNewGame(
+      _.cloneDeep(foundGame) as unknown as Parameters<typeof getNewGame>[0],
+      payload as unknown as Parameters<typeof getNewGame>[1]
+    ) as {
       id: number;
       collection?: { igdbId: number };
       igdbId: number;

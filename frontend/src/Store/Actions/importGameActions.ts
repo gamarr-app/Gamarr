@@ -300,7 +300,10 @@ export const actionHandlers = handleThunks({
         selectedGame &&
         !acc.some((a) => a.igdbId === selectedGame.igdbId)
       ) {
-        const newGame = getNewGame(_.cloneDeep(selectedGame) as Game, item);
+        const newGame = getNewGame(
+          _.cloneDeep(selectedGame) as Game,
+          item as unknown as Parameters<typeof getNewGame>[1]
+        );
         newGame.path = item.path;
 
         addedIds.push(id);

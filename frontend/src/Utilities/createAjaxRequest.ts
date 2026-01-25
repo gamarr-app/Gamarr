@@ -6,15 +6,16 @@ const apiRoot = window.Gamarr.apiRoot;
 export interface AjaxOptions {
   url: string;
   method?: string;
-  data?: string | object;
+  data?: string | object | FormData;
   dataType?: string;
-  contentType?: string | null;
+  contentType?: string | false | null;
+  processData?: boolean;
   headers?: Record<string, string>;
   traditional?: boolean;
   global?: boolean;
 }
 
-type AjaxPromise = ReturnType<typeof $.ajax>;
+export type AjaxPromise = ReturnType<typeof $.ajax>;
 
 interface AjaxRequestResult {
   request: AjaxPromise;
