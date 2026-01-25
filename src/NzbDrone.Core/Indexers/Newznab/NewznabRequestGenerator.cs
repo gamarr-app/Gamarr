@@ -151,13 +151,8 @@ namespace NzbDrone.Core.Indexers.Newznab
 
                 foreach (var queryTitle in queryTitles)
                 {
+                    // Don't include year by default - game releases rarely include year in name
                     var searchTitle = queryTitle;
-
-                    // Include year in search for disambiguation when available (unless RemoveYear is set)
-                    if (searchCriteria.Game.Year > 0 && !Settings.RemoveYear)
-                    {
-                        searchTitle = $"{queryTitle} {searchCriteria.Game.Year}";
-                    }
 
                     chain.Add(GetPagedRequests(MaxPages,
                         Settings.Categories,

@@ -24,7 +24,8 @@ namespace NzbDrone.Core.Indexers.Nyaa
 
             foreach (var queryTitle in searchCriteria.SceneTitles)
             {
-                pageableRequests.Add(GetPagedRequests(PrepareQuery($"{queryTitle} {searchCriteria.Game.Year}")));
+                // Don't include year - game releases rarely include year in name
+                pageableRequests.Add(GetPagedRequests(PrepareQuery(queryTitle)));
             }
 
             return pageableRequests;
