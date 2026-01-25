@@ -1144,6 +1144,8 @@
   "GameFileRenamedTooltip": "Game file renamed",
   "GameFiles": "Game Files",
   "GameFilesTotaling": "Game Files Totaling",
+  "GameFolder": "Game Folder",
+  "GameFolderTooltip": "This game file represents the entire game folder",
   "GameFolderFormat": "Game Folder Format",
   "GameFolderFormatHelpText": "Used when adding a new game or moving games via the game editor",
   "GameFolderFormatHelpTextDeprecatedWarning": "Tokens associated with game file properties have been deprecated and will no longer be supported in future major versions.",

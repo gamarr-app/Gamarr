@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,13 +8,15 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.MediaFiles.GameImport;
+using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Qualities;
 using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.MediaFiles
@@ -126,52 +127,66 @@ namespace NzbDrone.Core.MediaFiles
                 return;
             }
 
-            var videoFilesStopwatch = Stopwatch.StartNew();
-            var mediaFileList = FilterPaths(game.Path, GetVideoFiles(game.Path)).ToList();
-            videoFilesStopwatch.Stop();
-            _logger.Trace("Finished getting game files for: {0} [{1}]", game, videoFilesStopwatch.Elapsed);
+            // Check if the game folder has any content
+            var filesInFolder = _diskProvider.GetFiles(game.Path, true);
+            var folderHasContent = filesInFolder.Any();
 
-            CleanMediaFiles(game, mediaFileList);
+            // Get existing game files from database
+            var existingGameFiles = _mediaFileService.GetFilesByGame(game.Id);
 
-            var gameFiles = _mediaFileService.GetFilesByGame(game.Id);
-            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFileList, gameFiles, game);
-
-            var decisionsStopwatch = Stopwatch.StartNew();
-            var decisions = _importDecisionMaker.GetImportDecisions(unmappedFiles, game, false);
-            decisionsStopwatch.Stop();
-            _logger.Trace("Import decisions complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
-            _importApprovedGames.Import(decisions, false);
-
-            // Update existing files that have a different file size
-            var fileInfoStopwatch = Stopwatch.StartNew();
-            var filesToUpdate = new List<GameFile>();
-
-            foreach (var file in gameFiles)
+            if (folderHasContent)
             {
-                var path = Path.Combine(game.Path, file.RelativePath);
-                var fileSize = _diskProvider.GetFileSize(path);
+                // Folder has content - treat the entire folder as a single GameFile
+                var folderSize = _diskProvider.GetFolderSize(game.Path);
 
-                if (file.Size == fileSize)
+                // Check if we already have a folder-based GameFile (RelativePath is empty)
+                var existingFolderFile = existingGameFiles.FirstOrDefault(f => f.RelativePath.IsNullOrWhiteSpace());
+
+                if (existingFolderFile != null)
                 {
-                    continue;
+                    // Update existing folder record if size changed
+                    if (existingFolderFile.Size != folderSize)
+                    {
+                        _logger.Debug("Updating folder size for {0}: {1} -> {2}", game.Title, existingFolderFile.Size, folderSize);
+                        existingFolderFile.Size = folderSize;
+                        _mediaFileService.Update(existingFolderFile);
+                    }
                 }
-
-                file.Size = fileSize;
-
-                if (!_updateMediaInfoService.Update(file, game))
+                else
                 {
-                    filesToUpdate.Add(file);
+                    // No folder-based GameFile exists - create one
+                    // First, delete any old file-based GameFile records (migration from old behavior)
+                    foreach (var oldFile in existingGameFiles)
+                    {
+                        _logger.Debug("Removing old file-based GameFile record: {0}", oldFile.RelativePath);
+                        _mediaFileService.Delete(oldFile, DeleteMediaFileReason.ManualOverride);
+                    }
+
+                    // Create new folder-based GameFile
+                    _logger.Debug("Creating folder-based GameFile for {0}", game.Title);
+                    var folderGameFile = new GameFile
+                    {
+                        GameId = game.Id,
+                        RelativePath = string.Empty, // Empty means the folder itself
+                        Size = folderSize,
+                        DateAdded = DateTime.UtcNow,
+                        Quality = new QualityModel { Quality = Quality.Unknown },
+                        Languages = new List<Language> { Language.Unknown },
+                        IndexerFlags = 0
+                    };
+
+                    _mediaFileService.Add(folderGameFile);
                 }
             }
-
-            // Update any files that had a file size change, but didn't get media info updated.
-            if (filesToUpdate.Any())
+            else
             {
-                _mediaFileService.Update(filesToUpdate);
+                // Folder is empty - clean up any existing GameFile records
+                foreach (var existingFile in existingGameFiles)
+                {
+                    _logger.Debug("Removing GameFile for empty folder: {0}", existingFile.RelativePath);
+                    _mediaFileService.Delete(existingFile, DeleteMediaFileReason.MissingFromDisk);
+                }
             }
-
-            fileInfoStopwatch.Stop();
-            _logger.Trace("Reprocessing existing files complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
 
             var filesOnDisk = GetNonVideoFiles(game.Path);
             var possibleExtraFiles = FilterPaths(game.Path, filesOnDisk);

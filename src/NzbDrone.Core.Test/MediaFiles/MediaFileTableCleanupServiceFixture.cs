@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -82,6 +83,71 @@ namespace NzbDrone.Core.Test.MediaFiles
             Subject.Clean(_game, FilesOnDisk(gameFiles));
 
             Mocker.GetMock<IGameService>().Verify(c => c.UpdateGame(It.IsAny<Game>()), Times.Never());
+        }
+
+        [Test]
+        public void should_keep_folder_gamefile_when_folder_has_content()
+        {
+            var folderGameFile = Builder<GameFile>.CreateNew()
+                .With(f => f.RelativePath = string.Empty) // Folder-based
+                .Build();
+
+            GivenGameFiles(new[] { folderGameFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.FolderExists(_game.Path))
+                .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.GetFiles(_game.Path, true))
+                .Returns(new[] { Path.Combine(_game.Path, "game.exe") });
+
+            Subject.Clean(_game, new List<string>());
+
+            Mocker.GetMock<IMediaFileService>()
+                .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+        }
+
+        [Test]
+        public void should_delete_folder_gamefile_when_folder_is_empty()
+        {
+            var folderGameFile = Builder<GameFile>.CreateNew()
+                .With(f => f.RelativePath = string.Empty) // Folder-based
+                .Build();
+
+            GivenGameFiles(new[] { folderGameFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.FolderExists(_game.Path))
+                .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.GetFiles(_game.Path, true))
+                .Returns(Array.Empty<string>()); // Empty folder
+
+            Subject.Clean(_game, new List<string>());
+
+            Mocker.GetMock<IMediaFileService>()
+                .Verify(v => v.Delete(folderGameFile, DeleteMediaFileReason.MissingFromDisk), Times.Once());
+        }
+
+        [Test]
+        public void should_delete_folder_gamefile_when_folder_does_not_exist()
+        {
+            var folderGameFile = Builder<GameFile>.CreateNew()
+                .With(f => f.RelativePath = string.Empty) // Folder-based
+                .Build();
+
+            GivenGameFiles(new[] { folderGameFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.FolderExists(_game.Path))
+                .Returns(false);
+
+            Subject.Clean(_game, new List<string>());
+
+            Mocker.GetMock<IMediaFileService>()
+                .Verify(v => v.Delete(folderGameFile, DeleteMediaFileReason.MissingFromDisk), Times.Once());
         }
     }
 }

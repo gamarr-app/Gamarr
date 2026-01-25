@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NzbDrone.Common;
 using NzbDrone.Core.MediaFiles.Events;
@@ -70,7 +69,7 @@ namespace NzbDrone.Core.MediaFiles
                 gameFile.Game = _gameRepository.Get(gameFile.GameId);
             }
 
-            gameFile.Path = Path.Combine(gameFile.Game.Path, gameFile.RelativePath);
+            gameFile.Path = gameFile.GetPath();
 
             _mediaFileRepository.Delete(gameFile);
             _eventAggregator.PublishEvent(new GameFileDeletedEvent(gameFile, reason));
@@ -93,7 +92,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public List<string> FilterExistingFiles(List<string> files, Game game)
         {
-            var gameFiles = GetFilesByGame(game.Id).Select(f => Path.Combine(game.Path, f.RelativePath)).ToList();
+            var gameFiles = GetFilesByGame(game.Id).Select(f => f.GetPath(game)).ToList();
 
             if (!gameFiles.Any())
             {
@@ -125,7 +124,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public static List<string> FilterExistingFiles(List<string> files, List<GameFile> gameFiles, Game game)
         {
-            var seriesFilePaths = gameFiles.Select(f => Path.Combine(game.Path, f.RelativePath)).ToList();
+            var seriesFilePaths = gameFiles.Select(f => f.GetPath(game)).ToList();
 
             if (!seriesFilePaths.Any())
             {

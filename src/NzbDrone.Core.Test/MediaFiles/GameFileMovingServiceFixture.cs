@@ -67,12 +67,11 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Subject.MoveGameFile(_gameFile, _localGame);
 
-            var expectedDest = Path.Combine(_game.Path, "TestGame-CODEX");
-
+            // Folder contents are moved directly into game.Path, not as a subfolder
             Mocker.GetMock<IDiskTransferService>()
                   .Verify(s => s.TransferFolder(
                       _localGame.Path,
-                      expectedDest,
+                      _game.Path,
                       TransferMode.Move), Times.Once());
         }
 
@@ -93,12 +92,11 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Subject.CopyGameFile(_gameFile, _localGame);
 
-            var expectedDest = Path.Combine(_game.Path, "TestGame-CODEX");
-
+            // Folder contents are copied directly into game.Path, not as a subfolder
             Mocker.GetMock<IDiskTransferService>()
                   .Verify(s => s.TransferFolder(
                       _localGame.Path,
-                      expectedDest,
+                      _game.Path,
                       TransferMode.Copy), Times.Once());
         }
 
@@ -178,7 +176,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
-        public void should_set_relative_path_after_folder_move()
+        public void should_set_relative_path_to_empty_for_folder_move()
         {
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(_localGame.Path))
@@ -190,7 +188,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             var result = Subject.MoveGameFile(_gameFile, _localGame);
 
-            result.RelativePath.Should().NotBeNullOrEmpty();
+            // Folder-based GameFiles have empty RelativePath (the folder itself is the game)
+            result.RelativePath.Should().BeEmpty();
         }
     }
 }

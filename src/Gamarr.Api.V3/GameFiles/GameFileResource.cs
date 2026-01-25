@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Languages;
@@ -75,7 +75,7 @@ namespace Gamarr.Api.V3.GameFiles
 
                 GameId = model.GameId,
                 RelativePath = model.RelativePath,
-                Path = Path.Combine(game.Path, model.RelativePath),
+                Path = model.RelativePath.IsNullOrWhiteSpace() ? game.Path : global::System.IO.Path.Combine(game.Path, model.RelativePath),
                 Size = model.Size,
                 DateAdded = model.DateAdded,
                 SceneName = model.SceneName,

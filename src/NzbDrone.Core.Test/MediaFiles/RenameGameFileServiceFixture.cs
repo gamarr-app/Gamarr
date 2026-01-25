@@ -117,5 +117,65 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.GetGames(files), Times.Once());
         }
+
+        [Test]
+        public void should_skip_folder_based_gamefiles_in_rename()
+        {
+            // Create folder-based GameFiles (empty RelativePath)
+            var folderGameFiles = Builder<GameFile>.CreateListOfSize(2)
+                .All()
+                .With(e => e.GameId = _game.Id)
+                .With(e => e.RelativePath = string.Empty) // Folder-based
+                .Build()
+                .ToList();
+
+            Mocker.GetMock<IMediaFileService>()
+                .Setup(s => s.GetGames(It.IsAny<IEnumerable<int>>()))
+                .Returns(folderGameFiles);
+
+            Subject.Execute(new RenameFilesCommand(_game.Id, new List<int> { 1, 2 }));
+
+            // Should not attempt to move folder-based GameFiles
+            Mocker.GetMock<IMoveGameFiles>()
+                .Verify(v => v.MoveGameFile(It.IsAny<GameFile>(), _game), Times.Never());
+
+            // Should not publish rename event since nothing was renamed
+            Mocker.GetMock<IEventAggregator>()
+                .Verify(v => v.PublishEvent(It.IsAny<GameRenamedEvent>()), Times.Never());
+        }
+
+        [Test]
+        public void should_only_rename_file_based_gamefiles_when_mixed()
+        {
+            // Create mix of folder-based and file-based GameFiles
+            var folderGameFile = Builder<GameFile>.CreateNew()
+                .With(e => e.Id = 1)
+                .With(e => e.GameId = _game.Id)
+                .With(e => e.RelativePath = string.Empty) // Folder-based
+                .Build();
+
+            var fileGameFile = Builder<GameFile>.CreateNew()
+                .With(e => e.Id = 2)
+                .With(e => e.GameId = _game.Id)
+                .With(e => e.RelativePath = "game.exe") // File-based
+                .Build();
+
+            Mocker.GetMock<IMediaFileService>()
+                .Setup(s => s.GetGames(It.IsAny<IEnumerable<int>>()))
+                .Returns(new List<GameFile> { folderGameFile, fileGameFile });
+
+            Mocker.GetMock<IMoveGameFiles>()
+                .Setup(s => s.MoveGameFile(fileGameFile, _game));
+
+            Subject.Execute(new RenameFilesCommand(_game.Id, new List<int> { 1, 2 }));
+
+            // Should only move the file-based GameFile
+            Mocker.GetMock<IMoveGameFiles>()
+                .Verify(v => v.MoveGameFile(fileGameFile, _game), Times.Once());
+
+            // Should not move the folder-based GameFile
+            Mocker.GetMock<IMoveGameFiles>()
+                .Verify(v => v.MoveGameFile(folderGameFile, _game), Times.Never());
+        }
     }
 }
