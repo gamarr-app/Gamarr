@@ -1,27 +1,26 @@
 import _ from 'lodash';
 
-type State = Record<string, unknown>;
-
-function getSectionState(
-  state: State,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getSectionState<T = Record<string, unknown>>(
+  state: object,
   section: string,
   isFullStateTree: boolean = false
-): State {
+): T {
   if (isFullStateTree) {
-    return _.get(state, section) as State;
+    return _.get(state, section) as T;
   }
 
   const [, subSection] = section.split('.');
 
   if (subSection) {
-    return Object.assign({}, state[subSection] as State);
+    return Object.assign({}, _.get(state, subSection)) as T;
   }
 
-  if (state.hasOwnProperty(section)) {
-    return Object.assign({}, state[section] as State);
+  if (_.has(state, section)) {
+    return Object.assign({}, _.get(state, section)) as T;
   }
 
-  return Object.assign({}, state);
+  return Object.assign({}, state) as T;
 }
 
 export default getSectionState;

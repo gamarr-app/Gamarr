@@ -1,5 +1,5 @@
 interface ItemWithId {
-  [key: string]: unknown;
+  id: number | string;
 }
 
 function hasDifferentItems<T extends ItemWithId>(

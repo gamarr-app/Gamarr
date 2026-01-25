@@ -1,7 +1,7 @@
 import moment, { DurationInputArg2 } from 'moment';
 
 type DateInput = string | Date | moment.Moment | null | undefined;
-type Offsets = Record<DurationInputArg2, number>;
+type Offsets = Partial<Record<DurationInputArg2, number>>;
 
 function isBefore(date: DateInput, offsets: Offsets = {}): boolean {
   if (!date) {

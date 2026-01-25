@@ -1,21 +1,9 @@
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
 
-type QueueStatus =
-  | 'queue'
-  | 'paused'
-  | 'failed'
-  | 'downloading'
-  | 'delay'
-  | 'downloadClientUnavailable'
-  | 'warning'
-  | 'completed';
-
-type QueueState = 'importPending' | 'importing' | 'failedPending';
-
 export default function getQueueStatusText(
-  queueStatus: QueueStatus | undefined,
-  queueState?: QueueState
+  queueStatus: string | undefined,
+  queueState?: string
 ): string | undefined {
   if (!queueStatus) {
     return;
