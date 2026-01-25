@@ -8,12 +8,14 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
-            // Rename Recommendations to IgdbRecommendations for clarity
-            Rename.Column("Recommendations").OnTable("GameMetadata").To("IgdbRecommendations");
-
-            // Add new column for RAWG recommendations
-            Alter.Table("GameMetadata")
-                .AddColumn("RawgRecommendations").AsString().Nullable().WithDefaultValue("[]");
+            // Add RawgRecommendations column if it doesn't exist
+            // Note: IgdbRecommendations is already created in 001_initial_setup
+            // Only add RawgRecommendations if not already present
+            if (!Schema.Table("GameMetadata").Column("RawgRecommendations").Exists())
+            {
+                Alter.Table("GameMetadata")
+                    .AddColumn("RawgRecommendations").AsString().Nullable().WithDefaultValue("[]");
+            }
         }
     }
 }
