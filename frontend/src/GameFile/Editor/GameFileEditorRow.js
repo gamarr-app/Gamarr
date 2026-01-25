@@ -5,6 +5,7 @@ import ConfirmModal from 'Components/Modal/ConfirmModal';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableRow from 'Components/Table/TableRow';
+import GameLanguages from 'Game/GameLanguages';
 import FileEditModal from 'GameFile/Edit/FileEditModal';
 import { icons, kinds } from 'Helpers/Props';
 import formatBytes from 'Utilities/Number/formatBytes';
@@ -71,6 +72,7 @@ class GameFileEditorRow extends Component {
       size,
       sceneName,
       releaseGroup,
+      languages,
       dateAdded,
       columns
     } = this.props;
@@ -118,6 +120,31 @@ class GameFileEditorRow extends Component {
                   title={size}
                 >
                   {formatBytes(size)}
+                </TableRowCell>
+              );
+            }
+
+            if (name === 'languages') {
+              return (
+                <TableRowCell
+                  key={name}
+                  className={styles.languages}
+                >
+                  {languages && languages.length > 0 ?
+                    <GameLanguages languages={languages} /> :
+                    null
+                  }
+                </TableRowCell>
+              );
+            }
+
+            if (name === 'releaseGroup') {
+              return (
+                <TableRowCell
+                  key={name}
+                  className={styles.releaseGroup}
+                >
+                  {releaseGroup}
                 </TableRowCell>
               );
             }
@@ -199,9 +226,14 @@ GameFileEditorRow.propTypes = {
   relativePath: PropTypes.string.isRequired,
   sceneName: PropTypes.string,
   releaseGroup: PropTypes.string,
+  languages: PropTypes.arrayOf(PropTypes.object),
   dateAdded: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   onDeletePress: PropTypes.func.isRequired
+};
+
+GameFileEditorRow.defaultProps = {
+  languages: []
 };
 
 export default GameFileEditorRow;

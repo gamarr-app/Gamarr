@@ -49,9 +49,19 @@ export const defaultState = {
       isSortable: true
     },
     {
+      name: 'languages',
+      label: () => translate('Languages'),
+      isVisible: true
+    },
+    {
+      name: 'releaseGroup',
+      label: () => translate('ReleaseGroup'),
+      isVisible: true
+    },
+    {
       name: 'dateAdded',
       label: () => translate('Added'),
-      isVisible: true,
+      isVisible: false,
       isSortable: true
     },
     {
