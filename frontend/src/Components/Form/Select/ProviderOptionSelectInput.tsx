@@ -126,8 +126,7 @@ function ProviderOptionSelectInput({
         })
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectOptionsProviderAction, dispatch]);
+  }, [selectOptionsProviderAction, dispatch, provider, providerData]);
 
   useEffect(() => {
     if (!previousProviderData) {
@@ -148,8 +147,7 @@ function ProviderOptionSelectInput({
         dispatch(clearOptions({ section: selectOptionsProviderAction }));
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, selectOptionsProviderAction]);
 
   return (
     <EnhancedSelectInput

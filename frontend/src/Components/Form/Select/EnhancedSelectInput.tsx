@@ -189,7 +189,7 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     return '';
   }, [value, values, isMultiSelect]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PopperJS modifier callback
   const handleComputeMaxHeight = useCallback((data: any) => {
     const windowHeight = window.innerHeight;
 

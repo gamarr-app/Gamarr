@@ -113,25 +113,19 @@ function FileBrowserModalContent(props: FileBrowserModalContentProps) {
     }
   }, [value, previousValue, currentPath, setCurrentPath]);
 
-  useEffect(
-    () => {
-      dispatch(
-        fetchPaths({
-          path: currentPath,
-          allowFoldersWithoutTrailingSlashes: true,
-          includeFiles,
-        })
-      );
+  useEffect(() => {
+    dispatch(
+      fetchPaths({
+        path: currentPath,
+        allowFoldersWithoutTrailingSlashes: true,
+        includeFiles,
+      })
+    );
 
-      return () => {
-        dispatch(clearPaths());
-      };
-    },
-    // This should only run once when the component mounts,
-    // so we don't need to include the other dependencies.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dispatch]
-  );
+    return () => {
+      dispatch(clearPaths());
+    };
+  }, [dispatch, currentPath, includeFiles]);
 
   return (
     <ModalContent onModalClose={onModalClose}>

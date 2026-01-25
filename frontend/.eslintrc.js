@@ -29,7 +29,8 @@ module.exports = {
     expect: false,
     chai: false,
     sinon: false,
-    JSX: true
+    JSX: true,
+    __webpack_public_path__: true
   },
 
   parserOptions: {
@@ -248,7 +249,7 @@ module.exports = {
     'newline-before-return': 'off',
     'newline-per-chained-call': 'off',
     'no-array-constructor': 'error',
-    'no-bitwise': 'error',
+    'no-bitwise': ['error', { allow: ['&', '|', '~', '<<'] }],
     'no-continue': 'error',
     'no-inline-comments': 'off',
     'no-lonely-if': 'warn',

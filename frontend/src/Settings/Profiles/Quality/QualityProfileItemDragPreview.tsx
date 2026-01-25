@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { DragLayer } from 'react-dnd';
+import { DragLayer, DragLayerMonitor } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { QUALITY_PROFILE_ITEM } from 'Helpers/dragTypes';
 import dimensions from 'Styles/Variables/dimensions.js';
@@ -13,8 +13,7 @@ const formLabelRightMarginWidth = parseInt(
 );
 const dragHandleWidth = parseInt(dimensions.dragHandleWidth);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function collectDragLayer(monitor: any) {
+function collectDragLayer(monitor: DragLayerMonitor) {
   return {
     item: monitor.getItem(),
     itemType: monitor.getItemType(),
@@ -79,7 +78,6 @@ class QualityProfileItemDragPreviewComponent extends Component<QualityProfileIte
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default DragLayer(collectDragLayer)(
   QualityProfileItemDragPreviewComponent as unknown as React.ComponentType
 ) as unknown as React.ComponentType;

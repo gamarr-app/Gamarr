@@ -9,10 +9,8 @@ const response = await fetch(initializeUrl);
 
 window.Gamarr = await response.json();
 
-/* eslint-disable no-undef, @typescript-eslint/ban-ts-comment */
-// @ts-ignore 2304
+// @ts-expect-error __webpack_public_path__ is a webpack runtime global
 __webpack_public_path__ = `${window.Gamarr.urlBase}/`;
-/* eslint-enable no-undef, @typescript-eslint/ban-ts-comment */
 
 const error = console.error;
 

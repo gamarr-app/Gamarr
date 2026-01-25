@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch } from 'react-redux';
 import Icon from 'Components/Icon';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -103,20 +109,35 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     null
   );
 
-  useEffect(
-    () => {
-      if (allowGameChange && game && quality && languages && size > 0) {
-        onSelectedChange({
-          id,
-          hasGameFileId: !!gameFileId,
-          value: true,
-          shiftKey: false,
-        });
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const hasAutoSelectedRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      !hasAutoSelectedRef.current &&
+      allowGameChange &&
+      game &&
+      quality &&
+      languages &&
+      size > 0
+    ) {
+      hasAutoSelectedRef.current = true;
+      onSelectedChange({
+        id,
+        hasGameFileId: !!gameFileId,
+        value: true,
+        shiftKey: false,
+      });
+    }
+  }, [
+    allowGameChange,
+    game,
+    quality,
+    languages,
+    size,
+    id,
+    gameFileId,
+    onSelectedChange,
+  ]);
 
   useEffect(() => {
     const isValid = !!(game && quality && languages);

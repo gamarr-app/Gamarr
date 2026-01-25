@@ -37,7 +37,7 @@ interface DelayProfileProps {
   tags: number[];
   tagList: Tag[];
   isDragging: boolean;
-  connectDragSource?: (node: React.ReactElement) => React.ReactElement;
+  connectDragSource?: (node: React.ReactElement) => React.ReactElement | null;
   onConfirmDeleteDelayProfile: (id: number) => void;
 }
 

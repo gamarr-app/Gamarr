@@ -134,7 +134,7 @@ type PickProps<V, C extends InputType> = C extends 'text'
   : C extends 'rootFolderSelect'
   ? RootFolderSelectInputProps
   : C extends 'select'
-  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic select input
     EnhancedSelectInputProps<any, V>
   : C extends 'tag'
   ? GameTagInputProps<V>

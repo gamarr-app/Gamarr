@@ -47,15 +47,11 @@ const Scroller = forwardRef(
 
     useImperativeHandle(ref, () => internalRef.current!, []);
 
-    useEffect(
-      () => {
-        if (initialScrollTop != null) {
-          internalRef.current!.scrollTop = initialScrollTop;
-        }
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
-    );
+    useEffect(() => {
+      if (initialScrollTop != null) {
+        internalRef.current!.scrollTop = initialScrollTop;
+      }
+    }, [initialScrollTop]);
 
     useEffect(() => {
       if (scrollTop != null) {

@@ -162,13 +162,9 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
     }
   }, [isGrabbing, previousIsGrabbing, onModalClose]);
 
-  useEffect(
-    () => {
-      dispatch(fetchDownloadClients());
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    dispatch(fetchDownloadClients());
+  }, [dispatch]);
 
   return (
     <ModalContent onModalClose={onModalClose}>

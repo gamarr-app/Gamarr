@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import {
   fetchQualityProfileSchema,
   saveQualityProfile,
@@ -129,8 +130,7 @@ function createMapStateSelector(id: number | undefined) {
     createQualitiesSelector(),
     createFormatsSelector(),
     createLanguagesSelectorForProfiles(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => profileInUseSelector(state, { id: id ?? 0 }),
+    (state: AppState) => profileInUseSelector(state, { id: id ?? 0 }),
     (qualityProfile, qualities, customFormats, languages, isInUse) => {
       return {
         qualities,

@@ -10,7 +10,6 @@ function IndexerFlags({ indexerFlags = 0 }: IndexerFlagsProps) {
   const allIndexerFlags = useSelector(createIndexerFlagsSelector);
 
   const flags = allIndexerFlags.items.filter(
-    // eslint-disable-next-line no-bitwise
     (item) => (indexerFlags & item.id) === item.id
   );
 

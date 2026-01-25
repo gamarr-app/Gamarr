@@ -187,10 +187,7 @@ function RootFolderSelectInput({
         onChange({ name, value: defaultValue.key });
       }
     }
-
-    // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [name, value, values, onChange]);
 
   useEffect(() => {
     dispatch(fetchRootFolders());

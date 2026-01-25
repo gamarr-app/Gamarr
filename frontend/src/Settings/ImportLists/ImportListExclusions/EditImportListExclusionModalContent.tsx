@@ -76,13 +76,13 @@ function EditImportListExclusionModalContent({
   const dispatch = useDispatch();
   const previousIsSaving = usePrevious(isSaving);
 
-  const dispatchSetImportListExclusionValue = (payload: {
-    name: string;
-    value: string | number;
-  }) => {
-    // @ts-expect-error 'setImportListExclusionValue' isn't typed yet
-    dispatch(setImportListExclusionValue(payload));
-  };
+  const dispatchSetImportListExclusionValue = useCallback(
+    (payload: { name: string; value: string | number }) => {
+      // @ts-expect-error 'setImportListExclusionValue' isn't typed yet
+      dispatch(setImportListExclusionValue(payload));
+    },
+    [dispatch]
+  );
 
   useEffect(() => {
     if (!id) {
@@ -90,8 +90,7 @@ function EditImportListExclusionModalContent({
         dispatchSetImportListExclusionValue({ name, value });
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id, dispatchSetImportListExclusionValue]);
 
   useEffect(() => {
     if (previousIsSaving && !isSaving && !saveError) {
