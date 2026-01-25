@@ -447,6 +447,35 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
+            // Handle direct Steam App ID lookups
+            if (lowerTitle.StartsWith("steam:") || lowerTitle.StartsWith("steamid:"))
+            {
+                var idStr = lowerTitle.Split(':')[1].Trim();
+                if (int.TryParse(idStr, out var steamAppId))
+                {
+                    try
+                    {
+                        var metadata = _steamProxy.GetGameBySteamAppId(steamAppId);
+                        if (metadata != null)
+                        {
+                            var game = new Game { GameMetadata = metadata };
+                            return new List<Game> { game };
+                        }
+
+                        _logger.Warn("No game found for Steam App ID {0}", steamAppId);
+                        return new List<Game>();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to lookup Steam game for App ID {0}", steamAppId);
+                        return new List<Game>();
+                    }
+                }
+
+                _logger.Warn("Invalid Steam App ID format: '{0}'", title);
+                return new List<Game>();
+            }
+
             // Search Steam first (no API key needed - works out of the box!)
             try
             {
