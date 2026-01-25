@@ -10,11 +10,11 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   DOTNET_VERSION: '8.0.x'
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
 
 jobs:
   frontend:
