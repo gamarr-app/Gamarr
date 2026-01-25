@@ -200,9 +200,7 @@ export const actionHandlers = handleThunks({
       .then((queryParams: QueryParams) => {
         // Filter out undefined values from startResponse
         const filteredStartResponse = Object.fromEntries(
-          Object.entries(startResponse).filter(
-            ([, v]) => v !== undefined
-          )
+          Object.entries(startResponse).filter(([, v]) => v !== undefined)
         ) as OAuthResponseRecord;
 
         return requestAction({

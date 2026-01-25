@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Error as AppError } from 'App/State/AppSectionState';
 import { useDispatch, useSelector } from 'react-redux';
+import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -103,16 +103,10 @@ function ManageImportListsModalContent(
 ) {
   const { onModalClose } = props;
 
-  const {
-    isFetching,
-    isPopulated,
-    isDeleting,
-    isSaving,
-    error,
-    items,
-  } = useSelector(
-    createClientSideCollectionSelector('settings.importLists')
-  ) as unknown as ImportListsCollectionState;
+  const { isFetching, isPopulated, isDeleting, isSaving, error, items } =
+    useSelector(
+      createClientSideCollectionSelector('settings.importLists')
+    ) as unknown as ImportListsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

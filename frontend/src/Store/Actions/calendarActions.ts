@@ -43,7 +43,6 @@ interface CalendarOptions {
   fullColorEvents: boolean;
 }
 
-
 interface FilterBuilderProp {
   name: string;
   label: () => string;

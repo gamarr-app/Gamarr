@@ -92,7 +92,6 @@ interface ToggleMonitoredPayload {
   monitored: boolean;
 }
 
-
 //
 // Variables
 
