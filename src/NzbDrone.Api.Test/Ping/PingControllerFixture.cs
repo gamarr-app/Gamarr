@@ -50,6 +50,8 @@ namespace NzbDrone.Api.Test.Ping
             objectResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
             var resource = objectResult.Value as PingResource;
             resource.Status.Should().Be("Error");
+
+            ExceptionVerification.ExpectedErrors(1);
         }
     }
 }

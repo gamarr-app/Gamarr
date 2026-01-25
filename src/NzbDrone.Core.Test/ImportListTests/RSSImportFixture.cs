@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Linq;
 using FluentAssertions;
 using Moq;

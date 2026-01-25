@@ -32,10 +32,10 @@ namespace NzbDrone.Core.Datastore
                 return false;
             }
 
-            // This is a bit of a hack but is the only way to see if a type has a handler set in Dapper
-#pragma warning disable 618
+            // LookupDbType is obsolete ("for internal use only") but no public replacement exists in Dapper 2.x
+#pragma warning disable CS0618
             SqlMapper.LookupDbType(propertyInfo.PropertyType, "", false, out var handler);
-#pragma warning restore 618
+#pragma warning restore CS0618
             if (propertyInfo.PropertyType.IsSimpleType() || handler != null)
             {
                 return true;

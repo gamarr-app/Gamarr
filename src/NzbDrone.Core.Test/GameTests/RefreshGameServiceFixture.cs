@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Collections.Generic;
 using FizzWare.NBuilder;
 using Moq;
