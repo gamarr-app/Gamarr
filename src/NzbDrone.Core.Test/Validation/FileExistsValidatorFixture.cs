@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Validation
         [Test]
         public void should_be_valid_when_file_exists()
         {
-            var game = new Game { Path = @"C:\TV\Game\file.exe".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title\game.exe".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeTrue();
         }
 
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Test.Validation
                   .Setup(s => s.FileExists(It.IsAny<string>()))
                   .Returns(false);
 
-            var game = new Game { Path = @"C:\TV\Game\file.exe".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title\game.exe".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeFalse();
         }
 

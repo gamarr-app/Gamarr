@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Validation
         [Test]
         public void should_be_valid_when_folder_is_writable()
         {
-            var game = new Game { Path = @"C:\TV\Game".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeTrue();
         }
 
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Test.Validation
                   .Setup(s => s.FolderWritable(It.IsAny<string>()))
                   .Returns(false);
 
-            var game = new Game { Path = @"C:\TV\Game".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeFalse();
         }
 

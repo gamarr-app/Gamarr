@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Validation
         [Test]
         public void should_be_valid_when_path_is_not_a_root_folder()
         {
-            var game = new Game { Path = @"C:\TV\Game".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeTrue();
         }
 
@@ -39,9 +39,9 @@ namespace NzbDrone.Core.Test.Validation
         {
             Mocker.GetMock<IRootFolderService>()
                   .Setup(s => s.All())
-                  .Returns(new List<RootFolder> { new RootFolder { Path = @"C:\TV\Game".AsOsAgnostic() } });
+                  .Returns(new List<RootFolder> { new RootFolder { Path = @"C:\Games\Game Title".AsOsAgnostic() } });
 
-            var game = new Game { Path = @"C:\TV\Game".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeFalse();
         }
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Validation
         [Test]
         public void should_be_valid_when_no_root_folders_exist()
         {
-            var game = new Game { Path = @"C:\TV\Game".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeTrue();
         }
     }
