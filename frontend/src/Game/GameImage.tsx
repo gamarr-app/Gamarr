@@ -74,8 +74,8 @@ function GameImage({
     const matchingImages = findImages(images, coverType);
 
     if (matchingImages.length > 0) {
-      const currentUrl = availableImages.current[0]?.url;
-      const newUrl = matchingImages[0]?.url;
+      const currentUrl = availableImages.current[0]?.url ?? availableImages.current[0]?.remoteUrl;
+      const newUrl = matchingImages[0]?.url ?? matchingImages[0]?.remoteUrl;
 
       if (currentUrl !== newUrl) {
         availableImages.current = matchingImages;
