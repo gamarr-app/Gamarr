@@ -160,7 +160,7 @@ namespace NzbDrone.Automation.Test
         public async Task Add_Game_Full_Flow_Works()
         {
             // First, set up required configuration via API
-            var apiKey = await GetApiKey();
+            var apiKey = GetApiKeyFromRunner();
 
             // Create root folder
             await CreateRootFolderAsync(apiKey, "/tmp/gamarr-test-games");
@@ -213,12 +213,10 @@ namespace NzbDrone.Automation.Test
             await AssertNoJavaScriptErrors();
         }
 
-        private async Task<string> GetApiKey()
+        private string GetApiKeyFromRunner()
         {
-            // Get API key from config endpoint
-            var response = await Page.APIRequest.GetAsync($"{BaseUrl}/api/v3/config/host");
-            var json = await response.JsonAsync();
-            return json?.GetProperty("apiKey").GetString() ?? "";
+            // Get API key from the test runner
+            return ApiKey;
         }
 
         private async Task CreateRootFolderAsync(string apiKey, string path)
