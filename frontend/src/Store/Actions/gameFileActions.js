@@ -59,6 +59,11 @@ export const defaultState = {
       isVisible: true
     },
     {
+      name: 'version',
+      label: () => translate('Version'),
+      isVisible: true
+    },
+    {
       name: 'dateAdded',
       label: () => translate('Added'),
       isVisible: false,

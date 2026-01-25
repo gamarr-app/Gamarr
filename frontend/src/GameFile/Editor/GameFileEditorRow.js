@@ -72,6 +72,7 @@ class GameFileEditorRow extends Component {
       size,
       sceneName,
       releaseGroup,
+      version,
       languages,
       dateAdded,
       columns
@@ -145,6 +146,17 @@ class GameFileEditorRow extends Component {
                   className={styles.releaseGroup}
                 >
                   {releaseGroup}
+                </TableRowCell>
+              );
+            }
+
+            if (name === 'version') {
+              return (
+                <TableRowCell
+                  key={name}
+                  className={styles.version}
+                >
+                  {version}
                 </TableRowCell>
               );
             }
@@ -226,6 +238,7 @@ GameFileEditorRow.propTypes = {
   relativePath: PropTypes.string.isRequired,
   sceneName: PropTypes.string,
   releaseGroup: PropTypes.string,
+  version: PropTypes.string,
   languages: PropTypes.arrayOf(PropTypes.object),
   dateAdded: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,

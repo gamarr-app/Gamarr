@@ -21,6 +21,7 @@ namespace Gamarr.Api.V3.GameFiles
         public string SceneName { get; set; }
         public string ReleaseGroup { get; set; }
         public string Edition { get; set; }
+        public string Version { get; set; }
         public List<Language> Languages { get; set; }
         public QualityModel Quality { get; set; }
         public List<CustomFormatResource> CustomFormats { get; set; }
@@ -57,6 +58,7 @@ namespace Gamarr.Api.V3.GameFiles
                 Languages = model.Languages,
                 ReleaseGroup = model.ReleaseGroup,
                 Edition = model.Edition,
+                Version = model.GameVersion?.ToString(),
                 MediaInfo = model.MediaInfo.ToResource(model.SceneName),
                 OriginalFilePath = model.OriginalFilePath
             };
@@ -83,6 +85,7 @@ namespace Gamarr.Api.V3.GameFiles
                 Languages = model.Languages,
                 Edition = model.Edition,
                 ReleaseGroup = model.ReleaseGroup,
+                Version = model.GameVersion?.ToString(),
                 MediaInfo = model.MediaInfo.ToResource(model.SceneName),
                 QualityCutoffNotMet = upgradableSpecification?.QualityCutoffNotMet(game.QualityProfile, model.Quality) ?? false,
                 OriginalFilePath = model.OriginalFilePath,
