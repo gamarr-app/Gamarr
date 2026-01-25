@@ -51,6 +51,7 @@ import {
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import MissingRow from './MissingRow';
+import styles from './Missing.css';
 
 function getMonitoredValue(
   filters: Filter[],
@@ -257,7 +258,7 @@ function Missing() {
   }, [items, previousItems, dispatch]);
 
   return (
-    <PageContent title={translate('Missing')}>
+    <PageContent className={styles.missing} title={translate('Missing')}>
       <PageToolbar>
         <PageToolbarSection>
           <PageToolbarButton

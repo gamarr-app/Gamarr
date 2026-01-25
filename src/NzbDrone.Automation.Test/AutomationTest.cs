@@ -107,11 +107,18 @@ namespace NzbDrone.Automation.Test
 
             try
             {
-                await Page.Locator(".followingBalls").WaitForAsync(new LocatorWaitForOptions
+                // Wait for all spinners to be hidden (use .Nth(0) to avoid strict mode issues with multiple spinners)
+                var spinners = Page.Locator(".followingBalls");
+                var count = await spinners.CountAsync();
+
+                for (var i = 0; i < count; i++)
                 {
-                    State = WaitForSelectorState.Hidden,
-                    Timeout = timeoutMs
-                });
+                    await spinners.Nth(i).WaitForAsync(new LocatorWaitForOptions
+                    {
+                        State = WaitForSelectorState.Hidden,
+                        Timeout = timeoutMs
+                    });
+                }
             }
             catch (TimeoutException)
             {

@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.UpdateTests
                 {
                     FileName = "NzbDrone.develop.2.0.0.0.tar.gz",
                     Url = "http://download.gamarr.app/v2/develop/mono/Gamarr.develop.tar.gz",
-                    Version = new Version("2.0.0.0")
+                    Version = new Version("0.2.0.0")
                 };
             }
             else
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Test.UpdateTests
                 {
                     FileName = "NzbDrone.develop.2.0.0.0.zip",
                     Url = "http://download.gamarr.app/v2/develop/windows/Gamarr.develop.zip",
-                    Version = new Version("2.0.0.0")
+                    Version = new Version("0.2.0.0")
                 };
             }
 
