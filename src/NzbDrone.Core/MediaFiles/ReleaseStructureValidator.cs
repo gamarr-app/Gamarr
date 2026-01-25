@@ -195,7 +195,7 @@ namespace NzbDrone.Core.MediaFiles
             },
         };
 
-        // Suspicious file patterns - only checked for releases that don't match known group patterns
+        // Suspicious file patterns - always checked regardless of release group
         private static readonly string[] SuspiciousPatterns = new[]
         {
             @"\.scr$",           // Screen saver (no legitimate game use)
@@ -205,6 +205,7 @@ namespace NzbDrone.Core.MediaFiles
             @"\.ps1$",           // PowerShell script (no legitimate game use)
             @"\.vbs$",           // VBScript (no legitimate game use)
             @"\.vbe$",           // Encoded VBScript
+            @"\.jse$",           // Encoded JScript
             @"\.wsf$",           // Windows Script File
             @"\.wsh$",           // Windows Script Host settings
             @"readme.*\.exe$",   // Readme as executable is always suspicious
@@ -234,17 +235,25 @@ namespace NzbDrone.Core.MediaFiles
             var files = GetAllFiles(path);
             var relativeFiles = files.Select(f => GetRelativePath(path, f)).ToList();
 
+            // Always check for suspicious files first - these are never okay
+            result.SuspiciousFiles = FindSuspiciousFiles(relativeFiles);
+
+            if (result.SuspiciousFiles.Any())
+            {
+                result.IsValid = false;
+                result.Confidence = ReleaseStructureConfidence.Low;
+                result.Message = $"Found suspicious files that may be malware: {string.Join(", ", result.SuspiciousFiles.Take(5))}";
+                Logger.Warn("Release contains suspicious files: {0}", string.Join(", ", result.SuspiciousFiles));
+                return result;
+            }
+
             // Try to detect the actual release group from file structure
             result.DetectedGroup = DetectReleaseGroup(relativeFiles, releaseTitle);
 
-            // If we detected a known group structure, trust it
+            // If we detected a known group structure
             if (result.DetectedGroup != null)
             {
-                result.IsValid = true;
-                result.Confidence = ReleaseStructureConfidence.High;
-                result.Message = $"Release structure matches known {result.DetectedGroup} pattern";
-
-                // Only concern: if it claims to be a different group than detected
+                // Check if it claims to be a different group than detected
                 if (!string.IsNullOrWhiteSpace(releaseGroup))
                 {
                     var normalizedClaimed = NormalizeGroupName(releaseGroup);
@@ -254,11 +263,23 @@ namespace NzbDrone.Core.MediaFiles
                     {
                         // Claims to be one group but matches another - suspicious
                         result.IsValid = false;
+                        result.Confidence = ReleaseStructureConfidence.High;
                         result.Message = $"Claimed group '{releaseGroup}' but structure matches '{result.DetectedGroup}'";
                         Logger.Warn("Release claims to be {0} but structure matches {1}", releaseGroup, result.DetectedGroup);
+                        return result;
                     }
+
+                    // Claimed group matches detected group
+                    result.IsValid = true;
+                    result.Confidence = ReleaseStructureConfidence.High;
+                    result.Message = $"Release structure matches known {result.DetectedGroup} pattern";
+                    return result;
                 }
 
+                // Group detected but not claimed - still valid but medium confidence
+                result.IsValid = true;
+                result.Confidence = ReleaseStructureConfidence.Medium;
+                result.Message = $"Detected as {result.DetectedGroup} based on file structure";
                 return result;
             }
 
@@ -284,19 +305,8 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            // Unknown release group - check for suspicious files since we can't verify by structure
-            result.SuspiciousFiles = FindSuspiciousFiles(relativeFiles);
-
-            if (result.SuspiciousFiles.Any())
-            {
-                result.IsValid = false;
-                result.Confidence = ReleaseStructureConfidence.Low;
-                result.Message = $"Unknown release with suspicious files: {string.Join(", ", result.SuspiciousFiles.Take(5))}";
-                Logger.Warn("Unknown release contains suspicious files: {0}", string.Join(", ", result.SuspiciousFiles));
-                return result;
-            }
-
-            // No suspicious files - allow with low confidence
+            // Unknown release group - already checked for suspicious files above
+            // Allow with low confidence
             result.IsValid = true;
             result.Confidence = ReleaseStructureConfidence.Low;
             result.Message = string.IsNullOrWhiteSpace(releaseGroup)
