@@ -9,7 +9,7 @@ import styles from './TagSettings.css';
 
 function TagSettings() {
   return (
-    <PageContent className={styles.tags} title={translate('Tags')}>
+    <PageContent className={styles.tagSettings} title={translate('Tags')}>
       <SettingsToolbar showSave={false} />
 
       <PageContentBody>
