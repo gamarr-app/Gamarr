@@ -216,20 +216,41 @@ namespace NzbDrone.Automation.Test
                     var bodyHtml = await Page.Locator("body").InnerHTMLAsync();
                     Console.WriteLine($"[DEBUG] Page body length: {bodyHtml.Length} chars");
 
-                    // Check if there's an error message visible
-                    var errorLocator = Page.Locator("div[class*='error'], div[class*='Error']").First;
-                    if (await errorLocator.IsVisibleAsync())
+                    // Check if loading indicator is visible (search still in progress)
+                    var loadingLocator = Page.Locator("div[class*='LoadingIndicator'], div[class*='loadingIndicator']").First;
+                    var isLoading = await loadingLocator.IsVisibleAsync();
+                    Console.WriteLine($"[DEBUG] Loading indicator visible: {isLoading}");
+
+                    // Check if "no results" message appears
+                    var noResultsLocator = Page.Locator("div[class*='noResults']").First;
+                    var hasNoResults = await noResultsLocator.IsVisibleAsync();
+                    Console.WriteLine($"[DEBUG] No results message visible: {hasNoResults}");
+
+                    // Check if there's an error/alert message visible
+                    var alertLocator = Page.Locator("div[class*='alert'], div[class*='Alert']").First;
+                    if (await alertLocator.IsVisibleAsync())
                     {
-                        var errorText = await errorLocator.InnerTextAsync();
-                        Console.WriteLine($"[DEBUG] Error message visible: {errorText}");
+                        var alertText = await alertLocator.InnerTextAsync();
+                        Console.WriteLine($"[DEBUG] Alert message visible: {alertText}");
                     }
 
-                    // Check if spinner is still showing
-                    var spinnerLocator = Page.Locator("div[class*='spinner'], div[class*='Spinner'], div[class*='loading']").First;
-                    if (await spinnerLocator.IsVisibleAsync())
+                    // Check for "Failed loading search results" message
+                    var failedLocator = Page.Locator("text=Failed");
+                    if (await failedLocator.IsVisibleAsync())
                     {
-                        Console.WriteLine($"[DEBUG] Spinner/loading indicator still visible");
+                        Console.WriteLine($"[DEBUG] 'Failed' text found on page");
                     }
+
+                    // Log the search input value
+                    var inputValue = await searchInput.InputValueAsync();
+                    Console.WriteLine($"[DEBUG] Search input value: '{inputValue}'");
+
+                    // Count how many search results exist (even if hidden)
+                    var resultCount = await Page.Locator("div[class*='searchResult']").CountAsync();
+                    Console.WriteLine($"[DEBUG] Search result elements found: {resultCount}");
+
+                    // Log first 500 chars of body for inspection
+                    Console.WriteLine($"[DEBUG] Body preview: {bodyHtml.Substring(0, Math.Min(500, bodyHtml.Length))}...");
 
                     // Wait before retrying
                     await Task.Delay(2000);
