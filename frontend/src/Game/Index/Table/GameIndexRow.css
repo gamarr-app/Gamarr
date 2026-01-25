@@ -91,6 +91,12 @@
   flex: 0 0 120px;
 }
 
+.version {
+  composes: cell;
+
+  flex: 0 0 100px;
+}
+
 .igdbRating,
 .metacriticRating {
   composes: cell;

@@ -318,6 +318,14 @@ function GameIndexRow(props: GameIndexRowProps) {
           );
         }
 
+        if (name === 'version') {
+          return (
+            <VirtualTableRowCell key={name} className={styles[name]}>
+              {gameFile?.version}
+            </VirtualTableRowCell>
+          );
+        }
+
         if (name === 'genres') {
           const joinedGenres = genres.join(', ');
 

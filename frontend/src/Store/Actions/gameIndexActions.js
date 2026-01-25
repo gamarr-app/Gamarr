@@ -174,6 +174,12 @@ export const defaultState = {
       isVisible: false
     },
     {
+      name: 'version',
+      label: () => translate('Version'),
+      isSortable: true,
+      isVisible: false
+    },
+    {
       name: 'genres',
       label: () => translate('Genres'),
       isSortable: false,
