@@ -1,0 +1,16 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+mkdir -p /run/gamarr-temp
+
+if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
+    exec \
+        s6-notifyoncheck -d -n 300 -w 1000 \
+            cd /app/gamarr/bin s6-setuidgid abc /app/gamarr/bin/Gamarr \
+            -nobrowser -data=/config
+else
+    exec \
+        s6-notifyoncheck -d -n 300 -w 1000 \
+            cd /app/gamarr/bin /app/gamarr/bin/Gamarr \
+            -nobrowser -data=/config
+fi
