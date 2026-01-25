@@ -36,7 +36,7 @@ interface DownloadClientsCollectionState {
   isPopulated: boolean;
   isDeleting: boolean;
   isSaving: boolean;
-  error: Error | null;
+  error: Error | undefined;
   items: DownloadClient[];
   sortKey: string;
   sortDirection: SortDirection;
@@ -112,7 +112,7 @@ function ManageDownloadClientsModalContent(
     sortDirection,
   } = useSelector(
     createClientSideCollectionSelector('settings.downloadClients')
-  ) as DownloadClientsCollectionState;
+  ) as unknown as DownloadClientsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

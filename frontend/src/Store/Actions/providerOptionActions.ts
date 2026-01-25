@@ -25,11 +25,16 @@ export interface ProviderOptionsState {
   error: unknown;
 }
 
+interface ProviderData {
+  fields?: unknown;
+  [key: string]: { value: unknown } | unknown;
+}
+
 interface FetchOptionsPayload {
   section: string;
   provider: string;
   action: string;
-  providerData: unknown;
+  providerData: ProviderData;
   [key: string]: unknown;
 }
 

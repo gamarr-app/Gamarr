@@ -6,7 +6,7 @@ import createServerSideCollectionHandlers from 'Store/Actions/Creators/createSer
 import createClearReducer from 'Store/Actions/Creators/Reducers/createClearReducer';
 import createSetSettingValueReducer from 'Store/Actions/Creators/Reducers/createSetSettingValueReducer';
 import createSetTableOptionReducer from 'Store/Actions/Creators/Reducers/createSetTableOptionReducer';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { createThunk } from 'Store/thunks';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
 
 interface SettingValuePayload {
@@ -83,7 +83,7 @@ export default {
     pendingChanges: {},
   },
 
-  actionHandlers: handleThunks({
+  actionHandlers: {
     ...createServerSideCollectionHandlers(
       section,
       '/exclusions/paged',
@@ -107,7 +107,7 @@ export default {
       section,
       '/exclusions/bulk'
     ),
-  }),
+  },
 
   reducers: {
     [SET_IMPORT_LIST_EXCLUSION_VALUE]: createSetSettingValueReducer(section),

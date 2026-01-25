@@ -126,11 +126,17 @@ export const actionHandlers = handleThunks({
   ) {
     const state = (getState() as unknown as { captcha: CaptchaState }).captcha;
 
-    const queryParams = {
-      responseUrl: state.responseUrl,
-      ray: state.ray,
+    const queryParams: Record<string, string | number | boolean> = {
       captchaResponse: payload.captchaResponse,
     };
+
+    if (state.responseUrl) {
+      queryParams.responseUrl = state.responseUrl;
+    }
+
+    if (state.ray) {
+      queryParams.ray = state.ray;
+    }
 
     const actionPayload = {
       action: 'getCaptchaCookie',

@@ -43,11 +43,7 @@ export const deleteRootFolder = createThunk(DELETE_ROOT_FOLDER);
 export const actionHandlers = handleThunks({
   [FETCH_ROOT_FOLDERS]: createFetchHandler('rootFolders', '/rootFolder'),
 
-  [DELETE_ROOT_FOLDER]: createRemoveItemHandler(
-    'rootFolders',
-    '/rootFolder',
-    (state: AppState) => state.rootFolders
-  ),
+  [DELETE_ROOT_FOLDER]: createRemoveItemHandler('rootFolders', '/rootFolder'),
 
   [ADD_ROOT_FOLDER]: function (
     _getState: () => AppState,

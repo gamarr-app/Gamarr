@@ -21,13 +21,13 @@ interface ReleaseProfilesCollectionState {
   items: ReleaseProfile[];
   isFetching: boolean;
   isPopulated: boolean;
-  error: Error | null;
+  error: Error | undefined;
 }
 
 function ReleaseProfiles() {
   const { items, isFetching, isPopulated, error } = useSelector(
     createClientSideCollectionSelector('settings.releaseProfiles')
-  ) as ReleaseProfilesCollectionState;
+  ) as unknown as ReleaseProfilesCollectionState;
 
   const tagList = useSelector(createTagsSelector());
   const indexerList = useSelector(

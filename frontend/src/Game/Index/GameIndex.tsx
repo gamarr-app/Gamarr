@@ -38,7 +38,6 @@ import createCommandExecutingSelector from 'Store/Selectors/createCommandExecuti
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createGameClientSideCollectionItemsSelector, {
   GameClientSideCollectionItemsState,
-  GameIndexItem,
 } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import translate from 'Utilities/String/translate';
 import GameIndexFooter from './GameIndexFooter';
@@ -61,17 +60,7 @@ import GameIndexTable from './Table/GameIndexTable';
 import GameIndexTableOptions from './Table/GameIndexTableOptions';
 import styles from './GameIndex.css';
 
-function getViewComponent(
-  view: string
-): React.ComponentType<{
-  items: GameIndexItem[];
-  sortKey: string;
-  sortDirection?: string;
-  jumpToCharacter?: string;
-  scrollerRef: React.RefObject<HTMLDivElement>;
-  isSelectMode: boolean;
-  isSmallScreen: boolean;
-}> {
+function getViewComponent(view: string) {
   if (view === 'posters') {
     return GameIndexPosters;
   }
@@ -112,7 +101,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
   );
   const { isSmallScreen } = useSelector(createDimensionsSelector());
   const dispatch = useDispatch();
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLElement>(null);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isInteractiveImportModalOpen, setIsInteractiveImportModalOpen] =
     useState(false);

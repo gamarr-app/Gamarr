@@ -90,7 +90,8 @@ function showOAuthWindow(
   url: string,
   payload: OAuthPayload
 ): JQuery.Promise<QueryParams> {
-  const deferred = $.Deferred<QueryParams>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const deferred: any = $.Deferred<QueryParams>();
   const selfWindow = window;
 
   const newWindow = window.open(url);

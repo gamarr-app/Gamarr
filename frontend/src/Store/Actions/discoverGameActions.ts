@@ -14,7 +14,7 @@ import {
 import { createThunk, handleThunks } from 'Store/thunks';
 import sortByProp from 'Utilities/Array/sortByProp';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
-import getNewGame from 'Utilities/Game/getNewGame';
+import getNewGame, { NewGamePayload } from 'Utilities/Game/getNewGame';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 import translate from 'Utilities/String/translate';
@@ -825,7 +825,7 @@ export const actionHandlers = handleThunks({
 
     const newGame = getNewGame(
       _.cloneDeep(itemToUpdate) as unknown as Game,
-      payload
+      payload as unknown as NewGamePayload
     ) as { id: number };
     newGame.id = 0;
 
@@ -901,7 +901,7 @@ export const actionHandlers = handleThunks({
           if (!selectedGame.isExisting) {
             const newGame = getNewGame(
               _.cloneDeep(selectedGame) as unknown as Game,
-              addOptions
+              addOptions as unknown as NewGamePayload
             ) as { id: number; igdbId: number };
             newGame.id = 0;
 

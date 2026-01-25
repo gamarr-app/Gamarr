@@ -82,8 +82,8 @@ export const actionHandlers = handleThunks({
       },
     }).request;
 
-    promise.done((data: UpdatePathsPayload) => {
-      dispatch(updatePaths({ path, ...data }));
+    promise.done((data: Omit<UpdatePathsPayload, 'path'>) => {
+      dispatch(updatePaths({ ...data, path }));
 
       dispatch(
         set({
