@@ -79,7 +79,6 @@ function Naming() {
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error 'setNamingSettingsValue' isn't typed yet
       dispatch(setNamingSettingsValue(change));
 
       if (namingExampleTimeout.current) {

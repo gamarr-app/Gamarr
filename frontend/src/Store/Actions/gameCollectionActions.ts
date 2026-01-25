@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
@@ -10,7 +9,7 @@ import {
   filterTypes,
   sortDirections,
 } from 'Helpers/Props';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import sortByProp from 'Utilities/Array/sortByProp';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import getNewGame from 'Utilities/Game/getNewGame';
@@ -308,9 +307,9 @@ export const setGameCollectionValue = createAction(
 export const actionHandlers = handleThunks({
   [SAVE_GAME_COLLECTION]: createSaveProviderHandler(section, '/collection'),
   [FETCH_GAME_COLLECTIONS]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: FetchPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(set({ section, isFetching: true }));
 
@@ -349,7 +348,7 @@ export const actionHandlers = handleThunks({
   [ADD_GAME]: function (
     getState: () => AppState,
     payload: AddGamePayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(set({ section, isAdding: true }));
 
@@ -410,7 +409,7 @@ export const actionHandlers = handleThunks({
   [TOGGLE_COLLECTION_MONITORED]: (
     getState: () => AppState,
     payload: ToggleMonitoredPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) => {
     const { collectionId: id, monitored } = payload;
 
@@ -457,9 +456,9 @@ export const actionHandlers = handleThunks({
   },
 
   [SAVE_GAME_COLLECTIONS]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: SaveCollectionsPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const {
       collectionIds,

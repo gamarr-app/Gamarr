@@ -93,7 +93,6 @@ function EditGameModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error actions aren't typed
       dispatch(setGameValue({ name, value }));
     },
     [dispatch]

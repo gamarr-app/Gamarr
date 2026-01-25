@@ -227,7 +227,6 @@ function EditQualityProfileModalContentConnector({
             : firstAllowed.id;
         }
 
-        // @ts-expect-error - actions aren't typed
         dispatch(setQualityProfileValue({ name: 'cutoff', value: cutoffId }));
       }
     },
@@ -236,7 +235,6 @@ function EditQualityProfileModalContentConnector({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name, value }));
     },
     [dispatch]
@@ -257,7 +255,6 @@ function EditQualityProfileModalContentConnector({
       }
 
       const cutoffId = foundItem.quality ? foundItem.quality.id : foundItem.id;
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name, value: cutoffId }));
     },
     [dispatch, typedItem]
@@ -273,7 +270,6 @@ function EditQualityProfileModalContentConnector({
 
       if (language) {
         dispatch(
-          // @ts-expect-error - actions aren't typed
           setQualityProfileValue({
             name,
             value: { id: language.key, Name: language.value },
@@ -303,7 +299,6 @@ function EditQualityProfileModalContentConnector({
 
       foundItem.allowed = allowed;
 
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
@@ -326,7 +321,6 @@ function EditQualityProfileModalContentConnector({
       foundItem.score = score;
 
       dispatch(
-        // @ts-expect-error - actions aren't typed
         setQualityProfileValue({ name: 'formatItems', value: formatItems })
       );
     },
@@ -350,7 +344,6 @@ function EditQualityProfileModalContentConnector({
         i.allowed = allowed;
       });
 
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
@@ -371,7 +364,6 @@ function EditQualityProfileModalContentConnector({
 
       group.name = name;
 
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
     },
     [dispatch, typedItem]
@@ -402,7 +394,6 @@ function EditQualityProfileModalContentConnector({
 
       items.splice(index, 1, group);
 
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
@@ -425,7 +416,6 @@ function EditQualityProfileModalContentConnector({
 
       items.splice(index, 1, ...group.items);
 
-      // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
@@ -536,7 +526,6 @@ function EditQualityProfileModalContentConnector({
           }
         }
 
-        // @ts-expect-error - actions aren't typed
         dispatch(setQualityProfileValue({ name: 'items', value: items }));
         ensureCutoff(qualityProfile);
       }

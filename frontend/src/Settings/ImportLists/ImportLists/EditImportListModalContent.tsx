@@ -84,7 +84,6 @@ function EditImportListModalContent({
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setImportListValue(change));
     },
     [dispatch]
@@ -92,7 +91,6 @@ function EditImportListModalContent({
 
   const handleFieldChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setImportListFieldValue(change));
     },
     [dispatch]

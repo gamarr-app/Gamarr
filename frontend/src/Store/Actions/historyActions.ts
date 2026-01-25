@@ -301,7 +301,7 @@ export const actionHandlers = handleThunks({
   }),
 
   [MARK_AS_FAILED]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: MarkAsFailedPayload,
     dispatch: Dispatch
   ) {

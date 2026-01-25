@@ -150,7 +150,7 @@ function HistoryDetails(props: HistoryDetailsProps) {
         {age || ageHours || ageMinutes ? (
           <DescriptionListItem
             title={translate('AgeWhenGrabbed')}
-            data={formatAge(age, ageHours, ageMinutes)}
+            data={formatAge(parseFloat(age), ageHours, ageMinutes)}
           />
         ) : null}
 

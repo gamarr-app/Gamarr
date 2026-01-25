@@ -54,7 +54,6 @@ function EditMetadataModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error not typed
       dispatch(setMetadataValue({ name, value }));
     },
     [dispatch]
@@ -62,7 +61,6 @@ function EditMetadataModalContent({
 
   const handleFieldChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error not typed
       dispatch(setMetadataFieldValue({ name, value }));
     },
     [dispatch]

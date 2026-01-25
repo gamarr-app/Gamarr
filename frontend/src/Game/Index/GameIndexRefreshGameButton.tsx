@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
-import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
-import GamesAppState, { GameIndexAppState } from 'App/State/GamesAppState';
 import { REFRESH_GAME } from 'Commands/commandNames';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import { icons } from 'Helpers/Props';
@@ -21,11 +19,9 @@ function GameIndexRefreshGameButton(props: GameIndexRefreshGameButtonProps) {
   const isRefreshing = useSelector(
     createCommandExecutingSelector(REFRESH_GAME)
   );
-  const {
-    items,
-    totalItems,
-  }: GamesAppState & GameIndexAppState & ClientSideCollectionAppState =
-    useSelector(createGameClientSideCollectionItemsSelector('gameIndex'));
+  const { items, totalItems } = useSelector(
+    createGameClientSideCollectionItemsSelector('gameIndex')
+  );
 
   const dispatch = useDispatch();
   const { isSelectMode, selectedFilterKey } = props;

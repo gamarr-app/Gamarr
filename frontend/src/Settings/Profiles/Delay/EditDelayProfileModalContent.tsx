@@ -165,7 +165,6 @@ function EditDelayProfileModalContent({
     if (!id) {
       Object.keys(newDelayProfile).forEach((name) => {
         dispatch(
-          // @ts-expect-error - actions aren't typed
           setDelayProfileValue({
             name,
             value: (newDelayProfile as unknown as Record<string, unknown>)[
@@ -186,7 +185,6 @@ function EditDelayProfileModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setDelayProfileValue({ name, value }));
     },
     [dispatch]
@@ -196,26 +194,20 @@ function EditDelayProfileModalContent({
     ({ value }: InputChanged<string>) => {
       switch (value) {
         case 'preferUsenet':
-          // @ts-expect-error - actions aren't typed
           dispatch(setDelayProfileValue({ name: 'enableUsenet', value: true }));
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'enableTorrent', value: true })
           );
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' })
           );
           break;
         case 'preferTorrent':
-          // @ts-expect-error - actions aren't typed
           dispatch(setDelayProfileValue({ name: 'enableUsenet', value: true }));
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'enableTorrent', value: true })
           );
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({
               name: 'preferredProtocol',
               value: 'torrent',
@@ -223,28 +215,22 @@ function EditDelayProfileModalContent({
           );
           break;
         case 'onlyUsenet':
-          // @ts-expect-error - actions aren't typed
           dispatch(setDelayProfileValue({ name: 'enableUsenet', value: true }));
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'enableTorrent', value: false })
           );
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' })
           );
           break;
         case 'onlyTorrent':
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'enableUsenet', value: false })
           );
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({ name: 'enableTorrent', value: true })
           );
           dispatch(
-            // @ts-expect-error - actions aren't typed
             setDelayProfileValue({
               name: 'preferredProtocol',
               value: 'torrent',

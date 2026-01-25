@@ -65,6 +65,8 @@ interface SectionState {
   [key: string]: unknown;
 }
 
+type State = Record<string, unknown>;
+
 const section = 'settings.importLists';
 
 export const FETCH_IMPORT_LISTS = 'settings/importLists/fetchImportLists';
@@ -176,7 +178,7 @@ export default {
     [SET_IMPORT_LIST_FIELD_VALUE]: createSetProviderFieldValueReducer(section),
 
     [SELECT_IMPORT_LIST_SCHEMA]: (
-      state: unknown,
+      state: State,
       { payload }: { payload: SchemaPayload }
     ) => {
       return selectProviderSchema(
@@ -198,7 +200,7 @@ export default {
     },
 
     [CLONE_IMPORT_LIST]: (
-      state: unknown,
+      state: State,
       { payload }: { payload: IdPayload }
     ) => {
       const id = payload.id;
@@ -229,7 +231,7 @@ export default {
       delete pendingChanges.id;
 
       pendingChanges.name = translate('DefaultNameCopiedImportList', {
-        name: pendingChanges.name,
+        name: pendingChanges.name ?? '',
       });
       newState.pendingChanges = pendingChanges;
 

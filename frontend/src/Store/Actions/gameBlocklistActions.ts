@@ -49,7 +49,7 @@ export const clearGameBlocklist = createAction(CLEAR_GAME_BLOCKLIST);
 
 export const actionHandlers = handleThunks({
   [FETCH_GAME_BLOCKLIST]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: FetchPayload,
     dispatch: Dispatch
   ) {

@@ -1,12 +1,14 @@
 /* global JQuery */
-import $ from 'jquery';
+import $, { JQueryDeferred } from 'jquery';
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
 import { set } from 'Store/Actions/baseActions';
 import { createThunk, handleThunks } from 'Store/thunks';
-import createAjaxRequest from 'Utilities/createAjaxRequest';
+import createAjaxRequest, {
+  AjaxOptions as CreateAjaxOptions,
+} from 'Utilities/createAjaxRequest';
 import requestAction from 'Utilities/requestAction';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
@@ -15,18 +17,24 @@ import createHandleActions from './Creators/createHandleActions';
 
 declare global {
   interface Window {
-    Gamarr: {
-      urlBase: string;
-      [key: string]: unknown;
-    };
     onCompleteOauth?: (query: string, onComplete: () => void) => void;
   }
+}
+
+interface ProviderDataValue {
+  value: unknown;
+}
+
+interface ProviderData {
+  fields?: unknown;
+  [key: string]: ProviderDataValue | unknown;
 }
 
 interface OAuthPayload {
   name: string;
   section: string;
-  [key: string]: unknown;
+  provider: string;
+  providerData: ProviderData;
 }
 
 interface OAuthValuePayload {
@@ -41,14 +49,7 @@ interface QueryParams {
 
 interface OAuthResponse {
   oauthUrl?: string;
-  [key: string]: unknown;
-}
-
-interface AjaxOptions {
-  url?: string;
-  method?: string;
-  data?: unknown;
-  [key: string]: unknown;
+  [key: string]: string | number | boolean | undefined;
 }
 
 //
@@ -87,7 +88,7 @@ function showOAuthWindow(
   url: string,
   payload: OAuthPayload
 ): JQuery.Promise<QueryParams> {
-  const deferred = $.Deferred<QueryParams>();
+  const deferred = $.Deferred<QueryParams>() as JQueryDeferred<QueryParams>;
   const selfWindow = window;
 
   const newWindow = window.open(url);
@@ -136,8 +137,8 @@ function showOAuthWindow(
 }
 
 function executeIntermediateRequest(
-  payload: Record<string, unknown>,
-  ajaxOptions: AjaxOptions
+  payload: { provider: string; providerData: ProviderData },
+  ajaxOptions: CreateAjaxOptions
 ): JQuery.Promise<OAuthResponse> {
   return createAjaxRequest(ajaxOptions).request.then((data: OAuthResponse) => {
     return requestAction({
@@ -156,7 +157,7 @@ function executeIntermediateRequest(
 
 export const actionHandlers = handleThunks({
   [START_OAUTH]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: OAuthPayload,
     dispatch: Dispatch
   ) {

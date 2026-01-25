@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
-import { createThunk, handleThunks } from 'Store/thunks';
+import Game from 'Game/Game';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import getNewGame from 'Utilities/Game/getNewGame';
 import getSectionState from 'Utilities/State/getSectionState';
@@ -12,10 +12,9 @@ import { removeItem, set, updateItem } from './baseActions';
 import createHandleActions from './Creators/createHandleActions';
 import { fetchRootFolders } from './rootFolderActions';
 
-interface SelectedGame {
+type SelectedGame = Partial<Game> & {
   igdbId: number;
-  [key: string]: unknown;
-}
+};
 
 interface ImportItem {
   id: string;
@@ -116,7 +115,7 @@ export const actionHandlers = handleThunks({
   [QUEUE_LOOKUP_GAME]: function (
     getState: () => AppState,
     payload: QueuePayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { name, path, relativePath, term, topOfQueue = false } = payload;
 
@@ -163,7 +162,7 @@ export const actionHandlers = handleThunks({
   [START_LOOKUP_GAME]: function (
     getState: () => AppState,
     payload: StartPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     if (concurrentLookups >= 1) {
       return;
@@ -253,8 +252,8 @@ export const actionHandlers = handleThunks({
 
   [LOOKUP_UNSEARCHED_GAMES]: function (
     getState: () => AppState,
-    payload: unknown,
-    dispatch: Dispatch
+    _payload: unknown,
+    dispatch: AppDispatch
   ) {
     const state = getState().importGame as ImportGameState;
 
@@ -278,7 +277,7 @@ export const actionHandlers = handleThunks({
   [IMPORT_GAME]: function (
     getState: () => AppState,
     payload: ImportPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(set({ section, isImporting: true }));
 
@@ -286,7 +285,7 @@ export const actionHandlers = handleThunks({
     const items = (getState().importGame as ImportGameState).items;
     const addedIds: string[] = [];
 
-    const allNewGames = ids.reduce((acc: unknown[], id) => {
+    const allNewGames = ids.reduce((acc: SelectedGame[], id) => {
       const item = items.find((i) => i.id === id);
 
       if (!item) {
@@ -299,9 +298,9 @@ export const actionHandlers = handleThunks({
       // the same game hasn't been added yet.
       if (
         selectedGame &&
-        !acc.some((a: { igdbId?: number }) => a.igdbId === selectedGame.igdbId)
+        !acc.some((a) => a.igdbId === selectedGame.igdbId)
       ) {
-        const newGame = getNewGame(_.cloneDeep(selectedGame), item);
+        const newGame = getNewGame(_.cloneDeep(selectedGame) as Game, item);
         newGame.path = item.path;
 
         addedIds.push(id);
@@ -397,10 +396,10 @@ export const reducers = createHandleActions(
     },
 
     [SET_IMPORT_GAME_VALUE]: function (
-      state: unknown,
+      state: object,
       { payload }: { payload: SetValuePayload }
     ) {
-      const newState = getSectionState(state, section) as ImportGameState;
+      const newState = getSectionState<ImportGameState>(state, section);
       const items = newState.items;
       const index = items.findIndex((item) => item.id === payload.id);
 
@@ -409,9 +408,9 @@ export const reducers = createHandleActions(
       if (index >= 0) {
         const item = items[index];
 
-        newState.items.splice(index, 1, { ...item, ...payload } as ImportItem);
+        newState.items.splice(index, 1, { ...item, ...payload });
       } else {
-        newState.items.push({ ...payload } as ImportItem);
+        newState.items.push({ ...payload } as unknown as ImportItem);
       }
 
       return updateSectionState(state, section, newState);

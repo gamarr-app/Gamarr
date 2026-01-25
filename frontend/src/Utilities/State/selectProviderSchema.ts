@@ -20,7 +20,6 @@ interface Payload {
   presetName?: string;
 }
 
-type State = Record<string, unknown>;
 type SchemaDefaults = Record<string, unknown> | ((schema: Schema) => Schema);
 
 function applySchemaDefaults(
@@ -36,12 +35,12 @@ function applySchemaDefaults(
   return Object.assign(selectedSchema, schemaDefaults);
 }
 
-function selectProviderSchema(
-  state: State,
+function selectProviderSchema<T extends object>(
+  state: T,
   section: string,
   payload: Payload,
   schemaDefaults?: SchemaDefaults
-): State {
+): T {
   const newState = getSectionState(state, section) as SectionState;
 
   const { implementation, presetName } = payload;

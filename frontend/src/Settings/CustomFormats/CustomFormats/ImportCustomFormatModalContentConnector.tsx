@@ -95,7 +95,6 @@ function ImportCustomFormatModalContentConnector({
             })
           );
         }
-        // @ts-expect-error - actions aren't typed
         dispatch(setCustomFormatSpecificationFieldValue({ name: key, value }));
       }
     },
@@ -130,7 +129,6 @@ function ImportCustomFormatModalContentConnector({
         if (key === 'fields') {
           parseFields(value as Record<string, unknown>, selectedImplementation);
         } else if (key !== 'id') {
-          // @ts-expect-error - actions aren't typed
           dispatch(setCustomFormatSpecificationValue({ name: key, value }));
         }
       }
@@ -151,7 +149,6 @@ function ImportCustomFormatModalContentConnector({
             parseSpecification(spec);
           }
         } else if (key !== 'id') {
-          // @ts-expect-error - actions aren't typed
           dispatch(setCustomFormatValue({ name: key, value }));
         }
       }

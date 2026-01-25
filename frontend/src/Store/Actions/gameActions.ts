@@ -80,6 +80,7 @@ interface SaveGamePayload {
 }
 
 interface DeleteGamePayload {
+  id: number;
   deleteFiles?: boolean;
   addImportExclusion?: boolean;
   collectionIgdbId?: number;
@@ -91,15 +92,6 @@ interface ToggleMonitoredPayload {
   monitored: boolean;
 }
 
-interface AjaxOptions {
-  url: string;
-  [key: string]: unknown;
-}
-
-interface GetAjaxOptionsParams {
-  ajaxOptions: AjaxOptions;
-  payload: SaveGamePayload;
-}
 
 //
 // Variables
@@ -216,10 +208,13 @@ export const filters: Filter[] = [
   },
 ];
 
+type DateFilterValue = string | { time: string; value: number };
+type FilterPredicateType = keyof typeof filterTypePredicates;
+
 export const filterPredicates = {
   added: function (
     item: GameItem,
-    filterValue: unknown,
+    filterValue: DateFilterValue,
     type: string
   ): boolean {
     return dateFilterPredicate(item.added, filterValue, type);
@@ -230,7 +225,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
     const { collection } = item;
 
     return predicate(
@@ -244,7 +239,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
     const { originalLanguage } = item;
 
     return predicate(
@@ -258,7 +253,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
     const { statistics = {} } = item;
     const { releaseGroups = [] } = statistics;
 
@@ -270,7 +265,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
     const { statistics = {} } = item;
     const sizeOnDisk =
       statistics && statistics.sizeOnDisk ? statistics.sizeOnDisk : 0;
@@ -280,7 +275,7 @@ export const filterPredicates = {
 
   inCinemas: function (
     item: GameItem,
-    filterValue: unknown,
+    filterValue: DateFilterValue,
     type: string
   ): boolean {
     return dateFilterPredicate(item.inCinemas, filterValue, type);
@@ -288,7 +283,7 @@ export const filterPredicates = {
 
   physicalRelease: function (
     item: GameItem,
-    filterValue: unknown,
+    filterValue: DateFilterValue,
     type: string
   ): boolean {
     return dateFilterPredicate(item.physicalRelease, filterValue, type);
@@ -296,7 +291,7 @@ export const filterPredicates = {
 
   digitalRelease: function (
     item: GameItem,
-    filterValue: unknown,
+    filterValue: DateFilterValue,
     type: string
   ): boolean {
     return dateFilterPredicate(item.digitalRelease, filterValue, type);
@@ -304,7 +299,7 @@ export const filterPredicates = {
 
   releaseDate: function (
     item: GameItem,
-    filterValue: unknown,
+    filterValue: DateFilterValue,
     type: string
   ): boolean {
     return dateFilterPredicate(item.releaseDate, filterValue, type);
@@ -315,7 +310,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
 
     const rating = ratings.igdb ? ratings.igdb.value : 0;
 
@@ -327,7 +322,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
 
     const rating = ratings.igdb ? ratings.igdb.votes : 0;
 
@@ -339,7 +334,7 @@ export const filterPredicates = {
     filterValue: unknown,
     type: string
   ): boolean {
-    const predicate = filterTypePredicates[type];
+    const predicate = filterTypePredicates[type as FilterPredicateType];
 
     const rating = ratings.metacritic ? ratings.metacritic.value : 0;
 
@@ -509,32 +504,35 @@ export const TOGGLE_GAME_MONITORED = 'games/toggleGameMonitored';
 // Action Creators
 
 export const fetchGames = createThunk(FETCH_GAMES);
-export const saveGame = createThunk(SAVE_GAME, (payload: SaveGamePayload) => {
-  const newPayload: SaveGamePayload = {
-    ...payload,
-  };
-
-  if (payload.moveFiles) {
-    (newPayload as Record<string, unknown>).queryParams = {
-      moveFiles: true,
+export const saveGame = createThunk(
+  SAVE_GAME,
+  <T extends SaveGamePayload, TResult>(payload: T): TResult => {
+    const newPayload: SaveGamePayload = {
+      ...payload,
     };
+
+    if (payload.moveFiles) {
+      (newPayload as Record<string, unknown>).queryParams = {
+        moveFiles: true,
+      };
+    }
+
+    delete newPayload.moveFiles;
+
+    return newPayload as unknown as TResult;
   }
-
-  delete newPayload.moveFiles;
-
-  return newPayload;
-});
+);
 
 export const deleteGame = createThunk(
   DELETE_GAME,
-  (payload: DeleteGamePayload) => {
+  <T extends DeleteGamePayload, TResult>(payload: T): TResult => {
     return {
       ...payload,
       queryParams: {
         deleteFiles: payload.deleteFiles,
         addImportExclusion: payload.addImportExclusion,
       },
-    };
+    } as unknown as TResult;
   }
 );
 
@@ -555,27 +553,11 @@ export const setGameValue = createAction(
 export const setDeleteOption = createAction(SET_DELETE_OPTION);
 
 //
-// Helpers
-
-function getSaveAjaxOptions({
-  ajaxOptions,
-  payload,
-}: GetAjaxOptionsParams): AjaxOptions {
-  if (payload.moveFolder) {
-    ajaxOptions.url = `${ajaxOptions.url}?moveFolder=true`;
-  }
-
-  return ajaxOptions;
-}
-
-//
 // Action Handlers
 
 export const actionHandlers = handleThunks({
   [FETCH_GAMES]: createFetchHandler(section, '/game'),
-  [SAVE_GAME]: createSaveProviderHandler(section, '/game', {
-    getAjaxOptions: getSaveAjaxOptions,
-  }),
+  [SAVE_GAME]: createSaveProviderHandler(section, '/game'),
   [DELETE_GAME]: (
     getState: () => AppState,
     payload: DeleteGamePayload,
@@ -666,7 +648,7 @@ export const actionHandlers = handleThunks({
   },
 
   [SAVE_GAME_EDITOR]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: unknown,
     dispatch: Dispatch
   ) {
@@ -689,7 +671,6 @@ export const actionHandlers = handleThunks({
         batchActions([
           ...data.map((game) => {
             return updateItem({
-              id: game.id,
               section: 'games',
               ...game,
             });
@@ -716,7 +697,7 @@ export const actionHandlers = handleThunks({
   },
 
   [BULK_DELETE_GAME]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: unknown,
     dispatch: Dispatch
   ) {

@@ -1,8 +1,6 @@
-import { Dispatch } from 'redux';
-import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
 import { messageTypes } from 'Helpers/Props';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import { isSameCommand } from 'Utilities/Command';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import translate from 'Utilities/String/translate';
@@ -93,7 +91,7 @@ interface CommandPayload {
   [key: string]: unknown;
 }
 
-function showCommandMessage(payload: CommandData, dispatch: Dispatch): void {
+function showCommandMessage(payload: CommandData, dispatch: AppDispatch): void {
   const { id, name, trigger, message, body = {}, status } = payload;
 
   const { sendUpdatesToClient, suppressMessages } = body;
@@ -124,7 +122,10 @@ function showCommandMessage(payload: CommandData, dispatch: Dispatch): void {
   );
 }
 
-function scheduleRemoveCommand(command: CommandData, dispatch: Dispatch): void {
+function scheduleRemoveCommand(
+  command: CommandData,
+  dispatch: AppDispatch
+): void {
   const { id, status } = command;
 
   if (status === 'queued') {
@@ -138,12 +139,8 @@ function scheduleRemoveCommand(command: CommandData, dispatch: Dispatch): void {
   }
 
   removeCommandTimeoutIds[id] = setTimeout(() => {
-    dispatch(
-      batchActions([
-        removeCommand({ section: 'commands', id }),
-        hideMessage({ id }),
-      ])
-    );
+    dispatch(removeCommand({ section: 'commands', id }));
+    dispatch(hideMessage({ id }));
 
     delete removeCommandTimeoutIds[id];
   }, 60000 * 5);
@@ -151,7 +148,7 @@ function scheduleRemoveCommand(command: CommandData, dispatch: Dispatch): void {
 
 export function executeCommandHelper(
   payload: CommandPayload,
-  dispatch: Dispatch
+  dispatch: AppDispatch
 ): Promise<CommandData> | undefined {
   if (lastCommand && isSameCommand(lastCommand, payload)) {
     dispatch(
@@ -206,7 +203,7 @@ export const actionHandlers = handleThunks({
   [EXECUTE_COMMAND]: function (
     _getState: () => AppState,
     payload: CommandPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     executeCommandHelper(payload, dispatch);
   },
@@ -216,7 +213,7 @@ export const actionHandlers = handleThunks({
   [ADD_COMMAND]: function (
     _getState: () => AppState,
     payload: CommandData,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(updateItem({ section: 'commands', ...payload }));
   },
@@ -224,7 +221,7 @@ export const actionHandlers = handleThunks({
   [UPDATE_COMMAND]: function (
     _getState: () => AppState,
     payload: CommandData,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(updateItem({ section: 'commands', ...payload }));
 
@@ -235,17 +232,17 @@ export const actionHandlers = handleThunks({
   [FINISH_COMMAND]: function (
     getState: () => AppState,
     payload: CommandData,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const state = getState();
-    const handlers = (state.commands as CommandsState).handlers;
+    const handlers = (state.commands as unknown as CommandsState).handlers;
 
     Object.keys(handlers).forEach((key) => {
       const handler = handlers[key];
 
       if (handler.name === payload.name) {
         dispatch(
-          handler.handler(payload) as unknown as Parameters<Dispatch>[0]
+          handler.handler(payload) as unknown as Parameters<AppDispatch>[0]
         );
       }
     });
@@ -266,7 +263,7 @@ export const actionHandlers = handleThunks({
   [REMOVE_COMMAND]: function (
     _getState: () => AppState,
     payload: { id: number },
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(removeItem({ section: 'commands', ...payload }));
   },

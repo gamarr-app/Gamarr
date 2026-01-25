@@ -109,7 +109,7 @@ export const setAddGameValue = createAction(
 
 export const actionHandlers = handleThunks({
   [LOOKUP_GAME]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: LookupGamePayload,
     dispatch: Dispatch
   ) {

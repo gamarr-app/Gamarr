@@ -76,7 +76,6 @@ function EditIndexerModalContent({
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setIndexerValue(change));
     },
     [dispatch]
@@ -84,7 +83,6 @@ function EditIndexerModalContent({
 
   const handleFieldChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setIndexerFieldValue(change));
     },
     [dispatch]

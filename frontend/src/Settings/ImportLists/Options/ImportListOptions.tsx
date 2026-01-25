@@ -78,7 +78,6 @@ function ImportListOptions({
 
   const onInputChange = useCallback(
     ({ name, value }: { name: string; value: unknown }) => {
-      // @ts-expect-error 'setImportListOptionsValue' isn't typed yet
       dispatch(setImportListOptionsValue({ name, value }));
     },
     [dispatch]

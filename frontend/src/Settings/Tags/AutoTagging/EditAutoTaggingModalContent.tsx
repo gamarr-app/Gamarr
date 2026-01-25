@@ -82,7 +82,6 @@ export default function EditAutoTaggingModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions are not typed
       dispatch(setAutoTaggingValue({ name, value }));
     },
     [dispatch]

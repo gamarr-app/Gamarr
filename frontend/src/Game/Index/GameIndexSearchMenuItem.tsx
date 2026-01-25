@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
-import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
-import GamesAppState, { GameIndexAppState } from 'App/State/GamesAppState';
 import { GAME_SEARCH } from 'Commands/commandNames';
 import PageToolbarOverflowMenuItem from 'Components/Page/Toolbar/PageToolbarOverflowMenuItem';
 import { icons } from 'Helpers/Props';
@@ -19,10 +17,9 @@ interface GameIndexSearchMenuItemProps {
 
 function GameIndexSearchMenuItem(props: GameIndexSearchMenuItemProps) {
   const isSearching = useSelector(createCommandExecutingSelector(GAME_SEARCH));
-  const {
-    items,
-  }: GamesAppState & GameIndexAppState & ClientSideCollectionAppState =
-    useSelector(createGameClientSideCollectionItemsSelector('gameIndex'));
+  const { items } = useSelector(
+    createGameClientSideCollectionItemsSelector('gameIndex')
+  );
 
   const dispatch = useDispatch();
 

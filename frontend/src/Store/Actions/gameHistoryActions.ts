@@ -1,8 +1,7 @@
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import { set, update } from './baseActions';
 import createHandleActions from './Creators/createHandleActions';
@@ -57,9 +56,9 @@ export const gameHistoryMarkAsFailed = createThunk(GAME_HISTORY_MARK_AS_FAILED);
 
 export const actionHandlers = handleThunks({
   [FETCH_GAME_HISTORY]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: FetchPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     dispatch(set({ section, isFetching: true }));
 
@@ -96,9 +95,9 @@ export const actionHandlers = handleThunks({
   },
 
   [GAME_HISTORY_MARK_AS_FAILED]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: MarkAsFailedPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { historyId, gameId } = payload;
 

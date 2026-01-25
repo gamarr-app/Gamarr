@@ -150,14 +150,14 @@ export default {
           'settings.autoTaggings',
           true
         ) as SectionState;
-        const cf = cfState.items[cfState.itemMap[payload.id]] as {
+        const cf = cfState.items[cfState.itemMap[payload.id]] as unknown as {
           specifications: Omit<SpecificationItem, 'id'>[];
         };
         tags = cf.specifications.map((tag, i) => {
           return {
             id: i + 1,
             ...tag,
-          };
+          } as SpecificationItem;
         });
       }
 
@@ -181,7 +181,7 @@ export default {
 
       const saveData = getProviderState(
         { id, ...otherPayload },
-        getState,
+        getState as () => Record<string, unknown>,
         section,
         false
       ) as SpecificationItem;
@@ -246,7 +246,7 @@ export default {
       createSetProviderFieldValueReducer(section),
 
     [SELECT_AUTO_TAGGING_SPECIFICATION_SCHEMA]: (
-      state: unknown,
+      state: object,
       { payload }: { payload: SchemaPayload }
     ) => {
       return selectProviderSchema(
@@ -260,7 +260,7 @@ export default {
     },
 
     [CLONE_AUTO_TAGGING_SPECIFICATION]: function (
-      state: unknown,
+      state: object,
       { payload }: { payload: IdPayload }
     ) {
       const id = payload.id;

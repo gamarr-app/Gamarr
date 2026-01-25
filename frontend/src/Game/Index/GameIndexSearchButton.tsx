@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
-import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
-import GamesAppState, { GameIndexAppState } from 'App/State/GamesAppState';
 import { GAME_SEARCH } from 'Commands/commandNames';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
@@ -21,10 +19,9 @@ interface GameIndexSearchButtonProps {
 
 function GameIndexSearchButton(props: GameIndexSearchButtonProps) {
   const isSearching = useSelector(createCommandExecutingSelector(GAME_SEARCH));
-  const {
-    items,
-  }: GamesAppState & GameIndexAppState & ClientSideCollectionAppState =
-    useSelector(createGameClientSideCollectionItemsSelector('gameIndex'));
+  const { items } = useSelector(
+    createGameClientSideCollectionItemsSelector('gameIndex')
+  );
 
   const dispatch = useDispatch();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);

@@ -20,6 +20,12 @@ interface IdPayload {
   id: number;
 }
 
+interface SaveProviderPayload {
+  id?: number;
+  queryParams?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 interface AutoTaggingItem {
   id: number;
   name: string;
@@ -83,7 +89,7 @@ export default {
 
     [SAVE_AUTO_TAGGING]: (
       getState: () => AppState,
-      payload: unknown,
+      payload: SaveProviderPayload,
       dispatch: Dispatch
     ) => {
       const state = getState();
@@ -110,7 +116,7 @@ export default {
     [SET_AUTO_TAGGING_VALUE]: createSetSettingValueReducer(section),
 
     [CLONE_AUTO_TAGGING]: function (
-      state: unknown,
+      state: object,
       { payload }: { payload: IdPayload }
     ) {
       const id = payload.id;
@@ -125,7 +131,7 @@ export default {
       delete pendingChanges.id;
 
       pendingChanges.name = translate('DefaultNameCopiedProfile', {
-        name: pendingChanges.name,
+        name: pendingChanges.name ?? '',
       });
       newState.pendingChanges = pendingChanges;
 

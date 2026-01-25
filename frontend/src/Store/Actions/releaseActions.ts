@@ -81,6 +81,11 @@ export interface ReleasesState {
   selectedFilterKey: string;
 }
 
+interface FetchPayload {
+  id?: number;
+  [key: string]: unknown;
+}
+
 interface GrabPayload {
   guid: string;
   [key: string]: unknown;
@@ -171,7 +176,8 @@ export const defaultState: ReleasesState = {
       filterValue: unknown,
       type: string
     ) {
-      const predicate = filterTypePredicates[type];
+      const predicate =
+        filterTypePredicates[type as keyof typeof filterTypePredicates];
 
       const languages = item.languages.map((language) => language.name);
 
@@ -179,7 +185,8 @@ export const defaultState: ReleasesState = {
     },
 
     peers: function (item: ReleaseItem, value: unknown, type: string) {
-      const predicate = filterTypePredicates[type];
+      const predicate =
+        filterTypePredicates[type as keyof typeof filterTypePredicates];
       const seeders = item.seeders || 0;
       const leechers = item.leechers || 0;
 
@@ -328,7 +335,7 @@ const fetchReleasesHelper = createFetchHandler(section, '/release');
 export const actionHandlers = handleThunks({
   [FETCH_RELEASES]: function (
     getState: () => AppState,
-    payload: unknown,
+    payload: FetchPayload,
     dispatch: Dispatch
   ) {
     const abortRequest = fetchReleasesHelper(getState, payload, dispatch);
@@ -338,7 +345,8 @@ export const actionHandlers = handleThunks({
 
   [CANCEL_FETCH_RELEASES]: function () {
     if (abortCurrentRequest) {
-      abortCurrentRequest = abortCurrentRequest();
+      abortCurrentRequest();
+      abortCurrentRequest = null;
     }
   },
 
@@ -370,7 +378,7 @@ export const actionHandlers = handleThunks({
       );
     });
 
-    promise.fail((xhr: { responseJSON?: { message?: string } }) => {
+    promise.fail((xhr: JQuery.jqXHR & { responseJSON?: { message?: string } }) => {
       const grabError =
         (xhr.responseJSON && xhr.responseJSON.message) ||
         'Failed to add to download queue';

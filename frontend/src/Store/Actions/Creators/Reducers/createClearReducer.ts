@@ -1,10 +1,8 @@
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 
-type State = Record<string, unknown>;
-
-function createClearReducer(section: string, defaultState: State) {
-  return (state: State): State => {
+function createClearReducer(section: string, defaultState: object) {
+  return <T extends object>(state: T): T => {
     const newState = Object.assign(
       getSectionState(state, section),
       defaultState

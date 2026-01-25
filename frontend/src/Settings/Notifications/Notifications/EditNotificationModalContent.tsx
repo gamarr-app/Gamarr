@@ -65,7 +65,6 @@ function EditNotificationModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setNotificationValue({ name, value }));
     },
     [dispatch]
@@ -78,7 +77,6 @@ function EditNotificationModalContent({
       additionalProperties = {},
     }: InputChanged & { additionalProperties?: Record<string, unknown> }) => {
       dispatch(
-        // @ts-expect-error - actions aren't typed
         setNotificationFieldValues({
           properties: { ...additionalProperties, [name]: value },
         })

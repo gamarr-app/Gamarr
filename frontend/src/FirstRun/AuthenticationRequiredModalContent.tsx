@@ -60,7 +60,6 @@ export default function AuthenticationRequiredModalContent() {
 
   const onInputChange = useCallback(
     (args: InputChanged) => {
-      // @ts-expect-error Actions aren't typed
       dispatch(setGeneralSettingsValue(args));
     },
     [dispatch]

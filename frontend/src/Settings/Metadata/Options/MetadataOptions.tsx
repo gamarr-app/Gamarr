@@ -62,7 +62,6 @@ function MetadataOptions({
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setMetadataOptionsValue(change));
     },
     [dispatch]

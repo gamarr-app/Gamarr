@@ -47,7 +47,7 @@ export const fetchGameTitles = createThunk(FETCH_GAME_TITLES);
 
 export const actionHandlers = handleThunks({
   [FETCH_GAME_TITLES]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: FetchPayload,
     dispatch: Dispatch
   ) {

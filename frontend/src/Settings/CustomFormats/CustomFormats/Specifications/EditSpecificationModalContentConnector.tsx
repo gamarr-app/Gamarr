@@ -35,7 +35,6 @@ function EditSpecificationModalContentConnector({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setCustomFormatSpecificationValue({ name, value }));
     },
     [dispatch]
@@ -43,7 +42,6 @@ function EditSpecificationModalContentConnector({
 
   const handleFieldChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setCustomFormatSpecificationFieldValue({ name, value }));
     },
     [dispatch]

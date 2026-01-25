@@ -1,9 +1,8 @@
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import AppState from 'App/State/AppState';
 import { filterTypes, sortDirections } from 'Helpers/Props';
 import { setAppValue } from 'Store/Actions/appActions';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
 import translate from 'Utilities/String/translate';
@@ -350,7 +349,7 @@ export const actionHandlers = handleThunks({
   [RESTORE_BACKUP]: function (
     _getState: () => AppState,
     payload: RestoreBackupPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { id, file } = payload;
 
@@ -442,7 +441,7 @@ export const actionHandlers = handleThunks({
   [RESTART]: function (
     _getState: () => AppState,
     _payload: unknown,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const promise = createAjaxRequest({
       url: '/system/restart',

@@ -4,27 +4,39 @@ import {
   defaultMemoize,
   Selector,
 } from 'reselect';
-import AppState from 'App/State/AppState';
+import { Error } from 'App/State/AppSectionState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
+import Column from 'Components/Table/Column';
 import Game from 'Game/Game';
+import { SortDirection } from 'Helpers/Props/sortDirections';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import createClientSideCollectionSelector from './createClientSideCollectionSelector';
 
-interface GameItem {
+export interface GameIndexItem {
   id: number;
   sortTitle: string;
   collectionId?: number;
-  [key: string]: unknown;
 }
 
-interface GameResult {
-  items: GameItem[];
-  [key: string]: unknown;
+export interface GameClientSideCollectionItemsState {
+  isFetching: boolean;
+  isPopulated: boolean;
+  error: Error;
+  items: GameIndexItem[];
+  sortKey: string;
+  sortDirection: SortDirection;
+  selectedFilterKey: string;
+  filters: Filter[];
+  customFilters: CustomFilter[];
+  totalItems: number;
+  view: string;
+  columns: Column[];
 }
 
 function createUnoptimizedSelector(uiSection: string) {
   return createSelector(
     createClientSideCollectionSelector('games', uiSection),
-    (games): GameResult => {
+    (games): GameClientSideCollectionItemsState => {
       const items = (games.items as unknown as Game[]).map((s) => {
         const { id, sortTitle, collection } = s;
 
@@ -38,12 +50,15 @@ function createUnoptimizedSelector(uiSection: string) {
       return {
         ...games,
         items,
-      };
+      } as GameClientSideCollectionItemsState;
     }
   );
 }
 
-function gameListEqual(a: GameResult, b: GameResult): boolean {
+function gameListEqual(
+  a: GameClientSideCollectionItemsState,
+  b: GameClientSideCollectionItemsState
+): boolean {
   return hasDifferentItemsOrOrder(a.items, b.items);
 }
 
@@ -54,7 +69,7 @@ const createGameEqualSelector = createSelectorCreator(
 
 function createGameClientSideCollectionItemsSelector(
   uiSection: string
-): Selector<AppState, GameResult> {
+): Selector<AppState, GameClientSideCollectionItemsState> {
   return createGameEqualSelector(
     createUnoptimizedSelector(uiSection),
     (games) => games

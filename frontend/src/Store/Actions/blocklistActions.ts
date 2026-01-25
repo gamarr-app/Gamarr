@@ -1,4 +1,3 @@
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
@@ -7,7 +6,7 @@ import {
   filterBuilderValueTypes,
   sortDirections,
 } from 'Helpers/Props';
-import { createThunk, handleThunks } from 'Store/thunks';
+import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
 import translate from 'Utilities/String/translate';
@@ -200,9 +199,9 @@ export const actionHandlers = handleThunks({
   [REMOVE_BLOCKLIST_ITEM]: createRemoveItemHandler(section, '/blocklist'),
 
   [REMOVE_BLOCKLIST_ITEMS]: function (
-    getState: () => AppState,
+    _getState: () => AppState,
     payload: RemoveBlocklistItemsPayload,
-    dispatch: Dispatch
+    dispatch: AppDispatch
   ) {
     const { ids } = payload;
 

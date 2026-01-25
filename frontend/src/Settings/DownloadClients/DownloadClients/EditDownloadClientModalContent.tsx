@@ -75,7 +75,6 @@ function EditDownloadClientModalContent({
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setDownloadClientValue({ name, value }));
     },
     [dispatch]
@@ -83,7 +82,6 @@ function EditDownloadClientModalContent({
 
   const handleFieldChange = useCallback(
     ({ name, value }: InputChanged) => {
-      // @ts-expect-error - actions aren't typed
       dispatch(setDownloadClientFieldValue({ name, value }));
     },
     [dispatch]
