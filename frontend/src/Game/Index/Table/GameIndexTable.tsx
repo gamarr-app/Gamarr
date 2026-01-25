@@ -6,7 +6,7 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import Scroller from 'Components/Scroller/Scroller';
 import Column from 'Components/Table/Column';
-import Game from 'Game/Game';
+import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import dimensions from 'Styles/Variables/dimensions';
@@ -21,14 +21,14 @@ const bodyPaddingSmallScreen = parseInt(
 );
 
 interface RowItemData {
-  items: Game[];
+  items: GameIndexItem[];
   sortKey: string;
   columns: Column[];
   isSelectMode: boolean;
 }
 
 interface GameIndexTableProps {
-  items: Game[];
+  items: GameIndexItem[];
   sortKey: string;
   sortDirection?: SortDirection;
   jumpToCharacter?: string;

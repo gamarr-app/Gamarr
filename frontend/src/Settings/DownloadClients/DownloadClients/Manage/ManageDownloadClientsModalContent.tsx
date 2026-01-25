@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { DownloadClientAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -15,12 +14,14 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { kinds } from 'Helpers/Props';
+import { SortDirection } from 'Helpers/Props/sortDirections';
 import {
   bulkDeleteDownloadClients,
   bulkEditDownloadClients,
   setManageDownloadClientsSort,
 } from 'Store/Actions/settingsActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import DownloadClient from 'typings/DownloadClient';
 import { CheckInputChanged } from 'typings/inputs';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
@@ -29,6 +30,17 @@ import ManageDownloadClientsEditModal from './Edit/ManageDownloadClientsEditModa
 import ManageDownloadClientsModalRow from './ManageDownloadClientsModalRow';
 import TagsModal from './Tags/TagsModal';
 import styles from './ManageDownloadClientsModalContent.css';
+
+interface DownloadClientsCollectionState {
+  isFetching: boolean;
+  isPopulated: boolean;
+  isDeleting: boolean;
+  isSaving: boolean;
+  error: Error | null;
+  items: DownloadClient[];
+  sortKey: string;
+  sortDirection: SortDirection;
+}
 
 // TODO: This feels janky to do, but not sure of a better way currently
 type OnSelectedChangeCallback = React.ComponentProps<
@@ -98,9 +110,9 @@ function ManageDownloadClientsModalContent(
     items,
     sortKey,
     sortDirection,
-  }: DownloadClientAppState = useSelector(
+  } = useSelector(
     createClientSideCollectionSelector('settings.downloadClients')
-  );
+  ) as DownloadClientsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

@@ -2,11 +2,11 @@ import classNames from 'classnames';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import { ColorImpairedConsumer } from 'App/ColorImpairedContext';
 import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
 import Game, { GameStatus, Statistics } from 'Game/Game';
-import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import createDeepEqualSelector from 'Store/Selectors/createDeepEqualSelector';
 import formatBytes from 'Utilities/Number/formatBytes';
 import translate from 'Utilities/String/translate';
@@ -21,9 +21,9 @@ interface FooterGameItem {
 
 function createUnoptimizedSelector() {
   return createSelector(
-    createClientSideCollectionSelector('games', 'gameIndex'),
-    (games: { items: Game[] }): FooterGameItem[] => {
-      return games.items.map((m) => {
+    (state: AppState) => state.games.items,
+    (games: Game[]): FooterGameItem[] => {
+      return games.map((m) => {
         const { monitored, status, hasFile, statistics } = m;
 
         return {

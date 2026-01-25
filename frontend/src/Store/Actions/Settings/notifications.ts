@@ -78,7 +78,7 @@ export const setNotificationFieldValue = createAction(
 
 export const setNotificationFieldValues = createAction(
   SET_NOTIFICATION_FIELD_VALUES,
-  (payload: { name: string; value: unknown }) => {
+  (payload: { properties: Record<string, unknown> }) => {
     return {
       section,
       ...payload,

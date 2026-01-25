@@ -27,6 +27,9 @@ export interface ProviderOptionsState {
 
 interface FetchOptionsPayload {
   section: string;
+  provider: string;
+  action: string;
+  providerData: unknown;
   [key: string]: unknown;
 }
 
@@ -73,7 +76,10 @@ export const actionHandlers = handleThunks({
       payload,
     };
 
-    const state = getState() as Record<string, Record<string, unknown>>;
+    const state = getState() as unknown as Record<
+      string,
+      Record<string, unknown>
+    >;
     if (state[section][payload.section]) {
       dispatch(
         set({

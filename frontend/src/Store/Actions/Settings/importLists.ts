@@ -181,22 +181,18 @@ export default {
       state: State,
       { payload }: { payload: SchemaPayload }
     ) => {
-      return selectProviderSchema(
-        state,
-        section,
-        payload,
-        (selectedSchema: SelectedSchema) => {
-          selectedSchema.name =
-            payload.presetName ?? payload.implementationName;
-          selectedSchema.implementationName = payload.implementationName;
-          selectedSchema.minRefreshInterval =
-            selectedSchema.minRefreshInterval ?? payload.minRefreshInterval;
-          selectedSchema.minimumAvailability = 'released';
-          selectedSchema.rootFolderPath = '';
+      return selectProviderSchema(state, section, payload, (selectedSchema) => {
+        selectedSchema.name =
+          payload.presetName ?? payload.implementationName;
+        selectedSchema.implementationName = payload.implementationName;
+        selectedSchema.minRefreshInterval =
+          (selectedSchema.minRefreshInterval as string | undefined) ??
+          payload.minRefreshInterval;
+        selectedSchema.minimumAvailability = 'released';
+        selectedSchema.rootFolderPath = '';
 
-          return selectedSchema;
-        }
-      );
+        return selectedSchema;
+      });
     },
 
     [CLONE_IMPORT_LIST]: (

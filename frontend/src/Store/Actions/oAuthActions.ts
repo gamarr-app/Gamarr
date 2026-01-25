@@ -1,5 +1,5 @@
 /* global JQuery */
-import $, { JQueryDeferred } from 'jquery';
+import $ from 'jquery';
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
@@ -52,6 +52,8 @@ interface OAuthResponse {
   [key: string]: string | number | boolean | undefined;
 }
 
+type OAuthResponseRecord = Record<string, string | number | boolean>;
+
 //
 // Variables
 
@@ -88,7 +90,7 @@ function showOAuthWindow(
   url: string,
   payload: OAuthPayload
 ): JQuery.Promise<QueryParams> {
-  const deferred = $.Deferred<QueryParams>() as JQueryDeferred<QueryParams>;
+  const deferred = $.Deferred<QueryParams>();
   const selfWindow = window;
 
   const newWindow = window.open(url);
@@ -187,7 +189,7 @@ export const actionHandlers = handleThunks({
 
         return executeIntermediateRequest(
           otherPayload,
-          response as AjaxOptions
+          response as unknown as CreateAjaxOptions
         ).then((intermediateResponse) => {
           startResponse = intermediateResponse;
 
@@ -195,10 +197,17 @@ export const actionHandlers = handleThunks({
         });
       })
       .then((queryParams: QueryParams) => {
+        // Filter out undefined values from startResponse
+        const filteredStartResponse = Object.fromEntries(
+          Object.entries(startResponse).filter(
+            ([, v]) => v !== undefined
+          )
+        ) as OAuthResponseRecord;
+
         return requestAction({
           action: 'getOAuthToken',
           queryParams: {
-            ...startResponse,
+            ...filteredStartResponse,
             ...queryParams,
           },
           ...otherPayload,
@@ -256,7 +265,7 @@ export const actionHandlers = handleThunks({
 export const reducers = createHandleActions(
   {
     [SET_OAUTH_VALUE]: function (
-      state: unknown,
+      state: object,
       { payload }: { payload: OAuthValuePayload }
     ) {
       const newState = Object.assign(getSectionState(state, section), payload);
@@ -264,7 +273,7 @@ export const reducers = createHandleActions(
       return updateSectionState(state, section, newState);
     },
 
-    [RESET_OAUTH]: function (state: unknown) {
+    [RESET_OAUTH]: function (state: object) {
       return updateSectionState(state, section, defaultState);
     },
   },

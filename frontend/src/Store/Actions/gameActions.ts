@@ -504,35 +504,32 @@ export const TOGGLE_GAME_MONITORED = 'games/toggleGameMonitored';
 // Action Creators
 
 export const fetchGames = createThunk(FETCH_GAMES);
-export const saveGame = createThunk(
-  SAVE_GAME,
-  <T extends SaveGamePayload, TResult>(payload: T): TResult => {
-    const newPayload: SaveGamePayload = {
-      ...payload,
+export const saveGame = createThunk(SAVE_GAME, (payload: SaveGamePayload) => {
+  const newPayload: SaveGamePayload = {
+    ...payload,
+  };
+
+  if (payload.moveFiles) {
+    (newPayload as Record<string, unknown>).queryParams = {
+      moveFiles: true,
     };
-
-    if (payload.moveFiles) {
-      (newPayload as Record<string, unknown>).queryParams = {
-        moveFiles: true,
-      };
-    }
-
-    delete newPayload.moveFiles;
-
-    return newPayload as unknown as TResult;
   }
-);
+
+  delete newPayload.moveFiles;
+
+  return newPayload;
+});
 
 export const deleteGame = createThunk(
   DELETE_GAME,
-  <T extends DeleteGamePayload, TResult>(payload: T): TResult => {
+  (payload: DeleteGamePayload) => {
     return {
       ...payload,
       queryParams: {
         deleteFiles: payload.deleteFiles,
         addImportExclusion: payload.addImportExclusion,
       },
-    } as unknown as TResult;
+    };
   }
 );
 

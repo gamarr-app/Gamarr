@@ -176,14 +176,14 @@ export const actionHandlers = handleThunks({
     const deletePromise = deleteGameFileHelper(getState, payload, dispatch);
 
     deletePromise.done(() => {
-      const games = getState().games.items as Game[];
+      const games = getState().games.items as unknown as Game[];
       const gamesWithRemovedFiles = _.filter(games, { gameFileId });
 
       dispatch(
         batchActions([
           ...gamesWithRemovedFiles.map((game) => {
             return updateItem({
-              section: gameSection,
+              section: gameSection as string,
               ...game,
               gameFileId: 0,
               hasFile: false,
@@ -211,7 +211,7 @@ export const actionHandlers = handleThunks({
     }).request;
 
     promise.done(() => {
-      const games = getState().games.items as Game[];
+      const games = getState().games.items as unknown as Game[];
       const gamesWithRemovedFiles = gameFileIds.reduce(
         (acc: Game[], gameFileId) => {
           acc.push(..._.filter(games, { gameFileId }));

@@ -181,7 +181,7 @@ export default {
 
       const saveData = getProviderState(
         { id, ...otherPayload },
-        getState as () => Record<string, unknown>,
+        getState as unknown as () => Record<string, unknown>,
         section,
         false
       ) as SpecificationItem;
@@ -249,14 +249,7 @@ export default {
       state: object,
       { payload }: { payload: SchemaPayload }
     ) => {
-      return selectProviderSchema(
-        state,
-        section,
-        payload,
-        (selectedSchema: unknown) => {
-          return selectedSchema;
-        }
-      );
+      return selectProviderSchema(state, section, payload);
     },
 
     [CLONE_AUTO_TAGGING_SPECIFICATION]: function (

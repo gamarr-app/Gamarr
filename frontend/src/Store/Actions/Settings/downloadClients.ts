@@ -180,20 +180,15 @@ export default {
       createSetProviderFieldValueReducer(section),
 
     [SELECT_DOWNLOAD_CLIENT_SCHEMA]: (
-      state: unknown,
+      state: object,
       { payload }: { payload: SchemaPayload }
     ) => {
-      return selectProviderSchema(
-        state,
-        section,
-        payload,
-        (selectedSchema: SelectedSchema) => {
-          selectedSchema.name = selectedSchema.implementationName;
-          selectedSchema.enable = true;
+      return selectProviderSchema(state, section, payload, (selectedSchema) => {
+        selectedSchema.name = selectedSchema.implementationName as string;
+        selectedSchema.enable = true;
 
-          return selectedSchema;
-        }
-      );
+        return selectedSchema;
+      });
     },
 
     [SET_MANAGE_DOWNLOAD_CLIENTS_SORT]:
