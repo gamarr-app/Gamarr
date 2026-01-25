@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -32,7 +31,7 @@ function EditSpecificationModalContentConnector({
       state.settings.advancedSettings
   );
 
-  const specification = useSelector(providerSettingsSelector) as any;
+  const specification = useSelector(providerSettingsSelector);
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
@@ -60,11 +59,12 @@ function EditSpecificationModalContentConnector({
     onModalClose();
   }, [dispatch, id, onModalClose]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Content = EditSpecificationModalContent as any;
   return (
-    <EditSpecificationModalContent
+    <Content
       advancedSettings={advancedSettings}
       {...specification}
-      id={id}
       onCancelPress={handleCancelPress}
       onSavePress={handleSavePress}
       onInputChange={handleInputChange}

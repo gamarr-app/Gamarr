@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
 import Card from 'Components/Card';
 import Label from 'Components/Label';
@@ -23,7 +22,6 @@ interface CustomFormatProps {
   isDeleting: boolean;
   onConfirmDeleteCustomFormat: (id: number) => void;
   onCloneCustomFormatPress: (id: number) => void;
-  [key: string]: any;
 }
 
 function CustomFormat({

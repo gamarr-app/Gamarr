@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Card from 'Components/Card';
@@ -12,20 +11,31 @@ import {
   fetchCustomFormats,
 } from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
+import CustomFormatType from 'typings/CustomFormat';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import CustomFormat from './CustomFormat';
 import EditCustomFormatModal from './EditCustomFormatModal';
 import styles from './CustomFormats.css';
 
+interface CustomFormatListItem extends CustomFormatType {
+  specifications: Array<{ name: string; required: boolean; negate: boolean }>;
+}
+
 function CustomFormats() {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, error, items, isDeleting } = useSelector(
     createSortedSectionSelector(
       'settings.customFormats',
-      sortByProp('name') as (a: any, b: any) => number
+      sortByProp('name') as (a: { name: string }, b: { name: string }) => number
     )
-  ) as any;
+  ) as unknown as {
+    isFetching: boolean;
+    isPopulated: boolean;
+    error: import('App/State/AppSectionState').Error | undefined;
+    items: CustomFormatListItem[];
+    isDeleting: boolean;
+  };
 
   const [isCustomFormatModalOpen, setIsCustomFormatModalOpen] = useState(false);
   const [tagsFromId, setTagsFromId] = useState<number | undefined>(undefined);
@@ -68,7 +78,7 @@ function CustomFormats() {
         error={error}
       >
         <div className={styles.customFormats}>
-          {items.map((item: any) => {
+          {items.map((item) => {
             return (
               <CustomFormat
                 key={item.id}

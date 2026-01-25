@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
 import { Tag } from 'App/State/TagsAppState';
 import Card from 'Components/Card';
@@ -40,7 +39,6 @@ interface NotificationProps {
   tags: number[];
   tagList: Tag[];
   onConfirmDeleteNotification: (id: number) => void;
-  [key: string]: any;
 }
 
 function Notification({

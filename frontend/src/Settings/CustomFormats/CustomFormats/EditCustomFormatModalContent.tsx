@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
+import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Card from 'Components/Card';
 import FieldSet from 'Components/FieldSet';
@@ -16,7 +16,9 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { icons, inputTypes, kinds } from 'Helpers/Props';
+import CustomFormat from 'typings/CustomFormat';
 import { InputChanged } from 'typings/inputs';
+import { PendingSection } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import ImportCustomFormatModal from './ImportCustomFormatModal';
 import AddSpecificationModal from './Specifications/AddSpecificationModal';
@@ -24,15 +26,25 @@ import EditSpecificationModal from './Specifications/EditSpecificationModal';
 import Specification from './Specifications/Specification';
 import styles from './EditCustomFormatModalContent.css';
 
+interface SpecificationItem {
+  id: number;
+  name: string;
+  implementation: string;
+  implementationName: string;
+  negate: boolean;
+  required: boolean;
+  fields: object[];
+}
+
 interface EditCustomFormatModalContentProps {
   id?: number;
   isFetching: boolean;
-  error?: any;
+  error?: Error | null;
   isSaving: boolean;
-  saveError?: any;
-  item: Record<string, any>;
+  saveError?: Error | string;
+  item: PendingSection<CustomFormat>;
   specificationsPopulated: boolean;
-  specifications: any[];
+  specifications: SpecificationItem[];
   advancedSettings?: boolean;
   onInputChange: (change: InputChanged) => void;
   onSavePress: () => void;
@@ -44,6 +56,7 @@ interface EditCustomFormatModalContentProps {
 }
 
 function EditCustomFormatModalContent({
+  id,
   isFetching,
   error,
   isSaving,
@@ -65,7 +78,7 @@ function EditCustomFormatModalContent({
   const [isImportCustomFormatModalOpen, setIsImportCustomFormatModalOpen] =
     useState(false);
 
-  const { id, name, includeCustomFormatWhenRenaming } = item;
+  const { name, includeCustomFormatWhenRenaming } = item;
 
   const handleAddSpecificationPress = useCallback(() => {
     setIsAddSpecificationModalOpen(true);

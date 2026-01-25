@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
 import FieldSet from 'Components/FieldSet';
 import FormGroup from 'Components/Form/FormGroup';
@@ -10,6 +9,7 @@ import ClipboardButton from 'Components/Link/ClipboardButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import { icons, inputTypes, kinds } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
+import { Failure } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 
 export const authenticationMethodOptions = [
@@ -79,8 +79,17 @@ const certificateValidationOptions = [
   },
 ];
 
+interface SettingValue {
+  value: string;
+  errors?: Failure[];
+  warnings?: Failure[];
+  previousValue?: string;
+}
+
+type SettingsMap = Record<string, SettingValue>;
+
 interface SecuritySettingsProps {
-  settings: Record<string, any>;
+  settings: SettingsMap;
   isResettingApiKey: boolean;
   onInputChange: (change: InputChanged) => void;
   onConfirmResetApiKey: () => void;

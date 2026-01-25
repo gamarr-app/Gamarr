@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-bind */
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
@@ -35,7 +34,12 @@ function AddSpecificationModalContent({
             isSchemaFetching: boolean;
             isSchemaPopulated: boolean;
             schemaError: object | null;
-            schema: any[];
+            schema: Array<{
+              implementation: string;
+              implementationName: string;
+              infoLink: string;
+              presets?: Array<{ name: string }>;
+            }>;
           };
         };
       }) => state.settings.customFormatSpecifications
@@ -57,6 +61,10 @@ function AddSpecificationModalContent({
     },
     [dispatch, onModalClose]
   );
+
+  const handleClose = useCallback(() => {
+    onModalClose();
+  }, [onModalClose]);
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -82,11 +90,14 @@ function AddSpecificationModalContent({
             </Alert>
 
             <div className={styles.specifications}>
-              {schema.map((specification: any) => {
+              {schema.map((specification) => {
                 return (
                   <AddSpecificationItem
                     key={specification.implementation}
-                    {...specification}
+                    implementation={specification.implementation}
+                    implementationName={specification.implementationName}
+                    infoLink={specification.infoLink}
+                    presets={specification.presets}
                     onSpecificationSelect={handleSpecificationSelect}
                   />
                 );
@@ -96,7 +107,7 @@ function AddSpecificationModalContent({
         ) : null}
       </ModalBody>
       <ModalFooter>
-        <Button onPress={() => onModalClose()}>{translate('Close')}</Button>
+        <Button onPress={handleClose}>{translate('Close')}</Button>
       </ModalFooter>
     </ModalContent>
   );

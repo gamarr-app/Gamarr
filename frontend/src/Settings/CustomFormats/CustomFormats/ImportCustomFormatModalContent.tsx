@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
@@ -93,7 +92,11 @@ function ImportCustomFormatModalContent({
                   name="customFormatJson"
                   value={json}
                   placeholder={'{\n  "name": "Custom Format"\n}'}
-                  errors={parseError ? [parseError as any] : []}
+                  errors={
+                    parseError
+                      ? [parseError as unknown as { message: string }]
+                      : []
+                  }
                   onChange={handleChange}
                 />
               </FormGroup>

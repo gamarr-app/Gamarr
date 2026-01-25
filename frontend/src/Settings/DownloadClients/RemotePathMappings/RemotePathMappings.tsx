@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Error as AppError } from 'App/State/AppSectionState';
@@ -27,7 +26,12 @@ function RemotePathMappings() {
           isFetching: boolean;
           isPopulated: boolean;
           error: AppError | undefined;
-          items: Array<{ id: number }>;
+          items: Array<{
+            id: number;
+            host: string;
+            remotePath: string;
+            localPath: string;
+          }>;
         };
       };
     }) => state.settings.remotePathMappings
@@ -79,12 +83,11 @@ function RemotePathMappings() {
         </div>
 
         <div>
-          {items.map((item: any, index: number) => {
+          {items.map((item) => {
             return (
               <RemotePathMapping
                 key={item.id}
                 {...item}
-                index={index}
                 onConfirmDeleteRemotePathMapping={
                   handleConfirmDeleteRemotePathMapping
                 }

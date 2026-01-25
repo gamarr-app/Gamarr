@@ -16,3 +16,11 @@
 .qualityProfileItemPlaceholderAfter {
   margin-top: 8px;
 }
+
+.isDraggingUp {
+  /* placeholder for drag-up indicator styling */
+}
+
+.isDraggingDown {
+  /* placeholder for drag-down indicator styling */
+}

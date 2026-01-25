@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
@@ -9,6 +8,7 @@ import QualityProfileItemGroup from './QualityProfileItemGroup';
 import styles from './QualityProfileItemDragSource.css';
 
 const qualityProfileItemDragSource = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   beginDrag(props: any) {
     const { editGroups, qualityIndex, groupId, qualityId, name, allowed } =
       props;
@@ -24,12 +24,14 @@ const qualityProfileItemDragSource = {
     };
   },
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   endDrag(props: any) {
     props.onQualityProfileItemDragEnd(true);
   },
 };
 
 const qualityProfileItemDropTarget = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hover(props: any, monitor: any, component: any) {
     const { qualityIndex: dragQualityIndex, isGroup: isDragGroup } =
       monitor.getItem();
@@ -77,6 +79,7 @@ const qualityProfileItemDropTarget = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function collectDragSource(connect: any, monitor: any) {
   return {
     connectDragSource: connect.dragSource(),
@@ -84,6 +87,7 @@ function collectDragSource(connect: any, monitor: any) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function collectDropTarget(connect: any, monitor: any) {
   return {
     connectDropTarget: connect.dropTarget(),
@@ -98,14 +102,16 @@ interface QualityProfileItemDragSourceProps {
   qualityId?: number;
   name: string;
   allowed: boolean;
-  items?: any[];
+  items?: Array<{ quality: { id: number; name: string } }>;
   qualityIndex: string;
   isDragging?: boolean;
   isDraggingUp?: boolean;
   isDraggingDown?: boolean;
   isOverCurrent?: boolean;
   isInGroup?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connectDragSource?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connectDropTarget?: any;
   onCreateGroupPress?: (qualityId: number) => void;
   onDeleteGroupPress?: (groupId: number, value?: boolean) => void;
@@ -115,7 +121,11 @@ interface QualityProfileItemDragSourceProps {
   ) => void;
   onItemGroupAllowedChange?: (groupId: number, value: boolean) => void;
   onItemGroupNameChange?: (groupId: number, value: string) => void;
-  onQualityProfileItemDragMove: (payload: any) => void;
+  onQualityProfileItemDragMove: (payload: {
+    dragQualityIndex: string;
+    dropQualityIndex: string;
+    dropPosition: string;
+  }) => void;
   onQualityProfileItemDragEnd: (didDrop: boolean) => void;
 }
 
@@ -220,6 +230,7 @@ class QualityProfileItemDragSourceComponent extends Component<QualityProfileItem
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default DropTarget(
   QUALITY_PROFILE_ITEM,
   qualityProfileItemDropTarget,
@@ -229,5 +240,5 @@ export default DropTarget(
     QUALITY_PROFILE_ITEM,
     qualityProfileItemDragSource,
     collectDragSource
-  )(QualityProfileItemDragSourceComponent as any)
-) as any;
+  )(QualityProfileItemDragSourceComponent as unknown as React.ComponentType)
+) as unknown as React.ComponentType<QualityProfileItemDragSourceProps>;

@@ -6,14 +6,9 @@ import FormLabel from 'Components/Form/FormLabel';
 import InlineMarkdown from 'Components/Markdown/InlineMarkdown';
 import { sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
+import { FormatItem } from './EditQualityProfileModalContent';
 import QualityProfileFormatItem from './QualityProfileFormatItem';
 import styles from './QualityProfileFormatItems.css';
-
-interface FormatItem {
-  format: number;
-  name: string;
-  score: number;
-}
 
 interface FormError {
   message: string;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,12 +34,13 @@ function ImportCustomFormatModalContentConnector({
     [id]
   );
 
-  const advancedSettings = useSelector(
-    (state: { settings: { advancedSettings: boolean } }) =>
-      state.settings.advancedSettings
-  );
-
-  const customFormat = useSelector(providerSettingsSelector) as any;
+  const customFormat = useSelector(providerSettingsSelector) as unknown as {
+    isFetching: boolean;
+    error: object | null;
+    isSaving: boolean;
+    saveError: object | null;
+    item: Record<string, unknown>;
+  };
 
   const specificationsSelector = useMemo(
     () =>
@@ -49,7 +49,12 @@ function ImportCustomFormatModalContentConnector({
           settings: {
             customFormatSpecifications: {
               isPopulated: boolean;
-              schema: any[];
+              schema: Array<{
+                implementation: string;
+                implementationName: string;
+                fields: Array<{ name: string }>;
+                [key: string]: unknown;
+              }>;
             };
           };
         }) => state.settings.customFormatSpecifications,
@@ -76,7 +81,10 @@ function ImportCustomFormatModalContentConnector({
   }, [dispatch]);
 
   const parseFields = useCallback(
-    (fields: Record<string, any>, schema: any) => {
+    (
+      fields: Record<string, unknown>,
+      schema: { implementationName: string; fields: Array<{ name: string }> }
+    ) => {
       for (const [key, value] of Object.entries(fields)) {
         const field = _.find(schema.fields, { name: key });
         if (!field) {
@@ -95,7 +103,11 @@ function ImportCustomFormatModalContentConnector({
   );
 
   const parseSpecification = useCallback(
-    (spec: any) => {
+    (spec: {
+      implementation: string;
+      fields?: Record<string, unknown>;
+      [key: string]: unknown;
+    }) => {
       const selectedImplementation = _.find(specificationSchema, {
         implementation: spec.implementation,
       });
@@ -116,7 +128,7 @@ function ImportCustomFormatModalContentConnector({
 
       for (const [key, value] of Object.entries(spec)) {
         if (key === 'fields') {
-          parseFields(value as Record<string, any>, selectedImplementation);
+          parseFields(value as Record<string, unknown>, selectedImplementation);
         } else if (key !== 'id') {
           // @ts-expect-error - actions aren't typed
           dispatch(setCustomFormatSpecificationValue({ name: key, value }));
@@ -129,10 +141,13 @@ function ImportCustomFormatModalContentConnector({
   );
 
   const parseCf = useCallback(
-    (cf: any) => {
+    (cf: Record<string, unknown>) => {
       for (const [key, value] of Object.entries(cf)) {
         if (key === 'specifications') {
-          for (const spec of value as any[]) {
+          for (const spec of value as Array<{
+            implementation: string;
+            [key: string]: unknown;
+          }>) {
             parseSpecification(spec);
           }
         } else if (key !== 'id') {
@@ -151,11 +166,12 @@ function ImportCustomFormatModalContentConnector({
       try {
         const cf = JSON.parse(payload);
         parseCf(cf);
-      } catch (err: any) {
+      } catch (err: unknown) {
         clearPending();
+        const error = err as Error;
         return {
-          message: err.message,
-          detailedMessage: err.stack,
+          message: error.message,
+          detailedMessage: error.stack,
         };
       }
 
@@ -166,11 +182,9 @@ function ImportCustomFormatModalContentConnector({
 
   return (
     <ImportCustomFormatModalContent
-      advancedSettings={advancedSettings}
-      {...customFormat}
-      id={id}
+      isFetching={customFormat.isFetching}
+      error={customFormat.error as Error | undefined}
       specificationsPopulated={specificationsPopulated}
-      specificationSchema={specificationSchema}
       onImportPress={handleImportPress}
       onModalClose={onModalClose}
     />

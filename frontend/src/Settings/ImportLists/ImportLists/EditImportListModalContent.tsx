@@ -67,7 +67,7 @@ function EditImportListModalContent({
   const wasSaving = usePrevious(isSaving);
 
   const {
-    implementationName,
+    implementationName: implName,
     name,
     enabled,
     enableAuto,
@@ -80,6 +80,7 @@ function EditImportListModalContent({
     tags,
     fields,
   } = item;
+  const implementationName = implName ?? '';
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {

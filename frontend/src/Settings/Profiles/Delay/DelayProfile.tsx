@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { Tag } from 'App/State/TagsAppState';
@@ -40,7 +39,6 @@ interface DelayProfileProps {
   isDragging: boolean;
   connectDragSource?: (node: React.ReactElement) => React.ReactElement;
   onConfirmDeleteDelayProfile: (id: number) => void;
-  [key: string]: any;
 }
 
 function DelayProfile({

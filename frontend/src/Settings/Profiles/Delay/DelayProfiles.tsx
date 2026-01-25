@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,12 +23,23 @@ import DelayProfileDragSource from './DelayProfileDragSource';
 import EditDelayProfileModal from './EditDelayProfileModal';
 import styles from './DelayProfiles.css';
 
+interface DelayProfileItem {
+  id: number;
+  order: number;
+  enableUsenet: boolean;
+  enableTorrent: boolean;
+  preferredProtocol: string;
+  usenetDelay: number;
+  torrentDelay: number;
+  tags: number[];
+}
+
 function createDelayProfilesSelector() {
   return createSelector(
     (state: {
       settings: {
         delayProfiles: {
-          items: Array<{ id: number; order: number }>;
+          items: DelayProfileItem[];
           isFetching: boolean;
           isPopulated: boolean;
           error: AppError | undefined;
@@ -170,7 +180,7 @@ function DelayProfiles() {
                     onConfirmDeleteDelayProfile={
                       handleConfirmDeleteDelayProfile
                     }
-                    {...(defaultProfile as any)}
+                    {...defaultProfile}
                   />
                 </div>
               ) : null}

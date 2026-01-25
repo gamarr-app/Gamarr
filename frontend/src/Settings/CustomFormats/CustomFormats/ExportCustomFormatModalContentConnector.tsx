@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -8,14 +7,14 @@ import ExportCustomFormatModalContent from './ExportCustomFormatModalContent';
 
 const omittedProperties = ['id', 'implementationName', 'infoLink'];
 
-function replacer(key: string, value: any) {
+function replacer(key: string, value: unknown): unknown {
   if (omittedProperties.includes(key)) {
     return undefined;
   }
 
   if (key === 'fields') {
-    return value.reduce(
-      (acc: Record<string, any>, cur: { name: string; value: any }) => {
+    return (value as Array<{ name: string; value: unknown }>).reduce(
+      (acc: Record<string, unknown>, cur: { name: string; value: unknown }) => {
         acc[cur.name] = cur.value;
         return acc;
       },
@@ -24,7 +23,7 @@ function replacer(key: string, value: any) {
   }
 
   if (value && typeof value === 'object' && 'value' in value) {
-    return value.value;
+    return (value as { value: unknown }).value;
   }
 
   return value;
@@ -47,12 +46,13 @@ function ExportCustomFormatModalContentConnector({
     [id]
   );
 
-  const advancedSettings = useSelector(
-    (state: { settings: { advancedSettings: boolean } }) =>
-      state.settings.advancedSettings
-  );
-
-  const customFormat = useSelector(providerSettingsSelector) as any;
+  const customFormat = useSelector(providerSettingsSelector) as unknown as {
+    isFetching: boolean;
+    error: object | null;
+    isSaving: boolean;
+    saveError: object | null;
+    item: Record<string, unknown> | null;
+  };
 
   const specificationsSelector = useMemo(
     () =>
@@ -61,7 +61,7 @@ function ExportCustomFormatModalContentConnector({
           settings: {
             customFormatSpecifications: {
               isPopulated: boolean;
-              items: any[];
+              items: Array<{ id: number; [key: string]: unknown }>;
             };
           };
         }) => state.settings.customFormatSpecifications,
@@ -73,9 +73,7 @@ function ExportCustomFormatModalContentConnector({
     []
   );
 
-  const { specificationsPopulated, specifications } = useSelector(
-    specificationsSelector
-  );
+  const { specificationsPopulated } = useSelector(specificationsSelector);
 
   const json = customFormat.item
     ? JSON.stringify(customFormat.item, replacer, 2)
@@ -87,12 +85,10 @@ function ExportCustomFormatModalContentConnector({
 
   return (
     <ExportCustomFormatModalContent
-      advancedSettings={advancedSettings}
-      {...customFormat}
-      id={id}
+      isFetching={customFormat.isFetching}
+      error={customFormat.error ?? undefined}
       json={json}
       specificationsPopulated={specificationsPopulated}
-      specifications={specifications}
       onModalClose={onModalClose}
     />
   );

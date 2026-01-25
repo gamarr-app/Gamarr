@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -24,15 +23,14 @@ import {
 } from 'typings/Settings/SettingsState';
 import translate from 'Utilities/String/translate';
 
-const SECTION = 'downloadClientOptions';
+const SECTION = 'downloadClientOptions' as const;
 
 function createMapStateSelector() {
   return createSelector(
     (state: { settings: { advancedSettings: boolean } }) =>
       state.settings.advancedSettings,
-    // @ts-expect-error - downloadClientOptions section not in typed union
     createSettingsSectionSelector(SECTION),
-    (advancedSettings: boolean, sectionSettings: any) => {
+    (advancedSettings, sectionSettings) => {
       return {
         advancedSettings,
         ...sectionSettings,

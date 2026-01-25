@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Card from 'Components/Card';
@@ -18,6 +17,20 @@ import EditQualityProfileModal from './EditQualityProfileModal';
 import QualityProfile from './QualityProfile';
 import styles from './QualityProfiles.css';
 
+interface QualityProfileListItem {
+  id: number;
+  name: string;
+  upgradeAllowed: boolean;
+  cutoff: number;
+  items: Array<{
+    id: number;
+    name: string;
+    allowed: boolean;
+    quality?: { id: number; name: string };
+    items?: Array<{ quality: { id: number; name: string } }>;
+  }>;
+}
+
 function QualityProfiles() {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, error, items, isDeleting } = useSelector(
@@ -26,8 +39,13 @@ function QualityProfiles() {
       (a: { id: number; name: string }, b: { id: number; name: string }) =>
         a.name.localeCompare(b.name)
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  ) as unknown as {
+    isFetching: boolean;
+    isPopulated: boolean;
+    error: import('App/State/AppSectionState').Error | undefined;
+    items: QualityProfileListItem[];
+    isDeleting: boolean;
+  };
 
   const [isQualityProfileModalOpen, setIsQualityProfileModalOpen] =
     useState(false);
@@ -69,7 +87,7 @@ function QualityProfiles() {
         error={error}
       >
         <div className={styles.qualityProfiles}>
-          {items.map((item: any) => {
+          {items.map((item) => {
             return (
               <QualityProfile
                 key={item.id}

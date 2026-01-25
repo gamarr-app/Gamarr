@@ -23,6 +23,8 @@ import createCommandExecutingSelector from 'Store/Selectors/createCommandExecuti
 import createSettingsSectionSelector from 'Store/Selectors/createSettingsSectionSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import { InputChanged } from 'typings/inputs';
+import { Failure, PendingSection } from 'typings/pending';
+import General from 'typings/Settings/General';
 import translate from 'Utilities/String/translate';
 import AnalyticSettings from './AnalyticSettings';
 import BackupSettings from './BackupSettings';
@@ -104,11 +106,23 @@ function GeneralSettings() {
 
   useEffect(() => {
     if (!isSaving && !saveError && prevIsSaving.current) {
+      const typedSettings = settings as PendingSection<General>;
+      const typedPrevSettings = prevSettings.current as
+        | PendingSection<General>
+        | undefined;
+
       const pendingRestart = _.some(requiresRestartKeys, (key) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const setting = (settings as any)[key];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const prevSetting = (prevSettings.current as any)?.[key];
+        const setting = (
+          typedSettings as unknown as Record<
+            string,
+            { value: unknown; previousValue?: unknown }
+          >
+        )[key];
+        const prevSetting = (
+          typedPrevSettings as unknown as
+            | Record<string, { value: unknown; previousValue?: unknown }>
+            | undefined
+        )?.[key];
 
         if (!setting || !prevSetting) {
           return false;
@@ -189,7 +203,17 @@ function GeneralSettings() {
             />
 
             <SecuritySettings
-              settings={settings}
+              settings={
+                settings as unknown as Record<
+                  string,
+                  {
+                    value: string;
+                    errors?: Failure[];
+                    warnings?: Failure[];
+                    previousValue?: string;
+                  }
+                >
+              }
               isResettingApiKey={isResettingApiKey}
               onInputChange={handleInputChange}
               onConfirmResetApiKey={handleConfirmResetApiKey}
