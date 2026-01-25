@@ -22,6 +22,9 @@ namespace NzbDrone.Core.MetadataSource
         List<GameMetadata> GetTrendingGames();
         List<GameMetadata> GetPopularGames();
 
+        // Similar games / Recommendations
+        List<int> GetSimilarGames(string title, int igdbId);
+
         // Changed games tracking
         HashSet<int> GetChangedGames(DateTime startTime);
     }

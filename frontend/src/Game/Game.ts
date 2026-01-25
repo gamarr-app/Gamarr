@@ -144,8 +144,9 @@ interface Game extends ModelBase {
   themes: string[];
   platforms: GamePlatform[];
 
-  // Recommendations (IGDB IDs of similar games)
-  recommendations: number[];
+  // Recommendations
+  igdbRecommendations: number[];
+  rawgRecommendations: number[];
 
   // DLC-related properties
   gameType: GameType;

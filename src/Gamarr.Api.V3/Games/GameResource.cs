@@ -131,7 +131,8 @@ namespace Gamarr.Api.V3.Games
         public GameFileResource GameFile { get; set; }
         public GameCollectionResource Collection { get; set; }
         public float Popularity { get; set; }
-        public List<int> Recommendations { get; set; }
+        public List<int> IgdbRecommendations { get; set; }
+        public List<int> RawgRecommendations { get; set; }
         public string Developer { get; set; }
         public string Publisher { get; set; }
         public string GameEngine { get; set; }
@@ -271,7 +272,8 @@ namespace Gamarr.Api.V3.Games
                 Studio = model.GameMetadata.Value.Studio,
                 Collection = collection,
                 Popularity = model.GameMetadata.Value.Popularity,
-                Recommendations = model.GameMetadata.Value.Recommendations ?? new List<int>(),
+                IgdbRecommendations = model.GameMetadata.Value.IgdbRecommendations ?? new List<int>(),
+                RawgRecommendations = model.GameMetadata.Value.RawgRecommendations ?? new List<int>(),
                 Developer = model.GameMetadata.Value.Developer,
                 Publisher = model.GameMetadata.Value.Publisher,
                 GameEngine = model.GameMetadata.Value.GameEngine,

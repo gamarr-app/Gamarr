@@ -134,7 +134,8 @@ namespace NzbDrone.Core.Games
             gameMetadata.OriginalTitle = gameInfo.OriginalTitle;
             gameMetadata.CleanOriginalTitle = gameInfo.CleanOriginalTitle;
             gameMetadata.OriginalLanguage = gameInfo.OriginalLanguage;
-            gameMetadata.Recommendations = gameInfo.Recommendations;
+            gameMetadata.IgdbRecommendations = gameInfo.IgdbRecommendations;
+            gameMetadata.RawgRecommendations = gameInfo.RawgRecommendations;
             gameMetadata.Popularity = gameInfo.Popularity;
 
             // Update parent game ID for DLC linking

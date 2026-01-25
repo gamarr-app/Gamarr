@@ -420,6 +420,100 @@ namespace NzbDrone.Core.MetadataSource
             return changedIds;
         }
 
+        /// <summary>
+        /// Get similar games by merging recommendations from RAWG (first) and IGDB.
+        /// Returns a list of IGDB IDs for similar games.
+        /// RAWG suggestions are converted to IGDB IDs where possible.
+        /// </summary>
+        public List<int> GetSimilarGames(string title, int igdbId)
+        {
+            var recommendations = new List<int>();
+            var seenIds = new HashSet<int>();
+
+            // Try RAWG first (better recommendations for newer games)
+            if (HasRawgCredentials && HasIgdbCredentials)
+            {
+                try
+                {
+                    // Find the game's RAWG slug by title
+                    var rawgSlug = _rawgProxy.FindGameSlug(title);
+                    if (!string.IsNullOrEmpty(rawgSlug))
+                    {
+                        var rawgSuggestions = _rawgProxy.GetSuggestedGames(rawgSlug, 10);
+                        _logger.Debug("Got {0} suggestions from RAWG for '{1}'", rawgSuggestions.Count, title);
+
+                        // Convert RAWG IDs to IGDB IDs by looking up each game
+                        foreach (var rawgId in rawgSuggestions)
+                        {
+                            try
+                            {
+                                var rawgGame = _rawgProxy.GetGameInfo(rawgId);
+                                if (rawgGame != null && !string.IsNullOrEmpty(rawgGame.Title))
+                                {
+                                    // Search IGDB for this game by title
+                                    var igdbResults = _igdbProxy.SearchForNewGame(rawgGame.Title);
+                                    var match = igdbResults?.FirstOrDefault(g =>
+                                        g.Title.Equals(rawgGame.Title, StringComparison.OrdinalIgnoreCase) ||
+                                        (g.GameMetadata?.Value?.Year == rawgGame.Year && g.GameMetadata?.Value?.CleanTitle?.Equals(rawgGame.CleanTitle, StringComparison.OrdinalIgnoreCase) == true));
+
+                                    if (match?.GameMetadata?.Value?.IgdbId > 0)
+                                    {
+                                        var matchedIgdbId = match.GameMetadata.Value.IgdbId;
+                                        if (seenIds.Add(matchedIgdbId))
+                                        {
+                                            recommendations.Add(matchedIgdbId);
+                                            _logger.Debug("Converted RAWG suggestion '{0}' to IGDB ID {1}", rawgGame.Title, matchedIgdbId);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Trace(ex, "Failed to convert RAWG ID {0} to IGDB ID", rawgId);
+                            }
+
+                            // Limit API calls
+                            if (recommendations.Count >= 6)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Failed to get RAWG suggestions for '{0}'", title);
+                }
+            }
+
+            // Then add IGDB recommendations
+            if (igdbId > 0 && HasIgdbCredentials)
+            {
+                try
+                {
+                    var igdbGame = _igdbProxy.GetGameInfo(igdbId);
+                    if (igdbGame?.IgdbRecommendations != null)
+                    {
+                        foreach (var id in igdbGame.IgdbRecommendations)
+                        {
+                            if (seenIds.Add(id))
+                            {
+                                recommendations.Add(id);
+                            }
+                        }
+
+                        _logger.Debug("Added {0} recommendations from IGDB for IGDB ID {1}", igdbGame.IgdbRecommendations.Count, igdbId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Failed to get IGDB recommendations for IGDB ID {0}", igdbId);
+                }
+            }
+
+            return recommendations;
+        }
+
         public List<Game> SearchForNewGame(string title)
         {
             // In mock mode, delegate all searches to IGDB directly
@@ -445,6 +539,30 @@ namespace NzbDrone.Core.MetadataSource
                     _logger.Warn(ex, "Failed to lookup IGDB game for '{0}'", title);
                     return new List<Game>();
                 }
+            }
+
+            // Handle direct RAWG ID lookups
+            if (lowerTitle.StartsWith("rawg:") || lowerTitle.StartsWith("rawgid:"))
+            {
+                var idStr = lowerTitle.Split(':')[1].Trim();
+                if (int.TryParse(idStr, out var rawgId))
+                {
+                    try
+                    {
+                        var gameInfo = _rawgProxy.GetGameInfo(rawgId);
+                        if (gameInfo != null)
+                        {
+                            _logger.Debug("Found game by RAWG ID {0}: {1}", rawgId, gameInfo.Title);
+                            return new List<Game> { new Game { GameMetadata = gameInfo } };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to lookup RAWG game for ID {0}", rawgId);
+                    }
+                }
+
+                return new List<Game>();
             }
 
             // Handle direct Steam App ID lookups (supports comma-separated IDs)
@@ -825,6 +943,20 @@ namespace NzbDrone.Core.MetadataSource
             if ((existing.Genres == null || !existing.Genres.Any()) && secondary.Genres != null && secondary.Genres.Any())
             {
                 existing.Genres = secondary.Genres;
+            }
+
+            // Add RAWG recommendations if missing (keep separate from IGDB recommendations)
+            if ((existing.RawgRecommendations == null || !existing.RawgRecommendations.Any()) &&
+                secondary.RawgRecommendations != null && secondary.RawgRecommendations.Any())
+            {
+                existing.RawgRecommendations = secondary.RawgRecommendations;
+            }
+
+            // Add IGDB recommendations if missing (keep separate from RAWG recommendations)
+            if ((existing.IgdbRecommendations == null || !existing.IgdbRecommendations.Any()) &&
+                secondary.IgdbRecommendations != null && secondary.IgdbRecommendations.Any())
+            {
+                existing.IgdbRecommendations = secondary.IgdbRecommendations;
             }
         }
 

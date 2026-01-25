@@ -18,7 +18,8 @@ namespace NzbDrone.Core.Games
             Genres = new List<string>();
             Keywords = new List<string>();
             OriginalLanguage = Language.English;
-            Recommendations = new List<int>();
+            IgdbRecommendations = new List<int>();
+            RawgRecommendations = new List<int>();
             Ratings = new Ratings();
             Platforms = new List<GamePlatform>();
             GameModes = new List<string>();
@@ -81,7 +82,17 @@ namespace NzbDrone.Core.Games
         public string OriginalTitle { get; set; }
         public string CleanOriginalTitle { get; set; }
         public Language OriginalLanguage { get; set; }
-        public List<int> Recommendations { get; set; }
+
+        /// <summary>
+        /// IGDB recommended game IDs
+        /// </summary>
+        public List<int> IgdbRecommendations { get; set; }
+
+        /// <summary>
+        /// RAWG recommended game IDs
+        /// </summary>
+        public List<int> RawgRecommendations { get; set; }
+
         public float Popularity { get; set; }
 
         /// <summary>
