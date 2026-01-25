@@ -5,10 +5,11 @@ import SettingsToolbar from 'Settings/SettingsToolbar';
 import translate from 'Utilities/String/translate';
 import AutoTaggings from './AutoTagging/AutoTaggings';
 import Tags from './Tags';
+import styles from './TagSettings.css';
 
 function TagSettings() {
   return (
-    <PageContent title={translate('Tags')}>
+    <PageContent className={styles.tags} title={translate('Tags')}>
       <SettingsToolbar showSave={false} />
 
       <PageContentBody>

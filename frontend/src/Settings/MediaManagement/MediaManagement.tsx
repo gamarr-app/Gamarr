@@ -29,6 +29,7 @@ import isEmpty from 'Utilities/Object/isEmpty';
 import translate from 'Utilities/String/translate';
 import Naming from './Naming/Naming';
 import AddRootFolder from './RootFolder/AddRootFolder';
+import styles from './MediaManagement.css';
 
 const SECTION = 'mediaManagement';
 
@@ -136,7 +137,10 @@ function MediaManagement() {
   }, [dispatch]);
 
   return (
-    <PageContent title={translate('MediaManagementSettings')}>
+    <PageContent
+      className={styles.mediaManagement}
+      title={translate('MediaManagementSettings')}
+    >
       <SettingsToolbar
         isSaving={isSaving}
         hasPendingChanges={hasNamingPendingChanges || hasPendingChanges}

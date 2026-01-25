@@ -33,6 +33,7 @@ import LoggingSettings from './LoggingSettings';
 import ProxySettings from './ProxySettings';
 import SecuritySettings from './SecuritySettings';
 import UpdateSettings from './UpdateSettings';
+import styles from './GeneralSettings.css';
 
 const SECTION = 'general';
 
@@ -176,7 +177,10 @@ function GeneralSettings() {
   }, []);
 
   return (
-    <PageContent title={translate('GeneralSettings')}>
+    <PageContent
+      className={styles.generalSettings}
+      title={translate('GeneralSettings')}
+    >
       <SettingsToolbar
         isSaving={isSaving}
         hasPendingChanges={hasPendingChanges}
