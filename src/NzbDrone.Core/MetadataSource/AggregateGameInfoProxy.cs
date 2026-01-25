@@ -447,52 +447,61 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
-            // Handle direct Steam App ID lookups
+            // Handle direct Steam App ID lookups (supports comma-separated IDs)
             if (lowerTitle.StartsWith("steam:") || lowerTitle.StartsWith("steamid:"))
             {
                 var idStr = lowerTitle.Split(':')[1].Trim();
-                if (int.TryParse(idStr, out var steamAppId))
-                {
-                    try
-                    {
-                        var gameInfo = _steamProxy.GetGameBySteamAppId(steamAppId);
-                        if (gameInfo != null)
-                        {
-                            _logger.Debug("Found game by Steam App ID {0}: {1}", steamAppId, gameInfo.Title);
-                            var game = new Game { GameMetadata = gameInfo };
+                var idParts = idStr.Split(',');
+                var results = new List<Game>();
 
-                            // Try to enrich with IGDB data
-                            if (HasIgdbCredentials)
+                foreach (var idPart in idParts)
+                {
+                    if (int.TryParse(idPart.Trim(), out var steamAppId))
+                    {
+                        try
+                        {
+                            var gameInfo = _steamProxy.GetGameBySteamAppId(steamAppId);
+                            if (gameInfo != null)
                             {
-                                try
+                                _logger.Debug("Found game by Steam App ID {0}: {1}", steamAppId, gameInfo.Title);
+                                var game = new Game { GameMetadata = gameInfo };
+
+                                // Try to enrich with IGDB data
+                                if (HasIgdbCredentials)
                                 {
-                                    var igdbGame = _igdbProxy.GetGameBySteamAppId(steamAppId);
-                                    if (igdbGame != null)
+                                    try
                                     {
-                                        MergeMetadata(gameInfo, igdbGame);
+                                        var igdbGame = _igdbProxy.GetGameBySteamAppId(steamAppId);
+                                        if (igdbGame != null)
+                                        {
+                                            MergeMetadata(gameInfo, igdbGame);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.Debug(ex, "Failed to get IGDB data for Steam App ID {0}", steamAppId);
                                     }
                                 }
-                                catch (Exception ex)
-                                {
-                                    _logger.Debug(ex, "Failed to get IGDB data for Steam App ID {0}", steamAppId);
-                                }
+
+                                results.Add(game);
                             }
-
-                            return new List<Game> { game };
+                            else
+                            {
+                                _logger.Debug("No game found for Steam App ID {0}", steamAppId);
+                            }
                         }
-
-                        _logger.Debug("No game found for Steam App ID {0}", steamAppId);
-                        return new List<Game>();
+                        catch (Exception ex)
+                        {
+                            _logger.Warn(ex, "Failed to lookup Steam game for App ID {0}", steamAppId);
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logger.Warn(ex, "Failed to lookup Steam game for App ID {0}", steamAppId);
-                        return new List<Game>();
+                        _logger.Warn("Invalid Steam App ID: '{0}'", idPart);
                     }
                 }
 
-                _logger.Warn("Invalid Steam App ID format: '{0}'", title);
-                return new List<Game>();
+                return results;
             }
 
             // Search Steam first (no API key needed - works out of the box!)
