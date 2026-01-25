@@ -591,5 +591,57 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             qualifiedReports.Skip(2).First().RemoteGame.Should().Be(remoteGame2);
             qualifiedReports.Last().RemoteGame.Should().Be(remoteGame3);
         }
+
+        [Test]
+        public void should_prefer_release_with_all_dlc_over_base_game()
+        {
+            var remoteGame1 = GivenRemoteGame(new QualityModel(Quality.Steam));
+            remoteGame1.ParsedGameInfo.ContentType = ReleaseContentType.BaseGame;
+
+            var remoteGame2 = GivenRemoteGame(new QualityModel(Quality.Steam));
+            remoteGame2.ParsedGameInfo.ContentType = ReleaseContentType.BaseGameWithAllDlc;
+
+            var decisions = new List<DownloadDecision>();
+            decisions.Add(new DownloadDecision(remoteGame1));
+            decisions.Add(new DownloadDecision(remoteGame2));
+
+            var qualifiedReports = Subject.PrioritizeDecisionsForGames(decisions);
+            qualifiedReports.First().RemoteGame.ParsedGameInfo.ContentType.Should().Be(ReleaseContentType.BaseGameWithAllDlc);
+        }
+
+        [Test]
+        public void should_prefer_release_with_all_dlc_over_unknown_content_type()
+        {
+            var remoteGame1 = GivenRemoteGame(new QualityModel(Quality.Steam));
+            remoteGame1.ParsedGameInfo.ContentType = ReleaseContentType.Unknown;
+
+            var remoteGame2 = GivenRemoteGame(new QualityModel(Quality.Steam));
+            remoteGame2.ParsedGameInfo.ContentType = ReleaseContentType.BaseGameWithAllDlc;
+
+            var decisions = new List<DownloadDecision>();
+            decisions.Add(new DownloadDecision(remoteGame1));
+            decisions.Add(new DownloadDecision(remoteGame2));
+
+            var qualifiedReports = Subject.PrioritizeDecisionsForGames(decisions);
+            qualifiedReports.First().RemoteGame.ParsedGameInfo.ContentType.Should().Be(ReleaseContentType.BaseGameWithAllDlc);
+        }
+
+        [Test]
+        public void should_not_prefer_dlc_content_type_over_higher_quality()
+        {
+            var remoteGame1 = GivenRemoteGame(new QualityModel(Quality.Uplay));
+            remoteGame1.ParsedGameInfo.ContentType = ReleaseContentType.BaseGame;
+
+            var remoteGame2 = GivenRemoteGame(new QualityModel(Quality.Scene));
+            remoteGame2.ParsedGameInfo.ContentType = ReleaseContentType.BaseGameWithAllDlc;
+
+            var decisions = new List<DownloadDecision>();
+            decisions.Add(new DownloadDecision(remoteGame1));
+            decisions.Add(new DownloadDecision(remoteGame2));
+
+            // Higher quality (Uplay) should still win over content type
+            var qualifiedReports = Subject.PrioritizeDecisionsForGames(decisions);
+            qualifiedReports.First().RemoteGame.ParsedGameInfo.Quality.Quality.Should().Be(Quality.Uplay);
+        }
     }
 }
