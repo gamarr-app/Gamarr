@@ -12,6 +12,7 @@ using NzbDrone.Core.MetadataSource.IGDB;
 using NzbDrone.Core.MetadataSource.RAWG;
 using NzbDrone.Core.MetadataSource.Steam;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.MetadataSource
 {
@@ -515,6 +516,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             var result = _subject.GetGameInfo(12345);
 
             result.Should().BeNull();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -525,6 +528,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             var result = _subject.GetGameInfo(12345);
 
             result.Should().BeNull();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -534,6 +539,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             var result = _subject.GetGameInfo(12345);
 
             result.Should().BeNull();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -548,6 +555,8 @@ namespace NzbDrone.Core.Test.MetadataSource
 
             result.Should().NotBeNull();
             result.Should().BeEmpty();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -557,6 +566,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.SearchForNewGame("test game");
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -568,6 +579,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.SearchForNewGame("test game");
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -579,6 +592,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.SearchForNewGame("test game");
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -602,6 +617,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetTrendingGames();
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -612,6 +629,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetTrendingGames();
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -635,6 +654,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetPopularGames();
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -645,6 +666,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetPopularGames();
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -682,6 +705,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetBulkGameInfo(ids);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -705,6 +730,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetChangedGames(DateTime.UtcNow.AddDays(-1));
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -727,6 +754,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetCollectionInfo(42);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -810,6 +839,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.MapGameToIgdbGame(game);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -821,6 +852,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.MapGameToIgdbGame(game);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -833,6 +866,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.GetGameBySteamAppId(440);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -841,6 +876,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             var result = _subject.GetGameBySteamAppId(440);
 
             result.Should().BeNull();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
@@ -853,6 +890,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.SearchForNewGame(null);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -861,6 +900,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             Action act = () => _subject.SearchForNewGame(string.Empty);
 
             act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         // ============================================================
