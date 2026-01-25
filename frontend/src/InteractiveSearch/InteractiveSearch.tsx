@@ -85,6 +85,12 @@ const columns: Column[] = [
     isVisible: true,
   },
   {
+    name: 'version',
+    label: () => translate('Version'),
+    isSortable: true,
+    isVisible: true,
+  },
+  {
     name: 'customFormatScore',
     label: React.createElement(Icon, {
       name: icons.SCORE,

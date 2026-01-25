@@ -18,6 +18,7 @@ namespace Gamarr.Api.V3.Queue
         public GameResource Game { get; set; }
         public List<Language> Languages { get; set; }
         public QualityModel Quality { get; set; }
+        public string Version { get; set; }
         public List<CustomFormatResource> CustomFormats { get; set; }
         public int CustomFormatScore { get; set; }
         public decimal Size { get; set; }
@@ -58,6 +59,7 @@ namespace Gamarr.Api.V3.Queue
                 Game = includeGame && model.Game != null ? model.Game.ToResource(0) : null,
                 Languages = model.Languages,
                 Quality = model.Quality,
+                Version = model.RemoteGame?.ParsedGameInfo?.GameVersion?.ToString(),
                 CustomFormats = customFormats?.ToResource(false),
                 CustomFormatScore = customFormatScore,
                 Size = model.Size,

@@ -18,11 +18,16 @@
 }
 
 .quality,
-.languages {
+.languages,
+.version {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 }
 
 .quality {
+  white-space: nowrap;
+}
+
+.version {
   white-space: nowrap;
 }
 

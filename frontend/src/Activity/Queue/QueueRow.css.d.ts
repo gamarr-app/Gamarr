@@ -6,6 +6,7 @@ interface CssExports {
   'progress': string;
   'protocol': string;
   'quality': string;
+  'version': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

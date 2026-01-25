@@ -130,6 +130,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     customFormatScore,
     customFormats,
     mappedGameId,
+    version,
     indexerFlags = [],
     rejections = [],
     downloadAllowed,
@@ -283,6 +284,8 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
       <TableRowCell className={styles.quality}>
         <GameQuality quality={quality} showRevision={true} />
       </TableRowCell>
+
+      <TableRowCell className={styles.version}>{version}</TableRowCell>
 
       <TableRowCell className={styles.customFormatScore}>
         <Tooltip
