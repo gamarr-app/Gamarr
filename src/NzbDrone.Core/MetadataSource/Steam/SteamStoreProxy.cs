@@ -171,8 +171,18 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 Developer = data.Developers?.FirstOrDefault(),
                 Publisher = data.Publishers?.FirstOrDefault(),
                 Certification = MapAgeRating(data.Required_Age),
-                LastInfoSync = DateTime.UtcNow
+                LastInfoSync = DateTime.UtcNow,
+                GameType = MapGameType(data.Type)
             };
+
+            // Set parent game info for DLCs
+            if (data.Fullgame != null && !string.IsNullOrEmpty(data.Fullgame.Appid))
+            {
+                if (int.TryParse(data.Fullgame.Appid, out var parentSteamAppId))
+                {
+                    _logger.Debug("DLC {0} has parent game: {1} (Steam App ID {2})", data.Name, data.Fullgame.Name, parentSteamAppId);
+                }
+            }
 
             // Parse release date
             if (data.Release_Date != null && !string.IsNullOrEmpty(data.Release_Date.Date))
@@ -367,6 +377,26 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 17 => "ESRB-M",
                 18 => "ESRB-AO",
                 _ => requiredAge >= 18 ? "ESRB-M" : null
+            };
+        }
+
+        private GameType MapGameType(string steamType)
+        {
+            if (string.IsNullOrEmpty(steamType))
+            {
+                return GameType.MainGame;
+            }
+
+            return steamType.ToLowerInvariant() switch
+            {
+                "game" => GameType.MainGame,
+                "dlc" => GameType.DlcAddon,
+                "demo" => GameType.MainGame, // Treat demos as games for now
+                "advertising" => GameType.MainGame,
+                "mod" => GameType.Mod,
+                "video" => GameType.MainGame, // Should be filtered out earlier
+                "music" => GameType.MainGame, // Should be filtered out earlier
+                _ => GameType.MainGame
             };
         }
 
