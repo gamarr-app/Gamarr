@@ -206,7 +206,7 @@ namespace NzbDrone.Automation.Test
         {
             await NavigateToAsync("/settings/tags");
 
-            await Expect(Page.Locator("div[class*='Tags']").First).ToBeVisibleAsync();
+            await Expect(Page.Locator("div[class*='TagSettings']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("settings_tags");
         }
 
