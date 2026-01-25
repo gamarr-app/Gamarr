@@ -89,6 +89,7 @@ function Queue() {
   );
 
   const shouldBlockRefresh = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const currentQueue = useRef<ReactElement<any> | null>(null);
 
   const [selectState, setSelectState] = useSelectState();
