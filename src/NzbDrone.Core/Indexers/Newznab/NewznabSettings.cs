@@ -85,8 +85,8 @@ namespace NzbDrone.Core.Indexers.Newznab
         [FieldDefinition(6, Type = FieldType.Select, SelectOptions = typeof(FailDownloads), Label = "IndexerSettingsFailDownloads", HelpText = "IndexerSettingsFailDownloadsHelpText", Advanced = true)]
         public IEnumerable<int> FailDownloads { get; set; }
 
-        [FieldDefinition(7, Type = FieldType.Checkbox, Label = "IndexerSettingsRemoveYear", HelpText = "IndexerSettingsRemoveYearHelpText", Advanced = true)]
-        public bool RemoveYear { get; set; }
+        [FieldDefinition(7, Type = FieldType.Checkbox, Label = "IndexerSettingsIncludeYear", HelpText = "IndexerSettingsIncludeYearHelpText", Advanced = true)]
+        public bool IncludeYearInSearch { get; set; }
 
         // Field 8 is used by TorznabSettings MinimumSeeders
         // If you need to add another field here, update TorznabSettings as well and this comment
