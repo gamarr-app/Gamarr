@@ -188,7 +188,9 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
   return (
     <FieldSet legend={translate('SimilarGames')}>
       <div className={styles.container}>
-        {isLoading && libraryGames.length === 0 && externalGames.length === 0 ? (
+        {isLoading &&
+        libraryGames.length === 0 &&
+        externalGames.length === 0 ? (
           <LoadingIndicator />
         ) : (
           <div className={styles.grid}>
@@ -237,7 +239,9 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
             {/* Games NOT in library - with Add link */}
             {externalGames.map((ext) => (
               <Link
-                key={`${ext.source}-${ext.source === 'rawg' ? ext.rawgId : ext.igdbId}`}
+                key={`${ext.source}-${
+                  ext.source === 'rawg' ? ext.rawgId : ext.igdbId
+                }`}
                 className={styles.card}
                 to={getPathWithUrlBase(
                   ext.source === 'rawg' && ext.rawgId
