@@ -1,9 +1,12 @@
-interface SelectedGame {
+export interface ImportGameSelectedGame {
   igdbId: number;
+  title?: string;
+  year?: number;
+  studio?: string;
   [key: string]: unknown;
 }
 
-interface ImportItem {
+export interface ImportGameItem {
   id: string;
   term: string;
   path: string;
@@ -12,8 +15,11 @@ interface ImportItem {
   isPopulated: boolean;
   isQueued: boolean;
   error: unknown;
-  items: SelectedGame[];
-  selectedGame?: SelectedGame;
+  items: ImportGameSelectedGame[];
+  selectedGame?: ImportGameSelectedGame;
+  monitor?: string;
+  qualityProfileId?: number;
+  minimumAvailability?: string;
 }
 
 interface ImportGameAppState {
@@ -21,7 +27,7 @@ interface ImportGameAppState {
   isImporting: boolean;
   isImported: boolean;
   importError: unknown;
-  items: ImportItem[];
+  items: ImportGameItem[];
 }
 
 export default ImportGameAppState;

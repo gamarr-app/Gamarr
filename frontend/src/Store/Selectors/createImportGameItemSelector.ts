@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import Game, { GameMonitor } from 'Game/Game';
 import createAllGamesSelector from './createAllGamesSelector';
 
@@ -18,18 +19,6 @@ interface ImportGameItem {
   [key: string]: unknown;
 }
 
-interface AddGameState {
-  defaults: {
-    monitor: GameMonitor;
-    qualityProfileId: number;
-    [key: string]: unknown;
-  };
-}
-
-interface ImportGameState {
-  items: ImportGameItem[];
-}
-
 interface ImportGameItemResult {
   defaultMonitor: GameMonitor;
   defaultQualityProfileId: number;
@@ -39,12 +28,9 @@ interface ImportGameItemResult {
 
 function createImportGameItemSelector() {
   return createSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (_state: any, { id }: ImportGameItemProps) => id,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.addGame as AddGameState,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.importGame as ImportGameState,
+    (_state: AppState, { id }: ImportGameItemProps) => id,
+    (state: AppState) => state.addGame,
+    (state: AppState) => state.importGame,
     createAllGamesSelector(),
     (id, addGame, importGame, games: Game[]): ImportGameItemResult => {
       const item = _.find(importGame.items, { id }) || {};
