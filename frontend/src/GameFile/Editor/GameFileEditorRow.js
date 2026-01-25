@@ -1,24 +1,15 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableRow from 'Components/Table/TableRow';
-import Popover from 'Components/Tooltip/Popover';
-import Tooltip from 'Components/Tooltip/Tooltip';
-import GameFormats from 'Game/GameFormats';
-import GameLanguages from 'Game/GameLanguages';
-import GameQuality from 'Game/GameQuality';
-import IndexerFlags from 'Game/IndexerFlags';
 import FileEditModal from 'GameFile/Edit/FileEditModal';
-import { icons, kinds, tooltipPositions } from 'Helpers/Props';
+import { icons, kinds } from 'Helpers/Props';
 import formatBytes from 'Utilities/Number/formatBytes';
-import formatCustomFormatScore from 'Utilities/Number/formatCustomFormatScore';
 import translate from 'Utilities/String/translate';
 import FileDetailsModal from '../FileDetailsModal';
-import GameFileRowCellPlaceholder from './GameFileRowCellPlaceholder';
 import styles from './GameFileEditorRow.css';
 
 class GameFileEditorRow extends Component {
@@ -80,12 +71,6 @@ class GameFileEditorRow extends Component {
       size,
       sceneName,
       releaseGroup,
-      quality,
-      qualityCutoffNotMet,
-      customFormats,
-      customFormatScore,
-      indexerFlags,
-      languages,
       dateAdded,
       columns
     } = this.props;
@@ -95,9 +80,6 @@ class GameFileEditorRow extends Component {
       isFileEditModalOpen,
       isConfirmDeleteModalOpen
     } = this.state;
-
-    const showQualityPlaceholder = !quality;
-    const showLanguagePlaceholder = !languages;
 
     return (
       <TableRow>
@@ -128,99 +110,6 @@ class GameFileEditorRow extends Component {
               );
             }
 
-            if (name === 'customFormats') {
-              return (
-                <TableRowCell key={name}>
-                  <GameFormats
-                    formats={customFormats}
-                  />
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'customFormatScore') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.customFormatScore}
-                >
-                  <Tooltip
-                    anchor={formatCustomFormatScore(
-                      customFormatScore,
-                      customFormats.length
-                    )}
-                    tooltip={<GameFormats formats={customFormats} />}
-                    position={tooltipPositions.LEFT}
-                  />
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'indexerFlags') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.indexerFlags}
-                >
-                  {indexerFlags ? (
-                    <Popover
-                      anchor={<Icon name={icons.FLAG} />}
-                      title={translate('IndexerFlags')}
-                      body={<IndexerFlags indexerFlags={indexerFlags} />}
-                      position={tooltipPositions.LEFT}
-                    />
-                  ) : null}
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'languages') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.languages}
-                >
-                  {
-                    showLanguagePlaceholder ?
-                      <GameFileRowCellPlaceholder /> :
-                      null
-                  }
-
-                  {
-                    !showLanguagePlaceholder && !!languages &&
-                      <GameLanguages
-                        className={styles.label}
-                        languages={languages}
-                      />
-                  }
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'quality') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.quality}
-                >
-                  {
-                    showQualityPlaceholder ?
-                      <GameFileRowCellPlaceholder /> :
-                      null
-                  }
-
-                  {
-                    !showQualityPlaceholder && !!quality &&
-                      <GameQuality
-                        className={styles.label}
-                        quality={quality}
-                        isCutoffNotMet={qualityCutoffNotMet}
-                      />
-                  }
-                </TableRowCell>
-              );
-            }
-
             if (name === 'size') {
               return (
                 <TableRowCell
@@ -229,17 +118,6 @@ class GameFileEditorRow extends Component {
                   title={size}
                 >
                   {formatBytes(size)}
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'releaseGroup') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.releaseGroup}
-                >
-                  {releaseGroup}
                 </TableRowCell>
               );
             }
@@ -320,21 +198,10 @@ GameFileEditorRow.propTypes = {
   size: PropTypes.number.isRequired,
   relativePath: PropTypes.string.isRequired,
   sceneName: PropTypes.string,
-  quality: PropTypes.object.isRequired,
   releaseGroup: PropTypes.string,
-  customFormats: PropTypes.arrayOf(PropTypes.object).isRequired,
-  customFormatScore: PropTypes.number.isRequired,
-  indexerFlags: PropTypes.number.isRequired,
-  qualityCutoffNotMet: PropTypes.bool.isRequired,
-  languages: PropTypes.arrayOf(PropTypes.object).isRequired,
   dateAdded: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   onDeletePress: PropTypes.func.isRequired
-};
-
-GameFileEditorRow.defaultProps = {
-  customFormats: [],
-  indexerFlags: 0
 };
 
 export default GameFileEditorRow;

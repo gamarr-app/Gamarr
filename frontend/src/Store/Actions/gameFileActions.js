@@ -2,7 +2,6 @@ import _ from 'lodash';
 import React from 'react';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
-import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import gameEntities from 'Game/gameEntities';
 import { icons, sortDirections } from 'Helpers/Props';
@@ -54,45 +53,6 @@ export const defaultState = {
       label: () => translate('Added'),
       isVisible: true,
       isSortable: true
-    },
-    {
-      name: 'languages',
-      label: () => translate('Languages'),
-      isVisible: false
-    },
-    {
-      name: 'quality',
-      label: () => translate('Quality'),
-      isVisible: false
-    },
-    {
-      name: 'releaseGroup',
-      label: () => translate('ReleaseGroup'),
-      isVisible: false
-    },
-    {
-      name: 'customFormats',
-      label: () => translate('Formats'),
-      isVisible: false
-    },
-    {
-      name: 'customFormatScore',
-      columnLabel: () => translate('CustomFormatScore'),
-      label: React.createElement(Icon, {
-        name: icons.SCORE,
-        title: () => translate('CustomFormatScore')
-      }),
-      isVisible: false,
-      isSortable: true
-    },
-    {
-      name: 'indexerFlags',
-      columnLabel: () => translate('IndexerFlags'),
-      label: React.createElement(Icon, {
-        name: icons.FLAG,
-        title: () => translate('IndexerFlags')
-      }),
-      isVisible: false
     },
     {
       name: 'actions',
