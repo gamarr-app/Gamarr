@@ -296,10 +296,7 @@ export const actionHandlers = handleThunks({
 
       // Make sure we have a selected game and
       // the same game hasn't been added yet.
-      if (
-        selectedGame &&
-        !acc.some((a) => a.igdbId === selectedGame.igdbId)
-      ) {
+      if (selectedGame && !acc.some((a) => a.igdbId === selectedGame.igdbId)) {
         const newGame = getNewGame(
           _.cloneDeep(selectedGame) as Game,
           item as unknown as Parameters<typeof getNewGame>[1]

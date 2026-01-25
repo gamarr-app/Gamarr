@@ -5,9 +5,9 @@ import { FixedSizeGrid as Grid, GridChildComponentProps } from 'react-window';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import GameIndexPoster from 'Game/Index/Posters/GameIndexPoster';
-import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { SortDirection } from 'Helpers/Props/sortDirections';
+import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 

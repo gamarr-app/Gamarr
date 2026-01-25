@@ -383,7 +383,8 @@ export const actionHandlers = handleThunks({
         responseJSON?: { message?: string };
       };
       const grabError =
-        (xhrWithResponse.responseJSON && xhrWithResponse.responseJSON.message) ||
+        (xhrWithResponse.responseJSON &&
+          xhrWithResponse.responseJSON.message) ||
         'Failed to add to download queue';
 
       dispatch(

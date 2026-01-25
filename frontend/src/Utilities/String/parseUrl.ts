@@ -1,4 +1,4 @@
-import qs from 'qs';
+import qs, { ParsedQs } from 'qs';
 
 interface ParsedUrl {
   hash: string;
@@ -11,7 +11,7 @@ interface ParsedUrl {
   protocol: string;
   search: string;
   isAbsolute: boolean;
-  params: qs.ParsedQs;
+  params: ParsedQs;
 }
 
 const anchor = document.createElement('a');

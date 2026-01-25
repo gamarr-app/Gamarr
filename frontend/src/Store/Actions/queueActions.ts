@@ -338,8 +338,9 @@ function fetchDataAugmenter(
   _payload: unknown,
   data: Record<string, unknown>
 ) {
-  data.includeUnknownGameItems =
-    (getState() as AppState).queue.options.includeUnknownGameItems;
+  data.includeUnknownGameItems = (
+    getState() as AppState
+  ).queue.options.includeUnknownGameItems;
 }
 
 export const FETCH_QUEUE_STATUS = 'queue/fetchQueueStatus';

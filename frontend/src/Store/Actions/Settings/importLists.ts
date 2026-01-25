@@ -182,8 +182,7 @@ export default {
       { payload }: { payload: SchemaPayload }
     ) => {
       return selectProviderSchema(state, section, payload, (selectedSchema) => {
-        selectedSchema.name =
-          payload.presetName ?? payload.implementationName;
+        selectedSchema.name = payload.presetName ?? payload.implementationName;
         selectedSchema.implementationName = payload.implementationName;
         selectedSchema.minRefreshInterval =
           (selectedSchema.minRefreshInterval as string | undefined) ??
