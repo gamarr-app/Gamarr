@@ -245,7 +245,7 @@ function DlcList({ gameId }: DlcListProps) {
     const firstDlcRef = dlcReferences.length > 0 ? dlcReferences[0] : null;
 
     // Use the appropriate field - prefer IGDB IDs, fall back to Steam
-    let searchTerm: string;
+    let searchTerm = '';
     if (igdbDlcIds.length > 0) {
       // IGDB supports comma-separated IDs
       searchTerm = `igdb:${igdbDlcIds.join(',')}`;
