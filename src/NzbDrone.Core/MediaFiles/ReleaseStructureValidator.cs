@@ -195,6 +195,16 @@ namespace NzbDrone.Core.MediaFiles
             },
         };
 
+        // Suspicious file patterns - only checked for releases that don't match known group patterns
+        private static readonly string[] SuspiciousPatterns = new[]
+        {
+            @"\.scr$",           // Screen saver (no legitimate game use)
+            @"\.pif$",           // Program Information File (obsolete, can execute code)
+            @"\.hta$",           // HTML Application (can run arbitrary code)
+            @"\.cpl$",           // Control Panel extension
+            @"readme.*\.exe$",   // Readme as executable is always suspicious
+        };
+
         public ReleaseStructureValidator(IDiskProvider diskProvider)
         {
             _diskProvider = diskProvider;
@@ -269,8 +279,19 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            // Unknown release group - allow it with low confidence
-            // We don't block unknown releases, just note that we can't verify them
+            // Unknown release group - check for suspicious files since we can't verify by structure
+            result.SuspiciousFiles = FindSuspiciousFiles(relativeFiles);
+
+            if (result.SuspiciousFiles.Any())
+            {
+                result.IsValid = false;
+                result.Confidence = ReleaseStructureConfidence.Low;
+                result.Message = $"Unknown release with suspicious files: {string.Join(", ", result.SuspiciousFiles.Take(5))}";
+                Logger.Warn("Unknown release contains suspicious files: {0}", string.Join(", ", result.SuspiciousFiles));
+                return result;
+            }
+
+            // No suspicious files - allow with low confidence
             result.IsValid = true;
             result.Confidence = ReleaseStructureConfidence.Low;
             result.Message = string.IsNullOrWhiteSpace(releaseGroup)
@@ -278,6 +299,25 @@ namespace NzbDrone.Core.MediaFiles
                 : $"Unknown release group '{releaseGroup}' (cannot verify structure)";
 
             return result;
+        }
+
+        private List<string> FindSuspiciousFiles(List<string> files)
+        {
+            var suspicious = new List<string>();
+
+            foreach (var file in files)
+            {
+                foreach (var pattern in SuspiciousPatterns)
+                {
+                    if (Regex.IsMatch(file, pattern, RegexOptions.IgnoreCase))
+                    {
+                        suspicious.Add(file);
+                        break;
+                    }
+                }
+            }
+
+            return suspicious;
         }
 
         private List<string> GetAllFiles(string path)
