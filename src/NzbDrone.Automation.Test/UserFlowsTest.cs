@@ -175,15 +175,24 @@ namespace NzbDrone.Automation.Test
 
             var maxRetries = 3;
             var searchSucceeded = false;
+            var lastException = (Exception?)null;
 
             for (var attempt = 1; attempt <= maxRetries && !searchSucceeded; attempt++)
             {
                 try
                 {
+                    Console.WriteLine($"[DEBUG] Search attempt {attempt}/{maxRetries}");
+
                     // Clear and fill search input
                     await searchInput.ClearAsync();
                     await searchInput.FillAsync("The Witness");
+
+                    // Take screenshot before pressing Enter
+                    await TakeScreenshotAsync($"search_attempt_{attempt}_before_enter");
+
                     await searchInput.PressAsync("Enter");
+
+                    Console.WriteLine($"[DEBUG] Pressed Enter, waiting for results...");
 
                     // Wait for search results to appear
                     await Page.Locator("div[class*='searchResult']").First.WaitForAsync(new LocatorWaitForOptions
@@ -192,18 +201,55 @@ namespace NzbDrone.Automation.Test
                         Timeout = 30000
                     });
 
+                    Console.WriteLine($"[DEBUG] Search results appeared on attempt {attempt}");
                     searchSucceeded = true;
                 }
-                catch (TimeoutException) when (attempt < maxRetries)
+                catch (TimeoutException ex) when (attempt < maxRetries)
                 {
+                    lastException = ex;
+                    Console.WriteLine($"[DEBUG] Attempt {attempt} timed out, taking debug screenshot...");
+
+                    // Take screenshot to see what's on screen
+                    await TakeScreenshotAsync($"search_attempt_{attempt}_timeout");
+
+                    // Log page HTML for debugging
+                    var bodyHtml = await Page.Locator("body").InnerHTMLAsync();
+                    Console.WriteLine($"[DEBUG] Page body length: {bodyHtml.Length} chars");
+
+                    // Check if there's an error message visible
+                    var errorLocator = Page.Locator("div[class*='error'], div[class*='Error']").First;
+                    if (await errorLocator.IsVisibleAsync())
+                    {
+                        var errorText = await errorLocator.InnerTextAsync();
+                        Console.WriteLine($"[DEBUG] Error message visible: {errorText}");
+                    }
+
+                    // Check if spinner is still showing
+                    var spinnerLocator = Page.Locator("div[class*='spinner'], div[class*='Spinner'], div[class*='loading']").First;
+                    if (await spinnerLocator.IsVisibleAsync())
+                    {
+                        Console.WriteLine($"[DEBUG] Spinner/loading indicator still visible");
+                    }
+
                     // Wait before retrying
                     await Task.Delay(2000);
+                }
+                catch (TimeoutException ex)
+                {
+                    lastException = ex;
+                    Console.WriteLine($"[DEBUG] Final attempt {attempt} timed out");
+                    await TakeScreenshotAsync($"search_attempt_{attempt}_final_timeout");
                 }
             }
 
             if (!searchSucceeded)
             {
-                throw new TimeoutException($"Search results did not appear after {maxRetries} attempts");
+                // Take final debug screenshot
+                await TakeScreenshotAsync("search_all_attempts_failed");
+
+                var message = $"Search results did not appear after {maxRetries} attempts. " +
+                              $"Last error: {lastException?.Message}";
+                throw new TimeoutException(message, lastException);
             }
 
             await TakeScreenshotAsync("add_game_search_results");
