@@ -19,6 +19,9 @@ declare module 'jquery' {
       failFilter?: ((...args: any[]) => unknown) | null
     ): JQueryPromise<U>;
     always(callback: () => void): JQueryPromise<T>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    done(callback: (data: any) => void): JQueryPromise<T>;
+    fail(callback: (xhr: JQueryXHR) => void): JQueryPromise<T>;
   }
 
   interface JQueryStatic {
@@ -44,4 +47,11 @@ declare module 'jquery' {
 
   const $: JQueryStatic = {} as JQueryStatic;
   export default $;
+  export { JQueryPromise, JQueryDeferred, JQueryXHR, JQueryAjaxSettings };
+}
+
+// Global JQuery namespace for JQuery.Promise<T> syntax
+declare namespace JQuery {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type Promise<T = any> = import('jquery').JQueryPromise<T>;
 }
