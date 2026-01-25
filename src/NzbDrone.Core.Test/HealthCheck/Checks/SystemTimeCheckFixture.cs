@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Common.Cloud;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.HealthCheck.Checks;
@@ -15,15 +14,9 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
     [TestFixture]
     public class SystemTimeCheckFixture : CoreTest<SystemTimeCheck>
     {
-        [SetUp]
-        public void Setup()
-        {
-            Mocker.SetConstant<IGamarrCloudRequestBuilder>(new GamarrCloudRequestBuilder());
-        }
-
         private void GivenServerTime(DateTime dateTime)
         {
-            var json = new ServiceTimeResponse { DateTimeUtc = dateTime }.ToJson();
+            var json = new WorldTimeApiResponse { Datetime = dateTime }.ToJson();
 
             Mocker.GetMock<ILocalizationService>()
                   .Setup(s => s.GetLocalizedString(It.IsAny<string>()))
