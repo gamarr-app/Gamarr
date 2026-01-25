@@ -743,22 +743,27 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
             // DLCs and expansions
             var dlcIds = new List<int>();
+            var dlcReferences = new List<DlcReference>();
             if (resource.Dlcs != null)
             {
                 dlcIds.AddRange(resource.Dlcs.Select(d => d.Id));
+                dlcReferences.AddRange(resource.Dlcs.Select(d => new DlcReference(d.Id, d.Name)));
             }
 
             if (resource.Expansions != null)
             {
                 dlcIds.AddRange(resource.Expansions.Select(e => e.Id));
+                dlcReferences.AddRange(resource.Expansions.Select(e => new DlcReference(e.Id, e.Name)));
             }
 
             if (resource.StandaloneExpansions != null)
             {
                 dlcIds.AddRange(resource.StandaloneExpansions.Select(s => s.Id));
+                dlcReferences.AddRange(resource.StandaloneExpansions.Select(s => new DlcReference(s.Id, s.Name)));
             }
 
             game.DlcIds = dlcIds;
+            game.DlcReferences = dlcReferences;
 
             // Similar games as recommendations
             if (resource.SimilarGames != null)

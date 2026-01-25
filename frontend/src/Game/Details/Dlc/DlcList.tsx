@@ -59,6 +59,7 @@ function DlcList({ gameId }: DlcListProps) {
 
   const igdbId = game?.igdbId ?? 0;
   const dlcIds = game?.dlcIds ?? [];
+  const dlcReferences = game?.dlcReferences ?? [];
   const dlcCount = game?.dlcCount ?? 0;
   const isDlc = game?.isDlc ?? false;
   const parentGameIgdbId = game?.parentGameIgdbId;
@@ -239,6 +240,19 @@ function DlcList({ gameId }: DlcListProps) {
 
   // Show info about known DLCs not in the library
   if (dlcCount > 0 && isPopulated) {
+    // Get the first DLC reference with a name, if available
+    const firstDlcRef = dlcReferences.length > 0 ? dlcReferences[0] : null;
+    const firstDlcId = dlcIds.length > 0 ? dlcIds[0] : null;
+
+    // Use igdb:<id> for exact DLC search, fall back to parent game title
+    const searchTerm = firstDlcId ? `igdb:${firstDlcId}` : game?.title ?? '';
+
+    // Show DLC name if available and there's only one, otherwise show count
+    const displayText =
+      dlcCount === 1 && firstDlcRef?.name
+        ? firstDlcRef.name
+        : translate('DlcAvailableCount', { count: dlcCount });
+
     return (
       <FieldSet legend={translate('DlcAndExpansions')}>
         <div className={styles.container}>
@@ -246,10 +260,10 @@ function DlcList({ gameId }: DlcListProps) {
             <Link
               className={styles.parentLink}
               to={getPathWithUrlBase(
-                `/add/new?term=${encodeURIComponent(game?.title ?? '')}`
+                `/add/new?term=${encodeURIComponent(searchTerm)}`
               )}
             >
-              {translate('DlcAvailableCount', { count: dlcCount })}
+              {displayText}
             </Link>
           </div>
         </div>
