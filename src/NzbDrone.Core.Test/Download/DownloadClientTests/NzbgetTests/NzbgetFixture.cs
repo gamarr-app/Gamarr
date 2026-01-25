@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 FileSizeLo = 1000,
                 Category = "game",
                 Name = "Cyberpunk.2077.v2.1-CODEX",
-                DestDir = "/remote/mount/tv/Cyberpunk.2077.v2.1-CODEX",
+                DestDir = "/remote/mount/games/Cyberpunk.2077.v2.1-CODEX",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "SUCCESS",
                 UnpackStatus = "NONE",
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             _downloadClientItem = Builder<DownloadClientItem>
                                   .CreateNew()
                                   .With(d => d.DownloadId = "_Elden.Ring.v1.10-CODEX_0")
-                                  .With(d => d.OutputPath = new OsPath("/remote/mount/tv/Elden.Ring.v1.10-CODEX".AsOsAgnostic()))
+                                  .With(d => d.OutputPath = new OsPath("/remote/mount/games/Elden.Ring.v1.10-CODEX".AsOsAgnostic()))
                                   .Build();
 
             Mocker.GetMock<INzbgetProxy>()

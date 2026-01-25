@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Test.Validation
         [Test]
         public void should_be_valid_for_valid_path()
         {
-            var game = new Game { Path = @"C:\TV\Game".AsOsAgnostic() };
+            var game = new Game { Path = @"C:\Games\Game Title".AsOsAgnostic() };
             _validator.Validate(game).IsValid.Should().BeTrue();
         }
 

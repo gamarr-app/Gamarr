@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 Id = RandomNumber,
                 DownloadedSize = 1000,
                 TotalDownloadSize = 10,
-                GroupName = "tv",
+                GroupName = "games",
                 UiTitle = "Cyberpunk.2077.v2.1-CODEX"
             };
 
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
             {
                 DownloadedSize = 1000,
                 TotalDownloadSize = 1000,
-                GroupName = "tv",
+                GroupName = "games",
                 UiTitle = "Cyberpunk.2077.v2.1-CODEX",
                 DestinationPath = "somedirectory",
                 State = NzbVortexStateType.UncompressFailed,
@@ -60,9 +60,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
             {
                 DownloadedSize = 1000,
                 TotalDownloadSize = 1000,
-                GroupName = "tv",
+                GroupName = "games",
                 UiTitle = "Cyberpunk.2077.v2.1-CODEX",
-                DestinationPath = "/remote/mount/tv/Cyberpunk.2077.v2.1-CODEX",
+                DestinationPath = "/remote/mount/games/Cyberpunk.2077.v2.1-CODEX",
                 State = NzbVortexStateType.Done
             };
         }
