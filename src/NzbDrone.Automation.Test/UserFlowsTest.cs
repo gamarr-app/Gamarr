@@ -169,18 +169,42 @@ namespace NzbDrone.Automation.Test
             // Navigate to add game page
             await NavigateToAsync("/add/new");
 
-            // Search for a known Steam game
+            // Search for a known Steam game with retry logic for flaky external API
             var searchInput = Page.Locator("input[class*='searchInput']");
             await Expect(searchInput).ToBeVisibleAsync();
-            await searchInput.FillAsync("The Witness");
-            await searchInput.PressAsync("Enter");
 
-            // Wait for search results to appear
-            await Page.Locator("div[class*='searchResult']").First.WaitForAsync(new LocatorWaitForOptions
+            var maxRetries = 3;
+            var searchSucceeded = false;
+
+            for (var attempt = 1; attempt <= maxRetries && !searchSucceeded; attempt++)
             {
-                State = WaitForSelectorState.Visible,
-                Timeout = 30000
-            });
+                try
+                {
+                    // Clear and fill search input
+                    await searchInput.ClearAsync();
+                    await searchInput.FillAsync("The Witness");
+                    await searchInput.PressAsync("Enter");
+
+                    // Wait for search results to appear
+                    await Page.Locator("div[class*='searchResult']").First.WaitForAsync(new LocatorWaitForOptions
+                    {
+                        State = WaitForSelectorState.Visible,
+                        Timeout = 30000
+                    });
+
+                    searchSucceeded = true;
+                }
+                catch (TimeoutException) when (attempt < maxRetries)
+                {
+                    // Wait before retrying
+                    await Task.Delay(2000);
+                }
+            }
+
+            if (!searchSucceeded)
+            {
+                throw new TimeoutException($"Search results did not appear after {maxRetries} attempts");
+            }
 
             await TakeScreenshotAsync("add_game_search_results");
 
