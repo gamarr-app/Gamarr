@@ -32,7 +32,7 @@ function GameStatus({
   const hasGameFile = !!gameFile;
   const isQueued = !!queueItem;
 
-  if (isQueued && showMissingStatus) {
+  if (isQueued) {
     const { sizeLeft, size } = queueItem;
 
     const progress = size ? 100 - (sizeLeft / size) * 100 : 0;
