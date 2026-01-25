@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectedRouter, ConnectedRouterProps } from 'connected-react-router';
-import DocumentTitle from 'react-document-title';
+import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import Page from 'Components/Page/Page';
@@ -16,7 +16,10 @@ const queryClient = new QueryClient();
 
 function App({ store, history }: AppProps) {
   return (
-    <DocumentTitle title={window.Gamarr.instanceName}>
+    <HelmetProvider>
+      <Helmet>
+        <title>{window.Gamarr.instanceName}</title>
+      </Helmet>
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <ConnectedRouter history={history}>
@@ -27,7 +30,7 @@ function App({ store, history }: AppProps) {
           </ConnectedRouter>
         </Provider>
       </QueryClientProvider>
-    </DocumentTitle>
+    </HelmetProvider>
   );
 }
 

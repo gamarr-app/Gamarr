@@ -1,5 +1,5 @@
 import React from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import ErrorBoundary from 'Components/Error/ErrorBoundary';
 import PageContentError from './PageContentError';
 import styles from './PageContent.css';
@@ -17,15 +17,14 @@ function PageContent({
 }: PageContentProps) {
   return (
     <ErrorBoundary errorComponent={PageContentError}>
-      <DocumentTitle
-        title={
-          title
+      <Helmet>
+        <title>
+          {title
             ? `${title} - ${window.Gamarr.instanceName}`
-            : window.Gamarr.instanceName
-        }
-      >
-        <div className={className}>{children}</div>
-      </DocumentTitle>
+            : window.Gamarr.instanceName}
+        </title>
+      </Helmet>
+      <div className={className}>{children}</div>
     </ErrorBoundary>
   );
 }
