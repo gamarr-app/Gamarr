@@ -30,6 +30,7 @@ interface CssExports {
   'status': string;
   'studio': string;
   'tags': string;
+  'version': string;
   'year': string;
 }
 export const cssExports: CssExports;
