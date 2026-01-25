@@ -14,6 +14,7 @@ namespace NzbDrone.Automation.Test
     public abstract class AutomationTest : PageTest
     {
         private NzbDroneRunner _runner;
+        protected string ApiKey => _runner?.ApiKey;
         protected List<string> ConsoleErrors { get; private set; } = new ();
         protected const string BaseUrl = "http://localhost:6767";
 

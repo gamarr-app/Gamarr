@@ -240,7 +240,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("q=Some%20Game%20and%20Title%20Words%202021");
+            // Year is not included in search query by default (games rarely include year)
+            page.Url.Query.Should().Contain("q=Some%20Game%20and%20Title%20Words");
+            page.Url.Query.Should().NotContain("2021");
             page.Url.Query.Should().Contain("and");
             page.Url.Query.Should().NotContain(" & ");
             page.Url.Query.Should().NotContain("%26");
