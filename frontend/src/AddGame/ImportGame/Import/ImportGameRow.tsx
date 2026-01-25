@@ -1,9 +1,9 @@
-import React from 'react';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import { inputTypes } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
+import { SelectStateInputProps } from 'typings/props';
 import ImportGameSelectGameConnector from './SelectGame/ImportGameSelectGameConnector';
 import styles from './ImportGameRow.css';
 
@@ -12,7 +12,6 @@ interface SelectedGame {
   title: string;
   year: number;
   studio?: string;
-  [key: string]: unknown;
 }
 
 interface ImportGameRowProps {
@@ -25,9 +24,8 @@ interface ImportGameRowProps {
   isExistingGame: boolean;
   items: object[];
   isSelected?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSelectedChange: (payload: any) => void;
-  onInputChange: (change: InputChanged) => void;
+  onSelectedChange: (payload: SelectStateInputProps) => void;
+  onInputChange: (change: InputChanged<string | number>) => void;
 }
 
 function ImportGameRow(props: ImportGameRowProps) {
@@ -71,8 +69,7 @@ function ImportGameRow(props: ImportGameRowProps) {
           type={inputTypes.MONITOR_GAMES_SELECT}
           name="monitor"
           value={monitor}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={onInputChange as any}
+          onChange={onInputChange}
         />
       </VirtualTableRowCell>
 

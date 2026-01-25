@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabilityPopoverContent';
 import CheckInput from 'Components/Form/CheckInput';
 import Form from 'Components/Form/Form';
@@ -16,13 +16,14 @@ import { Image } from 'Game/Game';
 import GamePoster from 'Game/GamePoster';
 import { icons, inputTypes, kinds, tooltipPositions } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
+import { Failure } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import styles from './AddNewGameModalContent.css';
 
 interface FormValue<T> {
   value: T;
-  errors?: { message: string }[];
-  warnings?: { message: string }[];
+  errors?: Failure[];
+  warnings?: Failure[];
 }
 
 interface AddNewGameModalContentProps {
@@ -50,9 +51,15 @@ class AddNewGameModalContent extends Component<AddNewGameModalContentProps> {
   //
   // Listeners
 
-  onQualityProfileIdChange = ({ value }: { value: string | number }) => {
+  onQualityProfileIdChange = ({
+    name,
+    value,
+  }: {
+    name: string;
+    value: string | number;
+  }) => {
     this.props.onInputChange({
-      name: 'qualityProfileId',
+      name,
       value: typeof value === 'string' ? parseInt(value) : value,
     });
   };
@@ -170,12 +177,13 @@ class AddNewGameModalContent extends Component<AddNewGameModalContentProps> {
 
                 <FormGroup>
                   <FormLabel>{translate('QualityProfile')}</FormLabel>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <FormInputGroup
                     type={inputTypes.QUALITY_PROFILE_SELECT}
                     name="qualityProfileId"
-                    onChange={this.onQualityProfileIdChange as any}
-                    {...(qualityProfileId as any)}
+                    value={qualityProfileId?.value ?? 0}
+                    errors={qualityProfileId?.errors}
+                    warnings={qualityProfileId?.warnings}
+                    onChange={this.onQualityProfileIdChange}
                   />
                 </FormGroup>
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { Component, CSSProperties } from 'react';
+import { Component, CSSProperties } from 'react';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import Game from 'Game/Game';
@@ -14,13 +14,11 @@ interface UnmappedFolder {
 
 interface SelectedGame {
   igdbId: number;
-  [key: string]: unknown;
 }
 
 interface ImportGameItem {
   id: string;
   selectedGame?: SelectedGame;
-  [key: string]: unknown;
 }
 
 interface SelectedState {
@@ -48,7 +46,10 @@ interface ImportGameTableProps {
   }) => void;
   onRemoveSelectedStateItem: (id: string) => void;
   onGameLookup: (id: string, path: string, relativePath: string) => void;
-  onSetImportGameValue: (values: Record<string, unknown>) => void;
+  onSetImportGameValue: (values: {
+    id: string;
+    [key: string]: unknown;
+  }) => void;
 }
 
 interface RowRendererParams {

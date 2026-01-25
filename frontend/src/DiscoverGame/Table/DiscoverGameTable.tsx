@@ -13,18 +13,10 @@ import DiscoverGameHeaderConnector from './DiscoverGameHeaderConnector';
 import DiscoverGameRowConnector from './DiscoverGameRowConnector';
 import styles from './DiscoverGameTable.css';
 
-// Type for DiscoverGameItemConnector props
-interface DiscoverGameItemProps {
-  igdbId: number;
-  component: ComponentType<Record<string, unknown>>;
-  columns?: Column[];
-  isSelected?: boolean;
-  onSelectedChange?: (options: SelectStateInputProps) => void;
-}
-
-// Cast the connected component to the expected type
-const TypedDiscoverGameItemConnector =
-  DiscoverGameItemConnector as unknown as ComponentType<DiscoverGameItemProps>;
+// DiscoverGameRowConnector is typed as a connected component that accepts Row props
+// We cast it to a generic ComponentType to satisfy the connector's component prop
+const TypedDiscoverGameRowConnector =
+  DiscoverGameRowConnector as unknown as ComponentType<Record<string, unknown>>;
 
 interface DiscoverGameItem extends ModelBase {
   igdbId: number;
@@ -92,10 +84,9 @@ function DiscoverGameTable({
           style={style}
           className={styles.tableContainer}
         >
-          <TypedDiscoverGameItemConnector
+          <DiscoverGameItemConnector
             key={game.igdbId}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            component={DiscoverGameRowConnector as any}
+            component={TypedDiscoverGameRowConnector}
             columns={columns}
             igdbId={game.igdbId}
             isSelected={selectedState[game.igdbId]}

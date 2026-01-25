@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import TextInput from 'Components/Form/TextInput';
@@ -11,14 +11,20 @@ import PageContentBody from 'Components/Page/PageContentBody';
 import { icons, kinds } from 'Helpers/Props';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
+import { AddNewGameSearchResultProps } from './AddNewGameSearchResult';
 import AddNewGameSearchResultConnector from './AddNewGameSearchResultConnector';
 import styles from './AddNewGame.css';
 
-interface AddNewGameItem {
-  titleSlug: string;
-  igdbId: number;
-  [key: string]: unknown;
-}
+export type AddNewGameItem = Omit<
+  AddNewGameSearchResultProps,
+  | 'existingGameId'
+  | 'isExistingGame'
+  | 'isSmallScreen'
+  | 'gameFile'
+  | 'gameRuntimeFormat'
+> & {
+  internalId?: number;
+};
 
 interface AddNewGameProps {
   term?: string;
@@ -150,10 +156,9 @@ class AddNewGame extends Component<AddNewGameProps, AddNewGameState> {
             <div className={styles.searchResults}>
               {items.map((item) => {
                 return (
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   <AddNewGameSearchResultConnector
                     key={item.titleSlug || item.igdbId}
-                    {...(item as any)}
+                    {...item}
                   />
                 );
               })}

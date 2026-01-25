@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, { CustomFilter as CustomFilterType } from 'App/State/AppState';
 import { deleteCustomFilter } from 'Store/Actions/customFilterActions';
@@ -31,8 +31,16 @@ const mapDispatchToProps = {
   dispatchDeleteCustomFilter: deleteCustomFilter,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(CustomFiltersModalContent as any) as React.ComponentType<OwnProps>;
+const connector = connect(createMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+function CustomFiltersModalContentConnectorWrapper(
+  props: OwnProps & PropsFromRedux
+) {
+  return <CustomFiltersModalContent {...props} />;
+}
+
+export default connector(
+  CustomFiltersModalContentConnectorWrapper
+) as React.ComponentType<OwnProps>;

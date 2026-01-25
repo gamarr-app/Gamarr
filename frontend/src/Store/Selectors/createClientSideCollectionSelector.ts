@@ -191,21 +191,24 @@ export function createCustomFiltersSelector(
   );
 }
 
+type ItemType = Record<string, unknown>;
+
 function createClientSideCollectionSelector(
   section: string,
   uiSection?: string
 ) {
   return createSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: AppState) => _.get(state, section) as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: AppState) => (uiSection ? _.get(state, uiSection) : {}) as any,
+    (state: AppState) => _.get(state, section) as CollectionState<ItemType>,
+    (state: AppState) =>
+      (uiSection ? _.get(state, uiSection) : {}) as Partial<
+        CollectionState<ItemType>
+      >,
     createCustomFiltersSelector(section, uiSection),
     (
-      sectionState: CollectionState<Record<string, unknown>>,
-      uiSectionState: Partial<CollectionState<Record<string, unknown>>>,
+      sectionState: CollectionState<ItemType>,
+      uiSectionState: Partial<CollectionState<ItemType>>,
       customFilters: CustomFilter[]
-    ): CollectionResult<Record<string, unknown>> => {
+    ): CollectionResult<ItemType> => {
       const state = Object.assign({}, sectionState, uiSectionState || {}, {
         customFilters,
       });

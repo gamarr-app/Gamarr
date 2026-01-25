@@ -1,7 +1,8 @@
 import * as signalR from '@microsoft/signalr';
 import { Component } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import { setAppValue, setVersion } from 'Store/Actions/appActions';
 import { removeItem, update, updateItem } from 'Store/Actions/baseActions';
 import {
@@ -18,6 +19,7 @@ import { fetchTagDetails, fetchTags } from 'Store/Actions/tagActions';
 import { repopulatePage } from 'Utilities/pagePopulator';
 import titleCase from 'Utilities/String/titleCase';
 
+// SignalR message types
 interface SignalRMessage {
   name: string;
   body: MessageBody;
@@ -29,28 +31,12 @@ interface MessageBody {
   version?: string;
 }
 
-interface SignalRConnectorProps {
-  isReconnecting: boolean;
-  isDisconnected: boolean;
-  isQueuePopulated: boolean;
-  dispatchFetchCommands: () => void;
-  dispatchUpdateCommand: (resource: Record<string, unknown>) => void;
-  dispatchFinishCommand: (resource: Record<string, unknown>) => void;
-  dispatchSetAppValue: (values: Record<string, unknown>) => void;
-  dispatchSetVersion: (values: { version: string }) => void;
-  dispatchUpdate: (payload: { section: string; data: unknown }) => void;
-  dispatchUpdateItem: (payload: Record<string, unknown>) => void;
-  dispatchRemoveItem: (payload: { section: string; id: number }) => void;
-  dispatchFetchHealth: () => void;
-  dispatchFetchQualityDefinitions: () => void;
-  dispatchFetchQueue: () => void;
-  dispatchFetchQueueDetails: () => void;
-  dispatchFetchRootFolders: () => void;
-  dispatchFetchGames: () => void;
-  dispatchFetchTags: () => void;
-  dispatchFetchTagDetails: () => void;
+interface ResourceWithId {
+  id: number;
+  [key: string]: unknown;
 }
 
+// SignalR logger interface
 interface Logger {
   minimumLogLevel: number;
   cleanse: (message: string) => string;
@@ -66,12 +52,9 @@ function getHandlerName(name: string): string {
 
 function createMapStateToProps() {
   return createSelector(
-    (state: { app: { isReconnecting: boolean; isDisconnected: boolean } }) =>
-      state.app.isReconnecting,
-    (state: { app: { isReconnecting: boolean; isDisconnected: boolean } }) =>
-      state.app.isDisconnected,
-    (state: { queue: { paged: { isPopulated: boolean } } }) =>
-      state.queue.paged.isPopulated,
+    (state: AppState) => state.app.isReconnecting,
+    (state: AppState) => state.app.isDisconnected,
+    (state: AppState) => state.queue.paged.isPopulated,
     (isReconnecting, isDisconnected, isQueuePopulated) => {
       return {
         isReconnecting,
@@ -100,6 +83,10 @@ const mapDispatchToProps = {
   dispatchFetchTags: fetchTags,
   dispatchFetchTagDetails: fetchTagDetails,
 };
+
+const connector = connect(createMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
 
 function createLogger(minimumLogLevel: number): Logger {
   return {
@@ -151,7 +138,7 @@ function createLogger(minimumLogLevel: number): Logger {
   };
 }
 
-class SignalRConnector extends Component<SignalRConnectorProps> {
+class SignalRConnector extends Component<PropsFromRedux> {
   private connection: signalR.HubConnection | null = null;
 
   //
@@ -251,7 +238,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (body.action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (body.resource as { id: number }).id,
+        id: (body.resource as ResourceWithId).id,
       });
 
       repopulatePage('gameFileDeleted');
@@ -272,7 +259,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (resource as { id: number }).id,
+        id: (resource as ResourceWithId).id,
       });
     }
   };
@@ -295,7 +282,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (resource as { id: number }).id,
+        id: (resource as ResourceWithId).id,
       });
     }
   };
@@ -314,7 +301,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (resource as { id: number }).id,
+        id: (resource as ResourceWithId).id,
       });
     }
   };
@@ -347,7 +334,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (resource as { id: number }).id,
+        id: (resource as ResourceWithId).id,
       });
     }
   };
@@ -363,7 +350,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (body.resource as { id: number }).id,
+        id: (body.resource as ResourceWithId).id,
       });
     }
   };
@@ -377,7 +364,7 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({
         section,
-        id: (body.resource as { id: number }).id,
+        id: (body.resource as ResourceWithId).id,
       });
     }
   };
@@ -510,8 +497,4 @@ class SignalRConnector extends Component<SignalRConnectorProps> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(SignalRConnector as any);
+export default connector(SignalRConnector);

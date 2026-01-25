@@ -5,37 +5,12 @@ import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
 import { inputTypes } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
-import { Pending } from 'typings/pending';
+import NotificationType from 'typings/Notification';
+import { PendingSection } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import styles from './NotificationEventItems.css';
 
-interface NotificationEventItem {
-  onGrab: Pending<boolean>;
-  onDownload: Pending<boolean>;
-  onUpgrade: Pending<boolean>;
-  onRename: Pending<boolean>;
-  onGameAdded: Pending<boolean>;
-  onGameDelete: Pending<boolean>;
-  onGameFileDelete: Pending<boolean>;
-  onGameFileDeleteForUpgrade: Pending<boolean>;
-  onHealthIssue: Pending<boolean>;
-  onHealthRestored: Pending<boolean>;
-  onApplicationUpdate: Pending<boolean>;
-  onManualInteractionRequired: Pending<boolean>;
-  supportsOnGrab: Pending<boolean>;
-  supportsOnDownload: Pending<boolean>;
-  supportsOnUpgrade: Pending<boolean>;
-  supportsOnRename: Pending<boolean>;
-  supportsOnGameAdded: Pending<boolean>;
-  supportsOnGameDelete: Pending<boolean>;
-  supportsOnGameFileDelete: Pending<boolean>;
-  supportsOnGameFileDeleteForUpgrade: Pending<boolean>;
-  supportsOnApplicationUpdate: Pending<boolean>;
-  supportsOnManualInteractionRequired: Pending<boolean>;
-  supportsOnHealthIssue: Pending<boolean>;
-  supportsOnHealthRestored: Pending<boolean>;
-  includeHealthWarnings: Pending<boolean>;
-}
+export type NotificationEventItem = PendingSection<NotificationType>;
 
 interface NotificationEventItemsProps {
   item: NotificationEventItem;
