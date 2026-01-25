@@ -202,6 +202,11 @@ namespace NzbDrone.Core.MediaFiles
             @"\.pif$",           // Program Information File (obsolete, can execute code)
             @"\.hta$",           // HTML Application (can run arbitrary code)
             @"\.cpl$",           // Control Panel extension
+            @"\.ps1$",           // PowerShell script (no legitimate game use)
+            @"\.vbs$",           // VBScript (no legitimate game use)
+            @"\.vbe$",           // Encoded VBScript
+            @"\.wsf$",           // Windows Script File
+            @"\.wsh$",           // Windows Script Host settings
             @"readme.*\.exe$",   // Readme as executable is always suspicious
         };
 
