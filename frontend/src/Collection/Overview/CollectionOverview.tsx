@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import TextTruncate from 'react-text-truncate';
 import { Navigation } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import type { NavigationOptions } from 'swiper/types/modules/navigation';
 import EditGameCollectionModal from 'Collection/Edit/EditGameCollectionModal';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
@@ -294,12 +295,9 @@ class CollectionOverview extends Component<
                       swiper.params.navigation &&
                       typeof swiper.params.navigation !== 'boolean'
                     ) {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (swiper.params.navigation as any).prevEl =
-                        this._swiperPrevRef;
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (swiper.params.navigation as any).nextEl =
-                        this._swiperNextRef;
+                      const nav = swiper.params.navigation as NavigationOptions;
+                      nav.prevEl = this._swiperPrevRef;
+                      nav.nextEl = this._swiperNextRef;
                     }
                     swiper.navigation.init();
                     swiper.navigation.update();

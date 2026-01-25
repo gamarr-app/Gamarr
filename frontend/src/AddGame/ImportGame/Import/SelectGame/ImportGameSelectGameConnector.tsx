@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { Component } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import {
@@ -43,21 +43,25 @@ const mapDispatchToProps = {
   setImportGameValue,
 };
 
-interface ImportGameSelectGameConnectorProps {
+const connector = connect(createMapStateToProps, mapDispatchToProps);
+
+interface OwnProps {
   id: string;
+  isExistingGame: boolean;
+}
+
+interface StateFromSelector {
+  isLookingUpGame: boolean;
   items?: GameItem[];
   selectedGame?: SelectedGame;
   isSelected?: boolean;
-  isExistingGame: boolean;
-  isLookingUpGame?: boolean;
-  queueLookupGame: (payload: {
-    name: string;
-    term: string;
-    topOfQueue?: boolean;
-  }) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setImportGameValue: (values: any) => void;
 }
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type ImportGameSelectGameConnectorProps = OwnProps &
+  StateFromSelector &
+  PropsFromRedux;
 
 class ImportGameSelectGameConnector extends Component<ImportGameSelectGameConnectorProps> {
   //
@@ -95,8 +99,4 @@ class ImportGameSelectGameConnector extends Component<ImportGameSelectGameConnec
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(ImportGameSelectGameConnector as any);
+export default connector(ImportGameSelectGameConnector);

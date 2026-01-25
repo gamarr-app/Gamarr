@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { clearAddGame, lookupGame } from 'Store/Actions/addGameActions';
@@ -9,17 +9,8 @@ import {
 } from 'Store/Actions/queueActions';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import hasDifferentItems from 'Utilities/Object/hasDifferentItems';
-import selectUniqueIds from 'Utilities/Object/selectUniqueIds';
 import parseUrl from 'Utilities/String/parseUrl';
-import AddNewGame from './AddNewGame';
-
-interface AddNewGameItem {
-  titleSlug: string;
-  igdbId: number;
-  internalId?: number;
-  id?: number;
-  [key: string]: unknown;
-}
+import AddNewGame, { AddNewGameItem } from './AddNewGame';
 
 function createMapStateToProps() {
   return createSelector(
@@ -80,10 +71,11 @@ class AddNewGameConnector extends Component<AddNewGameConnectorProps> {
   componentDidUpdate(prevProps: AddNewGameConnectorProps) {
     const { items } = this.props;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (hasDifferentItems(prevProps.items as any, items as any)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const gameIds = selectUniqueIds(items as any, 'internalId') as number[];
+    if (hasDifferentItems(prevProps.items, items)) {
+      const gameIds = items
+        .filter((item) => item.internalId != null)
+        .map((item) => item.internalId as number)
+        .filter((id, index, self) => self.indexOf(id) === index);
 
       if (gameIds.length) {
         this.props.fetchGameFiles({ gameId: gameIds });

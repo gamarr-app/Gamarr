@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, {
   CustomFilter,
@@ -17,20 +17,10 @@ interface OwnProps {
   customFilters: CustomFilter[];
   customFilterType: string;
   sectionItems: unknown[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  filterBuilderProps: FilterBuilderProp<any>[];
+  filterBuilderProps: FilterBuilderProp<unknown>[];
   dispatchSetFilter: (payload: { selectedFilterKey: number | string }) => void;
   onCancelPress: () => void;
   onModalClose: () => void;
-}
-
-interface StateProps {
-  id?: number;
-  label: string;
-  filters: PropertyFilter[];
-  customFilters: CustomFilter[];
-  isSaving: boolean;
-  saveError: unknown;
 }
 
 function createMapStateToProps() {
@@ -39,14 +29,14 @@ function createMapStateToProps() {
     (_state: AppState, { id }: OwnProps) => id,
     (state: AppState) => state.customFilters.isSaving,
     (state: AppState) => state.customFilters.saveError,
-    (customFilters, id, isSaving, saveError): StateProps => {
+    (customFilters, id, isSaving, saveError) => {
       if (id) {
         const customFilter = customFilters.find((c) => c.id === id);
 
         return {
           id: customFilter?.id,
           label: customFilter?.label ?? '',
-          filters: customFilter?.filters ?? [],
+          filters: (customFilter?.filters ?? []) as PropertyFilter[],
           customFilters,
           isSaving,
           saveError,
@@ -55,7 +45,7 @@ function createMapStateToProps() {
 
       return {
         label: '',
-        filters: [],
+        filters: [] as PropertyFilter[],
         customFilters,
         isSaving,
         saveError,
@@ -69,8 +59,16 @@ const mapDispatchToProps = {
   dispatchDeleteCustomFilter: deleteCustomFilter,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(FilterBuilderModalContent as any) as React.ComponentType<OwnProps>;
+const connector = connect(createMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+function FilterBuilderModalContentConnectorWrapper(
+  props: OwnProps & PropsFromRedux
+) {
+  return <FilterBuilderModalContent {...props} />;
+}
+
+export default connector(
+  FilterBuilderModalContentConnectorWrapper
+) as React.ComponentType<OwnProps>;

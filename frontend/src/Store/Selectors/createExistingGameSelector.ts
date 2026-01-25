@@ -5,7 +5,7 @@ import createAllGamesSelector from './createAllGamesSelector';
 function createExistingGameSelector() {
   return createSelector(
     (_: AppState, { igdbId }: { igdbId: number }) => igdbId,
-    (_: AppState, { steamAppId }: { steamAppId: number }) => steamAppId,
+    (_: AppState, { steamAppId }: { steamAppId?: number }) => steamAppId,
     createAllGamesSelector(),
     (igdbId, steamAppId, games) => {
       // Check by Steam App ID first (primary identifier)

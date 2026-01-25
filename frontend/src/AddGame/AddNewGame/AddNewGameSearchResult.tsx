@@ -1,4 +1,4 @@
-import React, { Component, MouseEvent } from 'react';
+import { Component, MouseEvent } from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
 import Label from 'Components/Label';
@@ -19,7 +19,7 @@ import translate from 'Utilities/String/translate';
 import AddNewGameModal from './AddNewGameModal';
 import styles from './AddNewGameSearchResult.css';
 
-interface AddNewGameSearchResultProps {
+export interface AddNewGameSearchResultProps {
   igdbId: number;
   igdbSlug?: string;
   steamAppId?: number;

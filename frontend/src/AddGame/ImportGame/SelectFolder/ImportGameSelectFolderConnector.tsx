@@ -1,6 +1,6 @@
 import { push } from 'connected-react-router';
 import _ from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import {
@@ -24,11 +24,11 @@ interface UnmappedFolder {
   relativePath: string;
 }
 
-interface RootFolderItem {
+interface RootFolderItemFromState {
   id: number;
   path: string;
   freeSpace?: number;
-  unmappedFolders?: UnmappedFolder[];
+  unmappedFolders?: object[];
 }
 
 function createMapStateToProps() {
@@ -57,7 +57,7 @@ interface ImportGameSelectFolderConnectorProps {
   isFetching?: boolean;
   isPopulated?: boolean;
   saveError?: object;
-  items: RootFolderItem[];
+  items: RootFolderItemFromState[];
   fetchRootFolders: () => void;
   addRootFolder: (payload: { path: string }) => void;
   deleteRootFolder: (payload: { id: number }) => void;
@@ -114,7 +114,7 @@ class ImportGameSelectFolderConnector extends Component<ImportGameSelectFolderCo
         items={this.props.items.map((item) => ({
           ...item,
           freeSpace: item.freeSpace || 0,
-          unmappedFolders: item.unmappedFolders || [],
+          unmappedFolders: (item.unmappedFolders || []) as UnmappedFolder[],
         }))}
         onNewRootFolderSelect={this.onNewRootFolderSelect}
         onDeleteRootFolderPress={this.onDeleteRootFolderPress}
@@ -123,8 +123,7 @@ class ImportGameSelectFolderConnector extends Component<ImportGameSelectFolderCo
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default connect(
   createMapStateToProps,
   mapDispatchToProps
-)(ImportGameSelectFolderConnector as any);
+)(ImportGameSelectFolderConnector);

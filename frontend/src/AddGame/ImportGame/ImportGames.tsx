@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { Route } from 'react-router-dom';
 import ImportGameConnector from 'AddGame/ImportGame/Import/ImportGameConnector';
 import ImportGameSelectFolderConnector from 'AddGame/ImportGame/SelectFolder/ImportGameSelectFolderConnector';

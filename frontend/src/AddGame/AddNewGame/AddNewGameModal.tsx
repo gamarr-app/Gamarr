@@ -1,4 +1,3 @@
-import React from 'react';
 import Modal from 'Components/Modal/Modal';
 import { Image } from 'Game/Game';
 import AddNewGameModalContentConnector from './AddNewGameModalContentConnector';
@@ -20,9 +19,8 @@ function AddNewGameModal(props: AddNewGameModalProps) {
 
   return (
     <Modal isOpen={isOpen} onModalClose={onModalClose}>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <AddNewGameModalContentConnector
-        {...(otherProps as any)}
+        {...otherProps}
         onModalClose={onModalClose}
       />
     </Modal>

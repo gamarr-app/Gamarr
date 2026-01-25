@@ -1,5 +1,6 @@
 import { reduce } from 'lodash';
-import React, { Component, RefObject } from 'react';
+import { Component, createRef, RefObject } from 'react';
+import ModelBase from 'App/ModelBase';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -19,7 +20,6 @@ interface UnmappedFolder {
 
 interface ImportGameItem {
   id: string;
-  [key: string]: unknown;
 }
 
 interface ImportGameProps {
@@ -41,7 +41,7 @@ interface SelectedState {
 interface ImportGameState {
   allSelected: boolean;
   allUnselected: boolean;
-  lastToggled: string | null;
+  lastToggled: string | number | null;
   selectedState: SelectedState;
   contentBody: Element | null;
 }
@@ -59,7 +59,7 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
   constructor(props: ImportGameProps) {
     super(props);
 
-    this.scrollerRef = React.createRef();
+    this.scrollerRef = createRef();
 
     this.state = {
       allSelected: false,
@@ -102,14 +102,9 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
     shiftKey?: boolean;
   }) => {
     this.setState((state) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return toggleSelected(
-        state,
-        this.props.items as any,
-        id,
-        value,
-        shiftKey
-      ) as any;
+      // Cast items to ModelBase[] for toggleSelected - id comparison works with string ids
+      const itemsAsModelBase = this.props.items as unknown as ModelBase[];
+      return toggleSelected(state, itemsAsModelBase, id, value, shiftKey);
     });
   };
 
@@ -176,7 +171,6 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
           !!unmappedFolders.length &&
           this.scrollerRef.current ? (
             <ImportGameTableConnector
-              // @ts-expect-error - connector types are complex
               rootFolderId={rootFolderId}
               unmappedFolders={unmappedFolders}
               allSelected={allSelected}

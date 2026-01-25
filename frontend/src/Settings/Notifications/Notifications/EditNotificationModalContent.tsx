@@ -24,10 +24,10 @@ import {
 } from 'Store/Actions/settingsActions';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
 import { InputChanged } from 'typings/inputs';
-import NotificationType from 'typings/Notification';
-import { PendingSection } from 'typings/pending';
 import translate from 'Utilities/String/translate';
-import NotificationEventItems from './NotificationEventItems';
+import NotificationEventItems, {
+  NotificationEventItem,
+} from './NotificationEventItems';
 import styles from './EditNotificationModalContent.css';
 
 interface EditNotificationModalContentProps {
@@ -93,7 +93,7 @@ function EditNotificationModalContent({
     dispatch(testNotification({ id }));
   }, [dispatch, id]);
 
-  const typedItem = item as PendingSection<NotificationType>;
+  const typedItem = item as NotificationEventItem;
   const { implementationName = '', name, tags, fields, message } = typedItem;
 
   // saveError is already the correct type for SpinnerErrorButton
@@ -133,8 +133,7 @@ function EditNotificationModalContent({
             </FormGroup>
 
             <NotificationEventItems
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              item={typedItem as any}
+              item={typedItem}
               onInputChange={handleInputChange}
             />
 

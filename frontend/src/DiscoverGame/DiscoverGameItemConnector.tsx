@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 
 interface DiscoverGame {
@@ -58,11 +58,17 @@ interface OwnProps {
   [key: string]: unknown;
 }
 
+// StateProps matches the shape returned by mapStateToProps
+// Note: gameIgdbId is used to avoid conflict with OwnProps.igdbId
+interface StateProps extends Partial<Omit<DiscoverGame, 'igdbId'>> {
+  gameIgdbId?: number;
+}
+
 function createMapStateToProps() {
   return createSelector(
     (_state: RootState, { igdbId }: OwnProps) => igdbId,
     (state: RootState) => state.discoverGame,
-    (igdbId, discoverGame) => {
+    (igdbId, discoverGame): StateProps => {
       const game = discoverGame.items.find((g) => g.igdbId === igdbId);
 
       // If a game is deleted this selector may fire before the parent
@@ -71,33 +77,32 @@ function createMapStateToProps() {
       // trying to show a game that has no information available.
 
       if (!game) {
-        return { igdbId: undefined };
+        return { gameIgdbId: undefined };
       }
 
+      const { igdbId: foundIgdbId, ...rest } = game;
       return {
-        ...game,
+        ...rest,
+        gameIgdbId: foundIgdbId,
       };
     }
   );
 }
 
-interface StateProps {
-  igdbId?: number;
-}
+const connector = connect(createMapStateToProps);
 
-type DiscoverGameItemConnectorProps = OwnProps & StateProps;
+type PropsFromRedux = ConnectedProps<typeof connector>;
 
-function DiscoverGameItemConnector({
-  igdbId,
-  component: ItemComponent,
-  ...otherProps
-}: DiscoverGameItemConnectorProps) {
-  if (!igdbId) {
+function DiscoverGameItemConnectorWrapper(props: OwnProps & PropsFromRedux) {
+  const { gameIgdbId, component: ItemComponent, ...otherProps } = props;
+
+  if (!gameIgdbId) {
     return null;
   }
 
-  return <ItemComponent {...otherProps} igdbId={igdbId} />;
+  return <ItemComponent {...otherProps} igdbId={gameIgdbId} />;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default connect(createMapStateToProps)(DiscoverGameItemConnector as any);
+export default connector(
+  DiscoverGameItemConnectorWrapper
+) as React.ComponentType<OwnProps>;

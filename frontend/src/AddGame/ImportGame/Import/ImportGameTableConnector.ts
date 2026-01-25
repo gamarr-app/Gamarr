@@ -1,18 +1,22 @@
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
+import { AddGameState } from 'Store/Actions/addGameActions';
 import {
   queueLookupGame,
   setImportGameValue,
 } from 'Store/Actions/importGameActions';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
+import { AppDispatch } from 'Store/thunks';
 import ImportGameTable from './ImportGameTable';
+
+interface AddGameAppState {
+  addGame: AddGameState;
+}
 
 function createMapStateToProps() {
   return createSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state: any) => state.addGame,
+    (state: AppState & AddGameAppState) => state.addGame,
     (state: AppState) => state.importGame,
     (state: AppState) => state.app.dimensions,
     createAllGamesSelector(),
@@ -29,29 +33,27 @@ function createMapStateToProps() {
   );
 }
 
-function createMapDispatchToProps(dispatch: Dispatch) {
+function createMapDispatchToProps(dispatch: AppDispatch) {
   return {
     onGameLookup(name: string, path: string, relativePath: string) {
       dispatch(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         queueLookupGame({
           name,
           path,
           relativePath,
           term: name,
-        }) as any
+        })
       );
     },
 
-    onSetImportGameValue(values: Record<string, unknown>) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      dispatch(setImportGameValue(values as any));
+    onSetImportGameValue(values: { id: string; [key: string]: unknown }) {
+      dispatch(setImportGameValue(values));
     },
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default connect(
-  createMapStateToProps,
-  createMapDispatchToProps
-)(ImportGameTable as any);
+const connector = connect(createMapStateToProps, createMapDispatchToProps);
+
+export type ImportGameTableConnectorProps = ConnectedProps<typeof connector>;
+
+export default connector(ImportGameTable);

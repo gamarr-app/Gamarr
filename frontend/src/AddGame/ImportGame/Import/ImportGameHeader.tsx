@@ -1,4 +1,3 @@
-import React from 'react';
 import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabilityPopoverContent';
 import Icon from 'Components/Icon';
 import VirtualTableHeader from 'Components/Table/VirtualTableHeader';

@@ -1,4 +1,3 @@
-import React from 'react';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';

@@ -12,12 +12,17 @@ interface FetchOptions {
   data?: Resource;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ExtendedPromise<T> extends Promise<T> {
-  filter: (predicate: (value: any) => boolean) => ExtendedPromise<T>;
-  map: <U>(callback: (value: any) => U) => ExtendedPromise<U[]>;
+  filter: <U = T extends Array<infer E> ? E : unknown>(
+    predicate: (value: U) => boolean
+  ) => ExtendedPromise<T>;
+  map: <U, E = T extends Array<infer El> ? El : unknown>(
+    callback: (value: E) => U
+  ) => ExtendedPromise<U[]>;
   all: () => ExtendedPromise<T>;
-  forEach: <U>(action: (value: any) => U) => ExtendedPromise<U[]>;
+  forEach: <U, E = T extends Array<infer El> ? El : unknown>(
+    action: (value: E) => U
+  ) => ExtendedPromise<U[]>;
 }
 
 let hasWarned = false;
@@ -33,42 +38,36 @@ function checkActivationWarning(): void {
 function attachAsyncActions<T>(promise: Promise<T>): ExtendedPromise<T> {
   const extendedPromise = promise as ExtendedPromise<T>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extendedPromise.filter = function (
-    predicate: (value: any) => boolean
-  ): ExtendedPromise<T> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = this.then((d) => (d as any[]).filter(predicate) as T);
+  extendedPromise.filter = function <
+    U = T extends Array<infer E> ? E : unknown
+  >(predicate: (value: U) => boolean): ExtendedPromise<T> {
+    const res = this.then((d) => (d as U[]).filter(predicate) as T);
     attachAsyncActions(res);
     return res as ExtendedPromise<T>;
   };
 
-  extendedPromise.map = function <U>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (value: any) => U
-  ): ExtendedPromise<U[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = this.then((d) => (d as any[]).map(callback));
+  extendedPromise.map = function <
+    U,
+    E = T extends Array<infer El> ? El : unknown
+  >(callback: (value: E) => U): ExtendedPromise<U[]> {
+    const res = this.then((d) => (d as E[]).map(callback));
     attachAsyncActions(res);
     return res as ExtendedPromise<U[]>;
   };
 
   extendedPromise.all = function (): ExtendedPromise<T> {
     const res = this.then(
-      (d) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Promise.all(d as Iterable<any>) as Promise<T>
+      (d) => Promise.all(d as Iterable<Promise<unknown>>) as Promise<T>
     );
     attachAsyncActions(res);
     return res as ExtendedPromise<T>;
   };
 
-  extendedPromise.forEach = function <U>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    action: (value: any) => U
-  ): ExtendedPromise<U[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = this.then((d) => Promise.all((d as any[]).map(action)));
+  extendedPromise.forEach = function <
+    U,
+    E = T extends Array<infer El> ? El : unknown
+  >(action: (value: E) => U): ExtendedPromise<U[]> {
+    const res = this.then((d) => Promise.all((d as E[]).map(action)));
     attachAsyncActions(res);
     return res as ExtendedPromise<U[]>;
   };
