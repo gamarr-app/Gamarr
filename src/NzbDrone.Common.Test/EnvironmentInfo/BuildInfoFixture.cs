@@ -10,7 +10,9 @@ namespace NzbDrone.Common.Test.EnvironmentInfo
         [Test]
         public void should_return_version()
         {
-            BuildInfo.Version.Major.Should().BeOneOf(6, 10);
+            // Major version 0 is used for dev builds (0.0.1.* in Directory.Build.props)
+            // Major version 6 or 10 is used for production builds
+            BuildInfo.Version.Major.Should().BeOneOf(0, 6, 10);
         }
 
         [Test]
