@@ -1,4 +1,4 @@
-import React, { Component, ComponentType } from 'react';
+import { Component, ComponentType } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import createCollectionSelector from 'Store/Selectors/createCollectionSelector';

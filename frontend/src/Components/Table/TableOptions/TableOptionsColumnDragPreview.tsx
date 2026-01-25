@@ -1,4 +1,4 @@
-import React, { Component, CSSProperties } from 'react';
+import { Component, CSSProperties } from 'react';
 import { DragLayer, DragLayerMonitor } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { TABLE_COLUMN } from 'Helpers/dragTypes';

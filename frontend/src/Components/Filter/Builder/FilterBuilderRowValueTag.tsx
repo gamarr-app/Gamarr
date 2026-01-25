@@ -1,4 +1,3 @@
-import React from 'react';
 import { TagBase } from 'Components/Form/Tag/TagInput';
 import TagInputTag, { TagInputTagProps } from 'Components/Form/Tag/TagInputTag';
 import { kinds } from 'Helpers/Props';

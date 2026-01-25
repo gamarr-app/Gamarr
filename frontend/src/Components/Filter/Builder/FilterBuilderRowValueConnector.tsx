@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { FilterBuilderProp } from 'App/State/AppState';
 import { filterBuilderTypes } from 'Helpers/Props';
 import * as filterTypes from 'Helpers/Props/filterTypes';

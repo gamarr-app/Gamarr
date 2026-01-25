@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import Icon, { IconName } from 'Components/Icon';
 import Link, { LinkProps } from 'Components/Link/Link';
 import { icons } from 'Helpers/Props';

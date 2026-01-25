@@ -1,5 +1,5 @@
 import { maxBy } from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import {
   CustomFilter,

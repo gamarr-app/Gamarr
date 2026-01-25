@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import ReactMeasure from 'react-measure';
 
 // Simple dimensions object matching what consumers expect

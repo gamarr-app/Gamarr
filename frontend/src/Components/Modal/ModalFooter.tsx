@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './ModalFooter.css';
 
 interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> {

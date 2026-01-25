@@ -1,4 +1,3 @@
-import React from 'react';
 import { Error } from 'App/State/AppSectionState';
 import { CustomFilter as CustomFilterType } from 'App/State/AppState';
 import Button from 'Components/Link/Button';

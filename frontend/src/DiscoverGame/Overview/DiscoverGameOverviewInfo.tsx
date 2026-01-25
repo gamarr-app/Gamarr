@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import React from 'react';
 import { IconName } from 'Components/Icon';
 import { Ratings } from 'Game/Game';
 import { icons } from 'Helpers/Props';

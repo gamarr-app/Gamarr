@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './TableRow.css';
 
 interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import TextTruncate from 'react-text-truncate';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';

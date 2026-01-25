@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ConnectDragSource } from 'react-dnd';
 import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';

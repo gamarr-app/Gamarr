@@ -1,4 +1,3 @@
-import React from 'react';
 import { icons } from 'Helpers/Props';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import SelectedMenuItem from './SelectedMenuItem';

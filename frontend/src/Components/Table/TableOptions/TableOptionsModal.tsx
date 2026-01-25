@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { HTML5toTouch } from 'rdndmb-html5-to-touch';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { DndProvider } from 'react-dnd-multi-backend';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';

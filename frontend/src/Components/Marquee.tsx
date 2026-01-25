@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { Component, CSSProperties } from 'react';
+import { Component, CSSProperties } from 'react';
 
 const FPS = 20;
 const STEP = 1;

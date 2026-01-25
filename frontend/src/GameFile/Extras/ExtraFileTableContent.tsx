@@ -1,4 +1,3 @@
-import React from 'react';
 import IconButton from 'Components/Link/IconButton';
 import Column from 'Components/Table/Column';
 import Table from 'Components/Table/Table';

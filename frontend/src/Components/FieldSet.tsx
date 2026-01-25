@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { sizes } from 'Helpers/Props';
 import { Size } from 'Helpers/Props/sizes';
 import styles from './FieldSet.css';

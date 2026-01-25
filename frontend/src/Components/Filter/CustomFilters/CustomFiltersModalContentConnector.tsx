@@ -1,4 +1,3 @@
-import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, { CustomFilter as CustomFilterType } from 'App/State/AppState';

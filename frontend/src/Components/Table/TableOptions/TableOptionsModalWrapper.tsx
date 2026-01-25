@@ -1,4 +1,4 @@
-import React, { Component, ReactElement } from 'react';
+import { Component, ReactElement } from 'react';
 import Column from 'Components/Table/Column';
 import TableOptionsModal from './TableOptionsModal';
 

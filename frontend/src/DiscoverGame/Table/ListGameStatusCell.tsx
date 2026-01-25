@@ -1,4 +1,4 @@
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import Icon from 'Components/Icon';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import { GameStatus } from 'Game/Game';
