@@ -127,7 +127,7 @@ namespace NzbDrone.Automation.Test
                 ("Import Lists", "ImportLists"),
                 ("Connect", "Notifications"),
                 ("Metadata", "Metadata"),
-                ("Tags", "Tags"),
+                ("Tags", "TagSettings"),
                 ("General", "GeneralSettings"),
                 ("UI", "UISettings")
             };
