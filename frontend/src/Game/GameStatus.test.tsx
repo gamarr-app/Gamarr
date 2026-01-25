@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import { ReactNode } from 'react';
 import GameStatus from './GameStatus';
 
 import '@testing-library/jest-dom';
@@ -52,7 +53,7 @@ jest.mock('Components/ProgressBar', () => ({
 
 jest.mock('Activity/Queue/QueueDetails', () => ({
   __esModule: true,
-  default: ({ progressBar }: { progressBar: React.ReactNode }) => (
+  default: ({ progressBar }: { progressBar: ReactNode }) => (
     <div data-testid="queue-details">{progressBar}</div>
   ),
 }));

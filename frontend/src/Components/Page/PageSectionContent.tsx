@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -8,7 +9,7 @@ interface PageSectionContentProps {
   isPopulated: boolean;
   error?: Error;
   errorMessage: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function PageSectionContent({

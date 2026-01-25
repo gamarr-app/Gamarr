@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import Link, { LinkProps } from 'Components/Link/Link';
 import styles from './Card.css';
 
@@ -6,7 +7,7 @@ interface CardProps extends Pick<LinkProps, 'onPress'> {
   className?: string;
   overlayClassName?: string;
   overlayContent?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Card(props: CardProps) {

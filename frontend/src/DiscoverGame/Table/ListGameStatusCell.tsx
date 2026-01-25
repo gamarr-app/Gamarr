@@ -1,4 +1,4 @@
-import { ComponentType } from 'react';
+import { ComponentType, ReactNode } from 'react';
 import Icon from 'Components/Icon';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import { GameStatus } from 'Game/Game';
@@ -10,7 +10,7 @@ interface ListGameStatusCellProps {
   status: string;
   isExclusion?: boolean;
   isExisting?: boolean;
-  component?: ComponentType<{ className?: string; children?: React.ReactNode }>;
+  component?: ComponentType<{ className?: string; children?: ReactNode }>;
 }
 
 function ListGameStatusCell({

@@ -1,6 +1,7 @@
+import { ReactNode } from 'react';
 
 interface TableHeaderProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function TableHeader({ children }: TableHeaderProps) {

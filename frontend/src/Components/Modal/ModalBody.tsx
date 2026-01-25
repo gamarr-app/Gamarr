@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import Scroller from 'Components/Scroller/Scroller';
 import { ScrollDirection } from 'Helpers/Props/scrollDirections';
 import styles from './ModalBody.css';
@@ -5,7 +6,7 @@ import styles from './ModalBody.css';
 interface ModalBodyProps {
   className?: string;
   innerClassName?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   scrollDirection?: ScrollDirection;
 }
 

@@ -1,7 +1,8 @@
+import { ReactNode } from 'react';
 import styles from './VirtualTableHeader.css';
 
 interface VirtualTableHeaderProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function VirtualTableHeader({ children }: VirtualTableHeaderProps) {

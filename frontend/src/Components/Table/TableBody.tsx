@@ -1,6 +1,7 @@
+import { ReactNode } from 'react';
 
 interface TableBodyProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function TableBody({ children }: TableBodyProps) {

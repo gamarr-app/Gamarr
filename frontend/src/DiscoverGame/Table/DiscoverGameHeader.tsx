@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { ComponentType, useCallback, useState } from 'react';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import Column from 'Components/Table/Column';
@@ -162,7 +162,7 @@ function DiscoverGameHeader({
         isOpen={isTableOptionsModalOpen}
         columns={columns}
         optionsComponent={
-          DiscoverGameTableOptionsConnector as React.ComponentType<{
+          DiscoverGameTableOptionsConnector as ComponentType<{
             onTableOptionChange: (options: TableOptions) => void;
           }>
         }

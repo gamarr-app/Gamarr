@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Component } from 'react';
+import { Component, ReactNode } from 'react';
 import ReactMeasure from 'react-measure';
 
 // Simple dimensions object matching what consumers expect
@@ -13,7 +13,7 @@ interface MeasureProps {
   blacklist?: string[];
   includeMargin?: boolean;
   onMeasure: (dimensions: Dimensions) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 class Measure extends Component<MeasureProps> {

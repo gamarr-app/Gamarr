@@ -1,8 +1,9 @@
+import { ReactNode } from 'react';
 import styles from './PageToolbar.css';
 
 interface PageToolbarProps {
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function PageToolbar({

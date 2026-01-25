@@ -1,7 +1,8 @@
+import { HTMLAttributes, ReactNode } from 'react';
 import styles from './ModalFooter.css';
 
-interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  children?: React.ReactNode;
+interface ModalFooterProps extends HTMLAttributes<HTMLDivElement> {
+  children?: ReactNode;
 }
 
 function ModalFooter({ children, ...otherProps }: ModalFooterProps) {

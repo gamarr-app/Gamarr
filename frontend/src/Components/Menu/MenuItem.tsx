@@ -1,10 +1,11 @@
 import classNames from 'classnames';
+import { ReactNode } from 'react';
 import Link, { LinkProps } from 'Components/Link/Link';
 import styles from './MenuItem.css';
 
 export interface MenuItemProps extends LinkProps {
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   isDisabled?: boolean;
 }
 

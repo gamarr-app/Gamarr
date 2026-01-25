@@ -1,9 +1,10 @@
+import { HTMLAttributes, ReactNode } from 'react';
 import styles from './VirtualTableRow.css';
 
-interface VirtualTableRowProps extends React.HTMLAttributes<HTMLDivElement> {
+interface VirtualTableRowProps extends HTMLAttributes<HTMLDivElement> {
   className: string;
   style: object;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function VirtualTableRow({

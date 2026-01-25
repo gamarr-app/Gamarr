@@ -1,11 +1,12 @@
 import classNames from 'classnames';
+import { ReactNode } from 'react';
 import { Kind } from 'Helpers/Props/kinds';
 import styles from './Alert.css';
 
 interface AlertProps {
   className?: string;
   kind?: Extract<Kind, keyof typeof styles>;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Alert(props: AlertProps) {

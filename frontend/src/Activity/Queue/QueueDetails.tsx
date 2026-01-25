@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import Icon from 'Components/Icon';
 import Popover from 'Components/Tooltip/Popover';
 import { icons, tooltipPositions } from 'Helpers/Props';
@@ -20,7 +21,7 @@ interface QueueDetailsProps {
   trackedDownloadStatus?: QueueTrackedDownloadStatus;
   statusMessages?: StatusMessage[];
   errorMessage?: string;
-  progressBar: React.ReactNode;
+  progressBar: ReactNode;
 }
 
 function QueueDetails(props: QueueDetailsProps) {

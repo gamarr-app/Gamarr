@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { HTML5toTouch } from 'rdndmb-html5-to-touch';
-import { Component } from 'react';
+import { Component, ElementType } from 'react';
 import { DndProvider } from 'react-dnd-multi-backend';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
@@ -28,7 +28,7 @@ interface TableOptionsModalProps {
   pageSize?: number;
   maxPageSize?: number;
   canModifyColumns: boolean;
-  optionsComponent?: React.ElementType;
+  optionsComponent?: ElementType;
   onTableOptionChange: (options: TableOptions) => void;
   onModalClose: () => void;
 }

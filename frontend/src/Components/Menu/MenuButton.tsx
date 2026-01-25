@@ -1,10 +1,11 @@
 import classNames from 'classnames';
+import { ReactNode } from 'react';
 import Link from 'Components/Link/Link';
 import styles from './MenuButton.css';
 
 export interface MenuButtonProps {
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   isDisabled?: boolean;
   onPress?: () => void;
 }

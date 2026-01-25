@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import Menu from 'Components/Menu/Menu';
 import ToolbarMenuButton, {
   ToolbarMenuButtonProps,
@@ -6,7 +7,7 @@ import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 
 interface ViewMenuProps extends Omit<ToolbarMenuButtonProps, 'iconName'> {
-  children: React.ReactNode;
+  children: ReactNode;
   isDisabled?: boolean;
   alignMenu?: 'left' | 'right';
 }

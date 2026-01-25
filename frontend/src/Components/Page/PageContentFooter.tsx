@@ -1,8 +1,9 @@
+import { ReactNode } from 'react';
 import styles from './PageContentFooter.css';
 
 interface PageContentFooterProps {
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function PageContentFooter({

@@ -1,12 +1,13 @@
+import { HTMLAttributes, ReactNode } from 'react';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './ModalContent.css';
 
-interface ModalContentProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ModalContentProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   showCloseButton?: boolean;
   onModalClose: () => void;
 }

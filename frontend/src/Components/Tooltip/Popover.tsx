@@ -1,9 +1,10 @@
+import { ReactNode } from 'react';
 import Tooltip, { TooltipProps } from './Tooltip';
 import styles from './Popover.css';
 
 interface PopoverProps extends Omit<TooltipProps, 'tooltip' | 'bodyClassName'> {
   title: string;
-  body: React.ReactNode;
+  body: ReactNode;
 }
 
 function Popover({ title, body, ...otherProps }: PopoverProps) {

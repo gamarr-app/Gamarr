@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { useCallback } from 'react';
+import { Ref, useCallback } from 'react';
 import { ConnectDragSource } from 'react-dnd';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
@@ -97,7 +97,7 @@ function QualityProfileItem({
       </label>
 
       <div
-        ref={dragRef as unknown as React.Ref<HTMLDivElement>}
+        ref={dragRef as unknown as Ref<HTMLDivElement>}
         className={styles.dragHandle}
       >
         <Icon

@@ -1,3 +1,4 @@
+import { ElementType } from 'react';
 import { useSelector } from 'react-redux';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import formatDateTime from 'Utilities/Date/formatDateTime';
@@ -11,7 +12,7 @@ interface RelativeDateCellProps {
   includeSeconds?: boolean;
   includeTime?: boolean;
   timeForToday?: boolean;
-  component?: React.ElementType;
+  component?: ElementType;
 }
 
 function RelativeDateCell(props: RelativeDateCellProps) {
