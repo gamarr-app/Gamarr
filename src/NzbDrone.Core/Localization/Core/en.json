@@ -1834,6 +1834,7 @@
   "ShowMetacriticRatingHelpText": "Show Metacritic rating under poster",
   "ShowUnknownGameItems": "Show Unknown Game Items",
   "ShowUnknownGameItemsHelpText": "Show items without a game in the queue. This could include removed games or anything else in {appName}'s category",
+  "ShowVersion": "Show Version",
   "ShowYear": "Show Year",
   "ShownClickToHide": "Shown, click to hide",
   "Shutdown": "Shutdown",
