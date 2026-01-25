@@ -154,25 +154,30 @@ namespace NzbDrone.Core.MediaFiles
                 }
                 else
                 {
-                    // No folder-based GameFile exists - create one
-                    // First, delete any old file-based GameFile records (migration from old behavior)
+                    // No folder-based GameFile exists - migrate from file-based
+                    // Preserve metadata from the first existing file (if any)
+                    var sourceFile = existingGameFiles.FirstOrDefault();
+
+                    // Delete old file-based GameFile records
                     foreach (var oldFile in existingGameFiles)
                     {
                         _logger.Debug("Removing old file-based GameFile record: {0}", oldFile.RelativePath);
                         _mediaFileService.Delete(oldFile, DeleteMediaFileReason.ManualOverride);
                     }
 
-                    // Create new folder-based GameFile
+                    // Create new folder-based GameFile, preserving metadata from old record
                     _logger.Debug("Creating folder-based GameFile for {0}", game.Title);
                     var folderGameFile = new GameFile
                     {
                         GameId = game.Id,
                         RelativePath = string.Empty, // Empty means the folder itself
                         Size = folderSize,
-                        DateAdded = DateTime.UtcNow,
-                        Quality = new QualityModel { Quality = Quality.Unknown },
-                        Languages = new List<Language> { Language.Unknown },
-                        IndexerFlags = 0
+                        DateAdded = sourceFile?.DateAdded ?? DateTime.UtcNow,
+                        Quality = sourceFile?.Quality ?? new QualityModel { Quality = Quality.Unknown },
+                        Languages = sourceFile?.Languages ?? new List<Language> { Language.Unknown },
+                        IndexerFlags = sourceFile?.IndexerFlags ?? 0,
+                        ReleaseGroup = sourceFile?.ReleaseGroup,
+                        SceneName = sourceFile?.SceneName
                     };
 
                     _mediaFileService.Add(folderGameFile);
