@@ -53,7 +53,7 @@ function QualityProfileItems({
   const [qualitiesHeightEditGroups, setQualitiesHeightEditGroups] = useState(0);
 
   const handleMeasure = useCallback(
-    ({ height }: { height: number }) => {
+    ({ height = 0 }: { height?: number }) => {
       if (editGroups) {
         setQualitiesHeightEditGroups((prev) => (height > prev ? height : prev));
       } else {

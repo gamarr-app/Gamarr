@@ -3,10 +3,13 @@
 interface CssExports {
   'actions': string;
   'alreadyExistsIcon': string;
+  'checkInput': string;
+  'container': string;
   'content': string;
   'details': string;
   'editorSelect': string;
   'exclusionIcon': string;
+  'externalLinks': string;
   'info': string;
   'link': string;
   'lists': string;

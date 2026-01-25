@@ -57,17 +57,14 @@ function EditSpecificationModalContentConnector({
     onModalClose();
   }, [dispatch, id, onModalClose]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EditSpecificationModalContent is a JS file
-  const Content = EditSpecificationModalContent as any;
   return (
-    <Content
+    <EditSpecificationModalContent
       advancedSettings={advancedSettings}
       {...specification}
       onCancelPress={handleCancelPress}
       onSavePress={handleSavePress}
       onInputChange={handleInputChange}
       onFieldChange={handleFieldChange}
-      onModalClose={onModalClose}
     />
   );
 }

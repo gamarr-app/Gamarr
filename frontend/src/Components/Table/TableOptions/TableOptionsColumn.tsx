@@ -4,18 +4,18 @@ import { ConnectDragSource } from 'react-dnd';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import { icons } from 'Helpers/Props';
+import { CheckInputChanged } from 'typings/inputs';
 import styles from './TableOptionsColumn.css';
 
 interface TableOptionsColumnProps {
   name: string;
-  label: string;
+  label: string | (() => string);
   isVisible: boolean;
   isModifiable: boolean;
   index: number;
   isDragging?: boolean;
-  isOver?: boolean;
-  dragRef?: ConnectDragSource;
-  onVisibleChange: (payload: { name: string; value: boolean }) => void;
+  connectDragSource?: ConnectDragSource;
+  onVisibleChange: (change: CheckInputChanged) => void;
 }
 
 function TableOptionsColumn(props: TableOptionsColumnProps) {
@@ -25,7 +25,7 @@ function TableOptionsColumn(props: TableOptionsColumnProps) {
     isVisible,
     isModifiable,
     isDragging,
-    dragRef,
+    connectDragSource,
     onVisibleChange,
   } = props;
 
@@ -42,17 +42,15 @@ function TableOptionsColumn(props: TableOptionsColumnProps) {
             isDisabled={isModifiable === false}
             onChange={onVisibleChange}
           />
-          {label}
+          {typeof label === 'function' ? label() : label}
         </label>
 
-        {dragRef && (
-          <div
-            ref={dragRef as unknown as React.Ref<HTMLDivElement>}
-            className={styles.dragHandle}
-          >
-            <Icon className={styles.dragIcon} name={icons.REORDER} />
-          </div>
-        )}
+        {!!connectDragSource &&
+          connectDragSource(
+            <div className={styles.dragHandle}>
+              <Icon className={styles.dragIcon} name={icons.REORDER} />
+            </div>
+          )}
       </div>
     </div>
   );

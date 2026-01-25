@@ -133,7 +133,8 @@ function EditNotificationModalContent({
             </FormGroup>
 
             <NotificationEventItems
-              item={typedItem}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              item={typedItem as any}
               onInputChange={handleInputChange}
             />
 

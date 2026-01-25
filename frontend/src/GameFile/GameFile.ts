@@ -11,6 +11,7 @@ export interface GameFile extends ModelBase {
   dateAdded: string;
   sceneName: string;
   releaseGroup: string;
+  edition: string;
   version?: string;
   languages: Language[];
   quality: QualityModel;

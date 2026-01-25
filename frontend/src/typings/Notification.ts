@@ -17,6 +17,7 @@ interface Notification extends Provider {
   onHealthRestored: boolean;
   onApplicationUpdate: boolean;
   onManualInteractionRequired: boolean;
+  includeHealthWarnings: boolean;
 
   // Capability flags
   supportsOnGrab: boolean;

@@ -1,15 +1,17 @@
 import { FilterBuilderProp } from 'App/State/AppState';
 
-interface FilterBuilderRowOnChangeProps {
+export type FilterValue = Array<boolean | string | number>;
+
+export interface FilterBuilderRowOnChangeProps {
   name: string;
-  value: unknown[];
+  value: unknown;
 }
 
 interface FilterBuilderRowValueProps {
   filterType?: string;
-  filterValue: string | number | object | string[] | number[] | object[];
+  filterValue: FilterValue;
   selectedFilterBuilderProp: FilterBuilderProp<unknown>;
-  sectionItem: unknown[];
+  sectionItems?: unknown[];
   onChange: (payload: FilterBuilderRowOnChangeProps) => void;
 }
 

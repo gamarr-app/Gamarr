@@ -4,19 +4,21 @@ import {
   defaultMemoize,
   Selector,
 } from 'reselect';
-import AppState from 'App/State/AppState';
+import AppState, { CustomFilter } from 'App/State/AppState';
 import GameCollection from 'typings/GameCollection';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import createClientSideCollectionSelector from './createClientSideCollectionSelector';
 
-interface CollectionItem {
+export interface CollectionItem {
   id: number;
   sortTitle: string;
   [key: string]: unknown;
 }
 
-interface CollectionResult {
+export interface CollectionResult {
   items: CollectionItem[];
+  totalItems: number;
+  customFilters: CustomFilter[];
   [key: string]: unknown;
 }
 
