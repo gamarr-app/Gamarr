@@ -36,6 +36,7 @@
 }
 
 .releaseGroup,
+.version,
 .dateAdded {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
