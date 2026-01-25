@@ -104,7 +104,7 @@ function EditMetadataModalContent({
             />
           </FormGroup>
 
-          {fields.map((field) => {
+          {(fields ?? []).map((field) => {
             return (
               <ProviderFieldFormGroup
                 key={field.name}

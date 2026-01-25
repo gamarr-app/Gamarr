@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from 'react';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputHelpText from 'Components/Form/FormInputHelpText';
@@ -12,20 +11,32 @@ import QualityProfileItemDragPreview from './QualityProfileItemDragPreview';
 import QualityProfileItemDragSource from './QualityProfileItemDragSource';
 import styles from './QualityProfileItems.css';
 
-interface FormError {
-  message: string;
-}
-
 interface QualityProfileItemsProps {
   editGroups: boolean;
   dragQualityIndex?: string;
   dropQualityIndex?: string;
   dropPosition?: string;
-  qualityProfileItems: any[];
-  errors?: FormError[];
-  warnings?: FormError[];
+  qualityProfileItems: Array<{
+    id: number;
+    name: string;
+    allowed: boolean;
+    quality?: { id: number; name: string };
+    items?: Array<{ quality: { id: number; name: string } }>;
+  }>;
+  errors?: Array<{ message: string }>;
+  warnings?: Array<{ message: string }>;
   onToggleEditGroupsMode: () => void;
-  [key: string]: any;
+  onQualityProfileItemAllowedChange: (
+    qualityId: number,
+    value: boolean
+  ) => void;
+  onQualityProfileItemDragMove: (payload: {
+    dragQualityIndex: string;
+    dropQualityIndex: string;
+    dropPosition: string;
+  }) => void;
+  onQualityProfileItemDragEnd: (didDrop: boolean) => void;
+  [key: string]: unknown;
 }
 
 function QualityProfileItems({

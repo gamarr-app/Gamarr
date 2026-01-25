@@ -48,7 +48,9 @@ export interface PendingField<T>
 // };
 
 type Mapped<T> = {
-  [Prop in keyof T]: {
+  [Prop in keyof T as Prop extends 'fields' | 'implementationName'
+    ? never
+    : Prop]: {
     value: T[Prop];
     errors: Failure[];
     warnings: Failure[];

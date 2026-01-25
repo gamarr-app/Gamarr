@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
@@ -24,7 +23,9 @@ import {
   testDownloadClient,
 } from 'Store/Actions/settingsActions';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
+import DownloadClient from 'typings/DownloadClient';
 import { InputChanged } from 'typings/inputs';
+import { PendingSection } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import styles from './EditDownloadClientModalContent.css';
 
@@ -59,7 +60,9 @@ function EditDownloadClientModalContent({
     saveError,
     item,
     ...otherSettings
-  } = useSelector(providerSettingsSelector) as any;
+  } = useSelector(providerSettingsSelector);
+
+  const typedItem = item as PendingSection<DownloadClient>;
 
   const prevIsSaving = useRef(isSaving);
 
@@ -95,7 +98,7 @@ function EditDownloadClientModalContent({
   }, [dispatch, id]);
 
   const {
-    implementationName,
+    implementationName = '',
     name,
     enable,
     priority,
@@ -104,7 +107,9 @@ function EditDownloadClientModalContent({
     fields,
     tags,
     message,
-  } = item;
+  } = typedItem;
+
+  // saveError is already the correct type for SpinnerErrorButton
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -129,7 +134,7 @@ function EditDownloadClientModalContent({
 
         {!isFetching && !error ? (
           <Form {...otherSettings}>
-            {!!message && (
+            {!!message?.value && (
               <Alert className={styles.message} kind={message.value.type}>
                 {message.value.message}
               </Alert>
@@ -157,13 +162,13 @@ function EditDownloadClientModalContent({
               />
             </FormGroup>
 
-            {fields.map((field: any) => {
+            {(fields ?? []).map((field) => {
               return (
                 <ProviderFieldFormGroup
                   key={field.name}
                   advancedSettings={advancedSettings}
                   provider="downloadClient"
-                  providerData={item}
+                  providerData={typedItem}
                   {...field}
                   onChange={handleFieldChange}
                 />
@@ -241,7 +246,7 @@ function EditDownloadClientModalContent({
         <AdvancedSettingsButton showLabel={false} />
 
         <SpinnerErrorButton
-          isSpinning={isTesting}
+          isSpinning={isTesting ?? false}
           error={saveError}
           onPress={handleTestPress}
         >

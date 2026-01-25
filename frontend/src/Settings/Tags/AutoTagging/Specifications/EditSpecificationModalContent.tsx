@@ -78,7 +78,8 @@ function EditSpecificationModalContent({
     onModalClose();
   }, [dispatch, id, onModalClose]);
 
-  const { implementationName, name, negate, required, fields } = item;
+  const { implementationName: implName, name, negate, required, fields } = item;
+  const implementationName = implName ?? '';
 
   return (
     <ModalContent onModalClose={onCancelPress}>

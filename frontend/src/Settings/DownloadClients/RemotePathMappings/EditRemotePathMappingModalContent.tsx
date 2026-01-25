@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -22,6 +21,7 @@ import {
 } from 'Store/Actions/settingsActions';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
+import { Failure } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import styles from './EditRemotePathMappingModalContent.css';
 
@@ -93,7 +93,7 @@ function createRemotePathMappingSelector(id: number | undefined) {
         ? items.find((i) => i.id === id)
         : newRemotePathMapping;
       const settings = selectSettings(
-        mapping as any,
+        mapping as unknown as Record<string, unknown>,
         pendingChanges,
         saveError
       );
@@ -134,7 +134,19 @@ function EditRemotePathMappingModalContent({
     downloadClientHosts,
     id: _id,
     ...otherSettings
-  } = useSelector(createRemotePathMappingSelector(id)) as any;
+  } = useSelector(createRemotePathMappingSelector(id)) as {
+    isFetching: boolean;
+    error: AppError | undefined;
+    isSaving: boolean;
+    saveError: AppError | undefined;
+    item: Record<
+      string,
+      { value: string; errors?: Failure[]; warnings?: Failure[] }
+    >;
+    downloadClientHosts: Array<{ key: string; value: string; hint: string }>;
+    id: number | undefined;
+    [key: string]: unknown;
+  };
 
   const prevIsSaving = useRef(isSaving);
 

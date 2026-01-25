@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -28,7 +26,23 @@ function AddNotificationModalContent({
   const dispatch = useDispatch();
 
   const { isSchemaFetching, isSchemaPopulated, schemaError, schema } =
-    useSelector((state: AppState) => state.settings.notifications);
+    useSelector(
+      (state: {
+        settings: {
+          notifications: {
+            isSchemaFetching: boolean;
+            isSchemaPopulated: boolean;
+            schemaError: object | null;
+            schema: Array<{
+              implementation: string;
+              implementationName: string;
+              infoLink: string;
+              presets?: Array<{ name: string }>;
+            }>;
+          };
+        };
+      }) => state.settings.notifications
+    );
 
   useEffect(() => {
     dispatch(fetchNotificationSchema());
@@ -60,11 +74,14 @@ function AddNotificationModalContent({
         {isSchemaPopulated && !schemaError ? (
           <div>
             <div className={styles.notifications}>
-              {schema.map((notification: any) => {
+              {schema.map((notification) => {
                 return (
                   <AddNotificationItem
                     key={notification.implementation}
-                    {...notification}
+                    implementation={notification.implementation}
+                    implementationName={notification.implementationName}
+                    infoLink={notification.infoLink}
+                    presets={notification.presets}
                     onNotificationSelect={handleNotificationSelect}
                   />
                 );

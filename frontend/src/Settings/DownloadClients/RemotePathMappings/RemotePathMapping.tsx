@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import Icon from 'Components/Icon';
@@ -15,7 +14,6 @@ interface RemotePathMappingProps {
   remotePath: string;
   localPath: string;
   onConfirmDeleteRemotePathMapping: (id: number) => void;
-  [key: string]: any;
 }
 
 function RemotePathMapping({

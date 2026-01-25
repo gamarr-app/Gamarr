@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
@@ -16,6 +16,7 @@ import ModalHeader from 'Components/Modal/ModalHeader';
 import { inputTypes, kinds, sizes } from 'Helpers/Props';
 import dimensions from 'Styles/Variables/dimensions';
 import { InputChanged } from 'typings/inputs';
+import { Failure } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import QualityProfileFormatItems from './QualityProfileFormatItems';
 import QualityProfileItems from './QualityProfileItems';
@@ -32,7 +33,48 @@ const platformOptions = [
   { key: 4, value: 'Nintendo', order: 6 },
 ];
 
-function getCustomFormatRender(formatItems: any, otherProps: any) {
+interface PendingValue<T> {
+  value: T;
+  errors?: Failure[];
+  warnings?: Failure[];
+  pending?: boolean;
+  previousValue?: T;
+}
+
+interface QualityProfileItemValue {
+  id: number;
+  name: string;
+  allowed: boolean;
+  quality?: { id: number; name: string };
+  items?: Array<{ quality: { id: number; name: string } }>;
+}
+
+export interface FormatItem {
+  id?: number;
+  name: string;
+  format: number;
+  score: number;
+}
+
+interface QualityProfilePendingItem {
+  id: PendingValue<number>;
+  name: PendingValue<string>;
+  upgradeAllowed: PendingValue<boolean>;
+  cutoff: PendingValue<number>;
+  minFormatScore: PendingValue<number>;
+  minUpgradeFormatScore: PendingValue<number>;
+  cutoffFormatScore: PendingValue<number>;
+  language: PendingValue<{ id: number; Name?: string }>;
+  preferredPlatforms: PendingValue<number[]>;
+  items: PendingValue<QualityProfileItemValue[]>;
+  formatItems: PendingValue<FormatItem[]>;
+  [key: string]: PendingValue<unknown>;
+}
+
+function getCustomFormatRender(
+  formatItems: PendingValue<FormatItem[]>,
+  otherProps: Record<string, unknown>
+) {
   return (
     <QualityProfileFormatItems
       profileFormatItems={formatItems.value}
@@ -46,14 +88,17 @@ function getCustomFormatRender(formatItems: any, otherProps: any) {
 interface EditQualityProfileModalContentProps {
   editGroups: boolean;
   isFetching: boolean;
-  error?: any;
+  error?: Error | null;
   isSaving: boolean;
-  saveError?: any;
-  qualities: any[];
-  customFormats: any[];
-  languages: any[];
-  item: Record<string, any>;
+  saveError?: Error;
+  qualities: Array<{ key: number; value: string }>;
+  customFormats: Array<{ key: number; value: string; score: number }>;
+  languages: Array<{ key: number; value: string }>;
+  item: QualityProfilePendingItem;
   isInUse: boolean;
+  dragQualityIndex?: string | null;
+  dropQualityIndex?: string | null;
+  dropPosition?: string | null;
   onInputChange: (change: InputChanged) => void;
   onCutoffChange: (change: InputChanged) => void;
   onLanguageChange: (change: InputChanged) => void;
@@ -62,7 +107,17 @@ interface EditQualityProfileModalContentProps {
   onContentHeightChange: (height: number) => void;
   onModalClose: () => void;
   onDeleteQualityProfilePress?: () => void;
-  [key: string]: any;
+  onQualityProfileItemAllowedChange: (
+    qualityId: number,
+    value: boolean
+  ) => void;
+  onQualityProfileItemDragMove: (payload: {
+    dragQualityIndex: string;
+    dropQualityIndex: string;
+    dropPosition: string;
+  }) => void;
+  onQualityProfileItemDragEnd: (didDrop: boolean) => void;
+  [key: string]: unknown;
 }
 
 function EditQualityProfileModalContent({
@@ -75,6 +130,9 @@ function EditQualityProfileModalContent({
   languages,
   item,
   isInUse,
+  dragQualityIndex,
+  dropQualityIndex,
+  dropPosition,
   onInputChange,
   onCutoffChange,
   onLanguageChange,
@@ -83,6 +141,9 @@ function EditQualityProfileModalContent({
   onContentHeightChange,
   onModalClose,
   onDeleteQualityProfilePress,
+  onQualityProfileItemAllowedChange,
+  onQualityProfileItemDragMove,
+  onQualityProfileItemDragEnd,
   ...otherProps
 }: EditQualityProfileModalContentProps) {
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -287,16 +348,14 @@ function EditQualityProfileModalContent({
                       </FormLabel>
 
                       <FormInputGroup
-                        {...({
-                          type: inputTypes.TAG_SELECT,
-                          name: 'preferredPlatforms',
-                          value: preferredPlatforms
-                            ? preferredPlatforms.value
-                            : [],
-                          values: platformOptions,
-                          helpText: translate('PreferredPlatformsHelpText'),
-                          onChange: onInputChange,
-                        } as any)}
+                        type={inputTypes.TAG_SELECT}
+                        name="preferredPlatforms"
+                        value={
+                          preferredPlatforms ? preferredPlatforms.value : []
+                        }
+                        values={platformOptions}
+                        helpText={translate('PreferredPlatformsHelpText')}
+                        onChange={onInputChange}
                       />
                     </FormGroup>
 
@@ -308,10 +367,20 @@ function EditQualityProfileModalContent({
                   <div className={styles.formGroupWrapper}>
                     <QualityProfileItems
                       editGroups={editGroups}
+                      dragQualityIndex={dragQualityIndex ?? undefined}
+                      dropQualityIndex={dropQualityIndex ?? undefined}
+                      dropPosition={dropPosition ?? undefined}
                       qualityProfileItems={items.value}
                       errors={items.errors}
                       warnings={items.warnings}
                       onToggleEditGroupsMode={onToggleEditGroupsMode}
+                      onQualityProfileItemAllowedChange={
+                        onQualityProfileItemAllowedChange
+                      }
+                      onQualityProfileItemDragMove={
+                        onQualityProfileItemDragMove
+                      }
+                      onQualityProfileItemDragEnd={onQualityProfileItemDragEnd}
                       {...otherProps}
                     />
                   </div>

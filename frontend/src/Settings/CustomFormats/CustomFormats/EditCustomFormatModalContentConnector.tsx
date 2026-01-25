@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import { Error } from 'App/State/AppSectionState';
 import {
   cloneCustomFormatSpecification,
   deleteCustomFormatSpecification,
@@ -10,7 +10,9 @@ import {
   setCustomFormatValue,
 } from 'Store/Actions/settingsActions';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
+import CustomFormat from 'typings/CustomFormat';
 import { InputChanged } from 'typings/inputs';
+import { PendingSection } from 'typings/pending';
 import EditCustomFormatModalContent from './EditCustomFormatModalContent';
 
 interface EditCustomFormatModalContentConnectorProps {
@@ -40,7 +42,14 @@ function EditCustomFormatModalContentConnector({
       state.settings.advancedSettings
   );
 
-  const customFormat = useSelector(providerSettingsSelector) as any;
+  const customFormat = useSelector(providerSettingsSelector) as unknown as {
+    isFetching: boolean;
+    error: Error | null;
+    isSaving: boolean;
+    saveError: Error | undefined;
+    item: PendingSection<CustomFormat>;
+    [key: string]: unknown;
+  };
 
   const specificationsSelector = useMemo(
     () =>
@@ -49,7 +58,15 @@ function EditCustomFormatModalContentConnector({
           settings: {
             customFormatSpecifications: {
               isPopulated: boolean;
-              items: any[];
+              items: Array<{
+                id: number;
+                name: string;
+                implementation: string;
+                implementationName: string;
+                negate: boolean;
+                required: boolean;
+                fields: object[];
+              }>;
             };
           };
         }) => state.settings.customFormatSpecifications,

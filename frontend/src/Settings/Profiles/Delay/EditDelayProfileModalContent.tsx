@@ -51,7 +51,19 @@ const protocolOptions = [
   },
 ];
 
-const newDelayProfile = {
+interface DelayProfileModel {
+  enableUsenet: boolean;
+  enableTorrent: boolean;
+  preferredProtocol: string;
+  usenetDelay: number;
+  torrentDelay: number;
+  bypassIfHighestQuality: boolean;
+  bypassIfAboveCustomFormatScore: boolean;
+  minimumCustomFormatScore: number;
+  tags: number[];
+}
+
+const newDelayProfile: DelayProfileModel = {
   enableUsenet: true,
   enableTorrent: true,
   preferredProtocol: 'usenet',
@@ -73,7 +85,7 @@ function createDelayProfileSelector(id: number | undefined) {
           isSaving: boolean;
           saveError: AppError | undefined;
           pendingChanges: Record<string, unknown>;
-          items: Array<{ id: number }>;
+          items: Array<{ id: number } & Partial<DelayProfileModel>>;
         };
       };
     }) => state.settings.delayProfiles,
@@ -81,10 +93,11 @@ function createDelayProfileSelector(id: number | undefined) {
       const { isFetching, error, isSaving, saveError, pendingChanges, items } =
         delayProfiles;
 
-      const profile = id ? items.find((i) => i.id === id) : newDelayProfile;
+      const profile = id
+        ? (items.find((i) => i.id === id) as DelayProfileModel | undefined)
+        : newDelayProfile;
       const settings = selectSettings(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profile as any,
+        profile ?? newDelayProfile,
         pendingChanges,
         saveError
       );
@@ -155,7 +168,9 @@ function EditDelayProfileModalContent({
           // @ts-expect-error - actions aren't typed
           setDelayProfileValue({
             name,
-            value: (newDelayProfile as Record<string, unknown>)[name],
+            value: (newDelayProfile as unknown as Record<string, unknown>)[
+              name
+            ],
           })
         );
       });
@@ -257,6 +272,8 @@ function EditDelayProfileModalContent({
     minimumCustomFormatScore,
     tags,
   } = item;
+
+  // saveError is already the correct type for SpinnerErrorButton
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -398,8 +415,7 @@ function EditDelayProfileModalContent({
 
         <SpinnerErrorButton
           isSpinning={isSaving}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          error={saveError as any}
+          error={saveError}
           onPress={handleSavePress}
         >
           {translate('Save')}

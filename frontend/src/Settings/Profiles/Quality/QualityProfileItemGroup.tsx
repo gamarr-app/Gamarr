@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import CheckInput from 'Components/Form/CheckInput';
@@ -33,7 +32,11 @@ interface QualityProfileItemGroupProps {
   ) => void;
   onItemGroupNameChange: (groupId: number, value: string) => void;
   onDeleteGroupPress: (groupId: number, value?: boolean) => void;
-  onQualityProfileItemDragMove: (payload: any) => void;
+  onQualityProfileItemDragMove: (payload: {
+    dragQualityIndex: string;
+    dropQualityIndex: string;
+    dropPosition: string;
+  }) => void;
   onQualityProfileItemDragEnd: (didDrop: boolean) => void;
 }
 

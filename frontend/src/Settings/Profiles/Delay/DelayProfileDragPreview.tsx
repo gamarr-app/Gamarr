@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { Component } from 'react';
-import { DragLayer } from 'react-dnd';
+import { DragLayer, DragLayerMonitor } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { DELAY_PROFILE } from 'Helpers/dragTypes';
 import dimensions from 'Styles/Variables/dimensions.js';
@@ -9,7 +8,11 @@ import styles from './DelayProfileDragPreview.css';
 
 const dragHandleWidth = parseInt(dimensions.dragHandleWidth);
 
-function collectDragLayer(monitor: any) {
+function noop() {
+  // no-op for drag preview
+}
+
+function collectDragLayer(monitor: DragLayerMonitor) {
   return {
     item: monitor.getItem(),
     itemType: monitor.getItemType(),
@@ -19,7 +22,15 @@ function collectDragLayer(monitor: any) {
 
 interface DelayProfileDragPreviewProps {
   width: number;
-  item?: any;
+  item?: {
+    id: number;
+    enableUsenet: boolean;
+    enableTorrent: boolean;
+    preferredProtocol: string;
+    usenetDelay: number;
+    torrentDelay: number;
+    tags: number[];
+  };
   itemType?: string;
   currentOffset?: { x: number; y: number };
 }
@@ -47,10 +58,19 @@ class DelayProfileDragPreviewComponent extends Component<DelayProfileDragPreview
       transform,
     };
 
+    if (!item) {
+      return null;
+    }
+
     return (
       <DragPreviewLayer>
         <div className={styles.dragPreview} style={style}>
-          <DelayProfile isDragging={false} {...item} />
+          <DelayProfile
+            isDragging={false}
+            tagList={[]}
+            onConfirmDeleteDelayProfile={noop}
+            {...item}
+          />
         </div>
       </DragPreviewLayer>
     );
@@ -58,5 +78,5 @@ class DelayProfileDragPreviewComponent extends Component<DelayProfileDragPreview
 }
 
 export default DragLayer(collectDragLayer)(
-  DelayProfileDragPreviewComponent as any
-) as any;
+  DelayProfileDragPreviewComponent as unknown as React.ComponentType
+) as unknown as React.ComponentType<{ width: number }>;

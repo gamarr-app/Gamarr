@@ -19,6 +19,7 @@ import Indexer from 'typings/Indexer';
 import IndexerFlag from 'typings/IndexerFlag';
 import Notification from 'typings/Notification';
 import QualityProfile from 'typings/QualityProfile';
+import DownloadClientOptions from 'typings/Settings/DownloadClientOptions';
 import General from 'typings/Settings/General';
 import IndexerOptions from 'typings/Settings/IndexerOptions';
 import MediaManagement from 'typings/Settings/MediaManagement';
@@ -55,6 +56,10 @@ export interface DownloadClientAppState
     AppSectionSaveState {
   isTestingAll: boolean;
 }
+
+export interface DownloadClientOptionsAppState
+  extends AppSectionItemState<DownloadClientOptions>,
+    AppSectionSaveState {}
 
 export interface GeneralAppState
   extends AppSectionItemState<General>,
@@ -150,6 +155,7 @@ interface SettingsAppState {
   customFormats: CustomFormatAppState;
   delayProfiles: DelayProfileAppState;
   downloadClients: DownloadClientAppState;
+  downloadClientOptions: DownloadClientOptionsAppState;
   general: GeneralAppState;
   importListExclusions: ImportListExclusionsSettingsAppState;
   importListOptions: ImportListOptionsSettingsAppState;

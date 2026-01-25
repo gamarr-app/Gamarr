@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Card from 'Components/Card';
@@ -12,6 +11,7 @@ import {
 } from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
+import DownloadClientType from 'typings/DownloadClient';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import AddDownloadClientModal from './AddDownloadClientModal';
@@ -24,9 +24,14 @@ function DownloadClients() {
   const { isFetching, isPopulated, error, items } = useSelector(
     createSortedSectionSelector(
       'settings.downloadClients',
-      sortByProp('name') as (a: any, b: any) => number
+      sortByProp('name') as (a: { name: string }, b: { name: string }) => number
     )
-  ) as any;
+  ) as unknown as {
+    isFetching: boolean;
+    isPopulated: boolean;
+    error: import('App/State/AppSectionState').Error | undefined;
+    items: DownloadClientType[];
+  };
   const tagList = useSelector(createTagsSelector());
 
   const [isAddDownloadClientModalOpen, setIsAddDownloadClientModalOpen] =
@@ -70,7 +75,7 @@ function DownloadClients() {
         error={error}
       >
         <div className={styles.downloadClients}>
-          {items.map((item: any) => {
+          {items.map((item) => {
             return (
               <DownloadClient
                 key={item.id}

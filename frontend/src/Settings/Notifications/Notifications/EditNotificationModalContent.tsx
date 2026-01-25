@@ -24,6 +24,8 @@ import {
 } from 'Store/Actions/settingsActions';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
 import { InputChanged } from 'typings/inputs';
+import NotificationType from 'typings/Notification';
+import { PendingSection } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import NotificationEventItems from './NotificationEventItems';
 import styles from './EditNotificationModalContent.css';
@@ -93,7 +95,10 @@ function EditNotificationModalContent({
     dispatch(testNotification({ id }));
   }, [dispatch, id]);
 
-  const { implementationName = '', name, tags, fields, message } = item;
+  const typedItem = item as PendingSection<NotificationType>;
+  const { implementationName = '', name, tags, fields, message } = typedItem;
+
+  // saveError is already the correct type for SpinnerErrorButton
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -112,7 +117,7 @@ function EditNotificationModalContent({
 
         {!isFetching && !error ? (
           <Form {...otherSettings}>
-            {!!message && (
+            {!!message?.value && (
               <Alert className={styles.message} kind={message.value.type}>
                 {message.value.message}
               </Alert>
@@ -130,7 +135,7 @@ function EditNotificationModalContent({
             </FormGroup>
 
             <NotificationEventItems
-              item={item}
+              item={typedItem}
               onInputChange={handleInputChange}
             />
 
@@ -146,16 +151,15 @@ function EditNotificationModalContent({
               />
             </FormGroup>
 
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {(fields ?? []).map((field: any) => {
+            {(fields ?? []).map((field) => {
               return (
                 <ProviderFieldFormGroup
                   key={field.name}
                   advancedSettings={advancedSettings}
                   provider="notification"
-                  providerData={item}
-                  section="settings.notifications"
+                  providerData={typedItem}
                   {...field}
+                  section="settings.notifications"
                   onChange={handleFieldChange}
                 />
               );

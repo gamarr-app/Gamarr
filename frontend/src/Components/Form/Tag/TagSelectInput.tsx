@@ -13,7 +13,11 @@ interface TagSelectValue {
   order: number;
 }
 
-export interface TagSelectInputProps extends TagInputProps<SelectTag> {
+export interface TagSelectInputProps
+  extends Omit<
+    TagInputProps<SelectTag>,
+    'tags' | 'tagList' | 'onTagAdd' | 'onTagDelete'
+  > {
   name: string;
   value: number[];
   values: TagSelectValue[];

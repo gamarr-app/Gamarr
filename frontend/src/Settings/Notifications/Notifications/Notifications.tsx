@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -13,6 +12,7 @@ import {
 } from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
+import NotificationType from 'typings/Notification';
 import translate from 'Utilities/String/translate';
 import AddNotificationModal from './AddNotificationModal';
 import EditNotificationModal from './EditNotificationModal';
@@ -83,11 +83,18 @@ function Notifications() {
         error={error}
       >
         <div className={styles.notifications}>
-          {items.map((item: any) => {
+          {(
+            items as unknown as Array<
+              NotificationType & Record<string, unknown>
+            >
+          ).map((item) => {
             return (
               <Notification
                 key={item.id}
-                {...item}
+                {...(item as unknown as Omit<
+                  React.ComponentProps<typeof Notification>,
+                  'tagList' | 'onConfirmDeleteNotification'
+                >)}
                 tagList={tagList}
                 onConfirmDeleteNotification={handleConfirmDeleteNotification}
               />

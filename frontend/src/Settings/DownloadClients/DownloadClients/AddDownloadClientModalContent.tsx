@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-bind */
 import _ from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -36,7 +35,12 @@ function AddDownloadClientModalContent({
             isSchemaFetching: boolean;
             isSchemaPopulated: boolean;
             schemaError: object | null;
-            schema: Array<{ protocol: string; implementation: string }>;
+            schema: Array<{
+              protocol: string;
+              implementation: string;
+              implementationName: string;
+              infoLink: string;
+            }>;
           };
         };
       }) => state.settings.downloadClients
@@ -56,6 +60,10 @@ function AddDownloadClientModalContent({
     },
     [dispatch, onModalClose]
   );
+
+  const handleClose = useCallback(() => {
+    onModalClose();
+  }, [onModalClose]);
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -79,12 +87,13 @@ function AddDownloadClientModalContent({
 
             <FieldSet legend={translate('Usenet')}>
               <div className={styles.downloadClients}>
-                {usenetDownloadClients.map((downloadClient: any) => {
+                {usenetDownloadClients.map((downloadClient) => {
                   return (
                     <AddDownloadClientItem
                       key={downloadClient.implementation}
                       implementation={downloadClient.implementation}
-                      {...downloadClient}
+                      implementationName={downloadClient.implementationName}
+                      infoLink={downloadClient.infoLink}
                       onDownloadClientSelect={handleDownloadClientSelect}
                     />
                   );
@@ -94,12 +103,13 @@ function AddDownloadClientModalContent({
 
             <FieldSet legend={translate('Torrents')}>
               <div className={styles.downloadClients}>
-                {torrentDownloadClients.map((downloadClient: any) => {
+                {torrentDownloadClients.map((downloadClient) => {
                   return (
                     <AddDownloadClientItem
                       key={downloadClient.implementation}
                       implementation={downloadClient.implementation}
-                      {...downloadClient}
+                      implementationName={downloadClient.implementationName}
+                      infoLink={downloadClient.infoLink}
                       onDownloadClientSelect={handleDownloadClientSelect}
                     />
                   );
@@ -110,7 +120,7 @@ function AddDownloadClientModalContent({
         ) : null}
       </ModalBody>
       <ModalFooter>
-        <Button onPress={() => onModalClose()}>{translate('Close')}</Button>
+        <Button onPress={handleClose}>{translate('Close')}</Button>
       </ModalFooter>
     </ModalContent>
   );

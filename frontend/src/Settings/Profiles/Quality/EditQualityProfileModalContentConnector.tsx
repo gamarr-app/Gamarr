@@ -10,7 +10,9 @@ import {
 import createProfileInUseSelector from 'Store/Selectors/createProfileInUseSelector';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
 import { InputChanged } from 'typings/inputs';
-import EditQualityProfileModalContent from './EditQualityProfileModalContent';
+import EditQualityProfileModalContent, {
+  FormatItem,
+} from './EditQualityProfileModalContent';
 
 interface QualityItem {
   id?: number;
@@ -20,15 +22,9 @@ interface QualityItem {
   items?: QualityItem[];
 }
 
-interface FormatItem {
-  id?: number;
-  name?: string;
-  format?: number;
-  score?: number;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getQualityItemGroupId(qualityProfile: any) {
+function getQualityItemGroupId(qualityProfile: {
+  items: { value: Array<{ id?: number }> };
+}) {
   const ids = _.filter(
     _.map(qualityProfile.items.value, 'id'),
     (i) => i != null
@@ -147,6 +143,13 @@ function createMapStateSelector(id: number | undefined) {
   );
 }
 
+interface QualityProfilePending {
+  cutoff: { value: number };
+  items: { value: QualityItem[] };
+  formatItems: { value: FormatItem[] };
+  [key: string]: { value: unknown };
+}
+
 interface EditQualityProfileModalContentConnectorProps {
   id?: number;
   onContentHeightChange: (height: number) => void;
@@ -173,6 +176,8 @@ function EditQualityProfileModalContentConnector({
     ...otherSettings
   } = useSelector(createMapStateSelector(id));
 
+  const typedItem = item as unknown as QualityProfilePending;
+
   const [dragQualityIndex, setDragQualityIndex] = useState<string | null>(null);
   const [dropQualityIndex, setDropQualityIndex] = useState<string | null>(null);
   const [dropPosition, setDropPosition] = useState<string | null>(null);
@@ -194,8 +199,10 @@ function EditQualityProfileModalContentConnector({
   }, [isSaving, saveError, onModalClose]);
 
   const ensureCutoff = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (qualityProfile: any) => {
+    (qualityProfile: {
+      cutoff: { value: number };
+      items: { value: QualityItem[] };
+    }) => {
       const cutoff = qualityProfile.cutoff.value;
 
       const cutoffItem = _.find(
@@ -238,18 +245,22 @@ function EditQualityProfileModalContentConnector({
   const handleCutoffChange = useCallback(
     ({ name, value }: InputChanged) => {
       const numId = parseInt(value as string);
-      const foundItem = _.find(item.items.value, (i: QualityItem) => {
+      const foundItem = _.find(typedItem.items.value, (i: QualityItem) => {
         if (i.quality) {
           return i.quality.id === numId;
         }
         return i.id === numId;
-      });
+      }) as QualityItem | undefined;
+
+      if (!foundItem) {
+        return;
+      }
 
       const cutoffId = foundItem.quality ? foundItem.quality.id : foundItem.id;
       // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name, value: cutoffId }));
     },
-    [dispatch, item]
+    [dispatch, typedItem]
   );
 
   const handleLanguageChange = useCallback(
@@ -279,12 +290,16 @@ function EditQualityProfileModalContentConnector({
 
   const handleQualityProfileItemAllowedChange = useCallback(
     (qualityId: number, allowed: boolean) => {
-      const qualityProfile = _.cloneDeep(item);
+      const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
       const foundItem = _.find(
         items,
         (i: QualityItem) => i.quality && i.quality.id === qualityId
-      );
+      ) as QualityItem | undefined;
+
+      if (!foundItem) {
+        return;
+      }
 
       foundItem.allowed = allowed;
 
@@ -292,17 +307,21 @@ function EditQualityProfileModalContentConnector({
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
-    [dispatch, item, ensureCutoff]
+    [dispatch, typedItem, ensureCutoff]
   );
 
   const handleQualityProfileFormatItemScoreChange = useCallback(
     (formatId: number, score: number) => {
-      const qualityProfile = _.cloneDeep(item);
+      const qualityProfile = _.cloneDeep(typedItem);
       const formatItems = qualityProfile.formatItems.value;
       const foundItem = _.find(
         formatItems,
         (i: FormatItem) => i.format === formatId
-      );
+      ) as FormatItem | undefined;
+
+      if (!foundItem) {
+        return;
+      }
 
       foundItem.score = score;
 
@@ -311,17 +330,23 @@ function EditQualityProfileModalContentConnector({
         setQualityProfileValue({ name: 'formatItems', value: formatItems })
       );
     },
-    [dispatch, item]
+    [dispatch, typedItem]
   );
 
   const handleItemGroupAllowedChange = useCallback(
     (groupId: number, allowed: boolean) => {
-      const qualityProfile = _.cloneDeep(item);
+      const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: QualityItem) => i.id === groupId);
+      const group = _.find(items, (i: QualityItem) => i.id === groupId) as
+        | QualityItem
+        | undefined;
+
+      if (!group) {
+        return;
+      }
 
       group.allowed = allowed;
-      group.items.forEach((i: QualityItem) => {
+      (group.items ?? []).forEach((i: QualityItem) => {
         i.allowed = allowed;
       });
 
@@ -329,35 +354,46 @@ function EditQualityProfileModalContentConnector({
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
-    [dispatch, item, ensureCutoff]
+    [dispatch, typedItem, ensureCutoff]
   );
 
   const handleItemGroupNameChange = useCallback(
     (groupId: number, name: string) => {
-      const qualityProfile = _.cloneDeep(item);
+      const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: QualityItem) => i.id === groupId);
+      const group = _.find(items, (i: QualityItem) => i.id === groupId) as
+        | QualityItem
+        | undefined;
+
+      if (!group) {
+        return;
+      }
 
       group.name = name;
 
       // @ts-expect-error - actions aren't typed
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
     },
-    [dispatch, item]
+    [dispatch, typedItem]
   );
 
   const handleCreateGroupPress = useCallback(
     (qualityId: number) => {
-      const qualityProfile = _.cloneDeep(item);
+      const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
       const foundItem = _.find(
         items,
         (i: QualityItem) => i.quality && i.quality.id === qualityId
-      );
+      ) as QualityItem | undefined;
+
+      if (!foundItem || !foundItem.quality) {
+        return;
+      }
+
       const index = items.indexOf(foundItem);
       const groupId = getQualityItemGroupId(qualityProfile);
 
-      const group = {
+      const group: QualityItem = {
         id: groupId,
         name: foundItem.quality.name,
         allowed: foundItem.allowed,
@@ -370,14 +406,21 @@ function EditQualityProfileModalContentConnector({
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
-    [dispatch, item, ensureCutoff]
+    [dispatch, typedItem, ensureCutoff]
   );
 
   const handleDeleteGroupPress = useCallback(
     (groupId: number) => {
-      const qualityProfile = _.cloneDeep(item);
+      const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: QualityItem) => i.id === groupId);
+      const group = _.find(items, (i: QualityItem) => i.id === groupId) as
+        | QualityItem
+        | undefined;
+
+      if (!group || !group.items) {
+        return;
+      }
+
       const index = items.indexOf(group);
 
       items.splice(index, 1, ...group.items);
@@ -386,7 +429,7 @@ function EditQualityProfileModalContentConnector({
       dispatch(setQualityProfileValue({ name: 'items', value: items }));
       ensureCutoff(qualityProfile);
     },
-    [dispatch, item, ensureCutoff]
+    [dispatch, typedItem, ensureCutoff]
   );
 
   const handleQualityProfileItemDragMove = useCallback(
@@ -460,12 +503,12 @@ function EditQualityProfileModalContentConnector({
   const handleQualityProfileItemDragEnd = useCallback(
     (didDrop: boolean) => {
       if (didDrop && dropQualityIndex != null && dragQualityIndex != null) {
-        const qualityProfile = _.cloneDeep(item);
+        const qualityProfile = _.cloneDeep(typedItem);
         const items = qualityProfile.items.value;
         const [dragGroupIdx, dragItemIdx] = parseIndex(dragQualityIndex);
         const [dropGroupIdx, dropItemIdx] = parseIndex(dropQualityIndex);
 
-        let draggedItem = null;
+        let draggedItem: QualityItem | null = null;
         let dropGroup: QualityItem | null = null;
 
         if (dropGroupIdx != null) {
@@ -476,17 +519,21 @@ function EditQualityProfileModalContentConnector({
           draggedItem = items.splice(dragItemIdx, 1)[0];
         } else {
           const group = items[dragGroupIdx];
-          draggedItem = group.items.splice(dragItemIdx, 1)[0];
+          if (group.items) {
+            draggedItem = group.items.splice(dragItemIdx, 1)[0];
 
-          if (!group.items.length) {
-            items.splice(dragGroupIdx, 1);
+            if (!group.items.length) {
+              items.splice(dragGroupIdx, 1);
+            }
           }
         }
 
-        if (dropGroupIdx == null) {
-          items.splice(dropItemIdx, 0, draggedItem);
-        } else if (dropGroup?.items) {
-          dropGroup.items.splice(dropItemIdx, 0, draggedItem);
+        if (draggedItem) {
+          if (dropGroupIdx == null) {
+            items.splice(dropItemIdx, 0, draggedItem);
+          } else if (dropGroup?.items) {
+            dropGroup.items.splice(dropItemIdx, 0, draggedItem);
+          }
         }
 
         // @ts-expect-error - actions aren't typed
@@ -498,7 +545,7 @@ function EditQualityProfileModalContentConnector({
       setDropQualityIndex(null);
       setDropPosition(null);
     },
-    [dispatch, item, ensureCutoff, dragQualityIndex, dropQualityIndex]
+    [dispatch, typedItem, ensureCutoff, dragQualityIndex, dropQualityIndex]
   );
 
   const handleToggleEditGroupsMode = useCallback(() => {
@@ -517,10 +564,13 @@ function EditQualityProfileModalContentConnector({
       editGroups={editGroups}
       id={id}
       isFetching={isFetching}
-      isPopulated={isPopulated}
       isSaving={isSaving}
       saveError={saveError}
-      item={item}
+      item={
+        item as unknown as React.ComponentProps<
+          typeof EditQualityProfileModalContent
+        >['item']
+      }
       qualities={qualities}
       customFormats={customFormats}
       languages={languages}

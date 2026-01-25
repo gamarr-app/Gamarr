@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { Component } from 'react';
 import { DragLayer } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
@@ -14,6 +13,7 @@ const formLabelRightMarginWidth = parseInt(
 );
 const dragHandleWidth = parseInt(dimensions.dragHandleWidth);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function collectDragLayer(monitor: any) {
   return {
     item: monitor.getItem(),
@@ -23,7 +23,13 @@ function collectDragLayer(monitor: any) {
 }
 
 interface QualityProfileItemDragPreviewProps {
-  item?: any;
+  item?: {
+    editGroups: boolean;
+    groupId?: number;
+    qualityId?: number;
+    name: string;
+    allowed: boolean;
+  };
   itemType?: string;
   currentOffset?: { x: number; y: number };
 }
@@ -35,7 +41,7 @@ class QualityProfileItemDragPreviewComponent extends Component<QualityProfileIte
   render() {
     const { item, itemType, currentOffset } = this.props;
 
-    if (!currentOffset || itemType !== QUALITY_PROFILE_ITEM) {
+    if (!currentOffset || itemType !== QUALITY_PROFILE_ITEM || !item) {
       return null;
     }
 
@@ -62,7 +68,7 @@ class QualityProfileItemDragPreviewComponent extends Component<QualityProfileIte
           <QualityProfileItem
             editGroups={editGroups}
             isPreview={true}
-            qualityId={groupId || qualityId}
+            qualityId={groupId ?? qualityId ?? 0}
             name={name}
             allowed={allowed}
             isDragging={false}
@@ -73,6 +79,7 @@ class QualityProfileItemDragPreviewComponent extends Component<QualityProfileIte
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default DragLayer(collectDragLayer)(
-  QualityProfileItemDragPreviewComponent as any
-) as any;
+  QualityProfileItemDragPreviewComponent as unknown as React.ComponentType
+) as unknown as React.ComponentType;
