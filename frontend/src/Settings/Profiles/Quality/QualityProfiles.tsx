@@ -39,10 +39,7 @@ function QualityProfiles() {
     createSortedSectionSelector<
       QualityProfileListItem,
       AppSectionProviderState<QualityProfileListItem>
-    >(
-      'settings.qualityProfiles',
-      (a, b) => a.name.localeCompare(b.name)
-    )
+    >('settings.qualityProfiles', (a, b) => a.name.localeCompare(b.name))
   ) as {
     isFetching: boolean;
     isPopulated: boolean;

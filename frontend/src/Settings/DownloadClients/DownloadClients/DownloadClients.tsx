@@ -26,10 +26,7 @@ function createDownloadClientsSelector() {
     createSortedSectionSelector<
       DownloadClientType,
       AppSectionProviderState<DownloadClientType>
-    >(
-      'settings.downloadClients',
-      sortByProp('name')
-    ),
+    >('settings.downloadClients', sortByProp('name')),
     createTagsSelector(),
     (downloadClients, tagList) => ({
       ...downloadClients,
@@ -42,7 +39,13 @@ function DownloadClients() {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, error, items, tagList } = useSelector(
     createDownloadClientsSelector()
-  ) as { isFetching: boolean; isPopulated: boolean; error: Error | undefined; items: DownloadClientType[]; tagList: import('App/State/TagsAppState').Tag[] };
+  ) as {
+    isFetching: boolean;
+    isPopulated: boolean;
+    error: Error | undefined;
+    items: DownloadClientType[];
+    tagList: import('App/State/TagsAppState').Tag[];
+  };
 
   const [isAddDownloadClientModalOpen, setIsAddDownloadClientModalOpen] =
     useState(false);

@@ -129,14 +129,10 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const allGames = useSelector(createAllGamesSelector());
 
   const gameFilesSelector = useMemo(createGameFilesSelector, []);
-  const {
-    isGameFilesFetching,
-    gameFilesError,
-    hasGameFiles,
-    gameFileVersion,
-  } = useSelector((state: AppState) =>
-    gameFilesSelector(state, game?.gameFileId)
-  );
+  const { isGameFilesFetching, gameFilesError, hasGameFiles, gameFileVersion } =
+    useSelector((state: AppState) =>
+      gameFilesSelector(state, game?.gameFileId)
+    );
   const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
   const isSidebarVisible = useSelector(
     (state: AppState) => state.app.isSidebarVisible

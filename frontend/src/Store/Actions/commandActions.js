@@ -3,6 +3,7 @@ import { messageTypes } from 'Helpers/Props';
 import { createThunk, handleThunks } from 'Store/thunks';
 import { isSameCommand } from 'Utilities/Command';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
+import translate from 'Utilities/String/translate';
 import { hideMessage, showMessage } from './appActions';
 import { removeItem, updateItem } from './baseActions';
 import createFetchHandler from './Creators/createFetchHandler';
@@ -121,9 +122,16 @@ function scheduleRemoveCommand(command, dispatch) {
 }
 
 export function executeCommandHelper(payload, dispatch) {
-  // TODO: show a message for the user
   if (lastCommand && isSameCommand(lastCommand, payload)) {
-    console.warn('Please wait at least 5 seconds before running this command again');
+    dispatch(showMessage({
+      id: 'command-throttled',
+      name: 'commandThrottled',
+      message: translate('CommandThrottled'),
+      type: messageTypes.WARNING,
+      hideAfter: 5
+    }));
+
+    return;
   }
 
   lastCommand = payload;

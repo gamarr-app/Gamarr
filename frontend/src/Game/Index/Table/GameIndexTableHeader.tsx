@@ -92,9 +92,7 @@ function GameIndexTableHeader(props: GameIndexTableHeaderProps) {
         return (
           <VirtualTableHeaderCell
             key={name}
-            className={classNames(
-              styles[name as keyof typeof styles]
-            )}
+            className={classNames(styles[name as keyof typeof styles])}
             name={name}
             sortKey={sortKey}
             sortDirection={sortDirection}

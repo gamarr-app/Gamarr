@@ -241,6 +241,7 @@
   "Component": "Component",
   "ConditionUsingRegularExpressions": "This condition matches using Regular Expressions. Note that the characters `\\^$.|?*+()[{` have special meanings and need escaping with a `\\`",
   "Conditions": "Conditions",
+  "CommandThrottled": "Please wait at least 5 seconds before running this command again",
   "Connect": "Connect",
   "ConnectSettings": "Connect Settings",
   "ConnectSettingsSummary": "Notifications, connections to media servers/players, and custom scripts",
