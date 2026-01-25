@@ -67,7 +67,7 @@ namespace Gamarr.Api.V3.Queue
 
         protected override QueueResource GetResourceById(int id)
         {
-            throw new NotImplementedException();
+            throw new NotFoundException();
         }
 
         [RestDeleteById]

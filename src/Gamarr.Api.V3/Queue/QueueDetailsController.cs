@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +33,7 @@ namespace Gamarr.Api.V3.Queue
 
         protected override QueueResource GetResourceById(int id)
         {
-            throw new NotImplementedException();
+            throw new NotFoundException();
         }
 
         [HttpGet]

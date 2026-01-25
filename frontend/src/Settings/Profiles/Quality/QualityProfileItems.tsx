@@ -23,8 +23,8 @@ interface QualityProfileItemsProps {
     quality?: { id: number; name: string };
     items?: Array<{ quality: { id: number; name: string } }>;
   }>;
-  errors?: Array<{ message: string }>;
-  warnings?: Array<{ message: string }>;
+  errors?: Array<{ message?: string; errorMessage?: string }>;
+  warnings?: Array<{ message?: string; errorMessage?: string }>;
   onToggleEditGroupsMode: () => void;
   onQualityProfileItemAllowedChange: (
     qualityId: number,
@@ -80,7 +80,7 @@ function QualityProfileItems({
           return (
             <FormInputHelpText
               key={index}
-              text={error.message}
+              text={error.errorMessage ?? error.message ?? ''}
               isError={true}
               isCheckInput={false}
             />
@@ -91,7 +91,7 @@ function QualityProfileItems({
           return (
             <FormInputHelpText
               key={index}
-              text={warning.message}
+              text={warning.errorMessage ?? warning.message ?? ''}
               isWarning={true}
               isCheckInput={false}
             />

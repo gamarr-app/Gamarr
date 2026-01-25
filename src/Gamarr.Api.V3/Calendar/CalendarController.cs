@@ -41,7 +41,7 @@ namespace Gamarr.Api.V3.Calendar
         [NonAction]
         public override ActionResult<GameResource> GetResourceByIdWithErrorHandler(int id)
         {
-            throw new NotImplementedException();
+            return base.GetResourceByIdWithErrorHandler(id);
         }
 
         [HttpGet]

@@ -24,15 +24,11 @@ namespace NzbDrone.Core.MetadataSource.IGDB
     /// IGDB API Proxy - Handles all communication with the IGDB API.
     /// See https://api-docs.igdb.com/ for API documentation.
     /// </summary>
-    /// <remarks>
-    /// TODO: Implement rate limiting (4 requests per second for free tier).
-    /// TODO: Add webhook support for real-time updates.
-    /// TODO: Implement multi-query for batch requests.
-    /// </remarks>
     public class IgdbProxy : IProvideGameInfo, ISearchForNewGame
     {
         private const string IgdbApiBaseUrl = "https://api.igdb.com/v4/";
         private const int MaxRetries = 3;
+        private const int RateLimitRequestsPerSecond = 4;
 
         private const string GameFields = @"
             fields id, name, slug, summary, storyline, category, status,
@@ -66,6 +62,10 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             HttpStatusCode.ServiceUnavailable,
             HttpStatusCode.GatewayTimeout
         };
+
+        // Rate limiting: Track request timestamps to enforce 4 req/sec limit
+        private static readonly object RateLimitLock = new object();
+        private static readonly Queue<DateTime> RequestTimestamps = new Queue<DateTime>();
 
         private readonly IHttpClient _httpClient;
         private readonly IIgdbAuthService _authService;
@@ -173,14 +173,30 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
         public HashSet<int> GetChangedGames(DateTime startTime)
         {
-            // IGDB uses Unix timestamps
-            var unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
-            var query = $"fields game; where updated_at >= {unixTime}; limit 500;";
+            try
+            {
+                // IGDB uses Unix timestamps
+                var unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
 
-            // TODO: Use the change endpoint or updated_at field properly
-            // For now, return empty set - games don't change as frequently as we need to poll
-            _logger.Debug("GetChangedGames not fully implemented for IGDB. Returning empty set.");
-            return new HashSet<int>();
+                // Query games directly for updates - IGDB tracks updated_at on games
+                var query = $"fields id; where updated_at >= {unixTime}; limit 500;";
+                var games = ExecuteQuery<IgdbGameIdResource>("games", query);
+
+                if (games == null || !games.Any())
+                {
+                    _logger.Debug("No changed games found since {0}", startTime);
+                    return new HashSet<int>();
+                }
+
+                var changedIds = new HashSet<int>(games.Select(g => g.Id));
+                _logger.Debug("Found {0} changed games since {1}", changedIds.Count, startTime);
+                return changedIds;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Failed to get changed games from IGDB, returning empty set");
+                return new HashSet<int>();
+            }
         }
 
         public List<GameMetadata> GetTrendingGames()
@@ -383,6 +399,9 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
             for (var attempt = 0; attempt <= MaxRetries; attempt++)
             {
+                // Enforce rate limit before making request
+                EnforceRateLimit();
+
                 var requestBuilder = new HttpRequestBuilder($"{IgdbApiBaseUrl}{endpoint}")
                     .Post()
                     .SetHeader("Client-ID", _authService.ClientId)
@@ -444,6 +463,47 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return ex is System.Net.Http.HttpRequestException ||
                    ex is System.Threading.Tasks.TaskCanceledException ||
                    ex is TimeoutException;
+        }
+
+        /// <summary>
+        /// Enforces rate limiting of 4 requests per second for IGDB free tier.
+        /// </summary>
+        private void EnforceRateLimit()
+        {
+            lock (RateLimitLock)
+            {
+                var now = DateTime.UtcNow;
+                var oneSecondAgo = now.AddSeconds(-1);
+
+                // Remove timestamps older than 1 second
+                while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
+                {
+                    RequestTimestamps.Dequeue();
+                }
+
+                // If we've made 4+ requests in the last second, wait
+                if (RequestTimestamps.Count >= RateLimitRequestsPerSecond)
+                {
+                    var oldestRequest = RequestTimestamps.Peek();
+                    var waitTime = oldestRequest.AddSeconds(1) - now;
+                    if (waitTime.TotalMilliseconds > 0)
+                    {
+                        _logger.Debug("IGDB rate limit reached, waiting {0}ms", (int)waitTime.TotalMilliseconds);
+                        Thread.Sleep((int)waitTime.TotalMilliseconds + 10); // Add 10ms buffer
+                    }
+
+                    // Clean up again after waiting
+                    now = DateTime.UtcNow;
+                    oneSecondAgo = now.AddSeconds(-1);
+                    while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
+                    {
+                        RequestTimestamps.Dequeue();
+                    }
+                }
+
+                // Record this request
+                RequestTimestamps.Enqueue(DateTime.UtcNow);
+            }
         }
 
         private List<T> LoadMockData<T>(string query)
