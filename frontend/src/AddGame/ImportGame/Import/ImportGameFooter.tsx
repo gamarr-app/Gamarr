@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
+import { ImportError } from 'App/State/ImportGameAppState';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
@@ -13,10 +14,6 @@ import translate from 'Utilities/String/translate';
 import styles from './ImportGameFooter.css';
 
 const MIXED = 'mixed';
-
-interface ImportError {
-  responseJSON?: Array<{ errorMessage: string }> | object;
-}
 
 interface ImportGameFooterProps {
   selectedCount: number;

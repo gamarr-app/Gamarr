@@ -13,6 +13,7 @@ import {
 } from 'Store/Actions/importGameActions';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import { InputChanged } from 'typings/inputs';
+import { SelectStateInputProps } from 'typings/props';
 import ImportGameRow from './ImportGameRow';
 
 function createImportGameItemSelector() {
@@ -46,12 +47,6 @@ const mapDispatchToProps = {
   queueLookupGame,
   setImportGameValue,
 };
-
-interface SelectStateInputProps {
-  id: string | number;
-  value: boolean;
-  shiftKey: boolean;
-}
 
 interface SetImportGameValuePayload {
   id: string;
