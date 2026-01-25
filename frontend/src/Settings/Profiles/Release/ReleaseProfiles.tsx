@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
+import { Error as AppError } from 'App/State/AppSectionState';
 import Card from 'Components/Card';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
@@ -21,7 +22,7 @@ interface ReleaseProfilesCollectionState {
   items: ReleaseProfile[];
   isFetching: boolean;
   isPopulated: boolean;
-  error: Error | undefined;
+  error: AppError | undefined;
 }
 
 function ReleaseProfiles() {

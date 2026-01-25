@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { Error as AppError } from 'App/State/AppSectionState';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
@@ -36,7 +37,7 @@ interface IndexersCollectionState {
   isPopulated: boolean;
   isDeleting: boolean;
   isSaving: boolean;
-  error: Error | undefined;
+  error: AppError | undefined;
   items: Indexer[];
   sortKey: string;
   sortDirection: SortDirection;
