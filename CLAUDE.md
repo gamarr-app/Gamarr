@@ -23,6 +23,14 @@ yarn build
 dotnet test src/Gamarr.sln --filter "Category!=AutomationTest"
 ```
 
+## Git Workflow
+
+Push directly to main:
+
+```bash
+git push origin gamarr3-work:main
+```
+
 ## Project Structure
 
 - `src/` - .NET backend
