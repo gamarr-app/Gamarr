@@ -24,7 +24,14 @@ declare module 'jquery' {
     fail(callback: (xhr: JQueryXHR) => void): JQueryPromise<T>;
   }
 
+  interface JQuery {
+    width(): number | undefined;
+    height(): number | undefined;
+  }
+
   interface JQueryStatic {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (selector: string | Element | Window | Document): JQuery;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ajax(settings: JQueryAjaxSettings): JQueryPromise<any>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

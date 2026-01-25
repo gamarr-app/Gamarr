@@ -2,7 +2,7 @@ import moment from 'moment';
 import padNumber from 'Utilities/Number/padNumber';
 import translate from 'Utilities/String/translate';
 
-function formatTimeSpan(timeSpan: string | undefined | null): string {
+function formatTimeSpan(timeSpan: string | number | undefined | null): string {
   if (!timeSpan) {
     return '';
   }

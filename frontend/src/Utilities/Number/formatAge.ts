@@ -1,15 +1,15 @@
 import translate from 'Utilities/String/translate';
 
 function formatAge(
-  age: number,
+  age: number | string,
   ageHours: number | string,
   ageMinutes?: number | string
 ): string {
-  age = Math.round(age);
+  const parsedAge = Math.round(parseFloat(String(age)));
   const parsedAgeHours = parseFloat(String(ageHours));
   const parsedAgeMinutes = ageMinutes ? parseFloat(String(ageMinutes)) : 0;
 
-  if (age < 2 && parsedAgeHours) {
+  if (parsedAge < 2 && parsedAgeHours) {
     if (parsedAgeHours < 2 && !!parsedAgeMinutes) {
       return `${parsedAgeMinutes.toFixed(0)} ${
         parsedAgeHours === 1
@@ -25,8 +25,8 @@ function formatAge(
     }`;
   }
 
-  return `${age} ${
-    age === 1 ? translate('FormatAgeDay') : translate('FormatAgeDays')
+  return `${parsedAge} ${
+    parsedAge === 1 ? translate('FormatAgeDay') : translate('FormatAgeDays')
   }`;
 }
 

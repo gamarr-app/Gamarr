@@ -75,7 +75,7 @@ function getRelativeDate({
   }
 
   return includeTime
-    ? formatDateTime(date, shortDateFormat, timeFormat, { includeSeconds })
+    ? formatDateTime(date, shortDateFormat, timeFormat!, { includeSeconds })
     : moment(date).format(shortDateFormat);
 }
 

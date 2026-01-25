@@ -40,4 +40,4 @@ const resolutionUtility: ResolutionUtility = {
   },
 };
 
-export = resolutionUtility;
+export default resolutionUtility;
