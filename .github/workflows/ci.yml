@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Update browserslist database
+        run: npx update-browserslist-db@latest --update-db
+
       - name: Disable internet
         run: |
           sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
