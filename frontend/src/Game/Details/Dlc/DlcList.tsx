@@ -245,17 +245,19 @@ function DlcList({ gameId }: DlcListProps) {
     const firstDlcRef = dlcReferences.length > 0 ? dlcReferences[0] : null;
 
     // Use the appropriate field - prefer IGDB IDs, fall back to Steam
-    let searchTerm = '';
-    if (igdbDlcIds.length > 0) {
-      // IGDB supports comma-separated IDs
-      searchTerm = `igdb:${igdbDlcIds.join(',')}`;
-    } else if (steamDlcIds.length > 0) {
-      // Steam supports comma-separated IDs
-      searchTerm = `steam:${steamDlcIds.join(',')}`;
-    } else {
-      // Fall back to game title
-      searchTerm = game?.title ?? '';
-    }
+    const getSearchTerm = (): string => {
+      if (igdbDlcIds.length > 0) {
+        return `igdb:${igdbDlcIds.join(',')}`;
+      }
+
+      if (steamDlcIds.length > 0) {
+        return `steam:${steamDlcIds.join(',')}`;
+      }
+
+      return game?.title ?? '';
+    };
+
+    const searchTerm = getSearchTerm();
 
     // Show DLC name if available and there's only one, otherwise show count
     const displayText =
