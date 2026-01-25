@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using NLog;
+using NzbDrone.Common.Http;
 using NzbDrone.Core.MediaCover;
 
 namespace Gamarr.Http.Frontend.Mappers
@@ -14,11 +17,13 @@ namespace Gamarr.Http.Frontend.Mappers
 
         private readonly IMediaCoverProxy _mediaCoverProxy;
         private readonly IContentTypeProvider _mimeTypeProvider;
+        private readonly Logger _logger;
 
-        public MediaCoverProxyMapper(IMediaCoverProxy mediaCoverProxy)
+        public MediaCoverProxyMapper(IMediaCoverProxy mediaCoverProxy, Logger logger)
         {
             _mediaCoverProxy = mediaCoverProxy;
             _mimeTypeProvider = new FileExtensionContentTypeProvider();
+            _logger = logger;
         }
 
         public string Map(string resourceUrl)
@@ -43,14 +48,28 @@ namespace Gamarr.Http.Frontend.Mappers
             var hash = match.Groups["hash"].Value;
             var filename = match.Groups["filename"].Value;
 
-            var imageData = await _mediaCoverProxy.GetImage(hash);
-
-            if (!_mimeTypeProvider.TryGetContentType(filename, out var contentType))
+            try
             {
-                contentType = "application/octet-stream";
-            }
+                var imageData = await _mediaCoverProxy.GetImage(hash);
 
-            return new FileContentResult(imageData, contentType);
+                if (!_mimeTypeProvider.TryGetContentType(filename, out var contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+
+                return new FileContentResult(imageData, contentType);
+            }
+            catch (KeyNotFoundException)
+            {
+                // URL cache expired, return 404
+                _logger.Debug("Media cover proxy cache miss for hash: {0}", hash);
+                return new StatusCodeResult((int)HttpStatusCode.NotFound);
+            }
+            catch (HttpException ex)
+            {
+                _logger.Debug(ex, "Failed to fetch proxied media cover for hash: {0}", hash);
+                return new StatusCodeResult((int)(ex.Response?.StatusCode ?? HttpStatusCode.BadGateway));
+            }
         }
     }
 }
