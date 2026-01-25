@@ -51,7 +51,7 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
     unmappedFolders: [],
   };
 
-  scrollerRef: RefObject<HTMLDivElement>;
+  scrollerRef: RefObject<HTMLDivElement | null>;
 
   //
   // Lifecycle
