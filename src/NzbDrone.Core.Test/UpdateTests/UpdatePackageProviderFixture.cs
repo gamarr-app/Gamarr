@@ -6,6 +6,7 @@ using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Core.Update;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.UpdateTests
 {
@@ -20,6 +21,8 @@ namespace NzbDrone.Core.Test.UpdateTests
         [Test]
         public void no_update_when_version_higher()
         {
+            // Ignore warnings from GitHub API rate limiting
+            ExceptionVerification.IgnoreWarns();
             UseRealHttp();
             Subject.GetLatestUpdate("develop", new Version(10, 0)).Should().BeNull();
         }
