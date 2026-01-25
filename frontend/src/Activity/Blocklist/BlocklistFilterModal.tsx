@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import AppState from 'App/State/AppState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
 import FilterModal from 'Components/Filter/FilterModal';
 import { setBlocklistFilter } from 'Store/Actions/blocklistActions';
 
@@ -25,9 +25,21 @@ function createFilterBuilderPropsSelector() {
 
 interface BlocklistFilterModalProps {
   isOpen: boolean;
+  selectedFilterKey: string | number;
+  filters: Filter[];
+  customFilters: CustomFilter[];
+  onFilterSelect: (filter: string | number) => void;
+  onModalClose: () => void;
 }
 
-export default function BlocklistFilterModal(props: BlocklistFilterModalProps) {
+export default function BlocklistFilterModal({
+  isOpen,
+  selectedFilterKey,
+  filters,
+  customFilters,
+  onFilterSelect,
+  onModalClose,
+}: BlocklistFilterModalProps) {
   const sectionItems = useSelector(createBlocklistSelector());
   const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
   const customFilterType = 'blocklist';
@@ -43,8 +55,12 @@ export default function BlocklistFilterModal(props: BlocklistFilterModalProps) {
 
   return (
     <FilterModal
-      // TODO: Don't spread all the props
-      {...props}
+      isOpen={isOpen}
+      selectedFilterKey={selectedFilterKey}
+      filters={filters}
+      customFilters={customFilters}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType={customFilterType}

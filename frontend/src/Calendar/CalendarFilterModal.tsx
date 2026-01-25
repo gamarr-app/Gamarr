@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import AppState from 'App/State/AppState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
 import FilterModal from 'Components/Filter/FilterModal';
 import { setCalendarFilter } from 'Store/Actions/calendarActions';
 
@@ -25,9 +25,21 @@ function createFilterBuilderPropsSelector() {
 
 interface CalendarFilterModalProps {
   isOpen: boolean;
+  selectedFilterKey: string | number;
+  filters: Filter[];
+  customFilters: CustomFilter[];
+  onFilterSelect: (filter: string | number) => void;
+  onModalClose: () => void;
 }
 
-export default function CalendarFilterModal(props: CalendarFilterModalProps) {
+export default function CalendarFilterModal({
+  isOpen,
+  selectedFilterKey,
+  filters,
+  customFilters,
+  onFilterSelect,
+  onModalClose,
+}: CalendarFilterModalProps) {
   const sectionItems = useSelector(createCalendarSelector());
   const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
   const customFilterType = 'calendar';
@@ -43,8 +55,12 @@ export default function CalendarFilterModal(props: CalendarFilterModalProps) {
 
   return (
     <FilterModal
-      // TODO: Don't spread all the props
-      {...props}
+      isOpen={isOpen}
+      selectedFilterKey={selectedFilterKey}
+      filters={filters}
+      customFilters={customFilters}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType={customFilterType}

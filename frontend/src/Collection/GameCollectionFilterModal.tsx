@@ -1,16 +1,26 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import AppState from 'App/State/AppState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
 import FilterModal from 'Components/Filter/FilterModal';
 import { setGameCollectionsFilter } from 'Store/Actions/gameCollectionActions';
 
 interface GameCollectionFilterModalProps {
   isOpen: boolean;
+  selectedFilterKey: string | number;
+  filters: Filter[];
+  customFilters: CustomFilter[];
+  onFilterSelect: (filter: string | number) => void;
+  onModalClose: () => void;
 }
 
-export default function GameCollectionFilterModal(
-  props: GameCollectionFilterModalProps
-) {
+export default function GameCollectionFilterModal({
+  isOpen,
+  selectedFilterKey,
+  filters,
+  customFilters,
+  onFilterSelect,
+  onModalClose,
+}: GameCollectionFilterModalProps) {
   const sectionItems = useSelector(
     (state: AppState) => state.gameCollections.items
   );
@@ -29,7 +39,12 @@ export default function GameCollectionFilterModal(
 
   return (
     <FilterModal
-      {...props}
+      isOpen={isOpen}
+      selectedFilterKey={selectedFilterKey}
+      filters={filters}
+      customFilters={customFilters}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType="gameCollections"

@@ -386,12 +386,8 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                     };
                 }
 
-                if (version.Major >= 1)
-                {
-                    return null;
-                }
-
-                if (version.Minor >= 7)
+                // Require SABnzbd 4.3+ for proper history retention format support
+                if (version.Major > 4 || (version.Major == 4 && version.Minor >= 3))
                 {
                     return null;
                 }
@@ -400,7 +396,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                     _localizationService.GetLocalizedString("DownloadClientValidationErrorVersion",
                         new Dictionary<string, object>
                         {
-                            { "clientName", Name }, { "requiredVersion", "0.7.0" }, { "reportedVersion", version }
+                            { "clientName", Name }, { "requiredVersion", "4.3.0" }, { "reportedVersion", version }
                         }));
             }
             catch (Exception ex)
@@ -554,23 +550,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                 case "all-archive":
                 case "all-delete":
                     return true;
+                default:
+                    return false;
             }
-
-            // TODO: Remove these checks once support for SABnzbd < 4.3 is removed
-
-            if (retention.IsNullOrWhiteSpace())
-            {
-                return false;
-            }
-
-            if (retention.EndsWith("d"))
-            {
-                int.TryParse(config.Misc.history_retention.AsSpan(0, config.Misc.history_retention.Length - 1),
-                    out var daysRetention);
-                return daysRetention < 14;
-            }
-
-            return retention != "0";
         }
 
         private bool ValidatePath(DownloadClientItem downloadClientItem)
