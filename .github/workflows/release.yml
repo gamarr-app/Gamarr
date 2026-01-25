@@ -97,10 +97,17 @@ jobs:
       - name: Build backend
         shell: bash
         run: |
+          # FreeBSD cross-build feed lags behind official .NET releases, pin to available version
+          EXTRA_PROPS=""
+          if [[ "${{ matrix.runtime }}" == "freebsd-x64" ]]; then
+            EXTRA_PROPS="-p:RuntimeFrameworkVersion=8.0.12 -p:TargetLatestRuntimePatch=false"
+          fi
+
           dotnet msbuild -restore src/Gamarr.sln \
             -p:Configuration=Release \
             -p:Platform=Posix \
             -p:RuntimeIdentifiers=${{ matrix.runtime }} \
+            $EXTRA_PROPS \
             -t:PublishAllRids
 
       - name: Package
