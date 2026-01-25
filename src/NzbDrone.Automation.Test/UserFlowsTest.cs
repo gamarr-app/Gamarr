@@ -175,7 +175,7 @@ namespace NzbDrone.Automation.Test
 
             var maxRetries = 3;
             var searchSucceeded = false;
-            var lastException = (Exception?)null;
+            Exception lastException = null;
 
             for (var attempt = 1; attempt <= maxRetries && !searchSucceeded; attempt++)
             {
