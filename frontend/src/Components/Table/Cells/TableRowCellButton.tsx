@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import Link, { LinkProps } from 'Components/Link/Link';
 import TableRowCell from './TableRowCell';
 import styles from './TableRowCellButton.css';

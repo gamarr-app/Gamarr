@@ -1,4 +1,3 @@
-import React from 'react';
 import IconButton from 'Components/Link/IconButton';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';

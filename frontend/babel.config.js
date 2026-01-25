@@ -19,7 +19,7 @@ module.exports = {
   env: {
     development: {
       presets: [
-        ['@babel/preset-react', { development: true }],
+        ['@babel/preset-react', { development: true, runtime: 'automatic' }],
         '@babel/preset-typescript'
       ],
       plugins: [
@@ -28,7 +28,7 @@ module.exports = {
     },
     production: {
       presets: [
-        '@babel/preset-react',
+        ['@babel/preset-react', { runtime: 'automatic' }],
         '@babel/preset-typescript'
       ],
       plugins: [
@@ -37,7 +37,7 @@ module.exports = {
     },
     test: {
       presets: [
-        '@babel/preset-react',
+        ['@babel/preset-react', { runtime: 'automatic' }],
         '@babel/preset-typescript'
       ],
       plugins: [

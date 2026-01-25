@@ -1,4 +1,3 @@
-import React from 'react';
 import GameImage, { GameImageProps } from './GameImage';
 
 const posterPlaceholder =

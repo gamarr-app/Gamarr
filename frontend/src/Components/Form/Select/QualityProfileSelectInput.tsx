@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { QualityProfilesAppState } from 'App/State/SettingsAppState';

@@ -1,4 +1,3 @@
-import React from 'react';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { Ratings, RatingValues } from 'Game/Game';
 import { kinds, tooltipPositions } from 'Helpers/Props';

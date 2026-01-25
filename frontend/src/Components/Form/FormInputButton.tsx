@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import Button, { ButtonProps } from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import { kinds } from 'Helpers/Props';

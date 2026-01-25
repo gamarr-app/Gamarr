@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import ProgressBar from 'Components/ProgressBar';
 import { GameStatus } from 'Game/Game';

@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import elementClass from 'element-class';
-import React, {
+import {
   MouseEvent,
   useCallback,
   useEffect,

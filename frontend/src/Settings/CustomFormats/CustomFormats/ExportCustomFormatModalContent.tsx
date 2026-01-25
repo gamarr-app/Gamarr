@@ -1,4 +1,3 @@
-import React from 'react';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import ClipboardButton from 'Components/Link/ClipboardButton';

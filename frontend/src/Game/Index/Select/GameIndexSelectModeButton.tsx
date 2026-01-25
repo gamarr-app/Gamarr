@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useSelect } from 'App/SelectContext';
 import PageToolbarButton, {
   PageToolbarButtonProps,

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';

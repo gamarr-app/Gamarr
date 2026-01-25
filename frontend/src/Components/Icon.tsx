@@ -3,7 +3,7 @@ import {
   FontAwesomeIconProps,
 } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { kinds } from 'Helpers/Props';
 import { Kind } from 'Helpers/Props/kinds';
 import styles from './Icon.css';

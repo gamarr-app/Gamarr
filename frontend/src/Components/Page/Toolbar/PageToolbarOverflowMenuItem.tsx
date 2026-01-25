@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import { SyntheticEvent } from 'react';
 import { IconName } from 'Components/Icon';
 import MenuItem from 'Components/Menu/MenuItem';
 import SpinnerIcon from 'Components/SpinnerIcon';

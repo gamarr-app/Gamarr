@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
 import { Error } from 'App/State/AppSectionState';

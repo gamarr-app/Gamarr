@@ -1,4 +1,3 @@
-import React from 'react';
 import translate from 'Utilities/String/translate';
 import EnhancedSelectInput, {
   EnhancedSelectInputProps,

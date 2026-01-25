@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Button from 'Components/Link/Button';
 import ModalBody from 'Components/Modal/ModalBody';

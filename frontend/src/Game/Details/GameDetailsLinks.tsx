@@ -1,4 +1,3 @@
-import React from 'react';
 import Label from 'Components/Label';
 import Link from 'Components/Link/Link';
 import Game from 'Game/Game';

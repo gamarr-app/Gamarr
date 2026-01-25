@@ -5,6 +5,8 @@ interface CssExports {
   'columnPlaceholder': string;
   'columnPlaceholderAfter': string;
   'columnPlaceholderBefore': string;
+  'isDraggingDown': string;
+  'isDraggingUp': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

@@ -40,7 +40,7 @@ interface Game {
 
 interface Column {
   name: string;
-  label?: (() => string) | React.ReactElement;
+  label?: (() => string) | React.ReactElement<any>;
   columnLabel?: () => string;
   isVisible: boolean;
   isSortable?: boolean;

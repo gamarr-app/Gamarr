@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { ComponentProps, ReactNode } from 'react';
+import { ComponentProps, ReactNode } from 'react';
 import { Kind } from 'Helpers/Props/kinds';
 import { Size } from 'Helpers/Props/sizes';
 import styles from './InfoLabel.css';

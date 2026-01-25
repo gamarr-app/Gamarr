@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import { toggleCollectionMonitored } from 'Store/Actions/gameCollectionActions';

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Modal from 'Components/Modal/Modal';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { sizes } from 'Helpers/Props';

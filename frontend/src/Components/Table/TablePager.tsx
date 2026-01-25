@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import SelectInput from 'Components/Form/SelectInput';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import Link from 'Components/Link/Link';
 import styles from './PageJumpBarItem.css';
 

@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useCallback } from 'react';
+import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import IconButton from 'Components/Link/IconButton';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';

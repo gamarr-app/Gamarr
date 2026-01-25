@@ -1,4 +1,3 @@
-import React from 'react';
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
 

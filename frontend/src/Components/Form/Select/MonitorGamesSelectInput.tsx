@@ -1,4 +1,3 @@
-import React from 'react';
 import monitorOptions from 'Utilities/Game/monitorOptions';
 import translate from 'Utilities/String/translate';
 import EnhancedSelectInput, {

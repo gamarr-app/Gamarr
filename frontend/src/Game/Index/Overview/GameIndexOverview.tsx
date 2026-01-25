@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TextTruncate from 'react-text-truncate';
 import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';

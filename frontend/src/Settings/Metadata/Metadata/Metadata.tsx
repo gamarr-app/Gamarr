@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Card from 'Components/Card';
 import Label from 'Components/Label';
 import { kinds } from 'Helpers/Props';

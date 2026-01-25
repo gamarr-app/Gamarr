@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from 'Components/Icon';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import Tooltip from 'Components/Tooltip/Tooltip';

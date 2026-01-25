@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import Icon, { IconProps } from 'Components/Icon';
 import translate from 'Utilities/String/translate';
 import Link, { LinkProps } from './Link';

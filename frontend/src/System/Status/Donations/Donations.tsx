@@ -1,4 +1,3 @@
-import React from 'react';
 import FieldSet from 'Components/FieldSet';
 import Link from 'Components/Link/Link';
 import translate from 'Utilities/String/translate';

@@ -1,4 +1,3 @@
-import React from 'react';
 import SpinnerIcon from 'Components/SpinnerIcon';
 import { icons } from 'Helpers/Props';
 import styles from './CollectionFooterLabel.css';

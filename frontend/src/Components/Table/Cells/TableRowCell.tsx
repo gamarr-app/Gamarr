@@ -1,4 +1,4 @@
-import React, { ComponentPropsWithoutRef } from 'react';
+import { ComponentPropsWithoutRef } from 'react';
 import styles from './TableRowCell.css';
 
 export type TableRowCellProps = ComponentPropsWithoutRef<'td'>;

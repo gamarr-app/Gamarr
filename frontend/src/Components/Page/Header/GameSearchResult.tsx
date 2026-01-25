@@ -1,4 +1,3 @@
-import React from 'react';
 import { Tag } from 'App/State/TagsAppState';
 import Label from 'Components/Label';
 import GamePoster from 'Game/GamePoster';

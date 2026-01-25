@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { CalendarView } from 'Calendar/calendarViews';
 import Button, { ButtonProps } from 'Components/Link/Button';
 import titleCase from 'Utilities/String/titleCase';

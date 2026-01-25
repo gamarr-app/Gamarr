@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import Modal from 'Components/Modal/Modal';
 import AppUpdatedModalContent from './AppUpdatedModalContent';
 

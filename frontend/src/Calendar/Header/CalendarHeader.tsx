@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Icon from 'Components/Icon';

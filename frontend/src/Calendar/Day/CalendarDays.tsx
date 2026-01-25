@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import moment from 'moment';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import * as calendarViews from 'Calendar/calendarViews';
@@ -18,7 +18,7 @@ function CalendarDays() {
     (state: AppState) => state.app.isSidebarVisible
   );
 
-  const updateTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const updateTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const touchStart = useRef<number | null>(null);
   const [todaysDate, setTodaysDate] = useState(
     moment().startOf('day').toISOString()

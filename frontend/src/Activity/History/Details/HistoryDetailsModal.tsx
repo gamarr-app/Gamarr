@@ -1,4 +1,3 @@
-import React from 'react';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import Modal from 'Components/Modal/Modal';

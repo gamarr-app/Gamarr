@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'Components/Link/Link';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';

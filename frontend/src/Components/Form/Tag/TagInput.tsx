@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, {
+import {
   KeyboardEvent,
   Ref,
   SyntheticEvent,
@@ -272,7 +272,7 @@ function TagInput<T extends TagBase>({
     ) => {
       return (
         <TagInputInput
-          forwardedRef={forwardedRef}
+          ref={forwardedRef}
           tags={tags}
           kind={kind}
           inputProps={inputProps}
@@ -306,7 +306,7 @@ function TagInput<T extends TagBase>({
   return (
     <AutoSuggestInput
       {...otherProps}
-      forwardedRef={autoSuggestRef}
+      ref={autoSuggestRef}
       className={className}
       inputContainerClassName={classNames(
         inputContainerClassName,

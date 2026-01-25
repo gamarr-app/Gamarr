@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import { ColorImpairedConsumer } from 'App/ColorImpairedContext';
 import { Kind } from 'Helpers/Props/kinds';
 import { Size } from 'Helpers/Props/sizes';

@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { Placement } from 'popper.js';
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -35,7 +35,7 @@ function Tooltip(props: TooltipProps) {
     canFlip = false,
   } = props;
 
-  const closeTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const closeTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const updater = useRef<(() => void) | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 

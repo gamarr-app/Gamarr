@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import { SyntheticEvent, useCallback, useMemo } from 'react';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';

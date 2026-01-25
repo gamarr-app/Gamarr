@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import CheckInput from 'Components/Form/CheckInput';
 import { CheckInputChanged } from 'typings/inputs';
 import { SelectStateInputProps } from 'typings/props';

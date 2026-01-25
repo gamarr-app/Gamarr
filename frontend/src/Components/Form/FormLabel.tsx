@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Size } from 'Helpers/Props/sizes';
 import styles from './FormLabel.css';
 

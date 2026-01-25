@@ -1,4 +1,3 @@
-import React from 'react';
 import { Tag } from 'App/State/TagsAppState';
 import { kinds } from 'Helpers/Props';
 import sortByProp from 'Utilities/Array/sortByProp';

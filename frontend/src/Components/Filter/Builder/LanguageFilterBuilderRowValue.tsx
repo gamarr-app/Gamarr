@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import createLanguagesSelector from 'Store/Selectors/createLanguagesSelector';
 import FilterBuilderRowValue from './FilterBuilderRowValue';

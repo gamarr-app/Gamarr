@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import * as calendarViews from 'Calendar/calendarViews';
@@ -12,7 +12,7 @@ function DaysOfWeek() {
   const { calendarWeekColumnHeader, shortDateFormat, showRelativeDates } =
     useSelector(createUISettingsSelector());
 
-  const updateTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const updateTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [todaysDate, setTodaysDate] = useState(
     moment().startOf('day').toISOString()
   );

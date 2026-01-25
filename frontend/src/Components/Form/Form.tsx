@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import Alert from 'Components/Alert';
 import { kinds } from 'Helpers/Props';
 import { ValidationError, ValidationWarning } from 'typings/pending';

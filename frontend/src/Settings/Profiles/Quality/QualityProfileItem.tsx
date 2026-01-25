@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
+import { ConnectDragSource } from 'react-dnd';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
@@ -17,7 +18,7 @@ interface QualityProfileItemProps {
   isDragging: boolean;
   isOverCurrent?: boolean;
   isInGroup?: boolean;
-  connectDragSource?: (node: React.ReactElement) => React.ReactElement | null;
+  dragRef?: ConnectDragSource;
   onCreateGroupPress?: (qualityId: number) => void;
   onQualityProfileItemAllowedChange?: (
     qualityId: number,
@@ -34,7 +35,7 @@ function QualityProfileItem({
   allowed,
   isDragging,
   isOverCurrent = false,
-  connectDragSource = (node) => node,
+  dragRef,
   onCreateGroupPress,
   onQualityProfileItemAllowedChange,
 }: QualityProfileItemProps) {
@@ -95,15 +96,16 @@ function QualityProfileItem({
         </div>
       </label>
 
-      {connectDragSource(
-        <div className={styles.dragHandle}>
-          <Icon
-            className={styles.dragIcon}
-            title={translate('CreateGroup')}
-            name={icons.REORDER}
-          />
-        </div>
-      )}
+      <div
+        ref={dragRef as unknown as React.Ref<HTMLDivElement>}
+        className={styles.dragHandle}
+      >
+        <Icon
+          className={styles.dragIcon}
+          title={translate('CreateGroup')}
+          name={icons.REORDER}
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import CheckInput from 'Components/Form/CheckInput';
 import { CheckInputChanged } from 'typings/inputs';
 import VirtualTableHeaderCell from './VirtualTableHeaderCell';

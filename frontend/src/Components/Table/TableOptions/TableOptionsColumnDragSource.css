@@ -16,3 +16,11 @@
 .columnPlaceholderAfter {
   margin-top: 8px;
 }
+
+.isDraggingUp {
+  /* Placeholder for dragging up state */
+}
+
+.isDraggingDown {
+  /* Placeholder for dragging down state */
+}

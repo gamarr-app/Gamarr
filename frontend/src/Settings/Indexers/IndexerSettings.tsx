@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import PageContent from 'Components/Page/PageContent';
@@ -23,7 +23,7 @@ function IndexerSettings() {
     (state: AppState) => state.settings.indexers.isTestingAll
   );
 
-  const saveOptions = useRef<() => void>();
+  const saveOptions = useRef<() => void>(undefined);
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);

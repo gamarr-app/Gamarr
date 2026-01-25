@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import Label from 'Components/Label';
 import { GameStatus } from 'Game/Game';

@@ -1,4 +1,3 @@
-import React from 'react';
 import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItemDescription from 'Components/DescriptionList/DescriptionListItemDescription';
 import DescriptionListItemTitle from 'Components/DescriptionList/DescriptionListItemTitle';

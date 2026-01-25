@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';

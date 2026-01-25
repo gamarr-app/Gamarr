@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import StackTrace from 'stacktrace-js';
 import translate from 'Utilities/String/translate';
 import styles from './ErrorBoundaryError.css';

@@ -1,4 +1,3 @@
-import React from 'react';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';

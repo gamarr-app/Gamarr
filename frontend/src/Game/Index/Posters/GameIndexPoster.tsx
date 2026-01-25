@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
 import GameTagList from 'Components/GameTagList';

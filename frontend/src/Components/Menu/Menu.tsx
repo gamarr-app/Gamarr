@@ -125,7 +125,7 @@ function Menu({
   }, []);
 
   const childrenArray = React.Children.toArray(children);
-  const button = React.cloneElement(childrenArray[0] as ReactElement, {
+  const button = React.cloneElement(childrenArray[0] as ReactElement<any>, {
     onPress: handleMenuButtonPress,
   });
 
@@ -181,13 +181,12 @@ function Menu({
           </div>
         )}
       </Reference>
-
       <Portal>
         <Popper {...popperOptions[alignMenu]}>
           {({ ref, style, scheduleUpdate }) => {
             updater.current = scheduleUpdate;
 
-            return React.cloneElement(childrenArray[1] as ReactElement, {
+            return React.cloneElement(childrenArray[1] as ReactElement<any>, {
               forwardedRef: ref,
               style: {
                 ...style,

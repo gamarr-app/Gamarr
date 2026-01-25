@@ -1,5 +1,5 @@
 import jdu from 'jdu';
-import React, { SyntheticEvent, useCallback, useState } from 'react';
+import { SyntheticEvent, useCallback, useState } from 'react';
 import {
   ChangeEvent,
   SuggestionsFetchRequestedParams,

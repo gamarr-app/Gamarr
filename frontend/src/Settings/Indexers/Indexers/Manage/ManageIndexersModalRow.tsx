@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import GameTagList from 'Components/GameTagList';
 import Label from 'Components/Label';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';

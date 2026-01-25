@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Tag } from 'App/State/TagsAppState';
 import Card from 'Components/Card';

@@ -1,11 +1,11 @@
-import React, { MouseEvent, Ref, useCallback } from 'react';
+import { MouseEvent, Ref, useCallback } from 'react';
 import { Kind } from 'Helpers/Props/kinds';
 import { TagBase } from './TagInput';
 import { TagInputTagProps } from './TagInputTag';
 import styles from './TagInputInput.css';
 
 interface TagInputInputProps<T extends TagBase> {
-  forwardedRef?: Ref<HTMLDivElement>;
+  ref?: Ref<HTMLDivElement>;
   className?: string;
   tags: TagBase[];
   inputProps: object;
@@ -20,7 +20,7 @@ interface TagInputInputProps<T extends TagBase> {
 
 function TagInputInput<T extends TagBase>(props: TagInputInputProps<T>) {
   const {
-    forwardedRef,
+    ref,
     className = styles.inputContainer,
     tags,
     inputProps,
@@ -47,7 +47,7 @@ function TagInputInput<T extends TagBase>(props: TagInputInputProps<T>) {
   );
 
   return (
-    <div ref={forwardedRef} className={className} onMouseDown={handleMouseDown}>
+    <div ref={ref} className={className} onMouseDown={handleMouseDown}>
       {tags.map((tag, index) => {
         return (
           <TagComponent

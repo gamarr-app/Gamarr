@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import GameTagList from 'Components/GameTagList';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';

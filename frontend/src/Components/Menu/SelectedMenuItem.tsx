@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import Icon, { IconName } from 'Components/Icon';
 import { icons } from 'Helpers/Props';
 import MenuItem, { MenuItemProps } from './MenuItem';

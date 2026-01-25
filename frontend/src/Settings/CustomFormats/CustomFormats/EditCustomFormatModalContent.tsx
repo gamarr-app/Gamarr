@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Card from 'Components/Card';

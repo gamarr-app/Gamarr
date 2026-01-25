@@ -1,4 +1,3 @@
-import React from 'react';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';

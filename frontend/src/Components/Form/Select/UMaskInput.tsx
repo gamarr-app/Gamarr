@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import { SyntheticEvent } from 'react';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
 import EnhancedSelectInput from './EnhancedSelectInput';

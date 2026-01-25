@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
@@ -24,7 +24,7 @@ function DownloadClientSettings() {
       state.settings.downloadClients.isTestingAll
   );
 
-  const saveOptions = useRef<SaveCallback>();
+  const saveOptions = useRef<SaveCallback>(undefined);
   const [isSaving, setIsSaving] = useState(false);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const [isManageDownloadClientsOpen, setIsManageDownloadClientsOpen] =

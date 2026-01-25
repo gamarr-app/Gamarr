@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import React from 'react';
 import Icon, { IconName } from 'Components/Icon';
 import MenuButton, { MenuButtonProps } from 'Components/Menu/MenuButton';
 import { icons } from 'Helpers/Props';
