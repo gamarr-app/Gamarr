@@ -1,0 +1,366 @@
+import React from 'react';
+import { Dispatch } from 'redux';
+import { createAction } from 'redux-actions';
+import AppState from 'App/State/AppState';
+import Icon from 'Components/Icon';
+import {
+  filterBuilderTypes,
+  filterBuilderValueTypes,
+  filterTypes,
+  icons,
+  sortDirections,
+} from 'Helpers/Props';
+import { createThunk, handleThunks } from 'Store/thunks';
+import createAjaxRequest from 'Utilities/createAjaxRequest';
+import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
+import translate from 'Utilities/String/translate';
+import { updateItem } from './baseActions';
+import createHandleActions from './Creators/createHandleActions';
+import createServerSideCollectionHandlers from './Creators/createServerSideCollectionHandlers';
+import createClearReducer from './Creators/Reducers/createClearReducer';
+import createSetTableOptionReducer from './Creators/Reducers/createSetTableOptionReducer';
+
+interface HistoryItem {
+  id: number;
+  isMarkingAsFailed?: boolean;
+  markAsFailedError?: unknown;
+  [key: string]: unknown;
+}
+
+interface Column {
+  name: string;
+  label?: (() => string) | React.ReactElement;
+  columnLabel?: () => string;
+  isSortable?: boolean;
+  isVisible: boolean;
+  isModifiable?: boolean;
+}
+
+interface FilterValue {
+  key: string;
+  value: string;
+  type: string;
+}
+
+interface Filter {
+  key: string;
+  label: () => string;
+  filters: FilterValue[];
+}
+
+interface MarkAsFailedPayload {
+  id: number;
+}
+
+//
+// Variables
+
+export const section = 'history';
+
+//
+// State
+
+export const defaultState = {
+  isFetching: false,
+  isPopulated: false,
+  error: null as unknown,
+  pageSize: 20,
+  sortKey: 'date',
+  sortDirection: sortDirections.DESCENDING,
+  items: [] as HistoryItem[],
+
+  columns: [
+    {
+      name: 'eventType',
+      columnLabel: () => translate('EventType'),
+      isVisible: true,
+      isModifiable: false,
+    },
+    {
+      name: 'gameMetadata.sortTitle',
+      label: () => translate('Game'),
+      isSortable: true,
+      isVisible: true,
+    },
+    {
+      name: 'languages',
+      label: () => translate('Languages'),
+      isSortable: true,
+      isVisible: true,
+    },
+    {
+      name: 'quality',
+      label: () => translate('Quality'),
+      isSortable: true,
+      isVisible: true,
+    },
+    {
+      name: 'customFormats',
+      label: () => translate('Formats'),
+      isSortable: false,
+      isVisible: true,
+    },
+    {
+      name: 'date',
+      label: () => translate('Date'),
+      isSortable: true,
+      isVisible: true,
+    },
+    {
+      name: 'downloadClient',
+      label: () => translate('DownloadClient'),
+      isVisible: false,
+    },
+    {
+      name: 'indexer',
+      label: () => translate('Indexer'),
+      isVisible: false,
+    },
+    {
+      name: 'releaseGroup',
+      label: () => translate('ReleaseGroup'),
+      isVisible: false,
+    },
+    {
+      name: 'sourceTitle',
+      label: () => translate('SourceTitle'),
+      isVisible: false,
+    },
+    {
+      name: 'customFormatScore',
+      columnLabel: () => translate('CustomFormatScore'),
+      label: React.createElement(Icon, {
+        name: icons.SCORE,
+        title: () => translate('CustomFormatScore'),
+      }),
+      isVisible: false,
+    },
+    {
+      name: 'details',
+      columnLabel: () => translate('Details'),
+      isVisible: true,
+      isModifiable: false,
+    },
+  ] as Column[],
+
+  selectedFilterKey: 'all',
+
+  filters: [
+    {
+      key: 'all',
+      label: () => translate('All'),
+      filters: [],
+    },
+    {
+      key: 'grabbed',
+      label: () => translate('Grabbed'),
+      filters: [
+        {
+          key: 'eventType',
+          value: '1',
+          type: filterTypes.EQUAL,
+        },
+      ],
+    },
+    {
+      key: 'imported',
+      label: () => translate('Imported'),
+      filters: [
+        {
+          key: 'eventType',
+          value: '3',
+          type: filterTypes.EQUAL,
+        },
+      ],
+    },
+    {
+      key: 'failed',
+      label: () => translate('Failed'),
+      filters: [
+        {
+          key: 'eventType',
+          value: '4',
+          type: filterTypes.EQUAL,
+        },
+      ],
+    },
+    {
+      key: 'deleted',
+      label: () => translate('Deleted'),
+      filters: [
+        {
+          key: 'eventType',
+          value: '6',
+          type: filterTypes.EQUAL,
+        },
+      ],
+    },
+    {
+      key: 'renamed',
+      label: () => translate('Renamed'),
+      filters: [
+        {
+          key: 'eventType',
+          value: '8',
+          type: filterTypes.EQUAL,
+        },
+      ],
+    },
+    {
+      key: 'ignored',
+      label: () => translate('Ignored'),
+      filters: [
+        {
+          key: 'eventType',
+          value: '9',
+          type: filterTypes.EQUAL,
+        },
+      ],
+    },
+  ] as Filter[],
+
+  filterBuilderProps: [
+    {
+      name: 'eventType',
+      label: () => translate('EventType'),
+      type: filterBuilderTypes.EQUAL,
+      valueType: filterBuilderValueTypes.HISTORY_EVENT_TYPE,
+    },
+    {
+      name: 'gameIds',
+      label: () => translate('Game'),
+      type: filterBuilderTypes.EQUAL,
+      valueType: filterBuilderValueTypes.GAME,
+    },
+    {
+      name: 'quality',
+      label: () => translate('Quality'),
+      type: filterBuilderTypes.EQUAL,
+      valueType: filterBuilderValueTypes.QUALITY,
+    },
+    {
+      name: 'languages',
+      label: () => translate('Languages'),
+      type: filterBuilderTypes.CONTAINS,
+      valueType: filterBuilderValueTypes.LANGUAGE,
+    },
+  ],
+};
+
+export const persistState = [
+  'history.pageSize',
+  'history.sortKey',
+  'history.sortDirection',
+  'history.selectedFilterKey',
+  'history.columns',
+];
+
+//
+// Actions Types
+
+export const FETCH_HISTORY = 'history/fetchHistory';
+export const GOTO_FIRST_HISTORY_PAGE = 'history/gotoHistoryFirstPage';
+export const GOTO_PREVIOUS_HISTORY_PAGE = 'history/gotoHistoryPreviousPage';
+export const GOTO_NEXT_HISTORY_PAGE = 'history/gotoHistoryNextPage';
+export const GOTO_LAST_HISTORY_PAGE = 'history/gotoHistoryLastPage';
+export const GOTO_HISTORY_PAGE = 'history/gotoHistoryPage';
+export const SET_HISTORY_SORT = 'history/setHistorySort';
+export const SET_HISTORY_FILTER = 'history/setHistoryFilter';
+export const SET_HISTORY_TABLE_OPTION = 'history/setHistoryTableOption';
+export const CLEAR_HISTORY = 'history/clearHistory';
+export const MARK_AS_FAILED = 'history/markAsFailed';
+
+//
+// Action Creators
+
+export const fetchHistory = createThunk(FETCH_HISTORY);
+export const gotoHistoryFirstPage = createThunk(GOTO_FIRST_HISTORY_PAGE);
+export const gotoHistoryPreviousPage = createThunk(GOTO_PREVIOUS_HISTORY_PAGE);
+export const gotoHistoryNextPage = createThunk(GOTO_NEXT_HISTORY_PAGE);
+export const gotoHistoryLastPage = createThunk(GOTO_LAST_HISTORY_PAGE);
+export const gotoHistoryPage = createThunk(GOTO_HISTORY_PAGE);
+export const setHistorySort = createThunk(SET_HISTORY_SORT);
+export const setHistoryFilter = createThunk(SET_HISTORY_FILTER);
+export const setHistoryTableOption = createAction(SET_HISTORY_TABLE_OPTION);
+export const clearHistory = createAction(CLEAR_HISTORY);
+export const markAsFailed = createThunk(MARK_AS_FAILED);
+
+//
+// Action Handlers
+
+export const actionHandlers = handleThunks({
+  ...createServerSideCollectionHandlers(section, '/history', fetchHistory, {
+    [serverSideCollectionHandlers.FETCH]: FETCH_HISTORY,
+    [serverSideCollectionHandlers.FIRST_PAGE]: GOTO_FIRST_HISTORY_PAGE,
+    [serverSideCollectionHandlers.PREVIOUS_PAGE]: GOTO_PREVIOUS_HISTORY_PAGE,
+    [serverSideCollectionHandlers.NEXT_PAGE]: GOTO_NEXT_HISTORY_PAGE,
+    [serverSideCollectionHandlers.LAST_PAGE]: GOTO_LAST_HISTORY_PAGE,
+    [serverSideCollectionHandlers.EXACT_PAGE]: GOTO_HISTORY_PAGE,
+    [serverSideCollectionHandlers.SORT]: SET_HISTORY_SORT,
+    [serverSideCollectionHandlers.FILTER]: SET_HISTORY_FILTER,
+  }),
+
+  [MARK_AS_FAILED]: function (
+    getState: () => AppState,
+    payload: MarkAsFailedPayload,
+    dispatch: Dispatch
+  ) {
+    const id = payload.id;
+
+    dispatch(
+      updateItem({
+        section,
+        id,
+        isMarkingAsFailed: true,
+      })
+    );
+
+    const promise = createAjaxRequest({
+      url: `/history/failed/${id}`,
+      method: 'POST',
+      dataType: 'json',
+    }).request;
+
+    promise.done(() => {
+      dispatch(
+        updateItem({
+          section,
+          id,
+          isMarkingAsFailed: false,
+          markAsFailedError: null,
+        })
+      );
+    });
+
+    promise.fail((xhr: unknown) => {
+      dispatch(
+        updateItem({
+          section,
+          id,
+          isMarkingAsFailed: false,
+          markAsFailedError: xhr,
+        })
+      );
+    });
+  },
+});
+
+//
+// Reducers
+
+export const reducers = createHandleActions(
+  {
+    [SET_HISTORY_TABLE_OPTION]: createSetTableOptionReducer(section),
+
+    [CLEAR_HISTORY]: createClearReducer(section, {
+      isFetching: false,
+      isPopulated: false,
+      error: null,
+      items: [],
+      totalPages: 0,
+      totalRecords: 0,
+    }),
+  },
+  defaultState,
+  section
+);
