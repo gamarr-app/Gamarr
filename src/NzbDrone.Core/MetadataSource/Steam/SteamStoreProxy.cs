@@ -230,6 +230,19 @@ namespace NzbDrone.Core.MetadataSource.Steam
             game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, newCdnPoster));
             game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, oldCdnPoster));
 
+            // For DLCs, use parent game's poster as fallback (DLCs often lack vertical posters)
+            if (data.Fullgame != null && int.TryParse(data.Fullgame.Appid, out var parentAppId))
+            {
+                var parentPoster = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{parentAppId}/library_600x900.jpg";
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, parentPoster));
+            }
+
+            // Add header image from API response as last resort fallback (horizontal 460x215)
+            if (!string.IsNullOrEmpty(data.Header_Image))
+            {
+                game.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, data.Header_Image));
+            }
+
             // Use background as fanart
             if (!string.IsNullOrEmpty(data.Background_Raw ?? data.Background))
             {

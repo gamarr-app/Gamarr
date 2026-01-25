@@ -153,8 +153,8 @@ namespace NzbDrone.Core.Indexers.Newznab
                 {
                     var searchTitle = queryTitle;
 
-                    // Include year in search for disambiguation when available
-                    if (searchCriteria.Game.Year > 0)
+                    // Include year in search for disambiguation when available (unless RemoveYear is set)
+                    if (searchCriteria.Game.Year > 0 && !Settings.RemoveYear)
                     {
                         searchTitle = $"{queryTitle} {searchCriteria.Game.Year}";
                     }
