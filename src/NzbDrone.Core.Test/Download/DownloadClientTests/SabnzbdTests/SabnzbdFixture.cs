@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
 
             Mocker.GetMock<ISabnzbdProxy>()
                   .Setup(v => v.GetVersion(It.IsAny<SabnzbdSettings>()))
-                  .Returns("1.2.3");
+                  .Returns("4.3.0");
 
             Mocker.GetMock<ISabnzbdProxy>()
                 .Setup(s => s.GetConfig(It.IsAny<SabnzbdSettings>()))
@@ -452,31 +452,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
             result.OutputRootFolders.First().Should().Be(fullCategoryDir);
         }
 
-        [TestCase("0")]
-        [TestCase("15d")]
-        [TestCase("")]
-        [TestCase(null)]
-        public void should_set_history_removes_completed_downloads_false(string historyRetention)
-        {
-            _config.Misc.history_retention = historyRetention;
-
-            var downloadClientInfo = Subject.GetStatus();
-
-            downloadClientInfo.RemovesCompletedDownloads.Should().BeFalse();
-        }
-
-        [TestCase("-1")]
-        [TestCase("15")]
-        [TestCase("3")]
-        [TestCase("3d")]
-        public void should_set_history_removes_completed_downloads_true(string historyRetention)
-        {
-            _config.Misc.history_retention = historyRetention;
-
-            var downloadClientInfo = Subject.GetStatus();
-
-            downloadClientInfo.RemovesCompletedDownloads.Should().BeTrue();
-        }
+        // Tests for SABnzbd 4.3+ (uses history_retention_option and history_retention_number)
 
         [TestCase("all", 0)]
         [TestCase("days-archive", 15)]
@@ -547,11 +523,15 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         }
 
         [TestCase("0.6.9", false)]
-        [TestCase("0.7.0", true)]
-        [TestCase("0.8.0", true)]
-        [TestCase("1.0.0", true)]
-        [TestCase("1.0.0RC1", true)]
-        [TestCase("1.1.x", true)]
+        [TestCase("0.7.0", false)]
+        [TestCase("0.8.0", false)]
+        [TestCase("1.0.0", false)]
+        [TestCase("1.0.0RC1", false)]
+        [TestCase("1.1.x", false)]
+        [TestCase("4.2.0", false)]
+        [TestCase("4.3.0", true)]
+        [TestCase("4.4.0", true)]
+        [TestCase("5.0.0", true)]
         public void should_test_version(string version, bool expected)
         {
             Mocker.GetMock<ISabnzbdProxy>()
