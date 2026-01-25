@@ -1,3 +1,4 @@
+import { AddNewGameItem } from 'AddGame/AddNewGame/AddNewGame';
 import { GameMonitor } from 'Game/Game';
 
 interface AddGameDefaults {
@@ -16,8 +17,9 @@ interface AddGameAppState {
   isAdding: boolean;
   isAdded: boolean;
   addError: unknown;
-  items: unknown[];
+  items: AddNewGameItem[];
   defaults: AddGameDefaults;
 }
 
 export default AddGameAppState;
+export type { AddGameDefaults };
