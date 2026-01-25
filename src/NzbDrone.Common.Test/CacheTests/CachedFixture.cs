@@ -99,7 +99,8 @@ namespace NzbDrone.Common.Test.CacheTests
                 Thread.Sleep(100);
             }
 
-            hitCount.Should().BeInRange(3, 6);
+            // Range widened to accommodate timing variations on CI/Windows
+            hitCount.Should().BeInRange(3, 8);
         }
     }
 

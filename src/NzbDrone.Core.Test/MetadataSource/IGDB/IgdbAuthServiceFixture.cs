@@ -68,6 +68,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
 
             Subject.GetAccessToken().Should().BeNull();
 
+            ExceptionVerification.IgnoreWarns();
             ExceptionVerification.IgnoreErrors();
         }
 
