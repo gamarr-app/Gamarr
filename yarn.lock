@@ -3762,6 +3762,11 @@ dnd-multi-backend@^8.0.3:
   resolved "https://registry.yarnpkg.com/dnd-multi-backend/-/dnd-multi-backend-8.1.2.tgz#bf6a6ea9f6a9f5d58cabe12fd927753a753aeb92"
   integrity sha512-KPDVEsiM+6gNEegqZYTWJQgJxYV4vB91tUrvoKJjaS0wwWqT/jNU0P7xJAwCue/cbasJNvk2dFZH7tC+bjX1Rg==
 
+dnd-multi-backend@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/dnd-multi-backend/-/dnd-multi-backend-9.0.0.tgz#e5b5e96051c179566f8b1fa3433b69f6a87e6434"
+  integrity sha512-BCUFes4x0LA2bZyEZFHeQzZ1CBZo6PB40zMOG/gNgICxjAZfN2jHgISowqkR1isdx/msUNzscxEb17SP7yc4KQ==
+
 doctrine@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-2.1.0.tgz#5cd01fc101621b42c4cd7f5d1a66243716d3f39d"
@@ -7268,6 +7273,15 @@ raw-body@~1.1.0:
     bytes "1"
     string_decoder "0.10"
 
+rdndmb-html5-to-touch@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/rdndmb-html5-to-touch/-/rdndmb-html5-to-touch-9.0.0.tgz#32295752fe3b8663b3c0f3d4a1826ce6ca07c16b"
+  integrity sha512-g8XfS6y+CEFGWdFF5pIqrGSF6bTVe2sB5AIVVoBRIl+FzNuDrc2jpfzUmpsiNvx28l3BRZ91UFP0Mm4zYVJfHA==
+  dependencies:
+    dnd-multi-backend "^9.0.0"
+    react-dnd-html5-backend "^16.0.1"
+    react-dnd-touch-backend "^16.0.1"
+
 react-addons-shallow-compare@15.6.3:
   version "15.6.3"
   resolved "https://registry.yarnpkg.com/react-addons-shallow-compare/-/react-addons-shallow-compare-15.6.3.tgz#28a94b0dfee71530852c66a69053d59a1baf04cb"
@@ -7316,6 +7330,19 @@ react-dnd-html5-backend@^16.0.1:
   integrity sha512-Wu3dw5aDJmOGw8WjH1I1/yTH+vlXEL4vmjk5p+MHxP8HuHJS1lAGeIdG/hze1AvNeXWo/JgULV87LyQOr+r5jw==
   dependencies:
     dnd-core "^16.0.1"
+
+react-dnd-multi-backend@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/react-dnd-multi-backend/-/react-dnd-multi-backend-9.0.0.tgz#d62c9833a11c8ab6098f18beea6a8e2a497a1de5"
+  integrity sha512-LAKDdyj4oMvVA/k2RiJ8KLIPO9sBiYIjIYtoFCuAgml9qQwIq+oTav2IXGfG4DrP49fBnVO7jjf5ofJMNOlWTA==
+  dependencies:
+    dnd-multi-backend "^9.0.0"
+    react-dnd-preview "^9.0.0"
+
+react-dnd-preview@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/react-dnd-preview/-/react-dnd-preview-9.0.0.tgz#ce12f3383aa708911149a4fcecbe0ac6cec88858"
+  integrity sha512-WZTbrrNDlCGYJGrITHN/obI2kpdaKV3AY6Il2LLZcA9ApzG5bbDXBlWSFwuw8eTCMjmCXs5Wcv+p2QCMxX1Afw==
 
 react-dnd-touch-backend@^16.0.1:
   version "16.0.1"
