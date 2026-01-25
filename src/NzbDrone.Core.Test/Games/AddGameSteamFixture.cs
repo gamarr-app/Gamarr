@@ -249,7 +249,7 @@ namespace NzbDrone.Core.Test.Games
 
             var result = Subject.AddGame(_newGame);
 
-            result.Path.Should().Be("/games/Dota 2 (2013)");
+            result.Path.Should().Be("/games/Dota 2 (2013)".AsOsAgnostic());
         }
 
         [Test]
