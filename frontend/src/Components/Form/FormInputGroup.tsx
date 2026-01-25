@@ -285,7 +285,7 @@ function FormInputGroup<T, C extends InputType>(
       {helpLink ? <Link to={helpLink}>{translate('MoreInfo')}</Link> : null}
 
       {errors.map((error, index) => {
-        return 'errorMessage' in error ? (
+        return (
           <FormInputHelpText
             key={index}
             text={error.errorMessage}
@@ -294,30 +294,16 @@ function FormInputGroup<T, C extends InputType>(
             isError={true}
             isCheckInput={checkInput}
           />
-        ) : (
-          <FormInputHelpText
-            key={index}
-            text={error.message}
-            isError={true}
-            isCheckInput={checkInput}
-          />
         );
       })}
 
       {warnings.map((warning, index) => {
-        return 'errorMessage' in warning ? (
+        return (
           <FormInputHelpText
             key={index}
             text={warning.errorMessage}
             link={warning.infoLink}
             tooltip={warning.detailedDescription}
-            isWarning={true}
-            isCheckInput={checkInput}
-          />
-        ) : (
-          <FormInputHelpText
-            key={index}
-            text={warning.message}
             isWarning={true}
             isCheckInput={checkInput}
           />

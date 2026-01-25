@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import AppState from 'App/State/AppState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
 import FilterModal from 'Components/Filter/FilterModal';
 import { setReleasesFilter } from 'Store/Actions/releaseActions';
 
@@ -25,10 +25,20 @@ function createFilterBuilderPropsSelector() {
 
 interface InteractiveSearchFilterModalProps {
   isOpen: boolean;
+  selectedFilterKey: string | number;
+  filters: Filter[];
+  customFilters: CustomFilter[];
+  onFilterSelect: (filter: string | number) => void;
+  onModalClose: () => void;
 }
 
 export default function InteractiveSearchFilterModal({
-  ...otherProps
+  isOpen,
+  selectedFilterKey,
+  filters,
+  customFilters,
+  onFilterSelect,
+  onModalClose,
 }: InteractiveSearchFilterModalProps) {
   const sectionItems = useSelector(createReleasesSelector());
   const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
@@ -44,12 +54,16 @@ export default function InteractiveSearchFilterModal({
 
   return (
     <FilterModal
-      // TODO: Don't spread all the props
-      {...otherProps}
+      isOpen={isOpen}
+      selectedFilterKey={selectedFilterKey}
+      filters={filters}
+      customFilters={customFilters}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType="releases"
       dispatchSetFilter={dispatchSetFilter}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
     />
   );
 }
