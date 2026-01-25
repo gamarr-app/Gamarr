@@ -8,3 +8,7 @@
 .type {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 }
+
+.actions {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+}

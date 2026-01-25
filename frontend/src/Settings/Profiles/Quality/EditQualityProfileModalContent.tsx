@@ -171,17 +171,26 @@ function EditQualityProfileModalContent({
     prevDimensions.current = { headerHeight, bodyHeight, footerHeight };
   }, [headerHeight, bodyHeight, footerHeight, onContentHeightChange]);
 
-  const handleHeaderMeasure = useCallback(({ height }: { height: number }) => {
-    setHeaderHeight((prev) => (height > prev ? height : prev));
-  }, []);
+  const handleHeaderMeasure = useCallback(
+    ({ height = 0 }: { height?: number }) => {
+      setHeaderHeight((prev) => (height > prev ? height : prev));
+    },
+    []
+  );
 
-  const handleBodyMeasure = useCallback(({ height }: { height: number }) => {
-    setBodyHeight((prev) => (height > prev ? height : prev));
-  }, []);
+  const handleBodyMeasure = useCallback(
+    ({ height = 0 }: { height?: number }) => {
+      setBodyHeight((prev) => (height > prev ? height : prev));
+    },
+    []
+  );
 
-  const handleFooterMeasure = useCallback(({ height }: { height: number }) => {
-    setFooterHeight((prev) => (height > prev ? height : prev));
-  }, []);
+  const handleFooterMeasure = useCallback(
+    ({ height = 0 }: { height?: number }) => {
+      setFooterHeight((prev) => (height > prev ? height : prev));
+    },
+    []
+  );
 
   const {
     id,

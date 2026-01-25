@@ -20,11 +20,11 @@ interface SavePayload {
   searchOnAdd?: boolean;
 }
 
-interface CollectionFooterProps {
+export interface CollectionFooterProps {
   selectedIds: number[];
   isAdding: boolean;
   isSaving: boolean;
-  saveError: Error;
+  saveError?: Error;
   onUpdateSelectedPress(payload: object): void;
 }
 

@@ -49,7 +49,7 @@ export default useTheme;
 
 export const useThemeColor = (color: string) => {
   const theme = useTheme();
-  const themeVariables = themes[theme] as Record<string, string>;
+  const themeVariables = themes[theme] as unknown as Record<string, string>;
 
   return themeVariables[color];
 };

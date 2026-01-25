@@ -1,0 +1,104 @@
+import React from 'react';
+import FormInputGroup from 'Components/Form/FormInputGroup';
+import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
+import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
+import { inputTypes } from 'Helpers/Props';
+import { InputChanged } from 'typings/inputs';
+import ImportGameSelectGameConnector from './SelectGame/ImportGameSelectGameConnector';
+import styles from './ImportGameRow.css';
+
+interface SelectedGame {
+  igdbId: number;
+  title: string;
+  year: number;
+  studio?: string;
+  [key: string]: unknown;
+}
+
+interface ImportGameRowProps {
+  id: string;
+  relativePath: string;
+  monitor: string;
+  qualityProfileId: number;
+  minimumAvailability: string;
+  selectedGame?: SelectedGame;
+  isExistingGame: boolean;
+  items: object[];
+  isSelected?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSelectedChange: (payload: any) => void;
+  onInputChange: (change: InputChanged) => void;
+}
+
+function ImportGameRow(props: ImportGameRowProps) {
+  const {
+    id,
+    relativePath,
+    monitor,
+    qualityProfileId,
+    minimumAvailability,
+    selectedGame,
+    isExistingGame,
+    isSelected,
+    onSelectedChange,
+    onInputChange,
+  } = props;
+
+  return (
+    <>
+      <VirtualTableSelectCell
+        inputClassName={styles.selectInput}
+        id={id as unknown as number}
+        isSelected={isSelected}
+        isDisabled={!selectedGame || isExistingGame}
+        onSelectedChange={onSelectedChange}
+      />
+
+      <VirtualTableRowCell className={styles.folder}>
+        {relativePath}
+      </VirtualTableRowCell>
+
+      <VirtualTableRowCell className={styles.game}>
+        <ImportGameSelectGameConnector
+          // @ts-expect-error - connector exported as any, types not inferred
+          id={id}
+          isExistingGame={isExistingGame}
+        />
+      </VirtualTableRowCell>
+
+      <VirtualTableRowCell className={styles.monitor}>
+        <FormInputGroup
+          type={inputTypes.MONITOR_GAMES_SELECT}
+          name="monitor"
+          value={monitor}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onChange={onInputChange as any}
+        />
+      </VirtualTableRowCell>
+
+      <VirtualTableRowCell className={styles.minimumAvailability}>
+        <FormInputGroup
+          type={inputTypes.AVAILABILITY_SELECT}
+          name="minimumAvailability"
+          value={minimumAvailability}
+          onChange={onInputChange}
+        />
+      </VirtualTableRowCell>
+
+      <VirtualTableRowCell className={styles.qualityProfile}>
+        <FormInputGroup
+          type={inputTypes.QUALITY_PROFILE_SELECT}
+          name="qualityProfileId"
+          value={qualityProfileId}
+          onChange={onInputChange}
+        />
+      </VirtualTableRowCell>
+    </>
+  );
+}
+
+ImportGameRow.defaultProps = {
+  items: [],
+};
+
+export default ImportGameRow;

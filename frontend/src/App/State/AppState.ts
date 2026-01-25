@@ -4,6 +4,7 @@ import CalendarAppState from './CalendarAppState';
 import CaptchaAppState from './CaptchaAppState';
 import CommandAppState from './CommandAppState';
 import CustomFiltersAppState from './CustomFiltersAppState';
+import DiscoverGameAppState from './DiscoverGameAppState';
 import ExtraFilesAppState from './ExtraFilesAppState';
 import GameBlocklistAppState from './GameBlocklistAppState';
 import GameCollectionAppState from './GameCollectionAppState';
@@ -63,6 +64,7 @@ export interface AppSectionState {
   isConnected: boolean;
   isDisconnected: boolean;
   isReconnecting: boolean;
+  isRestarting: boolean;
   isSidebarVisible: boolean;
   version: string;
   prevVersion?: string;
@@ -86,6 +88,7 @@ interface AppState {
   captcha: CaptchaAppState;
   commands: CommandAppState;
   customFilters: CustomFiltersAppState;
+  discoverGame: DiscoverGameAppState;
   extraFiles: ExtraFilesAppState;
   history: HistoryAppState;
   importGame: ImportGameAppState;

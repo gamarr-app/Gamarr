@@ -106,6 +106,10 @@ $hoverScale: 1.05;
   z-index: 3;
 }
 
+.checkInput {
+  position: relative;
+}
+
 .action {
   composes: button from '~Components/Link/IconButton.css';
 

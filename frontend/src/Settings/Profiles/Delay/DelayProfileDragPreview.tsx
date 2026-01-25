@@ -1,7 +1,7 @@
 import { useDragLayer, XYCoord } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { DELAY_PROFILE } from 'Helpers/dragTypes';
-import dimensions from 'Styles/Variables/dimensions.js';
+import dimensions from 'Styles/Variables/dimensions';
 import DelayProfile from './DelayProfile';
 import styles from './DelayProfileDragPreview.css';
 

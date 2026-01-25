@@ -88,7 +88,7 @@ function DelayProfiles() {
     setIsAddDelayProfileModalOpen(false);
   }, []);
 
-  const handleMeasure = useCallback(({ width: w }: { width: number }) => {
+  const handleMeasure = useCallback(({ width: w = 0 }: { width?: number }) => {
     setWidth(w);
   }, []);
 

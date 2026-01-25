@@ -1,7 +1,7 @@
 import { useDragLayer, XYCoord } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { QUALITY_PROFILE_ITEM } from 'Helpers/dragTypes';
-import dimensions from 'Styles/Variables/dimensions.js';
+import dimensions from 'Styles/Variables/dimensions';
 import QualityProfileItem from './QualityProfileItem';
 import styles from './QualityProfileItemDragPreview.css';
 

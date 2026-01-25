@@ -1,0 +1,26 @@
+import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
+import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
+import DiscoverGameOverviews from './DiscoverGameOverviews';
+
+function createMapStateToProps() {
+  return createSelector(
+    (state: AppState) => state.discoverGame.overviewOptions,
+    createUISettingsSelector(),
+    createDimensionsSelector(),
+    (overviewOptions, uiSettings, dimensions) => {
+      return {
+        overviewOptions,
+        showRelativeDates: uiSettings.showRelativeDates,
+        shortDateFormat: uiSettings.shortDateFormat,
+        longDateFormat: uiSettings.longDateFormat,
+        timeFormat: uiSettings.timeFormat,
+        isSmallScreen: dimensions.isSmallScreen,
+      };
+    }
+  );
+}
+
+export default connect(createMapStateToProps)(DiscoverGameOverviews);
