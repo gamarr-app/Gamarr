@@ -38,7 +38,7 @@
     "@tanstack/react-query": "5.74.3",
     "@types/node": "20.16.11",
     "@types/react": "18.3.21",
-    "@types/react-dom": "18.3.1",
+    "@types/react-dom": "18.3.7",
     "classnames": "2.5.1",
     "connected-react-router": "6.9.3",
     "copy-to-clipboard": "3.3.3",
@@ -171,7 +171,6 @@
     "yarn": "1.22.19"
   },
   "resolutions": {
-    "@types/react": "18.3.21",
-    "@types/react-dom": "18.3.1"
+    "@types/react": "18.3.21"
   }
 }
