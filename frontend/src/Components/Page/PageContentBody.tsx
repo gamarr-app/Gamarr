@@ -22,26 +22,26 @@ function PageContentBody(props: PageContentBodyProps) {
     ...otherProps
   } = props;
 
-    const onScrollWrapper = useCallback(
-      (payload: OnScroll) => {
-        if (onScroll && !isLocked()) {
-          onScroll(payload);
-        }
-      },
-      [onScroll]
-    );
+  const onScrollWrapper = useCallback(
+    (payload: OnScroll) => {
+      if (onScroll && !isLocked()) {
+        onScroll(payload);
+      }
+    },
+    [onScroll]
+  );
 
-    return (
-      <Scroller
-        ref={ref}
-        {...otherProps}
-        className={className}
-        scrollDirection="vertical"
-        onScroll={onScrollWrapper}
-      >
-        <div className={innerClassName}>{children}</div>
-      </Scroller>
-    );
+  return (
+    <Scroller
+      ref={ref}
+      {...otherProps}
+      className={className}
+      scrollDirection="vertical"
+      onScroll={onScrollWrapper}
+    >
+      <div className={innerClassName}>{children}</div>
+    </Scroller>
+  );
 }
 
 export default PageContentBody;

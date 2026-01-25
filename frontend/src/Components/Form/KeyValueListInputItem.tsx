@@ -1,4 +1,4 @@
-import { useCallback, type JSX } from 'react';
+import { type JSX, useCallback } from 'react';
 import IconButton from 'Components/Link/IconButton';
 import { icons } from 'Helpers/Props';
 import TextInput from './TextInput';

@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { useRef } from 'react';
-import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
+import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { QUALITY_PROFILE_ITEM } from 'Helpers/dragTypes';
 import QualityProfileItem from './QualityProfileItem';
 import QualityProfileItemGroup from './QualityProfileItemGroup';
@@ -30,7 +30,10 @@ interface QualityProfileItemDragSourceProps {
   isInGroup?: boolean;
   onCreateGroupPress?: (qualityId: number) => void;
   onDeleteGroupPress?: (groupId: number, value?: boolean) => void;
-  onQualityProfileItemAllowedChange: (qualityId: number, value: boolean) => void;
+  onQualityProfileItemAllowedChange: (
+    qualityId: number,
+    value: boolean
+  ) => void;
   onItemGroupAllowedChange?: (groupId: number, value: boolean) => void;
   onItemGroupNameChange?: (groupId: number, value: string) => void;
   onQualityProfileItemDragMove: (payload: {
@@ -41,7 +44,9 @@ interface QualityProfileItemDragSourceProps {
   onQualityProfileItemDragEnd: (didDrop: boolean) => void;
 }
 
-function QualityProfileItemDragSource(props: QualityProfileItemDragSourceProps) {
+function QualityProfileItemDragSource(
+  props: QualityProfileItemDragSourceProps
+) {
   const {
     editGroups,
     groupId,

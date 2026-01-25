@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { useCallback, useState, type JSX } from 'react';
+import { type JSX, useCallback, useState } from 'react';
 import { InputOnChange } from 'typings/inputs';
 import KeyValueListInputItem from './KeyValueListInputItem';
 import styles from './KeyValueListInput.css';
