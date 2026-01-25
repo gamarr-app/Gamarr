@@ -44,6 +44,7 @@ import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import BlocklistFilterModal from './BlocklistFilterModal';
 import BlocklistRow from './BlocklistRow';
+import styles from './Blocklist.css';
 
 function Blocklist() {
   const requestCurrentPage = useCurrentPage();
@@ -201,7 +202,7 @@ function Blocklist() {
 
   return (
     <SelectProvider items={items}>
-      <PageContent title={translate('Blocklist')}>
+      <PageContent className={styles.blocklist} title={translate('Blocklist')}>
         <PageToolbar>
           <PageToolbarSection>
             <PageToolbarButton

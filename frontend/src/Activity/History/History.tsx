@@ -34,6 +34,7 @@ import {
 import translate from 'Utilities/String/translate';
 import HistoryFilterModal from './HistoryFilterModal';
 import HistoryRow from './HistoryRow';
+import styles from './History.css';
 
 function History() {
   const requestCurrentPage = useCurrentPage();
@@ -126,7 +127,7 @@ function History() {
   }, [dispatch]);
 
   return (
-    <PageContent title={translate('History')}>
+    <PageContent className={styles.history} title={translate('History')}>
       <PageToolbar>
         <PageToolbarSection>
           <PageToolbarButton
