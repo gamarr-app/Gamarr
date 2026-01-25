@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using System.Linq;
 using System.Net;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -50,7 +50,6 @@ namespace NzbDrone.Core.MediaFiles
 
         public void DeleteGameFile(Game game, GameFile gameFile)
         {
-            var fullPath = Path.Combine(game.Path, gameFile.RelativePath);
             var rootFolder = _diskProvider.GetParentFolder(game.Path);
 
             if (!_diskProvider.FolderExists(rootFolder))
@@ -65,20 +64,44 @@ namespace NzbDrone.Core.MediaFiles
                 throw new NzbDroneClientException(HttpStatusCode.Conflict, "Game's root folder ({0}) is empty. Rescan will not update games as a failsafe.", rootFolder);
             }
 
-            if (_diskProvider.FolderExists(game.Path) && _diskProvider.FileExists(fullPath))
+            // Handle folder-based GameFiles (RelativePath is empty)
+            if (gameFile.IsFolder())
             {
-                _logger.Info("Deleting game file: {0}", fullPath);
-
-                var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(fullPath));
-
-                try
+                if (_diskProvider.FolderExists(game.Path) &&
+                    _diskProvider.GetFiles(game.Path, true).Any())
                 {
-                    _recycleBinProvider.DeleteFile(fullPath, subfolder);
+                    _logger.Info("Deleting game folder contents: {0}", game.Path);
+
+                    try
+                    {
+                        _recycleBinProvider.DeleteFolder(game.Path);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e, "Unable to delete game folder");
+                        throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete game folder");
+                    }
                 }
-                catch (Exception e)
+            }
+            else
+            {
+                var fullPath = gameFile.GetPath(game);
+
+                if (_diskProvider.FolderExists(game.Path) && _diskProvider.FileExists(fullPath))
                 {
-                    _logger.Error(e, "Unable to delete game file");
-                    throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete game file");
+                    _logger.Info("Deleting game file: {0}", fullPath);
+
+                    var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(fullPath));
+
+                    try
+                    {
+                        _recycleBinProvider.DeleteFile(fullPath, subfolder);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e, "Unable to delete game file");
+                        throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete game file");
+                    }
                 }
             }
 

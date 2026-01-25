@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -43,7 +42,13 @@ namespace NzbDrone.Core.MediaFiles
 
         private bool ChangeFileDate(GameFile gameFile, Game game)
         {
-            var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
+            // For folder-based GameFiles, skip changing file date (folders don't have a single date)
+            if (gameFile.IsFolder())
+            {
+                return false;
+            }
+
+            var gameFilePath = gameFile.GetPath(game);
 
             switch (_configService.FileDate)
             {

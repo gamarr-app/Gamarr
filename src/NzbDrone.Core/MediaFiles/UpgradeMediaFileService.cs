@@ -1,4 +1,4 @@
-using System.IO;
+using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
@@ -51,18 +51,36 @@ namespace NzbDrone.Core.MediaFiles
 
             if (existingFile != null)
             {
-                var gameFilePath = Path.Combine(localGame.Game.Path, existingFile.RelativePath);
-                var subfolder = rootFolder.GetRelativePath(_diskProvider.GetParentFolder(gameFilePath));
                 string recycleBinPath = null;
 
-                if (_diskProvider.FileExists(gameFilePath))
+                // Handle folder-based GameFiles (RelativePath is empty)
+                if (existingFile.IsFolder())
                 {
-                    _logger.Debug("Removing existing game file: {0}", existingFile);
-                    recycleBinPath = _recycleBinProvider.DeleteFile(gameFilePath, subfolder);
+                    if (_diskProvider.FolderExists(localGame.Game.Path) &&
+                        _diskProvider.GetFiles(localGame.Game.Path, true).Any())
+                    {
+                        _logger.Debug("Removing existing game folder contents: {0}", localGame.Game.Path);
+                        _recycleBinProvider.DeleteFolder(localGame.Game.Path);
+                    }
+                    else
+                    {
+                        _logger.Warn("Existing game folder empty or missing: {0}", localGame.Game.Path);
+                    }
                 }
                 else
                 {
-                    _logger.Warn("Existing game file missing from disk: {0}", gameFilePath);
+                    var gameFilePath = existingFile.GetPath(localGame.Game);
+                    var subfolder = rootFolder.GetRelativePath(_diskProvider.GetParentFolder(gameFilePath));
+
+                    if (_diskProvider.FileExists(gameFilePath))
+                    {
+                        _logger.Debug("Removing existing game file: {0}", existingFile);
+                        recycleBinPath = _recycleBinProvider.DeleteFile(gameFilePath, subfolder);
+                    }
+                    else
+                    {
+                        _logger.Warn("Existing game file missing from disk: {0}", gameFilePath);
+                    }
                 }
 
                 moveFileResult.OldFiles.Add(new DeletedGameFile(existingFile, recycleBinPath));

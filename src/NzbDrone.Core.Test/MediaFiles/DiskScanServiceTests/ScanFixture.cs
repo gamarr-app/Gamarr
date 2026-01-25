@@ -142,7 +142,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         }
 
         [Test]
-        public void should_not_scan_extras_subfolder()
+        public void should_create_folder_gamefile_when_folder_has_content()
         {
             GivenGameFolder();
 
@@ -155,59 +155,67 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                            Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
                        });
 
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
+
             Subject.Scan(_game);
+
+            // Should create a single folder-based GameFile
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Once());
+        }
+
+        [Test]
+        public void should_update_existing_folder_gamefile_when_size_changed()
+        {
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
+                       });
+
+            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty, Size = 50000L };
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { existingFile });
 
             Mocker.GetMock<IDiskProvider>()
-                  .Verify(v => v.GetFiles(It.IsAny<string>(), It.IsAny<bool>()), Times.Exactly(2));
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
 
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
+            Subject.Scan(_game);
+
+            // Should update the existing folder-based GameFile with new size
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.Is<GameFile>(gf => gf.Id == 1 && gf.Size == 100000L)), Times.Once());
         }
 
         [Test]
-        public void should_not_scan_various_extras_subfolders()
+        public void should_not_update_folder_gamefile_when_size_unchanged()
         {
             GivenGameFolder();
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Behind the Scenes", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Deleted Scenes", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "file3.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Interviews", "file4.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Sample", "file5.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Samples", "file6.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Scenes", "file7.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Shorts", "file8.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Trailers", "file9.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Other", "file9.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "The Count of Monte Cristo (2002) (1080p BluRay x265 10bit Tigole).iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
                        });
+
+            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty, Size = 100000L };
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { existingFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
 
             Subject.Scan(_game);
 
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_not_scan_featurettes_subfolders()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, "Featurettes", "An Epic Reborn.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "Deleted & Alternate Scenes.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "En Garde - Multi-Angle Dailies.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Featurettes", "Layer-By-Layer - Sound Design - Multiple Audio.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "The Count of Monte Cristo (2002) (1080p BluRay x265 10bit Tigole).iso").AsOsAgnostic(),
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
+            // Should not update if size is the same
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.IsAny<GameFile>()), Times.Never());
         }
 
         [Test]
@@ -226,7 +234,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         }
 
         [Test]
-        public void should_clean_but_not_import_if_game_folder_does_not_exist()
+        public void should_clean_but_not_create_gamefile_if_game_folder_does_not_exist()
         {
             GivenRootFolder(_otherGameFolder);
 
@@ -238,215 +246,78 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileTableCleanupService>()
                   .Verify(v => v.Clean(It.IsAny<Game>(), It.IsAny<List<string>>()), Times.Once());
 
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), _game, false), Times.Never());
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.IsAny<GameFile>()), Times.Never());
         }
 
         [Test]
-        public void should_not_scan_AppleDouble_subfolder()
+        public void should_delete_existing_gamefiles_when_folder_is_empty()
         {
             GivenGameFolder();
 
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, ".AppleDouble", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".appledouble", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
-                       });
+            // Folder exists but has no files
+            GivenFiles(new List<string>());
+
+            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty };
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { existingFile });
 
             Subject.Scan(_game);
 
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(existingFile, DeleteMediaFileReason.MissingFromDisk), Times.Once());
         }
 
         [Test]
-        public void should_scan_extras_game_and_subfolders()
-        {
-            _game.Path = @"C:\Test\Games\Extras".AsOsAgnostic();
-
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, "Extras", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".AppleDouble", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e02.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 2", "s02e01.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 2", "s02e02.iso").AsOsAgnostic(),
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 4), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_not_scan_subfolders_that_start_with_period()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, ".@__thumb", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".@__THUMB", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, ".hidden", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_not_scan_subfolder_of_season_folder_that_starts_with_a_period()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, "Season 1", ".@__thumb", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", ".@__THUMB", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", ".hidden", "file2.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", ".AppleDouble", "s01e01.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_not_scan_Synology_eaDir()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, "@eaDir", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_not_scan_thumb_folder()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, ".@__thumb", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_scan_dotHack_folder()
-        {
-            _game.Path = @"C:\Test\Games\.hack".AsOsAgnostic();
-
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, "Season 1", "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Season 1", "s01e01.iso").AsOsAgnostic()
-                       });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 2), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_find_files_at_root_of_game_folder()
+        public void should_migrate_file_based_to_folder_based()
         {
             GivenGameFolder();
 
             GivenFiles(new List<string>
                        {
                            Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "s01e01.iso").AsOsAgnostic()
                        });
+
+            // Existing file-based GameFile (has non-empty RelativePath)
+            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = "old_file.exe" };
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { existingFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
 
             Subject.Scan(_game);
 
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 2), _game, false), Times.Once());
+            // Should delete old file-based record
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(existingFile, DeleteMediaFileReason.ManualOverride), Times.Once());
+
+            // Should create new folder-based record
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Once());
         }
 
         [Test]
-        public void should_exclude_inline_extra_files()
+        public void should_publish_game_scanned_event()
         {
             GivenGameFolder();
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_game.Path, "Avatar (2009).iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "Deleted Scenes-deleted.iso").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "The World of Pandora-other.iso").AsOsAgnostic()
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
                        });
 
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_exclude_osx_metadata_files()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-                       {
-                           Path.Combine(_game.Path, "._24 The Status Quo Combustion.mp4").AsOsAgnostic(),
-                           Path.Combine(_game.Path, "24 The Status Quo Combustion.iso").AsOsAgnostic()
-                       });
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
 
             Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
-        }
-
-        [Test]
-        public void should_not_scan_excluded_files()
-        {
-            GivenGameFolder();
-
-            GivenFiles(new List<string>
-            {
-                Path.Combine(_game.Path, ".DS_Store").AsOsAgnostic(),
-                Path.Combine(_game.Path, ".unmanic").AsOsAgnostic(),
-                Path.Combine(_game.Path, ".unmanic.part").AsOsAgnostic(),
-                Path.Combine(_game.Path, "24 The Status Quo Combustion.iso").AsOsAgnostic()
-            });
-
-            Subject.Scan(_game);
-
-            Mocker.GetMock<IMakeImportDecision>()
-                .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1), _game, false), Times.Once());
 
             Mocker.GetMock<IEventAggregator>()
-                .Verify(v => v.PublishEvent(It.Is<GameScannedEvent>(c => c.Game != null && c.PossibleExtraFiles.Count == 0)), Times.Once());
+                .Verify(v => v.PublishEvent(It.IsAny<GameScannedEvent>()), Times.Once());
         }
     }
 }

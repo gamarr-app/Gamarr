@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -67,10 +66,16 @@ namespace NzbDrone.Core.MediaFiles
         {
             foreach (var file in files)
             {
-                var gameFilePath = Path.Combine(game.Path, file.RelativePath);
+                // Skip folder-based GameFiles (they represent the game folder itself)
+                if (file.IsFolder())
+                {
+                    continue;
+                }
+
+                var gameFilePath = file.GetPath(game);
 
                 var newName = _filenameBuilder.BuildFileName(game, file);
-                var newPath = _filenameBuilder.BuildFilePath(game, newName, Path.GetExtension(gameFilePath));
+                var newPath = _filenameBuilder.BuildFilePath(game, newName, System.IO.Path.GetExtension(gameFilePath));
 
                 if (!gameFilePath.PathEquals(newPath, StringComparison.Ordinal))
                 {
@@ -92,8 +97,14 @@ namespace NzbDrone.Core.MediaFiles
 
             foreach (var gameFile in gameFiles)
             {
+                // Skip folder-based GameFiles (they represent the game folder itself)
+                if (gameFile.IsFolder())
+                {
+                    continue;
+                }
+
                 var previousRelativePath = gameFile.RelativePath;
-                var previousPath = Path.Combine(game.Path, gameFile.RelativePath);
+                var previousPath = gameFile.GetPath(game);
 
                 try
                 {

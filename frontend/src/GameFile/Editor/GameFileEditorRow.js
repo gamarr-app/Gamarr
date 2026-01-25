@@ -113,13 +113,17 @@ class GameFileEditorRow extends Component {
             }
 
             if (name === 'relativePath') {
+              // Empty relativePath means this is a folder-based GameFile
+              const displayPath = relativePath || translate('GameFolder');
+              const isFolder = !relativePath;
+
               return (
                 <TableRowCell
                   key={name}
                   className={styles.relativePath}
-                  title={relativePath}
+                  title={isFolder ? translate('GameFolderTooltip') : relativePath}
                 >
-                  {relativePath}
+                  {displayPath}
                 </TableRowCell>
               );
             }

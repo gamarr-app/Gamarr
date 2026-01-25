@@ -78,9 +78,9 @@ namespace NzbDrone.Core.MediaFiles
             string destinationPath;
             if (isFolder)
             {
-                // For folders, move to game's root path with folder name
-                var folderName = new DirectoryInfo(sourcePath).Name;
-                destinationPath = Path.Combine(localGame.Game.Path, folderName);
+                // For folders, move contents directly into game.Path
+                // TransferFolder will move the contents of sourcePath into destinationPath
+                destinationPath = localGame.Game.Path;
             }
             else
             {
@@ -102,9 +102,9 @@ namespace NzbDrone.Core.MediaFiles
             string destinationPath;
             if (isFolder)
             {
-                // For folders, copy to game's root path with folder name
-                var folderName = new DirectoryInfo(sourcePath).Name;
-                destinationPath = Path.Combine(localGame.Game.Path, folderName);
+                // For folders, copy contents directly into game.Path
+                // TransferFolder will copy the contents of sourcePath into destinationPath
+                destinationPath = localGame.Game.Path;
             }
             else
             {
@@ -136,22 +136,18 @@ namespace NzbDrone.Core.MediaFiles
                     throw new DirectoryNotFoundException($"Game folder path does not exist: {sourcePath}");
                 }
 
-                if (sourcePath == destinationPath)
+                // For folder imports, destinationPath is game.Path - we move contents INTO it
+                // Ensure the game folder exists
+                if (!_diskProvider.FolderExists(destinationPath))
                 {
-                    throw new SameFilenameException("Folder not moved, source and destination are the same", sourcePath);
+                    _diskProvider.CreateFolder(destinationPath);
                 }
 
-                // Ensure parent directory exists
-                var parentDir = Path.GetDirectoryName(destinationPath);
-                if (!_diskProvider.FolderExists(parentDir))
-                {
-                    _diskProvider.CreateFolder(parentDir);
-                }
-
-                // Move or copy the folder using DiskTransferService
+                // Move or copy the folder contents using DiskTransferService
                 _diskTransferService.TransferFolder(sourcePath, destinationPath, mode);
 
-                gameFile.RelativePath = game.Path.GetRelativePath(destinationPath);
+                // Folder-based GameFile has empty RelativePath (the folder itself IS the game)
+                gameFile.RelativePath = string.Empty;
 
                 if (localGame is not null)
                 {
