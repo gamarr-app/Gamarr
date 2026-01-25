@@ -128,15 +128,27 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
     return null;
   }
 
-  // Don't show if nothing to display (no library games and still loading or no external)
-  if (libraryGames.length === 0 && !isFetching && externalGames.length === 0) {
+  // Check if we're still waiting to fetch external games
+  const hasPendingFetches = missingIgdbIds.some(
+    (id) => !fetchedIdsRef.current.has(id)
+  );
+
+  // Don't show if nothing to display and nothing pending
+  if (
+    libraryGames.length === 0 &&
+    !isFetching &&
+    !hasPendingFetches &&
+    externalGames.length === 0
+  ) {
     return null;
   }
+
+  const isLoading = isFetching || hasPendingFetches;
 
   return (
     <FieldSet legend={translate('SimilarGames')}>
       <div className={styles.container}>
-        {isFetching && libraryGames.length === 0 ? (
+        {isLoading && libraryGames.length === 0 && externalGames.length === 0 ? (
           <LoadingIndicator />
         ) : (
           <div className={styles.grid}>
