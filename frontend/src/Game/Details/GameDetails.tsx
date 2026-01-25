@@ -99,14 +99,19 @@ function getFanartUrl(images: Image[]) {
 function createGameFilesSelector() {
   return createSelector(
     (state: AppState) => state.gameFiles,
-    ({ items, isFetching, isPopulated, error }) => {
+    (_state: AppState, gameFileId: number | undefined) => gameFileId,
+    ({ items, isFetching, isPopulated, error }, gameFileId) => {
       const hasGameFiles = !!items.length;
+      const primaryFile = gameFileId
+        ? items.find((f) => f.id === gameFileId)
+        : items[0];
 
       return {
         isGameFilesFetching: isFetching,
         isGameFilesPopulated: isPopulated,
         gameFilesError: error,
         hasGameFiles,
+        gameFileVersion: primaryFile?.version as string | undefined,
       };
     }
   );
@@ -123,8 +128,14 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const game = useGame(gameId);
   const allGames = useSelector(createAllGamesSelector());
 
-  const { isGameFilesFetching, gameFilesError, hasGameFiles } = useSelector(
-    createGameFilesSelector()
+  const gameFilesSelector = useMemo(createGameFilesSelector, []);
+  const {
+    isGameFilesFetching,
+    gameFilesError,
+    hasGameFiles,
+    gameFileVersion,
+  } = useSelector((state: AppState) =>
+    gameFilesSelector(state, game?.gameFileId)
   );
   const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
   const isSidebarVisible = useSelector(
@@ -777,6 +788,16 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     {formatBytes(sizeOnDisk)}
                   </span>
                 </InfoLabel>
+
+                {gameFileVersion ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Version')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.version}>{gameFileVersion}</span>
+                  </InfoLabel>
+                ) : null}
 
                 {collection ? (
                   <InfoLabel
