@@ -1,6 +1,8 @@
+import { GameMonitor } from 'Game/Game';
+
 interface AddGameDefaults {
   rootFolderPath: string;
-  monitor: string;
+  monitor: GameMonitor;
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
