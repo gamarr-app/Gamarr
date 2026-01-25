@@ -1,6 +1,13 @@
 import classNames from 'classnames';
 import { Placement } from 'popper.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Manager, Popper, Reference } from 'react-popper';
 import Portal from 'Components/Portal';
 import { kinds, tooltipPositions } from 'Helpers/Props';
@@ -12,8 +19,8 @@ import styles from './Tooltip.css';
 export interface TooltipProps {
   className?: string;
   bodyClassName?: string;
-  anchor: React.ReactNode;
-  tooltip: string | React.ReactNode;
+  anchor: ReactNode;
+  tooltip: string | ReactNode;
   kind?: Extract<Kind, keyof typeof styles>;
   position?: (typeof tooltipPositions.all)[number];
   canFlip?: boolean;

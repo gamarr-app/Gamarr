@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { ComponentProps, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
@@ -44,7 +44,7 @@ interface DownloadClientsCollectionState {
 }
 
 // TODO: This feels janky to do, but not sure of a better way currently
-type OnSelectedChangeCallback = React.ComponentProps<
+type OnSelectedChangeCallback = ComponentProps<
   typeof ManageDownloadClientsModalRow
 >['onSelectedChange'];
 

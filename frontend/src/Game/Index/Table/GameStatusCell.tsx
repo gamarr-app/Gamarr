@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { ElementType, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Icon from 'Components/Icon';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
@@ -17,7 +17,7 @@ interface GameStatusCellProps {
   status: GameStatus;
   isSelectMode: boolean;
   isSaving: boolean;
-  component?: React.ElementType;
+  component?: ElementType;
 }
 
 function GameStatusCell(props: GameStatusCellProps) {

@@ -1,5 +1,12 @@
 import classNames from 'classnames';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ElementType,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
 import QueueStatus from 'Activity/Queue/Status/QueueStatus';
@@ -28,11 +35,11 @@ interface SidebarItem {
   isActiveParent?: boolean;
   isParentItem?: boolean;
   isChildItem?: boolean;
-  statusComponent?: React.ElementType;
+  statusComponent?: ElementType;
   children?: {
     title: string | (() => string);
     to: string;
-    statusComponent?: React.ElementType;
+    statusComponent?: ElementType;
   }[];
 }
 

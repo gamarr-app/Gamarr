@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import Icon, { IconName } from 'Components/Icon';
 import { icons } from 'Helpers/Props';
 import MenuItem, { MenuItemProps } from './MenuItem';
@@ -6,7 +6,7 @@ import styles from './SelectedMenuItem.css';
 
 export interface SelectedMenuItemProps extends Omit<MenuItemProps, 'onPress'> {
   name?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   selectedIconName?: IconName;
   isSelected: boolean;
   onPress: (name: string) => void;

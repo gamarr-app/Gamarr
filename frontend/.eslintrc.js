@@ -307,7 +307,7 @@ module.exports = {
     'react/jsx-handler-names': [2, { eventHandlerPrefix: '(on|dispatch)', eventHandlerPropPrefix: 'on' }],
     'react/jsx-no-undef': 2,
     'react/jsx-pascal-case': 2,
-    'react/jsx-uses-react': 2,
+    'react/jsx-uses-react': 'off',
     // Explicitly disabled in case we want to enable them again
     'react/no-did-mount-set-state': 0,
     'react/no-did-update-set-state': 0,
@@ -316,7 +316,7 @@ module.exports = {
     'react/no-unknown-property': 2,
     'react/prefer-es6-class': 2,
     'react/prop-types': 2,
-    'react/react-in-jsx-scope': 2,
+    'react/react-in-jsx-scope': 'off',
     'react/self-closing-comp': 2,
     'react/sort-comp': 2,
     'react/jsx-wrap-multilines': 2,

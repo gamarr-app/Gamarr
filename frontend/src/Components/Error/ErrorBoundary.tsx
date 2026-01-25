@@ -1,9 +1,9 @@
 import * as sentry from '@sentry/browser';
-import { Component, ErrorInfo } from 'react';
+import { Component, ElementType, ErrorInfo, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  errorComponent: React.ElementType;
+  children: ReactNode;
+  errorComponent: ElementType;
   onModalClose?: () => void;
 }
 

@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react';
 import { useDragLayer, XYCoord } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { DELAY_PROFILE } from 'Helpers/dragTypes';
@@ -40,7 +41,7 @@ function DelayProfileDragPreview({ width }: DelayProfileDragPreviewProps) {
   const handleOffset = width - dragHandleWidth;
   const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
 
-  const style: React.CSSProperties = {
+  const style: CSSProperties = {
     width,
     position: 'absolute',
     WebkitTransform: transform,

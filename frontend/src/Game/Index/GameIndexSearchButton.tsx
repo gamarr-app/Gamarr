@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
 import { GAME_SEARCH } from 'Commands/commandNames';
@@ -14,7 +14,7 @@ import getSelectedIds from 'Utilities/Table/getSelectedIds';
 interface GameIndexSearchButtonProps {
   isSelectMode: boolean;
   selectedFilterKey: string;
-  overflowComponent: React.FunctionComponent<never>;
+  overflowComponent: FunctionComponent<never>;
 }
 
 function GameIndexSearchButton(props: GameIndexSearchButtonProps) {

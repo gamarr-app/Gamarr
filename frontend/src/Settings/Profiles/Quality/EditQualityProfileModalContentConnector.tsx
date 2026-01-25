@@ -1,5 +1,11 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -556,7 +562,7 @@ function EditQualityProfileModalContentConnector({
       isSaving={isSaving}
       saveError={saveError}
       item={
-        item as unknown as React.ComponentProps<
+        item as unknown as ComponentProps<
           typeof EditQualityProfileModalContent
         >['item']
       }

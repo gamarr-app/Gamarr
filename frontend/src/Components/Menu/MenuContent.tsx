@@ -1,4 +1,4 @@
-import { CSSProperties, Ref, useId } from 'react';
+import { CSSProperties, ReactNode, Ref, useId } from 'react';
 import Scroller from 'Components/Scroller/Scroller';
 import styles from './MenuContent.css';
 
@@ -6,7 +6,7 @@ interface MenuContentProps {
   forwardedRef?: Ref<HTMLDivElement> | undefined;
   className?: string;
   id?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   style?: CSSProperties;
   isOpen?: boolean;
 }

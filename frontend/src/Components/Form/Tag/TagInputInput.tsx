@@ -1,4 +1,4 @@
-import { MouseEvent, Ref, useCallback } from 'react';
+import { ElementType, MouseEvent, Ref, useCallback } from 'react';
 import { Kind } from 'Helpers/Props/kinds';
 import { TagBase } from './TagInput';
 import { TagInputTagProps } from './TagInputTag';
@@ -12,7 +12,7 @@ interface TagInputInputProps<T extends TagBase> {
   kind: Kind;
   isFocused: boolean;
   canEdit: boolean;
-  tagComponent: React.ElementType;
+  tagComponent: ElementType;
   onTagDelete: TagInputTagProps<T>['onDelete'];
   onTagEdit: TagInputTagProps<T>['onEdit'];
   onInputContainerPress: () => void;
