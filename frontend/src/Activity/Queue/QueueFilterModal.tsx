@@ -59,12 +59,12 @@ export default function QueueFilterModal({
       selectedFilterKey={selectedFilterKey}
       filters={filters}
       customFilters={customFilters}
-      onFilterSelect={onFilterSelect}
-      onModalClose={onModalClose}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType={customFilterType}
       dispatchSetFilter={dispatchSetFilter}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
     />
   );
 }

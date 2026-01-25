@@ -43,12 +43,12 @@ export default function GameCollectionFilterModal({
       selectedFilterKey={selectedFilterKey}
       filters={filters}
       customFilters={customFilters}
-      onFilterSelect={onFilterSelect}
-      onModalClose={onModalClose}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType="gameCollections"
       dispatchSetFilter={dispatchSetFilter}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
     />
   );
 }
