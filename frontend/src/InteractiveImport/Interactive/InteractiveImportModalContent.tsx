@@ -566,7 +566,7 @@ function InteractiveImportModalContent(
   );
 
   const onFilterExistingFilesChange = useCallback(
-    (value: string | undefined) => {
+    (value: string) => {
       const filter = value !== 'all';
 
       setFilterExistingFiles(filter);

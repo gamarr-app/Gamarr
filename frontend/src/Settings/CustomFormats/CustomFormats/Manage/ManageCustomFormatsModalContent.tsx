@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CustomFormatAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -15,12 +14,14 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { kinds } from 'Helpers/Props';
+import { SortDirection } from 'Helpers/Props/sortDirections';
 import {
   bulkDeleteCustomFormats,
   bulkEditCustomFormats,
   setManageCustomFormatsSort,
 } from 'Store/Actions/settingsActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import CustomFormat from 'typings/CustomFormat';
 import { CheckInputChanged } from 'typings/inputs';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
@@ -28,6 +29,17 @@ import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import ManageCustomFormatsEditModal from './Edit/ManageCustomFormatsEditModal';
 import ManageCustomFormatsModalRow from './ManageCustomFormatsModalRow';
 import styles from './ManageCustomFormatsModalContent.css';
+
+interface CustomFormatsCollectionState {
+  isFetching: boolean;
+  isPopulated: boolean;
+  isDeleting: boolean;
+  isSaving: boolean;
+  error: Error | null;
+  items: CustomFormat[];
+  sortKey: string;
+  sortDirection: SortDirection;
+}
 
 // TODO: This feels janky to do, but not sure of a better way currently
 type OnSelectedChangeCallback = React.ComponentProps<
@@ -72,9 +84,9 @@ function ManageCustomFormatsModalContent(
     items,
     sortKey,
     sortDirection,
-  }: CustomFormatAppState = useSelector(
+  } = useSelector(
     createClientSideCollectionSelector('settings.customFormats')
-  );
+  ) as CustomFormatsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

@@ -4,6 +4,7 @@ import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
+import Game from 'Game/Game';
 import {
   filterBuilderTypes,
   filterBuilderValueTypes,
@@ -822,9 +823,10 @@ export const actionHandlers = handleThunks({
     const items = state.discoverGame.items;
     const itemToUpdate = _.find(items, { igdbId });
 
-    const newGame = getNewGame(_.cloneDeep(itemToUpdate), payload) as {
-      id: number;
-    };
+    const newGame = getNewGame(
+      _.cloneDeep(itemToUpdate) as unknown as Game,
+      payload
+    ) as { id: number };
     newGame.id = 0;
 
     const promise = createAjaxRequest({
@@ -898,7 +900,7 @@ export const actionHandlers = handleThunks({
         ) {
           if (!selectedGame.isExisting) {
             const newGame = getNewGame(
-              _.cloneDeep(selectedGame),
+              _.cloneDeep(selectedGame) as unknown as Game,
               addOptions
             ) as { id: number; igdbId: number };
             newGame.id = 0;
@@ -1037,7 +1039,9 @@ export const reducers = createHandleActions(
       state: DiscoverGameState,
       { payload }: { payload: Partial<DiscoverGameDefaults> }
     ) {
-      const newState = getSectionState(state, section);
+      const newState = getSectionState<{
+        defaults: DiscoverGameDefaults;
+      }>(state, section);
 
       newState.defaults = {
         ...newState.defaults,

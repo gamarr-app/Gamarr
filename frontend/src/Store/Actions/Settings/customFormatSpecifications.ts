@@ -190,7 +190,7 @@ export default {
 
       const saveData = getProviderState(
         { id, ...otherPayload },
-        getState as () => Record<string, unknown>,
+        getState as unknown as () => Record<string, unknown>,
         section,
         false
       ) as SpecificationItem;
@@ -199,7 +199,7 @@ export default {
         const items = getState().settings.customFormatSpecifications.items;
         const itemsWithId = items.map((item, index) => ({
           ...item,
-          id: (item as SpecificationItem).id ?? index + 1,
+          id: item.id ?? index + 1,
         }));
         saveData.id = getNextId(itemsWithId);
       }
@@ -261,14 +261,7 @@ export default {
       state: object,
       { payload }: { payload: SchemaPayload }
     ) => {
-      return selectProviderSchema(
-        state,
-        section,
-        payload,
-        (selectedSchema: unknown) => {
-          return selectedSchema;
-        }
-      );
+      return selectProviderSchema(state, section, payload);
     },
 
     [CLONE_CUSTOM_FORMAT_SPECIFICATION]: function (

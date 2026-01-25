@@ -143,9 +143,8 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
     customFilters,
     sortKey,
     sortDirection,
-  }: ReleasesAppState & ClientSideCollectionAppState = useSelector(
-    createClientSideCollectionSelector('releases')
-  );
+  } = useSelector(createClientSideCollectionSelector('releases')) as ReleasesAppState &
+    ClientSideCollectionAppState;
 
   const dispatch = useDispatch();
 

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment, { Moment } from 'moment';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
-import AppState, { CustomFilter } from 'App/State/AppState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
 import * as calendarViews from 'Calendar/calendarViews';
 import * as commandNames from 'Commands/commandNames';
 import {
@@ -43,17 +43,6 @@ interface CalendarOptions {
   fullColorEvents: boolean;
 }
 
-interface CalendarFilter {
-  key: string;
-  value: unknown[];
-  type: string;
-}
-
-interface CalendarFilterItem {
-  key: string;
-  label: () => string;
-  filters: CalendarFilter[];
-}
 
 interface FilterBuilderProp {
   name: string;
@@ -76,7 +65,7 @@ export interface CalendarState {
   searchMissingCommandId: number | null;
   options: CalendarOptions;
   selectedFilterKey: string;
-  filters: CalendarFilterItem[];
+  filters: Filter[];
   filterBuilderProps: FilterBuilderProp[];
 }
 
@@ -115,7 +104,7 @@ export const defaultState: CalendarState = {
       filters: [
         {
           key: 'unmonitored',
-          value: [true],
+          value: true,
           type: filterTypes.EQUAL,
         },
       ],
@@ -126,7 +115,7 @@ export const defaultState: CalendarState = {
       filters: [
         {
           key: 'unmonitored',
-          value: [false],
+          value: false,
           type: filterTypes.EQUAL,
         },
       ],
@@ -395,19 +384,15 @@ export const actionHandlers = handleThunks({
       end,
     };
 
-    selectedFilters.forEach(
-      (selectedFilter: { key: string; value: unknown[] }) => {
-        if (selectedFilter.key === 'unmonitored') {
-          requestParams.unmonitored = (
-            selectedFilter.value as boolean[]
-          ).includes(true);
-        }
-
-        if (selectedFilter.key === 'tags') {
-          requestParams.tags = (selectedFilter.value as string[]).join(',');
-        }
+    selectedFilters.forEach((selectedFilter) => {
+      if (selectedFilter.key === 'unmonitored') {
+        requestParams.unmonitored = selectedFilter.value === true;
       }
-    );
+
+      if (selectedFilter.key === 'tags') {
+        requestParams.tags = (selectedFilter.value as string[]).join(',');
+      }
+    });
 
     requestParams.unmonitored = requestParams.unmonitored ?? false;
 

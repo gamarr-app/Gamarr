@@ -2,7 +2,7 @@ import { throttle } from 'lodash';
 import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
-import Game from 'Game/Game';
+import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
@@ -22,7 +22,7 @@ const bodyPaddingSmallScreen = parseInt(
 );
 
 interface RowItemData {
-  items: Game[];
+  items: GameIndexItem[];
   sortKey: string;
   posterWidth: number;
   posterHeight: number;
@@ -32,7 +32,7 @@ interface RowItemData {
 }
 
 interface GameIndexOverviewsProps {
-  items: Game[];
+  items: GameIndexItem[];
   sortKey: string;
   sortDirection?: string;
   jumpToCharacter?: string;

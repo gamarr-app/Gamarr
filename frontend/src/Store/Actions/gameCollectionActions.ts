@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
+import GameType from 'Game/Game';
 import {
   filterBuilderTypes,
   filterBuilderValueTypes,
@@ -157,7 +158,8 @@ export const defaultState = {
       filterValue: unknown,
       type: string
     ): boolean {
-      const predicate = filterTypePredicates[type];
+      const predicate =
+        filterTypePredicates[type as keyof typeof filterTypePredicates];
 
       const allGenres = item.games.flatMap(({ genres }) => genres);
       const genres = Array.from(new Set(allGenres));
@@ -169,7 +171,8 @@ export const defaultState = {
       filterValue: unknown,
       type: string
     ): boolean {
-      const predicate = filterTypePredicates[type];
+      const predicate =
+        filterTypePredicates[type as keyof typeof filterTypePredicates];
       const { games } = item;
 
       const totalGames = games.length;
@@ -354,7 +357,10 @@ export const actionHandlers = handleThunks({
 
     const { igdbId, title } = payload;
 
-    const newGame = getNewGame({ igdbId, title }, payload);
+    const newGame = getNewGame(
+      { igdbId, title } as unknown as GameType,
+      payload
+    );
     newGame.id = 0;
 
     const promise = createAjaxRequest({

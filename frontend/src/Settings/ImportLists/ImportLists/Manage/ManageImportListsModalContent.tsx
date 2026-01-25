@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ImportListAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -19,6 +18,7 @@ import {
   bulkEditImportLists,
 } from 'Store/Actions/settingsActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import ImportList from 'typings/ImportList';
 import { CheckInputChanged } from 'typings/inputs';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
@@ -27,6 +27,15 @@ import ManageImportListsEditModal from './Edit/ManageImportListsEditModal';
 import ManageImportListsModalRow from './ManageImportListsModalRow';
 import TagsModal from './Tags/TagsModal';
 import styles from './ManageImportListsModalContent.css';
+
+interface ImportListsCollectionState {
+  isFetching: boolean;
+  isPopulated: boolean;
+  isDeleting: boolean;
+  isSaving: boolean;
+  error: Error | null;
+  items: ImportList[];
+}
 
 // TODO: This feels janky to do, but not sure of a better way currently
 type OnSelectedChangeCallback = React.ComponentProps<
@@ -100,9 +109,9 @@ function ManageImportListsModalContent(
     isSaving,
     error,
     items,
-  }: ImportListAppState = useSelector(
+  } = useSelector(
     createClientSideCollectionSelector('settings.importLists')
-  );
+  ) as ImportListsCollectionState;
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

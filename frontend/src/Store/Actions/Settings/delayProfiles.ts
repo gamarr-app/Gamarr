@@ -9,6 +9,7 @@ import createRemoveItemHandler from 'Store/Actions/Creators/createRemoveItemHand
 import createSaveProviderHandler from 'Store/Actions/Creators/createSaveProviderHandler';
 import createSetSettingValueReducer from 'Store/Actions/Creators/Reducers/createSetSettingValueReducer';
 import { createThunk } from 'Store/thunks';
+import DelayProfile from 'typings/DelayProfile';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 
 interface SettingValuePayload {
@@ -19,12 +20,6 @@ interface SettingValuePayload {
 interface ReorderPayload {
   id: number;
   moveIndex: number;
-}
-
-interface DelayProfile {
-  id: number;
-  order: number;
-  [key: string]: unknown;
 }
 
 const section = 'settings.delayProfiles';

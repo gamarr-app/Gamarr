@@ -48,7 +48,7 @@ interface CollectionState<T> extends FilterState<T>, SortState<T> {
   items: T[];
 }
 
-interface CollectionResult<T> {
+export interface CollectionResult<T> {
   items: T[];
   totalItems: number;
   customFilters: CustomFilter[];

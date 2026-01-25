@@ -34,7 +34,7 @@ interface QueueItem {
 
 interface Column {
   name: string;
-  label?: () => string;
+  label?: (() => string) | React.ReactElement;
   columnLabel?: () => string;
   isSortable?: boolean;
   isVisible: boolean;
@@ -334,12 +334,12 @@ export const persistState = [
 ];
 
 function fetchDataAugmenter(
-  getState: () => AppState,
+  getState: () => unknown,
   _payload: unknown,
   data: Record<string, unknown>
 ) {
   data.includeUnknownGameItems =
-    getState().queue.options.includeUnknownGameItems;
+    (getState() as AppState).queue.options.includeUnknownGameItems;
 }
 
 export const FETCH_QUEUE_STATUS = 'queue/fetchQueueStatus';
@@ -396,12 +396,12 @@ export const actionHandlers = handleThunks({
     payload: Record<string, unknown>,
     dispatch: AppDispatch
   ) {
-    let params = payload;
+    let params: Record<string, unknown> = payload;
 
     if (params && !_.isEmpty(params)) {
       dispatch(set({ section: details, params }));
     } else {
-      params = getState().queue.details.params;
+      params = getState().queue.details.params as Record<string, unknown>;
     }
 
     fetchQueueDetailsHelper(getState, params, dispatch);

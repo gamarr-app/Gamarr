@@ -47,10 +47,20 @@ export const RESET_CAPTCHA = 'captcha/resetCaptcha';
 // Action Creators
 
 interface RefreshCaptchaPayload {
+  provider: string;
+  providerData: {
+    fields?: unknown;
+    [key: string]: { value: unknown } | unknown;
+  };
   [key: string]: unknown;
 }
 
 interface GetCaptchaCookiePayload {
+  provider: string;
+  providerData: {
+    fields?: unknown;
+    [key: string]: { value: unknown } | unknown;
+  };
   captchaResponse: string;
   [key: string]: unknown;
 }
@@ -158,5 +168,6 @@ export const reducers = createHandleActions(
       return updateSectionState(state, section, defaultState);
     },
   },
-  defaultState
+  defaultState,
+  section
 );

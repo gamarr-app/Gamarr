@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { FixedSizeGrid as Grid, GridChildComponentProps } from 'react-window';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
-import Game from 'Game/Game';
 import GameIndexPoster from 'Game/Index/Posters/GameIndexPoster';
+import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import dimensions from 'Styles/Variables/dimensions';
@@ -35,13 +35,13 @@ interface CellItemData {
     posterWidth: number;
     posterHeight: number;
   };
-  items: Game[];
+  items: GameIndexItem[];
   sortKey: string;
   isSelectMode: boolean;
 }
 
 interface GameIndexPostersProps {
-  items: Game[];
+  items: GameIndexItem[];
   sortKey: string;
   sortDirection?: SortDirection;
   jumpToCharacter?: string;

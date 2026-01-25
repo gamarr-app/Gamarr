@@ -15,7 +15,8 @@ interface SectionState {
 }
 
 type GetState = () => AppState;
-type FetchHandler = () => { type: string };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type FetchHandler = () => any;
 
 function createBatchToggleGameMonitoredHandler(
   section: string,

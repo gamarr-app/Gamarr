@@ -189,7 +189,19 @@ export const actionHandlers = handleThunks({
       foundGame = _.find(items, { steamAppId });
     }
 
-    const newGame = getNewGame(_.cloneDeep(foundGame), payload) as {
+    if (!foundGame) {
+      dispatch(
+        set({
+          section,
+          isAdding: false,
+          isAdded: false,
+          addError: { message: 'Game not found' },
+        })
+      );
+      return;
+    }
+
+    const newGame = getNewGame(_.cloneDeep(foundGame) as Parameters<typeof getNewGame>[0], payload) as {
       id: number;
       collection?: { igdbId: number };
       igdbId: number;
@@ -212,14 +224,17 @@ export const actionHandlers = handleThunks({
         images?: unknown;
         [key: string]: unknown;
       }) => {
+        const clonedData = _.cloneDeep(data);
         const updatedItem: {
           internalId: number;
           id: number;
           images?: unknown;
           [key: string]: unknown;
-        } = _.cloneDeep(data);
-        updatedItem.internalId = updatedItem.id;
-        updatedItem.id = data.igdbId;
+        } = {
+          ...clonedData,
+          internalId: clonedData.id,
+          id: data.igdbId,
+        };
         delete updatedItem.images;
 
         const actions = [
@@ -286,7 +301,7 @@ export const reducers = createHandleActions(
       state: AddGameState,
       { payload }: { payload: Partial<AddGameDefaults> }
     ) {
-      const newState = getSectionState(state, section);
+      const newState = getSectionState<AddGameState>(state, section);
 
       newState.defaults = {
         ...newState.defaults,
