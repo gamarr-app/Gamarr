@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { createSelector } from 'reselect';
@@ -22,27 +22,11 @@ interface ExternalGame {
   images: Image[];
 }
 
-function createRecommendedGamesSelector(igdbIds: number[]) {
-  return createSelector(
-    (state: AppState) => state.games,
-    (games) => {
-      const { items } = games;
-
-      const igdbIdSet = new Set(igdbIds);
-      const recommended = items.filter(
-        (game) => igdbIdSet.has(game.igdbId) && !game.isDlc
-      );
-
-      // Return both the games in library and the set of IGDB IDs in library
-      const libraryIgdbIds = new Set(items.map((g) => g.igdbId));
-
-      return {
-        libraryGames: recommended,
-        libraryIgdbIds,
-      };
-    }
-  );
-}
+// Stable selector that doesn't depend on recommendations array
+const gamesSelector = createSelector(
+  (state: AppState) => state.games.items,
+  (items) => items
+);
 
 interface RecommendationsListProps {
   gameId: number;
@@ -51,64 +35,93 @@ interface RecommendationsListProps {
 function RecommendationsList({ gameId }: RecommendationsListProps) {
   const game = useGame(gameId);
   const gameRecommendations = game?.recommendations;
+  const allGames = useSelector(gamesSelector);
+
+  const [externalGames, setExternalGames] = useState<ExternalGame[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const fetchedIdsRef = useRef<Set<number>>(new Set());
 
   const recommendations = useMemo(() => {
     return gameRecommendations ?? [];
   }, [gameRecommendations]);
 
-  const { libraryGames, libraryIgdbIds } = useSelector(
-    createRecommendedGamesSelector(recommendations)
-  );
+  // Memoize library games that match recommendations
+  const libraryGames = useMemo(() => {
+    if (!recommendations.length) {
+      return [];
+    }
+    const igdbIdSet = new Set(recommendations);
+    return allGames.filter((g) => igdbIdSet.has(g.igdbId) && !g.isDlc);
+  }, [recommendations, allGames]);
 
-  const [externalGames, setExternalGames] = useState<ExternalGame[]>([]);
-  const [isFetching, setIsFetching] = useState(false);
+  // Memoize which IGDB IDs are in the library
+  const libraryIgdbIds = useMemo(() => {
+    return new Set(allGames.map((g) => g.igdbId));
+  }, [allGames]);
 
   // Find which recommendations are NOT in the library
   const missingIgdbIds = useMemo(() => {
     return recommendations.filter((igdbId) => !libraryIgdbIds.has(igdbId));
   }, [recommendations, libraryIgdbIds]);
 
-  // Fetch external games that aren't in the library
-  const fetchExternalGames = useCallback(async () => {
+  // Fetch external games - only runs once per unique set of missing IDs
+  useEffect(() => {
     if (missingIgdbIds.length === 0) {
       return;
     }
 
+    // Check if we already fetched these IDs
+    const idsToFetch = missingIgdbIds
+      .filter((id) => !fetchedIdsRef.current.has(id))
+      .slice(0, 6);
+
+    if (idsToFetch.length === 0) {
+      return;
+    }
+
+    // Mark as fetched immediately to prevent re-fetching
+    idsToFetch.forEach((id) => fetchedIdsRef.current.add(id));
+
     setIsFetching(true);
-    const fetchedGames: ExternalGame[] = [];
 
-    // Fetch up to 6 games to avoid too many requests
-    const idsToFetch = missingIgdbIds.slice(0, 6);
+    const fetchGames = async () => {
+      const fetchedGames: ExternalGame[] = [];
+      const seenIds = new Set<number>();
 
-    await Promise.all(
-      idsToFetch.map(async (igdbId) => {
-        try {
-          const { request } = createAjaxRequest({
-            url: `/game/lookup/igdb?igdbId=${igdbId}`,
-          });
-
-          const data = await request;
-          if (data && data.title) {
-            fetchedGames.push({
-              igdbId: data.igdbId,
-              title: data.title,
-              year: data.year,
-              images: data.images || [],
+      await Promise.all(
+        idsToFetch.map(async (igdbId) => {
+          try {
+            const { request } = createAjaxRequest({
+              url: `/game/lookup/igdb?igdbId=${igdbId}`,
             });
+
+            const data = await request;
+            if (data && data.title && !seenIds.has(data.igdbId)) {
+              seenIds.add(data.igdbId);
+              fetchedGames.push({
+                igdbId: data.igdbId,
+                title: data.title,
+                year: data.year,
+                images: data.images || [],
+              });
+            }
+          } catch {
+            // Ignore failed fetches for individual games
           }
-        } catch {
-          // Ignore failed fetches for individual games
-        }
-      })
-    );
+        })
+      );
 
-    setExternalGames(fetchedGames);
-    setIsFetching(false);
+      setExternalGames((prev) => {
+        // Merge with existing, avoiding duplicates
+        const existingIds = new Set(prev.map((g) => g.igdbId));
+        const newGames = fetchedGames.filter((g) => !existingIds.has(g.igdbId));
+        return [...prev, ...newGames];
+      });
+      setIsFetching(false);
+    };
+
+    fetchGames();
   }, [missingIgdbIds]);
-
-  useEffect(() => {
-    fetchExternalGames();
-  }, [fetchExternalGames]);
 
   // Don't show anything if there are no recommendations
   if (!recommendations.length) {
