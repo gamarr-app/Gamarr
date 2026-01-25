@@ -52,8 +52,7 @@ jobs:
             os: macos-latest
           - runtime: osx-arm64
             os: macos-latest
-          - runtime: freebsd-x64
-            os: ubuntu-latest
+          # FreeBSD removed: dotnet-bsd-crossbuild feed lags behind official .NET releases
 
     steps:
       - name: Checkout
