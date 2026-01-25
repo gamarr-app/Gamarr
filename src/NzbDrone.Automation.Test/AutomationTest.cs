@@ -110,7 +110,7 @@ namespace NzbDrone.Automation.Test
                     }
 
                     // Ignore React key warnings (common in dynamic lists)
-                    if (msg.Text.Contains("same key") || msg.Text.Contains("key prop"))
+                    if (msg.Text.Contains("same key") || msg.Text.Contains("\"key\""))
                     {
                         return;
                     }
