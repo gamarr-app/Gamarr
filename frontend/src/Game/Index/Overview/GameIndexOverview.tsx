@@ -252,6 +252,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
               qualityProfile={qualityProfile}
               studio={studio}
               sizeOnDisk={sizeOnDisk}
+              version={game.gameFile?.version}
               added={added}
               path={path}
               sortKey={sortKey}

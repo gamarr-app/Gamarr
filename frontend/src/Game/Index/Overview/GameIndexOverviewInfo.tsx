@@ -32,12 +32,14 @@ interface GameIndexOverviewInfoProps {
   showAdded: boolean;
   showPath: boolean;
   showSizeOnDisk: boolean;
+  showVersion: boolean;
   monitored: boolean;
   studio?: string;
   qualityProfile?: QualityProfile;
   added?: string;
   path: string;
   sizeOnDisk?: number;
+  version?: string;
   sortKey: string;
 }
 
@@ -73,6 +75,11 @@ const rows = [
     name: 'sizeOnDisk',
     showProp: 'showSizeOnDisk',
     valueProp: 'sizeOnDisk',
+  },
+  {
+    name: 'version',
+    showProp: 'showVersion',
+    valueProp: 'version',
   },
 ];
 
@@ -142,6 +149,14 @@ function getInfoRowProps(
       title: 'Size on Disk',
       iconName: icons.DRIVE,
       label: formatBytes(sizeOnDisk),
+    };
+  }
+
+  if (name === 'version') {
+    return {
+      title: 'Version',
+      iconName: icons.INFO,
+      label: props.version ?? '',
     };
   }
 

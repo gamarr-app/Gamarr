@@ -52,6 +52,7 @@ export const defaultState = {
     showAdded: false,
     showPath: false,
     showSizeOnDisk: false,
+    showVersion: false,
     showTags: false,
     showSearchAction: false
   },

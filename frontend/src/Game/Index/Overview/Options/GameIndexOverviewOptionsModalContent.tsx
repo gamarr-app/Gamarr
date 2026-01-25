@@ -53,6 +53,7 @@ function GameIndexOverviewOptionsModalContent(
     showAdded,
     showPath,
     showSizeOnDisk,
+    showVersion,
     showTags,
     showSearchAction,
   } = useSelector(selectOverviewOptions);
@@ -158,6 +159,17 @@ function GameIndexOverviewOptionsModalContent(
               type={inputTypes.CHECK}
               name="showSizeOnDisk"
               value={showSizeOnDisk}
+              onChange={onOverviewOptionChange}
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <FormLabel>{translate('ShowVersion')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showVersion"
+              value={showVersion}
               onChange={onOverviewOptionChange}
             />
           </FormGroup>

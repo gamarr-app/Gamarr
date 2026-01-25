@@ -39,6 +39,7 @@ export interface GameIndexAppState {
     showAdded: boolean;
     showPath: boolean;
     showSizeOnDisk: boolean;
+    showVersion: boolean;
     showTags: boolean;
     showSearchAction: boolean;
   };
