@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import AppState from 'App/State/AppState';
+import AppState, { CustomFilter, Filter } from 'App/State/AppState';
 import FilterModal from 'Components/Filter/FilterModal';
 import { setQueueFilter } from 'Store/Actions/queueActions';
 
@@ -25,9 +25,21 @@ function createFilterBuilderPropsSelector() {
 
 interface QueueFilterModalProps {
   isOpen: boolean;
+  selectedFilterKey: string | number;
+  filters: Filter[];
+  customFilters: CustomFilter[];
+  onFilterSelect: (filter: string | number) => void;
+  onModalClose: () => void;
 }
 
-export default function QueueFilterModal(props: QueueFilterModalProps) {
+export default function QueueFilterModal({
+  isOpen,
+  selectedFilterKey,
+  filters,
+  customFilters,
+  onFilterSelect,
+  onModalClose,
+}: QueueFilterModalProps) {
   const sectionItems = useSelector(createQueueSelector());
   const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
   const customFilterType = 'queue';
@@ -43,8 +55,12 @@ export default function QueueFilterModal(props: QueueFilterModalProps) {
 
   return (
     <FilterModal
-      // TODO: Don't spread all the props
-      {...props}
+      isOpen={isOpen}
+      selectedFilterKey={selectedFilterKey}
+      filters={filters}
+      customFilters={customFilters}
+      onFilterSelect={onFilterSelect}
+      onModalClose={onModalClose}
       sectionItems={sectionItems}
       filterBuilderProps={filterBuilderProps}
       customFilterType={customFilterType}
