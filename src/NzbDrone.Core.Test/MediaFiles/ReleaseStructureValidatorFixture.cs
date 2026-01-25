@@ -107,6 +107,8 @@ namespace NzbDrone.Core.Test.MediaFiles
             result.Message.Should().Contain("Claimed group");
             result.Message.Should().Contain("FitGirl");
             result.Confidence.Should().Be(ReleaseStructureConfidence.High);
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -158,6 +160,8 @@ namespace NzbDrone.Core.Test.MediaFiles
             result.IsValid.Should().BeFalse();
             result.Message.Should().Contain("unexpected file");
             result.Message.Should().Contain("codex.nfo");
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -169,8 +173,10 @@ namespace NzbDrone.Core.Test.MediaFiles
             var result = Subject.ValidateReleaseStructure(TestPath, null, "Some.Game");
 
             result.DetectedGroup.Should().Be("FitGirl");
-            result.Confidence.Should().Be(ReleaseStructureConfidence.Medium);
-            result.Message.Should().Contain("Detected as FitGirl");
+            result.IsValid.Should().BeTrue();
+            result.Confidence.Should().Be(ReleaseStructureConfidence.High);
+            result.Message.Should().Contain("matches known");
+            result.Message.Should().Contain("FitGirl");
         }
 
         [Test]
@@ -182,7 +188,8 @@ namespace NzbDrone.Core.Test.MediaFiles
             var result = Subject.ValidateReleaseStructure(TestPath, "FitGirl", "Some.Game-FitGirl");
 
             result.IsValid.Should().BeFalse();
-            result.Message.Should().Contain("structure matches");
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
