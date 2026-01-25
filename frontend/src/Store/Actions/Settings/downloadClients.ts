@@ -28,12 +28,6 @@ interface SchemaPayload {
   implementationName: string;
 }
 
-interface SelectedSchema {
-  name: string;
-  implementationName: string;
-  enable: boolean;
-  [key: string]: unknown;
-}
 
 const section = 'settings.downloadClients';
 

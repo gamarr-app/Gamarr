@@ -101,7 +101,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
   );
   const { isSmallScreen } = useSelector(createDimensionsSelector());
   const dispatch = useDispatch();
-  const scrollerRef = useRef<HTMLElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isInteractiveImportModalOpen, setIsInteractiveImportModalOpen] =
     useState(false);

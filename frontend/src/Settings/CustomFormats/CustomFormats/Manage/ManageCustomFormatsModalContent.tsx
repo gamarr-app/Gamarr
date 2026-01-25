@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -35,7 +36,7 @@ interface CustomFormatsCollectionState {
   isPopulated: boolean;
   isDeleting: boolean;
   isSaving: boolean;
-  error: Error | undefined;
+  error: AppError | undefined;
   items: CustomFormat[];
   sortKey: string;
   sortDirection: SortDirection;
