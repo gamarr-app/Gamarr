@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { useRef } from 'react';
-import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
+import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { Tag } from 'App/State/TagsAppState';
 import { DELAY_PROFILE } from 'Helpers/dragTypes';
 import DelayProfile from './DelayProfile';

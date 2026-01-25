@@ -1,11 +1,5 @@
 import { Action, Location, UnregisterCallback } from 'history';
-import {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';

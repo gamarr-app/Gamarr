@@ -2,11 +2,11 @@ import classNames from 'classnames';
 import {
   ChangeEvent,
   FocusEvent,
+  type JSX,
   SyntheticEvent,
   useCallback,
   useEffect,
   useRef,
-  type JSX,
 } from 'react';
 import { FileInputChanged, InputChanged } from 'typings/inputs';
 import styles from './TextInput.css';

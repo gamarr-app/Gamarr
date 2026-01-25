@@ -1,12 +1,6 @@
 import classNames from 'classnames';
 import { Placement } from 'popper.js';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Manager, Popper, Reference } from 'react-popper';
 import Portal from 'Components/Portal';
 import { kinds, tooltipPositions } from 'Helpers/Props';
