@@ -21,12 +21,6 @@ export interface Failure {
   errorMessage: ValidationFailure['errorMessage'];
   infoLink: ValidationFailure['infoLink'];
   detailedDescription: ValidationFailure['detailedDescription'];
-
-  // TODO: Remove these renamed properties
-
-  message: ValidationFailure['errorMessage'];
-  link: ValidationFailure['infoLink'];
-  detailedMessage: ValidationFailure['detailedDescription'];
 }
 
 export interface Pending<T> {

@@ -60,11 +60,6 @@ function mapFailure(failure: ValidationFailure): Failure {
     errorMessage: failure.errorMessage,
     infoLink: failure.infoLink,
     detailedDescription: failure.detailedDescription,
-
-    // TODO: Remove these renamed properties
-    message: failure.errorMessage,
-    link: failure.infoLink,
-    detailedMessage: failure.detailedDescription,
   };
 }
 
