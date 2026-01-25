@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;

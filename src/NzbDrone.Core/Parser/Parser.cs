@@ -88,8 +88,9 @@ namespace NzbDrone.Core.Parser
             new Regex(@"^(?<title>[^(]+?)\s*(?:\([^)]*\)\s*)+\[(?:FitGirl|DODI)(?:\s+(?:Monkey\s+)?Repack)?(?:,\s*[^\]]+)?\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Simple bracket format without version: "Game Name [FitGirl Repack]" or "Game Name [DODI Repack]" or "Hytale [DODI Repack]"
+            // Also handles trailing info: "Game [FitGirl Repack, Selective Download - from 9.5 GB]"
             // Must come AFTER parenthetical patterns - this is the fallback for simple titles without parens
-            new Regex(@"^(?<title>.+?)\s+\[(?:FitGirl|DODI)(?:\s+(?:Monkey\s+)?Repack)?\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>.+?)\s+\[(?:FitGirl|DODI)(?:\s+(?:Monkey\s+)?Repack)?(?:,\s*[^\]]+)?\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // PORTABLE release format: "Game Name (year) [PORTABLE]" or "Game Name (year) + DLC [PORTABLE]"
             // Title stops at opening parenthesis or before bracket
@@ -169,7 +170,8 @@ namespace NzbDrone.Core.Parser
 
             // FitGirl/repacker format with Bonus metadata: "Title Bonus DLCs ... MULTi## FitGirl Repack"
             // Title stops at "Bonus" when followed by DLCs/Content and repacker
-            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+Bonus\s+(?:DLCs?|Content)).*?(?:FitGirl|DODI)[-_. ]?Repack", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Requires non-bracket content after "Bonus Content/DLCs" to avoid stripping when it's part of the title name
+            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+Bonus\s+(?:DLCs?|Content)\s+[^\[\(]).*?(?:FitGirl|DODI)[-_. ]?Repack", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // ElAmigos/repacker format with year: "Title YEAR MULTi##-ElAmigos"
             // Strip realistic years (1980-2049) before MULTi but keep fictional years (2050+) like "Cyberpunk 2077"
@@ -193,7 +195,8 @@ namespace NzbDrone.Core.Parser
             // Game releases without year - match title up to known release group at END of string (must be before year patterns to keep years in game titles)
             // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, etc.
             // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
-            new Regex(@"^(?<title>(?![(\[]).+?)[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|P2P)(?:[-_. ]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Optional version (v20251216) and REPACK before group are stripped from title
+            new Regex(@"^(?<title>(?![(\[]).+?)(?:[._]v\d+(?:[._]\d+)*)?(?:[._]REPACK)?[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|P2P)(?:[-_. ]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
             // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]

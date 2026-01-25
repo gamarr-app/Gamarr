@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -692,6 +691,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Damn_Dolls-bADkARMA", "Damn Dolls")]
         [TestCase("Stranger_Things_Game-bADkARMA", "Stranger Things Game")]
         [TestCase("MARVEL.Cosmic.Invasion.Plus.3.Trainer-PLAYMAGiC", "MARVEL Cosmic Invasion Plus 3 Trainer")]
+        [TestCase("Ghost.of.Tsushima.Directors.Cut.v20251216.REPACK-KaOs", "Ghost of Tsushima Directors Cut")]
         public void should_parse_other_scene_releases(string postTitle, string title)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle);
@@ -755,6 +755,21 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("PBA Pro Bowling 2026 (MULTi6) [FitGirl Repack]", "PBA Pro Bowling 2026")]
         [TestCase("The Temple of Elemental Evil (Re-release) [FitGirl Repack]", "The Temple of Elemental Evil")]
         [TestCase("Mutant Football League 2 [FitGirl Repack]", "Mutant Football League 2")]
+        [TestCase("Anno 1800: Definitive Annoversary Edition (v18.4.1412158 + All DLCs/Bonuses, MULTi12) [FitGirl Repack]", "Anno 1800: Definitive Annoversary Edition")]
+        [TestCase("Halo: The Master Chief Collection (v1.3528.0.0, MULTi12) [FitGirl Repack, Selective Download - from 75.8 GB]", "Halo: The Master Chief Collection")]
+        [TestCase("MIO: Memories in Orbit (v21606, MULTi15) [FitGirl Repack]", "MIO: Memories in Orbit")]
+        [TestCase("DYNASTY WARRIORS: ORIGINS - Digital Deluxe Edition (v1.0.0.9 + 9 DLCs + Controller Fix, MULTi14) [FitGirl Repack]", "DYNASTY WARRIORS: ORIGINS - Digital Deluxe Edition")]
+        [TestCase("Len's Island: Deluxe Edition (v1.1.43 + 3 DLCs/Bonuses, MULTi12) [FitGirl Repack]", "Len's Island: Deluxe Edition")]
+        [TestCase("Red Dead Redemption 2: Bonus Content [FitGirl Repack, Selective Download - from 9.5 GB]", "Red Dead Redemption 2: Bonus Content")]
+        [TestCase("Foundation: Supporter Edition (v1.11.0.11 + 2 DLCs/Bonuses, MULTi27) [FitGirl Repack]", "Foundation: Supporter Edition")]
+        [TestCase("Farm Manager World (v1.1.20260115.534 + Africa DLC, MULTi12) [FitGirl Repack]", "Farm Manager World")]
+        [TestCase("Craftlings (v1.0.2 + Bonus OST, MULTi14) [FitGirl Repack]", "Craftlings")]
+        [TestCase("Dungeon Defenders: Ultimate Collection (v10.5.0 + 42 DLCs, MULTi5) [FitGirl Repack]", "Dungeon Defenders: Ultimate Collection")]
+        [TestCase("Kotama and Academy Citadel (v1.00.01.00, MULTi5) [FitGirl Repack]", "Kotama and Academy Citadel")]
+        [TestCase("Tomba! Special Edition (Build 19099803, MULTi7) [FitGirl Repack, Selective Download]", "Tomba! Special Edition")]
+        [TestCase("Cubic Odyssey: Complete Edition (v1.2.0.1 + 6 DLCs, MULTi11) [FitGirl Repack]", "Cubic Odyssey: Complete Edition")]
+        [TestCase("BrokenLore: UNFOLLOW (+ Deluxe Pack DLC*, MULTi15) [FitGirl Repack]", "BrokenLore: UNFOLLOW")]
+        [TestCase("Journey Through the Undead [FitGirl Repack]", "Journey Through the Undead")]
         public void should_parse_1337x_fitgirl_releases(string postTitle, string title)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle);
@@ -772,6 +787,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Palworld (v0.7.0.84578 - Home Sweet Home Update + Bonus Content + MULTi17) (From 17.8 GB) [DODI Repack]", "Palworld")]
         [TestCase("Grand Theft Auto V Legacy (Build 3725.0 / Online 1.72 / v1.0.3725.0 + All DLCs, MULTi13) [DODI Repack]", "Grand Theft Auto V Legacy")]
         [TestCase("Persona 5 Royal (v1.03B + Bonus Content + MULTi10) (From 26.6 GB) (Lossless) [DODI Repack]", "Persona 5 Royal")]
+        [TestCase("Grand Theft Auto V Legacy (Build 3725.0 / Online 1.72 / v1.0.3725.0 + All DLCs, MULTi13) [DODI Repack]", "Grand Theft Auto V Legacy")]
+        [TestCase("inZOI (v20260108.9692.W + Island Getaway DLC + MULTi13) [DODI Repack]", "inZOI")]
+        [TestCase("Grand Theft Auto V Enhanced: Premium Edition (Build 1013.20 / Online 1.72 / v1.0.3725.0, MULTi13) [DODI Repack]", "Grand Theft Auto V Enhanced: Premium Edition")]
+        [TestCase("Dead Space Remake (2023) Digital Deluxe Edition (Build 10602756 + All DLCs + Bonus, MULTi13) [DODI Repack]", "Dead Space Remake")]
         public void should_parse_1337x_dodi_releases(string postTitle, string title)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle);
@@ -805,6 +824,12 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Dispatch (v1.0.16598)", "Dispatch")]
         [TestCase("Super Woden: Rally Edge", "Super Woden: Rally Edge")]
         [TestCase("Farthest Frontier (v1.0.6)", "Farthest Frontier")]
+        [TestCase("Hytale (v2026.01.20)", "Hytale")]
+        [TestCase("Timberborn (v2025.12.30)", "Timberborn")]
+        [TestCase("Tavern Keeper v0.70.5", "Tavern Keeper")]
+        [TestCase("Drifter Star: Evolution", "Drifter Star: Evolution")]
+        [TestCase("My Winter Car (v2026.01.11)", "My Winter Car")]
+        [TestCase("Anno 1800 End of an Era-voices38", "Anno 1800 End of an Era")]
         public void should_parse_1337x_igggamescom_releases(string postTitle, string title)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle);
