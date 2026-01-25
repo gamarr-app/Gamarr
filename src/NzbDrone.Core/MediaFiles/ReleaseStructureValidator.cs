@@ -204,7 +204,6 @@ namespace NzbDrone.Core.MediaFiles
             @"\.cmd$",           // Command script
             @"\.vbs$",           // VBScript
             @"\.vbe$",           // Encoded VBScript
-            @"\.js$",            // JavaScript (outside of game dirs)
             @"\.jse$",           // Encoded JavaScript
             @"\.wsf$",           // Windows Script File
             @"\.wsh$",           // Windows Script Host
@@ -212,7 +211,6 @@ namespace NzbDrone.Core.MediaFiles
             @"\.msi$",           // Windows Installer (unexpected)
             @"\.hta$",           // HTML Application
             @"\.cpl$",           // Control Panel extension
-            @"\.jar$",           // Java archive (can contain malware)
             @"readme.*\.exe$",   // Readme as executable
             @"^crack[^/\\]*\.exe$",  // Crack exe in root only (subfolders like _crack/ are normal)
             @"keygen.*\.exe$",   // Keygen in unexpected location
