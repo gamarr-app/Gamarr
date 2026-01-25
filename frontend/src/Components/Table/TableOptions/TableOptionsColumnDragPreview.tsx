@@ -1,5 +1,5 @@
-import { Component, CSSProperties } from 'react';
-import { DragLayer, DragLayerMonitor } from 'react-dnd';
+import { CSSProperties } from 'react';
+import { useDragLayer } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { TABLE_COLUMN } from 'Helpers/dragTypes';
 import dimensions from 'Styles/Variables/dimensions';
@@ -25,63 +25,46 @@ interface DragItem {
   index: number;
 }
 
-function collectDragLayer(monitor: DragLayerMonitor) {
-  return {
+function TableOptionsColumnDragPreview() {
+  const { item, itemType, currentOffset } = useDragLayer((monitor) => ({
     item: monitor.getItem() as DragItem | null,
     itemType: monitor.getItemType(),
     currentOffset: monitor.getSourceClientOffset(),
-  };
-}
+  }));
 
-interface TableOptionsColumnDragPreviewProps {
-  item?: DragItem | null;
-  itemType?: string | symbol | null;
-  currentOffset?: { x: number; y: number } | null;
-}
-
-class TableOptionsColumnDragPreviewComponent extends Component<TableOptionsColumnDragPreviewProps> {
-  //
-  // Render
-
-  render() {
-    const { item, itemType, currentOffset } = this.props;
-
-    if (!currentOffset || itemType !== TABLE_COLUMN || !item) {
-      return null;
-    }
-
-    // The offset is shifted because the drag handle is on the right edge of the
-    // list item and the preview is wider than the drag handle.
-
-    const { x, y } = currentOffset;
-    const handleOffset =
-      formGroupSmallWidth -
-      formLabelLargeWidth -
-      formLabelRightMarginWidth -
-      dragHandleWidth;
-    const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
-
-    const style: CSSProperties = {
-      position: 'absolute',
-      WebkitTransform: transform,
-      msTransform: transform,
-      transform,
-    };
-
-    return (
-      <DragPreviewLayer>
-        <div className={styles.dragPreview} style={style}>
-          <TableOptionsColumn
-            isDragging={false}
-            {...item}
-            onVisibleChange={noop}
-          />
-        </div>
-      </DragPreviewLayer>
-    );
+  if (!currentOffset || itemType !== TABLE_COLUMN || !item) {
+    return null;
   }
+
+  // The offset is shifted because the drag handle is on the right edge of the
+  // list item and the preview is wider than the drag handle.
+
+  const { x, y } = currentOffset;
+  const handleOffset =
+    formGroupSmallWidth -
+    formLabelLargeWidth -
+    formLabelRightMarginWidth -
+    dragHandleWidth;
+  const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
+
+  const style: CSSProperties = {
+    position: 'absolute',
+    WebkitTransform: transform,
+    msTransform: transform,
+    transform,
+  };
+
+  return (
+    <DragPreviewLayer>
+      <div className={styles.dragPreview} style={style}>
+        <TableOptionsColumn
+          isDragging={false}
+          {...item}
+          onVisibleChange={noop}
+        />
+      </div>
+    </DragPreviewLayer>
+  );
 }
 
-export default DragLayer(collectDragLayer)(
-  TableOptionsColumnDragPreviewComponent as unknown as React.ComponentType
-) as unknown as React.ComponentType;
+export default TableOptionsColumnDragPreview;
