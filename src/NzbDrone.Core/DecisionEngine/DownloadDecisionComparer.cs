@@ -32,6 +32,7 @@ namespace NzbDrone.Core.DecisionEngine
             {
                 CompareQuality,
                 CompareCustomFormatScore,
+                CompareContentType,
                 CompareProtocol,
                 CompareIndexerPriority,
                 CompareIndexerFlags,
@@ -82,6 +83,25 @@ namespace NzbDrone.Core.DecisionEngine
         private int CompareCustomFormatScore(DownloadDecision x, DownloadDecision y)
         {
             return CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => remoteGame.CustomFormatScore);
+        }
+
+        private int CompareContentType(DownloadDecision x, DownloadDecision y)
+        {
+            // Prefer releases that include DLC over base game only
+            // Higher score = better: BaseGameWithAllDlc (2) > BaseGame/Unknown (1) > Others (0)
+            return CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => ScoreContentType(remoteGame.ParsedGameInfo.ContentType));
+        }
+
+        private int ScoreContentType(ReleaseContentType contentType)
+        {
+            return contentType switch
+            {
+                ReleaseContentType.BaseGameWithAllDlc => 2,
+                ReleaseContentType.BaseGame => 1,
+                ReleaseContentType.Unknown => 1,
+                ReleaseContentType.Expansion => 1,
+                _ => 0
+            };
         }
 
         private int CompareIndexerFlags(DownloadDecision x, DownloadDecision y)
