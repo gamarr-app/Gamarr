@@ -18,6 +18,12 @@ namespace NzbDrone.Automation.Test
         protected List<string> ConsoleErrors { get; private set; } = new ();
         protected const string BaseUrl = "http://localhost:6767";
 
+        /// <summary>
+        /// Mock metadata is enabled by default so tests work without network access.
+        /// Override to false for tests that specifically need real API responses.
+        /// </summary>
+        protected virtual bool UseMockMetadata => true;
+
         public AutomationTest()
         {
             new StartupContext();
@@ -42,10 +48,43 @@ namespace NzbDrone.Automation.Test
         {
             _runner = new NzbDroneRunner(LogManager.GetCurrentClassLogger(), null);
             _runner.KillAll();
+
+            // Configure mock metadata mode so tests work without network access
+            _runner.UseMockMetadata = UseMockMetadata;
+            _runner.MockDataPath = FindMockDataPath();
+
             _runner.Start(true);
 
             // Wait for server to be ready
             await Task.Delay(2000);
+        }
+
+        /// <summary>
+        /// Attempts to find the mock data path relative to the test directory.
+        /// </summary>
+        private static string FindMockDataPath()
+        {
+            var testDir = TestContext.CurrentContext.TestDirectory;
+            var possiblePaths = new[]
+            {
+                Path.Combine(testDir, "Files", "MockData"),
+                Path.Combine(testDir, "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "src", "NzbDrone.Core.Test", "Files", "MockData"),
+                Path.Combine(testDir, "..", "..", "..", "src", "NzbDrone.Core.Test", "Files", "MockData"),
+            };
+
+            foreach (var path in possiblePaths)
+            {
+                var fullPath = Path.GetFullPath(path);
+                if (Directory.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            return null;
         }
 
         [SetUp]
