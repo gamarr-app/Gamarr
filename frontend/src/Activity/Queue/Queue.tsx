@@ -54,6 +54,7 @@ import QueueOptions from './QueueOptions';
 import QueueRow from './QueueRow';
 import RemoveQueueItemModal, { RemovePressProps } from './RemoveQueueItemModal';
 import createQueueStatusSelector from './Status/createQueueStatusSelector';
+import styles from './Queue.css';
 
 function Queue() {
   const requestCurrentPage = useCurrentPage();
@@ -300,7 +301,7 @@ function Queue() {
   }
 
   return (
-    <PageContent title={translate('Queue')}>
+    <PageContent className={styles.queue} title={translate('Queue')}>
       <PageToolbar>
         <PageToolbarSection>
           <PageToolbarButton

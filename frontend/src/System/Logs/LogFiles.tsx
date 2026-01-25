@@ -19,6 +19,7 @@ import combinePath from 'Utilities/String/combinePath';
 import translate from 'Utilities/String/translate';
 import LogFilesTableRow from './LogFilesTableRow';
 import LogsNavMenu from './LogsNavMenu';
+import styles from './LogFiles.css';
 
 const columns: Column[] = [
   {
@@ -70,7 +71,7 @@ function LogFiles({
   ]);
 
   return (
-    <PageContent title={translate('LogFiles')}>
+    <PageContent className={styles.logFiles} title={translate('LogFiles')}>
       <PageToolbar>
         <PageToolbarSection>
           <LogsNavMenu current={currentLogView} />

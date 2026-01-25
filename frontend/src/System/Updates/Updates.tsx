@@ -133,7 +133,7 @@ function Updates() {
   }, [dispatch]);
 
   return (
-    <PageContent title={translate('Updates')}>
+    <PageContent className={styles.updates} title={translate('Updates')}>
       <PageContentBody>
         {isPopulated || hasError ? null : <LoadingIndicator />}
 

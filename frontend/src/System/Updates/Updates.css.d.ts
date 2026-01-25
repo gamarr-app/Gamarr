@@ -10,6 +10,7 @@ interface CssExports {
   'space': string;
   'upToDateIcon': string;
   'update': string;
+  'updates': string;
   'version': string;
 }
 export const cssExports: CssExports;

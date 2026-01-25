@@ -4,10 +4,11 @@ import PageContentBody from 'Components/Page/PageContentBody';
 import translate from 'Utilities/String/translate';
 import QueuedTasks from './Queued/QueuedTasks';
 import ScheduledTasks from './Scheduled/ScheduledTasks';
+import styles from './Tasks.css';
 
 function Tasks() {
   return (
-    <PageContent title={translate('Tasks')}>
+    <PageContent className={styles.tasks} title={translate('Tasks')}>
       <PageContentBody>
         <ScheduledTasks />
         <QueuedTasks />

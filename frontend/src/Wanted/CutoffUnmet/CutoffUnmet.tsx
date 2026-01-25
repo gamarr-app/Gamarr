@@ -51,6 +51,7 @@ import {
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import CutoffUnmetRow from './CutoffUnmetRow';
+import styles from './CutoffUnmet.css';
 
 function getMonitoredValue(
   filters: Filter[],
@@ -252,7 +253,10 @@ function CutoffUnmet() {
   }, [items, previousItems, dispatch]);
 
   return (
-    <PageContent title={translate('CutoffUnmet')}>
+    <PageContent
+      className={styles.cutoffUnmet}
+      title={translate('CutoffUnmet')}
+    >
       <PageToolbar>
         <PageToolbarSection>
           <PageToolbarButton

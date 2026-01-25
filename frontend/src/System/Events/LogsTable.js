@@ -15,6 +15,7 @@ import TablePager from 'Components/Table/TablePager';
 import { align, icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import LogsTableRow from './LogsTableRow';
+import styles from './LogsTable.css';
 
 function LogsTable(props) {
   const {
@@ -34,7 +35,7 @@ function LogsTable(props) {
   } = props;
 
   return (
-    <PageContent title={translate('Logs')}>
+    <PageContent className={styles.logsTable} title={translate('Logs')}>
       <PageToolbar>
         <PageToolbarSection>
           <PageToolbarButton
