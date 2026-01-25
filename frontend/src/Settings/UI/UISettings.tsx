@@ -24,6 +24,7 @@ import themes from 'Styles/Themes';
 import { InputChanged } from 'typings/inputs';
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
+import styles from './UISettings.css';
 
 const SECTION = 'ui';
 const FILTER_LANGUAGES = ['Any', 'Unknown', 'Original'];
@@ -151,7 +152,7 @@ function UISettings() {
   );
 
   return (
-    <PageContent title={translate('UiSettings')}>
+    <PageContent className={styles.uiSettings} title={translate('UiSettings')}>
       <SettingsToolbar
         isSaving={isSaving}
         hasPendingChanges={hasPendingChanges}

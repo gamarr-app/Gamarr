@@ -13,6 +13,7 @@ import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import BackupRow from './BackupRow';
 import RestoreBackupModalConnector from './RestoreBackupModalConnector';
+import styles from './Backups.css';
 
 const columns = [
   {
@@ -82,7 +83,7 @@ class Backups extends Component {
     const noBackups = isPopulated && !items.length;
 
     return (
-      <PageContent title={translate('Backups')}>
+      <PageContent className={styles.backups} title={translate('Backups')}>
         <PageToolbar>
           <PageToolbarSection>
             <PageToolbarButton
