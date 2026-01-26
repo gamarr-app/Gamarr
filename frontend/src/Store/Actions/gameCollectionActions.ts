@@ -356,9 +356,8 @@ export const actionHandlers = handleThunks({
     const { igdbId, title } = payload;
 
     // Create a partial game object with minimum required fields for getNewGame
-    const partialGame = { igdbId, title } as Parameters<typeof getNewGame>[0];
+    const partialGame = { igdbId, title, id: 0 };
     const newGame = getNewGame(partialGame, payload);
-    newGame.id = 0;
 
     const promise = createAjaxRequest({
       url: '/game',

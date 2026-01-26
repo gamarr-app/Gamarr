@@ -1,4 +1,4 @@
-import Game, { GameAvailability, GameMonitor } from 'Game/Game';
+import { GameAddOptions, GameAvailability, GameMonitor } from 'Game/Game';
 
 export interface NewGamePayload {
   rootFolderPath: string;
@@ -9,7 +9,21 @@ export interface NewGamePayload {
   searchForGame?: boolean;
 }
 
-function getNewGame(game: Game, payload: NewGamePayload) {
+// Properties added by getNewGame to any game-like object
+interface NewGameAddedProps {
+  addOptions: GameAddOptions;
+  monitored: boolean;
+  qualityProfileId: number;
+  minimumAvailability: GameAvailability;
+  rootFolderPath: string;
+  tags: number[];
+}
+
+// Input type - accepts any object, returns it with added properties
+function getNewGame<T extends object>(
+  game: T,
+  payload: NewGamePayload
+): T & NewGameAddedProps {
   const {
     rootFolderPath,
     monitor,
@@ -19,19 +33,20 @@ function getNewGame(game: Game, payload: NewGamePayload) {
     searchForGame = false,
   } = payload;
 
-  const addOptions = {
+  const addOptions: GameAddOptions = {
     monitor,
     searchForGame,
   };
 
-  game.addOptions = addOptions;
-  game.monitored = monitor !== 'none';
-  game.qualityProfileId = qualityProfileId;
-  game.minimumAvailability = minimumAvailability;
-  game.rootFolderPath = rootFolderPath;
-  game.tags = tags;
+  const result = game as T & NewGameAddedProps;
+  result.addOptions = addOptions;
+  result.monitored = monitor !== 'none';
+  result.qualityProfileId = qualityProfileId;
+  result.minimumAvailability = minimumAvailability;
+  result.rootFolderPath = rootFolderPath;
+  result.tags = tags;
 
-  return game;
+  return result;
 }
 
 export default getNewGame;
