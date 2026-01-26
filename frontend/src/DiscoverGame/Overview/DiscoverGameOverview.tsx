@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import TextTruncate from 'react-text-truncate';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
@@ -73,7 +73,7 @@ interface DiscoverGameOverviewProps {
   isPopular: boolean;
   isTrending: boolean;
   isSelected?: boolean;
-  lists: number[];
+  lists?: number[];
   sortKey: string;
   studio?: string;
   genres: string[];
@@ -82,243 +82,212 @@ interface DiscoverGameOverviewProps {
   onSelectedChange: (props: SelectStateInputProps) => void;
 }
 
-interface DiscoverGameOverviewState {
-  isNewAddGameModalOpen: boolean;
-  isExcludeGameModalOpen: boolean;
-}
+function DiscoverGameOverview(props: DiscoverGameOverviewProps) {
+  const {
+    igdbId,
+    steamAppId,
+    youTubeTrailerId,
+    title,
+    folder,
+    year,
+    overview,
+    images,
+    lists = [],
+    posterWidth,
+    posterHeight,
+    rowHeight,
+    isSmallScreen,
+    isExisting,
+    isExcluded,
+    isRecommendation,
+    isPopular,
+    isTrending,
+    isSelected,
+    overviewOptions,
+    onSelectedChange,
+    ...otherProps
+  } = props;
 
-class DiscoverGameOverview extends Component<
-  DiscoverGameOverviewProps,
-  DiscoverGameOverviewState
-> {
-  static defaultProps = {
-    lists: [],
+  const [isNewAddGameModalOpen, setIsNewAddGameModalOpen] = useState(false);
+  const [isExcludeGameModalOpen, setIsExcludeGameModalOpen] = useState(false);
+
+  const onPress = useCallback(() => {
+    setIsNewAddGameModalOpen(true);
+  }, []);
+
+  const onAddGameModalClose = useCallback(() => {
+    setIsNewAddGameModalOpen(false);
+  }, []);
+
+  const onExcludeGamePress = useCallback(() => {
+    setIsExcludeGameModalOpen(true);
+  }, []);
+
+  const onExcludeGameModalClose = useCallback(() => {
+    setIsExcludeGameModalOpen(false);
+  }, []);
+
+  const onChange = useCallback(
+    ({ value, shiftKey }: CheckInputChanged) => {
+      onSelectedChange({ id: igdbId, value, shiftKey });
+    },
+    [igdbId, onSelectedChange]
+  );
+
+  const elementStyle = {
+    width: `${posterWidth}px`,
+    height: `${posterHeight}px`,
   };
 
-  //
-  // Lifecycle
+  // Use steamAppId for slug if available, otherwise igdbId
+  const titleSlug = steamAppId && steamAppId > 0 ? steamAppId : igdbId;
+  const linkProps = isExisting ? { to: `/game/${titleSlug}` } : { onPress };
 
-  constructor(props: DiscoverGameOverviewProps) {
-    super(props);
+  const contentHeight = getContentHeight(rowHeight, isSmallScreen);
+  const overviewHeight = contentHeight - titleRowHeight;
 
-    this.state = {
-      isNewAddGameModalOpen: false,
-      isExcludeGameModalOpen: false,
-    };
-  }
-
-  //
-  // Listeners
-
-  onPress = () => {
-    this.setState({ isNewAddGameModalOpen: true });
-  };
-
-  onAddGameModalClose = (_didAdd?: boolean) => {
-    this.setState({ isNewAddGameModalOpen: false });
-  };
-
-  onExcludeGamePress = () => {
-    this.setState({ isExcludeGameModalOpen: true });
-  };
-
-  onExcludeGameModalClose = (_didExclude?: boolean) => {
-    this.setState({ isExcludeGameModalOpen: false });
-  };
-
-  onChange = ({ value, shiftKey }: CheckInputChanged) => {
-    const { igdbId, onSelectedChange } = this.props;
-
-    onSelectedChange({ id: igdbId, value, shiftKey });
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      igdbId,
-      steamAppId,
-      youTubeTrailerId,
-      title,
-      folder,
-      year,
-      overview,
-      images,
-      lists,
-      posterWidth,
-      posterHeight,
-      rowHeight,
-      isSmallScreen,
-      isExisting,
-      isExcluded,
-      isRecommendation,
-      isPopular,
-      isTrending,
-      isSelected,
-      overviewOptions,
-      ...otherProps
-    } = this.props;
-
-    const { isNewAddGameModalOpen, isExcludeGameModalOpen } = this.state;
-
-    const elementStyle = {
-      width: `${posterWidth}px`,
-      height: `${posterHeight}px`,
-    };
-
-    // Use steamAppId for slug if available, otherwise igdbId
-    const titleSlug = steamAppId && steamAppId > 0 ? steamAppId : igdbId;
-    const linkProps = isExisting
-      ? { to: `/game/${titleSlug}` }
-      : { onPress: this.onPress };
-
-    const contentHeight = getContentHeight(rowHeight, isSmallScreen);
-    const overviewHeight = contentHeight - titleRowHeight;
-
-    return (
-      <div className={styles.container}>
-        <div className={styles.content}>
-          <div className={styles.poster}>
-            <div className={styles.posterContainer}>
-              <div className={styles.editorSelect}>
-                <CheckInput
-                  className={styles.checkInput}
-                  name={igdbId.toString()}
-                  value={isSelected}
-                  onChange={this.onChange}
-                />
-              </div>
-
-              <Link className={styles.link} style={elementStyle} {...linkProps}>
-                <GamePoster
-                  className={styles.poster}
-                  style={elementStyle}
-                  images={images}
-                  size={250}
-                  lazy={false}
-                  overflow={true}
-                />
-              </Link>
-            </div>
-          </div>
-
-          <div className={styles.info} style={{ maxHeight: contentHeight }}>
-            <div className={styles.titleRow}>
-              <Link className={styles.title} {...linkProps}>
-                {title}
-
-                {isExisting ? (
-                  <Icon
-                    className={styles.alreadyExistsIcon}
-                    name={icons.CHECK_CIRCLE}
-                    size={30}
-                    title={translate('AlreadyInYourLibrary')}
-                  />
-                ) : null}
-                {isExcluded && (
-                  <Icon
-                    className={styles.exclusionIcon}
-                    name={icons.DANGER}
-                    size={30}
-                    title={translate('GameAlreadyExcluded')}
-                  />
-                )}
-              </Link>
-
-              <div className={styles.actions}>
-                <span className={styles.externalLinks}>
-                  <Popover
-                    anchor={<Icon name={icons.EXTERNAL_LINK} size={12} />}
-                    title={translate('Links')}
-                    body={
-                      <GameDetailsLinks
-                        steamAppId={steamAppId ?? 0}
-                        igdbSlug={undefined}
-                        youTubeTrailerId={youTubeTrailerId}
-                      />
-                    }
-                  />
-                </span>
-
-                <IconButton
-                  name={icons.REMOVE}
-                  title={
-                    isExcluded
-                      ? translate('GameAlreadyExcluded')
-                      : translate('ExcludeGame')
-                  }
-                  isDisabled={isExcluded}
-                  onPress={this.onExcludeGamePress}
-                />
-              </div>
-            </div>
-
-            <div className={styles.lists}>
-              {isRecommendation ? (
-                <Label kind={kinds.INFO}>
-                  <Icon
-                    name={icons.RECOMMENDED}
-                    size={10}
-                    title={translate('GameIsRecommend')}
-                  />
-                </Label>
-              ) : null}
-
-              {isPopular ? (
-                <Label kind={kinds.INFO}>{translate('Popular')}</Label>
-              ) : null}
-
-              {isTrending ? (
-                <Label kind={kinds.INFO}>{translate('Trending')}</Label>
-              ) : null}
-
-              <ImportListList lists={lists} />
-            </div>
-
-            <div className={styles.details}>
-              <div className={styles.overviewContainer}>
-                <Link className={styles.overview} {...linkProps}>
-                  <TextTruncate
-                    line={Math.floor(
-                      overviewHeight / (defaultFontSize * lineHeight)
-                    )}
-                    text={overview}
-                  />
-                </Link>
-              </div>
-
-              <DiscoverGameOverviewInfo
-                height={overviewHeight}
-                year={year}
-                {...overviewOptions}
-                {...otherProps}
+  return (
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.poster}>
+          <div className={styles.posterContainer}>
+            <div className={styles.editorSelect}>
+              <CheckInput
+                className={styles.checkInput}
+                name={igdbId.toString()}
+                value={isSelected}
+                onChange={onChange}
               />
             </div>
+
+            <Link className={styles.link} style={elementStyle} {...linkProps}>
+              <GamePoster
+                className={styles.poster}
+                style={elementStyle}
+                images={images}
+                size={250}
+                lazy={false}
+                overflow={true}
+              />
+            </Link>
           </div>
         </div>
 
-        <AddNewDiscoverGameModal
-          isOpen={isNewAddGameModalOpen && !isExisting}
-          igdbId={igdbId}
-          title={title}
-          year={year}
-          overview={overview}
-          folder={folder}
-          images={images}
-          onModalClose={this.onAddGameModalClose}
-        />
+        <div className={styles.info} style={{ maxHeight: contentHeight }}>
+          <div className={styles.titleRow}>
+            <Link className={styles.title} {...linkProps}>
+              {title}
 
-        <ExcludeGameModal
-          isOpen={isExcludeGameModalOpen}
-          igdbId={igdbId}
-          title={title}
-          year={year}
-          onModalClose={this.onExcludeGameModalClose}
-        />
+              {isExisting ? (
+                <Icon
+                  className={styles.alreadyExistsIcon}
+                  name={icons.CHECK_CIRCLE}
+                  size={30}
+                  title={translate('AlreadyInYourLibrary')}
+                />
+              ) : null}
+              {isExcluded && (
+                <Icon
+                  className={styles.exclusionIcon}
+                  name={icons.DANGER}
+                  size={30}
+                  title={translate('GameAlreadyExcluded')}
+                />
+              )}
+            </Link>
+
+            <div className={styles.actions}>
+              <span className={styles.externalLinks}>
+                <Popover
+                  anchor={<Icon name={icons.EXTERNAL_LINK} size={12} />}
+                  title={translate('Links')}
+                  body={
+                    <GameDetailsLinks
+                      steamAppId={steamAppId ?? 0}
+                      igdbSlug={undefined}
+                      youTubeTrailerId={youTubeTrailerId}
+                    />
+                  }
+                />
+              </span>
+
+              <IconButton
+                name={icons.REMOVE}
+                title={
+                  isExcluded
+                    ? translate('GameAlreadyExcluded')
+                    : translate('ExcludeGame')
+                }
+                isDisabled={isExcluded}
+                onPress={onExcludeGamePress}
+              />
+            </div>
+          </div>
+
+          <div className={styles.lists}>
+            {isRecommendation ? (
+              <Label kind={kinds.INFO}>
+                <Icon
+                  name={icons.RECOMMENDED}
+                  size={10}
+                  title={translate('GameIsRecommend')}
+                />
+              </Label>
+            ) : null}
+
+            {isPopular ? (
+              <Label kind={kinds.INFO}>{translate('Popular')}</Label>
+            ) : null}
+
+            {isTrending ? (
+              <Label kind={kinds.INFO}>{translate('Trending')}</Label>
+            ) : null}
+
+            <ImportListList lists={lists} />
+          </div>
+
+          <div className={styles.details}>
+            <div className={styles.overviewContainer}>
+              <Link className={styles.overview} {...linkProps}>
+                <TextTruncate
+                  line={Math.floor(
+                    overviewHeight / (defaultFontSize * lineHeight)
+                  )}
+                  text={overview}
+                />
+              </Link>
+            </div>
+
+            <DiscoverGameOverviewInfo
+              height={overviewHeight}
+              year={year}
+              {...overviewOptions}
+              {...otherProps}
+            />
+          </div>
+        </div>
       </div>
-    );
-  }
+
+      <AddNewDiscoverGameModal
+        isOpen={isNewAddGameModalOpen && !isExisting}
+        igdbId={igdbId}
+        title={title}
+        year={year}
+        overview={overview}
+        folder={folder}
+        images={images}
+        onModalClose={onAddGameModalClose}
+      />
+
+      <ExcludeGameModal
+        isOpen={isExcludeGameModalOpen}
+        igdbId={igdbId}
+        title={title}
+        year={year}
+        onModalClose={onExcludeGameModalClose}
+      />
+    </div>
+  );
 }
 
 export default DiscoverGameOverview;

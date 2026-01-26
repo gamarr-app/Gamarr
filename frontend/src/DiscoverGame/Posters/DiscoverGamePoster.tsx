@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
@@ -46,224 +46,199 @@ interface DiscoverGamePosterProps {
   onSelectedChange: (props: SelectStateInputProps) => void;
 }
 
-interface DiscoverGamePosterState {
-  hasPosterError: boolean;
-  isNewAddGameModalOpen: boolean;
-  isExcludeGameModalOpen: boolean;
-}
+function DiscoverGamePoster(props: DiscoverGamePosterProps) {
+  const {
+    igdbId,
+    steamAppId,
+    youTubeTrailerId,
+    title,
+    year,
+    overview,
+    folder,
+    images,
+    posterWidth,
+    posterHeight,
+    showTitle,
+    showIgdbRating,
+    showMetacriticRating,
+    ratings,
+    isExisting,
+    isExcluded,
+    isSelected,
+    showRelativeDates,
+    shortDateFormat,
+    timeFormat,
+    gameRuntimeFormat,
+    onSelectedChange,
+    ...otherProps
+  } = props;
 
-class DiscoverGamePoster extends Component<
-  DiscoverGamePosterProps,
-  DiscoverGamePosterState
-> {
-  //
-  // Lifecycle
+  const [hasPosterError, setHasPosterError] = useState(false);
+  const [isNewAddGameModalOpen, setIsNewAddGameModalOpen] = useState(false);
+  const [isExcludeGameModalOpen, setIsExcludeGameModalOpen] = useState(false);
 
-  constructor(props: DiscoverGamePosterProps) {
-    super(props);
+  const onPress = useCallback(() => {
+    setIsNewAddGameModalOpen(true);
+  }, []);
 
-    this.state = {
-      hasPosterError: false,
-      isNewAddGameModalOpen: false,
-      isExcludeGameModalOpen: false,
-    };
-  }
+  const onAddGameModalClose = useCallback(() => {
+    setIsNewAddGameModalOpen(false);
+  }, []);
 
-  //
-  // Listeners
+  const onExcludeGamePress = useCallback(() => {
+    setIsExcludeGameModalOpen(true);
+  }, []);
 
-  onPress = () => {
-    this.setState({ isNewAddGameModalOpen: true });
+  const onExcludeGameModalClose = useCallback(() => {
+    setIsExcludeGameModalOpen(false);
+  }, []);
+
+  const onPosterLoad = useCallback(() => {
+    setHasPosterError((prev) => {
+      if (prev) {
+        return false;
+      }
+      return prev;
+    });
+  }, []);
+
+  const onPosterLoadError = useCallback(() => {
+    setHasPosterError((prev) => {
+      if (!prev) {
+        return true;
+      }
+      return prev;
+    });
+  }, []);
+
+  const onChange = useCallback(
+    ({ value, shiftKey }: CheckInputChanged) => {
+      onSelectedChange({ id: igdbId, value, shiftKey });
+    },
+    [igdbId, onSelectedChange]
+  );
+
+  // Use steamAppId for slug if available, otherwise igdbId
+  const titleSlug = steamAppId && steamAppId > 0 ? steamAppId : igdbId;
+  const linkProps = isExisting ? { to: `/game/${titleSlug}` } : { onPress };
+
+  const elementStyle = {
+    width: `${posterWidth}px`,
+    height: `${posterHeight}px`,
   };
 
-  onAddGameModalClose = (_didAdd?: boolean) => {
-    this.setState({ isNewAddGameModalOpen: false });
-  };
-
-  onExcludeGamePress = () => {
-    this.setState({ isExcludeGameModalOpen: true });
-  };
-
-  onExcludeGameModalClose = (_didExclude?: boolean) => {
-    this.setState({ isExcludeGameModalOpen: false });
-  };
-
-  onPosterLoad = () => {
-    if (this.state.hasPosterError) {
-      this.setState({ hasPosterError: false });
-    }
-  };
-
-  onPosterLoadError = () => {
-    if (!this.state.hasPosterError) {
-      this.setState({ hasPosterError: true });
-    }
-  };
-
-  onChange = ({ value, shiftKey }: CheckInputChanged) => {
-    const { igdbId, onSelectedChange } = this.props;
-
-    onSelectedChange({ id: igdbId, value, shiftKey });
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      igdbId,
-      steamAppId,
-      youTubeTrailerId,
-      title,
-      year,
-      overview,
-      folder,
-      images,
-      posterWidth,
-      posterHeight,
-      showTitle,
-      showIgdbRating,
-      showMetacriticRating,
-      ratings,
-      isExisting,
-      isExcluded,
-      isSelected,
-      showRelativeDates,
-      shortDateFormat,
-      timeFormat,
-      gameRuntimeFormat,
-      ...otherProps
-    } = this.props;
-
-    const { hasPosterError, isNewAddGameModalOpen, isExcludeGameModalOpen } =
-      this.state;
-
-    // Use steamAppId for slug if available, otherwise igdbId
-    const titleSlug = steamAppId && steamAppId > 0 ? steamAppId : igdbId;
-    const linkProps = isExisting
-      ? { to: `/game/${titleSlug}` }
-      : { onPress: this.onPress };
-
-    const elementStyle = {
-      width: `${posterWidth}px`,
-      height: `${posterHeight}px`,
-    };
-
-    return (
-      <div className={styles.content}>
-        <div className={styles.posterContainer} title={title}>
-          <div className={styles.editorSelect}>
-            <CheckInput
-              className={styles.checkInput}
-              name={igdbId.toString()}
-              value={isSelected}
-              onChange={this.onChange}
-            />
-          </div>
-
-          <Label className={styles.controls}>
-            <IconButton
-              className={styles.action}
-              name={icons.REMOVE}
-              title={
-                isExcluded
-                  ? translate('GameAlreadyExcluded')
-                  : translate('ExcludeGame')
-              }
-              isDisabled={isExcluded}
-              onPress={this.onExcludeGamePress}
-            />
-            <span className={styles.externalLinks}>
-              <Popover
-                anchor={<Icon name={icons.EXTERNAL_LINK} size={12} />}
-                title={translate('Links')}
-                body={
-                  <GameDetailsLinks
-                    steamAppId={steamAppId ?? 0}
-                    igdbSlug={undefined}
-                    youTubeTrailerId={youTubeTrailerId}
-                  />
-                }
-              />
-            </span>
-          </Label>
-
-          {isExcluded && (
-            <div className={styles.excluded} title={translate('Excluded')} />
-          )}
-
-          {isExisting && (
-            <div className={styles.existing} title={translate('Existing')} />
-          )}
-
-          <Link className={styles.link} style={elementStyle} {...linkProps}>
-            <GamePoster
-              className={styles.poster}
-              style={elementStyle}
-              images={images}
-              size={250}
-              lazy={false}
-              overflow={true}
-              onError={this.onPosterLoadError}
-              onLoad={this.onPosterLoad}
-            />
-
-            {hasPosterError && (
-              <div className={styles.overlayTitle}>{title}</div>
-            )}
-          </Link>
+  return (
+    <div className={styles.content}>
+      <div className={styles.posterContainer} title={title}>
+        <div className={styles.editorSelect}>
+          <CheckInput
+            className={styles.checkInput}
+            name={igdbId.toString()}
+            value={isSelected}
+            onChange={onChange}
+          />
         </div>
 
-        {showTitle ? (
-          <div className={styles.title} title={title}>
-            {title}
-          </div>
-        ) : null}
+        <Label className={styles.controls}>
+          <IconButton
+            className={styles.action}
+            name={icons.REMOVE}
+            title={
+              isExcluded
+                ? translate('GameAlreadyExcluded')
+                : translate('ExcludeGame')
+            }
+            isDisabled={isExcluded}
+            onPress={onExcludeGamePress}
+          />
+          <span className={styles.externalLinks}>
+            <Popover
+              anchor={<Icon name={icons.EXTERNAL_LINK} size={12} />}
+              title={translate('Links')}
+              body={
+                <GameDetailsLinks
+                  steamAppId={steamAppId ?? 0}
+                  igdbSlug={undefined}
+                  youTubeTrailerId={youTubeTrailerId}
+                />
+              }
+            />
+          </span>
+        </Label>
 
-        {showIgdbRating && !!ratings.igdb?.value ? (
-          <div className={styles.title}>
-            <IgdbRating ratings={ratings} iconSize={12} />
-          </div>
-        ) : null}
+        {isExcluded && (
+          <div className={styles.excluded} title={translate('Excluded')} />
+        )}
 
-        {showMetacriticRating && !!ratings.metacritic?.value ? (
-          <div className={styles.title}>
-            <MetacriticRating ratings={ratings} iconSize={12} />
-          </div>
-        ) : null}
+        {isExisting && (
+          <div className={styles.existing} title={translate('Existing')} />
+        )}
 
-        <DiscoverGamePosterInfo
-          showRelativeDates={showRelativeDates}
-          shortDateFormat={shortDateFormat}
-          timeFormat={timeFormat}
-          gameRuntimeFormat={gameRuntimeFormat}
-          ratings={ratings}
-          showIgdbRating={showIgdbRating}
-          showMetacriticRating={showMetacriticRating}
-          {...otherProps}
-        />
+        <Link className={styles.link} style={elementStyle} {...linkProps}>
+          <GamePoster
+            className={styles.poster}
+            style={elementStyle}
+            images={images}
+            size={250}
+            lazy={false}
+            overflow={true}
+            onError={onPosterLoadError}
+            onLoad={onPosterLoad}
+          />
 
-        <AddNewDiscoverGameModal
-          isOpen={isNewAddGameModalOpen && !isExisting}
-          igdbId={igdbId}
-          title={title}
-          year={year}
-          overview={overview}
-          folder={folder}
-          images={images}
-          onModalClose={this.onAddGameModalClose}
-        />
-
-        <ExcludeGameModal
-          isOpen={isExcludeGameModalOpen}
-          igdbId={igdbId}
-          title={title}
-          year={year}
-          onModalClose={this.onExcludeGameModalClose}
-        />
+          {hasPosterError && <div className={styles.overlayTitle}>{title}</div>}
+        </Link>
       </div>
-    );
-  }
+
+      {showTitle ? (
+        <div className={styles.title} title={title}>
+          {title}
+        </div>
+      ) : null}
+
+      {showIgdbRating && !!ratings.igdb?.value ? (
+        <div className={styles.title}>
+          <IgdbRating ratings={ratings} iconSize={12} />
+        </div>
+      ) : null}
+
+      {showMetacriticRating && !!ratings.metacritic?.value ? (
+        <div className={styles.title}>
+          <MetacriticRating ratings={ratings} iconSize={12} />
+        </div>
+      ) : null}
+
+      <DiscoverGamePosterInfo
+        showRelativeDates={showRelativeDates}
+        shortDateFormat={shortDateFormat}
+        timeFormat={timeFormat}
+        gameRuntimeFormat={gameRuntimeFormat}
+        ratings={ratings}
+        showIgdbRating={showIgdbRating}
+        showMetacriticRating={showMetacriticRating}
+        {...otherProps}
+      />
+
+      <AddNewDiscoverGameModal
+        isOpen={isNewAddGameModalOpen && !isExisting}
+        igdbId={igdbId}
+        title={title}
+        year={year}
+        overview={overview}
+        folder={folder}
+        images={images}
+        onModalClose={onAddGameModalClose}
+      />
+
+      <ExcludeGameModal
+        isOpen={isExcludeGameModalOpen}
+        igdbId={igdbId}
+        title={title}
+        year={year}
+        onModalClose={onExcludeGameModalClose}
+      />
+    </div>
+  );
 }
 
 export default DiscoverGamePoster;

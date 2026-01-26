@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TextInput from 'Components/Form/TextInput';
 import Icon, { IconKind, IconProps } from 'Components/Icon';
 import Button from 'Components/Link/Button';
@@ -80,164 +80,137 @@ interface RestoreBackupModalContentProps {
   onModalClose: () => void;
 }
 
-interface RestoreBackupModalContentState {
-  file: File | null;
-  path: string;
-  isRestored: boolean;
-  isRestarted: boolean;
-  isReloading: boolean;
-}
+function RestoreBackupModalContent(props: RestoreBackupModalContentProps) {
+  const {
+    id,
+    name,
+    isRestoring,
+    restoreError,
+    isRestarting,
+    dispatchRestart,
+    onRestorePress,
+    onModalClose,
+  } = props;
 
-class RestoreBackupModalContent extends Component<
-  RestoreBackupModalContentProps,
-  RestoreBackupModalContentState
-> {
-  //
-  // Lifecycle
+  const [file, setFile] = useState<File | null>(null);
+  const [path, setPath] = useState('');
+  const [isRestored, setIsRestored] = useState(false);
+  const [isRestarted, setIsRestarted] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
-  constructor(props: RestoreBackupModalContentProps) {
-    super(props);
+  const prevIsRestoringRef = useRef(isRestoring);
+  const prevIsRestartingRef = useRef(isRestarting);
 
-    this.state = {
-      file: null,
-      path: '',
-      isRestored: false,
-      isRestarted: false,
-      isReloading: false,
-    };
-  }
-
-  componentDidUpdate(prevProps: RestoreBackupModalContentProps) {
-    const { isRestoring, restoreError, isRestarting, dispatchRestart } =
-      this.props;
-
-    if (prevProps.isRestoring && !isRestoring && !restoreError) {
-      this.setState({ isRestored: true }, () => {
-        dispatchRestart();
-      });
+  // Handle restore completion
+  useEffect(() => {
+    if (prevIsRestoringRef.current && !isRestoring && !restoreError) {
+      setIsRestored(true);
+      dispatchRestart();
     }
+    prevIsRestoringRef.current = isRestoring;
+  }, [isRestoring, restoreError, dispatchRestart]);
 
-    if (prevProps.isRestarting && !isRestarting) {
-      this.setState(
-        {
-          isRestarted: true,
-          isReloading: true,
-        },
-        () => {
-          location.reload();
-        }
-      );
+  // Handle restart completion
+  useEffect(() => {
+    if (prevIsRestartingRef.current && !isRestarting) {
+      setIsRestarted(true);
+      setIsReloading(true);
+      location.reload();
     }
-  }
+    prevIsRestartingRef.current = isRestarting;
+  }, [isRestarting]);
 
-  //
-  // Listeners
+  const onPathChange = useCallback(({ value, files }: FileInputChanged) => {
+    setFile(files ? files[0] : null);
+    setPath(value);
+  }, []);
 
-  onPathChange = ({ value, files }: FileInputChanged) => {
-    this.setState({
-      file: files ? files[0] : null,
-      path: value,
-    });
-  };
-
-  onRestorePress = () => {
-    const { id, onRestorePress } = this.props;
-
+  const handleRestorePress = useCallback(() => {
     onRestorePress({
       id,
-      file: this.state.file ?? undefined,
+      file: file ?? undefined,
     });
-  };
+  }, [id, file, onRestorePress]);
 
-  //
-  // Render
+  const isRestoreDisabled =
+    (!id && !path) || isRestoring || isRestarting || isReloading;
 
-  render() {
-    const { id, name, isRestoring, restoreError, isRestarting, onModalClose } =
-      this.props;
+  return (
+    <ModalContent onModalClose={onModalClose}>
+      <ModalHeader>Restore Backup</ModalHeader>
 
-    const { path, isRestored, isRestarted, isReloading } = this.state;
+      <ModalBody>
+        {!!id &&
+          translate('WouldYouLikeToRestoreBackup', {
+            name: name || '',
+          })}
 
-    const isRestoreDisabled =
-      (!id && !path) || isRestoring || isRestarting || isReloading;
+        {!id && (
+          <TextInput
+            type="file"
+            name="path"
+            value={path}
+            onChange={onPathChange}
+          />
+        )}
 
-    return (
-      <ModalContent onModalClose={onModalClose}>
-        <ModalHeader>Restore Backup</ModalHeader>
-
-        <ModalBody>
-          {!!id &&
-            translate('WouldYouLikeToRestoreBackup', {
-              name: name || '',
-            })}
-
-          {!id && (
-            <TextInput
-              type="file"
-              name="path"
-              value={path}
-              onChange={this.onPathChange}
-            />
-          )}
-
-          <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.stepState}>
-                <Icon
-                  size={20}
-                  name={icons.PENDING}
-                  {...getStepIconProps(isRestoring, isRestored, restoreError)}
-                />
-              </div>
-
-              <div>{translate('Restore')}</div>
+        <div className={styles.steps}>
+          <div className={styles.step}>
+            <div className={styles.stepState}>
+              <Icon
+                size={20}
+                name={icons.PENDING}
+                {...getStepIconProps(isRestoring, isRestored, restoreError)}
+              />
             </div>
 
-            <div className={styles.step}>
-              <div className={styles.stepState}>
-                <Icon
-                  size={20}
-                  name={icons.PENDING}
-                  {...getStepIconProps(isRestarting, isRestarted)}
-                />
-              </div>
-
-              <div>{translate('Restart')}</div>
-            </div>
-
-            <div className={styles.step}>
-              <div className={styles.stepState}>
-                <Icon
-                  size={20}
-                  name={icons.PENDING}
-                  {...getStepIconProps(isReloading, false)}
-                />
-              </div>
-
-              <div>{translate('Reload')}</div>
-            </div>
-          </div>
-        </ModalBody>
-
-        <ModalFooter>
-          <div className={styles.additionalInfo}>
-            {translate('RestartReloadNote')}
+            <div>{translate('Restore')}</div>
           </div>
 
-          <Button onPress={onModalClose}>{translate('Cancel')}</Button>
+          <div className={styles.step}>
+            <div className={styles.stepState}>
+              <Icon
+                size={20}
+                name={icons.PENDING}
+                {...getStepIconProps(isRestarting, isRestarted)}
+              />
+            </div>
 
-          <SpinnerButton
-            kind={kinds.WARNING}
-            isDisabled={isRestoreDisabled}
-            isSpinning={isRestoring}
-            onPress={this.onRestorePress}
-          >
-            {translate('Restore')}
-          </SpinnerButton>
-        </ModalFooter>
-      </ModalContent>
-    );
-  }
+            <div>{translate('Restart')}</div>
+          </div>
+
+          <div className={styles.step}>
+            <div className={styles.stepState}>
+              <Icon
+                size={20}
+                name={icons.PENDING}
+                {...getStepIconProps(isReloading, false)}
+              />
+            </div>
+
+            <div>{translate('Reload')}</div>
+          </div>
+        </div>
+      </ModalBody>
+
+      <ModalFooter>
+        <div className={styles.additionalInfo}>
+          {translate('RestartReloadNote')}
+        </div>
+
+        <Button onPress={onModalClose}>{translate('Cancel')}</Button>
+
+        <SpinnerButton
+          kind={kinds.WARNING}
+          isDisabled={isRestoreDisabled}
+          isSpinning={isRestoring}
+          onPress={handleRestorePress}
+        >
+          {translate('Restore')}
+        </SpinnerButton>
+      </ModalFooter>
+    </ModalContent>
+  );
 }
 
 export default RestoreBackupModalContent;
