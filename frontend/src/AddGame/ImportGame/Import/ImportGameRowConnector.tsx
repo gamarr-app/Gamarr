@@ -85,9 +85,9 @@ class ImportGameRowConnector extends Component<ImportGameRowConnectorProps> {
   render() {
     // Don't show the row until we have the information we require for it.
 
-    const { items, monitor } = this.props;
+    const { monitor } = this.props;
 
-    if (!items || !monitor) {
+    if (!monitor) {
       return null;
     }
 
@@ -102,7 +102,6 @@ class ImportGameRowConnector extends Component<ImportGameRowConnectorProps> {
     return (
       <ImportGameRow
         {...rowProps}
-        items={rowProps.items || []}
         monitor={rowProps.monitor || ''}
         qualityProfileId={rowProps.qualityProfileId || 0}
         minimumAvailability={rowProps.minimumAvailability || ''}

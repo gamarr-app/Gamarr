@@ -16,7 +16,6 @@ interface ImportGameRowProps {
   minimumAvailability: string;
   selectedGame?: ImportGameSelectedGame;
   isExistingGame: boolean;
-  items?: ImportGameSelectedGame[];
   isSelected?: boolean;
   onSelectedChange: (payload: SelectStateInputProps) => void;
   onInputChange: (change: InputChanged<string | number>) => void;
@@ -34,7 +33,6 @@ function ImportGameRow(props: ImportGameRowProps) {
     isSelected,
     onSelectedChange,
     onInputChange,
-    items: _items = [],
   } = props;
 
   return (
