@@ -75,7 +75,7 @@ interface DiscoverGameProps {
   }) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- View components have varying props
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- View components (Posters, Overview, Table) have varying prop requirements
 type ViewComponent = ComponentType<any>;
 
 function getViewComponent(view: string): ViewComponent {

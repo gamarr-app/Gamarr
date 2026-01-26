@@ -1,10 +1,4 @@
-import {
-  ComponentType,
-  CSSProperties,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import ModelBase from 'App/ModelBase';
 import Column from 'Components/Table/Column';
 import VirtualTable from 'Components/Table/VirtualTable';
@@ -19,12 +13,9 @@ import DiscoverGameHeaderConnector from './DiscoverGameHeaderConnector';
 import DiscoverGameRowConnector from './DiscoverGameRowConnector';
 import styles from './DiscoverGameTable.css';
 
-// DiscoverGameRowConnector is a connected component that passes additional props to DiscoverGameRow.
-// The DiscoverGameItemConnector's component prop accepts ComponentType<any>, so we need only
-// a simple cast to satisfy TypeScript's structural typing requirements.
-const TypedDiscoverGameRowConnector =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Receives merged props from Redux
-  DiscoverGameRowConnector as ComponentType<any>;
+// DiscoverGameRowConnector is a connected component that receives props from both
+// the parent and Redux via DiscoverGameItemConnector.
+const TypedDiscoverGameRowConnector = DiscoverGameRowConnector;
 
 interface DiscoverGameItem extends ModelBase {
   igdbId: number;

@@ -3,6 +3,12 @@ import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import createCollectionSelector from 'Store/Selectors/createCollectionSelector';
+import GameCollection from 'typings/GameCollection';
+
+export interface CollectionData extends Omit<GameCollection, 'games'> {
+  games: GameCollection['games'];
+  genres: string[];
+}
 
 interface CollectionItemConnectorProps {
   collectionId: number;

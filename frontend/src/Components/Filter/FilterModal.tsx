@@ -10,7 +10,7 @@ interface FilterModalProps {
   filters: Filter[];
   customFilters: CustomFilter[];
   sectionItems: unknown[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FilterBuilderProp optionsSelector receives varying item types
   filterBuilderProps: FilterBuilderProp<any>[];
   customFilterType: string;
   dispatchSetFilter: (payload: { selectedFilterKey: number | string }) => void;
