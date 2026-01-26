@@ -108,21 +108,26 @@ namespace NzbDrone.Core.Parser
         // Space-separated limited to 4 components (major minor patch build)
         // Update/Patch requires a version number (no trailing ? to avoid matching "Update" alone)
         // Patterns:
-        // 1. v prefix with dotted version (v1.0.1, v.1.0.1, v 1.0.1) - most common
-        // 2. v prefix with date version (v20250317) - single number, 6+ digits
+        // 1. v prefix with dotted version (v1.0.1, v.1.0.1, v 1.0.1, v1.0u4) - most common
+        // 2. v prefix with date version (v20250317) - single number, 4+ digits
         // 3. Version with non-space delimiters and at least 3 parts (Game-1.2.3-SKIDROW)
         // 4. Space-separated after v (v1 0 1)
-        // 5. Build number (Build 12345, B12345)
-        // 6. Update/Patch version
+        // 5. Space-delimited version without v prefix (Game 1.12 MULTi9, Game? 1.0.11)
+        // 6. Parenthesized version without v prefix ((1.0.11))
+        // 7. Space-separated version without v prefix (Game 1 0 11 Release)
+        // 8. Standalone build number before MULTi (jc141 format: Game 1131346 MULTi15)
+        // 9. Build number (Build 12345, B12345)
+        // 10. Update/Patch version
         // Negative lookahead excludes file sizes (52.9 GB)
         private static readonly Regex GameVersionRegex = new (
-            @"[._\-\s\[\(]v[\.\s]?(?<version>\d+(?:\.\d+){1,3}[a-z]?\d*)(?![._]?\d*\s*[GMKT]i?B)(?=[._\-\s\]\)<]|$)|" +
-            @"[._\-\s\[\(]v(?<dateversion>\d{4,})(?=[._\-\s\]\)<]|$)|" +
+            @"[._\-\s\[\(]v[\.\s]?(?<version>\d+(?:\.\d+){1,3}[a-z]?\d*)(?![._]?\d*\s*[GMKT]i?B)(?=[._\-\s\]\)<,]|$)|" +
+            @"[._\-\s\[\(]v(?<dateversion>\d{4,})(?=[._\-\s\]\)<,]|$)|" +
             @"[._\-](?<version2>\d+(?:\.\d+){2,3})(?![._]?\d*\s*[GMKT]i?B)[._\-]|" +
-            @"[._\-\s\[\(]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?=[\s\-._\]\)]|$)|" +
+            @"[._\-\s\[\(]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?=[\s\-._\]\),]|$)|" +
             @"[\s\?\!](?<version3>\d+(?:\.\d+)+)(?![._]?\d*\s*[GMKT]i?B)(?=\s|$)|" +
             @"\((?<parenversion>\d+(?:\.\d+)+)\)|" +
             @"[\s\?\!](?<spacenov>\d+(?:\s+\d+){2,3})(?=\s|$)|" +
+            @"\s(?<buildonly>\d{6,})(?=\s+MULTi)|" +
             @"[._\-\s\[\(](?:BUILD|B)[._\-\s]?(?<build>\d+)|" +
             @"[._\-\s\[\(](?:Update|Patch)[._\-\s\]\)]?(?<update>\d+(?:\.\d+)*)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -179,6 +184,17 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
+            // Try version3 group (1.1.0.17370 without v prefix, space-delimited, exactly 4 parts)
+            if (match.Groups["version3"].Success)
+            {
+                var versionString = match.Groups["version3"].Value;
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from space-delimited '{1}'", version, name);
+                    return version;
+                }
+            }
+
             // Try space-separated version (v1 2 3 -> 1.2.3)
             // Convert space-separated to dot-separated for parsing
             if (match.Groups["spaceversion"].Success)
@@ -188,17 +204,6 @@ namespace NzbDrone.Core.Parser
                 if (GameVersion.TryParse(versionString, out var version))
                 {
                     Logger.Trace("Parsed game version '{0}' from space-separated '{1}'", version, name);
-                    return version;
-                }
-            }
-
-            // Try space-delimited version without v prefix (e.g., "FEZ 1.12 MULTi9" or "Game? 1.0.11 Release")
-            if (match.Groups["version3"].Success)
-            {
-                var versionString = match.Groups["version3"].Value;
-                if (GameVersion.TryParse(versionString, out var version))
-                {
-                    Logger.Trace("Parsed game version '{0}' from space-delimited '{1}'", version, name);
                     return version;
                 }
             }
@@ -222,6 +227,17 @@ namespace NzbDrone.Core.Parser
                 if (GameVersion.TryParse(versionString, out var version))
                 {
                     Logger.Trace("Parsed game version '{0}' from space-separated no-v '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            // Try buildonly group (standalone build number before MULTi, jc141 format)
+            if (match.Groups["buildonly"].Success)
+            {
+                var buildString = "Build " + match.Groups["buildonly"].Value;
+                if (GameVersion.TryParse(buildString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from standalone build '{1}'", version, name);
                     return version;
                 }
             }
