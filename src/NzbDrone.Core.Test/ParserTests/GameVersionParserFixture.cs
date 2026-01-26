@@ -153,6 +153,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Cyberpunk 2077 Update v2 3", 2, 3, 0, 0)]
         [TestCase("ELDEN RING Shadow of the Erdtree Update v1 16-RUNE", 1, 16, 0, 0)]
         [TestCase("ELDEN RING Deluxe Edition Shadow of the Erdtree Premium Bundle (v1 16 All DLCs Bonus Content Online Multiplayer MULTi15)", 1, 16, 0, 0)]
+        [TestCase("Manifold Garden Update v1 1 0 15463-CODEX", 1, 1, 0, 15463)]
         public void should_parse_space_separated_versions(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
@@ -240,6 +241,66 @@ namespace NzbDrone.Core.Test.ParserTests
         // Control versions - only dotted versions after proper delimiter work
         [TestCase("Control [v.0.0.518.2177 Build 17833993] (2020) PC", 0, 0, 518, 2177)]
         public void should_parse_control_versions(string title, int major, int minor, int patch, int build)
+        {
+            var version = QualityParser.ParseGameVersion(title);
+
+            version.HasValue.Should().BeTrue();
+            version.Major.Should().Be(major);
+            version.Minor.Should().Be(minor);
+            version.Patch.Should().Be(patch);
+            version.Build.Should().Be(build);
+        }
+
+        // FitGirl parenthesized format with comma after version
+        [TestCase("Manifold Garden (v1.1.0.14651, MULTi14) [FitGirl Repack]", 1, 1, 0, 14651)]
+        [TestCase("Celeste (v1.4.0.0, MULTi15) [FitGirl Repack]", 1, 4, 0, 0)]
+        [TestCase("FIFA 22 (v1.0.77.45722, MULTi21) [FitGirl Monkey Repack]", 1, 0, 77, 45722)]
+        [TestCase("Terra Invicta (v1.0.25, MULTi14) [FitGirl Repack]", 1, 0, 25, 0)]
+        [TestCase("Wreckreation (v1.2.0.147169, MULTi12) [FitGirl Repack]", 1, 2, 0, 147169)]
+        public void should_parse_fitgirl_comma_versions(string title, int major, int minor, int patch, int build)
+        {
+            var version = QualityParser.ParseGameVersion(title);
+
+            version.HasValue.Should().BeTrue();
+            version.Major.Should().Be(major);
+            version.Minor.Should().Be(minor);
+            version.Patch.Should().Be(patch);
+            version.Build.Should().Be(build);
+        }
+
+        // jc141 format without v prefix (4-part version space-delimited)
+        [TestCase("Manifold Garden 1.1.0.17370 MULTi14 GNU/Linux Wine jc141", 1, 1, 0, 17370)]
+        [TestCase("Game Name 1.2.3.4567 MULTi10", 1, 2, 3, 4567)]
+        public void should_parse_space_delimited_four_part_versions(string title, int major, int minor, int patch, int build)
+        {
+            var version = QualityParser.ParseGameVersion(title);
+
+            version.HasValue.Should().BeTrue();
+            version.Major.Should().Be(major);
+            version.Minor.Should().Be(minor);
+            version.Patch.Should().Be(patch);
+            version.Build.Should().Be(build);
+        }
+
+        // jc141 format with standalone build number before MULTi
+        [TestCase("Hades II 1131346 MULTi15 GNU Linux Wine jc141", 0, 0, 0, 1131346)]
+        [TestCase("Game Name 9876543 MULTi10", 0, 0, 0, 9876543)]
+        public void should_parse_standalone_build_before_multi(string title, int major, int minor, int patch, int build)
+        {
+            var version = QualityParser.ParseGameVersion(title);
+
+            version.HasValue.Should().BeTrue();
+            version.Major.Should().Be(major);
+            version.Minor.Should().Be(minor);
+            version.Patch.Should().Be(patch);
+            version.Build.Should().Be(build);
+        }
+
+        // Space-separated versions in parentheses (DODI/FitGirl format)
+        [TestCase("Hades II (v1 131346 Bonus Content MULTi15) [DODI Repack]", 1, 131346, 0, 0)]
+        [TestCase("Hades II Hades 2 (v1 131346 Bonus OST MULTi15) [FitGirl Repack]", 1, 131346, 0, 0)]
+        [TestCase("Hades II Update v1 131641-RUNE", 1, 131641, 0, 0)]
+        public void should_parse_space_separated_versions_in_parens(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
 
