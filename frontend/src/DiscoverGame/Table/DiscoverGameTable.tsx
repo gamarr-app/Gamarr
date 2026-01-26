@@ -71,14 +71,15 @@ function DiscoverGameTable({
   const [scrollIndex, setScrollIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    if (jumpToCharacter != null) {
-      const index = getIndexOfFirstCharacter(items, jumpToCharacter);
-
-      if (index != null) {
-        setScrollIndex(index);
-      }
-    } else {
+    if (jumpToCharacter == null) {
       setScrollIndex(null);
+      return;
+    }
+
+    const index = getIndexOfFirstCharacter(items, jumpToCharacter);
+
+    if (index != null) {
+      setScrollIndex(index);
     }
   }, [items, jumpToCharacter]);
 
