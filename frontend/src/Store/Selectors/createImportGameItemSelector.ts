@@ -5,7 +5,7 @@ import Game, { GameMonitor } from 'Game/Game';
 import createAllGamesSelector from './createAllGamesSelector';
 
 interface ImportGameItemProps {
-  id: number;
+  id: string;
 }
 
 interface SelectedGame {
@@ -14,7 +14,7 @@ interface SelectedGame {
 }
 
 interface ImportGameItem {
-  id: number;
+  id: string;
   selectedGame?: SelectedGame;
   [key: string]: unknown;
 }

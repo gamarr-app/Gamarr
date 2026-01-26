@@ -81,11 +81,11 @@ export const actionHandlers = handleThunks({
       payload,
     };
 
-    const state = getState() as unknown as Record<
-      string,
-      Record<string, unknown>
-    >;
-    if (state[section][payload.section]) {
+    const providerOptionsState = getState().providerOptions;
+    const subsectionExists =
+      payload.section in providerOptionsState &&
+      providerOptionsState[payload.section as keyof typeof providerOptionsState];
+    if (subsectionExists) {
       dispatch(
         set({
           section: subsection,

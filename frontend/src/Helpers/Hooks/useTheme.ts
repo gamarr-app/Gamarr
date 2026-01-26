@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import themes from 'Styles/Themes';
+import Theme from 'Styles/Themes/Theme';
 
 function createThemeSelector() {
   return createSelector(
@@ -47,9 +48,9 @@ const useTheme = () => {
 
 export default useTheme;
 
-export const useThemeColor = (color: string) => {
+export const useThemeColor = (color: keyof Theme) => {
   const theme = useTheme();
-  const themeVariables = themes[theme] as unknown as Record<string, string>;
+  const themeVariables = themes[theme];
 
   return themeVariables[color];
 };

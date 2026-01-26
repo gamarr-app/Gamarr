@@ -145,20 +145,18 @@ export default {
     ) => {
       let tags: SpecificationItem[] = [];
       if (payload.id) {
-        const cfState = getSectionState(
-          getState(),
-          'settings.autoTaggings',
-          true
-        ) as SectionState;
-        const cf = cfState.items[cfState.itemMap[payload.id]] as unknown as {
-          specifications: Omit<SpecificationItem, 'id'>[];
-        };
-        tags = cf.specifications.map((tag, i) => {
-          return {
-            id: i + 1,
-            ...tag,
-          } as SpecificationItem;
-        });
+        const autoTaggings = getState().settings.autoTaggings;
+        const autoTagging = autoTaggings.items.find(
+          (item) => item.id === payload.id
+        );
+        if (autoTagging?.specifications) {
+          tags = autoTagging.specifications.map((tag, i) => {
+            return {
+              ...tag,
+              id: i + 1,
+            } as SpecificationItem;
+          });
+        }
       }
 
       dispatch(
@@ -181,7 +179,7 @@ export default {
 
       const saveData = getProviderState(
         { id, ...otherPayload },
-        getState as unknown as () => Record<string, unknown>,
+        getState,
         section,
         false
       ) as SpecificationItem;

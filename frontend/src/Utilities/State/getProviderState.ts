@@ -35,7 +35,7 @@ interface Payload {
   [key: string]: unknown;
 }
 
-type GetState = () => Record<string, unknown>;
+type GetState = () => object;
 
 function getProviderState(
   payload: Payload,
