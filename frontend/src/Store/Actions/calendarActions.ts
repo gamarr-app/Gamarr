@@ -3,6 +3,7 @@ import moment, { Moment } from 'moment';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState, { CustomFilter, Filter } from 'App/State/AppState';
+import CalendarAppState from 'App/State/CalendarAppState';
 import * as calendarViews from 'Calendar/calendarViews';
 import * as commandNames from 'Commands/commandNames';
 import {
@@ -261,7 +262,7 @@ function getPopulatableRange(
 function isRangePopulated(
   start: string,
   _end: string,
-  state: CalendarState
+  state: CalendarAppState
 ): boolean {
   const { start: currentStart, end: currentEnd, view: currentView } = state;
 
@@ -336,7 +337,7 @@ export const actionHandlers = handleThunks({
     dispatch: AppDispatch
   ) {
     const state = getState();
-    const calendar = state.calendar as unknown as CalendarState;
+    const calendar = state.calendar;
     const customFilters = getCustomFilters(state, section);
     const selectedFilters = findSelectedFilters(
       calendar.selectedFilterKey,
@@ -346,22 +347,15 @@ export const actionHandlers = handleThunks({
 
     const { time = calendar.time, view = calendar.view } = payload;
 
-    const dayCount = (state.calendar as unknown as CalendarState).dayCount;
-    const settingsState = state.settings as unknown as {
-      ui: { item: { firstDayOfWeek: number } };
-    };
+    const dayCount = state.calendar.dayCount;
     const dates = getDates(
       moment(time),
       view,
-      settingsState.ui.item.firstDayOfWeek,
+      state.settings.ui.item.firstDayOfWeek,
       dayCount
     );
     const { start, end } = getPopulatableRange(dates.start, dates.end, view);
-    const isPrePopulated = isRangePopulated(
-      start,
-      end,
-      state.calendar as unknown as CalendarState
-    );
+    const isPrePopulated = isRangePopulated(start, end, state.calendar);
 
     const basesAttrs = {
       section,
@@ -434,10 +428,7 @@ export const actionHandlers = handleThunks({
     payload: SetCalendarDaysCountPayload,
     dispatch: AppDispatch
   ) {
-    if (
-      payload.dayCount ===
-      (getState().calendar as unknown as CalendarState).dayCount
-    ) {
+    if (payload.dayCount === getState().calendar.dayCount) {
       return;
     }
 
@@ -449,7 +440,7 @@ export const actionHandlers = handleThunks({
     );
 
     const state = getState();
-    const { time, view } = state.calendar as unknown as CalendarState;
+    const { time, view } = state.calendar;
 
     dispatch(fetchCalendar({ time, view }));
   },
@@ -467,7 +458,7 @@ export const actionHandlers = handleThunks({
     );
 
     const state = getState();
-    const { time, view } = state.calendar as unknown as CalendarState;
+    const { time, view } = state.calendar;
 
     dispatch(fetchCalendar({ time, view }));
   },
@@ -482,7 +473,7 @@ export const actionHandlers = handleThunks({
     const time =
       view === calendarViews.FORECAST || calendarViews.AGENDA
         ? moment()
-        : (state.calendar as unknown as CalendarState).time;
+        : state.calendar.time;
 
     dispatch(fetchCalendar({ time: time?.toString(), view }));
   },
@@ -493,7 +484,7 @@ export const actionHandlers = handleThunks({
     dispatch: AppDispatch
   ) {
     const state = getState();
-    const view = (state.calendar as unknown as CalendarState).view;
+    const view = state.calendar.view;
     const time = moment();
 
     dispatch(fetchCalendar({ time: time.toISOString(), view }));
@@ -506,12 +497,10 @@ export const actionHandlers = handleThunks({
   ) {
     const state = getState();
 
-    const { view, dayCount } = state.calendar as unknown as CalendarState;
+    const { view, dayCount, time: calendarTime } = state.calendar;
 
     const amount = view === calendarViews.FORECAST ? dayCount : 1;
-    const time = moment(
-      (state.calendar as unknown as CalendarState).time
-    ).subtract(
+    const time = moment(calendarTime).subtract(
       amount,
       viewRanges[view] as moment.unitOfTime.DurationConstructor
     );
@@ -526,10 +515,10 @@ export const actionHandlers = handleThunks({
   ) {
     const state = getState();
 
-    const { view, dayCount } = state.calendar as unknown as CalendarState;
+    const { view, dayCount, time: calendarTime } = state.calendar;
 
     const amount = view === calendarViews.FORECAST ? dayCount : 1;
-    const time = moment((state.calendar as unknown as CalendarState).time).add(
+    const time = moment(calendarTime).add(
       amount,
       viewRanges[view] as moment.unitOfTime.DurationConstructor
     );

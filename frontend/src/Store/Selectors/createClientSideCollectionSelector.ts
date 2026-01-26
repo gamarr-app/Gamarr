@@ -6,6 +6,7 @@ import AppState, {
   Filter,
   PropertyFilter,
 } from 'App/State/AppState';
+import Column from 'Components/Table/Column';
 import {
   filterTypePredicates,
   filterTypes,
@@ -73,6 +74,7 @@ export interface CollectionResult<T>
   items: T[];
   totalItems: number;
   customFilters: CustomFilter[];
+  columns?: Column[];
 }
 
 function getSortClause<T extends Record<string, unknown>>(

@@ -124,7 +124,7 @@ export const actionHandlers = handleThunks({
     payload: GetCaptchaCookiePayload,
     dispatch: Dispatch
   ) {
-    const state = (getState() as unknown as { captcha: CaptchaState }).captcha;
+    const state = getState().captcha;
 
     const queryParams: Record<string, string | number | boolean> = {
       captchaResponse: payload.captchaResponse,

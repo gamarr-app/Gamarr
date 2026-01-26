@@ -40,7 +40,7 @@ function ImportGameRow(props: ImportGameRowProps) {
     <>
       <VirtualTableSelectCell
         inputClassName={styles.selectInput}
-        id={id as unknown as number}
+        id={id}
         isSelected={isSelected}
         isDisabled={!selectedGame || isExistingGame}
         onSelectedChange={onSelectedChange}
