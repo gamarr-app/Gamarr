@@ -1,6 +1,9 @@
 # Gamarr
 
+[![Build Status](https://github.com/gamarr-app/Gamarr/actions/workflows/ci.yml/badge.svg)](https://github.com/gamarr-app/Gamarr/actions/workflows/ci.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/gamarr/gamarr.svg)](https://hub.docker.com/r/gamarr/gamarr)
 [![GitHub Downloads](https://img.shields.io/github/downloads/gamarr-app/Gamarr/total.svg)](https://github.com/gamarr-app/Gamarr/releases)
+[![Translation Status](https://translate.servarr.com/widget/servarr/gamarr/svg-badge.svg)](https://translate.servarr.com/engage/servarr/)
 [![License](https://img.shields.io/github/license/gamarr-app/Gamarr)](http://www.gnu.org/licenses/gpl.html)
 
 Gamarr is a game collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new games and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available.
