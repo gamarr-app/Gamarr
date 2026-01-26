@@ -74,9 +74,15 @@ export const router = createBrowserRouter(
         { path: '/settings/mediamanagement', element: <MediaManagement /> },
         { path: '/settings/profiles', element: <Profiles /> },
         { path: '/settings/quality', element: <Quality /> },
-        { path: '/settings/customformats', element: <CustomFormatSettingsPage /> },
+        {
+          path: '/settings/customformats',
+          element: <CustomFormatSettingsPage />,
+        },
         { path: '/settings/indexers', element: <IndexerSettings /> },
-        { path: '/settings/downloadclients', element: <DownloadClientSettings /> },
+        {
+          path: '/settings/downloadclients',
+          element: <DownloadClientSettings />,
+        },
         { path: '/settings/importlists', element: <ImportListSettings /> },
         { path: '/settings/connect', element: <NotificationSettings /> },
         { path: '/settings/metadata', element: <MetadataSettings /> },
