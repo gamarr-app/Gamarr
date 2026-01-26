@@ -4,7 +4,7 @@ declare module 'react-dnd-multi-backend' {
   import { DndProviderProps } from 'react-dnd';
 
   export interface DndProviderMultiBackendProps
-    extends Omit<DndProviderProps<unknown>, 'backend'> {
+    extends Omit<DndProviderProps<unknown, unknown>, 'backend'> {
     options: unknown;
   }
 

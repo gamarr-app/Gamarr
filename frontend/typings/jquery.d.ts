@@ -52,7 +52,7 @@ declare module 'jquery' {
     [key: string]: unknown;
   }
 
-  const $: JQueryStatic = {} as JQueryStatic;
+  const $: JQueryStatic;
   export default $;
   export { JQueryPromise, JQueryDeferred, JQueryXHR, JQueryAjaxSettings };
 }
