@@ -11,13 +11,16 @@ declare global {
   }
 }
 
-String.prototype.contains = function (
-  this: string,
-  str: string,
-  startIndex?: number
-) {
-  return this.indexOf(str, startIndex) !== -1;
-};
+if (!String.prototype.contains) {
+  // eslint-disable-next-line no-extend-native
+  Object.defineProperty(String.prototype, 'contains', {
+    value: function (this: string, str: string, startIndex?: number) {
+      return this.indexOf(str, startIndex) !== -1;
+    },
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock translate
 jest.mock('Utilities/String/translate', () => ({
