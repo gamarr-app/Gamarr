@@ -1,4 +1,3 @@
-import { push } from 'connected-react-router';
 import { ExtendedKeyboardEvent } from 'mousetrap';
 import {
   FormEvent,
@@ -11,7 +10,8 @@ import {
   useState,
 } from 'react';
 import Autosuggest from 'react-autosuggest';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { useDebouncedCallback } from 'use-debounce';
 import { Tag } from 'App/State/TagsAppState';
@@ -118,7 +118,7 @@ function createGamesSelector() {
 
 function GameSearchInput() {
   const games = useSelector(createGamesSelector());
-  const dispatch = useDispatch();
+  const history = useHistory();
   const { bindShortcut, unbindShortcut } = useKeyboardShortcuts();
 
   const [value, setValue] = useState('');
@@ -298,11 +298,7 @@ function GameSearchInput() {
         autosuggestRef.current.state;
 
       if (!suggestions.length || highlightedSectionIndex) {
-        dispatch(
-          push(
-            `${window.Gamarr.urlBase}/add/new?term=${encodeURIComponent(value)}`
-          )
-        );
+        history.push(`/add/new?term=${encodeURIComponent(value)}`);
 
         inputRef.current?.blur();
         reset();
@@ -318,16 +314,12 @@ function GameSearchInput() {
           ? suggestions[0]
           : suggestions[highlightedSuggestionIndex];
 
-      dispatch(
-        push(
-          `${window.Gamarr.urlBase}/game/${selectedSuggestion.item.titleSlug}`
-        )
-      );
+      history.push(`/game/${selectedSuggestion.item.titleSlug}`);
 
       inputRef.current?.blur();
       reset();
     },
-    [value, suggestions, dispatch, reset]
+    [value, suggestions, history, reset]
   );
 
   const handleBlur = useCallback(() => {
@@ -354,19 +346,13 @@ function GameSearchInput() {
       { suggestion }: { suggestion: GameSuggestion | AddNewGameSuggestion }
     ) => {
       if ('type' in suggestion) {
-        dispatch(
-          push(
-            `${window.Gamarr.urlBase}/add/new?term=${encodeURIComponent(value)}`
-          )
-        );
+        history.push(`/add/new?term=${encodeURIComponent(value)}`);
       } else {
         setValue('');
-        dispatch(
-          push(`${window.Gamarr.urlBase}/game/${suggestion.item.titleSlug}`)
-        );
+        history.push(`/game/${suggestion.item.titleSlug}`);
       }
     },
-    [value, dispatch]
+    [value, history]
   );
 
   const inputProps = {

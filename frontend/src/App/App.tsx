@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConnectedRouter, ConnectedRouterProps } from 'connected-react-router';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import { Store } from 'redux';
 import Page from 'Components/Page/Page';
 import ApplyTheme from './ApplyTheme';
@@ -9,12 +9,11 @@ import AppRoutes from './AppRoutes';
 
 interface AppProps {
   store: Store;
-  history: ConnectedRouterProps['history'];
 }
 
 const queryClient = new QueryClient();
 
-function App({ store, history }: AppProps) {
+function App({ store }: AppProps) {
   return (
     <HelmetProvider>
       <Helmet>
@@ -22,12 +21,12 @@ function App({ store, history }: AppProps) {
       </Helmet>
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
-          <ConnectedRouter history={history}>
+          <BrowserRouter basename={window.Gamarr.urlBase}>
             <ApplyTheme />
             <Page>
               <AppRoutes />
             </Page>
-          </ConnectedRouter>
+          </BrowserRouter>
         </Provider>
       </QueryClientProvider>
     </HelmetProvider>

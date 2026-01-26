@@ -1,7 +1,7 @@
-import { push } from 'connected-react-router';
 import _ from 'lodash';
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import {
   addRootFolder,
@@ -11,13 +11,6 @@ import {
 import createRootFoldersSelector from 'Store/Selectors/createRootFoldersSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import ImportGameSelectFolder from './ImportGameSelectFolder';
-
-// eslint-disable-next-line init-declarations
-declare const window: Window & {
-  Gamarr: {
-    urlBase: string;
-  };
-};
 
 interface UnmappedFolder {
   name: string;
@@ -32,99 +25,85 @@ interface RootFolderItemFromState {
   unmappedFolders?: object[];
 }
 
-function createMapStateToProps() {
-  return createSelector(
-    createRootFoldersSelector(),
-    createSystemStatusSelector(),
-    (rootFolders, systemStatus) => {
-      return {
-        ...rootFolders,
-        isWindows: systemStatus.isWindows,
-      };
-    }
-  );
-}
-
-const mapDispatchToProps = {
-  fetchRootFolders,
-  addRootFolder,
-  deleteRootFolder,
-  push,
-};
-
-interface ImportGameSelectFolderConnectorProps {
+interface RootFoldersState {
   isSaving: boolean;
-  isWindows?: boolean;
-  isFetching?: boolean;
-  isPopulated?: boolean;
   saveError?: object;
   items: RootFolderItemFromState[];
-  fetchRootFolders: () => void;
-  addRootFolder: (payload: { path: string }) => void;
-  deleteRootFolder: (payload: { id: number }) => void;
-  push: (path: string) => void;
+  isFetching?: boolean;
+  isPopulated?: boolean;
 }
 
-class ImportGameSelectFolderConnector extends Component<ImportGameSelectFolderConnectorProps> {
-  //
-  // Lifecycle
-
-  componentDidMount() {
-    this.props.fetchRootFolders();
+const createMapStateToProps = createSelector(
+  createRootFoldersSelector(),
+  createSystemStatusSelector(),
+  (rootFolders: RootFoldersState, systemStatus) => {
+    return {
+      ...rootFolders,
+      isWindows: systemStatus.isWindows,
+    };
   }
+);
 
-  componentDidUpdate(prevProps: ImportGameSelectFolderConnectorProps) {
-    const { items, isSaving, saveError } = this.props;
+function ImportGameSelectFolderConnector() {
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const state = useSelector(createMapStateToProps);
+  const prevItemsRef = useRef<RootFolderItemFromState[]>(state.items);
+  const prevIsSavingRef = useRef(state.isSaving);
 
-    if (prevProps.isSaving && !isSaving && !saveError) {
+  const { items, isSaving, saveError, isWindows, isFetching, isPopulated } =
+    state;
+
+  useEffect(() => {
+    dispatch(fetchRootFolders());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (prevIsSavingRef.current && !isSaving && !saveError) {
       const newRootFolders = _.differenceBy(
         items,
-        prevProps.items,
+        prevItemsRef.current,
         (item) => item.id
       );
 
       if (newRootFolders.length === 1) {
-        this.props.push(
-          `${window.Gamarr.urlBase}/add/import/${newRootFolders[0].id}`
-        );
+        history.push(`/add/import/${newRootFolders[0].id}`);
       }
     }
-  }
 
-  //
-  // Listeners
+    prevItemsRef.current = items;
+    prevIsSavingRef.current = isSaving;
+  }, [items, isSaving, saveError, history]);
 
-  onNewRootFolderSelect = (path: string) => {
-    this.props.addRootFolder({ path });
-  };
+  const onNewRootFolderSelect = useCallback(
+    (path: string) => {
+      dispatch(addRootFolder({ path }));
+    },
+    [dispatch]
+  );
 
-  onDeleteRootFolderPress = (id: number) => {
-    this.props.deleteRootFolder({ id });
-  };
+  const onDeleteRootFolderPress = useCallback(
+    (id: number) => {
+      dispatch(deleteRootFolder({ id }));
+    },
+    [dispatch]
+  );
 
-  //
-  // Render
-
-  render() {
-    return (
-      <ImportGameSelectFolder
-        {...this.props}
-        isWindows={this.props.isWindows || false}
-        isFetching={this.props.isFetching || false}
-        isPopulated={this.props.isPopulated || false}
-        items={this.props.items.map((item) => ({
-          ...item,
-          freeSpace: item.freeSpace || 0,
-          unmappedFolders: (item.unmappedFolders || []) as UnmappedFolder[],
-        }))}
-        onNewRootFolderSelect={this.onNewRootFolderSelect}
-        onDeleteRootFolderPress={this.onDeleteRootFolderPress}
-      />
-    );
-  }
+  return (
+    <ImportGameSelectFolder
+      isSaving={isSaving}
+      isWindows={isWindows || false}
+      isFetching={isFetching || false}
+      isPopulated={isPopulated || false}
+      items={items.map((item) => ({
+        ...item,
+        freeSpace: item.freeSpace || 0,
+        unmappedFolders: (item.unmappedFolders || []) as UnmappedFolder[],
+      }))}
+      onNewRootFolderSelect={onNewRootFolderSelect}
+      onDeleteRootFolderPress={onDeleteRootFolderPress}
+    />
+  );
 }
 
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(ImportGameSelectFolderConnector);
+export default ImportGameSelectFolderConnector;

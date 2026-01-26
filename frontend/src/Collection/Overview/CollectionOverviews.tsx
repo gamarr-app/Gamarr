@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component, RefObject } from 'react';
 import Measure, { ContentRect } from 'react-measure';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
 import CollectionItemConnector from 'Collection/CollectionItemConnector';
@@ -294,7 +294,7 @@ class CollectionOverviews extends Component<
     return (
       <Measure bounds={true} onResize={this.onMeasure}>
         {({ measureRef }) => (
-          <div ref={measureRef as React.RefObject<HTMLDivElement>}>
+          <div ref={measureRef as RefObject<HTMLDivElement>}>
             <WindowScroller
               scrollElement={isSmallScreen ? undefined : scroller}
             >
