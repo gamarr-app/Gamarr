@@ -188,7 +188,9 @@ function ImportGameConnector() {
   const { rootFolderId } = useParams<{ rootFolderId: string }>();
 
   return (
-    <ConnectedImportGameConnector rootFolderId={parseInt(rootFolderId || '0')} />
+    <ConnectedImportGameConnector
+      rootFolderId={parseInt(rootFolderId || '0')}
+    />
   );
 }
 

@@ -22,7 +22,8 @@ function createMapStateToProps() {
   return createSelector(
     (state: AppState) => state.addGame,
     (state: AppState) => state.games.items.length,
-    (_state: AppState, ownProps: { location: LocationState }) => ownProps.location,
+    (_state: AppState, ownProps: { location: LocationState }) =>
+      ownProps.location,
     (addGame, existingGamesCount, location) => {
       const { params } = parseUrl(location.search);
 
