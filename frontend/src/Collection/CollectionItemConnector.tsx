@@ -1,53 +1,52 @@
-import { Component, ComponentType } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { ComponentType } from 'react';
+import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
+import AppState from 'App/State/AppState';
 import createCollectionSelector from 'Store/Selectors/createCollectionSelector';
 
-function createMapStateToProps() {
-  return createSelector(createCollectionSelector(), (collection) => {
-    // If a game is deleted this selector may fire before the parent
-    // selectors, which will result in an undefined game, if that happens
-    // we want to return early here and again in the render function to avoid
-    // trying to show a game that has no information available.
-
-    if (!collection) {
-      return {};
-    }
-
-    const allGenres = collection.games.flatMap((game) => game.genres);
-
-    return {
-      ...collection,
-      games: [...collection.games].sort((a, b) => b.year - a.year),
-      genres: Array.from(new Set(allGenres)),
-    };
-  });
-}
-
-const connector = connect(createMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-interface CollectionItemConnectorProps extends PropsFromRedux {
-  id?: number;
+interface CollectionItemConnectorProps {
   collectionId: number;
-  component: ComponentType<{ id: number; [key: string]: unknown }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: ComponentType<any>;
   [key: string]: unknown;
 }
 
-class CollectionItemConnector extends Component<CollectionItemConnectorProps> {
-  //
-  // Render
+function createCollectionItemSelector(collectionId: number) {
+  return createSelector(
+    (state: AppState) => createCollectionSelector()(state, { collectionId }),
+    (collection) => {
+      // If a game is deleted this selector may fire before the parent
+      // selectors, which will result in an undefined game, if that happens
+      // we want to return early here and again in the render function to avoid
+      // trying to show a game that has no information available.
 
-  render() {
-    const { id, component: ItemComponent, ...otherProps } = this.props;
+      if (!collection) {
+        return { id: undefined };
+      }
 
-    if (!id) {
-      return null;
+      const allGenres = collection.games.flatMap((game) => game.genres);
+
+      return {
+        ...collection,
+        games: [...collection.games].sort((a, b) => b.year - a.year),
+        genres: Array.from(new Set(allGenres)),
+      };
     }
-
-    return <ItemComponent {...otherProps} id={id} />;
-  }
+  );
 }
 
-export default connector(CollectionItemConnector);
+function CollectionItemConnector(props: CollectionItemConnectorProps) {
+  const { collectionId, component: ItemComponent, ...otherProps } = props;
+
+  const collectionData = useSelector(
+    createCollectionItemSelector(collectionId)
+  );
+
+  if (!collectionData.id) {
+    return null;
+  }
+
+  return <ItemComponent {...otherProps} {...collectionData} />;
+}
+
+export default CollectionItemConnector;
