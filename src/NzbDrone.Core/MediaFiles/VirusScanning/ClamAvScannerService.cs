@@ -38,12 +38,6 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
 
         public string ScannerName => "ClamAV";
 
-        // For testing purposes - allows clearing the cache between tests
-        internal static void ClearCache()
-        {
-            _scanCache.Clear();
-        }
-
         public string DetectedScannerPath
         {
             get

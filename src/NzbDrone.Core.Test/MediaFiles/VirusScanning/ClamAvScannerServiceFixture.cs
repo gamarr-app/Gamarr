@@ -17,13 +17,6 @@ namespace NzbDrone.Core.Test.MediaFiles.VirusScanning
         private const string CLAMSCAN_PATH = "/usr/bin/clamscan";
         private const string SCAN_TARGET = "/data/downloads/game.zip";
 
-        [SetUp]
-        public void Setup()
-        {
-            // Clear the static cache before each test to ensure test isolation
-            ClamAvScannerService.ClearCache();
-        }
-
         private void GivenScannerAvailable()
         {
             Mocker.GetMock<IConfigService>()
