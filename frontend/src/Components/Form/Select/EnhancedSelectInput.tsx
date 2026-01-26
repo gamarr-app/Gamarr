@@ -22,6 +22,7 @@ import useMeasure from 'Helpers/Hooks/useMeasure';
 import { icons } from 'Helpers/Props';
 import ArrayElement from 'typings/Helpers/ArrayElement';
 import { EnhancedSelectInputChanged, InputChanged } from 'typings/inputs';
+import { asPopperModifier, PopperModifierData } from 'typings/Popper';
 import { isMobile as isMobileUtil } from 'Utilities/browser';
 import * as keyCodes from 'Utilities/Constants/keyCodes';
 import TextInput from '../TextInput';
@@ -189,8 +190,7 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     return '';
   }, [value, values, isMultiSelect]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types are incomplete (missing right/bottom on Offset)
-  const handleComputeMaxHeight = useCallback((data: any) => {
+  const handleComputeMaxHeight = useCallback((data: PopperModifierData) => {
     const windowHeight = window.innerHeight;
 
     data.styles.maxHeight = windowHeight - MINIMUM_DISTANCE_FROM_EDGE;
@@ -496,7 +496,7 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
               computeMaxHeight: {
                 order: 851,
                 enabled: true,
-                fn: handleComputeMaxHeight,
+                fn: asPopperModifier(handleComputeMaxHeight),
               },
               preventOverflow: {
                 enabled: true,

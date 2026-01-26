@@ -11,7 +11,7 @@ export interface PageToolbarButtonProps extends LinkProps {
   spinningName?: IconName;
   isSpinning?: boolean;
   isDisabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Overflow components have varying prop requirements
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Overflow components can have different prop types
   overflowComponent?: ComponentType<any>;
 }
 

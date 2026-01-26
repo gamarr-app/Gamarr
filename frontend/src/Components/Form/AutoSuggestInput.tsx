@@ -23,6 +23,7 @@ import { Manager, Popper, Reference } from 'react-popper';
 import Portal from 'Components/Portal';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { InputChanged } from 'typings/inputs';
+import { asPopperModifier, PopperModifierData } from 'typings/Popper';
 import styles from './AutoSuggestInput.css';
 
 interface AutoSuggestInputProps<T>
@@ -88,8 +89,7 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
   const previousSuggestions = usePrevious(suggestions);
 
   const handleComputeMaxHeight = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types are incomplete (missing right/bottom on Offset)
-    (data: any) => {
+    (data: PopperModifierData) => {
       const { top, bottom, width } = data.offsets.reference;
 
       if (enforceMaxHeight) {
@@ -142,7 +142,7 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
               computeMaxHeight: {
                 order: 851,
                 enabled: true,
-                fn: handleComputeMaxHeight,
+                fn: asPopperModifier(handleComputeMaxHeight),
               },
               flip: {
                 padding: minHeight,

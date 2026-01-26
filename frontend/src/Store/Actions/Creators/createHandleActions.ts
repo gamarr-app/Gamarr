@@ -12,7 +12,7 @@ import {
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- State sections have varying shapes
 type State = Record<string, any>;
 
 interface ItemWithId {

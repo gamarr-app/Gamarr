@@ -63,7 +63,7 @@ function mapFailure(failure: ValidationFailure): Failure {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Settings objects have dynamic keys from the API
 export type ModelBaseSetting = Record<string, any>;
 
 function selectSettings<T extends ModelBaseSetting>(
@@ -120,7 +120,7 @@ function selectSettings<T extends ModelBaseSetting>(
 
         if (pendingChanges && 'fields' in pendingChanges) {
           const pendingChangesFields =
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Fields have dynamic structure from API
             pendingChanges.fields as Record<string, any>;
 
           if (pendingChangesFields.hasOwnProperty(field.name)) {

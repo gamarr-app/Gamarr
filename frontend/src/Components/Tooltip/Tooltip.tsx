@@ -13,6 +13,7 @@ import Portal from 'Components/Portal';
 import { kinds, tooltipPositions } from 'Helpers/Props';
 import { Kind } from 'Helpers/Props/kinds';
 import dimensions from 'Styles/Variables/dimensions';
+import { asPopperModifier, PopperModifierData } from 'typings/Popper';
 import { isMobile as isMobileUtil } from 'Utilities/browser';
 import styles from './Tooltip.css';
 
@@ -98,8 +99,7 @@ function Tooltip(props: TooltipProps) {
   }, []);
 
   const computeMaxSize = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types are incomplete (missing right/bottom on Offset)
-    (data: any) => {
+    (data: PopperModifierData) => {
       const { top, right, bottom, left } = data.offsets.reference;
 
       const windowWidth = window.innerWidth;
@@ -162,7 +162,7 @@ function Tooltip(props: TooltipProps) {
             computeMaxHeight: {
               order: 851,
               enabled: true,
-              fn: computeMaxSize,
+              fn: asPopperModifier(computeMaxSize),
             },
             preventOverflow: {
               // Fixes positioning for tooltips in the queue

@@ -1,7 +1,9 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useBeforeUnload, useNavigate } from 'react-router-dom';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
+import PageToolbarButton, {
+  PageToolbarButtonProps,
+} from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 import { icons } from 'Helpers/Props';
@@ -13,8 +15,7 @@ interface SettingsToolbarProps {
   showSave?: boolean;
   isSaving?: boolean;
   hasPendingChanges?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accepts any PageToolbarButton-like element
-  additionalButtons?: ReactElement<any> | null;
+  additionalButtons?: ReactElement<PageToolbarButtonProps> | null;
   onSavePress?: () => void;
 }
 
