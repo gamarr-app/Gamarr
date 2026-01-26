@@ -113,9 +113,7 @@ function ManageDownloadClientsEditModalContent(
         setRemoveFailedDownloads(value as string);
         break;
       default:
-        console.warn(
-          `EditDownloadClientsModalContent Unknown Input: '${name}'`
-        );
+        break;
     }
   }, []);
 

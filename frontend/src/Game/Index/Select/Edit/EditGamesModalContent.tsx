@@ -120,7 +120,7 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
           setRootFolderPath(value as string);
           break;
         default:
-          console.warn('EditGamesModalContent Unknown Input');
+          break;
       }
     },
     [setMonitored]

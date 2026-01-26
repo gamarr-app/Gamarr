@@ -3,9 +3,8 @@ import { SortDirection } from 'Helpers/Props/sortDirections';
 
 type PropertyFunction<T> = () => T;
 
-// TODO: Convert to generic so `name` can be a type
-interface Column {
-  name: string;
+interface Column<T extends string = string> {
+  name: T;
   label: string | PropertyFunction<string> | React.ReactNode;
   className?: string;
   columnLabel?: string;

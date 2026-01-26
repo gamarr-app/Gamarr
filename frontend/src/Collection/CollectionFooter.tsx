@@ -157,7 +157,7 @@ function CollectionFooter({
         setSearchOnAdd(value as string);
         break;
       default:
-        console.warn(`CollectionFooter Unknown Input: '${name}'`);
+        break;
     }
   }, []);
 
