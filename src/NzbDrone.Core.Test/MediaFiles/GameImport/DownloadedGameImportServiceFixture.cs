@@ -77,6 +77,10 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             Mocker.GetMock<IImportApprovedGame>()
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()))
                   .Returns(new List<ImportResult>());
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>()))
+                  .Returns(new List<ImportDecision>());
         }
 
         private void GivenGameParsedFromFolder()
@@ -239,6 +243,13 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         {
             GivenGameParsedFromFolder();
 
+            // Need an approved decision for virus scan to trigger
+            var localGame = new LocalGame { Path = _folderPath, Game = _game };
+            var decisions = new List<ImportDecision> { new ImportDecision(localGame) };
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Returns(decisions);
+
             Mocker.GetMock<IVirusScannerService>()
                   .Setup(s => s.IsAvailable)
                   .Returns(true);
@@ -267,6 +278,13 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         public void should_quarantine_folder_when_virus_detected_and_quarantine_enabled()
         {
             GivenGameParsedFromFolder();
+
+            // Need an approved decision for virus scan to trigger
+            var localGame = new LocalGame { Path = _folderPath, Game = _game };
+            var decisions = new List<ImportDecision> { new ImportDecision(localGame) };
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Returns(decisions);
 
             var quarantineFolder = @"C:\quarantine".AsOsAgnostic();
 
