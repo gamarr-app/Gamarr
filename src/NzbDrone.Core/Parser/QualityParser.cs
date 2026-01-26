@@ -107,7 +107,21 @@ namespace NzbDrone.Core.Parser
         // Handles both dot-separated (v1.2.3) and space-separated (v1 2 3) versions
         // Space-separated limited to 4 components (major minor patch build)
         // Update/Patch requires a version number (no trailing ? to avoid matching "Update" alone)
-        private static readonly Regex GameVersionRegex = new (@"[._\-\s]v?(?<version>\d+(?:\.\d+){1,3})[._\-\s]|[._\-\s]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?:\s|$)|[._\-\s](?:BUILD|B)[._\-]?(?<build>\d+)|[._\-\s](?:Update|Patch)[._\-\s]?(?<update>\d+(?:\.\d+)*)",
+        // Patterns:
+        // 1. v prefix with dotted version (v1.0.1, v.1.0.1, v 1.0.1) - most common
+        // 2. v prefix with date version (v20250317) - single number, 6+ digits
+        // 3. Version with non-space delimiters and at least 3 parts (Game-1.2.3-SKIDROW)
+        // 4. Space-separated after v (v1 0 1)
+        // 5. Build number (Build 12345, B12345)
+        // 6. Update/Patch version
+        // Negative lookahead excludes file sizes (52.9 GB)
+        private static readonly Regex GameVersionRegex = new (
+            @"[._\-\s\[\(]v[\.\s]?(?<version>\d+(?:\.\d+){1,3})(?![._]?\d*\s*[GMKT]i?B)(?=[._\-\s\]\)<]|$)|" +
+            @"[._\-\s\[\(]v(?<dateversion>\d{6,})(?=[._\-\s\]\)<]|$)|" +
+            @"[._\-](?<version2>\d+(?:\.\d+){2,3})(?![._]?\d*\s*[GMKT]i?B)[._\-]|" +
+            @"[._\-\s]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?:\s|$)|" +
+            @"[._\-\s\[\(](?:BUILD|B)[._\-\s]?(?<build>\d+)|" +
+            @"[._\-\s](?:Update|Patch)[._\-\s]?(?<update>\d+(?:\.\d+)*)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -126,13 +140,35 @@ namespace NzbDrone.Core.Parser
                 return new GameVersion();
             }
 
-            // Try version group first (v1.0.1, 1.2.3)
+            // Try version group first (v1.0.1, v.1.0.1)
             if (match.Groups["version"].Success)
             {
                 var versionString = match.Groups["version"].Value;
                 if (GameVersion.TryParse(versionString, out var version))
                 {
                     Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            // Try date version group (v20250317 - single number, 6+ digits)
+            if (match.Groups["dateversion"].Success)
+            {
+                var versionString = match.Groups["dateversion"].Value;
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed game date version '{0}' from '{1}'", version, name);
+                    return version;
+                }
+            }
+
+            // Try version2 group (1.2.3 without v prefix, requires non-space delimiters)
+            if (match.Groups["version2"].Success)
+            {
+                var versionString = match.Groups["version2"].Value;
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed game version '{0}' from non-prefixed '{1}'", version, name);
                     return version;
                 }
             }

@@ -19,6 +19,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game-v1.0.0-RELOADED", 1, 0, 0, 0)]
         [TestCase("Game_v2.5_REPACK", 2, 5, 0, 0)]
         [TestCase("Game-1.2.3-SKIDROW", 1, 2, 3, 0)]
+        [TestCase("Split.Fiction.v20250317.UPDATE-KaOs", 20250317, 0, 0, 0)]
+        [TestCase("Game.v20240101-SKIDROW", 20240101, 0, 0, 0)]
+        [TestCase("Hytale (v20260120)", 20260120, 0, 0, 0)]
+        [TestCase("Hytale (v2026.01.20)", 2026, 1, 20, 0)]
         public void should_parse_version_from_release_title(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
@@ -32,6 +36,9 @@ namespace NzbDrone.Core.Test.ParserTests
 
         [TestCase("Game.Name.Build.12345-PLAZA", 0, 0, 0, 12345)]
         [TestCase("Game.Name.B12345-CODEX", 0, 0, 0, 12345)]
+        [TestCase("Split Fiction RUNE [build 18353366] [ALL DLCs] [Multi11]", 0, 0, 0, 18353366)]
+        [TestCase("High On Life Build 10158842 MULTi5 REPACK KaOs", 0, 0, 0, 10158842)]
+        [TestCase("High On Life DLC Bundle (Build 12321732 High On Knife DLC Windows 7 Fix MULTi5) [FitGirl Repack Selective Download from 35 2 GB]", 0, 0, 0, 12321732)]
         public void should_parse_build_number_from_release_title(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
@@ -60,6 +67,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game.Name-CODEX")]
         [TestCase("Game.Name.2023-GOG")]
         [TestCase("Game.Name.REPACK-FitGirl")]
+        [TestCase("Split Fiction (+ Online Multiplayer, MULTi11) [FitGirl Repack, Selective Download from 52.9 GB]")]
+        [TestCase("Game Name [Repack from 10.5 GB]")]
+        [TestCase("Game 56.7 GiB Download")]
+        [TestCase("Game [100 MB]")]
         public void should_return_empty_version_when_no_version_found(string title)
         {
             var version = QualityParser.ParseGameVersion(title);
