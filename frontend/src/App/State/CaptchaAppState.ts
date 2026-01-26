@@ -1,11 +1,11 @@
 interface CaptchaAppState {
-  refreshing: false;
-  token: string;
-  siteKey: unknown;
-  secretToken: unknown;
-  ray: unknown;
-  stoken: unknown;
-  responseUrl: unknown;
+  refreshing: boolean;
+  token: string | null;
+  siteKey: string | null;
+  secretToken: string | null;
+  ray: string | null;
+  stoken: string | null;
+  responseUrl: string | null;
 }
 
 export default CaptchaAppState;

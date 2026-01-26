@@ -1,4 +1,3 @@
-import moment from 'moment';
 import AppSectionState, {
   AppSectionFilterState,
 } from 'App/State/AppSectionState';
@@ -18,8 +17,8 @@ interface CalendarAppState
   extends AppSectionState<CalendarItem>,
     AppSectionFilterState<CalendarItem> {
   searchMissingCommandId: number | null;
-  start: moment.Moment;
-  end: moment.Moment;
+  start: string | null;
+  end: string | null;
   dates: string[];
   dayCount: number;
   time: string;

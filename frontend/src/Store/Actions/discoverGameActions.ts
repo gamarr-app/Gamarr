@@ -768,7 +768,7 @@ export const actionHandlers = handleThunks({
 
     const { id, ...otherPayload } = payload;
 
-    const state = getState() as unknown as { discoverGame: DiscoverGameState };
+    const state = getState();
     const {
       includeRecommendations = false,
       includeTrending = false,
@@ -819,7 +819,7 @@ export const actionHandlers = handleThunks({
     dispatch(set({ section, isAdding: true }));
 
     const igdbId = payload.igdbId;
-    const state = getState() as unknown as { discoverGame: DiscoverGameState };
+    const state = getState();
     const items = state.discoverGame.items;
     const itemToUpdate = _.find(items, { igdbId });
 
@@ -883,7 +883,7 @@ export const actionHandlers = handleThunks({
 
     const ids = payload.ids;
     const addOptions = payload.addOptions;
-    const state = getState() as unknown as { discoverGame: DiscoverGameState };
+    const state = getState();
     const items = state.discoverGame.items;
     const addedIds: number[] = [];
 
@@ -964,7 +964,7 @@ export const actionHandlers = handleThunks({
     dispatch: Dispatch
   ) {
     const ids = payload.ids;
-    const state = getState() as unknown as { discoverGame: DiscoverGameState };
+    const state = getState();
     const items = state.discoverGame.items;
 
     const exclusions = ids.reduce(

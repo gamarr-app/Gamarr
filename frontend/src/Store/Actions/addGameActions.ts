@@ -172,21 +172,14 @@ export const actionHandlers = handleThunks({
 
     const igdbId = payload.igdbId;
     const steamAppId = payload.steamAppId;
-    const items = (getState() as unknown as { addGame: AddGameState }).addGame
-      .items as Array<{
-      igdbId: number;
-      steamAppId?: number;
-      [key: string]: unknown;
-    }>;
+    const items = getState().addGame.items;
 
     // Find by igdbId if available, otherwise by steamAppId
-    let foundGame:
-      | { igdbId: number; steamAppId?: number; [key: string]: unknown }
-      | undefined = undefined;
-    if (igdbId > 0) {
-      foundGame = _.find(items, { igdbId });
-    } else if (steamAppId && steamAppId > 0) {
-      foundGame = _.find(items, { steamAppId });
+    let foundGame =
+      igdbId > 0 ? items.find((i) => i.igdbId === igdbId) : undefined;
+
+    if (!foundGame && steamAppId && steamAppId > 0) {
+      foundGame = items.find((item) => item.steamAppId === steamAppId);
     }
 
     if (!foundGame) {
@@ -257,11 +250,7 @@ export const actionHandlers = handleThunks({
           return;
         }
 
-        const state = getState() as unknown as {
-          gameCollections: {
-            items: Array<{ igdbId: number; missingGames: number }>;
-          };
-        };
+        const state = getState();
         const collectionToUpdate = state.gameCollections.items.find(
           (collection) => collection.igdbId === newGame.collection!.igdbId
         );

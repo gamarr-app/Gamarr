@@ -1,4 +1,5 @@
 import AppState from 'App/State/AppState';
+import Command from 'Commands/Command';
 import { messageTypes } from 'Helpers/Props';
 import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import { isSameCommand } from 'Utilities/Command';
@@ -21,22 +22,21 @@ const removeCommandTimeoutIds: Record<
   number,
   ReturnType<typeof setTimeout>
 > = {};
-const commandFinishedCallbacks: Record<number, (payload: CommandData) => void> =
-  {};
+const commandFinishedCallbacks: Record<number, (payload: Command) => void> = {};
 
 //
 // State
 
 interface CommandHandler {
   name: string;
-  handler: (payload: CommandData) => unknown;
+  handler: (payload: Command) => unknown;
 }
 
 export interface CommandsState {
   isFetching: boolean;
   isPopulated: boolean;
   error: unknown;
-  items: CommandData[];
+  items: Command[];
   handlers: Record<string, CommandHandler>;
 }
 
@@ -73,28 +73,17 @@ export const removeCommand = createThunk(REMOVE_COMMAND);
 //
 // Helpers
 
-interface CommandData {
-  id: number;
-  name: string;
-  trigger?: string;
-  message?: string;
-  body?: {
-    sendUpdatesToClient?: boolean;
-    suppressMessages?: boolean;
-  };
-  status: string;
-}
-
 interface CommandPayload {
   name: string;
-  commandFinished?: (payload: CommandData) => void;
+  commandFinished?: (payload: Command) => void;
   [key: string]: unknown;
 }
 
-function showCommandMessage(payload: CommandData, dispatch: AppDispatch): void {
-  const { id, name, trigger, message, body = {}, status } = payload;
+function showCommandMessage(payload: Command, dispatch: AppDispatch): void {
+  const { id, name, trigger, message, body, status } = payload;
 
-  const { sendUpdatesToClient, suppressMessages } = body;
+  const sendUpdatesToClient = body?.sendUpdatesToClient;
+  const suppressMessages = body?.suppressMessages;
 
   if (!message || !body || !sendUpdatesToClient || suppressMessages) {
     return;
@@ -122,10 +111,7 @@ function showCommandMessage(payload: CommandData, dispatch: AppDispatch): void {
   );
 }
 
-function scheduleRemoveCommand(
-  command: CommandData,
-  dispatch: AppDispatch
-): void {
+function scheduleRemoveCommand(command: Command, dispatch: AppDispatch): void {
   const { id, status } = command;
 
   if (status === 'queued') {
@@ -184,7 +170,7 @@ export function executeCommandHelper(
     dataType: 'json',
   }).request;
 
-  return promise.then((data: CommandData) => {
+  return promise.then((data: Command) => {
     if (commandFinished) {
       commandFinishedCallbacks[data.id] = commandFinished;
     }
@@ -212,7 +198,7 @@ export const actionHandlers = handleThunks({
 
   [ADD_COMMAND]: function (
     _getState: () => AppState,
-    payload: CommandData,
+    payload: Command,
     dispatch: AppDispatch
   ) {
     dispatch(updateItem({ section: 'commands', ...payload }));
@@ -220,7 +206,7 @@ export const actionHandlers = handleThunks({
 
   [UPDATE_COMMAND]: function (
     _getState: () => AppState,
-    payload: CommandData,
+    payload: Command,
     dispatch: AppDispatch
   ) {
     dispatch(updateItem({ section: 'commands', ...payload }));
@@ -231,11 +217,11 @@ export const actionHandlers = handleThunks({
 
   [FINISH_COMMAND]: function (
     getState: () => AppState,
-    payload: CommandData,
+    payload: Command,
     dispatch: AppDispatch
   ) {
     const state = getState();
-    const handlers = (state.commands as unknown as CommandsState).handlers;
+    const handlers = state.commands.handlers;
 
     Object.keys(handlers).forEach((key) => {
       const handler = handlers[key];

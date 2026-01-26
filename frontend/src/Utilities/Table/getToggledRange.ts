@@ -1,6 +1,8 @@
-import ModelBase from 'App/ModelBase';
+interface Identifiable {
+  id: number | string;
+}
 
-function getToggledRange<T extends ModelBase>(
+function getToggledRange<T extends Identifiable>(
   items: T[],
   id: number | string,
   lastToggled: number | string

@@ -40,6 +40,8 @@ interface ImportGameFooterState {
   minimumAvailability: string | typeof MIXED;
 }
 
+type ImportGameFooterStateKey = keyof ImportGameFooterState;
+
 class ImportGameFooter extends Component<
   ImportGameFooterProps,
   ImportGameFooterState
@@ -110,7 +112,11 @@ class ImportGameFooter extends Component<
   // Listeners
 
   onInputChange = ({ name, value }: InputChanged) => {
-    this.setState({ [name]: value } as unknown as ImportGameFooterState);
+    const key = name as ImportGameFooterStateKey;
+    this.setState((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
     this.props.onInputChange({ name, value });
   };
 

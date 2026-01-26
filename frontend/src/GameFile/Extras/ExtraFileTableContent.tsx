@@ -36,7 +36,7 @@ const columns: Column[] = [
   },
   {
     name: 'action',
-    label: (<IconButton name={icons.ADVANCED_SETTINGS} />) as unknown as string,
+    label: <IconButton name={icons.ADVANCED_SETTINGS} />,
     isVisible: true,
   },
 ];

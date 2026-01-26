@@ -1,6 +1,5 @@
 import { reduce } from 'lodash';
 import { Component, createRef, RefObject } from 'react';
-import ModelBase from 'App/ModelBase';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -96,11 +95,9 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
 
   onSelectedChange = ({ id, value, shiftKey }: SelectStateInputProps) => {
     this.setState((state) => {
-      // Cast items to ModelBase[] for toggleSelected - id comparison works with string ids
-      const itemsAsModelBase = this.props.items as unknown as ModelBase[];
       return toggleSelected(
         state,
-        itemsAsModelBase,
+        this.props.items,
         id,
         value ?? false,
         shiftKey ?? false

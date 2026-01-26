@@ -73,8 +73,8 @@ function FileEditModalContent(props: FileEditModalContentProps) {
   const [edition, setEdition] = useState(initialEdition);
   const [releaseGroup, setReleaseGroup] = useState(initialReleaseGroup);
 
-  const onQualityChange = useCallback(({ value }: { value: string }) => {
-    setQualityId(parseInt(value));
+  const onQualityChange = useCallback(({ value }: { value: number }) => {
+    setQualityId(value);
   }, []);
 
   const onInputChange = useCallback(({ name, value }: InputChangeEvent) => {
@@ -141,10 +141,10 @@ function FileEditModalContent(props: FileEditModalContentProps) {
             <FormGroup>
               <FormLabel>{translate('Quality')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputGroup<number, 'select'>
                 type={inputTypes.SELECT}
                 name="quality"
-                value={qualityId as unknown as string}
+                value={qualityId}
                 values={qualityOptions}
                 onChange={onQualityChange}
               />
