@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -62,113 +62,90 @@ interface BackupsProps {
   onDeleteBackupPress: (id: number) => void;
 }
 
-interface BackupsState {
-  isRestoreModalOpen: boolean;
-}
+function Backups(props: BackupsProps) {
+  const {
+    isFetching,
+    isPopulated,
+    error,
+    items,
+    backupExecuting,
+    onBackupPress,
+    onDeleteBackupPress,
+  } = props;
 
-class Backups extends Component<BackupsProps, BackupsState> {
-  //
-  // Lifecycle
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
 
-  constructor(props: BackupsProps) {
-    super(props);
+  const onRestorePress = useCallback(() => {
+    setIsRestoreModalOpen(true);
+  }, []);
 
-    this.state = {
-      isRestoreModalOpen: false,
-    };
-  }
+  const onRestoreModalClose = useCallback(() => {
+    setIsRestoreModalOpen(false);
+  }, []);
 
-  //
-  // Listeners
+  const hasBackups = isPopulated && !!items.length;
+  const noBackups = isPopulated && !items.length;
 
-  onRestorePress = () => {
-    this.setState({ isRestoreModalOpen: true });
-  };
+  return (
+    <PageContent className={styles.backups} title={translate('Backups')}>
+      <PageToolbar>
+        <PageToolbarSection>
+          <PageToolbarButton
+            label={translate('BackupNow')}
+            iconName={icons.BACKUP}
+            isSpinning={backupExecuting}
+            onPress={onBackupPress}
+          />
 
-  onRestoreModalClose = () => {
-    this.setState({ isRestoreModalOpen: false });
-  };
+          <PageToolbarButton
+            label={translate('RestoreBackup')}
+            iconName={icons.RESTORE}
+            onPress={onRestorePress}
+          />
+        </PageToolbarSection>
+      </PageToolbar>
 
-  //
-  // Render
+      <PageContentBody>
+        {isFetching && !isPopulated && <LoadingIndicator />}
 
-  render() {
-    const {
-      isFetching,
-      isPopulated,
-      error,
-      items,
-      backupExecuting,
-      onBackupPress,
-      onDeleteBackupPress,
-    } = this.props;
+        {!isFetching && !!error && (
+          <Alert kind={kinds.DANGER}>{translate('BackupsLoadError')}</Alert>
+        )}
 
-    const hasBackups = isPopulated && !!items.length;
-    const noBackups = isPopulated && !items.length;
+        {noBackups && (
+          <Alert kind={kinds.INFO}>{translate('NoBackupsAreAvailable')}</Alert>
+        )}
 
-    return (
-      <PageContent className={styles.backups} title={translate('Backups')}>
-        <PageToolbar>
-          <PageToolbarSection>
-            <PageToolbarButton
-              label={translate('BackupNow')}
-              iconName={icons.BACKUP}
-              isSpinning={backupExecuting}
-              onPress={onBackupPress}
-            />
+        {hasBackups && (
+          <Table columns={columns}>
+            <TableBody>
+              {items.map((item) => {
+                const { id, type, name, path, size, time } = item;
 
-            <PageToolbarButton
-              label={translate('RestoreBackup')}
-              iconName={icons.RESTORE}
-              onPress={this.onRestorePress}
-            />
-          </PageToolbarSection>
-        </PageToolbar>
+                return (
+                  <BackupRow
+                    key={id}
+                    id={id}
+                    type={type}
+                    name={name}
+                    path={path}
+                    size={size}
+                    time={time}
+                    onDeleteBackupPress={onDeleteBackupPress}
+                  />
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </PageContentBody>
 
-        <PageContentBody>
-          {isFetching && !isPopulated && <LoadingIndicator />}
-
-          {!isFetching && !!error && (
-            <Alert kind={kinds.DANGER}>{translate('BackupsLoadError')}</Alert>
-          )}
-
-          {noBackups && (
-            <Alert kind={kinds.INFO}>
-              {translate('NoBackupsAreAvailable')}
-            </Alert>
-          )}
-
-          {hasBackups && (
-            <Table columns={columns}>
-              <TableBody>
-                {items.map((item) => {
-                  const { id, type, name, path, size, time } = item;
-
-                  return (
-                    <BackupRow
-                      key={id}
-                      id={id}
-                      type={type}
-                      name={name}
-                      path={path}
-                      size={size}
-                      time={time}
-                      onDeleteBackupPress={onDeleteBackupPress}
-                    />
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </PageContentBody>
-
-        <RestoreBackupModalConnector
-          isOpen={this.state.isRestoreModalOpen}
-          onModalClose={this.onRestoreModalClose}
-        />
-      </PageContent>
-    );
-  }
+      <RestoreBackupModalConnector
+        isOpen={isRestoreModalOpen}
+        onModalClose={onRestoreModalClose}
+      />
+    </PageContent>
+  );
 }
 
 export default Backups;
