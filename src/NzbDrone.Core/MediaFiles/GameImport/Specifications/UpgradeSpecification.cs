@@ -2,6 +2,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -12,14 +13,17 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
     {
         private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _formatService;
+        private readonly IUpgradableSpecification _upgradableSpecification;
         private readonly Logger _logger;
 
         public UpgradeSpecification(IConfigService configService,
                                     ICustomFormatCalculationService formatService,
+                                    IUpgradableSpecification upgradableSpecification,
                                     Logger logger)
         {
             _configService = configService;
             _formatService = formatService;
+            _upgradableSpecification = upgradableSpecification;
             _logger = logger;
         }
 
@@ -42,10 +46,22 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
 
                 var qualityCompare = qualityComparer.Compare(localGame.Quality.Quality, gameFile.Quality.Quality);
 
+                // Get version info for version upgrade checks
+                var newVersion = localGame.FileGameInfo?.GameVersion ?? localGame.DownloadClientGameInfo?.GameVersion;
+                var existingVersion = gameFile.GameVersion;
+
                 if (qualityCompare < 0)
                 {
-                    _logger.Debug("This file isn't a quality upgrade for game. Existing quality: {0}. New Quality {1}. Skipping {2}", gameFile.Quality.Quality, localGame.Quality.Quality, localGame.Path);
-                    return ImportSpecDecision.Reject(ImportRejectionReason.NotQualityUpgrade, "Not an upgrade for existing game file. Existing quality: {0}. New Quality {1}.", gameFile.Quality.Quality, localGame.Quality.Quality);
+                    // Quality is lower, but check if it's a version upgrade
+                    if (_upgradableSpecification.IsVersionUpgrade(existingVersion, newVersion))
+                    {
+                        _logger.Debug("New file has newer game version {0} vs {1}, accepting despite lower quality", newVersion, existingVersion);
+                    }
+                    else
+                    {
+                        _logger.Debug("This file isn't a quality upgrade for game. Existing quality: {0}. New Quality {1}. Skipping {2}", gameFile.Quality.Quality, localGame.Quality.Quality, localGame.Path);
+                        return ImportSpecDecision.Reject(ImportRejectionReason.NotQualityUpgrade, "Not an upgrade for existing game file. Existing quality: {0}. New Quality {1}.", gameFile.Quality.Quality, localGame.Quality.Quality);
+                    }
                 }
 
                 // Same quality, propers/repacks are preferred and it is not a revision update. Reject revision downgrade.
@@ -54,8 +70,16 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                     downloadPropersAndRepacks != ProperDownloadTypes.DoNotPrefer &&
                     localGame.Quality.Revision.CompareTo(gameFile.Quality.Revision) < 0)
                 {
-                    _logger.Debug("This file isn't a quality revision upgrade for game. Skipping {0}", localGame.Path);
-                    return ImportSpecDecision.Reject(ImportRejectionReason.NotRevisionUpgrade, "Not a quality revision upgrade for existing game file(s)");
+                    // Revision is lower, but check if it's a version upgrade
+                    if (_upgradableSpecification.IsVersionUpgrade(existingVersion, newVersion))
+                    {
+                        _logger.Debug("New file has newer game version {0} vs {1}, accepting despite lower revision", newVersion, existingVersion);
+                    }
+                    else
+                    {
+                        _logger.Debug("This file isn't a quality revision upgrade for game. Skipping {0}", localGame.Path);
+                        return ImportSpecDecision.Reject(ImportRejectionReason.NotRevisionUpgrade, "Not a quality revision upgrade for existing game file(s)");
+                    }
                 }
 
                 gameFile.Game = localGame.Game;
@@ -66,18 +90,26 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
 
                 if (qualityCompare == 0 && newFormatScore < currentFormatScore)
                 {
-                    _logger.Debug("New item's custom formats [{0}] ({1}) do not improve on [{2}] ({3}), skipping",
-                        newCustomFormats != null ? newCustomFormats.ConcatToString() : "",
-                        newFormatScore,
-                        currentCustomFormats != null ? currentCustomFormats.ConcatToString() : "",
-                        currentFormatScore);
+                    // Custom format score is lower, but check if it's a version upgrade
+                    if (_upgradableSpecification.IsVersionUpgrade(existingVersion, newVersion))
+                    {
+                        _logger.Debug("New file has newer game version {0} vs {1}, accepting despite lower custom format score", newVersion, existingVersion);
+                    }
+                    else
+                    {
+                        _logger.Debug("New item's custom formats [{0}] ({1}) do not improve on [{2}] ({3}), skipping",
+                            newCustomFormats != null ? newCustomFormats.ConcatToString() : "",
+                            newFormatScore,
+                            currentCustomFormats != null ? currentCustomFormats.ConcatToString() : "",
+                            currentFormatScore);
 
-                    return ImportSpecDecision.Reject(ImportRejectionReason.NotCustomFormatUpgrade,
-                        "Not a Custom Format upgrade for existing game file(s). New: [{0}] ({1}) do not improve on Existing: [{2}] ({3})",
-                        newCustomFormats != null ? newCustomFormats.ConcatToString() : "",
-                        newFormatScore,
-                        currentCustomFormats != null ? currentCustomFormats.ConcatToString() : "",
-                        currentFormatScore);
+                        return ImportSpecDecision.Reject(ImportRejectionReason.NotCustomFormatUpgrade,
+                            "Not a Custom Format upgrade for existing game file(s). New: [{0}] ({1}) do not improve on Existing: [{2}] ({3})",
+                            newCustomFormats != null ? newCustomFormats.ConcatToString() : "",
+                            newFormatScore,
+                            currentCustomFormats != null ? currentCustomFormats.ConcatToString() : "",
+                            currentFormatScore);
+                    }
                 }
 
                 _logger.Debug("New item's custom formats [{0}] ({1}) do improve on [{2}] ({3}), accepting",
