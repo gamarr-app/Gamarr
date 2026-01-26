@@ -147,7 +147,6 @@ class DiscoverGamePosters extends Component<
   DiscoverGamePostersState
 > {
   // eslint-disable-next-line react/sort-comp
-  private _isInitialized = false;
   private _grid: Grid | null = null;
   private _padding: number;
 
