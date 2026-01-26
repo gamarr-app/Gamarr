@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import { LogItem } from 'App/State/SystemAppState';
@@ -19,195 +19,161 @@ import {
   setLogsTableOption,
 } from 'Store/Actions/systemActions';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
-import { AppDispatch } from 'Store/thunks';
 import LogsTable from './LogsTable';
 
-function createMapStateToProps() {
-  return createSelector(
-    (state: AppState) => state.system.logs,
-    createCommandExecutingSelector(commandNames.CLEAR_LOGS),
-    (logs, clearLogExecuting) => {
-      return {
-        clearLogExecuting,
-        ...logs,
-        items: logs.items as LogItem[],
-      };
-    }
-  );
-}
+const selectLogsState = createSelector(
+  (state: AppState) => state.system.logs,
+  createCommandExecutingSelector(commandNames.CLEAR_LOGS),
+  (logs, clearLogExecuting) => {
+    return {
+      clearLogExecuting,
+      ...logs,
+      items: logs.items as LogItem[],
+    };
+  }
+);
 
-function createMapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    fetchLogs() {
-      dispatch(fetchLogs());
-    },
-    gotoLogsFirstPage() {
-      dispatch(gotoLogsFirstPage());
-    },
-    gotoLogsPreviousPage() {
-      dispatch(gotoLogsPreviousPage());
-    },
-    gotoLogsNextPage() {
-      dispatch(gotoLogsNextPage());
-    },
-    gotoLogsLastPage() {
-      dispatch(gotoLogsLastPage());
-    },
-    gotoLogsPage(payload: { page: number }) {
-      dispatch(gotoLogsPage(payload));
-    },
-    setLogsSort(payload: { sortKey: string }) {
-      dispatch(setLogsSort(payload));
-    },
-    setLogsFilter(payload: { selectedFilterKey: string }) {
-      dispatch(setLogsFilter(payload));
-    },
-    setLogsTableOption(payload: { pageSize?: number }) {
-      dispatch(setLogsTableOption(payload));
-    },
-    executeCommand(payload: { name: string; commandFinished?: () => void }) {
-      dispatch(executeCommand(payload));
-    },
-  };
-}
-
-type StateProps = ReturnType<ReturnType<typeof createMapStateToProps>>;
-type DispatchProps = ReturnType<typeof createMapDispatchToProps>;
-
-interface LogsTableConnectorOwnProps {
+interface LogsTableConnectorProps {
   useCurrentPage: boolean;
 }
 
-type LogsTableConnectorProps = StateProps &
-  DispatchProps &
-  LogsTableConnectorOwnProps;
+function LogsTableConnector(props: LogsTableConnectorProps) {
+  const { useCurrentPage } = props;
+  const dispatch = useDispatch();
 
-class LogsTableConnector extends Component<LogsTableConnectorProps> {
-  //
-  // Lifecycle
+  const {
+    isFetching,
+    isPopulated,
+    error,
+    items,
+    columns,
+    selectedFilterKey,
+    filters,
+    totalRecords,
+    clearLogExecuting,
+    page,
+    pageSize,
+    totalPages,
+    sortKey,
+    sortDirection,
+  } = useSelector(selectLogsState);
 
-  componentDidMount() {
-    const { useCurrentPage, fetchLogs, gotoLogsFirstPage } = this.props;
+  const prevClearLogExecutingRef = useRef(clearLogExecuting);
 
+  const dispatchGotoLogsFirstPage = useCallback(() => {
+    dispatch(gotoLogsFirstPage());
+  }, [dispatch]);
+
+  // Fetch on mount
+  useEffect(() => {
     if (useCurrentPage) {
-      fetchLogs();
+      dispatch(fetchLogs());
     } else {
-      gotoLogsFirstPage();
+      dispatchGotoLogsFirstPage();
     }
-  }
+  }, [dispatch, useCurrentPage, dispatchGotoLogsFirstPage]);
 
-  componentDidUpdate(prevProps: LogsTableConnectorProps) {
-    if (prevProps.clearLogExecuting && !this.props.clearLogExecuting) {
-      this.props.gotoLogsFirstPage();
+  // Refresh when clear logs finishes
+  useEffect(() => {
+    if (prevClearLogExecutingRef.current && !clearLogExecuting) {
+      dispatchGotoLogsFirstPage();
     }
-  }
+    prevClearLogExecutingRef.current = clearLogExecuting;
+  }, [clearLogExecuting, dispatchGotoLogsFirstPage]);
 
-  //
-  // Listeners
+  const onFirstPagePress = useCallback(() => {
+    dispatch(gotoLogsFirstPage());
+  }, [dispatch]);
 
-  onFirstPagePress = () => {
-    this.props.gotoLogsFirstPage();
-  };
+  const onPreviousPagePress = useCallback(() => {
+    dispatch(gotoLogsPreviousPage());
+  }, [dispatch]);
 
-  onPreviousPagePress = () => {
-    this.props.gotoLogsPreviousPage();
-  };
+  const onNextPagePress = useCallback(() => {
+    dispatch(gotoLogsNextPage());
+  }, [dispatch]);
 
-  onNextPagePress = () => {
-    this.props.gotoLogsNextPage();
-  };
+  const onLastPagePress = useCallback(() => {
+    dispatch(gotoLogsLastPage());
+  }, [dispatch]);
 
-  onLastPagePress = () => {
-    this.props.gotoLogsLastPage();
-  };
+  const onPageSelect = useCallback(
+    (pageNum: number) => {
+      dispatch(gotoLogsPage({ page: pageNum }));
+    },
+    [dispatch]
+  );
 
-  onPageSelect = (page: number) => {
-    this.props.gotoLogsPage({ page });
-  };
+  const onSortPress = useCallback(
+    (sortKeyValue: string) => {
+      dispatch(setLogsSort({ sortKey: sortKeyValue }));
+    },
+    [dispatch]
+  );
 
-  onSortPress = (sortKey: string) => {
-    this.props.setLogsSort({ sortKey });
-  };
+  const onFilterSelect = useCallback(
+    (selectedFilterKeyValue: string | number) => {
+      dispatch(
+        setLogsFilter({ selectedFilterKey: String(selectedFilterKeyValue) })
+      );
+    },
+    [dispatch]
+  );
 
-  onFilterSelect = (selectedFilterKey: string | number) => {
-    this.props.setLogsFilter({ selectedFilterKey: String(selectedFilterKey) });
-  };
+  const onTableOptionChange = useCallback(
+    (payload: { pageSize?: number }) => {
+      dispatch(setLogsTableOption(payload));
 
-  onTableOptionChange = (payload: { pageSize?: number }) => {
-    this.props.setLogsTableOption(payload);
+      if (payload.pageSize) {
+        dispatch(gotoLogsFirstPage());
+      }
+    },
+    [dispatch]
+  );
 
-    if (payload.pageSize) {
-      this.props.gotoLogsFirstPage();
-    }
-  };
+  const onRefreshPress = useCallback(() => {
+    dispatch(gotoLogsFirstPage());
+  }, [dispatch]);
 
-  onRefreshPress = () => {
-    this.props.gotoLogsFirstPage();
-  };
-
-  onClearLogsPress = () => {
-    this.props.executeCommand({
-      name: commandNames.CLEAR_LOGS,
-      commandFinished: this.onCommandFinished,
-    });
-  };
-
-  onCommandFinished = () => {
-    this.props.gotoLogsFirstPage();
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      isFetching,
-      isPopulated,
-      error,
-      items,
-      columns,
-      selectedFilterKey,
-      filters,
-      totalRecords,
-      clearLogExecuting,
-      page,
-      pageSize,
-      totalPages,
-      sortKey,
-      sortDirection,
-    } = this.props;
-
-    return (
-      <LogsTable
-        isFetching={isFetching}
-        isPopulated={isPopulated}
-        error={error}
-        items={items}
-        columns={columns}
-        selectedFilterKey={selectedFilterKey}
-        filters={filters}
-        totalRecords={totalRecords}
-        clearLogExecuting={clearLogExecuting}
-        page={page}
-        pageSize={pageSize}
-        totalPages={totalPages}
-        sortKey={sortKey}
-        sortDirection={sortDirection as SortDirection}
-        onFirstPagePress={this.onFirstPagePress}
-        onPreviousPagePress={this.onPreviousPagePress}
-        onNextPagePress={this.onNextPagePress}
-        onLastPagePress={this.onLastPagePress}
-        onPageSelect={this.onPageSelect}
-        onSortPress={this.onSortPress}
-        onFilterSelect={this.onFilterSelect}
-        onTableOptionChange={this.onTableOptionChange}
-        onRefreshPress={this.onRefreshPress}
-        onClearLogsPress={this.onClearLogsPress}
-      />
+  const onClearLogsPress = useCallback(() => {
+    dispatch(
+      executeCommand({
+        name: commandNames.CLEAR_LOGS,
+        commandFinished: () => {
+          dispatch(gotoLogsFirstPage());
+        },
+      })
     );
-  }
+  }, [dispatch]);
+
+  return (
+    <LogsTable
+      isFetching={isFetching}
+      isPopulated={isPopulated}
+      error={error}
+      items={items}
+      columns={columns}
+      selectedFilterKey={selectedFilterKey}
+      filters={filters}
+      totalRecords={totalRecords}
+      clearLogExecuting={clearLogExecuting}
+      page={page}
+      pageSize={pageSize}
+      totalPages={totalPages}
+      sortKey={sortKey}
+      sortDirection={sortDirection as SortDirection}
+      onFirstPagePress={onFirstPagePress}
+      onPreviousPagePress={onPreviousPagePress}
+      onNextPagePress={onNextPagePress}
+      onLastPagePress={onLastPagePress}
+      onPageSelect={onPageSelect}
+      onSortPress={onSortPress}
+      onFilterSelect={onFilterSelect}
+      onTableOptionChange={onTableOptionChange}
+      onRefreshPress={onRefreshPress}
+      onClearLogsPress={onClearLogsPress}
+    />
+  );
 }
 
-export default withCurrentPage(
-  connect(createMapStateToProps, createMapDispatchToProps)(LogsTableConnector)
-);
+export default withCurrentPage(LogsTableConnector);
