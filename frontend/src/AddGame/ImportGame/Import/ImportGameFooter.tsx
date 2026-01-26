@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { Component } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ImportError } from 'App/State/ImportGameAppState';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import Icon from 'Components/Icon';
@@ -34,223 +33,192 @@ interface ImportGameFooterProps {
   onCancelLookupPress: () => void;
 }
 
-interface ImportGameFooterState {
-  monitor: string | typeof MIXED;
-  qualityProfileId: number | string | typeof MIXED;
-  minimumAvailability: string | typeof MIXED;
-}
+function ImportGameFooter(props: ImportGameFooterProps) {
+  const {
+    selectedCount,
+    isImporting,
+    isLookingUpGame,
+    defaultMonitor,
+    defaultQualityProfileId,
+    defaultMinimumAvailability,
+    isMonitorMixed,
+    isQualityProfileIdMixed,
+    isMinimumAvailabilityMixed,
+    hasUnsearchedItems,
+    importError,
+    onInputChange,
+    onImportPress,
+    onLookupPress,
+    onCancelLookupPress,
+  } = props;
 
-type ImportGameFooterStateKey = keyof ImportGameFooterState;
+  const [monitor, setMonitor] = useState<string>(defaultMonitor);
+  const [qualityProfileId, setQualityProfileId] = useState<number | string>(
+    defaultQualityProfileId || 0
+  );
+  const [minimumAvailability, setMinimumAvailability] = useState<string>(
+    defaultMinimumAvailability || ''
+  );
 
-class ImportGameFooter extends Component<
-  ImportGameFooterProps,
-  ImportGameFooterState
-> {
-  //
-  // Lifecycle
-
-  constructor(props: ImportGameFooterProps) {
-    super(props);
-
-    const {
-      defaultMonitor,
-      defaultQualityProfileId,
-      defaultMinimumAvailability,
-    } = props;
-
-    this.state = {
-      monitor: defaultMonitor,
-      qualityProfileId: defaultQualityProfileId || 0,
-      minimumAvailability: defaultMinimumAvailability || '',
-    };
-  }
-
-  componentDidUpdate(_prevProps: ImportGameFooterProps) {
-    const {
-      defaultMonitor,
-      defaultQualityProfileId,
-      defaultMinimumAvailability,
-      isMonitorMixed,
-      isQualityProfileIdMixed,
-      isMinimumAvailabilityMixed,
-    } = this.props;
-
-    const { monitor, qualityProfileId, minimumAvailability } = this.state;
-
-    const newState: Partial<ImportGameFooterState> = {};
-
+  // Sync state with props when mixed states change
+  useEffect(() => {
     if (isMonitorMixed && monitor !== MIXED) {
-      newState.monitor = MIXED;
+      setMonitor(MIXED);
     } else if (!isMonitorMixed && monitor !== defaultMonitor) {
-      newState.monitor = defaultMonitor;
+      setMonitor(defaultMonitor);
     }
+  }, [isMonitorMixed, defaultMonitor, monitor]);
 
+  useEffect(() => {
     if (isQualityProfileIdMixed && qualityProfileId !== MIXED) {
-      newState.qualityProfileId = MIXED;
+      setQualityProfileId(MIXED);
     } else if (
       !isQualityProfileIdMixed &&
       qualityProfileId !== defaultQualityProfileId
     ) {
-      newState.qualityProfileId = defaultQualityProfileId || 0;
+      setQualityProfileId(defaultQualityProfileId || 0);
     }
+  }, [isQualityProfileIdMixed, defaultQualityProfileId, qualityProfileId]);
 
+  useEffect(() => {
     if (isMinimumAvailabilityMixed && minimumAvailability !== MIXED) {
-      newState.minimumAvailability = MIXED;
+      setMinimumAvailability(MIXED);
     } else if (
       !isMinimumAvailabilityMixed &&
       minimumAvailability !== defaultMinimumAvailability
     ) {
-      newState.minimumAvailability = defaultMinimumAvailability || '';
+      setMinimumAvailability(defaultMinimumAvailability || '');
     }
+  }, [
+    isMinimumAvailabilityMixed,
+    defaultMinimumAvailability,
+    minimumAvailability,
+  ]);
 
-    if (!_.isEmpty(newState)) {
-      this.setState(newState as ImportGameFooterState);
-    }
-  }
+  const handleInputChange = useCallback(
+    ({ name, value }: InputChanged) => {
+      if (name === 'monitor') {
+        setMonitor(value as string);
+      } else if (name === 'qualityProfileId') {
+        setQualityProfileId(value as number | string);
+      } else if (name === 'minimumAvailability') {
+        setMinimumAvailability(value as string);
+      }
+      onInputChange({ name, value });
+    },
+    [onInputChange]
+  );
 
-  //
-  // Listeners
+  return (
+    <PageContentFooter>
+      <div className={styles.inputContainer}>
+        <div className={styles.label}>{translate('Monitor')}</div>
 
-  onInputChange = ({ name, value }: InputChanged) => {
-    const key = name as ImportGameFooterStateKey;
-    this.setState((prevState) => ({
-      ...prevState,
-      [key]: value,
-    }));
-    this.props.onInputChange({ name, value });
-  };
+        <FormInputGroup
+          type={inputTypes.MONITOR_GAMES_SELECT}
+          name="monitor"
+          value={monitor}
+          isDisabled={!selectedCount}
+          includeMixed={isMonitorMixed}
+          onChange={handleInputChange}
+        />
+      </div>
 
-  //
-  // Render
+      <div className={styles.inputContainer}>
+        <div className={styles.label}>{translate('MinimumAvailability')}</div>
 
-  render() {
-    const {
-      selectedCount,
-      isImporting,
-      isLookingUpGame,
-      isMonitorMixed,
-      isQualityProfileIdMixed,
-      isMinimumAvailabilityMixed,
-      hasUnsearchedItems,
-      importError,
-      onImportPress,
-      onLookupPress,
-      onCancelLookupPress,
-    } = this.props;
+        <FormInputGroup
+          type={inputTypes.AVAILABILITY_SELECT}
+          name="minimumAvailability"
+          value={minimumAvailability}
+          isDisabled={!selectedCount}
+          includeMixed={isMinimumAvailabilityMixed}
+          onChange={handleInputChange}
+        />
+      </div>
 
-    const { monitor, qualityProfileId, minimumAvailability } = this.state;
+      <div className={styles.inputContainer}>
+        <div className={styles.label}>{translate('QualityProfile')}</div>
 
-    return (
-      <PageContentFooter>
-        <div className={styles.inputContainer}>
-          <div className={styles.label}>{translate('Monitor')}</div>
+        <FormInputGroup
+          type={inputTypes.QUALITY_PROFILE_SELECT}
+          name="qualityProfileId"
+          value={qualityProfileId}
+          isDisabled={!selectedCount}
+          includeMixed={isQualityProfileIdMixed}
+          onChange={handleInputChange}
+        />
+      </div>
 
-          <FormInputGroup
-            type={inputTypes.MONITOR_GAMES_SELECT}
-            name="monitor"
-            value={monitor}
-            isDisabled={!selectedCount}
-            includeMixed={isMonitorMixed}
-            onChange={this.onInputChange}
-          />
-        </div>
+      <div>
+        <div className={styles.label}>&nbsp;</div>
 
-        <div className={styles.inputContainer}>
-          <div className={styles.label}>{translate('MinimumAvailability')}</div>
+        <div className={styles.importButtonContainer}>
+          <SpinnerButton
+            className={styles.importButton}
+            kind={kinds.PRIMARY}
+            isSpinning={isImporting}
+            isDisabled={!selectedCount || isLookingUpGame}
+            onPress={onImportPress}
+          >
+            {translate('Import')} {selectedCount}{' '}
+            {selectedCount > 1 ? translate('Games') : translate('Game')}
+          </SpinnerButton>
 
-          <FormInputGroup
-            type={inputTypes.AVAILABILITY_SELECT}
-            name="minimumAvailability"
-            value={minimumAvailability}
-            isDisabled={!selectedCount}
-            includeMixed={isMinimumAvailabilityMixed}
-            onChange={this.onInputChange}
-          />
-        </div>
-
-        <div className={styles.inputContainer}>
-          <div className={styles.label}>{translate('QualityProfile')}</div>
-
-          <FormInputGroup
-            type={inputTypes.QUALITY_PROFILE_SELECT}
-            name="qualityProfileId"
-            value={qualityProfileId}
-            isDisabled={!selectedCount}
-            includeMixed={isQualityProfileIdMixed}
-            onChange={this.onInputChange}
-          />
-        </div>
-
-        <div>
-          <div className={styles.label}>&nbsp;</div>
-
-          <div className={styles.importButtonContainer}>
-            <SpinnerButton
-              className={styles.importButton}
-              kind={kinds.PRIMARY}
-              isSpinning={isImporting}
-              isDisabled={!selectedCount || isLookingUpGame}
-              onPress={onImportPress}
+          {isLookingUpGame ? (
+            <Button
+              className={styles.loadingButton}
+              kind={kinds.WARNING}
+              onPress={onCancelLookupPress}
             >
-              {translate('Import')} {selectedCount}{' '}
-              {selectedCount > 1 ? translate('Games') : translate('Game')}
-            </SpinnerButton>
+              {translate('CancelProcessing')}
+            </Button>
+          ) : null}
 
-            {isLookingUpGame ? (
-              <Button
-                className={styles.loadingButton}
-                kind={kinds.WARNING}
-                onPress={onCancelLookupPress}
-              >
-                {translate('CancelProcessing')}
-              </Button>
-            ) : null}
+          {hasUnsearchedItems ? (
+            <Button
+              className={styles.loadingButton}
+              kind={kinds.SUCCESS}
+              onPress={onLookupPress}
+            >
+              {translate('StartProcessing')}
+            </Button>
+          ) : null}
 
-            {hasUnsearchedItems ? (
-              <Button
-                className={styles.loadingButton}
-                kind={kinds.SUCCESS}
-                onPress={onLookupPress}
-              >
-                {translate('StartProcessing')}
-              </Button>
-            ) : null}
+          {isLookingUpGame ? (
+            <LoadingIndicator className={styles.loading} size={24} />
+          ) : null}
 
-            {isLookingUpGame ? (
-              <LoadingIndicator className={styles.loading} size={24} />
-            ) : null}
+          {isLookingUpGame ? translate('ProcessingFolders') : null}
 
-            {isLookingUpGame ? translate('ProcessingFolders') : null}
-
-            {importError ? (
-              <Popover
-                anchor={
-                  <Icon
-                    className={styles.importError}
-                    name={icons.WARNING}
-                    kind={kinds.WARNING}
-                  />
-                }
-                title={translate('ImportErrors')}
-                body={
-                  <ul>
-                    {Array.isArray(importError.responseJSON) ? (
-                      importError.responseJSON.map((error, index) => {
-                        return <li key={index}>{error.errorMessage}</li>;
-                      })
-                    ) : (
-                      <li>{JSON.stringify(importError.responseJSON)}</li>
-                    )}
-                  </ul>
-                }
-                position={tooltipPositions.RIGHT}
-              />
-            ) : null}
-          </div>
+          {importError ? (
+            <Popover
+              anchor={
+                <Icon
+                  className={styles.importError}
+                  name={icons.WARNING}
+                  kind={kinds.WARNING}
+                />
+              }
+              title={translate('ImportErrors')}
+              body={
+                <ul>
+                  {Array.isArray(importError.responseJSON) ? (
+                    importError.responseJSON.map((error, index) => {
+                      return <li key={index}>{error.errorMessage}</li>;
+                    })
+                  ) : (
+                    <li>{JSON.stringify(importError.responseJSON)}</li>
+                  )}
+                </ul>
+              }
+              position={tooltipPositions.RIGHT}
+            />
+          ) : null}
         </div>
-      </PageContentFooter>
-    );
-  }
+      </div>
+    </PageContentFooter>
+  );
 }
 
 export default ImportGameFooter;

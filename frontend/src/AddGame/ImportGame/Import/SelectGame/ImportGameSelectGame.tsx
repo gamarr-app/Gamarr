@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Manager, Popper, Reference } from 'react-popper';
 import FormInputButton from 'Components/Form/FormInputButton';
 import TextInput from 'Components/Form/TextInput';
@@ -48,264 +48,235 @@ interface ImportGameSelectGameProps {
   onGameSelect: (igdbId: number) => void;
 }
 
-interface ImportGameSelectGameState {
-  term: string;
-  isOpen: boolean;
-}
+function ImportGameSelectGame(props: ImportGameSelectGameProps) {
+  const {
+    id,
+    selectedGame,
+    isExistingGame,
+    isFetching,
+    isPopulated,
+    error,
+    items,
+    isQueued,
+    isLookingUpGame,
+    onSearchInputChange,
+    onGameSelect,
+  } = props;
 
-class ImportGameSelectGame extends Component<
-  ImportGameSelectGameProps,
-  ImportGameSelectGameState
-> {
-  static defaultProps = {
-    isFetching: true,
-    isPopulated: false,
-    items: [],
-    isQueued: true,
-  };
+  const [term, setTerm] = useState(id);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // eslint-disable-next-line react/sort-comp
-  private _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
-  private _scheduleUpdate: (() => void) | null = null;
-  private _buttonId: string;
-  private _contentId: string;
+  const gameLookupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const scheduleUpdateRef = useRef<(() => void) | null>(null);
+  const buttonIdRef = useRef(getUniqueElememtId());
+  const contentIdRef = useRef(getUniqueElememtId());
 
-  //
-  // Lifecycle
+  const buttonId = buttonIdRef.current;
+  const contentId = contentIdRef.current;
 
-  constructor(props: ImportGameSelectGameProps) {
-    super(props);
-
-    this._buttonId = getUniqueElememtId();
-    this._contentId = getUniqueElememtId();
-
-    this.state = {
-      term: props.id,
-      isOpen: false,
-    };
-  }
-
-  componentDidUpdate() {
-    if (this._scheduleUpdate) {
-      this._scheduleUpdate();
+  // Update popper position when content changes
+  useEffect(() => {
+    if (scheduleUpdateRef.current) {
+      scheduleUpdateRef.current();
     }
-  }
+  });
 
-  //
-  // Control
-
-  _addListener() {
-    window.addEventListener('click', this.onWindowClick);
-  }
-
-  _removeListener() {
-    window.removeEventListener('click', this.onWindowClick);
-  }
-
-  //
-  // Listeners
-
-  onWindowClick = (event: MouseEvent) => {
-    const button = document.getElementById(this._buttonId);
-    const content = document.getElementById(this._contentId);
-
-    if (!button || !content) {
+  // Handle click outside to close
+  useEffect(() => {
+    if (!isOpen) {
       return;
     }
 
-    if (
-      !button.contains(event.target as Node) &&
-      !content.contains(event.target as Node) &&
-      this.state.isOpen
-    ) {
-      this.setState({ isOpen: false });
-      this._removeListener();
-    }
-  };
+    const handleWindowClick = (event: MouseEvent) => {
+      const button = document.getElementById(buttonId);
+      const content = document.getElementById(contentId);
 
-  onPress = () => {
-    if (this.state.isOpen) {
-      this._removeListener();
-    } else {
-      this._addListener();
-    }
+      if (!button || !content) {
+        return;
+      }
 
-    this.setState({ isOpen: !this.state.isOpen });
-  };
+      if (
+        !button.contains(event.target as Node) &&
+        !content.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
 
-  onSearchInputChange = ({ value }: { value: string }) => {
-    if (this._gameLookupTimeout) {
-      clearTimeout(this._gameLookupTimeout);
-    }
+    window.addEventListener('click', handleWindowClick);
 
-    this.setState({ term: value }, () => {
-      this._gameLookupTimeout = setTimeout(() => {
-        this.props.onSearchInputChange(value);
+    return () => {
+      window.removeEventListener('click', handleWindowClick);
+    };
+  }, [isOpen, buttonId, contentId]);
+
+  const handlePress = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const handleSearchInputChange = useCallback(
+    ({ value }: { value: string }) => {
+      if (gameLookupTimeoutRef.current) {
+        clearTimeout(gameLookupTimeoutRef.current);
+      }
+
+      setTerm(value);
+
+      gameLookupTimeoutRef.current = setTimeout(() => {
+        onSearchInputChange(value);
       }, 200);
-    });
-  };
+    },
+    [onSearchInputChange]
+  );
 
-  onRefreshPress = () => {
-    this.props.onSearchInputChange(this.state.term);
-  };
+  const handleRefreshPress = useCallback(() => {
+    onSearchInputChange(term);
+  }, [onSearchInputChange, term]);
 
-  onGameSelect = (igdbId: number) => {
-    this.setState({ isOpen: false });
+  const handleGameSelect = useCallback(
+    (igdbId: number) => {
+      setIsOpen(false);
+      onGameSelect(igdbId);
+    },
+    [onGameSelect]
+  );
 
-    this.props.onGameSelect(igdbId);
-  };
+  const errorMessage =
+    error && error.responseJSON && error.responseJSON.message;
 
-  //
-  // Render
+  return (
+    <Manager>
+      <Reference>
+        {({ ref }) => (
+          <div ref={ref} id={buttonId}>
+            <Link
+              className={styles.button}
+              component="div"
+              onPress={handlePress}
+            >
+              {isLookingUpGame && isQueued && !isPopulated ? (
+                <LoadingIndicator className={styles.loading} size={20} />
+              ) : null}
 
-  render() {
-    const {
-      id,
-      selectedGame,
-      isExistingGame,
-      isFetching,
-      isPopulated,
-      error,
-      items,
-      isQueued,
-      isLookingUpGame,
-    } = this.props;
+              {isPopulated && selectedGame && isExistingGame ? (
+                <Icon
+                  className={styles.warningIcon}
+                  name={icons.WARNING}
+                  kind={kinds.WARNING}
+                />
+              ) : null}
 
-    const errorMessage =
-      error && error.responseJSON && error.responseJSON.message;
+              {isPopulated && selectedGame ? (
+                <ImportGameTitle
+                  title={selectedGame.title}
+                  year={selectedGame.year}
+                  studio={selectedGame.studio}
+                  isExistingGame={isExistingGame}
+                />
+              ) : null}
 
-    return (
-      <Manager>
-        <Reference>
-          {({ ref }) => (
-            <div ref={ref} id={this._buttonId}>
-              <Link
-                className={styles.button}
-                component="div"
-                onPress={this.onPress}
-              >
-                {isLookingUpGame && isQueued && !isPopulated ? (
-                  <LoadingIndicator className={styles.loading} size={20} />
-                ) : null}
-
-                {isPopulated && selectedGame && isExistingGame ? (
+              {isPopulated && !selectedGame ? (
+                <div className={styles.noMatches}>
                   <Icon
                     className={styles.warningIcon}
                     name={icons.WARNING}
                     kind={kinds.WARNING}
                   />
-                ) : null}
 
-                {isPopulated && selectedGame ? (
-                  <ImportGameTitle
-                    title={selectedGame.title}
-                    year={selectedGame.year}
-                    studio={selectedGame.studio}
-                    isExistingGame={isExistingGame}
+                  {translate('NoMatchFound')}
+                </div>
+              ) : null}
+
+              {!isFetching && !!error ? (
+                <div>
+                  <Icon
+                    className={styles.warningIcon}
+                    title={errorMessage}
+                    name={icons.WARNING}
+                    kind={kinds.WARNING}
                   />
-                ) : null}
 
-                {isPopulated && !selectedGame ? (
-                  <div className={styles.noMatches}>
-                    <Icon
-                      className={styles.warningIcon}
-                      name={icons.WARNING}
-                      kind={kinds.WARNING}
-                    />
-
-                    {translate('NoMatchFound')}
-                  </div>
-                ) : null}
-
-                {!isFetching && !!error ? (
-                  <div>
-                    <Icon
-                      className={styles.warningIcon}
-                      title={errorMessage}
-                      name={icons.WARNING}
-                      kind={kinds.WARNING}
-                    />
-
-                    {translate('SearchFailedPleaseTryAgainLater')}
-                  </div>
-                ) : null}
-
-                <div className={styles.dropdownArrowContainer}>
-                  <Icon name={icons.CARET_DOWN} />
+                  {translate('SearchFailedPleaseTryAgainLater')}
                 </div>
-              </Link>
-            </div>
-          )}
-        </Reference>
+              ) : null}
 
-        <Portal>
-          <Popper
-            placement="bottom"
-            modifiers={{
-              preventOverflow: {
-                boundariesElement: 'viewport',
-              },
-            }}
-          >
-            {({ ref, style, scheduleUpdate }) => {
-              this._scheduleUpdate = scheduleUpdate;
+              <div className={styles.dropdownArrowContainer}>
+                <Icon name={icons.CARET_DOWN} />
+              </div>
+            </Link>
+          </div>
+        )}
+      </Reference>
 
-              return (
-                <div
-                  ref={ref}
-                  id={this._contentId}
-                  className={styles.contentContainer}
-                  style={style}
-                >
-                  {this.state.isOpen ? (
-                    <div className={styles.content}>
-                      <div className={styles.searchContainer}>
-                        <div className={styles.searchIconContainer}>
-                          <Icon name={icons.SEARCH} />
-                        </div>
+      <Portal>
+        <Popper
+          placement="bottom"
+          modifiers={{
+            preventOverflow: {
+              boundariesElement: 'viewport',
+            },
+          }}
+        >
+          {({ ref, style, scheduleUpdate }) => {
+            scheduleUpdateRef.current = scheduleUpdate;
 
-                        <TextInput
-                          className={styles.searchInput}
-                          name={`${id}_textInput`}
-                          value={this.state.term}
-                          onChange={this.onSearchInputChange}
-                        />
-
-                        <FormInputButton
-                          kind={kinds.DEFAULT}
-                          canSpin={true}
-                          isSpinning={isFetching}
-                          onPress={this.onRefreshPress}
-                        >
-                          <Icon name={icons.REFRESH} />
-                        </FormInputButton>
+            return (
+              <div
+                ref={ref}
+                id={contentId}
+                className={styles.contentContainer}
+                style={style}
+              >
+                {isOpen ? (
+                  <div className={styles.content}>
+                    <div className={styles.searchContainer}>
+                      <div className={styles.searchIconContainer}>
+                        <Icon name={icons.SEARCH} />
                       </div>
 
-                      <div className={styles.results}>
-                        {items.map((item) => {
-                          return (
-                            <ImportGameSearchResultConnector
-                              key={item.igdbId}
-                              igdbId={item.igdbId}
-                              steamAppId={0}
-                              title={item.title}
-                              year={item.year}
-                              studio={item.studio}
-                              onPress={this.onGameSelect}
-                            />
-                          );
-                        })}
-                      </div>
+                      <TextInput
+                        className={styles.searchInput}
+                        name={`${id}_textInput`}
+                        value={term}
+                        onChange={handleSearchInputChange}
+                      />
+
+                      <FormInputButton
+                        kind={kinds.DEFAULT}
+                        canSpin={true}
+                        isSpinning={isFetching}
+                        onPress={handleRefreshPress}
+                      >
+                        <Icon name={icons.REFRESH} />
+                      </FormInputButton>
                     </div>
-                  ) : null}
-                </div>
-              );
-            }}
-          </Popper>
-        </Portal>
-      </Manager>
-    );
-  }
+
+                    <div className={styles.results}>
+                      {items.map((item) => {
+                        return (
+                          <ImportGameSearchResultConnector
+                            key={item.igdbId}
+                            igdbId={item.igdbId}
+                            steamAppId={0}
+                            title={item.title}
+                            year={item.year}
+                            studio={item.studio}
+                            onPress={handleGameSelect}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          }}
+        </Popper>
+      </Portal>
+    </Manager>
+  );
 }
 
 export default ImportGameSelectGame;

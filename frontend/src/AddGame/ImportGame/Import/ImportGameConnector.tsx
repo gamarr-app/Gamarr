@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useCallback, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -12,7 +12,6 @@ import {
   setImportGameValue,
 } from 'Store/Actions/importGameActions';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
-import QualityProfile from 'typings/QualityProfile';
 import ImportGame from './ImportGame';
 
 interface UnmappedFolder {
@@ -28,18 +27,13 @@ interface RootFolderItem {
   [key: string]: unknown;
 }
 
-interface OwnProps {
-  rootFolderId: number;
-}
-
-function createMapStateToProps() {
+function createImportGameSelector(rootFolderId: number) {
   return createSelector(
-    (_state: AppState, { rootFolderId }: OwnProps) => rootFolderId,
     (state: AppState) => state.rootFolders,
     (state: AppState) => state.addGame,
     (state: AppState) => state.importGame,
     (state: AppState) => state.settings.qualityProfiles,
-    (rootFolderId, rootFolders, addGame, importGameState, qualityProfiles) => {
+    (rootFolders, addGame, importGameState, qualityProfiles) => {
       const {
         isFetching: rootFoldersFetching,
         isPopulated: rootFoldersPopulated,
@@ -76,56 +70,28 @@ function createMapStateToProps() {
   );
 }
 
-const mapDispatchToProps = {
-  dispatchSetImportGameValue: setImportGameValue,
-  dispatchImportGame: importGame,
-  dispatchClearImportGame: clearImportGame,
-  dispatchFetchRootFolders: fetchRootFolders,
-  dispatchSetAddGameDefault: setAddGameDefault,
-};
+function ImportGameConnector() {
+  const { rootFolderId: rootFolderIdParam } = useParams<{
+    rootFolderId: string;
+  }>();
+  const rootFolderId = parseInt(rootFolderIdParam || '0');
 
-interface SetImportGameValuePayload {
-  id: string;
-  [key: string]: unknown;
-}
+  const dispatch = useDispatch();
 
-interface ImportGamePayload {
-  ids: string[];
-}
+  const selector = createImportGameSelector(rootFolderId);
+  const {
+    rootFoldersFetching,
+    rootFoldersPopulated,
+    rootFoldersError,
+    qualityProfiles,
+    defaultQualityProfileId,
+    items,
+    ...otherProps
+  } = useSelector(selector);
 
-interface FetchRootFoldersPayload {
-  id?: number;
-  timeout?: boolean;
-}
-
-interface ImportGameConnectorProps {
-  rootFolderId: number;
-  rootFoldersFetching: boolean;
-  rootFoldersPopulated: boolean;
-  qualityProfiles: QualityProfile[];
-  defaultQualityProfileId: number;
-  items: ImportGameItem[];
-  dispatchSetImportGameValue: (values: SetImportGameValuePayload) => void;
-  dispatchImportGame: (payload: ImportGamePayload) => void;
-  dispatchClearImportGame: () => void;
-  dispatchFetchRootFolders: (payload?: FetchRootFoldersPayload) => void;
-  dispatchSetAddGameDefault: (defaults: Record<string, unknown>) => void;
-}
-
-class ImportGameConnectorClass extends Component<ImportGameConnectorProps> {
-  //
-  // Lifecycle
-
-  componentDidMount() {
-    const {
-      rootFolderId,
-      qualityProfiles,
-      defaultQualityProfileId,
-      dispatchFetchRootFolders,
-      dispatchSetAddGameDefault,
-    } = this.props;
-
-    dispatchFetchRootFolders({ id: rootFolderId, timeout: false });
+  // Mount effect
+  useEffect(() => {
+    dispatch(fetchRootFolders({ id: rootFolderId, timeout: false }));
 
     let setDefaults = false;
     const setDefaultPayload: Record<string, unknown> = {};
@@ -135,61 +101,53 @@ class ImportGameConnectorClass extends Component<ImportGameConnectorProps> {
       !qualityProfiles.some((p) => p.id === defaultQualityProfileId)
     ) {
       setDefaults = true;
-      setDefaultPayload.qualityProfileId = qualityProfiles[0].id;
+      setDefaultPayload.qualityProfileId = qualityProfiles[0]?.id;
     }
 
     if (setDefaults) {
-      dispatchSetAddGameDefault(setDefaultPayload);
+      dispatch(setAddGameDefault(setDefaultPayload));
     }
-  }
 
-  componentWillUnmount() {
-    this.props.dispatchClearImportGame();
-  }
+    return () => {
+      dispatch(clearImportGame());
+    };
+    // Only run on mount/unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  //
-  // Listeners
+  const onInputChange = useCallback(
+    (ids: string[], name: string, value: unknown) => {
+      dispatch(setAddGameDefault({ [name]: value }));
 
-  onInputChange = (ids: string[], name: string, value: unknown) => {
-    this.props.dispatchSetAddGameDefault({ [name]: value });
-
-    ids.forEach((id) => {
-      this.props.dispatchSetImportGameValue({
-        id,
-        [name]: value,
+      ids.forEach((id) => {
+        dispatch(
+          setImportGameValue({
+            id,
+            [name]: value,
+          })
+        );
       });
-    });
-  };
+    },
+    [dispatch]
+  );
 
-  onImportPress = (ids: string[]) => {
-    this.props.dispatchImportGame({ ids });
-  };
-
-  //
-  // Render
-
-  render() {
-    return (
-      <ImportGame
-        {...this.props}
-        onInputChange={this.onInputChange}
-        onImportPress={this.onImportPress}
-      />
-    );
-  }
-}
-
-const ConnectedImportGameConnector = connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(ImportGameConnectorClass);
-
-function ImportGameConnector() {
-  const { rootFolderId } = useParams<{ rootFolderId: string }>();
+  const onImportPress = useCallback(
+    (ids: string[]) => {
+      dispatch(importGame({ ids }));
+    },
+    [dispatch]
+  );
 
   return (
-    <ConnectedImportGameConnector
-      rootFolderId={parseInt(rootFolderId || '0')}
+    <ImportGame
+      {...otherProps}
+      rootFolderId={rootFolderId}
+      rootFoldersFetching={rootFoldersFetching}
+      rootFoldersPopulated={rootFoldersPopulated}
+      rootFoldersError={rootFoldersError}
+      items={items}
+      onInputChange={onInputChange}
+      onImportPress={onImportPress}
     />
   );
 }
