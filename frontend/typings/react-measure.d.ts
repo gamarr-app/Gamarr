@@ -94,7 +94,4 @@ declare module 'react-measure' {
   }
 
   export default class Measure extends React.Component<MeasureProps> {}
-
-  // Re-export for backward compatibility
-  export { MeasureProps };
 }

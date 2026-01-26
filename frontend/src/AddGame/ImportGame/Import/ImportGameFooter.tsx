@@ -8,6 +8,7 @@ import SpinnerButton from 'Components/Link/SpinnerButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContentFooter from 'Components/Page/PageContentFooter';
 import Popover from 'Components/Tooltip/Popover';
+import { GameMonitor } from 'Game/Game';
 import { icons, inputTypes, kinds, tooltipPositions } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
@@ -19,7 +20,7 @@ interface ImportGameFooterProps {
   selectedCount: number;
   isImporting: boolean;
   isLookingUpGame: boolean;
-  defaultMonitor: string;
+  defaultMonitor: GameMonitor;
   defaultQualityProfileId?: number;
   defaultMinimumAvailability?: string;
   isMonitorMixed: boolean;
