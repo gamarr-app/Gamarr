@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import { CustomFilter, Filter, FilterBuilderProp } from 'App/State/AppState';
 import Modal from 'Components/Modal/Modal';
 import FilterBuilderModalContentConnector from './Builder/FilterBuilderModalContentConnector';
@@ -18,91 +18,59 @@ interface FilterModalProps {
   onModalClose: () => void;
 }
 
-interface FilterModalState {
-  filterBuilder: boolean;
-  id: number | null;
-}
+function FilterModal(props: FilterModalProps) {
+  const { isOpen, customFilters, onModalClose, ...otherProps } = props;
 
-class FilterModal extends Component<FilterModalProps, FilterModalState> {
-  //
-  // Lifecycle
+  const [filterBuilder, setFilterBuilder] = useState(!customFilters.length);
+  const [id, setId] = useState<number | null>(null);
 
-  constructor(props: FilterModalProps) {
-    super(props);
+  const onAddCustomFilter = useCallback(() => {
+    setFilterBuilder(true);
+  }, []);
 
-    this.state = {
-      filterBuilder: !props.customFilters.length,
-      id: null,
-    };
-  }
+  const onEditCustomFilter = useCallback((editId: number) => {
+    setFilterBuilder(true);
+    setId(editId);
+  }, []);
 
-  //
-  // Listeners
-
-  onAddCustomFilter = () => {
-    this.setState({
-      filterBuilder: true,
-    });
-  };
-
-  onEditCustomFilter = (id: number) => {
-    this.setState({
-      filterBuilder: true,
-      id,
-    });
-  };
-
-  onCancelPress = () => {
-    if (this.state.filterBuilder) {
-      this.setState({
-        filterBuilder: false,
-        id: null,
-      });
+  const onCancelPress = useCallback(() => {
+    if (filterBuilder) {
+      setFilterBuilder(false);
+      setId(null);
     } else {
-      this.onModalClose();
+      setFilterBuilder(false);
+      setId(null);
+      onModalClose();
     }
-  };
+  }, [filterBuilder, onModalClose]);
 
-  onModalClose = () => {
-    this.setState(
-      {
-        filterBuilder: false,
-        id: null,
-      },
-      () => {
-        this.props.onModalClose();
-      }
-    );
-  };
+  const handleModalClose = useCallback(() => {
+    setFilterBuilder(false);
+    setId(null);
+    onModalClose();
+  }, [onModalClose]);
 
-  //
-  // Render
-
-  render() {
-    const { isOpen, ...otherProps } = this.props;
-
-    const { filterBuilder, id } = this.state;
-
-    return (
-      <Modal isOpen={isOpen} onModalClose={this.onModalClose}>
-        {filterBuilder ? (
-          <FilterBuilderModalContentConnector
-            {...otherProps}
-            id={id ?? undefined}
-            onCancelPress={this.onCancelPress}
-            onModalClose={this.onModalClose}
-          />
-        ) : (
-          <CustomFiltersModalContentConnector
-            {...otherProps}
-            onAddCustomFilter={this.onAddCustomFilter}
-            onEditCustomFilter={this.onEditCustomFilter}
-            onModalClose={this.onModalClose}
-          />
-        )}
-      </Modal>
-    );
-  }
+  return (
+    <Modal isOpen={isOpen} onModalClose={handleModalClose}>
+      {filterBuilder ? (
+        <FilterBuilderModalContentConnector
+          {...otherProps}
+          customFilters={customFilters}
+          id={id ?? undefined}
+          onCancelPress={onCancelPress}
+          onModalClose={handleModalClose}
+        />
+      ) : (
+        <CustomFiltersModalContentConnector
+          {...otherProps}
+          customFilters={customFilters}
+          onAddCustomFilter={onAddCustomFilter}
+          onEditCustomFilter={onEditCustomFilter}
+          onModalClose={handleModalClose}
+        />
+      )}
+    </Modal>
+  );
 }
 
 export default FilterModal;

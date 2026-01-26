@@ -1,4 +1,4 @@
-import React, { Component, ComponentType } from 'react';
+import React, { ComponentType, useCallback, useEffect, useRef } from 'react';
 import { FilterBuilderProp } from 'App/State/AppState';
 import SelectInput from 'Components/Form/SelectInput';
 import IconButton from 'Components/Link/IconButton';
@@ -166,42 +166,32 @@ interface FilterBuilderRowProps {
   onRemovePress: (index: number) => void;
 }
 
-interface FilterBuilderRowState {
-  selectedFilterBuilderProp?: FilterBuilderProp<unknown>;
-}
+function FilterBuilderRow(props: FilterBuilderRowProps) {
+  const {
+    index,
+    filterKey,
+    filterValue,
+    filterType,
+    filterCount,
+    filterBuilderProps,
+    sectionItems,
+    onFilterChange,
+    onAddPress,
+    onRemovePress,
+  } = props;
 
-class FilterBuilderRow extends Component<
-  FilterBuilderRowProps,
-  FilterBuilderRowState
-> {
-  // eslint-disable-next-line react/sort-comp
-  private selectedFilterBuilderProp?: FilterBuilderProp<unknown>;
+  const selectedFilterBuilderPropRef = useRef<
+    FilterBuilderProp<unknown> | undefined
+  >(
+    filterKey ? filterBuilderProps.find((a) => a.name === filterKey) : undefined
+  );
 
-  //
-  // Lifecycle
-
-  constructor(props: FilterBuilderRowProps) {
-    super(props);
-
-    const { filterKey, filterBuilderProps } = props;
-
+  // Initialize filter on mount if no filterKey
+  useEffect(() => {
     if (filterKey) {
-      const selectedFilterBuilderProp = filterBuilderProps.find(
+      selectedFilterBuilderPropRef.current = filterBuilderProps.find(
         (a) => a.name === filterKey
       );
-      this.selectedFilterBuilderProp = selectedFilterBuilderProp;
-    }
-  }
-
-  componentDidMount() {
-    const { index, filterKey, filterBuilderProps, onFilterChange } = this.props;
-
-    if (filterKey) {
-      const selectedFilterBuilderProp = filterBuilderProps.find(
-        (a) => a.name === filterKey
-      );
-      this.selectedFilterBuilderProp = selectedFilterBuilderProp;
-
       return;
     }
 
@@ -213,151 +203,132 @@ class FilterBuilderRow extends Component<
       type: getDefaultFilterType(selectedFilterBuilderProp),
     };
 
-    this.selectedFilterBuilderProp = selectedFilterBuilderProp;
+    selectedFilterBuilderPropRef.current = selectedFilterBuilderProp;
     onFilterChange(index, filter);
-  }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  //
-  // Listeners
+  const handleFilterKeyChange = useCallback(
+    ({ value: key }: { value: string }) => {
+      const selectedFilterBuilderProp = getselectedFilterBuilderProp(
+        filterBuilderProps,
+        key
+      )!;
+      const type = getDefaultFilterType(selectedFilterBuilderProp);
 
-  onFilterKeyChange = ({ value: key }: { value: string }) => {
-    const { index, filterBuilderProps, onFilterChange } = this.props;
+      const filter: Filter = {
+        key,
+        value: getDefaultFilterValue(selectedFilterBuilderProp),
+        type,
+      };
 
-    const selectedFilterBuilderProp = getselectedFilterBuilderProp(
-      filterBuilderProps,
-      key
-    )!;
-    const type = getDefaultFilterType(selectedFilterBuilderProp);
+      selectedFilterBuilderPropRef.current = selectedFilterBuilderProp;
+      onFilterChange(index, filter);
+    },
+    [filterBuilderProps, index, onFilterChange]
+  );
 
-    const filter: Filter = {
-      key,
-      value: getDefaultFilterValue(selectedFilterBuilderProp),
-      type,
-    };
+  const handleFilterChange = useCallback(
+    ({ name, value }: { name: string; value: unknown }) => {
+      const filter: Filter = {
+        key: filterKey!,
+        value: filterValue,
+        type: filterType!,
+      };
 
-    this.selectedFilterBuilderProp = selectedFilterBuilderProp;
-    onFilterChange(index, filter);
-  };
+      if (name === 'key') {
+        filter.key = value as string;
+      } else if (name === 'value') {
+        filter.value = value as FilterValueType;
+      } else if (name === 'type') {
+        filter.type = value as string;
+      }
 
-  onFilterChange = ({ name, value }: { name: string; value: unknown }) => {
-    const { index, filterKey, filterValue, filterType, onFilterChange } =
-      this.props;
+      onFilterChange(index, filter);
+    },
+    [filterKey, filterValue, filterType, index, onFilterChange]
+  );
 
-    const filter: Filter = {
-      key: filterKey!,
-      value: filterValue,
-      type: filterType!,
-    };
-
-    if (name === 'key') {
-      filter.key = value as string;
-    } else if (name === 'value') {
-      filter.value = value as FilterValueType;
-    } else if (name === 'type') {
-      filter.type = value as string;
-    }
-
-    onFilterChange(index, filter);
-  };
-
-  onAddPress = () => {
-    const { index, onAddPress } = this.props;
-
+  const handleAddPress = useCallback(() => {
     onAddPress(index);
-  };
+  }, [index, onAddPress]);
 
-  onRemovePress = () => {
-    const { index, onRemovePress } = this.props;
-
+  const handleRemovePress = useCallback(() => {
     onRemovePress(index);
-  };
+  }, [index, onRemovePress]);
 
-  //
-  // Render
+  const selectedFilterBuilderProp = selectedFilterBuilderPropRef.current;
 
-  render() {
-    const {
-      filterKey,
-      filterType,
-      filterValue,
-      filterCount,
-      filterBuilderProps,
-      sectionItems,
-    } = this.props;
+  const keyOptions = filterBuilderProps
+    .map((availablePropFilter) => {
+      const { name, label } = availablePropFilter;
 
-    const selectedFilterBuilderProp = this.selectedFilterBuilderProp;
+      return {
+        key: name,
+        value: typeof label === 'function' ? (label as () => string)() : label,
+      };
+    })
+    .sort(sortByProp('value'));
 
-    const keyOptions = filterBuilderProps
-      .map((availablePropFilter) => {
-        const { name, label } = availablePropFilter;
+  const ValueComponent = getRowValueConnector(selectedFilterBuilderProp);
 
-        return {
-          key: name,
-          value:
-            typeof label === 'function' ? (label as () => string)() : label,
-        };
-      })
-      .sort(sortByProp('value'));
-
-    const ValueComponent = getRowValueConnector(selectedFilterBuilderProp);
-
-    return (
-      <div className={styles.filterRow}>
-        <div className={styles.inputContainer}>
-          {filterKey && (
-            <SelectInput
-              name="key"
-              value={filterKey}
-              values={keyOptions}
-              onChange={this.onFilterKeyChange}
-            />
-          )}
-        </div>
-
-        <div className={styles.inputContainer}>
-          {filterType && (
-            <SelectInput
-              name="type"
-              value={filterType}
-              values={getFilterTypeOptions(filterBuilderProps, filterKey)}
-              onChange={this.onFilterChange}
-            />
-          )}
-        </div>
-
-        <div className={styles.valueInputContainer}>
-          {filterValue != null &&
-            !!selectedFilterBuilderProp &&
-            React.createElement(
-              ValueComponent as React.ComponentType<{
-                filterType?: string;
-                filterValue: FilterValueType;
-                selectedFilterBuilderProp: FilterBuilderProp<unknown>;
-                sectionItems: unknown[];
-                onChange: (payload: { name: string; value: unknown }) => void;
-              }>,
-              {
-                filterType,
-                filterValue,
-                selectedFilterBuilderProp,
-                sectionItems,
-                onChange: this.onFilterChange,
-              }
-            )}
-        </div>
-
-        <div className={styles.actionsContainer}>
-          <IconButton
-            name={icons.SUBTRACT}
-            isDisabled={filterCount === 1}
-            onPress={this.onRemovePress}
+  return (
+    <div className={styles.filterRow}>
+      <div className={styles.inputContainer}>
+        {filterKey && (
+          <SelectInput
+            name="key"
+            value={filterKey}
+            values={keyOptions}
+            onChange={handleFilterKeyChange}
           />
-
-          <IconButton name={icons.ADD} onPress={this.onAddPress} />
-        </div>
+        )}
       </div>
-    );
-  }
+
+      <div className={styles.inputContainer}>
+        {filterType && (
+          <SelectInput
+            name="type"
+            value={filterType}
+            values={getFilterTypeOptions(filterBuilderProps, filterKey)}
+            onChange={handleFilterChange}
+          />
+        )}
+      </div>
+
+      <div className={styles.valueInputContainer}>
+        {filterValue != null &&
+          !!selectedFilterBuilderProp &&
+          React.createElement(
+            ValueComponent as React.ComponentType<{
+              filterType?: string;
+              filterValue: FilterValueType;
+              selectedFilterBuilderProp: FilterBuilderProp<unknown>;
+              sectionItems: unknown[];
+              onChange: (payload: { name: string; value: unknown }) => void;
+            }>,
+            {
+              filterType,
+              filterValue,
+              selectedFilterBuilderProp,
+              sectionItems,
+              onChange: handleFilterChange,
+            }
+          )}
+      </div>
+
+      <div className={styles.actionsContainer}>
+        <IconButton
+          name={icons.SUBTRACT}
+          isDisabled={filterCount === 1}
+          onPress={handleRemovePress}
+        />
+
+        <IconButton name={icons.ADD} onPress={handleAddPress} />
+      </div>
+    </div>
+  );
 }
 
 export default FilterBuilderRow;
