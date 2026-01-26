@@ -98,7 +98,7 @@ function Tooltip(props: TooltipProps) {
   }, []);
 
   const computeMaxSize = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types don't match runtime behavior
     (data: any) => {
       const { top, right, bottom, left } = data.offsets.reference;
 

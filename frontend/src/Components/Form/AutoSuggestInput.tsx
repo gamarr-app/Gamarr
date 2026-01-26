@@ -88,7 +88,7 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
   const previousSuggestions = usePrevious(suggestions);
 
   const handleComputeMaxHeight = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types don't match runtime behavior
     (data: any) => {
       const { top, bottom, width } = data.offsets.reference;
 
