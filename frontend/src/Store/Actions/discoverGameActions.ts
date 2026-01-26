@@ -4,7 +4,6 @@ import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
-import Game from 'Game/Game';
 import {
   filterBuilderTypes,
   filterBuilderValueTypes,
@@ -699,14 +698,13 @@ export const ADD_IMPORT_LIST_EXCLUSIONS =
 //
 // Action Creators
 
-interface AddGamePayload {
+interface AddGamePayload extends NewGamePayload {
   igdbId: number;
-  [key: string]: unknown;
 }
 
 interface AddGamesPayload {
   ids: number[];
-  addOptions: Record<string, unknown>;
+  addOptions: NewGamePayload;
 }
 
 interface AddImportListExclusionsPayload {
@@ -823,11 +821,13 @@ export const actionHandlers = handleThunks({
     const items = state.discoverGame.items;
     const itemToUpdate = _.find(items, { igdbId });
 
-    const newGame = getNewGame(
-      _.cloneDeep(itemToUpdate) as unknown as Game,
-      payload as unknown as NewGamePayload
-    ) as { id: number };
-    newGame.id = 0;
+    if (!itemToUpdate) {
+      dispatch(set({ section, isAdding: false }));
+      return;
+    }
+
+    const newGame = getNewGame(_.cloneDeep(itemToUpdate), payload);
+    (newGame as { id: number }).id = 0;
 
     const promise = createAjaxRequest({
       url: '/game',
@@ -844,11 +844,11 @@ export const actionHandlers = handleThunks({
             ...(data as Record<string, unknown>),
           }),
 
-          itemToUpdate!.lists.length === 0
-            ? removeItem({ section: 'discoverGame', ...itemToUpdate! })
+          itemToUpdate.lists.length === 0
+            ? removeItem({ section: 'discoverGame', ...itemToUpdate })
             : updateItem({
                 section: 'discoverGame',
-                ...itemToUpdate!,
+                ...itemToUpdate,
                 isExisting: true,
               }),
 
@@ -899,11 +899,8 @@ export const actionHandlers = handleThunks({
           !acc.some((a) => a.igdbId === selectedGame.igdbId)
         ) {
           if (!selectedGame.isExisting) {
-            const newGame = getNewGame(
-              _.cloneDeep(selectedGame) as unknown as Game,
-              addOptions as unknown as NewGamePayload
-            ) as { id: number; igdbId: number };
-            newGame.id = 0;
+            const newGame = getNewGame(_.cloneDeep(selectedGame), addOptions);
+            (newGame as { id: number }).id = 0;
 
             addedIds.push(id);
             acc.push(newGame);

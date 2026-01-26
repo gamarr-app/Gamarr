@@ -5,7 +5,7 @@ import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
 import { createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
-import getNewGame from 'Utilities/Game/getNewGame';
+import getNewGame, { NewGamePayload } from 'Utilities/Game/getNewGame';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 import { set, update, updateItem } from './baseActions';
@@ -78,10 +78,9 @@ interface LookupGamePayload {
   term: string;
 }
 
-interface AddGamePayload {
+interface AddGamePayload extends NewGamePayload {
   igdbId: number;
   steamAppId?: number;
-  [key: string]: unknown;
 }
 
 interface SetAddGameValuePayload {
@@ -194,16 +193,8 @@ export const actionHandlers = handleThunks({
       return;
     }
 
-    const newGame = getNewGame(
-      _.cloneDeep(foundGame) as unknown as Parameters<typeof getNewGame>[0],
-      payload as unknown as Parameters<typeof getNewGame>[1]
-    ) as {
-      id: number;
-      collection?: { igdbId: number };
-      igdbId: number;
-      images?: unknown;
-    };
-    newGame.id = 0;
+    const gameWithId = { ..._.cloneDeep(foundGame), id: 0 } as typeof foundGame & { id: number; collection?: { igdbId: number } };
+    const newGame = getNewGame(gameWithId, payload);
 
     const promise = createAjaxRequest({
       url: '/game',
