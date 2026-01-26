@@ -9,11 +9,12 @@ import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
+import { Failure } from 'typings/pending';
 
 interface FormValue<T> {
   value: T;
-  errors?: { message: string }[];
-  warnings?: { message: string }[];
+  errors?: Failure[];
+  warnings?: Failure[];
 }
 
 interface DiscoverGameDefaults {
