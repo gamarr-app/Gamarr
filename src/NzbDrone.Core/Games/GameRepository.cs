@@ -372,13 +372,13 @@ namespace NzbDrone.Core.Games
                     recommendations = conn.Query<int>(@"SELECT DISTINCT ""Rec"" FROM (
                                                     SELECT DISTINCT ""Rec"" FROM
                                                     (
-                                                    SELECT DISTINCT CAST(""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id"", json_array_elements_text((""GameMetadata"".""Recommendations"")::json)
+                                                    SELECT DISTINCT CAST(""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id"", json_array_elements_text((""GameMetadata"".""IgdbRecommendations"")::json)
                                                     WHERE CAST(""value"" AS INT) NOT IN (SELECT ""IgdbId"" FROM ""GameMetadata"" union SELECT ""IgdbId"" from ""ImportExclusions"" as sub1) LIMIT 10
                                                     ) as sub2
                                                     UNION
                                                     SELECT ""Rec"" FROM
                                                     (
-                                                    SELECT CAST(""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id"", json_array_elements_text((""GameMetadata"".""Recommendations"")::json)
+                                                    SELECT CAST(""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id"", json_array_elements_text((""GameMetadata"".""IgdbRecommendations"")::json)
                                                     WHERE CAST(""value"" AS INT) NOT IN (SELECT ""IgdbId"" FROM ""GameMetadata"" union SELECT ""IgdbId"" from ""ImportExclusions"" as sub2)
                                                     GROUP BY ""Rec"" ORDER BY count(*) DESC LIMIT 120
                                                     ) as sub4
@@ -391,14 +391,14 @@ namespace NzbDrone.Core.Games
                                                     SELECT DISTINCT ""Rec"" FROM
                                                     (
                                                     SELECT DISTINCT CAST(""j"".""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" == ""GameMetadata"".""Id""
-                                                    CROSS JOIN json_each(""GameMetadata"".""Recommendations"") AS ""j""
+                                                    CROSS JOIN json_each(""GameMetadata"".""IgdbRecommendations"") AS ""j""
                                                     WHERE ""Rec"" NOT IN (SELECT ""IgdbId"" FROM ""GameMetadata"" union SELECT ""IgdbId"" from ""ImportExclusions"") LIMIT 10
                                                     )
                                                     UNION
                                                     SELECT ""Rec"" FROM
                                                     (
                                                     SELECT CAST(""j"".""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" == ""GameMetadata"".""Id""
-                                                    CROSS JOIN json_each(""GameMetadata"".""Recommendations"") AS ""j""
+                                                    CROSS JOIN json_each(""GameMetadata"".""IgdbRecommendations"") AS ""j""
                                                     WHERE ""Rec"" NOT IN (SELECT ""IgdbId"" FROM ""GameMetadata"" union SELECT ""IgdbId"" from ""ImportExclusions"")
                                                     GROUP BY ""Rec"" ORDER BY count(*) DESC LIMIT 120
                                                     )
