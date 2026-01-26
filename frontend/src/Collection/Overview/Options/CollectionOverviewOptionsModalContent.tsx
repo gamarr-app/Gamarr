@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { Component } from 'react';
+import { useCallback } from 'react';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputGroup from 'Components/Form/FormInputGroup';
@@ -49,196 +48,99 @@ interface CollectionOverviewOptionsModalContentProps {
   onModalClose: () => void;
 }
 
-interface CollectionOverviewOptionsModalContentState {
-  detailedProgressBar: boolean;
-  size: string;
-  showDetails: boolean;
-  showOverview: boolean;
-  showPosters: boolean;
-}
+function CollectionOverviewOptionsModalContent(
+  props: CollectionOverviewOptionsModalContentProps
+) {
+  const {
+    detailedProgressBar,
+    size,
+    showDetails,
+    showOverview,
+    showPosters,
+    onChangeOverviewOption,
+    onModalClose,
+  } = props;
 
-class CollectionOverviewOptionsModalContent extends Component<
-  CollectionOverviewOptionsModalContentProps,
-  CollectionOverviewOptionsModalContentState
-> {
-  //
-  // Lifecycle
+  const handleChangeOverviewOption = useCallback(
+    ({ name, value }: { name: string; value: unknown }) => {
+      onChangeOverviewOption({ [name]: value });
+    },
+    [onChangeOverviewOption]
+  );
 
-  constructor(props: CollectionOverviewOptionsModalContentProps) {
-    super(props);
+  return (
+    <ModalContent onModalClose={onModalClose}>
+      <ModalHeader>{translate('CollectionOptions')}</ModalHeader>
 
-    this.state = {
-      detailedProgressBar: props.detailedProgressBar,
-      size: props.size,
-      showDetails: props.showDetails,
-      showOverview: props.showOverview,
-      showPosters: props.showPosters,
-    };
-  }
+      <ModalBody>
+        <Form>
+          <FormGroup>
+            <FormLabel>{translate('PosterSize')}</FormLabel>
 
-  componentDidUpdate(prevProps: CollectionOverviewOptionsModalContentProps) {
-    const {
-      detailedProgressBar,
-      size,
-      showDetails,
-      showOverview,
-      showPosters,
-    } = this.props;
+            <FormInputGroup
+              type={inputTypes.SELECT}
+              name="size"
+              value={size}
+              values={posterSizeOptions}
+              onChange={handleChangeOverviewOption}
+            />
+          </FormGroup>
 
-    const state: Partial<CollectionOverviewOptionsModalContentState> = {};
+          <FormGroup>
+            <FormLabel>{translate('DetailedProgressBar')}</FormLabel>
 
-    if (detailedProgressBar !== prevProps.detailedProgressBar) {
-      state.detailedProgressBar = detailedProgressBar;
-    }
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="detailedProgressBar"
+              value={detailedProgressBar}
+              helpText={translate('DetailedProgressBarHelpText')}
+              onChange={handleChangeOverviewOption}
+            />
+          </FormGroup>
 
-    if (size !== prevProps.size) {
-      state.size = size;
-    }
+          <FormGroup>
+            <FormLabel>{translate('ShowCollectionDetails')}</FormLabel>
 
-    if (showDetails !== prevProps.showDetails) {
-      state.showDetails = showDetails;
-    }
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showDetails"
+              value={showDetails}
+              helpText={translate('CollectionShowDetailsHelpText')}
+              onChange={handleChangeOverviewOption}
+            />
+          </FormGroup>
 
-    if (showOverview !== prevProps.showOverview) {
-      state.showOverview = showOverview;
-    }
+          <FormGroup>
+            <FormLabel>{translate('ShowOverview')}</FormLabel>
 
-    if (showPosters !== prevProps.showPosters) {
-      state.showPosters = showPosters;
-    }
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showOverview"
+              value={showOverview}
+              helpText={translate('CollectionShowOverviewsHelpText')}
+              onChange={handleChangeOverviewOption}
+            />
+          </FormGroup>
 
-    if (!_.isEmpty(state)) {
-      this.setState(state as CollectionOverviewOptionsModalContentState);
-    }
-  }
+          <FormGroup>
+            <FormLabel>{translate('ShowPosters')}</FormLabel>
 
-  //
-  // Listeners
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showPosters"
+              value={showPosters}
+              helpText={translate('CollectionShowPostersHelpText')}
+              onChange={handleChangeOverviewOption}
+            />
+          </FormGroup>
+        </Form>
+      </ModalBody>
 
-  onChangeOverviewOption = ({
-    name,
-    value,
-  }: {
-    name: string;
-    value: unknown;
-  }) => {
-    this.setState(
-      {
-        [name]: value,
-      } as Pick<
-        CollectionOverviewOptionsModalContentState,
-        keyof CollectionOverviewOptionsModalContentState
-      >,
-      () => {
-        this.props.onChangeOverviewOption({ [name]: value });
-      }
-    );
-  };
-
-  onChangeOption = ({ name, value }: { name: string; value: unknown }) => {
-    this.setState(
-      {
-        [name]: value,
-      } as Pick<
-        CollectionOverviewOptionsModalContentState,
-        keyof CollectionOverviewOptionsModalContentState
-      >,
-      () => {
-        this.props.onChangeOption({
-          [name]: value,
-        });
-      }
-    );
-  };
-
-  //
-  // Render
-
-  render() {
-    const { onModalClose } = this.props;
-
-    const {
-      size,
-      detailedProgressBar,
-      showDetails,
-      showPosters,
-      showOverview,
-    } = this.state;
-
-    return (
-      <ModalContent onModalClose={onModalClose}>
-        <ModalHeader>{translate('CollectionOptions')}</ModalHeader>
-
-        <ModalBody>
-          <Form>
-            <FormGroup>
-              <FormLabel>{translate('PosterSize')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.SELECT}
-                name="size"
-                value={size}
-                values={posterSizeOptions}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('DetailedProgressBar')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="detailedProgressBar"
-                value={detailedProgressBar}
-                helpText={translate('DetailedProgressBarHelpText')}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowCollectionDetails')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showDetails"
-                value={showDetails}
-                helpText={translate('CollectionShowDetailsHelpText')}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowOverview')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showOverview"
-                value={showOverview}
-                helpText={translate('CollectionShowOverviewsHelpText')}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowPosters')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showPosters"
-                value={showPosters}
-                helpText={translate('CollectionShowPostersHelpText')}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-          </Form>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button onPress={onModalClose}>{translate('Close')}</Button>
-        </ModalFooter>
-      </ModalContent>
-    );
-  }
+      <ModalFooter>
+        <Button onPress={onModalClose}>{translate('Close')}</Button>
+      </ModalFooter>
+    </ModalContent>
+  );
 }
 
 export default CollectionOverviewOptionsModalContent;
