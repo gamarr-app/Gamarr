@@ -1,9 +1,7 @@
 import { ReactElement, useCallback, useEffect } from 'react';
 import { useBlocker } from 'react-router-dom';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton, {
-  PageToolbarButtonProps,
-} from 'Components/Page/Toolbar/PageToolbarButton';
+import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 import { icons } from 'Helpers/Props';
@@ -11,16 +9,14 @@ import translate from 'Utilities/String/translate';
 import AdvancedSettingsButton from './AdvancedSettingsButton';
 import PendingChangesModal from './PendingChangesModal';
 
-type ToolbarButtonElement =
-  | ReactElement<PageToolbarButtonProps>
-  | ReactElement<never>
-  | null;
-
 interface SettingsToolbarProps {
   showSave?: boolean;
   isSaving?: boolean;
   hasPendingChanges?: boolean;
-  additionalButtons?: ToolbarButtonElement | ToolbarButtonElement[];
+  // TODO: This should do type checking like PageToolbarSectionProps,
+  // but this works for the time being.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  additionalButtons?: ReactElement<any> | null;
   onSavePress?: () => void;
 }
 
