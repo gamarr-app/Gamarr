@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,10 +21,6 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
         private static readonly Regex InfectedFileRegex = new Regex(@"^(.+?):\s+(.+?)\s+FOUND$", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex ScanSummaryRegex = new Regex(@"Scanned files:\s*(\d+)", RegexOptions.Compiled);
 
-        // Cache scan results to avoid rescanning unchanged folders
-        private static readonly ConcurrentDictionary<string, CachedScanResult> _scanCache = new ConcurrentDictionary<string, CachedScanResult>();
-        private static readonly TimeSpan CacheExpiry = TimeSpan.FromHours(1);
-
         // Cache the detected path to avoid repeated logging
         private string _cachedClamScanPath;
         private bool _clamScanPathChecked;
@@ -39,13 +34,6 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
             _configService = configService;
             _diskProvider = diskProvider;
             _logger = logger;
-        }
-
-        private class CachedScanResult
-        {
-            public VirusScanResult Result { get; set; }
-            public DateTime ScanTime { get; set; }
-            public DateTime FolderModifiedTime { get; set; }
         }
 
         public string ScannerName => "ClamAV";
@@ -95,14 +83,6 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                     ScanCompleted = false,
                     ErrorMessage = "ClamAV is not available or not configured"
                 };
-            }
-
-            // Check cache for existing scan result
-            var cachedResult = GetCachedResult(path);
-            if (cachedResult != null)
-            {
-                _logger.Debug("Using cached ClamAV scan result for: {0}", path);
-                return cachedResult;
             }
 
             var stopwatch = Stopwatch.StartNew();
@@ -161,9 +141,6 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                 {
                     _logger.Info("ClamAV scan completed. {0} files scanned, no threats detected", result.ScannedFileCount);
                 }
-
-                // Cache the successful scan result
-                CacheResult(path, result);
             }
             catch (Exception ex)
             {
@@ -175,79 +152,6 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
             }
 
             return result;
-        }
-
-        private VirusScanResult GetCachedResult(string path)
-        {
-            if (!_scanCache.TryGetValue(path, out var cached))
-            {
-                return null;
-            }
-
-            // Check if cache has expired
-            if (DateTime.UtcNow - cached.ScanTime > CacheExpiry)
-            {
-                _scanCache.TryRemove(path, out _);
-                return null;
-            }
-
-            // Check if folder has been modified since the scan
-            try
-            {
-                var currentModTime = GetFolderModifiedTime(path);
-                if (currentModTime > cached.FolderModifiedTime)
-                {
-                    _scanCache.TryRemove(path, out _);
-                    return null;
-                }
-            }
-            catch
-            {
-                // If we can't check modification time, invalidate cache to be safe
-                _scanCache.TryRemove(path, out _);
-                return null;
-            }
-
-            return cached.Result;
-        }
-
-        private void CacheResult(string path, VirusScanResult result)
-        {
-            if (!result.ScanCompleted)
-            {
-                return;
-            }
-
-            try
-            {
-                var cached = new CachedScanResult
-                {
-                    Result = result,
-                    ScanTime = DateTime.UtcNow,
-                    FolderModifiedTime = GetFolderModifiedTime(path)
-                };
-
-                _scanCache[path] = cached;
-            }
-            catch
-            {
-                // Ignore caching errors
-            }
-        }
-
-        private DateTime GetFolderModifiedTime(string path)
-        {
-            if (_diskProvider.FolderExists(path))
-            {
-                return _diskProvider.FolderGetLastWrite(path);
-            }
-
-            if (_diskProvider.FileExists(path))
-            {
-                return _diskProvider.FileGetLastWrite(path);
-            }
-
-            return DateTime.MinValue;
         }
 
         public VirusScanResult ScanFile(string filePath)

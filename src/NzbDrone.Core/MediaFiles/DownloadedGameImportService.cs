@@ -235,8 +235,16 @@ namespace NzbDrone.Core.MediaFiles
                 _logger.Debug("Release structure validated as {0}", structureValidation.DetectedGroup);
             }
 
-            // Virus scan if enabled
-            if (_virusScanner.IsAvailable)
+            // For games, we import the entire folder as a unit, not individual files
+            // The folder path becomes the "file" path for the game
+            var folderPath = directoryInfo.FullName;
+
+            _logger.Debug("Importing game folder: {0}", folderPath);
+
+            var decisions = _importDecisionMaker.GetImportDecisions(new List<string> { folderPath }, game, downloadClientItem, folderInfo, true);
+
+            // Only run virus scan if there are approved imports (avoid scanning on every check for rejected items)
+            if (decisions.Any(d => d.Approved) && _virusScanner.IsAvailable)
             {
                 var scanResult = _virusScanner.ScanPath(directoryInfo.FullName);
 
@@ -258,13 +266,6 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            // For games, we import the entire folder as a unit, not individual files
-            // The folder path becomes the "file" path for the game
-            var folderPath = directoryInfo.FullName;
-
-            _logger.Debug("Importing game folder: {0}", folderPath);
-
-            var decisions = _importDecisionMaker.GetImportDecisions(new List<string> { folderPath }, game, downloadClientItem, folderInfo, true);
             var importResults = _importApprovedGame.Import(decisions, true, downloadClientItem, importMode);
 
             if (importMode == ImportMode.Auto)
