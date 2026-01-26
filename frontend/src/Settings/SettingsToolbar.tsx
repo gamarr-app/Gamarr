@@ -1,5 +1,5 @@
-import { ReactElement, useCallback, useEffect } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { useBeforeUnload, useNavigate } from 'react-router-dom';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
@@ -28,24 +28,34 @@ function SettingsToolbar({
   onSavePress,
 }: SettingsToolbarProps) {
   const { bindShortcut, unbindShortcut } = useKeyboardShortcuts();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      Boolean(hasPendingChanges) &&
-      currentLocation.pathname !== nextLocation.pathname
+  // Warn on browser/tab close when there are pending changes
+  useBeforeUnload(
+    useCallback(
+      (event) => {
+        if (hasPendingChanges) {
+          event.preventDefault();
+        }
+      },
+      [hasPendingChanges]
+    )
   );
 
   const handleConfirmNavigation = useCallback(() => {
-    if (blocker.state === 'blocked') {
-      blocker.proceed();
+    setIsModalOpen(false);
+    if (pendingPath) {
+      navigate(pendingPath);
+      setPendingPath(null);
     }
-  }, [blocker]);
+  }, [navigate, pendingPath]);
 
   const handleCancelNavigation = useCallback(() => {
-    if (blocker.state === 'blocked') {
-      blocker.reset();
-    }
-  }, [blocker]);
+    setIsModalOpen(false);
+    setPendingPath(null);
+  }, []);
 
   useEffect(() => {
     bindShortcut(
@@ -87,7 +97,7 @@ function SettingsToolbar({
       </PageToolbarSection>
 
       <PendingChangesModal
-        isOpen={blocker.state === 'blocked'}
+        isOpen={isModalOpen}
         onConfirm={handleConfirmNavigation}
         onCancel={handleCancelNavigation}
       />

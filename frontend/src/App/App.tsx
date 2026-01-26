@@ -1,11 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { Store } from 'redux';
-import Page from 'Components/Page/Page';
 import ApplyTheme from './ApplyTheme';
-import AppRoutes from './AppRoutes';
+import { router } from './AppRouter';
 
 interface AppProps {
   store: Store;
@@ -21,12 +20,8 @@ function App({ store }: AppProps) {
       </Helmet>
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
-          <BrowserRouter basename={window.Gamarr.urlBase}>
-            <ApplyTheme />
-            <Page>
-              <AppRoutes />
-            </Page>
-          </BrowserRouter>
+          <ApplyTheme />
+          <RouterProvider router={router} />
         </Provider>
       </QueryClientProvider>
     </HelmetProvider>
