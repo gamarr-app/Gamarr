@@ -70,14 +70,23 @@ const rows: RowConfig[] = [
   },
 ];
 
+type ShowProps = Pick<
+  DiscoverGameOverviewInfoProps,
+  | 'showYear'
+  | 'showStudio'
+  | 'showGenres'
+  | 'showIgdbRating'
+  | 'showMetacriticRating'
+  | 'showCertification'
+>;
+
 function isVisible(row: RowConfig, props: DiscoverGameOverviewInfoProps) {
   const { name, showProp, valueProp } = row;
-  const indexableProps = props as unknown as Record<string, unknown>;
 
   return (
     _.has(props, valueProp) &&
     _.get(props, valueProp) !== null &&
-    (indexableProps[showProp] || props.sortKey === name)
+    (props[showProp as keyof ShowProps] || props.sortKey === name)
   );
 }
 

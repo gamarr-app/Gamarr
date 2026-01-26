@@ -5,6 +5,7 @@ declare module 'jquery' {
   }
 
   interface JQueryDeferred<T> {
+    resolve(value?: T): JQueryDeferred<T>;
     reject(...args: unknown[]): JQueryDeferred<T>;
     promise(): JQueryPromise<T>;
   }
@@ -58,8 +59,10 @@ declare module 'jquery' {
   export { JQueryPromise, JQueryDeferred, JQueryXHR, JQueryAjaxSettings };
 }
 
-// Global JQuery namespace for JQuery.Promise<T> syntax
+// Global JQuery namespace for JQuery.Promise<T> and JQuery.Deferred<T> syntax
 declare namespace JQuery {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type Promise<T = any> = import('jquery').JQueryPromise<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type Deferred<T = any> = import('jquery').JQueryDeferred<T>;
 }

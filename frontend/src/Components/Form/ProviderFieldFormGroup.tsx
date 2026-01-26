@@ -121,8 +121,7 @@ function ProviderFieldFormGroup<T>({
         helpTextWarning={helpTextWarning}
         helpLink={helpLink}
         placeholder={placeholder}
-        // @ts-expect-error - this isn't available on all types
-        selectOptionsProviderAction={selectOptionsProviderAction}
+        // @ts-expect-error - value prop varies by input type
         value={value}
         values={selectValues}
         errors={errors}
@@ -131,6 +130,7 @@ function ProviderFieldFormGroup<T>({
         includeFiles={providerType === 'filePath' ? true : undefined}
         onChange={onChange}
         {...otherProps}
+        {...(type === 'dynamicSelect' ? { selectOptionsProviderAction } : {})}
       />
     </FormGroup>
   );

@@ -104,8 +104,7 @@ function selectSettings<T extends ModelBaseSetting>(
         setting.pending = true;
       }
 
-      // @ts-expect-error - This is a valid key
-      acc[key] = setting;
+      (acc as Record<string, Pending<T>>)[key] = setting;
       return acc;
     },
     {} as PendingSection<T>

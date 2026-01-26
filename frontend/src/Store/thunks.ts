@@ -10,32 +10,32 @@ export type AppThunk<ReturnType = unknown> = ThunkAction<
   AnyAction
 >;
 export type AppDispatch = ThunkDispatch<AppState, undefined, AnyAction>;
-type Thunk = (
+
+export type Thunk<T = unknown> = (
   getState: GetState,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  identityFn: any,
+  payload: T,
   dispatch: AppDispatch
 ) => unknown;
 
-const thunks: Record<string, Thunk> = {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const thunks: Record<string, Thunk<any>> = {};
 
 function identity<T>(payload: T): T {
   return payload;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type IdentityFunction = (payload: any) => any;
-
-export function createThunk(
+export function createThunk<TInput = unknown, TOutput = TInput>(
   type: string,
-  identityFunction: IdentityFunction = identity
+  identityFunction: (payload: TInput) => TOutput = identity as unknown as (
+    payload: TInput
+  ) => TOutput
 ) {
-  return function <T>(payload?: T): AppThunk {
+  return function (payload?: TInput): AppThunk {
     return function (dispatch: AppDispatch, getState: GetState) {
       const thunk = thunks[type];
 
       if (thunk) {
-        const finalPayload = payload ?? {};
+        const finalPayload = (payload ?? {}) as TInput;
 
         return thunk(getState, identityFunction(finalPayload), dispatch);
       }
@@ -45,7 +45,8 @@ export function createThunk(
   };
 }
 
-export function handleThunks(handlers: Record<string, Thunk>) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function handleThunks(handlers: Record<string, Thunk<any>>) {
   const types = Object.keys(handlers);
 
   types.forEach((type) => {

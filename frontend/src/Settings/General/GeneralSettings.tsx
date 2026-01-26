@@ -23,9 +23,20 @@ import createCommandExecutingSelector from 'Store/Selectors/createCommandExecuti
 import createSettingsSectionSelector from 'Store/Selectors/createSettingsSectionSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import { InputChanged } from 'typings/inputs';
-import { Failure, PendingSection } from 'typings/pending';
+import { Failure } from 'typings/pending';
 import General from 'typings/Settings/General';
 import translate from 'Utilities/String/translate';
+
+interface SettingValue<T = unknown> {
+  value: T;
+  errors?: Failure[];
+  warnings?: Failure[];
+  previousValue?: T;
+}
+
+type GeneralSettingsValues = {
+  [K in keyof General]: SettingValue<General[K]>;
+};
 import AnalyticSettings from './AnalyticSettings';
 import BackupSettings from './BackupSettings';
 import HostSettings from './HostSettings';
@@ -107,23 +118,15 @@ function GeneralSettings() {
 
   useEffect(() => {
     if (!isSaving && !saveError && prevIsSaving.current) {
-      const typedSettings = settings as PendingSection<General>;
+      const typedSettings = settings as GeneralSettingsValues;
       const typedPrevSettings = prevSettings.current as
-        | PendingSection<General>
+        | GeneralSettingsValues
         | undefined;
 
       const pendingRestart = _.some(requiresRestartKeys, (key) => {
-        const setting = (
-          typedSettings as unknown as Record<
-            string,
-            { value: unknown; previousValue?: unknown }
-          >
-        )[key];
-        const prevSetting = (
-          typedPrevSettings as unknown as
-            | Record<string, { value: unknown; previousValue?: unknown }>
-            | undefined
-        )?.[key];
+        const settingKey = key as keyof GeneralSettingsValues;
+        const setting = typedSettings[settingKey];
+        const prevSetting = typedPrevSettings?.[settingKey];
 
         if (!setting || !prevSetting) {
           return false;
@@ -206,17 +209,7 @@ function GeneralSettings() {
             />
 
             <SecuritySettings
-              settings={
-                settings as unknown as Record<
-                  string,
-                  {
-                    value: string;
-                    errors?: Failure[];
-                    warnings?: Failure[];
-                    previousValue?: string;
-                  }
-                >
-              }
+              settings={settings as GeneralSettingsValues}
               isResettingApiKey={isResettingApiKey}
               onInputChange={handleInputChange}
               onConfirmResetApiKey={handleConfirmResetApiKey}

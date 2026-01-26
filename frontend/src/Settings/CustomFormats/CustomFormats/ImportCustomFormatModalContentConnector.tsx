@@ -14,6 +14,7 @@ import {
   setCustomFormatValue,
 } from 'Store/Actions/settingsActions';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
+import CustomFormat from 'typings/CustomFormat';
 import translate from 'Utilities/String/translate';
 import ImportCustomFormatModalContent from './ImportCustomFormatModalContent';
 
@@ -30,17 +31,11 @@ function ImportCustomFormatModalContentConnector({
   const dispatch = useDispatch();
 
   const providerSettingsSelector = useMemo(
-    () => createProviderSettingsSelectorHook('customFormats', id),
+    () => createProviderSettingsSelectorHook<CustomFormat>('customFormats', id),
     [id]
   );
 
-  const customFormat = useSelector(providerSettingsSelector) as unknown as {
-    isFetching: boolean;
-    error: object | null;
-    isSaving: boolean;
-    saveError: object | null;
-    item: Record<string, unknown>;
-  };
+  const customFormat = useSelector(providerSettingsSelector);
 
   const specificationsSelector = useMemo(
     () =>
@@ -180,7 +175,7 @@ function ImportCustomFormatModalContentConnector({
   return (
     <ImportCustomFormatModalContent
       isFetching={customFormat.isFetching}
-      error={customFormat.error as Error | undefined}
+      error={customFormat.error ?? undefined}
       specificationsPopulated={specificationsPopulated}
       onImportPress={handleImportPress}
       onModalClose={onModalClose}

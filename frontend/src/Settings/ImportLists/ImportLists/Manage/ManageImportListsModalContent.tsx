@@ -1,6 +1,5 @@
 import { ComponentProps, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -28,15 +27,6 @@ import ManageImportListsEditModal from './Edit/ManageImportListsEditModal';
 import ManageImportListsModalRow from './ManageImportListsModalRow';
 import TagsModal from './Tags/TagsModal';
 import styles from './ManageImportListsModalContent.css';
-
-interface ImportListsCollectionState {
-  isFetching: boolean;
-  isPopulated: boolean;
-  isDeleting: boolean;
-  isSaving: boolean;
-  error: AppError | undefined;
-  items: ImportList[];
-}
 
 // TODO: This feels janky to do, but not sure of a better way currently
 type OnSelectedChangeCallback = ComponentProps<
@@ -103,10 +93,16 @@ function ManageImportListsModalContent(
 ) {
   const { onModalClose } = props;
 
-  const { isFetching, isPopulated, isDeleting, isSaving, error, items } =
-    useSelector(
-      createClientSideCollectionSelector('settings.importLists')
-    ) as unknown as ImportListsCollectionState;
+  const {
+    isFetching,
+    isPopulated,
+    isDeleting = false,
+    isSaving = false,
+    error,
+    items,
+  } = useSelector(
+    createClientSideCollectionSelector<ImportList>('settings.importLists')
+  );
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

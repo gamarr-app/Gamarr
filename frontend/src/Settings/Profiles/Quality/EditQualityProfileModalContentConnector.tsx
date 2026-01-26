@@ -1,11 +1,5 @@
 import _ from 'lodash';
-import {
-  ComponentProps,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -19,17 +13,11 @@ import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProvid
 import { InputChanged } from 'typings/inputs';
 import EditQualityProfileModalContent, {
   FormatItem,
+  QualityProfileItemValue,
+  QualityProfilePendingItem,
 } from './EditQualityProfileModalContent';
 
-interface QualityItem {
-  id?: number;
-  name?: string;
-  allowed?: boolean;
-  quality?: { id: number; name: string };
-  items?: QualityItem[];
-}
-
-function getQualityItemGroupId(qualityProfile: {
+function getQualityProfileItemValueGroupId(qualityProfile: {
   items: { value: Array<{ id?: number }> };
 }) {
   const ids = _.filter(
@@ -63,7 +51,7 @@ function createQualitiesSelector() {
         items.value,
         (
           result: Array<{ key: number; value: string }>,
-          { allowed, id, name, quality }: QualityItem
+          { allowed, id, name, quality }: QualityProfileItemValue
         ) => {
           if (allowed) {
             if (id) {
@@ -149,13 +137,6 @@ function createMapStateSelector(id: number | undefined) {
   );
 }
 
-interface QualityProfilePending {
-  cutoff: { value: number };
-  items: { value: QualityItem[] };
-  formatItems: { value: FormatItem[] };
-  [key: string]: { value: unknown };
-}
-
 interface EditQualityProfileModalContentConnectorProps {
   id?: number;
   onContentHeightChange: (height: number) => void;
@@ -182,7 +163,9 @@ function EditQualityProfileModalContentConnector({
     ...otherSettings
   } = useSelector(createMapStateSelector(id));
 
-  const typedItem = item as unknown as QualityProfilePending;
+  // The item from createProviderSettingsSelectorHook matches QualityProfilePendingItem
+  // since both use the same PendingValue wrapper shape for each property.
+  const typedItem = item as QualityProfilePendingItem;
 
   const [dragQualityIndex, setDragQualityIndex] = useState<string | null>(null);
   const [dropQualityIndex, setDropQualityIndex] = useState<string | null>(null);
@@ -207,19 +190,19 @@ function EditQualityProfileModalContentConnector({
   const ensureCutoff = useCallback(
     (qualityProfile: {
       cutoff: { value: number };
-      items: { value: QualityItem[] };
+      items: { value: QualityProfileItemValue[] };
     }) => {
       const cutoff = qualityProfile.cutoff.value;
 
       const cutoffItem = _.find(
         qualityProfile.items.value,
-        (i: QualityItem) => {
+        (i: QualityProfileItemValue) => {
           if (!cutoff) {
             return false;
           }
           return i.id === cutoff || (i.quality && i.quality.id === cutoff);
         }
-      ) as QualityItem | undefined;
+      ) as QualityProfileItemValue | undefined;
 
       if (!cutoff || !cutoffItem || !cutoffItem.allowed) {
         const firstAllowed = _.find(qualityProfile.items.value, {
@@ -249,12 +232,15 @@ function EditQualityProfileModalContentConnector({
   const handleCutoffChange = useCallback(
     ({ name, value }: InputChanged) => {
       const numId = parseInt(value as string);
-      const foundItem = _.find(typedItem.items.value, (i: QualityItem) => {
-        if (i.quality) {
-          return i.quality.id === numId;
+      const foundItem = _.find(
+        typedItem.items.value,
+        (i: QualityProfileItemValue) => {
+          if (i.quality) {
+            return i.quality.id === numId;
+          }
+          return i.id === numId;
         }
-        return i.id === numId;
-      }) as QualityItem | undefined;
+      ) as QualityProfileItemValue | undefined;
 
       if (!foundItem) {
         return;
@@ -296,8 +282,8 @@ function EditQualityProfileModalContentConnector({
       const items = qualityProfile.items.value;
       const foundItem = _.find(
         items,
-        (i: QualityItem) => i.quality && i.quality.id === qualityId
-      ) as QualityItem | undefined;
+        (i: QualityProfileItemValue) => i.quality && i.quality.id === qualityId
+      ) as QualityProfileItemValue | undefined;
 
       if (!foundItem) {
         return;
@@ -337,16 +323,17 @@ function EditQualityProfileModalContentConnector({
     (groupId: number, allowed: boolean) => {
       const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: QualityItem) => i.id === groupId) as
-        | QualityItem
-        | undefined;
+      const group = _.find(
+        items,
+        (i: QualityProfileItemValue) => i.id === groupId
+      ) as QualityProfileItemValue | undefined;
 
       if (!group) {
         return;
       }
 
       group.allowed = allowed;
-      (group.items ?? []).forEach((i: QualityItem) => {
+      (group.items ?? []).forEach((i: QualityProfileItemValue) => {
         i.allowed = allowed;
       });
 
@@ -360,9 +347,10 @@ function EditQualityProfileModalContentConnector({
     (groupId: number, name: string) => {
       const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: QualityItem) => i.id === groupId) as
-        | QualityItem
-        | undefined;
+      const group = _.find(
+        items,
+        (i: QualityProfileItemValue) => i.id === groupId
+      ) as QualityProfileItemValue | undefined;
 
       if (!group) {
         return;
@@ -381,17 +369,17 @@ function EditQualityProfileModalContentConnector({
       const items = qualityProfile.items.value;
       const foundItem = _.find(
         items,
-        (i: QualityItem) => i.quality && i.quality.id === qualityId
-      ) as QualityItem | undefined;
+        (i: QualityProfileItemValue) => i.quality && i.quality.id === qualityId
+      ) as QualityProfileItemValue | undefined;
 
       if (!foundItem || !foundItem.quality) {
         return;
       }
 
       const index = items.indexOf(foundItem);
-      const groupId = getQualityItemGroupId(qualityProfile);
+      const groupId = getQualityProfileItemValueGroupId(qualityProfile);
 
-      const group: QualityItem = {
+      const group: QualityProfileItemValue = {
         id: groupId,
         name: foundItem.quality.name,
         allowed: foundItem.allowed,
@@ -410,9 +398,10 @@ function EditQualityProfileModalContentConnector({
     (groupId: number) => {
       const qualityProfile = _.cloneDeep(typedItem);
       const items = qualityProfile.items.value;
-      const group = _.find(items, (i: QualityItem) => i.id === groupId) as
-        | QualityItem
-        | undefined;
+      const group = _.find(
+        items,
+        (i: QualityProfileItemValue) => i.id === groupId
+      ) as QualityProfileItemValue | undefined;
 
       if (!group || !group.items) {
         return;
@@ -504,8 +493,8 @@ function EditQualityProfileModalContentConnector({
         const [dragGroupIdx, dragItemIdx] = parseIndex(dragQualityIndex);
         const [dropGroupIdx, dropItemIdx] = parseIndex(dropQualityIndex);
 
-        let draggedItem: QualityItem | null = null;
-        let dropGroup: QualityItem | null = null;
+        let draggedItem: QualityProfileItemValue | null = null;
+        let dropGroup: QualityProfileItemValue | null = null;
 
         if (dropGroupIdx != null) {
           dropGroup = items[dropGroupIdx];
@@ -561,11 +550,7 @@ function EditQualityProfileModalContentConnector({
       isFetching={isFetching}
       isSaving={isSaving}
       saveError={saveError}
-      item={
-        item as unknown as ComponentProps<
-          typeof EditQualityProfileModalContent
-        >['item']
-      }
+      item={item as QualityProfilePendingItem}
       qualities={qualities}
       customFormats={customFormats}
       languages={languages}

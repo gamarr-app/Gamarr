@@ -7,6 +7,7 @@ import Button from 'Components/Link/Button';
 import Measure from 'Components/Measure';
 import { icons, kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
+import { QualityProfileItemValue } from './EditQualityProfileModalContent';
 import QualityProfileItemDragPreview from './QualityProfileItemDragPreview';
 import QualityProfileItemDragSource from './QualityProfileItemDragSource';
 import styles from './QualityProfileItems.css';
@@ -16,13 +17,7 @@ interface QualityProfileItemsProps {
   dragQualityIndex?: string;
   dropQualityIndex?: string;
   dropPosition?: string;
-  qualityProfileItems: Array<{
-    id: number;
-    name: string;
-    allowed: boolean;
-    quality?: { id: number; name: string };
-    items?: Array<{ quality: { id: number; name: string } }>;
-  }>;
+  qualityProfileItems: QualityProfileItemValue[];
   errors?: Array<{ message?: string; errorMessage?: string }>;
   warnings?: Array<{ message?: string; errorMessage?: string }>;
   onToggleEditGroupsMode: () => void;

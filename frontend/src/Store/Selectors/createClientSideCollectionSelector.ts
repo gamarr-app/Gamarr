@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { createSelector } from 'reselect';
+import { Error } from 'App/State/AppSectionState';
 import AppState, {
   CustomFilter,
   Filter,
@@ -45,14 +46,33 @@ interface SortState<T> {
 }
 
 interface CollectionState<T> extends FilterState<T>, SortState<T> {
+  isFetching: boolean;
+  isPopulated: boolean;
+  error?: Error;
   items: T[];
+  isDeleting?: boolean;
+  isSaving?: boolean;
 }
 
-export interface CollectionResult<T> {
+export interface ClientSideCollectionState<T> {
+  isFetching: boolean;
+  isPopulated: boolean;
+  error?: Error;
+  items: T[];
+  sortKey?: string;
+  sortDirection?: SortDirection;
+  selectedFilterKey?: string | number;
+  filters?: Filter[];
+  customFilters?: CustomFilter[];
+  isDeleting?: boolean;
+  isSaving?: boolean;
+}
+
+export interface CollectionResult<T>
+  extends Omit<ClientSideCollectionState<T>, 'items'> {
   items: T[];
   totalItems: number;
   customFilters: CustomFilter[];
-  [key: string]: unknown;
 }
 
 function getSortClause<T extends Record<string, unknown>>(
@@ -192,23 +212,25 @@ export function createCustomFiltersSelector(
 }
 
 type ItemType = Record<string, unknown>;
+type IndexableItem = Record<string, unknown>;
 
-function createClientSideCollectionSelector(
+function createClientSideCollectionSelector<T extends object = ItemType>(
   section: string,
   uiSection?: string
 ) {
   return createSelector(
-    (state: AppState) => _.get(state, section) as CollectionState<ItemType>,
+    (state: AppState) =>
+      _.get(state, section) as CollectionState<T & IndexableItem>,
     (state: AppState) =>
       (uiSection ? _.get(state, uiSection) : {}) as Partial<
-        CollectionState<ItemType>
+        CollectionState<T & IndexableItem>
       >,
     createCustomFiltersSelector(section, uiSection),
     (
-      sectionState: CollectionState<ItemType>,
-      uiSectionState: Partial<CollectionState<ItemType>>,
+      sectionState: CollectionState<T & IndexableItem>,
+      uiSectionState: Partial<CollectionState<T & IndexableItem>>,
       customFilters: CustomFilter[]
-    ): CollectionResult<ItemType> => {
+    ): CollectionResult<T> => {
       const state = Object.assign({}, sectionState, uiSectionState || {}, {
         customFilters,
       });
@@ -220,7 +242,7 @@ function createClientSideCollectionSelector(
         ...sectionState,
         ...uiSectionState,
         customFilters,
-        items: sorted,
+        items: sorted as T[],
         totalItems: state.items.length,
       };
     }

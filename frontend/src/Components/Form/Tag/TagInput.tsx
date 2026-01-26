@@ -9,7 +9,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import {
+import Autosuggest, {
+  AutosuggestState,
   ChangeEvent,
   RenderInputComponentProps,
   RenderSuggestion,
@@ -30,7 +31,7 @@ export interface TagBase {
 
 function getTag<T extends { id: T['id']; name: T['name'] }>(
   value: string,
-  selectedIndex: number,
+  selectedIndex: number | null,
   suggestions: T[],
   allowNew: boolean
 ) {
@@ -109,7 +110,9 @@ function TagInput<T extends TagBase>({
   const [value, setValue] = useState('');
   const [suggestions, setSuggestions] = useState<T[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const autoSuggestRef = useRef(null);
+  const autoSuggestRef = useRef<
+    Autosuggest<T> & { state: AutosuggestState<T> }
+  >(null);
 
   const addTag = useDebouncedCallback(
     (tag: T | null) => {
@@ -143,15 +146,16 @@ function TagInput<T extends TagBase>({
   );
 
   const handleInputContainerPress = useCallback(() => {
-    // @ts-expect-error Ref isn't typed yet
-    autoSuggestRef?.current?.input.focus();
+    autoSuggestRef.current?.input?.focus();
   }, []);
 
   const handleInputChange = useCallback(
     (_event: SyntheticEvent, { newValue, method }: ChangeEvent) => {
+      // newValue is typed as string, but defensive check retained for edge cases
       const finalValue =
-        // @ts-expect-error newValue may be an object?
-        typeof newValue === 'object' ? newValue.name : newValue;
+        typeof newValue === 'object' && newValue !== null
+          ? (newValue as unknown as { name: string }).name
+          : newValue;
 
       if (method === 'type') {
         setValue(finalValue);
@@ -202,8 +206,8 @@ function TagInput<T extends TagBase>({
       }
 
       if (delimiters.includes(key)) {
-        // @ts-expect-error Ref isn't typed yet
-        const selectedIndex = autoSuggestRef.current.highlightedSuggestionIndex;
+        const selectedIndex =
+          autoSuggestRef.current.state.highlightedSuggestionIndex;
         const tag = getTag<T>(value, selectedIndex, suggestions, allowNew);
 
         if (tag) {
@@ -235,8 +239,8 @@ function TagInput<T extends TagBase>({
       return;
     }
 
-    // @ts-expect-error Ref isn't typed yet
-    const selectedIndex = autoSuggestRef.current.highlightedSuggestionIndex;
+    const selectedIndex =
+      autoSuggestRef.current.state.highlightedSuggestionIndex;
     const tag = getTag(value, selectedIndex, suggestions, allowNew);
 
     if (tag) {

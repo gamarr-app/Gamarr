@@ -79,17 +79,25 @@ const certificateValidationOptions = [
   },
 ];
 
-interface SettingValue {
-  value: string;
+interface SettingValue<T = string> {
+  value: T;
   errors?: Failure[];
   warnings?: Failure[];
-  previousValue?: string;
+  previousValue?: T;
 }
 
-type SettingsMap = Record<string, SettingValue>;
+interface SecuritySettingsRequiredKeys {
+  authenticationMethod: SettingValue<string>;
+  authenticationRequired: SettingValue<string>;
+  username: SettingValue<string>;
+  password: SettingValue<string>;
+  passwordConfirmation: SettingValue<string>;
+  apiKey: SettingValue<string>;
+  certificateValidation: SettingValue<string>;
+}
 
 interface SecuritySettingsProps {
-  settings: SettingsMap;
+  settings: SecuritySettingsRequiredKeys;
   isResettingApiKey: boolean;
   onInputChange: (change: InputChanged) => void;
   onConfirmResetApiKey: () => void;

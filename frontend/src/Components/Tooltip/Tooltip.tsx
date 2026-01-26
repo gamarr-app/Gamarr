@@ -98,7 +98,7 @@ function Tooltip(props: TooltipProps) {
   }, []);
 
   const computeMaxSize = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PopperJS modifier callback
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data: any) => {
       const { top, right, bottom, left } = data.offsets.reference;
 
@@ -203,8 +203,7 @@ function Tooltip(props: TooltipProps) {
                       ? classNames(
                           styles.arrow,
                           styles[kind],
-                          // @ts-expect-error - is a string that may not exist in styles
-                          styles[popperPlacement]
+                          styles[popperPlacement as keyof typeof styles]
                         )
                       : styles.arrowDisabled
                   }
