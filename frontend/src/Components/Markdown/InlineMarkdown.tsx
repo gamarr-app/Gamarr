@@ -11,8 +11,7 @@ function InlineMarkdown(props: InlineMarkdownProps) {
   const { className, data, blockClassName } = props;
 
   // For now only replace links or code blocks (not both)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markdownBlocks: (ReactElement<any> | string)[] = [];
+  const markdownBlocks: (ReactElement | string)[] = [];
 
   if (data) {
     const linkRegex = RegExp(/\[(.+?)\]\((.+?)\)/g);

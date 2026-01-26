@@ -6,7 +6,7 @@ import createCollectionSelector from 'Store/Selectors/createCollectionSelector';
 
 interface CollectionItemConnectorProps {
   collectionId: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component receives merged props from Redux and parent
   component: ComponentType<any>;
   [key: string]: unknown;
 }
