@@ -52,6 +52,7 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
     unmappedFolders: [],
   };
 
+  // eslint-disable-next-line react/sort-comp
   scrollerRef: RefObject<HTMLDivElement | null>;
 
   //

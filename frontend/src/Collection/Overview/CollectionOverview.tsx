@@ -23,9 +23,9 @@ import styles from './CollectionOverview.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const dimensions = require('Styles/Variables/dimensions');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const fonts = require('Styles/Variables/fonts');
 
 const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
@@ -99,8 +99,9 @@ class CollectionOverview extends Component<
   CollectionOverviewProps,
   CollectionOverviewState
 > {
-  _swiperPrevRef: HTMLSpanElement | null = null;
-  _swiperNextRef: HTMLSpanElement | null = null;
+  // eslint-disable-next-line react/sort-comp
+  private _swiperPrevRef: HTMLSpanElement | null = null;
+  private _swiperNextRef: HTMLSpanElement | null = null;
 
   //
   // Lifecycle
@@ -290,6 +291,7 @@ class CollectionOverview extends Component<
                   loopFillGroupWithBlank={true}
                   className="mySwiper"
                   modules={[Navigation]}
+                  // eslint-disable-next-line react/jsx-no-bind
                   onInit={(swiper) => {
                     if (
                       swiper.params.navigation &&

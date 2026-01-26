@@ -104,7 +104,7 @@ class ResourceApi {
   }
 
   delete(resource: Resource | number): ExtendedPromise<void> {
-    let resourceId: number;
+    let resourceId: number | undefined = undefined;
 
     if (typeof resource === 'object' && resource !== null && resource.id) {
       resourceId = resource.id;

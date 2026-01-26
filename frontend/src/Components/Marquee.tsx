@@ -28,6 +28,7 @@ class Marquee extends Component<MarqueeProps, MarqueeState> {
     className: '',
   };
 
+  // eslint-disable-next-line react/sort-comp
   private container: HTMLDivElement | null = null;
   private text: HTMLSpanElement | null = null;
   private marqueeTimer: ReturnType<typeof setTimeout> | null = null;

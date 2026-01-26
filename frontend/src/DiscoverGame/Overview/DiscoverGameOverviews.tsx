@@ -89,7 +89,8 @@ class DiscoverGameOverviews extends Component<
   DiscoverGameOverviewsProps,
   DiscoverGameOverviewsState
 > {
-  _grid: Grid | null = null;
+  // eslint-disable-next-line react/sort-comp
+  private _grid: Grid | null = null;
 
   //
   // Lifecycle

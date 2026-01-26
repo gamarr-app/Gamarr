@@ -76,6 +76,7 @@ function getViewComponent(_view: string) {
 }
 
 class Collection extends Component<CollectionProps, CollectionState> {
+  // eslint-disable-next-line react/sort-comp
   scrollerRef = createRef<HTMLDivElement>();
 
   constructor(props: CollectionProps) {
