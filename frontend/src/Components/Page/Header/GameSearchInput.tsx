@@ -11,7 +11,7 @@ import {
 } from 'react';
 import Autosuggest from 'react-autosuggest';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { useDebouncedCallback } from 'use-debounce';
 import { Tag } from 'App/State/TagsAppState';
@@ -118,7 +118,7 @@ function createGamesSelector() {
 
 function GameSearchInput() {
   const games = useSelector(createGamesSelector());
-  const history = useHistory();
+  const navigate = useNavigate();
   const { bindShortcut, unbindShortcut } = useKeyboardShortcuts();
 
   const [value, setValue] = useState('');
@@ -298,7 +298,7 @@ function GameSearchInput() {
         autosuggestRef.current.state;
 
       if (!suggestions.length || highlightedSectionIndex) {
-        history.push(`/add/new?term=${encodeURIComponent(value)}`);
+        navigate(`/add/new?term=${encodeURIComponent(value)}`);
 
         inputRef.current?.blur();
         reset();
@@ -314,7 +314,7 @@ function GameSearchInput() {
           ? suggestions[0]
           : suggestions[highlightedSuggestionIndex];
 
-      history.push(`/game/${selectedSuggestion.item.titleSlug}`);
+      navigate(`/game/${selectedSuggestion.item.titleSlug}`);
 
       inputRef.current?.blur();
       reset();
@@ -346,13 +346,13 @@ function GameSearchInput() {
       { suggestion }: { suggestion: GameSuggestion | AddNewGameSuggestion }
     ) => {
       if ('type' in suggestion) {
-        history.push(`/add/new?term=${encodeURIComponent(value)}`);
+        navigate(`/add/new?term=${encodeURIComponent(value)}`);
       } else {
         setValue('');
-        history.push(`/game/${suggestion.item.titleSlug}`);
+        navigate(`/game/${suggestion.item.titleSlug}`);
       }
     },
-    [value, history]
+    [value, navigate]
   );
 
   const inputProps = {

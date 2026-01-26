@@ -1,26 +1,20 @@
 import { FC } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useNavigationType } from 'react-router-dom';
 import scrollPositions from 'Store/scrollPositions';
 
 interface WrappedComponentProps {
   initialScrollTop: number;
 }
 
-interface ScrollPositionProps {
-  history: RouteComponentProps['history'];
-  location: RouteComponentProps['location'];
-  match: RouteComponentProps['match'];
-}
-
 function withScrollPosition(
   WrappedComponent: FC<WrappedComponentProps>,
   scrollPositionKey: string
 ) {
-  function ScrollPosition(props: ScrollPositionProps) {
-    const { history } = props;
+  function ScrollPosition(props: object) {
+    const navigationType = useNavigationType();
 
     const initialScrollTop =
-      history.action === 'POP' ? scrollPositions[scrollPositionKey] : 0;
+      navigationType === 'POP' ? scrollPositions[scrollPositionKey] : 0;
 
     return <WrappedComponent {...props} initialScrollTop={initialScrollTop} />;
   }

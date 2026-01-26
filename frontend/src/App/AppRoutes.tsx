@@ -1,10 +1,4 @@
-import { Redirect, Route } from 'react-router-dom';
-
-declare module 'react-router-dom' {
-  interface RouteProps {
-    addUrlBase?: boolean;
-  }
-}
+import { Route } from 'react-router-dom';
 import Blocklist from 'Activity/Blocklist/Blocklist';
 import History from 'Activity/History/History';
 import Queue from 'Activity/Queue/Queue';
@@ -36,13 +30,8 @@ import Logs from 'System/Logs/Logs';
 import Status from 'System/Status/Status';
 import Tasks from 'System/Tasks/Tasks';
 import Updates from 'System/Updates/Updates';
-import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 import CutoffUnmet from 'Wanted/CutoffUnmet/CutoffUnmet';
 import Missing from 'Wanted/Missing/Missing';
-
-function RedirectWithUrlBase() {
-  return <Redirect to={getPathWithUrlBase('/')} />;
-}
 
 function AppRoutes() {
   return (
@@ -51,108 +40,99 @@ function AppRoutes() {
         Games
       */}
 
-      <Route exact={true} path="/" component={GameIndex} />
+      <Route path="/" element={<GameIndex />} />
 
-      {window.Gamarr.urlBase && (
-        <Route
-          exact={true}
-          path="/"
-          addUrlBase={false}
-          render={RedirectWithUrlBase}
-        />
-      )}
+      <Route path="/add/new" element={<AddNewGameConnector />} />
 
-      <Route path="/add/new" component={AddNewGameConnector} />
+      <Route path="/collections" element={<CollectionConnector />} />
 
-      <Route path="/collections" component={CollectionConnector} />
+      <Route path="/add/import" element={<ImportGames />} />
 
-      <Route path="/add/import" component={ImportGames} />
+      <Route path="/add/discover" element={<DiscoverGameConnector />} />
 
-      <Route path="/add/discover" component={DiscoverGameConnector} />
-
-      <Route path="/game/:titleSlug" component={GameDetailsPage} />
+      <Route path="/game/:titleSlug" element={<GameDetailsPage />} />
 
       {/*
         Calendar
       */}
 
-      <Route path="/calendar" component={CalendarPage} />
+      <Route path="/calendar" element={<CalendarPage />} />
 
       {/*
         Activity
       */}
 
-      <Route path="/activity/history" component={History} />
+      <Route path="/activity/history" element={<History />} />
 
-      <Route path="/activity/queue" component={Queue} />
+      <Route path="/activity/queue" element={<Queue />} />
 
-      <Route path="/activity/blocklist" component={Blocklist} />
+      <Route path="/activity/blocklist" element={<Blocklist />} />
 
       {/*
         Wanted
       */}
 
-      <Route path="/wanted/missing" component={Missing} />
+      <Route path="/wanted/missing" element={<Missing />} />
 
-      <Route path="/wanted/cutoffunmet" component={CutoffUnmet} />
+      <Route path="/wanted/cutoffunmet" element={<CutoffUnmet />} />
 
       {/*
         Settings
       */}
 
-      <Route exact={true} path="/settings" component={Settings} />
+      <Route path="/settings" element={<Settings />} />
 
-      <Route path="/settings/mediamanagement" component={MediaManagement} />
+      <Route path="/settings/mediamanagement" element={<MediaManagement />} />
 
-      <Route path="/settings/profiles" component={Profiles} />
+      <Route path="/settings/profiles" element={<Profiles />} />
 
-      <Route path="/settings/quality" component={Quality} />
+      <Route path="/settings/quality" element={<Quality />} />
 
       <Route
         path="/settings/customformats"
-        component={CustomFormatSettingsPage}
+        element={<CustomFormatSettingsPage />}
       />
 
-      <Route path="/settings/indexers" component={IndexerSettings} />
+      <Route path="/settings/indexers" element={<IndexerSettings />} />
 
       <Route
         path="/settings/downloadclients"
-        component={DownloadClientSettings}
+        element={<DownloadClientSettings />}
       />
 
-      <Route path="/settings/importlists" component={ImportListSettings} />
+      <Route path="/settings/importlists" element={<ImportListSettings />} />
 
-      <Route path="/settings/connect" component={NotificationSettings} />
+      <Route path="/settings/connect" element={<NotificationSettings />} />
 
-      <Route path="/settings/metadata" component={MetadataSettings} />
+      <Route path="/settings/metadata" element={<MetadataSettings />} />
 
-      <Route path="/settings/tags" component={TagSettings} />
+      <Route path="/settings/tags" element={<TagSettings />} />
 
-      <Route path="/settings/general" component={GeneralSettings} />
+      <Route path="/settings/general" element={<GeneralSettings />} />
 
-      <Route path="/settings/ui" component={UISettings} />
+      <Route path="/settings/ui" element={<UISettings />} />
 
       {/*
         System
       */}
 
-      <Route path="/system/status" component={Status} />
+      <Route path="/system/status" element={<Status />} />
 
-      <Route path="/system/tasks" component={Tasks} />
+      <Route path="/system/tasks" element={<Tasks />} />
 
-      <Route path="/system/backup" component={BackupsConnector} />
+      <Route path="/system/backup" element={<BackupsConnector />} />
 
-      <Route path="/system/updates" component={Updates} />
+      <Route path="/system/updates" element={<Updates />} />
 
-      <Route path="/system/events" component={LogsTableConnector} />
+      <Route path="/system/events" element={<LogsTableConnector />} />
 
-      <Route path="/system/logs/files" component={Logs} />
+      <Route path="/system/logs/files" element={<Logs />} />
 
       {/*
         Not Found
       */}
 
-      <Route path="*" component={NotFound} />
+      <Route path="*" element={<NotFound />} />
     </Switch>
   );
 }
