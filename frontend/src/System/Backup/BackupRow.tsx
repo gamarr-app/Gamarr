@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
@@ -22,121 +22,95 @@ interface BackupRowProps {
   onDeleteBackupPress: (id: number) => void;
 }
 
-interface BackupRowState {
-  isRestoreModalOpen: boolean;
-  isConfirmDeleteModalOpen: boolean;
-}
+function BackupRow(props: BackupRowProps) {
+  const { id, type, name, path, size, time, onDeleteBackupPress } = props;
 
-class BackupRow extends Component<BackupRowProps, BackupRowState> {
-  //
-  // Lifecycle
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
+    useState(false);
 
-  constructor(props: BackupRowProps) {
-    super(props);
+  const onRestorePress = useCallback(() => {
+    setIsRestoreModalOpen(true);
+  }, []);
 
-    this.state = {
-      isRestoreModalOpen: false,
-      isConfirmDeleteModalOpen: false,
-    };
+  const onRestoreModalClose = useCallback(() => {
+    setIsRestoreModalOpen(false);
+  }, []);
+
+  const onDeletePress = useCallback(() => {
+    setIsConfirmDeleteModalOpen(true);
+  }, []);
+
+  const onConfirmDeleteModalClose = useCallback(() => {
+    setIsConfirmDeleteModalOpen(false);
+  }, []);
+
+  const onConfirmDeletePress = useCallback(() => {
+    setIsConfirmDeleteModalOpen(false);
+    onDeleteBackupPress(id);
+  }, [id, onDeleteBackupPress]);
+
+  let iconClassName = icons.SCHEDULED;
+  let iconTooltip = translate('Scheduled');
+
+  if (type === 'manual') {
+    iconClassName = icons.INTERACTIVE;
+    iconTooltip = translate('Manual');
+  } else if (type === 'update') {
+    iconClassName = icons.UPDATE;
+    iconTooltip = translate('BeforeUpdate');
   }
 
-  //
-  // Listeners
+  return (
+    <TableRow key={id}>
+      <TableRowCell className={styles.type}>
+        <Icon name={iconClassName} title={iconTooltip} />
+      </TableRowCell>
 
-  onRestorePress = () => {
-    this.setState({ isRestoreModalOpen: true });
-  };
+      <TableRowCell>
+        <Link to={`${window.Gamarr.urlBase}${path}`} noRouter={true}>
+          {name}
+        </Link>
+      </TableRowCell>
 
-  onRestoreModalClose = () => {
-    this.setState({ isRestoreModalOpen: false });
-  };
+      <TableRowCell>{formatBytes(size)}</TableRowCell>
 
-  onDeletePress = () => {
-    this.setState({ isConfirmDeleteModalOpen: true });
-  };
+      <RelativeDateCell date={time} />
 
-  onConfirmDeleteModalClose = () => {
-    this.setState({ isConfirmDeleteModalOpen: false });
-  };
-
-  onConfirmDeletePress = () => {
-    const { id, onDeleteBackupPress } = this.props;
-
-    this.setState({ isConfirmDeleteModalOpen: false }, () => {
-      onDeleteBackupPress(id);
-    });
-  };
-
-  //
-  // Render
-
-  render() {
-    const { id, type, name, path, size, time } = this.props;
-
-    const { isRestoreModalOpen, isConfirmDeleteModalOpen } = this.state;
-
-    let iconClassName = icons.SCHEDULED;
-    let iconTooltip = translate('Scheduled');
-
-    if (type === 'manual') {
-      iconClassName = icons.INTERACTIVE;
-      iconTooltip = translate('Manual');
-    } else if (type === 'update') {
-      iconClassName = icons.UPDATE;
-      iconTooltip = translate('BeforeUpdate');
-    }
-
-    return (
-      <TableRow key={id}>
-        <TableRowCell className={styles.type}>
-          <Icon name={iconClassName} title={iconTooltip} />
-        </TableRowCell>
-
-        <TableRowCell>
-          <Link to={`${window.Gamarr.urlBase}${path}`} noRouter={true}>
-            {name}
-          </Link>
-        </TableRowCell>
-
-        <TableRowCell>{formatBytes(size)}</TableRowCell>
-
-        <RelativeDateCell date={time} />
-
-        <TableRowCell className={styles.actions}>
-          <IconButton
-            title={translate('RestoreBackup')}
-            name={icons.RESTORE}
-            onPress={this.onRestorePress}
-          />
-
-          <IconButton
-            title={translate('DeleteBackup')}
-            name={icons.DELETE}
-            onPress={this.onDeletePress}
-          />
-        </TableRowCell>
-
-        <RestoreBackupModalConnector
-          isOpen={isRestoreModalOpen}
-          id={id}
-          name={name}
-          onModalClose={this.onRestoreModalClose}
+      <TableRowCell className={styles.actions}>
+        <IconButton
+          title={translate('RestoreBackup')}
+          name={icons.RESTORE}
+          onPress={onRestorePress}
         />
 
-        <ConfirmModal
-          isOpen={isConfirmDeleteModalOpen}
-          kind={kinds.DANGER}
+        <IconButton
           title={translate('DeleteBackup')}
-          message={translate('DeleteBackupMessageText', {
-            name,
-          })}
-          confirmLabel={translate('Delete')}
-          onConfirm={this.onConfirmDeletePress}
-          onCancel={this.onConfirmDeleteModalClose}
+          name={icons.DELETE}
+          onPress={onDeletePress}
         />
-      </TableRow>
-    );
-  }
+      </TableRowCell>
+
+      <RestoreBackupModalConnector
+        isOpen={isRestoreModalOpen}
+        id={id}
+        name={name}
+        onModalClose={onRestoreModalClose}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmDeleteModalOpen}
+        kind={kinds.DANGER}
+        title={translate('DeleteBackup')}
+        message={translate('DeleteBackupMessageText', {
+          name,
+        })}
+        confirmLabel={translate('Delete')}
+        onConfirm={onConfirmDeletePress}
+        onCancel={onConfirmDeleteModalClose}
+      />
+    </TableRow>
+  );
 }
 
 export default BackupRow;

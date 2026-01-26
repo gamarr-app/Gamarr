@@ -1,4 +1,4 @@
-import { Component, MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
 import Label from 'Components/Label';
@@ -29,7 +29,7 @@ export interface AddNewGameSearchResultProps {
   year: number;
   studio?: string;
   originalLanguage?: Language;
-  genres: string[];
+  genres?: string[];
   status: GameStatus;
   overview?: string;
   ratings: Ratings;
@@ -37,7 +37,7 @@ export interface AddNewGameSearchResultProps {
   images: Image[];
   existingGameId?: number;
   isExistingGame: boolean;
-  isExcluded: boolean;
+  isExcluded?: boolean;
   isSmallScreen: boolean;
   monitored: boolean;
   isAvailable: boolean;
@@ -47,264 +47,230 @@ export interface AddNewGameSearchResultProps {
   certification?: string;
 }
 
-interface AddNewGameSearchResultState {
-  isNewAddGameModalOpen: boolean;
-}
+function AddNewGameSearchResult(props: AddNewGameSearchResultProps) {
+  const {
+    igdbId,
+    igdbSlug,
+    steamAppId,
+    youTubeTrailerId,
+    title,
+    titleSlug,
+    year,
+    studio,
+    originalLanguage,
+    genres = [],
+    status,
+    overview,
+    ratings,
+    folder,
+    images,
+    existingGameId,
+    isExistingGame,
+    isExcluded = false,
+    isSmallScreen,
+    monitored,
+    isAvailable,
+    gameFile,
+    runtime,
+    gameRuntimeFormat,
+    certification,
+  } = props;
 
-class AddNewGameSearchResult extends Component<
-  AddNewGameSearchResultProps,
-  AddNewGameSearchResultState
-> {
-  static defaultProps = {
-    genres: [],
-    isExcluded: false,
-  };
+  const [isNewAddGameModalOpen, setIsNewAddGameModalOpen] = useState(false);
+  const prevIsExistingGameRef = useRef(isExistingGame);
 
-  //
-  // Lifecycle
-
-  constructor(props: AddNewGameSearchResultProps) {
-    super(props);
-
-    this.state = {
-      isNewAddGameModalOpen: false,
-    };
-  }
-
-  componentDidUpdate(prevProps: AddNewGameSearchResultProps) {
-    if (!prevProps.isExistingGame && this.props.isExistingGame) {
-      this.onAddGameModalClose();
+  // Close modal when game becomes existing
+  useEffect(() => {
+    if (!prevIsExistingGameRef.current && isExistingGame) {
+      setIsNewAddGameModalOpen(false);
     }
-  }
+    prevIsExistingGameRef.current = isExistingGame;
+  }, [isExistingGame]);
 
-  //
-  // Listeners
+  const onPress = useCallback(() => {
+    setIsNewAddGameModalOpen(true);
+  }, []);
 
-  onPress = () => {
-    this.setState({ isNewAddGameModalOpen: true });
+  const onAddGameModalClose = useCallback(() => {
+    setIsNewAddGameModalOpen(false);
+  }, []);
+
+  const hasGameFile = !!gameFile;
+
+  const linkProps = isExistingGame ? { to: `/game/${titleSlug}` } : { onPress };
+  const posterWidth = 167;
+  const posterHeight = 250;
+
+  const elementStyle = {
+    width: `${posterWidth}px`,
+    height: `${posterHeight}px`,
   };
 
-  onAddGameModalClose = () => {
-    this.setState({ isNewAddGameModalOpen: false });
-  };
+  return (
+    <div className={styles.searchResult}>
+      <Link className={styles.underlay} {...linkProps} />
 
-  onExternalLinkPress = (event: MouseEvent) => {
-    event.stopPropagation();
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      igdbId,
-      igdbSlug,
-      steamAppId,
-      youTubeTrailerId,
-      title,
-      titleSlug,
-      year,
-      studio,
-      originalLanguage,
-      genres,
-      status,
-      overview,
-      ratings,
-      folder,
-      images,
-      existingGameId,
-      isExistingGame,
-      isExcluded,
-      isSmallScreen,
-      monitored,
-      isAvailable,
-      gameFile,
-      runtime,
-      gameRuntimeFormat,
-      certification,
-    } = this.props;
-
-    const { isNewAddGameModalOpen } = this.state;
-
-    const hasGameFile = !!gameFile;
-
-    const linkProps = isExistingGame
-      ? { to: `/game/${titleSlug}` }
-      : { onPress: this.onPress };
-    const posterWidth = 167;
-    const posterHeight = 250;
-
-    const elementStyle = {
-      width: `${posterWidth}px`,
-      height: `${posterHeight}px`,
-    };
-
-    return (
-      <div className={styles.searchResult}>
-        <Link className={styles.underlay} {...linkProps} />
-
-        <div className={styles.overlay}>
-          {isSmallScreen ? null : (
-            <div>
-              <div className={styles.posterContainer}>
-                <GamePoster
-                  className={styles.poster}
-                  style={elementStyle}
-                  images={images}
-                  size={250}
-                  overflow={true}
-                  lazy={false}
-                />
-              </div>
-
-              {isExistingGame && existingGameId && (
-                <GameIndexProgressBar
-                  gameId={existingGameId}
-                  gameFile={gameFile}
-                  monitored={monitored}
-                  hasFile={hasGameFile}
-                  status={status}
-                  width={posterWidth}
-                  detailedProgressBar={true}
-                  isAvailable={isAvailable}
-                />
-              )}
-            </div>
-          )}
-
-          <div className={styles.content}>
-            <div className={styles.titleRow}>
-              <div className={styles.titleContainer}>
-                <div className={styles.title}>
-                  {title}
-
-                  {!title.contains(String(year)) && !!year ? (
-                    <span className={styles.year}>({year})</span>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className={styles.icons}>
-                <div>
-                  {isExistingGame && (
-                    <Icon
-                      className={styles.alreadyExistsIcon}
-                      name={icons.CHECK_CIRCLE}
-                      size={36}
-                      title={translate('AlreadyInYourLibrary')}
-                    />
-                  )}
-
-                  {isExcluded && (
-                    <Icon
-                      className={styles.exclusionIcon}
-                      name={icons.DANGER}
-                      size={36}
-                      title={translate('GameIsOnImportExclusionList')}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              {!!certification && (
-                <span className={styles.certification}>{certification}</span>
-              )}
-
-              {!!runtime && (
-                <span className={styles.runtime}>
-                  {formatRuntime(runtime, gameRuntimeFormat)}
-                </span>
-              )}
-            </div>
-
-            <div>
-              {ratings.igdb?.value ? (
-                <Label size={sizes.LARGE}>
-                  <IgdbRating ratings={ratings} iconSize={13} />
-                </Label>
-              ) : null}
-
-              {ratings.metacritic?.value ? (
-                <Label size={sizes.LARGE}>
-                  <MetacriticRating ratings={ratings} iconSize={13} />
-                </Label>
-              ) : null}
-
-              {originalLanguage?.name ? (
-                <Label size={sizes.LARGE}>
-                  <Icon name={icons.LANGUAGE} size={13} />
-                  <span className={styles.originalLanguage}>
-                    {originalLanguage.name}
-                  </span>
-                </Label>
-              ) : null}
-
-              {studio ? (
-                <Label size={sizes.LARGE}>
-                  <Icon name={icons.STUDIO} size={13} />
-                  <span className={styles.studio}>{studio}</span>
-                </Label>
-              ) : null}
-
-              {genres.length > 0 ? (
-                <Label size={sizes.LARGE}>
-                  <Icon name={icons.GENRE} size={13} />
-                  <GameGenres className={styles.genres} genres={genres} />
-                </Label>
-              ) : null}
-
-              <Tooltip
-                anchor={
-                  <Label size={sizes.LARGE}>
-                    <Icon name={icons.EXTERNAL_LINK} size={13} />
-
-                    <span className={styles.links}>{translate('Links')}</span>
-                  </Label>
-                }
-                tooltip={
-                  <GameDetailsLinks
-                    steamAppId={steamAppId || 0}
-                    igdbSlug={igdbSlug}
-                    youTubeTrailerId={youTubeTrailerId}
-                  />
-                }
-                canFlip={true}
-                kind={kinds.INVERSE}
-                position={tooltipPositions.TOP}
+      <div className={styles.overlay}>
+        {isSmallScreen ? null : (
+          <div>
+            <div className={styles.posterContainer}>
+              <GamePoster
+                className={styles.poster}
+                style={elementStyle}
+                images={images}
+                size={250}
+                overflow={true}
+                lazy={false}
               />
-
-              {isExistingGame && isSmallScreen && existingGameId && (
-                <GameStatusLabel
-                  gameId={existingGameId}
-                  monitored={monitored}
-                  isAvailable={isAvailable}
-                  hasGameFiles={hasGameFile}
-                  status={status}
-                  useLabel={true}
-                />
-              )}
             </div>
 
-            <div className={styles.overview}>{overview}</div>
+            {isExistingGame && existingGameId && (
+              <GameIndexProgressBar
+                gameId={existingGameId}
+                gameFile={gameFile}
+                monitored={monitored}
+                hasFile={hasGameFile}
+                status={status}
+                width={posterWidth}
+                detailedProgressBar={true}
+                isAvailable={isAvailable}
+              />
+            )}
           </div>
-        </div>
+        )}
 
-        <AddNewGameModal
-          isOpen={isNewAddGameModalOpen && !isExistingGame}
-          igdbId={igdbId}
-          steamAppId={steamAppId}
-          title={title}
-          year={year}
-          overview={overview}
-          folder={folder}
-          images={images}
-          onModalClose={this.onAddGameModalClose}
-        />
+        <div className={styles.content}>
+          <div className={styles.titleRow}>
+            <div className={styles.titleContainer}>
+              <div className={styles.title}>
+                {title}
+
+                {!title.contains(String(year)) && !!year ? (
+                  <span className={styles.year}>({year})</span>
+                ) : null}
+              </div>
+            </div>
+
+            <div className={styles.icons}>
+              <div>
+                {isExistingGame && (
+                  <Icon
+                    className={styles.alreadyExistsIcon}
+                    name={icons.CHECK_CIRCLE}
+                    size={36}
+                    title={translate('AlreadyInYourLibrary')}
+                  />
+                )}
+
+                {isExcluded && (
+                  <Icon
+                    className={styles.exclusionIcon}
+                    name={icons.DANGER}
+                    size={36}
+                    title={translate('GameIsOnImportExclusionList')}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            {!!certification && (
+              <span className={styles.certification}>{certification}</span>
+            )}
+
+            {!!runtime && (
+              <span className={styles.runtime}>
+                {formatRuntime(runtime, gameRuntimeFormat)}
+              </span>
+            )}
+          </div>
+
+          <div>
+            {ratings.igdb?.value ? (
+              <Label size={sizes.LARGE}>
+                <IgdbRating ratings={ratings} iconSize={13} />
+              </Label>
+            ) : null}
+
+            {ratings.metacritic?.value ? (
+              <Label size={sizes.LARGE}>
+                <MetacriticRating ratings={ratings} iconSize={13} />
+              </Label>
+            ) : null}
+
+            {originalLanguage?.name ? (
+              <Label size={sizes.LARGE}>
+                <Icon name={icons.LANGUAGE} size={13} />
+                <span className={styles.originalLanguage}>
+                  {originalLanguage.name}
+                </span>
+              </Label>
+            ) : null}
+
+            {studio ? (
+              <Label size={sizes.LARGE}>
+                <Icon name={icons.STUDIO} size={13} />
+                <span className={styles.studio}>{studio}</span>
+              </Label>
+            ) : null}
+
+            {genres.length > 0 ? (
+              <Label size={sizes.LARGE}>
+                <Icon name={icons.GENRE} size={13} />
+                <GameGenres className={styles.genres} genres={genres} />
+              </Label>
+            ) : null}
+
+            <Tooltip
+              anchor={
+                <Label size={sizes.LARGE}>
+                  <Icon name={icons.EXTERNAL_LINK} size={13} />
+
+                  <span className={styles.links}>{translate('Links')}</span>
+                </Label>
+              }
+              tooltip={
+                <GameDetailsLinks
+                  steamAppId={steamAppId || 0}
+                  igdbSlug={igdbSlug}
+                  youTubeTrailerId={youTubeTrailerId}
+                />
+              }
+              canFlip={true}
+              kind={kinds.INVERSE}
+              position={tooltipPositions.TOP}
+            />
+
+            {isExistingGame && isSmallScreen && existingGameId && (
+              <GameStatusLabel
+                gameId={existingGameId}
+                monitored={monitored}
+                isAvailable={isAvailable}
+                hasGameFiles={hasGameFile}
+                status={status}
+                useLabel={true}
+              />
+            )}
+          </div>
+
+          <div className={styles.overview}>{overview}</div>
+        </div>
       </div>
-    );
-  }
+
+      <AddNewGameModal
+        isOpen={isNewAddGameModalOpen && !isExistingGame}
+        igdbId={igdbId}
+        steamAppId={steamAppId}
+        title={title}
+        year={year}
+        overview={overview}
+        folder={folder}
+        images={images}
+        onModalClose={onAddGameModalClose}
+      />
+    </div>
+  );
 }
 
 export default AddNewGameSearchResult;

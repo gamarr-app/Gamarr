@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import Icon, { IconName } from 'Components/Icon';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -34,91 +34,72 @@ interface LogsTableRowProps {
   columns: Column[];
 }
 
-interface LogsTableRowState {
-  isDetailsModalOpen: boolean;
-}
+function LogsTableRow(props: LogsTableRowProps) {
+  const { level, time, logger, message, exception, columns } = props;
 
-class LogsTableRow extends Component<LogsTableRowProps, LogsTableRowState> {
-  //
-  // Lifecycle
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  constructor(props: LogsTableRowProps) {
-    super(props);
+  const onPress = useCallback(() => {
+    setIsDetailsModalOpen((prev) => {
+      if (!prev) {
+        return true;
+      }
+      return prev;
+    });
+  }, []);
 
-    this.state = {
-      isDetailsModalOpen: false,
-    };
-  }
+  const onModalClose = useCallback(() => {
+    setIsDetailsModalOpen(false);
+  }, []);
 
-  //
-  // Listeners
+  return (
+    <TableRowButton onPress={onPress}>
+      {columns.map((column) => {
+        const { name, isVisible } = column;
 
-  onPress = () => {
-    // Don't re-open the modal if it's already open
-    if (!this.state.isDetailsModalOpen) {
-      this.setState({ isDetailsModalOpen: true });
-    }
-  };
-
-  onModalClose = () => {
-    this.setState({ isDetailsModalOpen: false });
-  };
-
-  //
-  // Render
-
-  render() {
-    const { level, time, logger, message, exception, columns } = this.props;
-
-    return (
-      <TableRowButton onPress={this.onPress}>
-        {columns.map((column) => {
-          const { name, isVisible } = column;
-
-          if (!isVisible) {
-            return null;
-          }
-
-          if (name === 'level') {
-            return (
-              <TableRowCell key={name} className={styles.level}>
-                <Icon
-                  className={styles[level as keyof typeof styles]}
-                  name={getIconName(level)}
-                  title={level}
-                />
-              </TableRowCell>
-            );
-          }
-
-          if (name === 'time') {
-            return <RelativeDateCell key={name} date={time} />;
-          }
-
-          if (name === 'logger') {
-            return <TableRowCell key={name}>{logger}</TableRowCell>;
-          }
-
-          if (name === 'message') {
-            return <TableRowCell key={name}>{message}</TableRowCell>;
-          }
-
-          if (name === 'actions') {
-            return <TableRowCell key={name} className={styles.actions} />;
-          }
-
+        if (!isVisible) {
           return null;
-        })}
+        }
 
-        <LogsTableDetailsModal
-          isOpen={this.state.isDetailsModalOpen}
-          message={message}
-          exception={exception}
-          onModalClose={this.onModalClose}
-        />
-      </TableRowButton>
-    );
-  }
+        if (name === 'level') {
+          return (
+            <TableRowCell key={name} className={styles.level}>
+              <Icon
+                className={styles[level as keyof typeof styles]}
+                name={getIconName(level)}
+                title={level}
+              />
+            </TableRowCell>
+          );
+        }
+
+        if (name === 'time') {
+          return <RelativeDateCell key={name} date={time} />;
+        }
+
+        if (name === 'logger') {
+          return <TableRowCell key={name}>{logger}</TableRowCell>;
+        }
+
+        if (name === 'message') {
+          return <TableRowCell key={name}>{message}</TableRowCell>;
+        }
+
+        if (name === 'actions') {
+          return <TableRowCell key={name} className={styles.actions} />;
+        }
+
+        return null;
+      })}
+
+      <LogsTableDetailsModal
+        isOpen={isDetailsModalOpen}
+        message={message}
+        exception={exception}
+        onModalClose={onModalClose}
+      />
+    </TableRowButton>
+  );
 }
 
 export default LogsTableRow;

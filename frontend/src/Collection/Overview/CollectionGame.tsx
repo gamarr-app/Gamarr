@@ -1,4 +1,4 @@
-import { Component, CSSProperties } from 'react';
+import { CSSProperties, useCallback, useState } from 'react';
 import AddNewGameCollectionGameModal from 'Collection/AddNewGameCollectionGameModal';
 import Link from 'Components/Link/Link';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
@@ -34,183 +34,154 @@ interface CollectionGameProps {
   onMonitorTogglePress: (monitored: boolean) => void;
 }
 
-interface CollectionGameState {
-  hasPosterError: boolean;
-  isEditGameModalOpen: boolean;
-  isNewAddGameModalOpen: boolean;
-}
+function CollectionGame(props: CollectionGameProps) {
+  const {
+    id,
+    title,
+    status,
+    overview,
+    year,
+    igdbId,
+    steamAppId,
+    images,
+    monitored,
+    hasFile,
+    folder,
+    isAvailable,
+    gameFile,
+    isExistingGame,
+    isExcluded,
+    posterWidth,
+    posterHeight,
+    detailedProgressBar,
+    onMonitorTogglePress,
+    collectionId,
+  } = props;
 
-class CollectionGame extends Component<
-  CollectionGameProps,
-  CollectionGameState
-> {
-  //
-  // Lifecycle
+  const [hasPosterError, setHasPosterError] = useState(false);
+  const [isEditGameModalOpen, setIsEditGameModalOpen] = useState(false);
+  const [isNewAddGameModalOpen, setIsNewAddGameModalOpen] = useState(false);
 
-  constructor(props: CollectionGameProps) {
-    super(props);
+  const onEditGameModalClose = useCallback(() => {
+    setIsEditGameModalOpen(false);
+  }, []);
 
-    this.state = {
-      hasPosterError: false,
-      isEditGameModalOpen: false,
-      isNewAddGameModalOpen: false,
-    };
-  }
+  const onAddGamePress = useCallback(() => {
+    setIsNewAddGameModalOpen(true);
+  }, []);
 
-  //
-  // Listeners
+  const onAddGameModalClose = useCallback(() => {
+    setIsNewAddGameModalOpen(false);
+  }, []);
 
-  onEditGamePress = () => {
-    this.setState({ isEditGameModalOpen: true });
-  };
+  const onPosterLoad = useCallback(() => {
+    setHasPosterError((prev) => {
+      if (prev) {
+        return false;
+      }
+      return prev;
+    });
+  }, []);
 
-  onEditGameModalClose = () => {
-    this.setState({ isEditGameModalOpen: false });
-  };
+  const onPosterLoadError = useCallback(() => {
+    setHasPosterError((prev) => {
+      if (!prev) {
+        return true;
+      }
+      return prev;
+    });
+  }, []);
 
-  onAddGamePress = () => {
-    this.setState({ isNewAddGameModalOpen: true });
-  };
-
-  onAddGameModalClose = () => {
-    this.setState({ isNewAddGameModalOpen: false });
-  };
-
-  onPosterLoad = () => {
-    if (this.state.hasPosterError) {
-      this.setState({ hasPosterError: false });
-    }
-  };
-
-  onPosterLoadError = () => {
-    if (!this.state.hasPosterError) {
-      this.setState({ hasPosterError: true });
-    }
-  };
-
-  onDeleteGamePress = () => {
+  const onDeleteGamePress = useCallback(() => {
     // Placeholder for delete functionality
+  }, []);
+
+  // Use steamAppId for slug if available, otherwise igdbId
+  const titleSlug = steamAppId && steamAppId > 0 ? steamAppId : igdbId;
+  const linkProps = id
+    ? { to: `/game/${titleSlug}` }
+    : { onPress: onAddGamePress };
+
+  const elementStyle: CSSProperties = {
+    width: `${posterWidth}px`,
+    height: `${posterHeight}px`,
+    borderRadius: '5px',
   };
 
-  //
-  // Render
-
-  render() {
-    const {
-      id,
-      title,
-      status,
-      overview,
-      year,
-      igdbId,
-      steamAppId,
-      images,
-      monitored,
-      hasFile,
-      folder,
-      isAvailable,
-      gameFile,
-      isExistingGame,
-      isExcluded,
-      posterWidth,
-      posterHeight,
-      detailedProgressBar,
-      onMonitorTogglePress,
-      collectionId,
-    } = this.props;
-
-    const { hasPosterError, isEditGameModalOpen, isNewAddGameModalOpen } =
-      this.state;
-
-    // Use steamAppId for slug if available, otherwise igdbId
-    const titleSlug = steamAppId && steamAppId > 0 ? steamAppId : igdbId;
-    const linkProps = id
-      ? { to: `/game/${titleSlug}` }
-      : { onPress: this.onAddGamePress };
-
-    const elementStyle: CSSProperties = {
-      width: `${posterWidth}px`,
-      height: `${posterHeight}px`,
-      borderRadius: '5px',
-    };
-
-    return (
-      <div className={styles.content}>
-        <div className={styles.posterContainer}>
-          {isExistingGame && monitored !== undefined && (
-            <div className={styles.editorSelect}>
-              <MonitorToggleButton
-                className={styles.monitorToggleButton}
-                monitored={monitored}
-                size={20}
-                onPress={onMonitorTogglePress}
-              />
-            </div>
-          )}
-
-          {isExcluded ? (
-            <div className={styles.excluded} title={translate('Excluded')} />
-          ) : null}
-
-          <Link className={styles.link} style={elementStyle} {...linkProps}>
-            <GamePoster
-              className={styles.poster}
-              style={elementStyle}
-              images={images}
-              size={250}
-              lazy={false}
-              overflow={true}
-              onError={this.onPosterLoadError}
-              onLoad={this.onPosterLoad}
+  return (
+    <div className={styles.content}>
+      <div className={styles.posterContainer}>
+        {isExistingGame && monitored !== undefined && (
+          <div className={styles.editorSelect}>
+            <MonitorToggleButton
+              className={styles.monitorToggleButton}
+              monitored={monitored}
+              size={20}
+              onPress={onMonitorTogglePress}
             />
+          </div>
+        )}
 
-            {hasPosterError && (
-              <div className={styles.overlayTitle}>{title}</div>
-            )}
+        {isExcluded ? (
+          <div className={styles.excluded} title={translate('Excluded')} />
+        ) : null}
 
-            <div className={styles.overlayHover}>
-              <div className={styles.overlayHoverTitle}>
-                {title} {year > 0 ? `(${year})` : ''}
-              </div>
+        <Link className={styles.link} style={elementStyle} {...linkProps}>
+          <GamePoster
+            className={styles.poster}
+            style={elementStyle}
+            images={images}
+            size={250}
+            lazy={false}
+            overflow={true}
+            onError={onPosterLoadError}
+            onLoad={onPosterLoad}
+          />
 
-              {id ? (
-                <GameIndexProgressBar
-                  gameId={id}
-                  gameFile={gameFile}
-                  monitored={monitored ?? false}
-                  hasFile={hasFile ?? false}
-                  status={status}
-                  bottomRadius={true}
-                  width={posterWidth}
-                  detailedProgressBar={detailedProgressBar}
-                  isAvailable={isAvailable ?? false}
-                />
-              ) : null}
+          {hasPosterError && <div className={styles.overlayTitle}>{title}</div>}
+
+          <div className={styles.overlayHover}>
+            <div className={styles.overlayHoverTitle}>
+              {title} {year > 0 ? `(${year})` : ''}
             </div>
-          </Link>
-        </div>
 
-        <AddNewGameCollectionGameModal
-          isOpen={isNewAddGameModalOpen && !isExistingGame}
-          igdbId={igdbId}
-          title={title}
-          year={year}
-          overview={overview ?? ''}
-          images={images}
-          folder={folder ?? ''}
-          collectionId={collectionId}
-          onModalClose={this.onAddGameModalClose}
-        />
-
-        <EditGameModal
-          isOpen={isEditGameModalOpen}
-          gameId={id ?? 0}
-          onModalClose={this.onEditGameModalClose}
-          onDeleteGamePress={this.onDeleteGamePress}
-        />
+            {id ? (
+              <GameIndexProgressBar
+                gameId={id}
+                gameFile={gameFile}
+                monitored={monitored ?? false}
+                hasFile={hasFile ?? false}
+                status={status}
+                bottomRadius={true}
+                width={posterWidth}
+                detailedProgressBar={detailedProgressBar}
+                isAvailable={isAvailable ?? false}
+              />
+            ) : null}
+          </div>
+        </Link>
       </div>
-    );
-  }
+
+      <AddNewGameCollectionGameModal
+        isOpen={isNewAddGameModalOpen && !isExistingGame}
+        igdbId={igdbId}
+        title={title}
+        year={year}
+        overview={overview ?? ''}
+        images={images}
+        folder={folder ?? ''}
+        collectionId={collectionId}
+        onModalClose={onAddGameModalClose}
+      />
+
+      <EditGameModal
+        isOpen={isEditGameModalOpen}
+        gameId={id ?? 0}
+        onModalClose={onEditGameModalClose}
+        onDeleteGamePress={onDeleteGamePress}
+      />
+    </div>
+  );
 }
 
 export default CollectionGame;
