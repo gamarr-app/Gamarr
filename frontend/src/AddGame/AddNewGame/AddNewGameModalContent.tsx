@@ -20,7 +20,7 @@ import { Failure } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import styles from './AddNewGameModalContent.css';
 
-interface FormValue<T> {
+export interface FormValue<T> {
   value: T;
   errors?: Failure[];
   warnings?: Failure[];

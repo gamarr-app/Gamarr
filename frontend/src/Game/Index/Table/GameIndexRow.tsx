@@ -132,7 +132,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         type: 'toggleSelected',
         id,
         isSelected: value,
-        shiftKey,
+        shiftKey: shiftKey ?? false,
       });
     },
     [selectDispatch]
