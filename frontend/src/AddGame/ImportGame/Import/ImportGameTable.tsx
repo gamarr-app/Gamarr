@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Component, CSSProperties } from 'react';
+import { CSSProperties, useCallback, useEffect, useRef } from 'react';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import Game from 'Game/Game';
@@ -55,20 +55,32 @@ interface RowRendererParams {
   style: CSSProperties;
 }
 
-class ImportGameTable extends Component<ImportGameTableProps> {
-  //
-  // Lifecycle
+function ImportGameTable(props: ImportGameTableProps) {
+  const {
+    rootFolderId,
+    items,
+    unmappedFolders,
+    defaultMonitor,
+    defaultQualityProfileId,
+    defaultMinimumAvailability,
+    allSelected,
+    allUnselected,
+    selectedState,
+    isSmallScreen,
+    allGames,
+    scroller,
+    onSelectAllChange,
+    onSelectedChange,
+    onRemoveSelectedStateItem,
+    onGameLookup,
+    onSetImportGameValue,
+  } = props;
 
-  componentDidMount() {
-    const {
-      unmappedFolders,
-      defaultMonitor,
-      defaultQualityProfileId,
-      defaultMinimumAvailability,
-      onGameLookup,
-      onSetImportGameValue,
-    } = this.props;
+  const prevItemsRef = useRef<ImportGameItem[]>(items);
+  const prevAllGamesRef = useRef<Game[]>(allGames);
 
+  // Mount effect - lookup games and set default values
+  useEffect(() => {
     const values = {
       monitor: defaultMonitor,
       qualityProfileId: defaultQualityProfileId,
@@ -85,21 +97,15 @@ class ImportGameTable extends Component<ImportGameTableProps> {
         ...values,
       });
     });
-  }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // This isn't great, but it's the most reliable way to ensure the items
-  // are checked off even if they aren't actually visible since the cells
-  // are virtualized.
+  // Update effect - handle selection state changes
+  useEffect(() => {
+    const prevItems = prevItemsRef.current;
 
-  componentDidUpdate(prevProps: ImportGameTableProps) {
-    const {
-      items,
-      selectedState,
-      onSelectedChange,
-      onRemoveSelectedStateItem,
-    } = this.props;
-
-    prevProps.items.forEach((prevItem) => {
+    prevItems.forEach((prevItem) => {
       const { id } = prevItem;
 
       const item = _.find(items, { id });
@@ -114,7 +120,7 @@ class ImportGameTable extends Component<ImportGameTableProps> {
 
       const isExistingGame =
         !!selectedGame &&
-        _.some(prevProps.allGames, { igdbId: selectedGame.igdbId });
+        _.some(prevAllGamesRef.current, { igdbId: selectedGame.igdbId });
 
       // Props doesn't have a selected game or
       // the selected game is an existing game.
@@ -142,66 +148,57 @@ class ImportGameTable extends Component<ImportGameTableProps> {
         return;
       }
     });
-  }
 
-  //
-  // Control
+    prevItemsRef.current = items;
+    prevAllGamesRef.current = allGames;
+  }, [
+    items,
+    allGames,
+    selectedState,
+    onSelectedChange,
+    onRemoveSelectedStateItem,
+  ]);
 
-  rowRenderer = ({ key, rowIndex, style }: RowRendererParams) => {
-    const { rootFolderId, items, selectedState, onSelectedChange } = this.props;
+  const rowRenderer = useCallback(
+    ({ key, rowIndex, style }: RowRendererParams) => {
+      const item = items[rowIndex];
 
-    const item = items[rowIndex];
-
-    return (
-      <VirtualTableRow key={key} style={style} className="">
-        <ImportGameRowConnector
-          key={item.id}
-          rootFolderId={rootFolderId}
-          isSelected={selectedState[item.id]}
-          id={item.id}
-          onSelectedChange={onSelectedChange}
-        />
-      </VirtualTableRow>
-    );
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      items,
-      allSelected,
-      allUnselected,
-      isSmallScreen,
-      scroller,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      selectedState: _selectedState,
-      onSelectAllChange,
-    } = this.props;
-
-    if (!items.length) {
-      return null;
-    }
-
-    return (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      <VirtualTable<any>
-        items={items}
-        isSmallScreen={isSmallScreen}
-        scroller={scroller}
-        rowHeight={52}
-        rowRenderer={this.rowRenderer}
-        header={
-          <ImportGameHeader
-            allSelected={allSelected}
-            allUnselected={allUnselected}
-            onSelectAllChange={onSelectAllChange}
+      return (
+        <VirtualTableRow key={key} style={style} className="">
+          <ImportGameRowConnector
+            key={item.id}
+            rootFolderId={rootFolderId}
+            isSelected={selectedState[item.id]}
+            id={item.id}
+            onSelectedChange={onSelectedChange}
           />
-        }
-      />
-    );
+        </VirtualTableRow>
+      );
+    },
+    [items, rootFolderId, selectedState, onSelectedChange]
+  );
+
+  if (!items.length) {
+    return null;
   }
+
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <VirtualTable<any>
+      items={items}
+      isSmallScreen={isSmallScreen}
+      scroller={scroller}
+      rowHeight={52}
+      rowRenderer={rowRenderer}
+      header={
+        <ImportGameHeader
+          allSelected={allSelected}
+          allUnselected={allUnselected}
+          onSelectAllChange={onSelectAllChange}
+        />
+      }
+    />
+  );
 }
 
 export default ImportGameTable;

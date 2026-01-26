@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback } from 'react';
 import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabilityPopoverContent';
 import CheckInput from 'Components/Form/CheckInput';
 import Form from 'Components/Form/Form';
@@ -47,188 +47,178 @@ interface AddNewGameModalContentProps {
   onAddGamePress: () => void;
 }
 
-class AddNewGameModalContent extends Component<AddNewGameModalContentProps> {
-  //
-  // Listeners
+function AddNewGameModalContent(props: AddNewGameModalContentProps) {
+  const {
+    title,
+    year,
+    overview,
+    images,
+    isAdding,
+    rootFolderPath,
+    monitor,
+    qualityProfileId,
+    minimumAvailability,
+    searchForGame,
+    folder,
+    tags,
+    isSmallScreen,
+    isWindows,
+    onModalClose,
+    onInputChange,
+    onAddGamePress,
+  } = props;
 
-  onQualityProfileIdChange = ({
-    name,
-    value,
-  }: {
-    name: string;
-    value: string | number;
-  }) => {
-    this.props.onInputChange({
-      name,
-      value: typeof value === 'string' ? parseInt(value) : value,
-    });
-  };
+  const onQualityProfileIdChange = useCallback(
+    ({ name, value }: { name: string; value: string | number }) => {
+      onInputChange({
+        name,
+        value: typeof value === 'string' ? parseInt(value) : value,
+      });
+    },
+    [onInputChange]
+  );
 
-  onAddGamePress = () => {
-    this.props.onAddGamePress();
-  };
+  const handleAddGamePress = useCallback(() => {
+    onAddGamePress();
+  }, [onAddGamePress]);
 
-  //
-  // Render
+  return (
+    <ModalContent onModalClose={onModalClose}>
+      <ModalHeader>
+        {title}
 
-  render() {
-    const {
-      title,
-      year,
-      overview,
-      images,
-      isAdding,
-      rootFolderPath,
-      monitor,
-      qualityProfileId,
-      minimumAvailability,
-      searchForGame,
-      folder,
-      tags,
-      isSmallScreen,
-      isWindows,
-      onModalClose,
-      onInputChange,
-    } = this.props;
+        {!title.contains(String(year)) && !!year && (
+          <span className={styles.year}>({year})</span>
+        )}
+      </ModalHeader>
 
-    return (
-      <ModalContent onModalClose={onModalClose}>
-        <ModalHeader>
-          {title}
-
-          {!title.contains(String(year)) && !!year && (
-            <span className={styles.year}>({year})</span>
-          )}
-        </ModalHeader>
-
-        <ModalBody>
-          <div className={styles.container}>
-            {!isSmallScreen && (
-              <div className={styles.poster}>
-                <GamePoster
-                  className={styles.poster}
-                  images={images}
-                  size={250}
-                />
-              </div>
-            )}
-
-            <div className={styles.info}>
-              {overview ? (
-                <div className={styles.overview}>{overview}</div>
-              ) : null}
-
-              <Form>
-                <FormGroup>
-                  <FormLabel>{translate('RootFolder')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.ROOT_FOLDER_SELECT}
-                    name="rootFolderPath"
-                    valueOptions={{
-                      gameFolder: folder,
-                      isWindows,
-                    }}
-                    selectedValueOptions={{
-                      gameFolder: folder,
-                      isWindows,
-                    }}
-                    helpText={translate('AddNewGameRootFolderHelpText', {
-                      folder,
-                    })}
-                    onChange={onInputChange}
-                    {...rootFolderPath}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>{translate('Monitor')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.MONITOR_GAMES_SELECT}
-                    name="monitor"
-                    onChange={onInputChange}
-                    {...monitor}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>
-                    {translate('MinimumAvailability')}
-
-                    <Popover
-                      anchor={
-                        <Icon className={styles.labelIcon} name={icons.INFO} />
-                      }
-                      title={translate('MinimumAvailability')}
-                      body={<GameMinimumAvailabilityPopoverContent />}
-                      position={tooltipPositions.RIGHT}
-                    />
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.AVAILABILITY_SELECT}
-                    name="minimumAvailability"
-                    onChange={onInputChange}
-                    {...minimumAvailability}
-                    helpLink="https://wiki.servarr.com/gamarr/faq#what-is-minimum-availability"
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>{translate('QualityProfile')}</FormLabel>
-                  <FormInputGroup
-                    type={inputTypes.QUALITY_PROFILE_SELECT}
-                    name="qualityProfileId"
-                    value={qualityProfileId?.value ?? 0}
-                    errors={qualityProfileId?.errors}
-                    warnings={qualityProfileId?.warnings}
-                    onChange={this.onQualityProfileIdChange}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>{translate('Tags')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.TAG}
-                    name="tags"
-                    onChange={onInputChange}
-                    {...tags}
-                  />
-                </FormGroup>
-              </Form>
+      <ModalBody>
+        <div className={styles.container}>
+          {!isSmallScreen && (
+            <div className={styles.poster}>
+              <GamePoster
+                className={styles.poster}
+                images={images}
+                size={250}
+              />
             </div>
+          )}
+
+          <div className={styles.info}>
+            {overview ? (
+              <div className={styles.overview}>{overview}</div>
+            ) : null}
+
+            <Form>
+              <FormGroup>
+                <FormLabel>{translate('RootFolder')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.ROOT_FOLDER_SELECT}
+                  name="rootFolderPath"
+                  valueOptions={{
+                    gameFolder: folder,
+                    isWindows,
+                  }}
+                  selectedValueOptions={{
+                    gameFolder: folder,
+                    isWindows,
+                  }}
+                  helpText={translate('AddNewGameRootFolderHelpText', {
+                    folder,
+                  })}
+                  onChange={onInputChange}
+                  {...rootFolderPath}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>{translate('Monitor')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.MONITOR_GAMES_SELECT}
+                  name="monitor"
+                  onChange={onInputChange}
+                  {...monitor}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>
+                  {translate('MinimumAvailability')}
+
+                  <Popover
+                    anchor={
+                      <Icon className={styles.labelIcon} name={icons.INFO} />
+                    }
+                    title={translate('MinimumAvailability')}
+                    body={<GameMinimumAvailabilityPopoverContent />}
+                    position={tooltipPositions.RIGHT}
+                  />
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.AVAILABILITY_SELECT}
+                  name="minimumAvailability"
+                  onChange={onInputChange}
+                  {...minimumAvailability}
+                  helpLink="https://wiki.servarr.com/gamarr/faq#what-is-minimum-availability"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>{translate('QualityProfile')}</FormLabel>
+                <FormInputGroup
+                  type={inputTypes.QUALITY_PROFILE_SELECT}
+                  name="qualityProfileId"
+                  value={qualityProfileId?.value ?? 0}
+                  errors={qualityProfileId?.errors}
+                  warnings={qualityProfileId?.warnings}
+                  onChange={onQualityProfileIdChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>{translate('Tags')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.TAG}
+                  name="tags"
+                  onChange={onInputChange}
+                  {...tags}
+                />
+              </FormGroup>
+            </Form>
           </div>
-        </ModalBody>
+        </div>
+      </ModalBody>
 
-        <ModalFooter className={styles.modalFooter}>
-          <label className={styles.searchForMissingGameLabelContainer}>
-            <span className={styles.searchForMissingGameLabel}>
-              {translate('StartSearchForMissingGame')}
-            </span>
+      <ModalFooter className={styles.modalFooter}>
+        <label className={styles.searchForMissingGameLabelContainer}>
+          <span className={styles.searchForMissingGameLabel}>
+            {translate('StartSearchForMissingGame')}
+          </span>
 
-            <CheckInput
-              containerClassName={styles.searchForMissingGameContainer}
-              className={styles.searchForMissingGameInput}
-              name="searchForGame"
-              onChange={onInputChange}
-              {...searchForGame}
-            />
-          </label>
+          <CheckInput
+            containerClassName={styles.searchForMissingGameContainer}
+            className={styles.searchForMissingGameInput}
+            name="searchForGame"
+            onChange={onInputChange}
+            {...searchForGame}
+          />
+        </label>
 
-          <SpinnerButton
-            className={styles.addButton}
-            kind={kinds.SUCCESS}
-            isSpinning={isAdding}
-            onPress={this.onAddGamePress}
-          >
-            {translate('AddGame')}
-          </SpinnerButton>
-        </ModalFooter>
-      </ModalContent>
-    );
-  }
+        <SpinnerButton
+          className={styles.addButton}
+          kind={kinds.SUCCESS}
+          isSpinning={isAdding}
+          onPress={handleAddGamePress}
+        >
+          {translate('AddGame')}
+        </SpinnerButton>
+      </ModalFooter>
+    </ModalContent>
+  );
 }
 
 export default AddNewGameModalContent;

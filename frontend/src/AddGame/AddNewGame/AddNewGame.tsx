@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import TextInput from 'Components/Form/TextInput';
@@ -38,174 +38,161 @@ interface AddNewGameProps {
   onClearGameLookup: () => void;
 }
 
-interface AddNewGameState {
-  term: string;
-  isFetching: boolean;
-}
+function AddNewGame(props: AddNewGameProps) {
+  const {
+    term: termProp,
+    isFetching: isFetchingProp,
+    error,
+    items,
+    hasExistingGames,
+    onGameLookupChange,
+    onClearGameLookup,
+  } = props;
 
-class AddNewGame extends Component<AddNewGameProps, AddNewGameState> {
-  //
-  // Lifecycle
+  const [term, setTerm] = useState(termProp || '');
+  const [isFetching, setIsFetching] = useState(false);
 
-  constructor(props: AddNewGameProps) {
-    super(props);
+  const prevTermPropRef = useRef(termProp);
+  const prevIsFetchingPropRef = useRef(isFetchingProp);
 
-    this.state = {
-      term: props.term || '',
-      isFetching: false,
-    };
-  }
-
-  componentDidMount() {
-    const term = this.state.term;
-
+  // Mount effect - perform initial lookup if term exists
+  useEffect(() => {
     if (term) {
-      this.props.onGameLookupChange(term);
+      onGameLookupChange(term);
     }
-  }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  componentDidUpdate(prevProps: AddNewGameProps) {
-    const { term, isFetching } = this.props;
-
-    if (term && term !== prevProps.term) {
-      this.setState({
-        term,
-        isFetching: true,
-      });
-      this.props.onGameLookupChange(term);
-    } else if (isFetching !== prevProps.isFetching) {
-      this.setState({
-        isFetching,
-      });
+  // Update effect - sync with prop changes
+  useEffect(() => {
+    if (termProp && termProp !== prevTermPropRef.current) {
+      setTerm(termProp);
+      setIsFetching(true);
+      onGameLookupChange(termProp);
+    } else if (isFetchingProp !== prevIsFetchingPropRef.current) {
+      setIsFetching(isFetchingProp);
     }
-  }
 
-  //
-  // Listeners
+    prevTermPropRef.current = termProp;
+    prevIsFetchingPropRef.current = isFetchingProp;
+  }, [termProp, isFetchingProp, onGameLookupChange]);
 
-  onSearchInputChange = ({ value }: { value: string }) => {
-    const hasValue = !!value.trim();
+  const onSearchInputChange = useCallback(
+    ({ value }: { value: string }) => {
+      const hasValue = !!value.trim();
 
-    this.setState({ term: value, isFetching: hasValue }, () => {
+      setTerm(value);
+      setIsFetching(hasValue);
+
       if (hasValue) {
-        this.props.onGameLookupChange(value);
+        onGameLookupChange(value);
       } else {
-        this.props.onClearGameLookup();
+        onClearGameLookup();
       }
-    });
-  };
+    },
+    [onGameLookupChange, onClearGameLookup]
+  );
 
-  onClearGameLookupPress = () => {
-    this.setState({ term: '' });
-    this.props.onClearGameLookup();
-  };
+  const onClearGameLookupPress = useCallback(() => {
+    setTerm('');
+    onClearGameLookup();
+  }, [onClearGameLookup]);
 
-  //
-  // Render
-
-  render() {
-    const { error, items, hasExistingGames } = this.props;
-
-    const term = this.state.term;
-    const isFetching = this.state.isFetching;
-
-    return (
-      <PageContent title={translate('AddNewGame')}>
-        <PageContentBody>
-          <div className={styles.searchContainer}>
-            <div className={styles.searchIconContainer}>
-              <Icon name={icons.SEARCH} size={20} />
-            </div>
-
-            <TextInput
-              className={styles.searchInput}
-              name="gameLookup"
-              value={term}
-              placeholder="e.g. Elden Ring, steam:1245620, igdb:119133"
-              autoFocus={true}
-              onChange={this.onSearchInputChange}
-            />
-
-            <Button
-              className={styles.clearLookupButton}
-              onPress={this.onClearGameLookupPress}
-            >
-              <Icon name={icons.REMOVE} size={20} />
-            </Button>
+  return (
+    <PageContent title={translate('AddNewGame')}>
+      <PageContentBody>
+        <div className={styles.searchContainer}>
+          <div className={styles.searchIconContainer}>
+            <Icon name={icons.SEARCH} size={20} />
           </div>
 
-          {isFetching && <LoadingIndicator />}
+          <TextInput
+            className={styles.searchInput}
+            name="gameLookup"
+            value={term}
+            placeholder="e.g. Elden Ring, steam:1245620, igdb:119133"
+            autoFocus={true}
+            onChange={onSearchInputChange}
+          />
 
-          {!isFetching && !!error ? (
-            <div className={styles.message}>
-              <div className={styles.helpText}>
-                {translate('FailedLoadingSearchResults')}
-              </div>
+          <Button
+            className={styles.clearLookupButton}
+            onPress={onClearGameLookupPress}
+          >
+            <Icon name={icons.REMOVE} size={20} />
+          </Button>
+        </div>
 
-              <Alert kind={kinds.DANGER}>{getErrorMessage(error)}</Alert>
+        {isFetching && <LoadingIndicator />}
 
-              <div>
-                <Link to="https://wiki.servarr.com/gamarr/troubleshooting#invalid-response-received-from-igdb">
-                  {translate('WhySearchesCouldBeFailing')}
-                </Link>
-              </div>
+        {!isFetching && !!error ? (
+          <div className={styles.message}>
+            <div className={styles.helpText}>
+              {translate('FailedLoadingSearchResults')}
             </div>
-          ) : null}
 
-          {!isFetching && !error && !!items.length && (
-            <div className={styles.searchResults}>
-              {items.map((item) => {
-                return (
-                  <AddNewGameSearchResultConnector
-                    key={item.titleSlug || item.igdbId}
-                    {...item}
-                  />
-                );
-              })}
+            <Alert kind={kinds.DANGER}>{getErrorMessage(error)}</Alert>
+
+            <div>
+              <Link to="https://wiki.servarr.com/gamarr/troubleshooting#invalid-response-received-from-igdb">
+                {translate('WhySearchesCouldBeFailing')}
+              </Link>
             </div>
-          )}
+          </div>
+        ) : null}
 
-          {!isFetching && !error && !items.length && !!term && (
-            <div className={styles.message}>
-              <div className={styles.noResults}>
-                {translate('CouldNotFindResults', { term })}
-              </div>
-              <div>{translate('YouCanAlsoSearch')}</div>
-              <div>
-                <Link to="https://wiki.servarr.com/gamarr/faq#why-can-i-not-add-a-new-game-to-gamarr">
-                  {translate('CantFindGame')}
-                </Link>
-              </div>
+        {!isFetching && !error && !!items.length && (
+          <div className={styles.searchResults}>
+            {items.map((item) => {
+              return (
+                <AddNewGameSearchResultConnector
+                  key={item.titleSlug || item.igdbId}
+                  {...item}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        {!isFetching && !error && !items.length && !!term && (
+          <div className={styles.message}>
+            <div className={styles.noResults}>
+              {translate('CouldNotFindResults', { term })}
             </div>
-          )}
-
-          {term ? null : (
-            <div className={styles.message}>
-              <div className={styles.helpText}>
-                {translate('AddNewMessage')}
-              </div>
-              <div>{translate('AddNewIgdbIdMessage')}</div>
+            <div>{translate('YouCanAlsoSearch')}</div>
+            <div>
+              <Link to="https://wiki.servarr.com/gamarr/faq#why-can-i-not-add-a-new-game-to-gamarr">
+                {translate('CantFindGame')}
+              </Link>
             </div>
-          )}
+          </div>
+        )}
 
-          {!term && !hasExistingGames ? (
-            <div className={styles.message}>
-              <div className={styles.noGamesText}>
-                {translate('HaveNotAddedGames')}
-              </div>
-              <div>
-                <Button to="/add/import" kind={kinds.PRIMARY}>
-                  {translate('ImportExistingGames')}
-                </Button>
-              </div>
+        {term ? null : (
+          <div className={styles.message}>
+            <div className={styles.helpText}>{translate('AddNewMessage')}</div>
+            <div>{translate('AddNewIgdbIdMessage')}</div>
+          </div>
+        )}
+
+        {!term && !hasExistingGames ? (
+          <div className={styles.message}>
+            <div className={styles.noGamesText}>
+              {translate('HaveNotAddedGames')}
             </div>
-          ) : null}
+            <div>
+              <Button to="/add/import" kind={kinds.PRIMARY}>
+                {translate('ImportExistingGames')}
+              </Button>
+            </div>
+          </div>
+        ) : null}
 
-          <div />
-        </PageContentBody>
-      </PageContent>
-    );
-  }
+        <div />
+      </PageContentBody>
+    </PageContent>
+  );
 }
 
 export default AddNewGame;

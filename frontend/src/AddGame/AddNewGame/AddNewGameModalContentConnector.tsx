@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { Error } from 'App/State/AppSectionState';
 import { Image } from 'Game/Game';
@@ -25,41 +25,30 @@ interface AddGameAppState {
   addGame: AddGameState;
 }
 
-function createMapStateToProps() {
-  return createSelector(
-    (state: AddGameAppState) => state.addGame,
-    createDimensionsSelector(),
-    createSystemStatusSelector(),
-    (addGameState, dimensions, systemStatus) => {
-      const { isAdding, addError, defaults } = addGameState;
+const addNewGameModalContentSelector = createSelector(
+  (state: AddGameAppState) => state.addGame,
+  createDimensionsSelector(),
+  createSystemStatusSelector(),
+  (addGameState, dimensions, systemStatus) => {
+    const { isAdding, addError, defaults } = addGameState;
 
-      const { settings } = selectSettings(
-        defaults,
-        {},
-        addError as Error | undefined
-      );
+    const { settings } = selectSettings(
+      defaults,
+      {},
+      addError as Error | undefined
+    );
 
-      return {
-        isAdding,
-        addError: addError as Error | undefined,
-        isSmallScreen: dimensions.isSmallScreen,
-        isWindows: systemStatus.isWindows,
-        ...settings,
-      };
-    }
-  );
-}
+    return {
+      isAdding,
+      addError: addError as Error | undefined,
+      isSmallScreen: dimensions.isSmallScreen,
+      isWindows: systemStatus.isWindows,
+      ...settings,
+    };
+  }
+);
 
-const mapDispatchToProps = {
-  setAddGameDefault,
-  addGame,
-};
-
-const connector = connect(createMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-interface OwnProps {
+interface AddNewGameModalContentConnectorProps {
   igdbId: number;
   steamAppId?: number;
   title: string;
@@ -70,101 +59,100 @@ interface OwnProps {
   onModalClose: () => void;
 }
 
-interface StateProps {
-  isAdding: boolean;
-  addError?: Error;
-  isSmallScreen: boolean;
-  isWindows: boolean;
-  rootFolderPath?: FormValue<string>;
-  monitor: FormValue<string>;
-  qualityProfileId?: FormValue<number>;
-  minimumAvailability: FormValue<string>;
-  searchForGame: FormValue<boolean>;
-  tags: FormValue<number[]>;
-}
+function AddNewGameModalContentConnector(
+  props: AddNewGameModalContentConnectorProps
+) {
+  const {
+    igdbId,
+    steamAppId,
+    title,
+    year,
+    overview,
+    folder,
+    images,
+    onModalClose,
+  } = props;
 
-type AddNewGameModalContentConnectorProps = OwnProps &
-  StateProps &
-  PropsFromRedux;
+  const dispatch = useDispatch();
 
-class AddNewGameModalContentConnector extends Component<AddNewGameModalContentConnectorProps> {
-  //
-  // Listeners
-
-  onInputChange = ({ name, value }: InputChanged) => {
-    this.props.setAddGameDefault({ [name]: value });
+  const {
+    isAdding,
+    addError,
+    isSmallScreen,
+    isWindows,
+    rootFolderPath,
+    monitor,
+    qualityProfileId,
+    minimumAvailability,
+    searchForGame,
+    tags,
+  } = useSelector(addNewGameModalContentSelector) as {
+    isAdding: boolean;
+    addError?: Error;
+    isSmallScreen: boolean;
+    isWindows: boolean;
+    rootFolderPath?: FormValue<string>;
+    monitor: FormValue<string>;
+    qualityProfileId?: FormValue<number>;
+    minimumAvailability: FormValue<string>;
+    searchForGame: FormValue<boolean>;
+    tags: FormValue<number[]>;
   };
 
-  onAddGamePress = () => {
-    const {
-      igdbId,
-      steamAppId,
-      rootFolderPath,
-      monitor,
-      qualityProfileId,
-      minimumAvailability,
-      searchForGame,
-      tags,
-    } = this.props;
+  const onInputChange = useCallback(
+    ({ name, value }: InputChanged) => {
+      dispatch(setAddGameDefault({ [name]: value }));
+    },
+    [dispatch]
+  );
 
-    this.props.addGame({
-      igdbId,
-      steamAppId,
-      rootFolderPath: rootFolderPath?.value || '',
-      monitor: monitor.value,
-      qualityProfileId: qualityProfileId?.value || 0,
-      minimumAvailability: minimumAvailability.value,
-      searchForGame: searchForGame.value,
-      tags: tags.value,
-    });
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      title,
-      year,
-      overview,
-      images,
-      isAdding,
-      addError,
-      rootFolderPath,
-      monitor,
-      qualityProfileId,
-      minimumAvailability,
-      searchForGame,
-      folder,
-      tags,
-      isSmallScreen,
-      isWindows,
-      onModalClose,
-    } = this.props;
-
-    return (
-      <AddNewGameModalContent
-        title={title}
-        year={year}
-        overview={overview}
-        images={images}
-        isAdding={isAdding}
-        addError={addError}
-        rootFolderPath={rootFolderPath}
-        monitor={monitor}
-        qualityProfileId={qualityProfileId}
-        minimumAvailability={minimumAvailability}
-        searchForGame={searchForGame}
-        folder={folder}
-        tags={tags}
-        isSmallScreen={isSmallScreen}
-        isWindows={isWindows}
-        onModalClose={onModalClose}
-        onInputChange={this.onInputChange}
-        onAddGamePress={this.onAddGamePress}
-      />
+  const onAddGamePress = useCallback(() => {
+    dispatch(
+      addGame({
+        igdbId,
+        steamAppId,
+        rootFolderPath: rootFolderPath?.value || '',
+        monitor: monitor.value,
+        qualityProfileId: qualityProfileId?.value || 0,
+        minimumAvailability: minimumAvailability.value,
+        searchForGame: searchForGame.value,
+        tags: tags.value,
+      })
     );
-  }
+  }, [
+    dispatch,
+    igdbId,
+    steamAppId,
+    rootFolderPath,
+    monitor,
+    qualityProfileId,
+    minimumAvailability,
+    searchForGame,
+    tags,
+  ]);
+
+  return (
+    <AddNewGameModalContent
+      title={title}
+      year={year}
+      overview={overview}
+      images={images}
+      isAdding={isAdding}
+      addError={addError}
+      rootFolderPath={rootFolderPath}
+      monitor={monitor}
+      qualityProfileId={qualityProfileId}
+      minimumAvailability={minimumAvailability}
+      searchForGame={searchForGame}
+      folder={folder}
+      tags={tags}
+      isSmallScreen={isSmallScreen}
+      isWindows={isWindows}
+      onModalClose={onModalClose}
+      onInputChange={onInputChange}
+      onAddGamePress={onAddGamePress}
+    />
+  );
 }
 
-export default connector(AddNewGameModalContentConnector);
+export default AddNewGameModalContentConnector;

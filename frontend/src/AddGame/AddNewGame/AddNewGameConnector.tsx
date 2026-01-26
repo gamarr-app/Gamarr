@@ -1,7 +1,8 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { createSelector } from 'reselect';
+import { Error } from 'App/State/AppSectionState';
 import AppState from 'App/State/AppState';
 import { clearAddGame, lookupGame } from 'Store/Actions/addGameActions';
 import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
@@ -14,18 +15,12 @@ import hasDifferentItems from 'Utilities/Object/hasDifferentItems';
 import parseUrl from 'Utilities/String/parseUrl';
 import AddNewGame, { AddNewGameItem } from './AddNewGame';
 
-interface LocationState {
-  search: string;
-}
-
-function createMapStateToProps() {
+function createAddNewGameSelector(searchParams: string) {
   return createSelector(
     (state: AppState) => state.addGame,
     (state: AppState) => state.games.items.length,
-    (_state: AppState, ownProps: { location: LocationState }) =>
-      ownProps.location,
-    (addGame, existingGamesCount, location) => {
-      const { params } = parseUrl(location.search);
+    (addGame, existingGamesCount) => {
+      const { params } = parseUrl(searchParams);
 
       return {
         ...addGame,
@@ -36,116 +31,95 @@ function createMapStateToProps() {
   );
 }
 
-const mapDispatchToProps = {
-  lookupGame,
-  clearAddGame,
-  fetchRootFolders,
-  fetchQueueDetails,
-  clearQueueDetails,
-  fetchGameFiles,
-  clearGameFiles,
-};
+function AddNewGameConnector() {
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-interface AddNewGameConnectorProps {
-  location: LocationState;
-  term?: string;
-  isFetching: boolean;
-  isAdding: boolean;
-  hasExistingGames: boolean;
-  items: AddNewGameItem[];
-  lookupGame: (payload: { term: string }) => void;
-  clearAddGame: () => void;
-  fetchRootFolders: () => void;
-  fetchQueueDetails: () => void;
-  clearQueueDetails: () => void;
-  fetchGameFiles: (payload: { gameId: number[] }) => void;
-  clearGameFiles: () => void;
-}
+  const gameLookupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
-class AddNewGameConnectorClass extends Component<AddNewGameConnectorProps> {
-  // eslint-disable-next-line react/sort-comp
-  private _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
+  const selector = createAddNewGameSelector(location.search);
+  const {
+    term,
+    isFetching,
+    isAdding,
+    error,
+    addError,
+    items,
+    hasExistingGames,
+  } = useSelector(selector);
 
-  //
-  // Lifecycle
+  const prevItemsRef = useRef<AddNewGameItem[]>(items);
 
-  componentDidMount() {
-    this.props.fetchRootFolders();
-    this.props.fetchQueueDetails();
-  }
+  // Mount effect
+  useEffect(() => {
+    dispatch(fetchRootFolders());
+    dispatch(fetchQueueDetails());
 
-  componentDidUpdate(prevProps: AddNewGameConnectorProps) {
-    const { items } = this.props;
+    return () => {
+      if (gameLookupTimeoutRef.current) {
+        clearTimeout(gameLookupTimeoutRef.current);
+      }
 
-    if (hasDifferentItems(prevProps.items, items)) {
+      dispatch(clearAddGame());
+      dispatch(clearQueueDetails());
+      dispatch(clearGameFiles());
+    };
+    // Only run on mount/unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update effect - fetch game files when items change
+  useEffect(() => {
+    if (hasDifferentItems(prevItemsRef.current, items)) {
       const gameIds = items
         .filter((item) => item.internalId != null)
         .map((item) => item.internalId as number)
         .filter((id, index, self) => self.indexOf(id) === index);
 
       if (gameIds.length) {
-        this.props.fetchGameFiles({ gameId: gameIds });
+        dispatch(fetchGameFiles({ gameId: gameIds }));
       }
     }
-  }
 
-  componentWillUnmount() {
-    if (this._gameLookupTimeout) {
-      clearTimeout(this._gameLookupTimeout);
-    }
+    prevItemsRef.current = items;
+  }, [items, dispatch]);
 
-    this.props.clearAddGame();
-    this.props.clearQueueDetails();
-    this.props.clearGameFiles();
-  }
+  const onGameLookupChange = useCallback(
+    (searchTerm: string) => {
+      if (gameLookupTimeoutRef.current) {
+        clearTimeout(gameLookupTimeoutRef.current);
+      }
 
-  //
-  // Listeners
+      if (searchTerm.trim() === '') {
+        dispatch(clearAddGame());
+      } else {
+        gameLookupTimeoutRef.current = setTimeout(() => {
+          dispatch(lookupGame({ term: searchTerm }));
+        }, 300);
+      }
+    },
+    [dispatch]
+  );
 
-  onGameLookupChange = (term: string) => {
-    if (this._gameLookupTimeout) {
-      clearTimeout(this._gameLookupTimeout);
-    }
+  const onClearGameLookup = useCallback(() => {
+    dispatch(clearAddGame());
+  }, [dispatch]);
 
-    if (term.trim() === '') {
-      this.props.clearAddGame();
-    } else {
-      this._gameLookupTimeout = setTimeout(() => {
-        this.props.lookupGame({ term });
-      }, 300);
-    }
-  };
-
-  onClearGameLookup = () => {
-    this.props.clearAddGame();
-  };
-
-  //
-  // Render
-
-  render() {
-    const { term, ...otherProps } = this.props;
-
-    return (
-      <AddNewGame
-        term={term}
-        {...otherProps}
-        onGameLookupChange={this.onGameLookupChange}
-        onClearGameLookup={this.onClearGameLookup}
-      />
-    );
-  }
-}
-
-const ConnectedAddNewGameConnector = connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(AddNewGameConnectorClass);
-
-function AddNewGameConnector() {
-  const location = useLocation();
-
-  return <ConnectedAddNewGameConnector location={location} />;
+  return (
+    <AddNewGame
+      term={term}
+      isFetching={isFetching}
+      isAdding={isAdding}
+      error={error as Error | undefined}
+      addError={addError as Error | undefined}
+      items={items}
+      hasExistingGames={hasExistingGames}
+      onGameLookupChange={onGameLookupChange}
+      onClearGameLookup={onClearGameLookup}
+    />
+  );
 }
 
 export default AddNewGameConnector;

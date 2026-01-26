@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useState } from 'react';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import FileBrowserModal from 'Components/FileBrowser/FileBrowserModal';
@@ -43,10 +43,6 @@ interface ImportGameSelectFolderProps {
   onDeleteRootFolderPress: (id: number) => void;
 }
 
-interface ImportGameSelectFolderState {
-  isAddNewRootFolderModalOpen: boolean;
-}
-
 const rootFolderColumns = [
   {
     name: 'path',
@@ -70,164 +66,144 @@ const rootFolderColumns = [
   },
 ];
 
-class ImportGameSelectFolder extends Component<
-  ImportGameSelectFolderProps,
-  ImportGameSelectFolderState
-> {
-  //
-  // Lifecycle
+function ImportGameSelectFolder(props: ImportGameSelectFolderProps) {
+  const {
+    isWindows,
+    isFetching,
+    isPopulated,
+    isSaving,
+    error,
+    saveError,
+    items,
+    onNewRootFolderSelect,
+  } = props;
 
-  constructor(props: ImportGameSelectFolderProps) {
-    super(props);
+  const [isAddNewRootFolderModalOpen, setIsAddNewRootFolderModalOpen] =
+    useState(false);
 
-    this.state = {
-      isAddNewRootFolderModalOpen: false,
-    };
-  }
+  const onAddNewRootFolderPress = useCallback(() => {
+    setIsAddNewRootFolderModalOpen(true);
+  }, []);
 
-  //
-  // Lifecycle
+  const handleNewRootFolderSelect = useCallback(
+    ({ value }: { value: string }) => {
+      onNewRootFolderSelect(value);
+    },
+    [onNewRootFolderSelect]
+  );
 
-  onAddNewRootFolderPress = () => {
-    this.setState({ isAddNewRootFolderModalOpen: true });
-  };
+  const onAddRootFolderModalClose = useCallback(() => {
+    setIsAddNewRootFolderModalOpen(false);
+  }, []);
 
-  onNewRootFolderSelect = ({ value }: { value: string }) => {
-    this.props.onNewRootFolderSelect(value);
-  };
+  const hasRootFolders = items.length > 0;
 
-  onAddRootFolderModalClose = () => {
-    this.setState({ isAddNewRootFolderModalOpen: false });
-  };
+  return (
+    <PageContent title={translate('ImportGames')}>
+      <PageContentBody>
+        {isFetching && !isPopulated ? <LoadingIndicator /> : null}
 
-  //
-  // Render
+        {!isFetching && error ? (
+          <Alert kind={kinds.DANGER}>{translate('RootFoldersLoadError')}</Alert>
+        ) : null}
 
-  render() {
-    const {
-      isWindows,
-      isFetching,
-      isPopulated,
-      isSaving,
-      error,
-      saveError,
-      items,
-    } = this.props;
+        {!error && isPopulated && (
+          <div>
+            <div className={styles.header}>{translate('ImportHeader')}</div>
 
-    const hasRootFolders = items.length > 0;
-
-    return (
-      <PageContent title={translate('ImportGames')}>
-        <PageContentBody>
-          {isFetching && !isPopulated ? <LoadingIndicator /> : null}
-
-          {!isFetching && error ? (
-            <Alert kind={kinds.DANGER}>
-              {translate('RootFoldersLoadError')}
-            </Alert>
-          ) : null}
-
-          {!error && isPopulated && (
-            <div>
-              <div className={styles.header}>{translate('ImportHeader')}</div>
-
-              <div className={styles.tips}>
-                {translate('ImportTipsMessage')}
-                <ul>
-                  <li
-                    dangerouslySetInnerHTML={{
-                      __html: translate('ImportIncludeQuality', {
-                        0: '<code>game.2008.bluray.mkv</code>',
-                      }),
-                    }}
-                    className={styles.tip}
-                  />
-                  <li
-                    dangerouslySetInnerHTML={{
-                      __html: translate('ImportRootPath', {
-                        0: `<code>${isWindows ? 'C:\\games' : '/games'}</code>`,
-                        1: `<code>${
-                          isWindows
-                            ? 'C:\\games\\the matrix'
-                            : '/games/the matrix'
-                        }</code>`,
-                      }),
-                    }}
-                    className={styles.tip}
-                  />
-                  <li className={styles.tip}>
-                    {translate('ImportNotForDownloads')}
-                  </li>
-                </ul>
-              </div>
-
-              {hasRootFolders ? (
-                <div className={styles.recentFolders}>
-                  <FieldSet legend={translate('RecentFolders')}>
-                    <Table columns={rootFolderColumns}>
-                      <TableBody>
-                        {items.map((rootFolder) => {
-                          return (
-                            <ImportGameRootFolderRowConnector
-                              key={rootFolder.id}
-                              id={rootFolder.id}
-                              path={rootFolder.path}
-                              freeSpace={rootFolder.freeSpace}
-                              unmappedFolders={rootFolder.unmappedFolders}
-                            />
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </FieldSet>
-                </div>
-              ) : null}
-
-              {!isSaving && saveError ? (
-                <Alert className={styles.addErrorAlert} kind={kinds.DANGER}>
-                  {translate('AddRootFolderError')}
-
-                  <ul>
-                    {Array.isArray(saveError.responseJSON) ? (
-                      saveError.responseJSON.map((e, index) => {
-                        return <li key={index}>{e.errorMessage}</li>;
-                      })
-                    ) : (
-                      <li>{JSON.stringify(saveError.responseJSON)}</li>
-                    )}
-                  </ul>
-                </Alert>
-              ) : null}
-
-              <div className={hasRootFolders ? undefined : styles.startImport}>
-                <Button
-                  kind={kinds.PRIMARY}
-                  size={sizes.LARGE}
-                  onPress={this.onAddNewRootFolderPress}
-                >
-                  <Icon
-                    className={styles.importButtonIcon}
-                    name={icons.DRIVE}
-                  />
-                  {hasRootFolders
-                    ? translate('ChooseAnotherFolder')
-                    : translate('StartImport')}
-                </Button>
-              </div>
-
-              <FileBrowserModal
-                isOpen={this.state.isAddNewRootFolderModalOpen}
-                name="rootFolderPath"
-                value=""
-                onChange={this.onNewRootFolderSelect}
-                onModalClose={this.onAddRootFolderModalClose}
-              />
+            <div className={styles.tips}>
+              {translate('ImportTipsMessage')}
+              <ul>
+                <li
+                  dangerouslySetInnerHTML={{
+                    __html: translate('ImportIncludeQuality', {
+                      0: '<code>game.2008.bluray.mkv</code>',
+                    }),
+                  }}
+                  className={styles.tip}
+                />
+                <li
+                  dangerouslySetInnerHTML={{
+                    __html: translate('ImportRootPath', {
+                      0: `<code>${isWindows ? 'C:\\games' : '/games'}</code>`,
+                      1: `<code>${
+                        isWindows
+                          ? 'C:\\games\\the matrix'
+                          : '/games/the matrix'
+                      }</code>`,
+                    }),
+                  }}
+                  className={styles.tip}
+                />
+                <li className={styles.tip}>
+                  {translate('ImportNotForDownloads')}
+                </li>
+              </ul>
             </div>
-          )}
-        </PageContentBody>
-      </PageContent>
-    );
-  }
+
+            {hasRootFolders ? (
+              <div className={styles.recentFolders}>
+                <FieldSet legend={translate('RecentFolders')}>
+                  <Table columns={rootFolderColumns}>
+                    <TableBody>
+                      {items.map((rootFolder) => {
+                        return (
+                          <ImportGameRootFolderRowConnector
+                            key={rootFolder.id}
+                            id={rootFolder.id}
+                            path={rootFolder.path}
+                            freeSpace={rootFolder.freeSpace}
+                            unmappedFolders={rootFolder.unmappedFolders}
+                          />
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </FieldSet>
+              </div>
+            ) : null}
+
+            {!isSaving && saveError ? (
+              <Alert className={styles.addErrorAlert} kind={kinds.DANGER}>
+                {translate('AddRootFolderError')}
+
+                <ul>
+                  {Array.isArray(saveError.responseJSON) ? (
+                    saveError.responseJSON.map((e, index) => {
+                      return <li key={index}>{e.errorMessage}</li>;
+                    })
+                  ) : (
+                    <li>{JSON.stringify(saveError.responseJSON)}</li>
+                  )}
+                </ul>
+              </Alert>
+            ) : null}
+
+            <div className={hasRootFolders ? undefined : styles.startImport}>
+              <Button
+                kind={kinds.PRIMARY}
+                size={sizes.LARGE}
+                onPress={onAddNewRootFolderPress}
+              >
+                <Icon className={styles.importButtonIcon} name={icons.DRIVE} />
+                {hasRootFolders
+                  ? translate('ChooseAnotherFolder')
+                  : translate('StartImport')}
+              </Button>
+            </div>
+
+            <FileBrowserModal
+              isOpen={isAddNewRootFolderModalOpen}
+              name="rootFolderPath"
+              value=""
+              onChange={handleNewRootFolderSelect}
+              onModalClose={onAddRootFolderModalClose}
+            />
+          </div>
+        )}
+      </PageContentBody>
+    </PageContent>
+  );
 }
 
 export default ImportGameSelectFolder;
