@@ -51,6 +51,7 @@ namespace NzbDrone.Core.Games
         List<Game> UpdateGame(List<Game> games, bool useExistingRelativeFolder);
         void UpdateLastSearchTime(Game game);
         List<int> GetRecommendedIgdbIds();
+        List<int> GetRecommendedRawgIds();
         bool GamePathExists(string folder);
         void RemoveAddOptions(Game game);
         bool UpdateTags(Game game);
@@ -446,6 +447,11 @@ namespace NzbDrone.Core.Games
         public List<int> GetRecommendedIgdbIds()
         {
             return _gameRepository.GetRecommendations();
+        }
+
+        public List<int> GetRecommendedRawgIds()
+        {
+            return _gameRepository.GetRawgRecommendations();
         }
 
         public bool ExistsByMetadataId(int metadataId)

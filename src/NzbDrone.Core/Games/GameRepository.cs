@@ -37,6 +37,7 @@ namespace NzbDrone.Core.Games
         Dictionary<int, string> AllGamePaths();
         Dictionary<int, List<int>> AllGameTags();
         List<int> GetRecommendations();
+        List<int> GetRawgRecommendations();
         bool ExistsByMetadataId(int metadataId);
         HashSet<int> AllGameWithCollectionsIgdbIds();
 
@@ -400,6 +401,60 @@ namespace NzbDrone.Core.Games
                                                     SELECT CAST(""j"".""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" == ""GameMetadata"".""Id""
                                                     CROSS JOIN json_each(""GameMetadata"".""IgdbRecommendations"") AS ""j""
                                                     WHERE ""Rec"" NOT IN (SELECT ""IgdbId"" FROM ""GameMetadata"" union SELECT ""IgdbId"" from ""ImportExclusions"")
+                                                    GROUP BY ""Rec"" ORDER BY count(*) DESC LIMIT 120
+                                                    )
+                                                    )
+                                                    LIMIT 100;").ToList();
+                }
+            }
+
+            return recommendations;
+        }
+
+        public List<int> GetRawgRecommendations()
+        {
+            var recommendations = new List<int>();
+
+            if (_database.DatabaseType == DatabaseType.SQLite && _database.Version < new Version("3.9.0"))
+            {
+                return recommendations;
+            }
+
+            using (var conn = _database.OpenConnection())
+            {
+                if (_database.DatabaseType == DatabaseType.PostgreSQL)
+                {
+                    recommendations = conn.Query<int>(@"SELECT DISTINCT ""Rec"" FROM (
+                                                    SELECT DISTINCT ""Rec"" FROM
+                                                    (
+                                                    SELECT DISTINCT CAST(""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id"", json_array_elements_text((""GameMetadata"".""RawgRecommendations"")::json)
+                                                    WHERE CAST(""value"" AS INT) NOT IN (SELECT ""RawgId"" FROM ""GameMetadata"" WHERE ""RawgId"" > 0 union SELECT ""RawgId"" from ""ImportExclusions"" WHERE ""RawgId"" > 0 as sub1) LIMIT 10
+                                                    ) as sub2
+                                                    UNION
+                                                    SELECT ""Rec"" FROM
+                                                    (
+                                                    SELECT CAST(""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" = ""GameMetadata"".""Id"", json_array_elements_text((""GameMetadata"".""RawgRecommendations"")::json)
+                                                    WHERE CAST(""value"" AS INT) NOT IN (SELECT ""RawgId"" FROM ""GameMetadata"" WHERE ""RawgId"" > 0 union SELECT ""RawgId"" from ""ImportExclusions"" WHERE ""RawgId"" > 0 as sub2)
+                                                    GROUP BY ""Rec"" ORDER BY count(*) DESC LIMIT 120
+                                                    ) as sub4
+                                                    ) as sub5
+                                                    LIMIT 100;").ToList();
+                }
+                else
+                {
+                    recommendations = conn.Query<int>(@"SELECT DISTINCT ""Rec"" FROM (
+                                                    SELECT DISTINCT ""Rec"" FROM
+                                                    (
+                                                    SELECT DISTINCT CAST(""j"".""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" == ""GameMetadata"".""Id""
+                                                    CROSS JOIN json_each(""GameMetadata"".""RawgRecommendations"") AS ""j""
+                                                    WHERE ""Rec"" NOT IN (SELECT ""RawgId"" FROM ""GameMetadata"" WHERE ""RawgId"" > 0 union SELECT ""RawgId"" from ""ImportExclusions"" WHERE ""RawgId"" > 0) LIMIT 10
+                                                    )
+                                                    UNION
+                                                    SELECT ""Rec"" FROM
+                                                    (
+                                                    SELECT CAST(""j"".""value"" AS INT) AS ""Rec"" FROM ""GameMetadata"" JOIN ""Games"" ON ""Games"".""GameMetadataId"" == ""GameMetadata"".""Id""
+                                                    CROSS JOIN json_each(""GameMetadata"".""RawgRecommendations"") AS ""j""
+                                                    WHERE ""Rec"" NOT IN (SELECT ""RawgId"" FROM ""GameMetadata"" WHERE ""RawgId"" > 0 union SELECT ""RawgId"" from ""ImportExclusions"" WHERE ""RawgId"" > 0)
                                                     GROUP BY ""Rec"" ORDER BY count(*) DESC LIMIT 120
                                                     )
                                                     )

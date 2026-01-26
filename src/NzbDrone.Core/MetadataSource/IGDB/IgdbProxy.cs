@@ -171,6 +171,24 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return games?.Select(MapGame).ToList() ?? new List<GameMetadata>();
         }
 
+        public List<GameMetadata> GetBulkGameInfoByIgdbIds(List<int> igdbIds)
+        {
+            return GetBulkGameInfo(igdbIds);
+        }
+
+        public List<GameMetadata> GetBulkGameInfoBySteamAppIds(List<int> steamAppIds)
+        {
+            // IGDB doesn't support bulk lookup by Steam App IDs directly
+            // Use AggregateGameInfoProxy for Steam-based lookups
+            return new List<GameMetadata>();
+        }
+
+        public List<GameMetadata> GetBulkGameInfoByRawgIds(List<int> rawgIds)
+        {
+            // IGDB doesn't know RAWG IDs
+            return new List<GameMetadata>();
+        }
+
         public HashSet<int> GetChangedGames(DateTime startTime)
         {
             try
