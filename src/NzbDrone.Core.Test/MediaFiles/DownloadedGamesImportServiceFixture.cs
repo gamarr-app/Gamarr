@@ -49,6 +49,10 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
                   .Returns(new List<ImportResult>());
 
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>()))
+                  .Returns(new List<ImportDecision>());
+
             Mocker.GetMock<IReleaseStructureValidator>()
                   .Setup(s => s.ValidateReleaseStructure(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                   .Returns(new ReleaseStructureValidationResult
@@ -479,7 +483,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             var imported = new List<ImportDecision>();
 
             Mocker.GetMock<IMakeImportDecision>()
-                .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), null, true, true))
+                .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
                 .Returns(imported);
 
             Mocker.GetMock<IImportApprovedGame>()
@@ -505,7 +509,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             var imported = new List<ImportDecision>();
 
             Mocker.GetMock<IMakeImportDecision>()
-                .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), null, true, true))
+                .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
                 .Returns(imported);
 
             Mocker.GetMock<IImportApprovedGame>()
