@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
 import Measure from 'Components/Measure';
 import DiscoverGameItemConnector, {
@@ -45,14 +45,6 @@ interface DiscoverGameOverviewsProps {
   onSelectedChange: DiscoverGameProps['onSelectedChange'];
 }
 
-interface DiscoverGameOverviewsState {
-  width: number;
-  columnCount: number;
-  posterWidth: number;
-  posterHeight: number;
-  rowHeight: number;
-}
-
 function calculatePosterWidth(posterSize: string, isSmallScreen: boolean) {
   const maximumPosterWidth = isSmallScreen ? 152 : 162;
 
@@ -85,112 +77,190 @@ function calculatePosterHeight(posterWidth: number) {
   return Math.ceil((250 / 170) * posterWidth);
 }
 
-class DiscoverGameOverviews extends Component<
-  DiscoverGameOverviewsProps,
-  DiscoverGameOverviewsState
-> {
-  // eslint-disable-next-line react/sort-comp
-  private _grid: Grid | null = null;
+function DiscoverGameOverviews(props: DiscoverGameOverviewsProps) {
+  const {
+    items,
+    sortKey,
+    overviewOptions,
+    jumpToCharacter,
+    scroller,
+    showRelativeDates,
+    shortDateFormat,
+    longDateFormat,
+    timeFormat,
+    isSmallScreen,
+    selectedState,
+    onSelectedChange,
+  } = props;
 
-  //
-  // Lifecycle
+  const gridRef = useRef<Grid | null>(null);
 
-  constructor(props: DiscoverGameOverviewsProps) {
-    super(props);
+  const [width, setWidth] = useState(0);
+  const [posterWidth, setPosterWidth] = useState(162);
+  const [posterHeight, setPosterHeight] = useState(238);
+  const [rowHeight, setRowHeight] = useState(
+    calculateRowHeight(238, undefined, isSmallScreen, {} as OverviewOptions)
+  );
 
-    this.state = {
-      width: 0,
-      columnCount: 1,
-      posterWidth: 162,
-      posterHeight: 238,
-      rowHeight: calculateRowHeight(
-        238,
-        undefined,
-        props.isSmallScreen,
-        {} as OverviewOptions
-      ),
-    };
-  }
+  const prevItemsRef = useRef(items);
+  const prevSortKeyRef = useRef(sortKey);
+  const prevOverviewOptionsRef = useRef(overviewOptions);
+  const prevJumpToCharacterRef = useRef(jumpToCharacter);
+  const prevWidthRef = useRef(width);
+  const prevRowHeightRef = useRef(rowHeight);
 
-  componentDidUpdate(
-    prevProps: DiscoverGameOverviewsProps,
-    prevState: DiscoverGameOverviewsState
-  ) {
-    const { items, sortKey, overviewOptions, jumpToCharacter, isSmallScreen } =
-      this.props;
+  const calculateGrid = useCallback(
+    (newWidth: number = width) => {
+      const newPosterWidth = calculatePosterWidth(
+        overviewOptions.size,
+        isSmallScreen
+      );
+      const newPosterHeight = calculatePosterHeight(newPosterWidth);
+      const newRowHeight = calculateRowHeight(
+        newPosterHeight,
+        sortKey,
+        isSmallScreen,
+        overviewOptions
+      );
 
-    const { width, rowHeight } = this.state;
+      setWidth(newWidth);
+      setPosterWidth(newPosterWidth);
+      setPosterHeight(newPosterHeight);
+      setRowHeight(newRowHeight);
+    },
+    [width, sortKey, overviewOptions, isSmallScreen]
+  );
 
+  const gridScrollToPosition = useCallback(
+    ({
+      scrollTop = 0,
+      scrollLeft = 0,
+    }: {
+      scrollTop?: number;
+      scrollLeft?: number;
+    }) => {
+      scroller?.scrollTo({ top: scrollTop, left: scrollLeft });
+    },
+    [scroller]
+  );
+
+  const gridScrollToCell = useCallback(
+    ({
+      rowIndex = 0,
+      columnIndex = 0,
+    }: {
+      rowIndex?: number;
+      columnIndex?: number;
+    }) => {
+      const scrollOffset = gridRef.current?.getOffsetForCell({
+        rowIndex,
+        columnIndex,
+      });
+
+      if (scrollOffset) {
+        gridScrollToPosition(scrollOffset);
+      }
+    },
+    [gridScrollToPosition]
+  );
+
+  // Update effect
+  useEffect(() => {
     if (
-      prevProps.sortKey !== sortKey ||
-      prevProps.overviewOptions !== overviewOptions
+      prevSortKeyRef.current !== sortKey ||
+      prevOverviewOptionsRef.current !== overviewOptions
     ) {
-      this.calculateGrid(this.state.width, isSmallScreen);
+      calculateGrid(width);
     }
 
     if (
-      this._grid &&
-      (prevState.width !== width ||
-        prevState.rowHeight !== rowHeight ||
-        hasDifferentItemsOrOrder(prevProps.items, items, 'igdbId') ||
-        prevProps.overviewOptions !== overviewOptions)
+      gridRef.current &&
+      (prevWidthRef.current !== width ||
+        prevRowHeightRef.current !== rowHeight ||
+        hasDifferentItemsOrOrder(prevItemsRef.current, items, 'igdbId') ||
+        prevOverviewOptionsRef.current !== overviewOptions)
     ) {
-      // recomputeGridSize also forces Grid to discard its cache of rendered cells
-      this._grid.recomputeGridSize();
+      gridRef.current.recomputeGridSize();
     }
 
     if (
       jumpToCharacter != null &&
-      jumpToCharacter !== prevProps.jumpToCharacter
+      jumpToCharacter !== prevJumpToCharacterRef.current
     ) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (this._grid && index != null) {
-        this._gridScrollToCell({
+      if (gridRef.current && index != null) {
+        gridScrollToCell({
           rowIndex: index,
           columnIndex: 0,
         });
       }
     }
-  }
 
-  //
-  // Control
+    prevItemsRef.current = items;
+    prevSortKeyRef.current = sortKey;
+    prevOverviewOptionsRef.current = overviewOptions;
+    prevJumpToCharacterRef.current = jumpToCharacter;
+    prevWidthRef.current = width;
+    prevRowHeightRef.current = rowHeight;
+  }, [
+    items,
+    sortKey,
+    overviewOptions,
+    jumpToCharacter,
+    width,
+    rowHeight,
+    calculateGrid,
+    gridScrollToCell,
+  ]);
 
-  setGridRef = (ref: Grid) => {
-    this._grid = ref;
-  };
+  const setGridRef = useCallback((ref: Grid | null) => {
+    gridRef.current = ref;
+  }, []);
 
-  calculateGrid = (
-    width: number = this.state.width,
-    isSmallScreen: boolean
-  ) => {
-    const { sortKey, overviewOptions } = this.props;
+  const onMeasure = useCallback(
+    ({ width: measuredWidth = 0 }: { width?: number }) => {
+      calculateGrid(measuredWidth);
+    },
+    [calculateGrid]
+  );
 
-    const posterWidth = calculatePosterWidth(
-      overviewOptions.size,
-      isSmallScreen
-    );
-    const posterHeight = calculatePosterHeight(posterWidth);
-    const rowHeight = calculateRowHeight(
-      posterHeight,
+  const cellRenderer: GridCellRenderer = useCallback(
+    ({ key, rowIndex, style }) => {
+      const game = items[rowIndex];
+
+      if (!game) {
+        return null;
+      }
+
+      return (
+        <div key={key} className={styles.container} style={style}>
+          <DiscoverGameItemConnector
+            key={game.igdbId}
+            component={DiscoverGameOverviewConnector}
+            sortKey={sortKey}
+            posterWidth={posterWidth}
+            posterHeight={posterHeight}
+            rowHeight={rowHeight}
+            overviewOptions={overviewOptions}
+            showRelativeDates={showRelativeDates}
+            shortDateFormat={shortDateFormat}
+            longDateFormat={longDateFormat}
+            timeFormat={timeFormat}
+            isSmallScreen={isSmallScreen}
+            igdbId={game.igdbId}
+            isSelected={selectedState[game.igdbId]}
+            onSelectedChange={onSelectedChange}
+          />
+        </div>
+      );
+    },
+    [
+      items,
       sortKey,
-      isSmallScreen,
-      overviewOptions
-    );
-
-    this.setState({
-      width,
       posterWidth,
       posterHeight,
       rowHeight,
-    });
-  };
-
-  cellRenderer: GridCellRenderer = ({ key, rowIndex, style }) => {
-    const {
-      items,
-      sortKey,
       overviewOptions,
       showRelativeDates,
       shortDateFormat,
@@ -199,114 +269,43 @@ class DiscoverGameOverviews extends Component<
       isSmallScreen,
       selectedState,
       onSelectedChange,
-    } = this.props;
+    ]
+  );
 
-    const { posterWidth, posterHeight, rowHeight } = this.state;
+  return (
+    <Measure whitelist={['width']} onMeasure={onMeasure}>
+      <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
+        {({ height, registerChild, onChildScroll, scrollTop }) => {
+          if (!height) {
+            return <div />;
+          }
 
-    const game = items[rowIndex];
-
-    if (!game) {
-      return null;
-    }
-
-    return (
-      <div key={key} className={styles.container} style={style}>
-        <DiscoverGameItemConnector
-          key={game.igdbId}
-          component={DiscoverGameOverviewConnector}
-          sortKey={sortKey}
-          posterWidth={posterWidth}
-          posterHeight={posterHeight}
-          rowHeight={rowHeight}
-          overviewOptions={overviewOptions}
-          showRelativeDates={showRelativeDates}
-          shortDateFormat={shortDateFormat}
-          longDateFormat={longDateFormat}
-          timeFormat={timeFormat}
-          isSmallScreen={isSmallScreen}
-          igdbId={game.igdbId}
-          isSelected={selectedState[game.igdbId]}
-          onSelectedChange={onSelectedChange}
-        />
-      </div>
-    );
-  };
-
-  _gridScrollToCell = ({
-    rowIndex = 0,
-    columnIndex = 0,
-  }: {
-    rowIndex?: number;
-    columnIndex?: number;
-  }) => {
-    const scrollOffset = this._grid!.getOffsetForCell({
-      rowIndex,
-      columnIndex,
-    });
-
-    this._gridScrollToPosition(scrollOffset);
-  };
-
-  _gridScrollToPosition = ({
-    scrollTop = 0,
-    scrollLeft = 0,
-  }: {
-    scrollTop?: number;
-    scrollLeft?: number;
-  }) => {
-    this.props.scroller?.scrollTo({ top: scrollTop, left: scrollLeft });
-  };
-
-  //
-  // Listeners
-
-  onMeasure = ({ width = 0 }: { width?: number }) => {
-    this.calculateGrid(width, this.props.isSmallScreen);
-  };
-
-  //
-  // Render
-
-  render() {
-    const { isSmallScreen, scroller, items, selectedState } = this.props;
-
-    const { width, rowHeight } = this.state;
-
-    return (
-      <Measure whitelist={['width']} onMeasure={this.onMeasure}>
-        <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
-          {({ height, registerChild, onChildScroll, scrollTop }) => {
-            if (!height) {
-              return <div />;
-            }
-
-            return (
-              <div ref={registerChild}>
-                <Grid
-                  ref={this.setGridRef}
-                  className={styles.grid}
-                  autoHeight={true}
-                  height={height}
-                  columnCount={1}
-                  columnWidth={width}
-                  rowCount={items.length}
-                  rowHeight={rowHeight}
-                  width={width}
-                  scrollTop={scrollTop}
-                  overscanRowCount={2}
-                  cellRenderer={this.cellRenderer}
-                  selectedState={selectedState}
-                  scrollToAlignment="start"
-                  isScrollingOptout={true}
-                  onScroll={onChildScroll}
-                />
-              </div>
-            );
-          }}
-        </WindowScroller>
-      </Measure>
-    );
-  }
+          return (
+            <div ref={registerChild}>
+              <Grid
+                ref={setGridRef}
+                className={styles.grid}
+                autoHeight={true}
+                height={height}
+                columnCount={1}
+                columnWidth={width}
+                rowCount={items.length}
+                rowHeight={rowHeight}
+                width={width}
+                scrollTop={scrollTop}
+                overscanRowCount={2}
+                cellRenderer={cellRenderer}
+                selectedState={selectedState}
+                scrollToAlignment="start"
+                isScrollingOptout={true}
+                onScroll={onChildScroll}
+              />
+            </div>
+          );
+        }}
+      </WindowScroller>
+    </Measure>
+  );
 }
 
 export default DiscoverGameOverviews;
