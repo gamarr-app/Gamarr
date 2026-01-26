@@ -108,7 +108,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return null;
         }
 
-        public GameMetadata GetGameInfo(int igdbId)
+        public GameMetadata GetGameInfoByIgdbId(int igdbId)
         {
             var query = $"{GameFields} where id = {igdbId};";
             var games = ExecuteQuery<IgdbGameResource>("games", query);
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             }
 
             var igdbId = externalGames.First().Game.Value;
-            var result = GetGameInfo(igdbId);
+            var result = GetGameInfoByIgdbId(igdbId);
             if (result != null)
             {
                 result.SteamAppId = steamAppId;
@@ -258,7 +258,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 return new List<int>();
             }
 
-            var gameInfo = GetGameInfo(igdbId);
+            var gameInfo = GetGameInfoByIgdbId(igdbId);
             return gameInfo?.IgdbRecommendations ?? new List<int>();
         }
 
@@ -285,7 +285,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                             {
                                 try
                                 {
-                                    var gameLookup = GetGameInfo(partId);
+                                    var gameLookup = GetGameInfoByIgdbId(partId);
                                     if (gameLookup != null)
                                     {
                                         results.Add(_gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup });
@@ -305,7 +305,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                     {
                         try
                         {
-                            var gameLookup = GetGameInfo(igdbId);
+                            var gameLookup = GetGameInfoByIgdbId(igdbId);
                             return gameLookup == null
                                 ? new List<Game>()
                                 : new List<Game> { _gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup } };
@@ -383,7 +383,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                         return existing;
                     }
 
-                    return GetGameInfo(game.IgdbId);
+                    return GetGameInfoByIgdbId(game.IgdbId);
                 }
 
                 // Search by title

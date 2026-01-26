@@ -52,66 +52,28 @@ namespace NzbDrone.Core.MetadataSource
                                            (!string.IsNullOrEmpty(_configService.IgdbClientId) &&
                                             !string.IsNullOrEmpty(_configService.IgdbClientSecret));
 
-        public GameMetadata GetGameInfo(int gameId)
+        public GameMetadata GetGameInfoByIgdbId(int igdbId)
         {
-            // In mock mode, go directly to IGDB (which uses mock data files)
-            if (_mockEnabled)
+            if (!HasIgdbCredentials)
             {
-                return _igdbProxy.GetGameInfo(gameId);
+                _logger.Warn("IGDB credentials not configured, cannot fetch game info for IGDB ID {0}", igdbId);
+                return null;
             }
 
-            // Try Steam first - the ID might be a Steam App ID
             try
             {
-                var result = _steamProxy.GetGameInfo(gameId);
+                var result = _igdbProxy.GetGameInfoByIgdbId(igdbId);
                 if (result != null)
                 {
-                    _logger.Debug("Got game info from Steam for ID {0}", gameId);
+                    _logger.Debug("Got game info from IGDB for IGDB ID {0}", igdbId);
                     return result;
                 }
             }
             catch (Exception ex)
             {
-                _logger.Debug(ex, "ID {0} not found in Steam, trying IGDB", gameId);
+                _logger.Warn(ex, "Failed to get game info from IGDB for IGDB ID {0}", igdbId);
             }
 
-            // Try IGDB (preferred secondary source)
-            if (HasIgdbCredentials)
-            {
-                try
-                {
-                    var result = _igdbProxy.GetGameInfo(gameId);
-                    if (result != null)
-                    {
-                        _logger.Debug("Got game info from IGDB for ID {0}", gameId);
-                        return result;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to get game info from IGDB for ID {0}, trying RAWG", gameId);
-                }
-            }
-
-            // Fall back to RAWG
-            if (HasRawgCredentials)
-            {
-                try
-                {
-                    var result = _rawgProxy.GetGameInfo(gameId);
-                    if (result != null)
-                    {
-                        _logger.Debug("Got game info from RAWG for ID {0}", gameId);
-                        return result;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to get game info from RAWG for ID {0}", gameId);
-                }
-            }
-
-            _logger.Warn("No metadata source available or all sources failed for game ID {0}", gameId);
             return null;
         }
 
@@ -508,7 +470,7 @@ namespace NzbDrone.Core.MetadataSource
             {
                 try
                 {
-                    var igdbGame = _igdbProxy.GetGameInfo(igdbId);
+                    var igdbGame = _igdbProxy.GetGameInfoByIgdbId(igdbId);
                     if (igdbGame?.IgdbRecommendations != null)
                     {
                         foreach (var id in igdbGame.IgdbRecommendations)

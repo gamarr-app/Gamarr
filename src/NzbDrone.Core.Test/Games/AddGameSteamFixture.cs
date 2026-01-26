@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.GetGameBySteamAppId(570), Times.Once());
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Verify(v => v.GetGameInfo(It.IsAny<int>()), Times.Never());
+                  .Verify(v => v.GetGameInfoByIgdbId(It.IsAny<int>()), Times.Never());
         }
 
         [Test]
@@ -102,13 +102,13 @@ namespace NzbDrone.Core.Test.Games
             };
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(5000))
+                  .Setup(s => s.GetGameInfoByIgdbId(5000))
                   .Returns(_steamMetadata);
 
             Subject.AddGame(gameWithIgdb);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Verify(v => v.GetGameInfo(5000), Times.Once());
+                  .Verify(v => v.GetGameInfoByIgdbId(5000), Times.Once());
 
             Mocker.GetMock<IProvideGameInfo>()
                   .Verify(v => v.GetGameBySteamAppId(It.IsAny<int>()), Times.Never());
@@ -150,11 +150,11 @@ namespace NzbDrone.Core.Test.Games
             };
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(5000))
+                  .Setup(s => s.GetGameInfoByIgdbId(5000))
                   .Returns(_steamMetadata);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(9999))
+                  .Setup(s => s.GetGameInfoByIgdbId(9999))
                   .Throws(new Exceptions.GameNotFoundException(9999));
 
             Mocker.GetMock<IAddGameValidator>()

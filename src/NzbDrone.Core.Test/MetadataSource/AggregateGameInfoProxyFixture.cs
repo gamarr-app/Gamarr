@@ -536,34 +536,10 @@ namespace NzbDrone.Core.Test.MetadataSource
         // ============================================================
 
         [Test]
-        public void get_game_info_should_return_null_when_steam_returns_null_and_no_credentials()
+        public void get_game_info_by_igdb_id_should_return_null_when_no_igdb_credentials()
         {
-            // Steam proxy will throw (methods aren't virtual, so the real GetGameInfo will run
-            // and IHttpClient is null, causing an exception which is caught)
-            var result = _subject.GetGameInfo(12345);
-
-            result.Should().BeNull();
-
-            ExceptionVerification.IgnoreWarns();
-        }
-
-        [Test]
-        public void get_game_info_should_skip_igdb_when_no_credentials()
-        {
-            // No IGDB credentials set - IGDB should be skipped
-            // Steam also fails (null IHttpClient) - caught by exception handler
-            var result = _subject.GetGameInfo(12345);
-
-            result.Should().BeNull();
-
-            ExceptionVerification.IgnoreWarns();
-        }
-
-        [Test]
-        public void get_game_info_should_skip_rawg_when_no_credentials()
-        {
-            // No RAWG credentials set - RAWG should be skipped
-            var result = _subject.GetGameInfo(12345);
+            // No IGDB credentials set - should return null
+            var result = _subject.GetGameInfoByIgdbId(12345);
 
             result.Should().BeNull();
 

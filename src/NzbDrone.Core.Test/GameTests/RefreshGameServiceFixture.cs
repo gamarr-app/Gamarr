@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.GameTests
                   .Returns(_gameCollection);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(It.IsAny<int>()))
+                  .Setup(s => s.GetGameInfoByIgdbId(It.IsAny<int>()))
                   .Callback<int>((i) => { throw new GameNotFoundException(i); });
 
             Mocker.GetMock<IRootFolderService>()
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Test.GameTests
         private void GivenNewGameInfo(GameMetadata game)
         {
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(_game.IgdbId))
+                  .Setup(s => s.GetGameInfoByIgdbId(_game.IgdbId))
                   .Returns(game);
         }
 
