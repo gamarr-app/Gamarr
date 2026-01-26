@@ -1,12 +1,13 @@
 name: Release
 
 on:
-  # Triggered by CI workflow when all jobs pass
-  workflow_call:
-    inputs:
-      branch:
-        required: true
-        type: string
+  # Only release after CI passes
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
   # Or on explicit version tags
   push:
     tags:
@@ -22,6 +23,11 @@ env:
 jobs:
   build:
     name: Build (${{ matrix.runtime }})
+    # Only run if CI passed (workflow_run), or if triggered by tag/manual
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -150,9 +156,9 @@ jobs:
       - name: Calculate version
         id: version
         run: |
-          # Handle workflow_call, push (tags), and workflow_dispatch
-          if [[ "${{ github.event_name }}" == "workflow_call" ]]; then
-            BRANCH="${{ inputs.branch }}"
+          # Handle both direct push and workflow_run triggers
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
           else
             BRANCH="${{ github.ref }}"
           fi
@@ -210,9 +216,9 @@ jobs:
       - name: Calculate version
         id: version
         run: |
-          # Handle workflow_call, push (tags), and workflow_dispatch
-          if [[ "${{ github.event_name }}" == "workflow_call" ]]; then
-            BRANCH="${{ inputs.branch }}"
+          # Handle both direct push and workflow_run triggers
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
           else
             BRANCH="${{ github.ref }}"
           fi
