@@ -35,8 +35,12 @@ function createMapStateToProps() {
       const isExistingGame =
         !!selectedGame && _.some(games, { igdbId: selectedGame.igdbId });
 
+      // Exclude id from the spread - id always comes from ownProps, not state
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, ...itemWithoutId } = item;
+
       return {
-        ...item,
+        ...itemWithoutId,
         isExistingGame,
       };
     }
