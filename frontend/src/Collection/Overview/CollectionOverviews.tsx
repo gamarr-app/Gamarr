@@ -1,7 +1,7 @@
-import { Component, RefObject } from 'react';
-import Measure, { ContentRect } from 'react-measure';
+import { Component } from 'react';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
 import CollectionItemConnector from 'Collection/CollectionItemConnector';
+import Measure from 'Components/Measure';
 import { CollectionItem } from 'Store/Selectors/createCollectionClientSideCollectionItemsSelector';
 import { SelectStateInputProps } from 'typings/props';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
@@ -276,11 +276,8 @@ class CollectionOverviews extends Component<
   //
   // Listeners
 
-  onMeasure = (contentRect: ContentRect) => {
-    this.calculateGrid(
-      contentRect.bounds?.width ?? 0,
-      this.props.isSmallScreen
-    );
+  onMeasure = ({ width = 0 }: { width?: number; height?: number }) => {
+    this.calculateGrid(width, this.props.isSmallScreen);
   };
 
   //
@@ -292,47 +289,43 @@ class CollectionOverviews extends Component<
     const { width, rowHeight } = this.state;
 
     return (
-      <Measure bounds={true} onResize={this.onMeasure}>
-        {({ measureRef }) => (
-          <div ref={measureRef as RefObject<HTMLDivElement>}>
-            <WindowScroller
-              scrollElement={isSmallScreen ? undefined : scroller}
-            >
-              {({
-                height,
-                registerChild,
-                onChildScroll,
-                scrollTop: wsScrollTop,
-              }) => {
-                if (!height) {
-                  return <div />;
-                }
+      <Measure onMeasure={this.onMeasure}>
+        <div>
+          <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
+            {({
+              height,
+              registerChild,
+              onChildScroll,
+              scrollTop: wsScrollTop,
+            }) => {
+              if (!height) {
+                return <div />;
+              }
 
-                return (
-                  <div ref={registerChild}>
-                    <Grid
-                      ref={this.setGridRef}
-                      className={styles.grid}
-                      autoHeight={true}
-                      height={height}
-                      columnCount={1}
-                      columnWidth={width}
-                      rowCount={items.length}
-                      rowHeight={rowHeight}
-                      width={width}
-                      scrollTop={wsScrollTop}
-                      overscanRowCount={2}
-                      cellRenderer={this.cellRenderer}
-                      scrollToAlignment="start"
-                      isScrollingOptOut={true}
-                      onScroll={onChildScroll}
-                    />
-                  </div>
-                );
-              }}
-            </WindowScroller>
-          </div>
-        )}
+              return (
+                <div ref={registerChild}>
+                  <Grid
+                    ref={this.setGridRef}
+                    className={styles.grid}
+                    autoHeight={true}
+                    height={height}
+                    columnCount={1}
+                    columnWidth={width}
+                    rowCount={items.length}
+                    rowHeight={rowHeight}
+                    width={width}
+                    scrollTop={wsScrollTop}
+                    overscanRowCount={2}
+                    cellRenderer={this.cellRenderer}
+                    scrollToAlignment="start"
+                    isScrollingOptOut={true}
+                    onScroll={onChildScroll}
+                  />
+                </div>
+              );
+            }}
+          </WindowScroller>
+        </div>
       </Measure>
     );
   }
