@@ -3,6 +3,7 @@ import { Component, CSSProperties } from 'react';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import Game from 'Game/Game';
+import { SelectStateInputProps } from 'typings/props';
 import ImportGameHeader from './ImportGameHeader';
 import ImportGameRowConnector from './ImportGameRowConnector';
 
@@ -39,11 +40,7 @@ interface ImportGameTableProps {
   allGames: Game[];
   scroller: Element;
   onSelectAllChange: (payload: { value: boolean }) => void;
-  onSelectedChange: (payload: {
-    id: string;
-    value: boolean;
-    shiftKey?: boolean;
-  }) => void;
+  onSelectedChange: (payload: SelectStateInputProps) => void;
   onRemoveSelectedStateItem: (id: string) => void;
   onGameLookup: (id: string, path: string, relativePath: string) => void;
   onSetImportGameValue: (values: {
@@ -125,7 +122,7 @@ class ImportGameTable extends Component<ImportGameTableProps> {
         (!selectedGame && prevItem.selectedGame) ||
         (isExistingGame && !prevItem.selectedGame)
       ) {
-        onSelectedChange({ id, value: false });
+        onSelectedChange({ id, value: false, shiftKey: false });
 
         return;
       }
@@ -133,14 +130,14 @@ class ImportGameTable extends Component<ImportGameTableProps> {
       // State is selected, but a game isn't selected or
       // the selected game is an existing game.
       if (isSelected && (!selectedGame || isExistingGame)) {
-        onSelectedChange({ id, value: false });
+        onSelectedChange({ id, value: false, shiftKey: false });
 
         return;
       }
 
       // A game is being selected that wasn't previously selected.
       if (selectedGame && selectedGame !== prevItem.selectedGame) {
-        onSelectedChange({ id, value: true });
+        onSelectedChange({ id, value: true, shiftKey: false });
 
         return;
       }

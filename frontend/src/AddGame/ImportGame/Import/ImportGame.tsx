@@ -6,6 +6,7 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
 import { kinds } from 'Helpers/Props';
+import { SelectStateInputProps } from 'typings/props';
 import translate from 'Utilities/String/translate';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
@@ -92,19 +93,17 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
     this.setState(selectAll(this.state.selectedState, value));
   };
 
-  onSelectedChange = ({
-    id,
-    value,
-    shiftKey = false,
-  }: {
-    id: string;
-    value: boolean;
-    shiftKey?: boolean;
-  }) => {
+  onSelectedChange = ({ id, value, shiftKey }: SelectStateInputProps) => {
     this.setState((state) => {
       // Cast items to ModelBase[] for toggleSelected - id comparison works with string ids
       const itemsAsModelBase = this.props.items as unknown as ModelBase[];
-      return toggleSelected(state, itemsAsModelBase, id, value, shiftKey);
+      return toggleSelected(
+        state,
+        itemsAsModelBase,
+        id,
+        value ?? false,
+        shiftKey
+      );
     });
   };
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Component } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -119,7 +119,10 @@ class ImportGameRowConnector extends Component<ImportGameRowConnectorProps> {
   }
 }
 
+// The id is always passed from the parent component (ImportGameTable), not from state
 export default connect(
   createMapStateToProps,
   mapDispatchToProps
-)(ImportGameRowConnector);
+)(ImportGameRowConnector) as React.ComponentType<
+  Omit<ImportGameRowConnectorProps, 'queueLookupGame' | 'setImportGameValue'>
+>;
