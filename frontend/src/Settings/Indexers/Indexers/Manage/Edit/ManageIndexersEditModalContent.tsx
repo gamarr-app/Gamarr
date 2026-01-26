@@ -113,7 +113,7 @@ function ManageIndexersEditModalContent(
         setPriority(value as number);
         break;
       default:
-        console.warn(`EditIndexersModalContent Unknown Input: '${name}'`);
+        break;
     }
   }, []);
 

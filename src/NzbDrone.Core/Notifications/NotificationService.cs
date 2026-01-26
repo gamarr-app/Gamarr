@@ -76,8 +76,11 @@ namespace NzbDrone.Core.Notifications
                 return true;
             }
 
-            // TODO: this message could be more clear
-            _logger.Debug("{0} does not have any intersecting tags with {1}. Notification will not be sent", definition.Name, game.Title);
+            _logger.Debug("Notification '{0}' (tags: [{1}]) does not have any intersecting tags with game '{2}' (tags: [{3}]). Notification will not be sent",
+                definition.Name,
+                string.Join(", ", definition.Tags),
+                game.Title,
+                string.Join(", ", game.Tags));
             return false;
         }
 

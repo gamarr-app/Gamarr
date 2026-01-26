@@ -18,8 +18,11 @@ export default function findSelectedFilters(
   }
 
   if (!selectedFilter) {
-    // TODO: throw in dev
-    console.error('Matching filter not found');
+    if (process.env.NODE_ENV === 'development') {
+      throw new Error(
+        `Matching filter not found for key: ${selectedFilterKey}`
+      );
+    }
     return [];
   }
 

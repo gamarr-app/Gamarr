@@ -14,8 +14,14 @@ namespace NzbDrone.Core.Notifications.Twitter
             RuleFor(c => c.AccessToken).NotEmpty();
             RuleFor(c => c.AccessTokenSecret).NotEmpty();
 
-            // TODO: Validate that it is a valid username (numbers, letters and underscores - I think)
-            RuleFor(c => c.Mention).NotEmpty().When(c => c.DirectMessage);
+            RuleFor(c => c.Mention)
+                .NotEmpty()
+                .When(c => c.DirectMessage);
+
+            RuleFor(c => c.Mention)
+                .Matches(@"^[A-Za-z0-9_]{1,15}$")
+                .WithMessage("Username must contain only letters, numbers, and underscores (max 15 characters)")
+                .When(c => c.DirectMessage && !string.IsNullOrEmpty(c.Mention));
 
             RuleFor(c => c.DirectMessage).Equal(true)
                                          .WithMessage("Using Direct Messaging is recommended, or use a private account.")

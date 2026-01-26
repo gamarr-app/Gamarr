@@ -77,9 +77,7 @@ function ManageCustomFormatsEditModalContent(
           setIncludeCustomFormatWhenRenaming(value);
           break;
         default:
-          console.warn(
-            `EditCustomFormatsModalContent Unknown Input: '${name}'`
-          );
+          break;
       }
     },
     []

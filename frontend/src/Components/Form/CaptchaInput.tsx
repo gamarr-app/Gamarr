@@ -50,10 +50,9 @@ function CaptchaInput({
   const handleCaptchaChange = useCallback(
     (token: string | null) => {
       // If the captcha has expired `captchaResponse` will be null.
-      // In the event it's null don't try to get the captchaCookie.
-      // TODO: Should we clear the cookie? or reset the captcha?
-
+      // In the event it's null, reset the captcha state.
       if (!token) {
+        dispatch(resetCaptcha());
         return;
       }
 

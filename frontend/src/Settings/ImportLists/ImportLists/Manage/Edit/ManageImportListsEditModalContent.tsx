@@ -125,7 +125,7 @@ function ManageImportListsEditModalContent(
         setRootFolderPath(value as string);
         break;
       default:
-        console.warn(`EditImportListModalContent Unknown Input: '${name}'`);
+        break;
     }
   }, []);
 
