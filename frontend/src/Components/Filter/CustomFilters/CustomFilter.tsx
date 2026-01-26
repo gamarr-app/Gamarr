@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import IconButton from 'Components/Link/IconButton';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
@@ -17,86 +17,72 @@ interface CustomFilterProps {
   dispatchDeleteCustomFilter: (payload: { id: number }) => void;
 }
 
-interface CustomFilterState {
-  isDeleting: boolean;
-}
+function CustomFilter(props: CustomFilterProps) {
+  const {
+    id,
+    label,
+    selectedFilterKey,
+    isDeleting: isDeletingProp,
+    deleteError,
+    dispatchSetFilter,
+    onEditPress,
+    dispatchDeleteCustomFilter,
+  } = props;
 
-class CustomFilter extends Component<CustomFilterProps, CustomFilterState> {
-  //
-  // Lifecycle
+  const [isDeleting, setIsDeleting] = useState(false);
+  const prevIsDeletingRef = useRef(isDeletingProp);
 
-  constructor(props: CustomFilterProps) {
-    super(props);
-
-    this.state = {
-      isDeleting: false,
-    };
-  }
-
-  componentDidUpdate(prevProps: CustomFilterProps) {
-    const { isDeleting, deleteError } = this.props;
-
+  // Handle delete error - reset isDeleting state
+  useEffect(() => {
     if (
-      prevProps.isDeleting &&
-      !isDeleting &&
-      this.state.isDeleting &&
+      prevIsDeletingRef.current &&
+      !isDeletingProp &&
+      isDeleting &&
       deleteError
     ) {
-      this.setState({ isDeleting: false });
+      setIsDeleting(false);
     }
-  }
+    prevIsDeletingRef.current = isDeletingProp;
+  }, [isDeletingProp, isDeleting, deleteError]);
 
-  componentWillUnmount() {
-    const { id, selectedFilterKey, dispatchSetFilter } = this.props;
+  // Handle unmount - reset filter if this filter was being deleted
+  useEffect(() => {
+    return () => {
+      // Assume that delete and then unmounting means the deletion was successful.
+      // Moving this check to an ancestor would be more accurate, but would have
+      // more boilerplate.
+      if (isDeleting && id === selectedFilterKey) {
+        dispatchSetFilter({ selectedFilterKey: 'all' });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDeleting, id, selectedFilterKey]);
 
-    // Assume that delete and then unmounting means the deletion was successful.
-    // Moving this check to an ancestor would be more accurate, but would have
-    // more boilerplate.
-    if (this.state.isDeleting && id === selectedFilterKey) {
-      dispatchSetFilter({ selectedFilterKey: 'all' });
-    }
-  }
-
-  //
-  // Listeners
-
-  onEditPress = () => {
-    const { id, onEditPress } = this.props;
-
+  const handleEditPress = useCallback(() => {
     onEditPress(id);
-  };
+  }, [id, onEditPress]);
 
-  onRemovePress = () => {
-    const { id, dispatchDeleteCustomFilter } = this.props;
+  const handleRemovePress = useCallback(() => {
+    setIsDeleting(true);
+    dispatchDeleteCustomFilter({ id });
+  }, [id, dispatchDeleteCustomFilter]);
 
-    this.setState({ isDeleting: true }, () => {
-      dispatchDeleteCustomFilter({ id });
-    });
-  };
+  return (
+    <div className={styles.customFilter}>
+      <div className={styles.label}>{label}</div>
 
-  //
-  // Render
+      <div className={styles.actions}>
+        <IconButton name={icons.EDIT} onPress={handleEditPress} />
 
-  render() {
-    const { label } = this.props;
-
-    return (
-      <div className={styles.customFilter}>
-        <div className={styles.label}>{label}</div>
-
-        <div className={styles.actions}>
-          <IconButton name={icons.EDIT} onPress={this.onEditPress} />
-
-          <SpinnerIconButton
-            title={translate('RemoveFilter')}
-            name={icons.REMOVE}
-            isSpinning={this.state.isDeleting}
-            onPress={this.onRemovePress}
-          />
-        </div>
+        <SpinnerIconButton
+          title={translate('RemoveFilter')}
+          name={icons.REMOVE}
+          isSpinning={isDeleting}
+          onPress={handleRemovePress}
+        />
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default CustomFilter;
