@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import { clearAddGame, lookupGame } from 'Store/Actions/addGameActions';
@@ -14,11 +14,15 @@ import hasDifferentItems from 'Utilities/Object/hasDifferentItems';
 import parseUrl from 'Utilities/String/parseUrl';
 import AddNewGame, { AddNewGameItem } from './AddNewGame';
 
+interface LocationState {
+  search: string;
+}
+
 function createMapStateToProps() {
   return createSelector(
     (state: AppState) => state.addGame,
     (state: AppState) => state.games.items.length,
-    (_state: AppState, ownProps: RouteComponentProps) => ownProps.location,
+    (_state: AppState, ownProps: { location: LocationState }) => ownProps.location,
     (addGame, existingGamesCount, location) => {
       const { params } = parseUrl(location.search);
 
@@ -41,7 +45,8 @@ const mapDispatchToProps = {
   clearGameFiles,
 };
 
-interface AddNewGameConnectorProps extends RouteComponentProps {
+interface AddNewGameConnectorProps {
+  location: LocationState;
   term?: string;
   isFetching: boolean;
   isAdding: boolean;
@@ -56,7 +61,7 @@ interface AddNewGameConnectorProps extends RouteComponentProps {
   clearGameFiles: () => void;
 }
 
-class AddNewGameConnector extends Component<AddNewGameConnectorProps> {
+class AddNewGameConnectorClass extends Component<AddNewGameConnectorProps> {
   // eslint-disable-next-line react/sort-comp
   private _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -131,6 +136,15 @@ class AddNewGameConnector extends Component<AddNewGameConnectorProps> {
   }
 }
 
-export default withRouter(
-  connect(createMapStateToProps, mapDispatchToProps)(AddNewGameConnector)
-);
+const ConnectedAddNewGameConnector = connect(
+  createMapStateToProps,
+  mapDispatchToProps
+)(AddNewGameConnectorClass);
+
+function AddNewGameConnector() {
+  const location = useLocation();
+
+  return <ConnectedAddNewGameConnector location={location} />;
+}
+
+export default AddNewGameConnector;

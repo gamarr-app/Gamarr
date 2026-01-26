@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import { ImportGameItem } from 'App/State/ImportGameAppState';
@@ -14,10 +14,6 @@ import {
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import QualityProfile from 'typings/QualityProfile';
 import ImportGame from './ImportGame';
-
-interface MatchParams {
-  rootFolderId: string;
-}
 
 interface UnmappedFolder {
   name: string;
@@ -32,22 +28,24 @@ interface RootFolderItem {
   [key: string]: unknown;
 }
 
+interface OwnProps {
+  rootFolderId: number;
+}
+
 function createMapStateToProps() {
   return createSelector(
-    (_state: AppState, { match }: RouteComponentProps<MatchParams>) => match,
+    (_state: AppState, { rootFolderId }: OwnProps) => rootFolderId,
     (state: AppState) => state.rootFolders,
     (state: AppState) => state.addGame,
     (state: AppState) => state.importGame,
     (state: AppState) => state.settings.qualityProfiles,
-    (match, rootFolders, addGame, importGameState, qualityProfiles) => {
+    (rootFolderId, rootFolders, addGame, importGameState, qualityProfiles) => {
       const {
         isFetching: rootFoldersFetching,
         isPopulated: rootFoldersPopulated,
         error: rootFoldersError,
         items,
       } = rootFolders;
-
-      const rootFolderId = parseInt(match.params.rootFolderId);
 
       const result = {
         rootFolderId,
@@ -100,7 +98,7 @@ interface FetchRootFoldersPayload {
   timeout?: boolean;
 }
 
-interface ImportGameConnectorProps extends RouteComponentProps<MatchParams> {
+interface ImportGameConnectorProps {
   rootFolderId: number;
   rootFoldersFetching: boolean;
   rootFoldersPopulated: boolean;
@@ -114,7 +112,7 @@ interface ImportGameConnectorProps extends RouteComponentProps<MatchParams> {
   dispatchSetAddGameDefault: (defaults: Record<string, unknown>) => void;
 }
 
-class ImportGameConnector extends Component<ImportGameConnectorProps> {
+class ImportGameConnectorClass extends Component<ImportGameConnectorProps> {
   //
   // Lifecycle
 
@@ -181,7 +179,17 @@ class ImportGameConnector extends Component<ImportGameConnectorProps> {
   }
 }
 
-export default connect(
+const ConnectedImportGameConnector = connect(
   createMapStateToProps,
   mapDispatchToProps
-)(ImportGameConnector);
+)(ImportGameConnectorClass);
+
+function ImportGameConnector() {
+  const { rootFolderId } = useParams<{ rootFolderId: string }>();
+
+  return (
+    <ConnectedImportGameConnector rootFolderId={parseInt(rootFolderId || '0')} />
+  );
+}
+
+export default ImportGameConnector;

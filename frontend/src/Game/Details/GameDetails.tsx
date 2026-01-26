@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import TextTruncate from 'react-text-truncate';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -117,7 +117,7 @@ interface GameDetailsProps {
 
 function GameDetails({ gameId }: GameDetailsProps) {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const game = useGame(gameId);
   const allGames = useSelector(createAllGamesSelector());
@@ -355,13 +355,13 @@ function GameDetails({ gameId }: GameDetailsProps) {
         currentTouch - touchStart.current > 100 &&
         previousGame !== undefined
       ) {
-        history.push(getPathWithUrlBase(`/game/${previousGame.titleSlug}`));
+        navigate(getPathWithUrlBase(`/game/${previousGame.titleSlug}`));
       } else if (
         currentTouch < touchStart.current &&
         touchStart.current - currentTouch > 100 &&
         nextGame !== undefined
       ) {
-        history.push(getPathWithUrlBase(`/game/${nextGame.titleSlug}`));
+        navigate(getPathWithUrlBase(`/game/${nextGame.titleSlug}`));
       }
 
       touchStart.current = null;
@@ -394,11 +394,11 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
       if (event.composedPath && event.composedPath().length === 4) {
         if (event.key === 'ArrowLeft' && previousGame !== undefined) {
-          history.push(getPathWithUrlBase(`/game/${previousGame.titleSlug}`));
+          navigate(getPathWithUrlBase(`/game/${previousGame.titleSlug}`));
         }
 
         if (event.key === 'ArrowRight' && nextGame !== undefined) {
-          history.push(getPathWithUrlBase(`/game/${nextGame.titleSlug}`));
+          navigate(getPathWithUrlBase(`/game/${nextGame.titleSlug}`));
         }
       }
     },

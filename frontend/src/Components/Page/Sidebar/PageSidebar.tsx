@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import QueueStatus from 'Activity/Queue/Status/QueueStatus';
 import { IconName } from 'Components/Icon';
 import OverlayScroller from 'Components/Scroller/OverlayScroller';

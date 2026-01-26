@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import {
   addRootFolder,
@@ -46,7 +46,7 @@ const createMapStateToProps = createSelector(
 
 function ImportGameSelectFolderConnector() {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const state = useSelector(createMapStateToProps);
   const prevItemsRef = useRef<RootFolderItemFromState[]>(state.items);
   const prevIsSavingRef = useRef(state.isSaving);
@@ -67,13 +67,13 @@ function ImportGameSelectFolderConnector() {
       );
 
       if (newRootFolders.length === 1) {
-        history.push(`/add/import/${newRootFolders[0].id}`);
+        navigate(`/add/import/${newRootFolders[0].id}`);
       }
     }
 
     prevItemsRef.current = items;
     prevIsSavingRef.current = isSaving;
-  }, [items, isSaving, saveError, history]);
+  }, [items, isSaving, saveError, navigate]);
 
   const onNewRootFolderSelect = useCallback(
     (path: string) => {

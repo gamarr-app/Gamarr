@@ -1,5 +1,5 @@
 import React, { Children, ReactElement, ReactNode } from 'react';
-import { Switch as RouterSwitch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 
 interface ExtendedRoute {
@@ -13,7 +13,7 @@ interface SwitchProps {
 
 function Switch({ children }: SwitchProps) {
   return (
-    <RouterSwitch>
+    <Routes>
       {Children.map(children, (child) => {
         if (!React.isValidElement<ExtendedRoute>(child)) {
           return child;
@@ -31,7 +31,7 @@ function Switch({ children }: SwitchProps) {
 
         return React.cloneElement(child, { path });
       })}
-    </RouterSwitch>
+    </Routes>
   );
 }
 

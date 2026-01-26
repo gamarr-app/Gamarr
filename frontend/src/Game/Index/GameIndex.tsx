@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
+import { useNavigationType } from 'react-router-dom';
 import { SelectProvider } from 'App/SelectContext';
 import { RSS_SYNC } from 'Commands/commandNames';
 import Alert from 'Components/Alert';
@@ -71,7 +71,7 @@ interface GameIndexProps {
 }
 
 const GameIndex = withScrollPosition((props: GameIndexProps) => {
-  const history = useHistory();
+  const navigationType = useNavigationType();
 
   const {
     isFetching,
@@ -105,10 +105,10 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
   const [isSelectMode, setIsSelectMode] = useState(false);
 
   useEffect(() => {
-    if (history.action === 'PUSH') {
+    if (navigationType === 'PUSH') {
       dispatch(fetchGames());
     }
-  }, [history, dispatch]);
+  }, [navigationType, dispatch]);
 
   useEffect(() => {
     dispatch(fetchQueueDetails({ all: true }));

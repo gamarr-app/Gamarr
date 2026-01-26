@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom';
 import NotFound from 'Components/NotFound';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
@@ -10,7 +10,7 @@ import GameDetails from './GameDetails';
 function GameDetailsPage() {
   const allGames = useSelector(createAllGamesSelector());
   const { titleSlug } = useParams<{ titleSlug: string }>();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const gameIndex = allGames.findIndex((game) => game.titleSlug === titleSlug);
 
@@ -22,9 +22,9 @@ function GameDetailsPage() {
       previousIndex !== -1 &&
       previousIndex !== undefined
     ) {
-      history.push(`${window.Gamarr.urlBase}/`);
+      navigate(`${window.Gamarr.urlBase}/`);
     }
-  }, [gameIndex, previousIndex, history]);
+  }, [gameIndex, previousIndex, navigate]);
 
   if (gameIndex === -1) {
     return <NotFound message={translate('GameCannotBeFound')} />;
