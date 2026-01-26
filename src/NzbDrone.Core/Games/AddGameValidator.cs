@@ -18,10 +18,14 @@ namespace NzbDrone.Core.Games
         {
             RuleFor(c => c.Path).Cascade(CascadeMode.Stop)
                                 .IsValidPath()
-                                .SetValidator(rootFolderValidator)
-                                .SetValidator(recycleBinValidator)
-                                .SetValidator(gamePathValidator)
-                                .SetValidator(gameAncestorValidator);
+                                .Must(value => rootFolderValidator.Validate(value))
+                                .WithMessage("Path is already configured as a root folder")
+                                .Must(value => recycleBinValidator.Validate(value))
+                                .WithMessage("Path is configured recycle bin folder")
+                                .Must((game, value) => gamePathValidator.Validate(value, game.Id))
+                                .WithMessage("Path is already configured for an existing game")
+                                .Must(value => gameAncestorValidator.Validate(value))
+                                .WithMessage("Path is an ancestor of an existing game");
         }
     }
 }

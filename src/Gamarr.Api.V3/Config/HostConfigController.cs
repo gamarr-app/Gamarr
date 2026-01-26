@@ -53,7 +53,7 @@ namespace Gamarr.Api.V3.Config
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .IsValidPath()
-                .SetValidator(fileExistsValidator)
+                .SetPathValidator(fileExistsValidator)
                 .IsValidCertificate()
                 .When(c => c.EnableSsl);
 

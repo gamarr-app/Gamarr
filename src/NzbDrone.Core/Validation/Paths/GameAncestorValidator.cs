@@ -1,11 +1,10 @@
 using System.Linq;
-using FluentValidation.Validators;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Validation.Paths
 {
-    public class GameAncestorValidator : PropertyValidator
+    public class GameAncestorValidator
     {
         private readonly IGameService _gameService;
 
@@ -14,18 +13,14 @@ namespace NzbDrone.Core.Validation.Paths
             _gameService = gameService;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Path '{path}' is an ancestor of an existing game";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return true;
             }
 
-            context.MessageFormatter.AppendArgument("path", context.PropertyValue.ToString());
-
-            return !_gameService.AllGamePaths().Any(s => context.PropertyValue.ToString().IsParentPath(s.Value));
+            return !_gameService.AllGamePaths().Any(s => value.IsParentPath(s.Value));
         }
     }
 }

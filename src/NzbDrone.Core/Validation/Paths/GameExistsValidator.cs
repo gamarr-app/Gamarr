@@ -1,9 +1,8 @@
-using FluentValidation.Validators;
 using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Validation.Paths
 {
-    public class GameExistsValidator : PropertyValidator
+    public class GameExistsValidator
     {
         private readonly IGameService _gameService;
 
@@ -12,16 +11,12 @@ namespace NzbDrone.Core.Validation.Paths
             _gameService = gameService;
         }
 
-        protected override string GetDefaultMessageTemplate() => "This game has already been added";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(int igdbId)
         {
-            if (context.PropertyValue == null)
+            if (igdbId == 0)
             {
                 return true;
             }
-
-            var igdbId = (int)context.PropertyValue;
 
             return _gameService.FindByIgdbId(igdbId) == null;
         }

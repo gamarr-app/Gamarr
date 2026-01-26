@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using FizzWare.NBuilder;
 using FluentAssertions;
+using FluentValidation;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Games;
@@ -20,7 +21,7 @@ namespace NzbDrone.Core.Test.ValidationTests
         {
             _validator = new TestValidator<Game>
                             {
-                                v => v.RuleFor(s => s.Path).SetValidator(Subject)
+                                v => v.RuleFor(s => s.Path).Must(path => Subject.Validate(path))
                             };
         }
 

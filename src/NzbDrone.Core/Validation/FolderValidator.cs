@@ -1,23 +1,18 @@
-using FluentValidation.Validators;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 
 namespace NzbDrone.Core.Validation
 {
-    public class FolderValidator : PropertyValidator
+    public class FolderValidator
     {
-        protected override string GetDefaultMessageTemplate() => "Invalid Path: '{path}'";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return false;
             }
 
-            context.MessageFormatter.AppendArgument("path", context.PropertyValue.ToString());
-
-            return context.PropertyValue.ToString().IsPathValid(PathValidationType.CurrentOs);
+            return value.IsPathValid(PathValidationType.CurrentOs);
         }
     }
 }

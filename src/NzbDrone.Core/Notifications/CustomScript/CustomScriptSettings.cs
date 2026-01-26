@@ -9,8 +9,10 @@ namespace NzbDrone.Core.Notifications.CustomScript
     {
         public CustomScriptSettingsValidator()
         {
+            var systemFolderValidator = new SystemFolderValidator();
+
             RuleFor(c => c.Path).IsValidPath();
-            RuleFor(c => c.Path).SetValidator(new SystemFolderValidator()).WithMessage("Must not be a descendant of '{systemFolder}'");
+            RuleFor(c => c.Path).Must(value => systemFolderValidator.Validate(value)).WithMessage("Must not be a descendant of system folder");
             RuleFor(c => c.Arguments).Empty().WithMessage("Arguments are no longer supported for custom scripts");
         }
     }

@@ -1,20 +1,14 @@
-﻿using FluentValidation.Validators;
+using FluentValidation;
+using FluentValidation.Validators;
 
 namespace Gamarr.Http.Validation
 {
-    public class RssSyncIntervalValidator : PropertyValidator
+    public class RssSyncIntervalValidator<T> : PropertyValidator<T, int>
     {
-        protected override string GetDefaultMessageTemplate() => "Must be between 10 and 120 or 0 to disable";
+        public override string Name => "RssSyncIntervalValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, int value)
         {
-            if (context.PropertyValue == null)
-            {
-                return true;
-            }
-
-            var value = (int)context.PropertyValue;
-
             if (value == 0)
             {
                 return true;
@@ -22,5 +16,7 @@ namespace Gamarr.Http.Validation
 
             return value is >= 10 and <= 120;
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Must be between 10 and 120 or 0 to disable";
     }
 }

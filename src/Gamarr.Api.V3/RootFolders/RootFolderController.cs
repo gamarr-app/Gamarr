@@ -32,13 +32,13 @@ namespace Gamarr.Api.V3.RootFolders
             SharedValidator.RuleFor(c => c.Path)
                 .Cascade(CascadeMode.Stop)
                 .IsValidPath()
-                           .SetValidator(rootFolderValidator)
-                           .SetValidator(mappedNetworkDriveValidator)
-                           .SetValidator(startupFolderValidator)
-                           .SetValidator(recycleBinValidator)
-                           .SetValidator(pathExistsValidator)
-                           .SetValidator(systemFolderValidator)
-                           .SetValidator(folderWritableValidator);
+                           .SetPathValidator(rootFolderValidator)
+                           .SetPathValidator(mappedNetworkDriveValidator)
+                           .SetPathValidator(startupFolderValidator)
+                           .SetPathValidator(recycleBinValidator)
+                           .SetPathValidator(pathExistsValidator)
+                           .SetPathValidator(systemFolderValidator)
+                           .SetPathValidator(folderWritableValidator);
         }
 
         protected override RootFolderResource GetResourceById(int id)

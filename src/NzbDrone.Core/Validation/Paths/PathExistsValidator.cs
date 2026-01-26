@@ -1,9 +1,8 @@
-﻿using FluentValidation.Validators;
 using NzbDrone.Common.Disk;
 
 namespace NzbDrone.Core.Validation.Paths
 {
-    public class PathExistsValidator : PropertyValidator
+    public class PathExistsValidator
     {
         private readonly IDiskProvider _diskProvider;
 
@@ -12,18 +11,14 @@ namespace NzbDrone.Core.Validation.Paths
             _diskProvider = diskProvider;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Path '{path}' does not exist";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return false;
             }
 
-            context.MessageFormatter.AppendArgument("path", context.PropertyValue.ToString());
-
-            return _diskProvider.FolderExists(context.PropertyValue.ToString());
+            return _diskProvider.FolderExists(value);
         }
     }
 }

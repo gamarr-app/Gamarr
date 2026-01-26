@@ -1,10 +1,8 @@
-﻿using System;
-using FluentValidation.Validators;
 using NzbDrone.Common.Disk;
 
 namespace NzbDrone.Core.Validation.Paths
 {
-    public class FolderWritableValidator : PropertyValidator
+    public class FolderWritableValidator
     {
         private readonly IDiskProvider _diskProvider;
 
@@ -13,19 +11,14 @@ namespace NzbDrone.Core.Validation.Paths
             _diskProvider = diskProvider;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Folder '{path}' is not writable by user '{user}'";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return false;
             }
 
-            context.MessageFormatter.AppendArgument("path", context.PropertyValue.ToString());
-            context.MessageFormatter.AppendArgument("user", Environment.UserName);
-
-            return _diskProvider.FolderWritable(context.PropertyValue.ToString());
+            return _diskProvider.FolderWritable(value);
         }
     }
 }

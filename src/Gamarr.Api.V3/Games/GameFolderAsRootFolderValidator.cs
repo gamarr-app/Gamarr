@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.IO;
+using FluentValidation;
 using FluentValidation.Validators;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Organizer;
 
 namespace Gamarr.Api.V3.Games
 {
-    public class GameFolderAsRootFolderValidator : PropertyValidator
+    public class GameFolderAsRootFolderValidator : PropertyValidator<object, string>
     {
         private readonly IBuildFileNames _fileNameBuilder;
 
@@ -15,11 +16,11 @@ namespace Gamarr.Api.V3.Games
             _fileNameBuilder = fileNameBuilder;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Root folder path '{rootFolderPath}' contains game folder '{gameFolder}'";
+        public override string Name => "GameFolderAsRootFolderValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<object> context, string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return true;
             }
@@ -29,7 +30,7 @@ namespace Gamarr.Api.V3.Games
                 return true;
             }
 
-            var rootFolderPath = context.PropertyValue.ToString();
+            var rootFolderPath = value;
 
             if (rootFolderPath.IsNullOrWhiteSpace())
             {
@@ -52,5 +53,7 @@ namespace Gamarr.Api.V3.Games
 
             return distance >= Math.Max(1, gameFolder.Length * 0.2);
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Root folder path '{rootFolderPath}' contains game folder '{gameFolder}'";
     }
 }

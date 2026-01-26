@@ -1,33 +1,26 @@
-using FluentValidation.Validators;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 
 namespace NzbDrone.Core.Validation.Paths
 {
-    public class SystemFolderValidator : PropertyValidator
+    public class SystemFolderValidator
     {
-        protected override string GetDefaultMessageTemplate() => "Path '{path}' is {relationship} system folder {systemFolder}";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(string value)
         {
-            var folder = context.PropertyValue.ToString();
-            context.MessageFormatter.AppendArgument("path", folder);
+            if (value == null)
+            {
+                return true;
+            }
 
             foreach (var systemFolder in SystemFolders.GetSystemFolders())
             {
-                context.MessageFormatter.AppendArgument("systemFolder", systemFolder);
-
-                if (systemFolder.PathEquals(folder))
+                if (systemFolder.PathEquals(value))
                 {
-                    context.MessageFormatter.AppendArgument("relationship", "set to");
-
                     return false;
                 }
 
-                if (systemFolder.IsParentPath(folder))
+                if (systemFolder.IsParentPath(value))
                 {
-                    context.MessageFormatter.AppendArgument("relationship", "child of");
-
                     return false;
                 }
             }

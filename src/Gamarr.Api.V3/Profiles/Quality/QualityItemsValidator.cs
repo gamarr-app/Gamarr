@@ -10,7 +10,7 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public static IRuleBuilderOptions<T, IList<QualityProfileQualityItemResource>> ValidItems<T>(this IRuleBuilder<T, IList<QualityProfileQualityItemResource>> ruleBuilder)
         {
-            ruleBuilder.SetValidator(new NotEmptyValidator(null));
+            ruleBuilder.NotEmpty();
             ruleBuilder.SetValidator(new AllowedValidator<T>());
             ruleBuilder.SetValidator(new QualityNameValidator<T>());
             ruleBuilder.SetValidator(new GroupItemValidator<T>());
@@ -23,84 +23,93 @@ namespace Gamarr.Api.V3.Profiles.Quality
         }
     }
 
-    public class AllowedValidator<T> : PropertyValidator
+    public class AllowedValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Must contain at least one allowed quality";
+        public override string Name => "AllowedValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> list)
         {
-            return context.PropertyValue is IList<QualityProfileQualityItemResource> list &&
-                   list.Any(c => c.Allowed);
+            return list != null && list.Any(c => c.Allowed);
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Must contain at least one allowed quality";
     }
 
-    public class GroupItemValidator<T> : PropertyValidator
+    public class GroupItemValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Groups must contain multiple qualities";
+        public override string Name => "GroupItemValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
 
             return !items.Any(i => i.Name.IsNotNullOrWhiteSpace() && i.Items.Count <= 1);
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must contain multiple qualities";
     }
 
-    public class QualityNameValidator<T> : PropertyValidator
+    public class QualityNameValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Individual qualities should not be named";
+        public override string Name => "QualityNameValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
 
             return !items.Any(i => i.Name.IsNotNullOrWhiteSpace() && i.Quality != null);
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Individual qualities should not be named";
     }
 
-    public class ItemGroupNameValidator<T> : PropertyValidator
+    public class ItemGroupNameValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Groups must have a name";
+        public override string Name => "ItemGroupNameValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
 
             return !items.Any(i => i.Quality == null && i.Name.IsNullOrWhiteSpace());
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must have a name";
     }
 
-    public class ItemGroupIdValidator<T> : PropertyValidator
+    public class ItemGroupIdValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Groups must have an ID";
+        public override string Name => "ItemGroupIdValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
 
             return !items.Any(i => i.Quality == null && i.Id == 0);
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must have an ID";
     }
 
-    public class UniqueIdValidator<T> : PropertyValidator
+    public class UniqueIdValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Groups must have a unique ID";
+        public override string Name => "UniqueIdValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
@@ -110,15 +119,17 @@ namespace Gamarr.Api.V3.Profiles.Quality
 
             return groupedIds.All(g => g.Count() == 1);
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must have a unique ID";
     }
 
-    public class UniqueQualityIdValidator<T> : PropertyValidator
+    public class UniqueQualityIdValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Qualities can only be used once";
+        public override string Name => "UniqueQualityIdValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
@@ -152,15 +163,17 @@ namespace Gamarr.Api.V3.Profiles.Quality
 
             return true;
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Qualities can only be used once";
     }
 
-    public class AllQualitiesValidator<T> : PropertyValidator
+    public class AllQualitiesValidator<T> : PropertyValidator<T, IList<QualityProfileQualityItemResource>>
     {
-        protected override string GetDefaultMessageTemplate() => "Must contain all qualities";
+        public override string Name => "AllQualitiesValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
         {
-            if (context.PropertyValue is not IList<QualityProfileQualityItemResource> items)
+            if (items == null)
             {
                 return false;
             }
@@ -194,5 +207,7 @@ namespace Gamarr.Api.V3.Profiles.Quality
 
             return true;
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Must contain all qualities";
     }
 }
