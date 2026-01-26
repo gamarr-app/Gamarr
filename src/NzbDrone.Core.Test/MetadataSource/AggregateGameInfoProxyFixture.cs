@@ -698,38 +698,51 @@ namespace NzbDrone.Core.Test.MetadataSource
         }
 
         // ============================================================
-        // GetBulkGameInfo Tests
+        // GetBulkGameInfoByIgdbIds Tests
         // ============================================================
 
         [Test]
-        public void get_bulk_game_info_should_return_empty_when_all_sources_fail()
+        public void get_bulk_game_info_by_igdb_ids_should_return_empty_when_no_credentials()
         {
             var ids = new List<int> { 100, 200, 300 };
 
-            var result = _subject.GetBulkGameInfo(ids);
+            var result = _subject.GetBulkGameInfoByIgdbIds(ids);
 
             result.Should().NotBeNull();
             result.Should().BeEmpty();
         }
 
         [Test]
-        public void get_bulk_game_info_should_not_throw_when_steam_fails()
-        {
-            var ids = new List<int> { 100, 200 };
-
-            Action act = () => _subject.GetBulkGameInfo(ids);
-
-            act.Should().NotThrow();
-        }
-
-        [Test]
-        public void get_bulk_game_info_should_not_throw_when_igdb_fails()
+        public void get_bulk_game_info_by_igdb_ids_should_not_throw_when_igdb_fails()
         {
             GivenIgdbCredentials();
 
             var ids = new List<int> { 100, 200 };
 
-            Action act = () => _subject.GetBulkGameInfo(ids);
+            Action act = () => _subject.GetBulkGameInfoByIgdbIds(ids);
+
+            act.Should().NotThrow();
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void get_bulk_game_info_by_rawg_ids_should_return_empty_when_no_credentials()
+        {
+            var ids = new List<int> { 100, 200, 300 };
+
+            var result = _subject.GetBulkGameInfoByRawgIds(ids);
+
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
+        }
+
+        [Test]
+        public void get_bulk_game_info_by_steam_app_ids_should_not_throw()
+        {
+            var ids = new List<int> { 100, 200 };
+
+            Action act = () => _subject.GetBulkGameInfoBySteamAppIds(ids);
 
             act.Should().NotThrow();
 

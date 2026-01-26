@@ -71,20 +71,38 @@ namespace Gamarr.Api.V3.ImportLists
 
                 if (includeRecommendations)
                 {
+                    // Get IGDB recommendations
                     try
                     {
-                        var recommendedResults = _gameService.GetRecommendedIgdbIds();
+                        var recommendedIgdbIds = _gameService.GetRecommendedIgdbIds();
 
-                        if (recommendedResults.Count > 0)
+                        if (recommendedIgdbIds.Count > 0)
                         {
-                            var mapped = _gameInfo.GetBulkGameInfo(recommendedResults).Select(m => new Game { GameMetadata = m }).ToList();
+                            var mapped = _gameInfo.GetBulkGameInfoByIgdbIds(recommendedIgdbIds).Select(m => new Game { GameMetadata = m }).ToList();
 
                             realResults.AddRange(MapToResource(mapped.Where(x => x != null), gameLanguage, isRecommendation: true));
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.Warn(ex, "Failed to get recommended games");
+                        _logger.Warn(ex, "Failed to get IGDB recommended games");
+                    }
+
+                    // Get RAWG recommendations
+                    try
+                    {
+                        var recommendedRawgIds = _gameService.GetRecommendedRawgIds();
+
+                        if (recommendedRawgIds.Count > 0)
+                        {
+                            var mapped = _gameInfo.GetBulkGameInfoByRawgIds(recommendedRawgIds).Select(m => new Game { GameMetadata = m }).ToList();
+
+                            realResults.AddRange(MapToResource(mapped.Where(x => x != null), gameLanguage, isRecommendation: true));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to get RAWG recommended games");
                     }
                 }
 

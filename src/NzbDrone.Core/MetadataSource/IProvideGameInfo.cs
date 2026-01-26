@@ -13,7 +13,11 @@ namespace NzbDrone.Core.MetadataSource
 
         // Secondary identifiers
         GameMetadata GetGameInfo(int igdbId);
-        List<GameMetadata> GetBulkGameInfo(List<int> igdbIds);
+
+        // Bulk lookups by specific ID type
+        List<GameMetadata> GetBulkGameInfoByIgdbIds(List<int> igdbIds);
+        List<GameMetadata> GetBulkGameInfoBySteamAppIds(List<int> steamAppIds);
+        List<GameMetadata> GetBulkGameInfoByRawgIds(List<int> rawgIds);
 
         // Collection info
         GameCollection GetCollectionInfo(int igdbId);

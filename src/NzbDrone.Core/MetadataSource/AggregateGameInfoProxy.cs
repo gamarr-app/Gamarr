@@ -224,67 +224,84 @@ namespace NzbDrone.Core.MetadataSource
             return null;
         }
 
-        public List<GameMetadata> GetBulkGameInfo(List<int> gameIds)
+        public List<GameMetadata> GetBulkGameInfoByIgdbIds(List<int> igdbIds)
         {
             var results = new List<GameMetadata>();
-            var remainingIds = new List<int>(gameIds);
 
-            // Try Steam first for each ID (no API key needed)
-            // Limit to avoid too many API calls
-            foreach (var id in gameIds.Take(20))
-            {
-                try
-                {
-                    var steamResult = _steamProxy.GetGameBySteamAppId(id);
-                    if (steamResult != null)
-                    {
-                        results.Add(steamResult);
-                        remainingIds.Remove(id);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Debug(ex, "ID {0} not found in Steam", id);
-                }
-            }
-
-            if (!remainingIds.Any())
+            if (igdbIds == null || !igdbIds.Any())
             {
                 return results;
             }
 
-            // Try IGDB for remaining IDs (preferred secondary source)
             if (HasIgdbCredentials)
             {
                 try
                 {
-                    var igdbResults = _igdbProxy.GetBulkGameInfo(remainingIds);
+                    var igdbResults = _igdbProxy.GetBulkGameInfo(igdbIds);
                     results.AddRange(igdbResults);
 
-                    // Remove found IDs
-                    foreach (var game in igdbResults)
+                    if (igdbResults.Count < igdbIds.Count)
                     {
-                        remainingIds.Remove(game.IgdbId);
+                        _logger.Debug("IGDB returned {0} of {1} requested games", igdbResults.Count, igdbIds.Count);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to get bulk game info from IGDB, trying RAWG");
+                    _logger.Warn(ex, "Failed to get bulk game info from IGDB");
                 }
             }
 
-            if (!remainingIds.Any())
+            return results;
+        }
+
+        public List<GameMetadata> GetBulkGameInfoBySteamAppIds(List<int> steamAppIds)
+        {
+            var results = new List<GameMetadata>();
+
+            if (steamAppIds == null || !steamAppIds.Any())
             {
                 return results;
             }
 
-            // Fall back to RAWG for any remaining
+            foreach (var steamAppId in steamAppIds.Take(20))
+            {
+                try
+                {
+                    var result = GetGameBySteamAppId(steamAppId);
+                    if (result != null)
+                    {
+                        results.Add(result);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Failed to get game info for Steam App ID {0}", steamAppId);
+                }
+            }
+
+            return results;
+        }
+
+        public List<GameMetadata> GetBulkGameInfoByRawgIds(List<int> rawgIds)
+        {
+            var results = new List<GameMetadata>();
+
+            if (rawgIds == null || !rawgIds.Any())
+            {
+                return results;
+            }
+
             if (HasRawgCredentials)
             {
                 try
                 {
-                    var rawgResults = _rawgProxy.GetBulkGameInfo(remainingIds);
+                    var rawgResults = _rawgProxy.GetBulkGameInfo(rawgIds);
                     results.AddRange(rawgResults);
+
+                    if (rawgResults.Count < rawgIds.Count)
+                    {
+                        _logger.Debug("RAWG returned {0} of {1} requested games", rawgResults.Count, rawgIds.Count);
+                    }
                 }
                 catch (Exception ex)
                 {

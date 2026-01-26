@@ -163,6 +163,24 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             return games;
         }
 
+        public List<GameMetadata> GetBulkGameInfoByRawgIds(List<int> rawgIds)
+        {
+            return GetBulkGameInfo(rawgIds);
+        }
+
+        public List<GameMetadata> GetBulkGameInfoByIgdbIds(List<int> igdbIds)
+        {
+            // RAWG doesn't know IGDB IDs
+            return new List<GameMetadata>();
+        }
+
+        public List<GameMetadata> GetBulkGameInfoBySteamAppIds(List<int> steamAppIds)
+        {
+            // RAWG doesn't support bulk lookup by Steam App IDs directly
+            // Use AggregateGameInfoProxy for Steam-based lookups
+            return new List<GameMetadata>();
+        }
+
         public List<GameMetadata> GetTrendingGames()
         {
             // Get recently released games sorted by popularity/additions
