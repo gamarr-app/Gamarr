@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Games
         Game FindByPath(string path);
         Dictionary<int, string> AllGamePaths();
         Dictionary<int, List<int>> AllGameTags();
-        List<int> GetRecommendations();
+        List<int> GetIgdbRecommendations();
         List<int> GetRawgRecommendations();
         bool ExistsByMetadataId(int metadataId);
         HashSet<int> AllGameWithCollectionsIgdbIds();
@@ -357,7 +357,7 @@ namespace NzbDrone.Core.Games
             }
         }
 
-        public List<int> GetRecommendations()
+        public List<int> GetIgdbRecommendations()
         {
             var recommendations = new List<int>();
 

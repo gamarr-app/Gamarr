@@ -446,7 +446,7 @@ namespace NzbDrone.Core.Games
 
         public List<int> GetRecommendedIgdbIds()
         {
-            return _gameRepository.GetRecommendations();
+            return _gameRepository.GetIgdbRecommendations();
         }
 
         public List<int> GetRecommendedRawgIds()
