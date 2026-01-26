@@ -60,6 +60,7 @@ import createClientSideCollectionSelector, {
   CollectionResult,
 } from 'Store/Selectors/createClientSideCollectionSelector';
 import { SortCallback } from 'typings/callbacks';
+import { SelectStateInputProps } from 'typings/props';
 import { CheckInputChanged } from 'typings/inputs';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
@@ -75,10 +76,9 @@ type SelectType =
   | 'language'
   | 'indexerFlags';
 
-// TODO: This feels janky to do, but not sure of a better way currently
-type OnSelectedChangeCallback = React.ComponentProps<
-  typeof InteractiveImportRow
->['onSelectedChange'];
+type InteractiveImportSelectedChangeCallback = (
+  props: SelectStateInputProps & { hasGameFileId: boolean }
+) => void;
 
 const COLUMNS = [
   {
@@ -396,7 +396,7 @@ function InteractiveImportModalContent(
     [items, setSelectState]
   );
 
-  const onSelectedChange = useCallback<OnSelectedChangeCallback>(
+  const onSelectedChange = useCallback<InteractiveImportSelectedChangeCallback>(
     ({ id, value, hasGameFileId, shiftKey = false }) => {
       setSelectState({
         type: 'toggleSelected',
