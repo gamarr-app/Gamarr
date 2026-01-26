@@ -16,13 +16,19 @@ interface UnmappedFolder {
 interface ImportGameRootFolderRowProps {
   id: number;
   path: string;
-  freeSpace: number;
-  unmappedFolders: UnmappedFolder[];
+  freeSpace?: number;
+  unmappedFolders?: UnmappedFolder[];
   onDeletePress: () => void;
 }
 
 function ImportGameRootFolderRow(props: ImportGameRootFolderRowProps) {
-  const { id, path, freeSpace, unmappedFolders, onDeletePress } = props;
+  const {
+    id,
+    path,
+    freeSpace = 0,
+    unmappedFolders = [],
+    onDeletePress,
+  } = props;
 
   const unmappedFoldersCount = unmappedFolders.length || '-';
 
@@ -52,10 +58,5 @@ function ImportGameRootFolderRow(props: ImportGameRootFolderRowProps) {
     </TableRow>
   );
 }
-
-ImportGameRootFolderRow.defaultProps = {
-  freeSpace: 0,
-  unmappedFolders: [],
-};
 
 export default ImportGameRootFolderRow;

@@ -1,6 +1,5 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { deleteRootFolder } from 'Store/Actions/rootFolderActions';
 import ImportGameRootFolderRow from './ImportGameRootFolderRow';
 
@@ -10,46 +9,32 @@ interface UnmappedFolder {
   relativePath: string;
 }
 
-function createMapStateToProps() {
-  return createSelector(() => {
-    return {};
-  });
-}
-
-const mapDispatchToProps = {
-  deleteRootFolder,
-};
-
 interface ImportGameRootFolderRowConnectorProps {
   id: number;
   path: string;
   freeSpace: number;
   unmappedFolders: UnmappedFolder[];
-  deleteRootFolder: (payload: { id: number }) => void;
 }
 
-class ImportGameRootFolderRowConnector extends Component<ImportGameRootFolderRowConnectorProps> {
-  //
-  // Listeners
+function ImportGameRootFolderRowConnector(
+  props: ImportGameRootFolderRowConnectorProps
+) {
+  const { id, path, freeSpace, unmappedFolders } = props;
+  const dispatch = useDispatch();
 
-  onDeletePress = () => {
-    this.props.deleteRootFolder({ id: this.props.id });
-  };
+  const onDeletePress = useCallback(() => {
+    dispatch(deleteRootFolder({ id }));
+  }, [dispatch, id]);
 
-  //
-  // Render
-
-  render() {
-    return (
-      <ImportGameRootFolderRow
-        {...this.props}
-        onDeletePress={this.onDeletePress}
-      />
-    );
-  }
+  return (
+    <ImportGameRootFolderRow
+      id={id}
+      path={path}
+      freeSpace={freeSpace}
+      unmappedFolders={unmappedFolders}
+      onDeletePress={onDeletePress}
+    />
+  );
 }
 
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(ImportGameRootFolderRowConnector);
+export default ImportGameRootFolderRowConnector;

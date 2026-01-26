@@ -13,7 +13,6 @@ interface GameLanguagesProps {
 function GameLanguages(props: GameLanguagesProps) {
   const { className, languages, isCutoffNotMet = true } = props;
 
-  // TODO: Typescript - Remove once everything is converted
   if (!languages || languages.length === 0) {
     return null;
   }
