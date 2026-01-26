@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import NumberInput from 'Components/Form/NumberInput';
 import SelectInput from 'Components/Form/SelectInput';
 import TextInput from 'Components/Form/TextInput';
@@ -76,31 +76,37 @@ interface DateFilterBuilderRowValueProps {
   }) => void;
 }
 
-class DateFilterBuilderRowValue extends Component<DateFilterBuilderRowValueProps> {
-  //
-  // Lifecycle
+function DateFilterBuilderRowValue(props: DateFilterBuilderRowValueProps) {
+  const { filterType, filterValue, onChange } = props;
 
-  componentDidMount() {
-    const { filterType, filterValue, onChange } = this.props;
+  const prevFilterTypeRef = useRef(filterType);
+  const isInitialMount = useRef(true);
 
-    if (isInFilter(filterType) && isString(filterValue)) {
-      onChange({
-        name: NAME,
-        value: {
-          time: timeOptions[0].key,
-          value: null,
-        },
-      });
-    }
-  }
-
-  componentDidUpdate(prevProps: DateFilterBuilderRowValueProps) {
-    const { filterType, filterValue, onChange } = this.props;
-
-    if (prevProps.filterType === filterType) {
+  // Handle mount and filterType changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      // componentDidMount equivalent
+      isInitialMount.current = false;
+      if (isInFilter(filterType) && isString(filterValue)) {
+        onChange({
+          name: NAME,
+          value: {
+            time: timeOptions[0].key,
+            value: null,
+          },
+        });
+      }
       return;
     }
 
+    // componentDidUpdate equivalent
+    if (prevFilterTypeRef.current === filterType) {
+      prevFilterTypeRef.current = filterType;
+      return;
+    }
+
+    prevFilterTypeRef.current = filterType;
+
     if (isInFilter(filterType) && isString(filterValue)) {
       onChange({
         name: NAME,
@@ -109,7 +115,6 @@ class DateFilterBuilderRowValue extends Component<DateFilterBuilderRowValueProps
           value: null,
         },
       });
-
       return;
     }
 
@@ -119,87 +124,79 @@ class DateFilterBuilderRowValue extends Component<DateFilterBuilderRowValueProps
         value: '',
       });
     }
+  }, [filterType, filterValue, onChange]);
+
+  const onValueChange = useCallback(
+    ({ value }: InputChanged<string | number | null>) => {
+      let newValue: string | DateFilterValue = value as string;
+
+      if (!isString(value)) {
+        newValue = {
+          time: (filterValue as DateFilterValue).time,
+          value: value as number,
+        };
+      }
+
+      onChange({
+        name: NAME,
+        value: newValue,
+      });
+    },
+    [filterValue, onChange]
+  );
+
+  const onTimeChange = useCallback(
+    ({ value }: InputChanged<string>) => {
+      onChange({
+        name: NAME,
+        value: {
+          time: value,
+          value: (filterValue as DateFilterValue).value,
+        },
+      });
+    },
+    [filterValue, onChange]
+  );
+
+  if (
+    (isInFilter(filterType) && isString(filterValue)) ||
+    (!isInFilter(filterType) && !isString(filterValue))
+  ) {
+    return null;
   }
 
-  //
-  // Listeners
-
-  onValueChange = ({ value }: InputChanged<string | number | null>) => {
-    const { filterValue, onChange } = this.props;
-
-    let newValue: string | DateFilterValue = value as string;
-
-    if (!isString(value)) {
-      newValue = {
-        time: (filterValue as DateFilterValue).time,
-        value: value as number,
-      };
-    }
-
-    onChange({
-      name: NAME,
-      value: newValue,
-    });
-  };
-
-  onTimeChange = ({ value }: InputChanged<string>) => {
-    const { filterValue, onChange } = this.props;
-
-    onChange({
-      name: NAME,
-      value: {
-        time: value,
-        value: (filterValue as DateFilterValue).value,
-      },
-    });
-  };
-
-  //
-  // Render
-
-  render() {
-    const { filterType, filterValue } = this.props;
-
-    if (
-      (isInFilter(filterType) && isString(filterValue)) ||
-      (!isInFilter(filterType) && !isString(filterValue))
-    ) {
-      return null;
-    }
-
-    if (isInFilter(filterType)) {
-      const dateFilterValue = filterValue as DateFilterValue;
-
-      return (
-        <div className={styles.container}>
-          <NumberInput
-            className={styles.numberInput}
-            name={NAME}
-            value={dateFilterValue.value}
-            onChange={this.onValueChange}
-          />
-
-          <SelectInput
-            className={styles.selectInput}
-            name={NAME}
-            value={dateFilterValue.time}
-            values={timeOptions}
-            onChange={this.onTimeChange}
-          />
-        </div>
-      );
-    }
+  if (isInFilter(filterType)) {
+    const dateFilterValue = filterValue as DateFilterValue;
 
     return (
-      <TextInput
-        name={NAME}
-        value={filterValue as string}
-        type="date"
-        placeholder="yyyy-mm-dd"
-        onChange={this.onValueChange}
-      />
+      <div className={styles.container}>
+        <NumberInput
+          className={styles.numberInput}
+          name={NAME}
+          value={dateFilterValue.value}
+          onChange={onValueChange}
+        />
+
+        <SelectInput
+          className={styles.selectInput}
+          name={NAME}
+          value={dateFilterValue.time}
+          values={timeOptions}
+          onChange={onTimeChange}
+        />
+      </div>
     );
   }
+
+  return (
+    <TextInput
+      name={NAME}
+      value={filterValue as string}
+      type="date"
+      placeholder="yyyy-mm-dd"
+      onChange={onValueChange}
+    />
+  );
 }
 
 export default DateFilterBuilderRowValue;
