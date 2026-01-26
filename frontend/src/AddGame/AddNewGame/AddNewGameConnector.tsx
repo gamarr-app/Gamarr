@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import { clearAddGame, lookupGame } from 'Store/Actions/addGameActions';
@@ -17,7 +18,7 @@ function createMapStateToProps() {
   return createSelector(
     (state: AppState) => state.addGame,
     (state: AppState) => state.games.items.length,
-    (state: AppState) => state.router.location,
+    (_state: AppState, ownProps: RouteComponentProps) => ownProps.location,
     (addGame, existingGamesCount, location) => {
       const { params } = parseUrl(location.search);
 
@@ -40,7 +41,7 @@ const mapDispatchToProps = {
   clearGameFiles,
 };
 
-interface AddNewGameConnectorProps {
+interface AddNewGameConnectorProps extends RouteComponentProps {
   term?: string;
   isFetching: boolean;
   isAdding: boolean;
@@ -130,7 +131,6 @@ class AddNewGameConnector extends Component<AddNewGameConnectorProps> {
   }
 }
 
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(AddNewGameConnector);
+export default withRouter(
+  connect(createMapStateToProps, mapDispatchToProps)(AddNewGameConnector)
+);

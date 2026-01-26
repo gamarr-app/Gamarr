@@ -1,4 +1,3 @@
-import { RouterState } from 'connected-react-router';
 import AddGameAppState from './AddGameAppState';
 import { Error } from './AppSectionState';
 import BlocklistAppState from './BlocklistAppState';
@@ -110,7 +109,6 @@ interface AppState {
   queue: QueueAppState;
   releases: ReleasesAppState;
   rootFolders: RootFolderAppState;
-  router: RouterState;
   settings: SettingsAppState;
   system: SystemAppState;
   tags: TagsAppState;

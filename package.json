@@ -41,7 +41,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "classnames": "2.5.1",
-    "connected-react-router": "6.9.3",
     "copy-to-clipboard": "3.3.3",
     "dnd-core": "^16.0.1",
     "dnd-multi-backend": "^8.0.3",
