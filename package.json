@@ -5,8 +5,8 @@
   "description": "Gamarr is a PVR for Usenet and BitTorrent users",
   "scripts": {
     "build": "webpack --config ./frontend/build/webpack.config.js",
+    "build:clean": "yarn clean && yarn build",
     "analyze": "webpack --config ./frontend/build/webpack.config.js --env production --env analyze",
-    "prebuild": "yarn clean",
     "clean": "rimraf ./_output/UI && rimraf --glob \"**/*.js.map\"",
     "start": "NODE_OPTIONS='--disable-warning=DEP0169' webpack --watch --config ./frontend/build/webpack.config.js",
     "watch": "NODE_OPTIONS='--disable-warning=DEP0169' webpack --watch --config ./frontend/build/webpack.config.js",
