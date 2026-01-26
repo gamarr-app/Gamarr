@@ -22,8 +22,8 @@ import styles from './DiscoverGameTable.css';
 // DiscoverGameRowConnector is a connected component that passes additional props to DiscoverGameRow.
 // The DiscoverGameItemConnector's component prop accepts ComponentType<any>, so we need only
 // a simple cast to satisfy TypeScript's structural typing requirements.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TypedDiscoverGameRowConnector =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   DiscoverGameRowConnector as ComponentType<any>;
 
 interface DiscoverGameItem extends ModelBase {
