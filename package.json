@@ -10,7 +10,7 @@
     "clean": "rimraf ./_output/UI && rimraf --glob \"**/*.js.map\"",
     "start": "NODE_OPTIONS='--disable-warning=DEP0169' webpack --watch --config ./frontend/build/webpack.config.js",
     "watch": "NODE_OPTIONS='--disable-warning=DEP0169' webpack --watch --config ./frontend/build/webpack.config.js",
-    "lint": "eslint --config frontend/.eslintrc.js --ignore-path frontend/.eslintignore frontend/",
+    "lint": "eslint --cache --config frontend/.eslintrc.js --ignore-path frontend/.eslintignore frontend/",
     "lint-fix": "yarn lint --fix",
     "stylelint-linux": "stylelint $(find frontend -name '*.css') --config frontend/.stylelintrc",
     "stylelint-windows": "stylelint \"frontend/**/*.css\" --config frontend/.stylelintrc",

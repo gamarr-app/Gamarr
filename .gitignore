@@ -186,3 +186,4 @@ dotnet
 rebuild.sh
 -c
 UI
+.eslintcache
