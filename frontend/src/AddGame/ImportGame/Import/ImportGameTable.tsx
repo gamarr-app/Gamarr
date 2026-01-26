@@ -183,7 +183,7 @@ function ImportGameTable(props: ImportGameTableProps) {
   }
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ImportGameItem.id is string, not number like ModelBase expects
     <VirtualTable<any>
       items={items}
       isSmallScreen={isSmallScreen}

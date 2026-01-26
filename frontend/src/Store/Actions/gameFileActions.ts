@@ -34,8 +34,7 @@ interface GameFile {
 
 interface Column {
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  label?: (() => string) | React.ReactElement<any>;
+  label?: (() => string) | React.ReactNode;
   columnLabel?: () => string;
   isVisible: boolean;
   isSortable?: boolean;

@@ -23,7 +23,7 @@ import styles from './DiscoverGameTable.css';
 // The DiscoverGameItemConnector's component prop accepts ComponentType<any>, so we need only
 // a simple cast to satisfy TypeScript's structural typing requirements.
 const TypedDiscoverGameRowConnector =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Receives merged props from Redux
   DiscoverGameRowConnector as ComponentType<any>;
 
 interface DiscoverGameItem extends ModelBase {

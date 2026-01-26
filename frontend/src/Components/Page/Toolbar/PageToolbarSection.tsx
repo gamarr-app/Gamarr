@@ -38,8 +38,7 @@ function PageToolbarSection({
   const { buttons, buttonCount, overflowItems } = useMemo(() => {
     let buttonCount = 0;
     let separatorCount = 0;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const validChildren: ReactElement<any>[] = [];
+    const validChildren: NonNullable<ToolbarButtonChild>[] = [];
 
     React.Children.forEach(children, (child) => {
       if (!child) {

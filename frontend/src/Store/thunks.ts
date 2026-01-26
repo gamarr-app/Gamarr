@@ -17,7 +17,7 @@ export type Thunk<T = unknown> = (
   dispatch: AppDispatch
 ) => unknown;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Thunks have varying payload types
 const thunks: Record<string, Thunk<any>> = {};
 
 function identity<T>(payload: T): T {
@@ -45,7 +45,7 @@ export function createThunk<TInput = unknown, TOutput = TInput>(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Thunks have varying payload types
 export function handleThunks(handlers: Record<string, Thunk<any>>) {
   const types = Object.keys(handlers);
 

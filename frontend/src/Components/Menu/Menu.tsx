@@ -1,5 +1,7 @@
 import React, {
+  CSSProperties,
   ReactElement,
+  Ref,
   useCallback,
   useEffect,
   useId,
@@ -9,6 +11,16 @@ import React, {
 import { Manager, Popper, PopperProps, Reference } from 'react-popper';
 import Portal from 'Components/Portal';
 import styles from './Menu.css';
+
+interface MenuButtonChildProps {
+  onPress?: () => void;
+}
+
+interface MenuContentChildProps {
+  forwardedRef?: Ref<HTMLDivElement>;
+  style?: CSSProperties;
+  isOpen?: boolean;
+}
 
 const sharedPopperOptions = {
   modifiers: {
@@ -125,10 +137,12 @@ function Menu({
   }, []);
 
   const childrenArray = React.Children.toArray(children);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const button = React.cloneElement(childrenArray[0] as ReactElement<any>, {
-    onPress: handleMenuButtonPress,
-  });
+  const button = React.cloneElement(
+    childrenArray[0] as ReactElement<MenuButtonChildProps>,
+    {
+      onPress: handleMenuButtonPress,
+    }
+  );
 
   useEffect(() => {
     if (enforceMaxHeight) {
@@ -187,15 +201,17 @@ function Menu({
           {({ ref, style, scheduleUpdate }) => {
             updater.current = scheduleUpdate;
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return React.cloneElement(childrenArray[1] as ReactElement<any>, {
-              forwardedRef: ref,
-              style: {
-                ...style,
-                maxHeight,
-              },
-              isOpen: isMenuOpen,
-            });
+            return React.cloneElement(
+              childrenArray[1] as ReactElement<MenuContentChildProps>,
+              {
+                forwardedRef: ref,
+                style: {
+                  ...style,
+                  maxHeight,
+                },
+                isOpen: isMenuOpen,
+              }
+            );
           }}
         </Popper>
       </Portal>

@@ -189,7 +189,7 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     return '';
   }, [value, values, isMultiSelect]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types don't match runtime behavior
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Popper.js types are incomplete (missing right/bottom on Offset)
   const handleComputeMaxHeight = useCallback((data: any) => {
     const windowHeight = window.innerHeight;
 

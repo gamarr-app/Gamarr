@@ -13,9 +13,7 @@ interface SettingsToolbarProps {
   showSave?: boolean;
   isSaving?: boolean;
   hasPendingChanges?: boolean;
-  // TODO: This should do type checking like PageToolbarSectionProps,
-  // but this works for the time being.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accepts any PageToolbarButton-like element
   additionalButtons?: ReactElement<any> | null;
   onSavePress?: () => void;
 }

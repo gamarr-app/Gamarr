@@ -47,7 +47,7 @@ export interface DiscoverGameProps {
 
 interface OwnProps {
   igdbId: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component receives merged props from Redux and parent
   component: ComponentType<any>;
   isSelected?: boolean;
   onSelectedChange?: (options: {
