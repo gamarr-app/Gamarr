@@ -193,7 +193,10 @@ export const actionHandlers = handleThunks({
       return;
     }
 
-    const gameWithId = { ..._.cloneDeep(foundGame), id: 0 } as typeof foundGame & { id: number; collection?: { igdbId: number } };
+    const gameWithId = {
+      ..._.cloneDeep(foundGame),
+      id: 0,
+    } as typeof foundGame & { id: number; collection?: { igdbId: number } };
     const newGame = getNewGame(gameWithId, payload);
 
     const promise = createAjaxRequest({
