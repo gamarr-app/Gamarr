@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
 import CollectionItemConnector from 'Collection/CollectionItemConnector';
 import Measure from 'Components/Measure';
@@ -78,133 +78,201 @@ interface CollectionOverviewsProps {
   onSelectedChange: (props: SelectStateInputProps) => void;
 }
 
-interface CollectionOverviewsState {
-  width: number;
-  columnCount: number;
-  posterWidth: number;
-  posterHeight: number;
-  rowHeight: number;
-  scrollRestored?: boolean;
-}
+function CollectionOverviews(props: CollectionOverviewsProps) {
+  const {
+    items,
+    sortKey,
+    overviewOptions,
+    jumpToCharacter,
+    scrollTop,
+    scroller,
+    showRelativeDates,
+    shortDateFormat,
+    longDateFormat,
+    timeFormat,
+    isSmallScreen,
+    selectedState,
+    onSelectedChange,
+  } = props;
 
-class CollectionOverviews extends Component<
-  CollectionOverviewsProps,
-  CollectionOverviewsState
-> {
-  // eslint-disable-next-line react/sort-comp
-  private _grid: Grid | null = null;
+  const gridRef = useRef<Grid | null>(null);
 
-  //
-  // Lifecycle
+  const [width, setWidth] = useState(0);
+  const [posterWidth, setPosterWidth] = useState(162);
+  const [posterHeight, setPosterHeight] = useState(238);
+  const [rowHeight, setRowHeight] = useState(
+    calculateRowHeight(238, undefined, isSmallScreen, {} as OverviewOptions)
+  );
+  const [scrollRestored, setScrollRestored] = useState(false);
 
-  constructor(props: CollectionOverviewsProps) {
-    super(props);
+  const prevItemsRef = useRef(items);
+  const prevSortKeyRef = useRef(sortKey);
+  const prevOverviewOptionsRef = useRef(overviewOptions);
+  const prevJumpToCharacterRef = useRef(jumpToCharacter);
+  const prevWidthRef = useRef(width);
+  const prevRowHeightRef = useRef(rowHeight);
 
-    this.state = {
-      width: 0,
-      columnCount: 1,
-      posterWidth: 162,
-      posterHeight: 238,
-      rowHeight: calculateRowHeight(
-        238,
-        undefined,
-        props.isSmallScreen,
-        {} as OverviewOptions
-      ),
-    };
-  }
+  const calculateGrid = useCallback(
+    (newWidth: number = width) => {
+      const newPosterWidth = overviewOptions.showPosters
+        ? calculatePosterWidth(overviewOptions.size, isSmallScreen)
+        : 0;
+      const newPosterHeight = overviewOptions.showPosters
+        ? calculatePosterHeight(newPosterWidth)
+        : 0;
+      const newRowHeight = calculateRowHeight(
+        newPosterHeight,
+        sortKey,
+        isSmallScreen,
+        overviewOptions
+      );
 
-  componentDidUpdate(
-    prevProps: CollectionOverviewsProps,
-    prevState: CollectionOverviewsState
-  ) {
-    const {
-      items,
-      sortKey,
-      overviewOptions,
-      jumpToCharacter,
-      scrollTop,
-      isSmallScreen,
-    } = this.props;
+      setWidth(newWidth);
+      setPosterWidth(newPosterWidth);
+      setPosterHeight(newPosterHeight);
+      setRowHeight(newRowHeight);
+    },
+    [width, sortKey, overviewOptions, isSmallScreen]
+  );
 
-    const { width, rowHeight, scrollRestored } = this.state;
+  const gridScrollToPosition = useCallback(
+    ({
+      scrollTop: top = 0,
+      scrollLeft = 0,
+    }: {
+      scrollTop?: number;
+      scrollLeft?: number;
+    }) => {
+      scroller?.scrollTo({ top, left: scrollLeft });
+    },
+    [scroller]
+  );
 
+  const gridScrollToCell = useCallback(
+    ({
+      rowIndex = 0,
+      columnIndex = 0,
+    }: {
+      rowIndex?: number;
+      columnIndex?: number;
+    }) => {
+      const scrollOffset = gridRef.current?.getOffsetForCell({
+        rowIndex,
+        columnIndex,
+      });
+
+      if (scrollOffset) {
+        gridScrollToPosition(scrollOffset);
+      }
+    },
+    [gridScrollToPosition]
+  );
+
+  // Update effect
+  useEffect(() => {
     if (
-      prevProps.sortKey !== sortKey ||
-      prevProps.overviewOptions !== overviewOptions
+      prevSortKeyRef.current !== sortKey ||
+      prevOverviewOptionsRef.current !== overviewOptions
     ) {
-      this.calculateGrid(this.state.width, isSmallScreen);
+      calculateGrid(width);
     }
 
     if (
-      this._grid &&
-      (prevState.width !== width ||
-        prevState.rowHeight !== rowHeight ||
-        hasDifferentItemsOrOrder(prevProps.items, items) ||
-        prevProps.overviewOptions !== overviewOptions)
+      gridRef.current &&
+      (prevWidthRef.current !== width ||
+        prevRowHeightRef.current !== rowHeight ||
+        hasDifferentItemsOrOrder(prevItemsRef.current, items) ||
+        prevOverviewOptionsRef.current !== overviewOptions)
     ) {
-      // recomputeGridSize also forces Grid to discard its cache of rendered cells
-      this._grid.recomputeGridSize();
+      gridRef.current.recomputeGridSize();
     }
 
-    if (this._grid && scrollTop !== 0 && !scrollRestored) {
-      this.setState({ scrollRestored: true });
-      this._gridScrollToPosition({ scrollTop: scrollTop || 0 });
+    if (gridRef.current && scrollTop !== 0 && !scrollRestored) {
+      setScrollRestored(true);
+      gridScrollToPosition({ scrollTop: scrollTop || 0 });
     }
 
     if (
       jumpToCharacter != null &&
-      jumpToCharacter !== prevProps.jumpToCharacter
+      jumpToCharacter !== prevJumpToCharacterRef.current
     ) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (this._grid && index != null) {
-        this._gridScrollToCell({
+      if (gridRef.current && index != null) {
+        gridScrollToCell({
           rowIndex: index,
           columnIndex: 0,
         });
       }
     }
-  }
 
-  //
-  // Control
+    prevItemsRef.current = items;
+    prevSortKeyRef.current = sortKey;
+    prevOverviewOptionsRef.current = overviewOptions;
+    prevJumpToCharacterRef.current = jumpToCharacter;
+    prevWidthRef.current = width;
+    prevRowHeightRef.current = rowHeight;
+  }, [
+    items,
+    sortKey,
+    overviewOptions,
+    jumpToCharacter,
+    scrollTop,
+    width,
+    rowHeight,
+    scrollRestored,
+    calculateGrid,
+    gridScrollToPosition,
+    gridScrollToCell,
+  ]);
 
-  setGridRef = (ref: Grid | null) => {
-    this._grid = ref;
-  };
+  const setGridRef = useCallback((ref: Grid | null) => {
+    gridRef.current = ref;
+  }, []);
 
-  calculateGrid = (
-    width: number = this.state.width,
-    isSmallScreen: boolean
-  ) => {
-    const { sortKey, overviewOptions } = this.props;
+  const onMeasure = useCallback(
+    ({ width: measuredWidth = 0 }: { width?: number; height?: number }) => {
+      calculateGrid(measuredWidth);
+    },
+    [calculateGrid]
+  );
 
-    const posterWidth = overviewOptions.showPosters
-      ? calculatePosterWidth(overviewOptions.size, isSmallScreen)
-      : 0;
-    const posterHeight = overviewOptions.showPosters
-      ? calculatePosterHeight(posterWidth)
-      : 0;
-    const rowHeight = calculateRowHeight(
-      posterHeight,
+  const cellRenderer: GridCellRenderer = useCallback(
+    ({ key, rowIndex, style }) => {
+      const collection = items[rowIndex];
+
+      if (!collection) {
+        return null;
+      }
+
+      return (
+        <div key={key} className={styles.container} style={style}>
+          <CollectionItemConnector
+            key={collection.id}
+            component={CollectionOverviewConnector}
+            sortKey={sortKey}
+            posterWidth={posterWidth}
+            posterHeight={posterHeight}
+            rowHeight={rowHeight}
+            overviewOptions={overviewOptions}
+            showRelativeDates={showRelativeDates}
+            shortDateFormat={shortDateFormat}
+            longDateFormat={longDateFormat}
+            timeFormat={timeFormat}
+            isSmallScreen={isSmallScreen}
+            collectionId={collection.id}
+            isSelected={selectedState[collection.id]}
+            onSelectedChange={onSelectedChange}
+          />
+        </div>
+      );
+    },
+    [
+      items,
       sortKey,
-      isSmallScreen,
-      overviewOptions
-    );
-
-    this.setState({
-      width,
       posterWidth,
       posterHeight,
       rowHeight,
-    });
-  };
-
-  cellRenderer: GridCellRenderer = ({ key, rowIndex, style }) => {
-    const {
-      items,
-      sortKey,
       overviewOptions,
       showRelativeDates,
       shortDateFormat,
@@ -213,122 +281,49 @@ class CollectionOverviews extends Component<
       isSmallScreen,
       selectedState,
       onSelectedChange,
-    } = this.props;
+    ]
+  );
 
-    const { posterWidth, posterHeight, rowHeight } = this.state;
+  return (
+    <Measure onMeasure={onMeasure}>
+      <div>
+        <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
+          {({
+            height,
+            registerChild,
+            onChildScroll,
+            scrollTop: wsScrollTop,
+          }) => {
+            if (!height) {
+              return <div />;
+            }
 
-    const collection = items[rowIndex];
-
-    if (!collection) {
-      return null;
-    }
-
-    return (
-      <div key={key} className={styles.container} style={style}>
-        <CollectionItemConnector
-          key={collection.id}
-          component={CollectionOverviewConnector}
-          sortKey={sortKey}
-          posterWidth={posterWidth}
-          posterHeight={posterHeight}
-          rowHeight={rowHeight}
-          overviewOptions={overviewOptions}
-          showRelativeDates={showRelativeDates}
-          shortDateFormat={shortDateFormat}
-          longDateFormat={longDateFormat}
-          timeFormat={timeFormat}
-          isSmallScreen={isSmallScreen}
-          collectionId={collection.id}
-          isSelected={selectedState[collection.id]}
-          onSelectedChange={onSelectedChange}
-        />
+            return (
+              <div ref={registerChild}>
+                <Grid
+                  ref={setGridRef}
+                  className={styles.grid}
+                  autoHeight={true}
+                  height={height}
+                  columnCount={1}
+                  columnWidth={width}
+                  rowCount={items.length}
+                  rowHeight={rowHeight}
+                  width={width}
+                  scrollTop={wsScrollTop}
+                  overscanRowCount={2}
+                  cellRenderer={cellRenderer}
+                  scrollToAlignment="start"
+                  isScrollingOptOut={true}
+                  onScroll={onChildScroll}
+                />
+              </div>
+            );
+          }}
+        </WindowScroller>
       </div>
-    );
-  };
-
-  _gridScrollToCell = ({
-    rowIndex = 0,
-    columnIndex = 0,
-  }: {
-    rowIndex?: number;
-    columnIndex?: number;
-  }) => {
-    const scrollOffset = this._grid?.getOffsetForCell({
-      rowIndex,
-      columnIndex,
-    });
-
-    if (scrollOffset) {
-      this._gridScrollToPosition(scrollOffset);
-    }
-  };
-
-  _gridScrollToPosition = ({
-    scrollTop = 0,
-    scrollLeft = 0,
-  }: {
-    scrollTop?: number;
-    scrollLeft?: number;
-  }) => {
-    this.props.scroller?.scrollTo({ top: scrollTop, left: scrollLeft });
-  };
-
-  //
-  // Listeners
-
-  onMeasure = ({ width = 0 }: { width?: number; height?: number }) => {
-    this.calculateGrid(width, this.props.isSmallScreen);
-  };
-
-  //
-  // Render
-
-  render() {
-    const { isSmallScreen, scroller, items } = this.props;
-
-    const { width, rowHeight } = this.state;
-
-    return (
-      <Measure onMeasure={this.onMeasure}>
-        <div>
-          <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
-            {({
-              height,
-              registerChild,
-              onChildScroll,
-              scrollTop: wsScrollTop,
-            }) => {
-              if (!height) {
-                return <div />;
-              }
-
-              return (
-                <div ref={registerChild}>
-                  <Grid
-                    ref={this.setGridRef}
-                    className={styles.grid}
-                    autoHeight={true}
-                    height={height}
-                    columnCount={1}
-                    columnWidth={width}
-                    rowCount={items.length}
-                    rowHeight={rowHeight}
-                    width={width}
-                    scrollTop={wsScrollTop}
-                    overscanRowCount={2}
-                    cellRenderer={this.cellRenderer}
-                    scrollToAlignment="start"
-                    isScrollingOptOut={true}
-                    onScroll={onChildScroll}
-                  />
-                </div>
-              );
-            }}
-          </WindowScroller>
-        </div>
-      </Measure>
-    );
-  }
+    </Measure>
+  );
 }
 
 export default CollectionOverviews;
