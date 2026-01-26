@@ -123,6 +123,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Popularity").AsFloat().Nullable()
                 .WithColumn("LastInfoSync").AsDateTime().Nullable()
                 .WithColumn("IgdbRecommendations").AsString().WithDefaultValue("[]")
+                .WithColumn("RawgRecommendations").AsString().Nullable().WithDefaultValue("[]")
                 .WithColumn("CollectionIgdbId").AsInt32().Nullable().Indexed()
                 .WithColumn("CollectionTitle").AsString().Nullable()
                 .WithColumn("GameType").AsInt32().WithDefaultValue(0)
