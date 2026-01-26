@@ -4,15 +4,36 @@ import {
   AppSectionItemSchemaState,
   AppSectionProviderState,
   AppSectionSchemaState,
+  Error,
 } from 'App/State/AppSectionState';
 import AppState from 'App/State/AppState';
 import selectSettings, {
   ModelBaseSetting,
 } from 'Store/Selectors/selectSettings';
-import { PendingSection } from 'typings/pending';
+import {
+  PendingSection,
+  ValidationError,
+  ValidationWarning,
+} from 'typings/pending';
 import getSectionState from 'Utilities/State/getSectionState';
 
 type SchemaState<T> = AppSectionSchemaState<T> | AppSectionItemSchemaState<T>;
+
+export interface ProviderSettingsResult<T> {
+  isFetching: boolean;
+  isPopulated: boolean;
+  error: Error | null;
+  isSaving: boolean;
+  saveError: Error | undefined;
+  isTesting: boolean | undefined;
+  settings: PendingSection<T>;
+  validationErrors: ValidationError[];
+  validationWarnings: ValidationWarning[];
+  hasPendingChanges: boolean;
+  hasSettings: boolean;
+  pendingChanges: Partial<T> | undefined;
+  item: PendingSection<T>;
+}
 
 function selector<
   T extends ModelBaseSetting,
@@ -81,25 +102,25 @@ function selector<
 export default function createProviderSettingsSelector<
   T extends ModelBase,
   S extends AppSectionProviderState<T> & SchemaState<T>
->(sectionName: string) {
-  // @ts-expect-error - This isn't fully typed
+>(sectionName: keyof AppState['settings']) {
   return createSelector(
     (_state: AppState, { id }: { id: number }) => id,
-    (state) => state.settings[sectionName] as S,
+    (state: AppState) => state.settings[sectionName] as unknown as S,
     (id: number, section: S) => selector(id, section)
   );
 }
 
 export function createProviderSettingsSelectorHook<
   T extends ModelBaseSetting,
-  S extends AppSectionProviderState<T> & SchemaState<T>
+  S extends AppSectionProviderState<T> &
+    SchemaState<T> = AppSectionProviderState<T> & SchemaState<T>
 >(sectionName: string, id: number | undefined) {
   return createSelector(
     (state: AppState) => state.settings,
-    (state) => {
+    (state): ProviderSettingsResult<T> => {
       const sectionState = getSectionState(state, sectionName, false) as S;
 
-      return selector<T, S>(id, sectionState);
+      return selector<T, S>(id, sectionState) as ProviderSettingsResult<T>;
     }
   );
 }

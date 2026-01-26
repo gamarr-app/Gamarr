@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
@@ -22,7 +23,7 @@ interface ParseError {
 
 interface ImportCustomFormatModalContentProps {
   isFetching: boolean;
-  error?: Error;
+  error?: AppError;
   specificationsPopulated: boolean;
   onImportPress: (json: string) => ParseError | null;
   onModalClose: () => void;
@@ -92,11 +93,7 @@ function ImportCustomFormatModalContent({
                   name="customFormatJson"
                   value={json}
                   placeholder={'{\n  "name": "Custom Format"\n}'}
-                  errors={
-                    parseError
-                      ? [parseError as unknown as { message: string }]
-                      : []
-                  }
+                  errors={parseError ? [parseError] : []}
                   onChange={handleChange}
                 />
               </FormGroup>

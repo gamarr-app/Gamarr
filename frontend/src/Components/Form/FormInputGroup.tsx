@@ -219,7 +219,7 @@ function FormInputGroup<T, C extends InputType>(
     <div className={containerClassName}>
       <div className={className}>
         <div className={styles.inputContainer}>
-          {/* @ts-expect-error - types are validated already */}
+          {/* @ts-expect-error - InputComponent is dynamically selected and types vary */}
           <InputComponent
             className={inputClassName}
             helpText={helpText}
@@ -227,7 +227,7 @@ function FormInputGroup<T, C extends InputType>(
             hasError={hasError}
             hasWarning={hasWarning}
             hasButton={hasButton}
-            {...otherProps}
+            {...(otherProps as Record<string, unknown>)}
           />
 
           {unit && (

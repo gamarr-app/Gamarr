@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { fetchCustomFormatSpecifications } from 'Store/Actions/settingsActions';
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
+import CustomFormat from 'typings/CustomFormat';
 import ExportCustomFormatModalContent from './ExportCustomFormatModalContent';
 
 const omittedProperties = ['id', 'implementationName', 'infoLink'];
@@ -42,17 +43,11 @@ function ExportCustomFormatModalContentConnector({
   const dispatch = useDispatch();
 
   const providerSettingsSelector = useMemo(
-    () => createProviderSettingsSelectorHook('customFormats', id),
+    () => createProviderSettingsSelectorHook<CustomFormat>('customFormats', id),
     [id]
   );
 
-  const customFormat = useSelector(providerSettingsSelector) as unknown as {
-    isFetching: boolean;
-    error: object | null;
-    isSaving: boolean;
-    saveError: object | null;
-    item: Record<string, unknown> | null;
-  };
+  const customFormat = useSelector(providerSettingsSelector);
 
   const specificationsSelector = useMemo(
     () =>

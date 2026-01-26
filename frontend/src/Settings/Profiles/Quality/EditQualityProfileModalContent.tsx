@@ -41,12 +41,12 @@ interface PendingValue<T> {
   previousValue?: T;
 }
 
-interface QualityProfileItemValue {
-  id: number;
-  name: string;
-  allowed: boolean;
+export interface QualityProfileItemValue {
+  id?: number;
+  name?: string;
+  allowed?: boolean;
   quality?: { id: number; name: string };
-  items?: Array<{ quality: { id: number; name: string } }>;
+  items?: QualityProfileItemValue[];
 }
 
 export interface FormatItem {
@@ -56,7 +56,7 @@ export interface FormatItem {
   score: number;
 }
 
-interface QualityProfilePendingItem {
+export interface QualityProfilePendingItem {
   id: PendingValue<number>;
   name: PendingValue<string>;
   upgradeAllowed: PendingValue<boolean>;

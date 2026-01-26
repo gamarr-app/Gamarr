@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Error } from 'App/State/AppSectionState';
 import AppState from 'App/State/AppState';
 import Card from 'Components/Card';
 import FieldSet from 'Components/FieldSet';
@@ -18,17 +17,12 @@ import EditReleaseProfileModal from './EditReleaseProfileModal';
 import ReleaseProfileItem from './ReleaseProfileItem';
 import styles from './ReleaseProfiles.css';
 
-interface ReleaseProfilesCollectionState {
-  items: ReleaseProfile[];
-  isFetching: boolean;
-  isPopulated: boolean;
-  error: Error | undefined;
-}
-
 function ReleaseProfiles() {
   const { items, isFetching, isPopulated, error } = useSelector(
-    createClientSideCollectionSelector('settings.releaseProfiles')
-  ) as unknown as ReleaseProfilesCollectionState;
+    createClientSideCollectionSelector<ReleaseProfile>(
+      'settings.releaseProfiles'
+    )
+  );
 
   const tagList = useSelector(createTagsSelector());
   const indexerList = useSelector(

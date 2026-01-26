@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { Ref, useCallback } from 'react';
+import { RefCallback, useCallback, useMemo } from 'react';
 import { ConnectDragSource } from 'react-dnd';
 import CheckInput from 'Components/Form/CheckInput';
 import TextInput from 'Components/Form/TextInput';
@@ -59,6 +59,18 @@ function QualityProfileItemGroup({
   onQualityProfileItemDragMove,
   onQualityProfileItemDragEnd,
 }: QualityProfileItemGroupProps) {
+  // Convert ConnectDragSource to a proper RefCallback for use with the ref prop.
+  // ConnectDragSource accepts Element | null but returns ReactElement | null,
+  // while RefCallback expects void. The return value is unused when used as a ref.
+  const dragRefCallback = useMemo(():
+    | RefCallback<HTMLDivElement>
+    | undefined => {
+    if (!dragRef) return undefined;
+    return (element: HTMLDivElement | null) => {
+      dragRef(element);
+    };
+  }, [dragRef]);
+
   const handleAllowedChange = useCallback(
     ({ value }: { value: boolean }) => {
       onItemGroupAllowedChange(groupId, value);
@@ -135,10 +147,7 @@ function QualityProfileItemGroup({
           </label>
         )}
 
-        <div
-          ref={dragRef as unknown as Ref<HTMLDivElement>}
-          className={styles.dragHandle}
-        >
+        <div ref={dragRefCallback} className={styles.dragHandle}>
           <Icon
             className={styles.dragIcon}
             name={icons.REORDER}

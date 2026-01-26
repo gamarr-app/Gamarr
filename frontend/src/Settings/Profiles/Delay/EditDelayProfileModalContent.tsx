@@ -163,16 +163,16 @@ function EditDelayProfileModalContent({
 
   useEffect(() => {
     if (!id) {
-      Object.keys(newDelayProfile).forEach((name) => {
-        dispatch(
-          setDelayProfileValue({
-            name,
-            value: (newDelayProfile as unknown as Record<string, unknown>)[
-              name
-            ],
-          })
-        );
-      });
+      (Object.keys(newDelayProfile) as Array<keyof DelayProfileModel>).forEach(
+        (name) => {
+          dispatch(
+            setDelayProfileValue({
+              name,
+              value: newDelayProfile[name],
+            })
+          );
+        }
+      );
     }
   }, [dispatch, id]);
 

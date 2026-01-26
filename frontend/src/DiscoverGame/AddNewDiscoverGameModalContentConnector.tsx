@@ -1,9 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import AddNewGameModalContent, {
-  FormValue,
-} from 'AddGame/AddNewGame/AddNewGameModalContent';
+import AddNewGameModalContent from 'AddGame/AddNewGame/AddNewGameModalContent';
 import { Error } from 'App/State/AppSectionState';
 import { Image } from 'Game/Game';
 import { addGame, setAddGameDefault } from 'Store/Actions/discoverGameActions';
@@ -79,16 +77,16 @@ function AddNewDiscoverGameModalContentConnector({
 
   const { isAdding, isSmallScreen, isWindows, settings } = selectorResult;
 
-  // Extract settings and cast to expected types
-  const rootFolderPath =
-    settings.rootFolderPath as unknown as FormValue<string>;
-  const monitor = settings.monitor as unknown as FormValue<string>;
-  const qualityProfileId =
-    settings.qualityProfileId as unknown as FormValue<number>;
-  const minimumAvailability =
-    settings.minimumAvailability as unknown as FormValue<string>;
-  const searchForGame = settings.searchForGame as unknown as FormValue<boolean>;
-  const tags = settings.tags as unknown as FormValue<number[]>;
+  // selectSettings returns PendingSection<DiscoverGameDefaults> which has the same
+  // shape as FormValue (value, errors, warnings) for each property
+  const {
+    rootFolderPath,
+    monitor,
+    qualityProfileId,
+    minimumAvailability,
+    searchForGame,
+    tags,
+  } = settings;
 
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {

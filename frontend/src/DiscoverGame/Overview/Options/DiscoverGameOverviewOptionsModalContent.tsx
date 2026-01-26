@@ -60,6 +60,7 @@ interface DiscoverGameOverviewOptionsModalContentState {
   includeRecommendations: boolean;
   includeTrending: boolean;
   includePopular: boolean;
+  [key: string]: string | boolean;
 }
 
 class DiscoverGameOverviewOptionsModalContent extends Component<
@@ -154,24 +155,30 @@ class DiscoverGameOverviewOptionsModalContent extends Component<
     name,
     value,
   }: {
-    name: string;
-    value: unknown;
+    name: keyof DiscoverGameOverviewOptionsModalContentState;
+    value: string | boolean;
   }) => {
     this.setState(
       {
         [name]: value,
-      } as unknown as DiscoverGameOverviewOptionsModalContentState,
+      },
       () => {
         this.props.onChangeOverviewOption({ [name]: value });
       }
     );
   };
 
-  onChangeOption = ({ name, value }: { name: string; value: unknown }) => {
+  onChangeOption = ({
+    name,
+    value,
+  }: {
+    name: keyof DiscoverGameOverviewOptionsModalContentState;
+    value: string | boolean;
+  }) => {
     this.setState(
       {
         [name]: value,
-      } as unknown as DiscoverGameOverviewOptionsModalContentState,
+      },
       () => {
         this.props.onChangeOption({
           [name]: value,

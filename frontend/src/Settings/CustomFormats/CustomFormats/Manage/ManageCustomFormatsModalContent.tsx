@@ -1,6 +1,5 @@
 import { ComponentProps, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Error } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -15,7 +14,6 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { kinds } from 'Helpers/Props';
-import { SortDirection } from 'Helpers/Props/sortDirections';
 import {
   bulkDeleteCustomFormats,
   bulkEditCustomFormats,
@@ -30,17 +28,6 @@ import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import ManageCustomFormatsEditModal from './Edit/ManageCustomFormatsEditModal';
 import ManageCustomFormatsModalRow from './ManageCustomFormatsModalRow';
 import styles from './ManageCustomFormatsModalContent.css';
-
-interface CustomFormatsCollectionState {
-  isFetching: boolean;
-  isPopulated: boolean;
-  isDeleting: boolean;
-  isSaving: boolean;
-  error: Error | undefined;
-  items: CustomFormat[];
-  sortKey: string;
-  sortDirection: SortDirection;
-}
 
 // TODO: This feels janky to do, but not sure of a better way currently
 type OnSelectedChangeCallback = ComponentProps<
@@ -79,15 +66,15 @@ function ManageCustomFormatsModalContent(
   const {
     isFetching,
     isPopulated,
-    isDeleting,
-    isSaving,
+    isDeleting = false,
+    isSaving = false,
     error,
     items,
     sortKey,
     sortDirection,
   } = useSelector(
-    createClientSideCollectionSelector('settings.customFormats')
-  ) as unknown as CustomFormatsCollectionState;
+    createClientSideCollectionSelector<CustomFormat>('settings.customFormats')
+  );
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

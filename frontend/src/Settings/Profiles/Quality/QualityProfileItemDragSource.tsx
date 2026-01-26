@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import { useRef } from 'react';
 import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { QUALITY_PROFILE_ITEM } from 'Helpers/dragTypes';
+import { QualityProfileItemValue } from './EditQualityProfileModalContent';
 import QualityProfileItem from './QualityProfileItem';
 import QualityProfileItemGroup from './QualityProfileItemGroup';
 import styles from './QualityProfileItemDragSource.css';
@@ -12,17 +13,17 @@ interface DragItem {
   editGroups: boolean;
   groupId?: number;
   qualityId?: number;
-  name: string;
-  allowed: boolean;
+  name?: string;
+  allowed?: boolean;
 }
 
 interface QualityProfileItemDragSourceProps {
   editGroups: boolean;
   groupId?: number;
   qualityId?: number;
-  name: string;
-  allowed: boolean;
-  items?: Array<{ quality: { id: number; name: string } }>;
+  name?: string;
+  allowed?: boolean;
+  items?: QualityProfileItemValue[];
   qualityIndex: string;
   isDragging?: boolean;
   isDraggingUp?: boolean;
@@ -167,9 +168,13 @@ function QualityProfileItemDragSource(
         <QualityProfileItemGroup
           editGroups={editGroups}
           groupId={groupId}
-          name={name}
-          allowed={allowed}
-          items={items || []}
+          name={name ?? ''}
+          allowed={allowed ?? false}
+          items={
+            (items?.filter((i) => i.quality != null) as Array<{
+              quality: { id: number; name: string };
+            }>) ?? []
+          }
           qualityIndex={qualityIndex}
           isDragging={isDragging}
           isDraggingUp={!!isDraggingUp}
@@ -189,8 +194,8 @@ function QualityProfileItemDragSource(
           editGroups={editGroups}
           groupId={groupId}
           qualityId={qualityId}
-          name={name}
-          allowed={allowed}
+          name={name ?? ''}
+          allowed={allowed ?? false}
           isDragging={isDragging}
           isOverCurrent={isOverCurrent}
           dragRef={drag}

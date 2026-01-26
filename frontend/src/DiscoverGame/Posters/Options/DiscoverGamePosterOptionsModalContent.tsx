@@ -54,6 +54,7 @@ interface DiscoverGamePosterOptionsModalContentState {
   includeRecommendations: boolean;
   includeTrending: boolean;
   includePopular: boolean;
+  [key: string]: string | boolean;
 }
 
 class DiscoverGamePosterOptionsModalContent extends Component<
@@ -130,24 +131,30 @@ class DiscoverGamePosterOptionsModalContent extends Component<
     name,
     value,
   }: {
-    name: string;
-    value: unknown;
+    name: keyof DiscoverGamePosterOptionsModalContentState;
+    value: string | boolean;
   }) => {
     this.setState(
       {
         [name]: value,
-      } as unknown as DiscoverGamePosterOptionsModalContentState,
+      },
       () => {
         this.props.onChangePosterOption({ [name]: value });
       }
     );
   };
 
-  onChangeOption = ({ name, value }: { name: string; value: unknown }) => {
+  onChangeOption = ({
+    name,
+    value,
+  }: {
+    name: keyof DiscoverGamePosterOptionsModalContentState;
+    value: string | boolean;
+  }) => {
     this.setState(
       {
         [name]: value,
-      } as unknown as DiscoverGamePosterOptionsModalContentState,
+      },
       () => {
         this.props.onChangeOption({
           [name]: value,

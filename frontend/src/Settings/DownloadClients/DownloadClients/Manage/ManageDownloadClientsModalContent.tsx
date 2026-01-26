@@ -1,6 +1,5 @@
 import { ComponentProps, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Error as AppError } from 'App/State/AppSectionState';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
@@ -15,7 +14,6 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import useSelectState from 'Helpers/Hooks/useSelectState';
 import { kinds } from 'Helpers/Props';
-import { SortDirection } from 'Helpers/Props/sortDirections';
 import {
   bulkDeleteDownloadClients,
   bulkEditDownloadClients,
@@ -31,17 +29,6 @@ import ManageDownloadClientsEditModal from './Edit/ManageDownloadClientsEditModa
 import ManageDownloadClientsModalRow from './ManageDownloadClientsModalRow';
 import TagsModal from './Tags/TagsModal';
 import styles from './ManageDownloadClientsModalContent.css';
-
-interface DownloadClientsCollectionState {
-  isFetching: boolean;
-  isPopulated: boolean;
-  isDeleting: boolean;
-  isSaving: boolean;
-  error: AppError | undefined;
-  items: DownloadClient[];
-  sortKey: string;
-  sortDirection: SortDirection;
-}
 
 // TODO: This feels janky to do, but not sure of a better way currently
 type OnSelectedChangeCallback = ComponentProps<
@@ -105,15 +92,17 @@ function ManageDownloadClientsModalContent(
   const {
     isFetching,
     isPopulated,
-    isDeleting,
-    isSaving,
+    isDeleting = false,
+    isSaving = false,
     error,
     items,
     sortKey,
     sortDirection,
   } = useSelector(
-    createClientSideCollectionSelector('settings.downloadClients')
-  ) as unknown as DownloadClientsCollectionState;
+    createClientSideCollectionSelector<DownloadClient>(
+      'settings.downloadClients'
+    )
+  );
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

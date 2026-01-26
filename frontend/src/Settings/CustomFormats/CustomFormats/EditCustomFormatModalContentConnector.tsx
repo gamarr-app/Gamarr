@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import { Error } from 'App/State/AppSectionState';
 import {
   cloneCustomFormatSpecification,
   deleteCustomFormatSpecification,
@@ -12,7 +11,6 @@ import {
 import { createProviderSettingsSelectorHook } from 'Store/Selectors/createProviderSettingsSelector';
 import CustomFormat from 'typings/CustomFormat';
 import { InputChanged } from 'typings/inputs';
-import { PendingSection } from 'typings/pending';
 import EditCustomFormatModalContent from './EditCustomFormatModalContent';
 
 interface EditCustomFormatModalContentConnectorProps {
@@ -33,7 +31,7 @@ function EditCustomFormatModalContentConnector({
   const dispatch = useDispatch();
 
   const providerSettingsSelector = useMemo(
-    () => createProviderSettingsSelectorHook('customFormats', id),
+    () => createProviderSettingsSelectorHook<CustomFormat>('customFormats', id),
     [id]
   );
 
@@ -42,14 +40,7 @@ function EditCustomFormatModalContentConnector({
       state.settings.advancedSettings
   );
 
-  const customFormat = useSelector(providerSettingsSelector) as unknown as {
-    isFetching: boolean;
-    error: Error | null;
-    isSaving: boolean;
-    saveError: Error | undefined;
-    item: PendingSection<CustomFormat>;
-    [key: string]: unknown;
-  };
+  const customFormat = useSelector(providerSettingsSelector);
 
   const specificationsSelector = useMemo(
     () =>

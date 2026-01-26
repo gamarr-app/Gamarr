@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { Ref, useCallback, useState } from 'react';
+import { RefCallback, useCallback, useMemo, useState } from 'react';
 import { ConnectDragSource } from 'react-dnd';
 import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';
@@ -55,6 +55,18 @@ function DelayProfile({
   dragRef,
   onConfirmDeleteDelayProfile,
 }: DelayProfileProps) {
+  // Convert ConnectDragSource to a proper RefCallback for use with the ref prop.
+  // ConnectDragSource accepts Element | null but returns ReactElement | null,
+  // while RefCallback expects void. The return value is unused when used as a ref.
+  const dragRefCallback = useMemo(():
+    | RefCallback<HTMLDivElement>
+    | undefined => {
+    if (!dragRef) return undefined;
+    return (element: HTMLDivElement | null) => {
+      dragRef(element);
+    };
+  }, [dragRef]);
+
   const [isEditDelayProfileModalOpen, setIsEditDelayProfileModalOpen] =
     useState(false);
   const [isDeleteDelayProfileModalOpen, setIsDeleteDelayProfileModalOpen] =
@@ -113,10 +125,7 @@ function DelayProfile({
         </Link>
 
         {id !== 1 && (
-          <div
-            ref={dragRef as unknown as Ref<HTMLDivElement>}
-            className={styles.dragHandle}
-          >
+          <div ref={dragRefCallback} className={styles.dragHandle}>
             <Icon className={styles.dragIcon} name={icons.REORDER} />
           </div>
         )}
