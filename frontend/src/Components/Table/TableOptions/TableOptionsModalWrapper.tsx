@@ -1,4 +1,4 @@
-import React, { Component, ReactElement } from 'react';
+import React, { ReactElement, useCallback, useState } from 'react';
 import Column from 'Components/Table/Column';
 import TableOptionsModal from './TableOptionsModal';
 
@@ -15,55 +15,31 @@ interface TableOptionsModalWrapperProps {
   }) => void;
 }
 
-interface TableOptionsModalWrapperState {
-  isTableOptionsModalOpen: boolean;
-}
+function TableOptionsModalWrapper(props: TableOptionsModalWrapperProps) {
+  const { columns, children, ...otherProps } = props;
 
-class TableOptionsModalWrapper extends Component<
-  TableOptionsModalWrapperProps,
-  TableOptionsModalWrapperState
-> {
-  //
-  // Lifecycle
+  const [isTableOptionsModalOpen, setIsTableOptionsModalOpen] = useState(false);
 
-  constructor(props: TableOptionsModalWrapperProps) {
-    super(props);
+  const onTableOptionsPress = useCallback(() => {
+    setIsTableOptionsModalOpen(true);
+  }, []);
 
-    this.state = {
-      isTableOptionsModalOpen: false,
-    };
-  }
+  const onTableOptionsModalClose = useCallback(() => {
+    setIsTableOptionsModalOpen(false);
+  }, []);
 
-  //
-  // Listeners
+  return (
+    <>
+      {React.cloneElement(children, { onPress: onTableOptionsPress })}
 
-  onTableOptionsPress = () => {
-    this.setState({ isTableOptionsModalOpen: true });
-  };
-
-  onTableOptionsModalClose = () => {
-    this.setState({ isTableOptionsModalOpen: false });
-  };
-
-  //
-  // Render
-
-  render() {
-    const { columns, children, ...otherProps } = this.props;
-
-    return (
-      <>
-        {React.cloneElement(children, { onPress: this.onTableOptionsPress })}
-
-        <TableOptionsModal
-          {...otherProps}
-          isOpen={this.state.isTableOptionsModalOpen}
-          columns={columns}
-          onModalClose={this.onTableOptionsModalClose}
-        />
-      </>
-    );
-  }
+      <TableOptionsModal
+        {...otherProps}
+        isOpen={isTableOptionsModalOpen}
+        columns={columns}
+        onModalClose={onTableOptionsModalClose}
+      />
+    </>
+  );
 }
 
 export default TableOptionsModalWrapper;
