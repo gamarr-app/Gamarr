@@ -64,10 +64,11 @@ class ImportGameSelectGame extends Component<
     isQueued: true,
   };
 
-  _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
-  _scheduleUpdate: (() => void) | null = null;
-  _buttonId: string;
-  _contentId: string;
+  // eslint-disable-next-line react/sort-comp
+  private _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
+  private _scheduleUpdate: (() => void) | null = null;
+  private _buttonId: string;
+  private _contentId: string;
 
   //
   // Lifecycle

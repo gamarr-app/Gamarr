@@ -139,6 +139,7 @@ function createLogger(minimumLogLevel: number): Logger {
 }
 
 class SignalRConnector extends Component<PropsFromRedux> {
+  // eslint-disable-next-line react/sort-comp
   private connection: signalR.HubConnection | null = null;
 
   //

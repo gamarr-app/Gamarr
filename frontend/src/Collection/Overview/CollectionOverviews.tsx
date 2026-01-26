@@ -9,7 +9,7 @@ import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder'
 import CollectionOverviewConnector from './CollectionOverviewConnector';
 import styles from './CollectionOverviews.css';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const dimensions = require('Styles/Variables/dimensions');
 
 // Poster container dimensions
@@ -91,7 +91,8 @@ class CollectionOverviews extends Component<
   CollectionOverviewsProps,
   CollectionOverviewsState
 > {
-  _grid: Grid | null = null;
+  // eslint-disable-next-line react/sort-comp
+  private _grid: Grid | null = null;
 
   //
   // Lifecycle

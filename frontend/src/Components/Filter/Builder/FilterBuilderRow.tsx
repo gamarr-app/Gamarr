@@ -174,7 +174,8 @@ class FilterBuilderRow extends Component<
   FilterBuilderRowProps,
   FilterBuilderRowState
 > {
-  selectedFilterBuilderProp?: FilterBuilderProp<unknown>;
+  // eslint-disable-next-line react/sort-comp
+  private selectedFilterBuilderProp?: FilterBuilderProp<unknown>;
 
   //
   // Lifecycle

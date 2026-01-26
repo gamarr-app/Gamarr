@@ -56,7 +56,8 @@ interface AddNewGameConnectorProps {
 }
 
 class AddNewGameConnector extends Component<AddNewGameConnectorProps> {
-  _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
+  // eslint-disable-next-line react/sort-comp
+  private _gameLookupTimeout: ReturnType<typeof setTimeout> | null = null;
 
   //
   // Lifecycle

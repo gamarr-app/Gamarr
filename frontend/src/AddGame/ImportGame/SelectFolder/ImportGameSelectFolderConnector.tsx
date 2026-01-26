@@ -12,6 +12,7 @@ import createRootFoldersSelector from 'Store/Selectors/createRootFoldersSelector
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import ImportGameSelectFolder from './ImportGameSelectFolder';
 
+// eslint-disable-next-line init-declarations
 declare const window: Window & {
   Gamarr: {
     urlBase: string;
