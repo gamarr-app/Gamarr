@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
@@ -20,6 +20,7 @@ import {
   setManageIndexersSort,
 } from 'Store/Actions/settingsActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import { SelectStateChangeCallback } from 'typings/callbacks';
 import Indexer from 'typings/Indexer';
 import { CheckInputChanged } from 'typings/inputs';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
@@ -29,11 +30,6 @@ import ManageIndexersEditModal from './Edit/ManageIndexersEditModal';
 import ManageIndexersModalRow from './ManageIndexersModalRow';
 import TagsModal from './Tags/TagsModal';
 import styles from './ManageIndexersModalContent.css';
-
-// TODO: This feels janky to do, but not sure of a better way currently
-type OnSelectedChangeCallback = ComponentProps<
-  typeof ManageIndexersModalRow
->['onSelectedChange'];
 
 const COLUMNS: Column[] = [
   {
@@ -189,7 +185,7 @@ function ManageIndexersModalContent(props: ManageIndexersModalContentProps) {
     [items, setSelectState]
   );
 
-  const onSelectedChange = useCallback<OnSelectedChangeCallback>(
+  const onSelectedChange = useCallback<SelectStateChangeCallback>(
     ({ id, value, shiftKey = false }) => {
       setSelectState({
         type: 'toggleSelected',
