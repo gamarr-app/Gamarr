@@ -1,7 +1,7 @@
 # Gamarr
 
 [![Build Status](https://github.com/gamarr-app/Gamarr/actions/workflows/ci.yml/badge.svg)](https://github.com/gamarr-app/Gamarr/actions/workflows/ci.yml)
-[![Docker Pulls](https://img.shields.io/docker/pulls/gamarr/gamarr.svg)](https://hub.docker.com/r/gamarr/gamarr)
+[![Docker Pulls](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/gamarr-app/Gamarr/pkgs/container/gamarr)
 [![GitHub Downloads](https://img.shields.io/github/downloads/gamarr-app/Gamarr/total.svg)](https://github.com/gamarr-app/Gamarr/releases)
 [![License](https://img.shields.io/github/license/gamarr-app/Gamarr)](http://www.gnu.org/licenses/gpl.html)
 
