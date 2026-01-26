@@ -65,12 +65,18 @@ namespace NzbDrone.Core.Test.ParserTests
         }
 
         [TestCase("Game.Name-CODEX")]
-        [TestCase("Game.Name.2023-GOG")]
+        [TestCase("Game.Name.2023-GOG")] // Year should not be parsed as version
         [TestCase("Game.Name.REPACK-FitGirl")]
         [TestCase("Split Fiction (+ Online Multiplayer, MULTi11) [FitGirl Repack, Selective Download from 52.9 GB]")]
         [TestCase("Game Name [Repack from 10.5 GB]")]
         [TestCase("Game 56.7 GiB Download")]
         [TestCase("Game [100 MB]")]
+        [TestCase("Borderlands 3 (2019) PC")] // "3" and "2019" are not versions
+        [TestCase("Portal 2 Repack")] // "2" is part of title
+        [TestCase("Hades II RUNE")] // "II" is Roman numeral, not version
+        [TestCase("Game v5 Edition")] // "v5" alone has no minor version
+        [TestCase("Game 2025 Edition")] // Year without v prefix
+        [TestCase("FIFA 25 Repack")] // "25" is part of title
         public void should_return_empty_version_when_no_version_found(string title)
         {
             var version = QualityParser.ParseGameVersion(title);
