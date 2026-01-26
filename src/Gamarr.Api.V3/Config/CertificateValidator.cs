@@ -10,28 +10,27 @@ namespace Gamarr.Api.V3.Config
     public static class CertificateValidation
     {
         public static IRuleBuilderOptions<T, string> IsValidCertificate<T>(this IRuleBuilder<T, string> ruleBuilder)
+            where T : HostConfigResource
         {
-            return ruleBuilder.SetValidator(new CertificateValidator());
+            return ruleBuilder.SetValidator(new CertificateValidator<T>());
         }
     }
 
-    public class CertificateValidator : PropertyValidator
+    public class CertificateValidator<T> : PropertyValidator<T, string>
+        where T : HostConfigResource
     {
-        protected override string GetDefaultMessageTemplate() => "Invalid SSL certificate file or password. {message}";
+        public override string Name => "CertificateValidator";
 
-        private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(CertificateValidator));
+        private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(CertificateValidator<>));
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return false;
             }
 
-            if (context.InstanceToValidate is not HostConfigResource resource)
-            {
-                return true;
-            }
+            var resource = context.InstanceToValidate;
 
             try
             {
@@ -48,5 +47,7 @@ namespace Gamarr.Api.V3.Config
                 return false;
             }
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Invalid SSL certificate file or password. {message}";
     }
 }

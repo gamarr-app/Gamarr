@@ -82,12 +82,13 @@ namespace Gamarr.Api.V3.Games
 
             SharedValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
                 .IsValidPath()
-                .SetValidator(rootFolderValidator)
-                .SetValidator(mappedNetworkDriveValidator)
-                .SetValidator(gamesPathValidator)
-                .SetValidator(gamesAncestorValidator)
-                .SetValidator(recycleBinValidator)
-                .SetValidator(systemFolderValidator)
+                .SetPathValidator(rootFolderValidator)
+                .SetPathValidator(mappedNetworkDriveValidator)
+                .Must((resource, path) => gamesPathValidator.Validate(path, resource.Id))
+                .WithMessage("Path is already used by another game")
+                .SetPathValidator(gamesAncestorValidator)
+                .SetPathValidator(recycleBinValidator)
+                .SetPathValidator(systemFolderValidator)
                 .When(s => s.Path.IsNotNullOrWhiteSpace());
 
             PostValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
@@ -97,8 +98,9 @@ namespace Gamarr.Api.V3.Games
             PostValidator.RuleFor(s => s.RootFolderPath).Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .IsValidPath()
-                .SetValidator(rootFolderExistsValidator)
-                .SetValidator(gameFolderAsRootFolderValidator)
+                .SetPathValidator(rootFolderExistsValidator)
+                .Must((resource, path) => gameFolderAsRootFolderValidator.IsValid(null, path))
+                .WithMessage("Root folder path contains game folder")
                 .When(s => s.Path.IsNullOrWhiteSpace());
 
             PutValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
@@ -115,7 +117,7 @@ namespace Gamarr.Api.V3.Games
             PostValidator.RuleFor(s => s.IgdbId)
                 .NotNull()
                 .NotEmpty()
-                .SetValidator(gamesExistsValidator)
+                .SetPathValidator(gamesExistsValidator)
                 .When(s => s.SteamAppId <= 0);
             PostValidator.RuleFor(s => s.SteamAppId)
                 .GreaterThan(0)

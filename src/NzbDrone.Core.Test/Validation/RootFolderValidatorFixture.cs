@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using FluentAssertions;
+using FluentValidation;
 using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.RootFolders;
@@ -19,7 +20,7 @@ namespace NzbDrone.Core.Test.Validation
         {
             _validator = new TestValidator<Game>
             {
-                v => v.RuleFor(s => s.Path).SetValidator(Subject)
+                v => v.RuleFor(s => s.Path).Must(path => Subject.Validate(path))
             };
 
             Mocker.GetMock<IRootFolderService>()

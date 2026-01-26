@@ -1,9 +1,8 @@
-﻿using FluentValidation.Validators;
 using NzbDrone.Core.Download;
 
 namespace NzbDrone.Core.Validation
 {
-    public class DownloadClientExistsValidator : PropertyValidator
+    public class DownloadClientExistsValidator
     {
         private readonly IDownloadClientFactory _downloadClientFactory;
 
@@ -12,16 +11,14 @@ namespace NzbDrone.Core.Validation
             _downloadClientFactory = downloadClientFactory;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Download Client does not exist";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(int downloadClientId)
         {
-            if (context?.PropertyValue == null || (int)context.PropertyValue == 0)
+            if (downloadClientId == 0)
             {
                 return true;
             }
 
-            return _downloadClientFactory.Exists((int)context.PropertyValue);
+            return _downloadClientFactory.Exists(downloadClientId);
         }
     }
 }

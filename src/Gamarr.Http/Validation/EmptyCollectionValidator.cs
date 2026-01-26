@@ -1,23 +1,24 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using FluentValidation;
 using FluentValidation.Validators;
 using NzbDrone.Common.Extensions;
 
 namespace Gamarr.Http.Validation
 {
-    public class EmptyCollectionValidator<T> : PropertyValidator
+    public class EmptyCollectionValidator<T, TElement> : PropertyValidator<T, IEnumerable<TElement>>
     {
-        protected override string GetDefaultMessageTemplate() => "Collection Must Be Empty";
+        public override string Name => "EmptyCollectionValidator";
 
-        protected override bool IsValid(PropertyValidatorContext context)
+        public override bool IsValid(ValidationContext<T> context, IEnumerable<TElement> value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return true;
             }
 
-            var collection = context.PropertyValue as IEnumerable<T>;
-
-            return collection != null && collection.Empty();
+            return value.Empty();
         }
+
+        protected override string GetDefaultMessageTemplate(string errorCode) => "Collection Must Be Empty";
     }
 }

@@ -19,9 +19,12 @@ namespace NzbDrone.Core.Download.Clients.rTorrent
         {
             RuleFor(c => c.GameDirectory).Cascade(CascadeMode.Stop)
                                        .IsValidPath()
-                                       .SetValidator(rootFolderValidator)
-                                       .SetValidator(mappedNetworkDriveValidator)
-                                       .SetValidator(pathExistsValidator)
+                                       .Must(value => rootFolderValidator.Validate(value))
+                                       .WithMessage("Path is already configured as a root folder")
+                                       .Must(value => mappedNetworkDriveValidator.Validate(value))
+                                       .WithMessage("Mapped Network Drive and Windows Service")
+                                       .Must(value => pathExistsValidator.Validate(value))
+                                       .WithMessage("Path does not exist")
                                        .When(c => c.GameDirectory.IsNotNullOrWhiteSpace())
                                        .When(c => c.Host == "localhost" || c.Host == "127.0.0.1");
         }

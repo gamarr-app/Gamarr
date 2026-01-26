@@ -8,7 +8,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.Validation
 {
     [TestFixture]
-    public class PathValidatorFixture : CoreTest<PathValidator>
+    public class PathValidatorFixture : CoreTest
     {
         private TestValidator<Game> _validator;
 
@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.Validation
         {
             _validator = new TestValidator<Game>
             {
-                v => v.RuleFor(s => s.Path).SetValidator(Subject)
+                v => v.RuleFor(s => s.Path).IsValidPath()
             };
         }
 

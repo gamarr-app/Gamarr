@@ -17,7 +17,8 @@ namespace Gamarr.Api.V3.RemotePathMappings
 
         public RemotePathMappingController(IRemotePathMappingService remotePathMappingService,
                                        PathExistsValidator pathExistsValidator,
-                                       MappedNetworkDriveValidator mappedNetworkDriveValidator)
+                                       MappedNetworkDriveValidator mappedNetworkDriveValidator,
+                                       SystemFolderValidator systemFolderValidator)
         {
             _remotePathMappingService = remotePathMappingService;
 
@@ -39,9 +40,9 @@ namespace Gamarr.Api.V3.RemotePathMappings
             SharedValidator.RuleFor(c => c.LocalPath)
                 .Cascade(CascadeMode.Stop)
                 .IsValidPath()
-                .SetValidator(mappedNetworkDriveValidator)
-                .SetValidator(pathExistsValidator)
-                .SetValidator(new SystemFolderValidator())
+                .SetPathValidator(mappedNetworkDriveValidator)
+                .SetPathValidator(pathExistsValidator)
+                .SetPathValidator(systemFolderValidator)
                 .NotEqual("/")
                 .WithMessage("Cannot be set to '/'");
         }

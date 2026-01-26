@@ -51,17 +51,14 @@ class Marquee extends Component<MarqueeProps, MarqueeState> {
     }
   }
 
-  // eslint-disable-next-line react/no-deprecated
-  componentWillReceiveProps(nextProps: MarqueeProps) {
-    if (this.props.text.length !== nextProps.text.length) {
+  componentDidUpdate(prevProps: MarqueeProps) {
+    if (prevProps.text.length !== this.props.text.length) {
       if (this.marqueeTimer) {
         clearTimeout(this.marqueeTimer);
       }
       this.setState({ animatedWidth: 0, direction: 0 });
     }
-  }
 
-  componentDidUpdate() {
     this.measureText();
 
     if (this.props.hoverToStop) {

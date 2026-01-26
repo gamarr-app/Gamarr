@@ -1,4 +1,5 @@
 using FluentAssertions;
+using FluentValidation;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
@@ -19,7 +20,7 @@ namespace NzbDrone.Core.Test.Validation
         {
             _validator = new TestValidator<Game>
             {
-                v => v.RuleFor(s => s.Path).SetValidator(Subject)
+                v => v.RuleFor(s => s.Path).Must(path => Subject.Validate(path))
             };
 
             Mocker.GetMock<IDiskProvider>()

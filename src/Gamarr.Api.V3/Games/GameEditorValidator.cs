@@ -12,7 +12,7 @@ namespace Gamarr.Api.V3.Games
         {
             RuleFor(s => s.RootFolderPath).Cascade(CascadeMode.Stop)
                 .IsValidPath()
-                .SetValidator(rootFolderExistsValidator)
+                .SetPathValidator(rootFolderExistsValidator)
                 .When(s => s.RootFolderPath.IsNotNullOrWhiteSpace());
 
             RuleFor(c => c.QualityProfileId).Cascade(CascadeMode.Stop)

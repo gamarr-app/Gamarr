@@ -20,7 +20,8 @@ namespace Gamarr.Api.V3.Profiles.Delay
 
             SharedValidator.RuleFor(d => d.Tags).NotEmpty().When(d => d.Id != 1);
             SharedValidator.RuleFor(d => d.Tags).EmptyCollection<DelayProfileResource, int>().When(d => d.Id == 1);
-            SharedValidator.RuleFor(d => d.Tags).SetValidator(tagInUseValidator);
+            SharedValidator.RuleFor(d => d.Tags).Must((resource, tags) => tagInUseValidator.Validate(tags, resource.Id))
+                .WithMessage("Tags are already in use by another delay profile");
             SharedValidator.RuleFor(d => d.UsenetDelay).GreaterThanOrEqualTo(0);
             SharedValidator.RuleFor(d => d.TorrentDelay).GreaterThanOrEqualTo(0);
 

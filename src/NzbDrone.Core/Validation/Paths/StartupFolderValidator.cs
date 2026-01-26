@@ -1,10 +1,9 @@
-﻿using FluentValidation.Validators;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
 
 namespace NzbDrone.Core.Validation.Paths
 {
-    public class StartupFolderValidator : PropertyValidator
+    public class StartupFolderValidator
     {
         private readonly IAppFolderInfo _appFolderInfo;
 
@@ -13,30 +12,22 @@ namespace NzbDrone.Core.Validation.Paths
             _appFolderInfo = appFolderInfo;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Path '{path}' cannot be {relationship} the start up folder";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        public bool Validate(string value)
         {
-            if (context.PropertyValue == null)
+            if (value == null)
             {
                 return true;
             }
 
             var startupFolder = _appFolderInfo.StartUpFolder;
-            var folder = context.PropertyValue.ToString();
-            context.MessageFormatter.AppendArgument("path", folder);
 
-            if (startupFolder.PathEquals(folder))
+            if (startupFolder.PathEquals(value))
             {
-                context.MessageFormatter.AppendArgument("relationship", "set to");
-
                 return false;
             }
 
-            if (startupFolder.IsParentPath(folder))
+            if (startupFolder.IsParentPath(value))
             {
-                context.MessageFormatter.AppendArgument("relationship", "child of");
-
                 return false;
             }
 

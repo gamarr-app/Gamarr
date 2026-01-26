@@ -5,6 +5,7 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -23,7 +24,6 @@ import ArrayElement from 'typings/Helpers/ArrayElement';
 import { EnhancedSelectInputChanged, InputChanged } from 'typings/inputs';
 import { isMobile as isMobileUtil } from 'Utilities/browser';
 import * as keyCodes from 'Utilities/Constants/keyCodes';
-import getUniqueElementId from 'Utilities/getUniqueElementId';
 import TextInput from '../TextInput';
 import HintedSelectInputOption from './HintedSelectInputOption';
 import HintedSelectInputSelectedValue from './HintedSelectInputSelectedValue';
@@ -164,8 +164,8 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
 
   const [measureRef, { width }] = useMeasure();
   const updater = useRef<(() => void) | null>(null);
-  const buttonId = useMemo(() => getUniqueElementId(), []);
-  const optionsId = useMemo(() => getUniqueElementId(), []);
+  const buttonId = useId();
+  const optionsId = useId();
   const [selectedIndex, setSelectedIndex] = useState(
     getSelectedIndex(value, values)
   );

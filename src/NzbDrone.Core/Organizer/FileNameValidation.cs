@@ -2,7 +2,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FluentValidation;
-using FluentValidation.Validators;
 using NzbDrone.Common.Extensions;
 
 namespace NzbDrone.Core.Organizer
@@ -15,101 +14,79 @@ namespace NzbDrone.Core.Organizer
         internal static readonly Regex OriginalTokenRegex = new (@"(\{Original[- ._](?:Title|Filename)\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
+
         public static IRuleBuilderOptions<T, string> ValidGameFormat<T>(this IRuleBuilder<T, string> ruleBuilder)
         {
-            ruleBuilder.SetValidator(new NotEmptyValidator(null));
-            ruleBuilder.SetValidator(new IllegalCharactersValidator());
-
-            return ruleBuilder.SetValidator(new ValidGameFormatValidator());
+            return ruleBuilder.NotEmpty()
+                              .Must(value => !HasIllegalCharacters(value))
+                              .WithMessage(GetIllegalCharacterMessage)
+                              .Must(value => IsValidGameFormat(value))
+                              .WithMessage("Must contain either game title and release year OR Original Title/Filename");
         }
 
         public static IRuleBuilderOptions<T, string> ValidGameFolderFormat<T>(this IRuleBuilder<T, string> ruleBuilder)
         {
-            ruleBuilder.SetValidator(new NotEmptyValidator(null));
-            ruleBuilder.SetValidator(new IllegalCharactersValidator());
-            ruleBuilder.SetValidator(new IllegalGameFolderTokensValidator());
-
-            return ruleBuilder.SetValidator(new ValidGameFolderFormatValidator());
+            return ruleBuilder.NotEmpty()
+                              .Must(value => !HasIllegalCharacters(value))
+                              .WithMessage(GetIllegalCharacterMessage)
+                              .Must(value => !HasDeprecatedTokens(value))
+                              .WithMessage(GetDeprecatedTokenMessage)
+                              .Must(value => FileNameBuilder.GameTitleRegex.IsMatch(value))
+                              .WithMessage("Must contain game title");
         }
-    }
 
-    public class ValidGameFormatValidator : PropertyValidator
-    {
-        protected override string GetDefaultMessageTemplate() => "Must contain either game title and release year OR Original Title/Filename";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        private static bool IsValidGameFormat(string value)
         {
-            if (context.PropertyValue is not string value)
+            if (value == null)
             {
                 return false;
             }
 
-            return (FileNameBuilder.GameTitleRegex.IsMatch(value) && FileNameBuilder.ReleaseYearRegex.IsMatch(value) && !FileNameValidation.OriginalTokenRegex.IsMatch(value)) ||
-                   FileNameValidation.OriginalTokenRegex.IsMatch(value);
+            return (FileNameBuilder.GameTitleRegex.IsMatch(value) && FileNameBuilder.ReleaseYearRegex.IsMatch(value) && !OriginalTokenRegex.IsMatch(value)) ||
+                   OriginalTokenRegex.IsMatch(value);
         }
-    }
 
-    public class ValidGameFolderFormatValidator : PropertyValidator
-    {
-        protected override string GetDefaultMessageTemplate() => "Must contain game title";
-
-        protected override bool IsValid(PropertyValidatorContext context)
+        private static bool HasIllegalCharacters(string value)
         {
-            if (context.PropertyValue is not string value)
-            {
-                return false;
-            }
-
-            return FileNameBuilder.GameTitleRegex.IsMatch(value);
-        }
-    }
-
-    public class IllegalGameFolderTokensValidator : PropertyValidator
-    {
-        protected override string GetDefaultMessageTemplate() => "Must not contain deprecated tokens derived from file properties: {tokens}";
-
-        protected override bool IsValid(PropertyValidatorContext context)
-        {
-            if (context.PropertyValue is not string value)
-            {
-                return false;
-            }
-
-            var match = FileNameValidation.DeprecatedGameFolderTokensRegex.Matches(value);
-
-            if (match.Any())
-            {
-                context.MessageFormatter.AppendArgument("tokens", string.Join(", ", match.Select(c => c.Value).ToArray()));
-
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    public class IllegalCharactersValidator : PropertyValidator
-    {
-        private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
-
-        protected override string GetDefaultMessageTemplate() => "Contains illegal characters: {InvalidCharacters}";
-
-        protected override bool IsValid(PropertyValidatorContext context)
-        {
-            var value = context.PropertyValue as string;
             if (value.IsNullOrWhiteSpace())
             {
-                return true;
-            }
-
-            var invalidCharacters = InvalidPathChars.Where(i => value!.IndexOf(i) >= 0).ToList();
-            if (invalidCharacters.Any())
-            {
-                context.MessageFormatter.AppendArgument("InvalidCharacters", string.Join("", invalidCharacters));
                 return false;
             }
 
-            return true;
+            return InvalidPathChars.Any(i => value.IndexOf(i) >= 0);
+        }
+
+        private static string GetIllegalCharacterMessage<T>(T instance, string value)
+        {
+            if (value.IsNullOrWhiteSpace())
+            {
+                return string.Empty;
+            }
+
+            var invalidCharacters = InvalidPathChars.Where(i => value.IndexOf(i) >= 0).ToList();
+            return $"Contains illegal characters: {string.Join("", invalidCharacters)}";
+        }
+
+        private static bool HasDeprecatedTokens(string value)
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            return DeprecatedGameFolderTokensRegex.IsMatch(value);
+        }
+
+        private static string GetDeprecatedTokenMessage<T>(T instance, string value)
+        {
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
+            var match = DeprecatedGameFolderTokensRegex.Matches(value);
+            return $"Must not contain deprecated tokens derived from file properties: {string.Join(", ", match.Select(c => c.Value).ToArray())}";
         }
     }
 }

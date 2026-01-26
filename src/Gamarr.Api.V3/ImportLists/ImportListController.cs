@@ -23,7 +23,7 @@ namespace Gamarr.Api.V3.ImportLists
 
             SharedValidator.RuleFor(c => c.RootFolderPath).Cascade(CascadeMode.Stop)
                 .IsValidPath()
-                .SetValidator(rootFolderExistsValidator);
+                .SetPathValidator(rootFolderExistsValidator);
 
             SharedValidator.RuleFor(c => c.QualityProfileId).Cascade(CascadeMode.Stop)
                 .ValidId()
