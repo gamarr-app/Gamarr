@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { Component } from 'react';
+import { useCallback } from 'react';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputGroup from 'Components/Form/FormInputGroup';
@@ -46,237 +45,133 @@ interface DiscoverGamePosterOptionsModalContentProps {
   onModalClose: (...args: unknown[]) => void;
 }
 
-interface DiscoverGamePosterOptionsModalContentState {
-  size: string;
-  showTitle: boolean;
-  showIgdbRating: boolean;
-  showMetacriticRating: boolean;
-  includeRecommendations: boolean;
-  includeTrending: boolean;
-  includePopular: boolean;
-  [key: string]: string | boolean;
-}
+function DiscoverGamePosterOptionsModalContent(
+  props: DiscoverGamePosterOptionsModalContentProps
+) {
+  const {
+    size,
+    showTitle,
+    showIgdbRating,
+    showMetacriticRating,
+    includeRecommendations,
+    includeTrending,
+    includePopular,
+    onChangePosterOption,
+    onChangeOption,
+    onModalClose,
+  } = props;
 
-class DiscoverGamePosterOptionsModalContent extends Component<
-  DiscoverGamePosterOptionsModalContentProps,
-  DiscoverGamePosterOptionsModalContentState
-> {
-  //
-  // Lifecycle
+  const handleChangePosterOption = useCallback(
+    ({ name, value }: { name: string; value: string | boolean }) => {
+      onChangePosterOption({ [name]: value });
+    },
+    [onChangePosterOption]
+  );
 
-  constructor(props: DiscoverGamePosterOptionsModalContentProps) {
-    super(props);
+  const handleChangeOption = useCallback(
+    ({ name, value }: { name: string; value: string | boolean }) => {
+      onChangeOption({ [name]: value });
+    },
+    [onChangeOption]
+  );
 
-    this.state = {
-      size: props.size,
-      showTitle: props.showTitle,
-      showIgdbRating: props.showIgdbRating,
-      showMetacriticRating: props.showMetacriticRating,
-      includeRecommendations: props.includeRecommendations,
-      includeTrending: props.includeTrending,
-      includePopular: props.includePopular,
-    };
-  }
+  return (
+    <ModalContent onModalClose={onModalClose}>
+      <ModalHeader>{translate('PosterOptions')}</ModalHeader>
 
-  componentDidUpdate(prevProps: DiscoverGamePosterOptionsModalContentProps) {
-    const {
-      size,
-      showTitle,
-      showIgdbRating,
-      showMetacriticRating,
-      includeRecommendations,
-      includeTrending,
-      includePopular,
-    } = this.props;
+      <ModalBody>
+        <Form>
+          <FormGroup>
+            <FormLabel>{translate('IncludeGamarrRecommendations')}</FormLabel>
 
-    const state: Partial<DiscoverGamePosterOptionsModalContentState> = {};
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="includeRecommendations"
+              value={includeRecommendations}
+              helpText={translate('IncludeRecommendationsHelpText')}
+              onChange={handleChangeOption}
+            />
+          </FormGroup>
 
-    if (size !== prevProps.size) {
-      state.size = size;
-    }
+          <FormGroup>
+            <FormLabel>{translate('IncludeTrending')}</FormLabel>
 
-    if (showTitle !== prevProps.showTitle) {
-      state.showTitle = showTitle;
-    }
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="includeTrending"
+              value={includeTrending}
+              helpText={translate('IncludeTrendingGamesHelpText')}
+              onChange={handleChangeOption}
+            />
+          </FormGroup>
 
-    if (showIgdbRating !== prevProps.showIgdbRating) {
-      state.showIgdbRating = showIgdbRating;
-    }
+          <FormGroup>
+            <FormLabel>{translate('IncludePopular')}</FormLabel>
 
-    if (showMetacriticRating !== prevProps.showMetacriticRating) {
-      state.showMetacriticRating = showMetacriticRating;
-    }
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="includePopular"
+              value={includePopular}
+              helpText={translate('IncludePopularGamesHelpText')}
+              onChange={handleChangeOption}
+            />
+          </FormGroup>
 
-    if (includeRecommendations !== prevProps.includeRecommendations) {
-      state.includeRecommendations = includeRecommendations;
-    }
+          <FormGroup>
+            <FormLabel>{translate('PosterSize')}</FormLabel>
 
-    if (includeTrending !== prevProps.includeTrending) {
-      state.includeTrending = includeTrending;
-    }
+            <FormInputGroup
+              type={inputTypes.SELECT}
+              name="size"
+              value={size}
+              values={posterSizeOptions}
+              onChange={handleChangePosterOption}
+            />
+          </FormGroup>
 
-    if (includePopular !== prevProps.includePopular) {
-      state.includePopular = includePopular;
-    }
+          <FormGroup>
+            <FormLabel>{translate('ShowTitle')}</FormLabel>
 
-    if (!_.isEmpty(state)) {
-      this.setState(state as DiscoverGamePosterOptionsModalContentState);
-    }
-  }
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showTitle"
+              value={showTitle}
+              helpText={translate('ShowTitleHelpText')}
+              onChange={handleChangePosterOption}
+            />
+          </FormGroup>
 
-  //
-  // Listeners
+          <FormGroup>
+            <FormLabel>{translate('ShowIgdbRating')}</FormLabel>
 
-  onChangePosterOption = ({
-    name,
-    value,
-  }: {
-    name: keyof DiscoverGamePosterOptionsModalContentState;
-    value: string | boolean;
-  }) => {
-    this.setState(
-      {
-        [name]: value,
-      },
-      () => {
-        this.props.onChangePosterOption({ [name]: value });
-      }
-    );
-  };
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showIgdbRating"
+              value={showIgdbRating}
+              helpText={translate('ShowIgdbRatingHelpText')}
+              onChange={handleChangePosterOption}
+            />
+          </FormGroup>
 
-  onChangeOption = ({
-    name,
-    value,
-  }: {
-    name: keyof DiscoverGamePosterOptionsModalContentState;
-    value: string | boolean;
-  }) => {
-    this.setState(
-      {
-        [name]: value,
-      },
-      () => {
-        this.props.onChangeOption({
-          [name]: value,
-        });
-      }
-    );
-  };
+          <FormGroup>
+            <FormLabel>{translate('ShowMetacriticRating')}</FormLabel>
 
-  //
-  // Render
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showMetacriticRating"
+              value={showMetacriticRating}
+              helpText={translate('ShowMetacriticRatingHelpText')}
+              onChange={handleChangePosterOption}
+            />
+          </FormGroup>
+        </Form>
+      </ModalBody>
 
-  render() {
-    const { onModalClose } = this.props;
-
-    const {
-      size,
-      showTitle,
-      showIgdbRating,
-      showMetacriticRating,
-      includeRecommendations,
-      includeTrending,
-      includePopular,
-    } = this.state;
-
-    return (
-      <ModalContent onModalClose={onModalClose}>
-        <ModalHeader>{translate('PosterOptions')}</ModalHeader>
-
-        <ModalBody>
-          <Form>
-            <FormGroup>
-              <FormLabel>{translate('IncludeGamarrRecommendations')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="includeRecommendations"
-                value={includeRecommendations}
-                helpText={translate('IncludeRecommendationsHelpText')}
-                onChange={this.onChangeOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('IncludeTrending')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="includeTrending"
-                value={includeTrending}
-                helpText={translate('IncludeTrendingGamesHelpText')}
-                onChange={this.onChangeOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('IncludePopular')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="includePopular"
-                value={includePopular}
-                helpText={translate('IncludePopularGamesHelpText')}
-                onChange={this.onChangeOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('PosterSize')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.SELECT}
-                name="size"
-                value={size}
-                values={posterSizeOptions}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowTitle')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showTitle"
-                value={showTitle}
-                helpText={translate('ShowTitleHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowIgdbRating')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showIgdbRating"
-                value={showIgdbRating}
-                helpText={translate('ShowIgdbRatingHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowMetacriticRating')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showMetacriticRating"
-                value={showMetacriticRating}
-                helpText={translate('ShowMetacriticRatingHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-          </Form>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button onPress={onModalClose}>{translate('Close')}</Button>
-        </ModalFooter>
-      </ModalContent>
-    );
-  }
+      <ModalFooter>
+        <Button onPress={onModalClose}>{translate('Close')}</Button>
+      </ModalFooter>
+    </ModalContent>
+  );
 }
 
 export default DiscoverGamePosterOptionsModalContent;
