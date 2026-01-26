@@ -52,6 +52,7 @@ declare module 'jquery' {
     [key: string]: unknown;
   }
 
+  // eslint-disable-next-line init-declarations
   const $: JQueryStatic;
   export default $;
   export { JQueryPromise, JQueryDeferred, JQueryXHR, JQueryAjaxSettings };

@@ -102,7 +102,7 @@ class ImportGame extends Component<ImportGameProps, ImportGameState> {
         itemsAsModelBase,
         id,
         value ?? false,
-        shiftKey
+        shiftKey ?? false
       );
     });
   };

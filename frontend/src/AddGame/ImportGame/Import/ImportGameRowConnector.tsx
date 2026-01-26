@@ -1,12 +1,9 @@
 import _ from 'lodash';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { Component } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
-import {
-  ImportGameItem,
-  ImportGameSelectedGame,
-} from 'App/State/ImportGameAppState';
+import { ImportGameItem } from 'App/State/ImportGameAppState';
 import {
   queueLookupGame,
   setImportGameValue,
@@ -16,12 +13,29 @@ import { InputChanged } from 'typings/inputs';
 import { SelectStateInputProps } from 'typings/props';
 import ImportGameRow from './ImportGameRow';
 
+// Own props - passed by parent component
+interface OwnProps {
+  rootFolderId: number;
+  id: string;
+  isSelected?: boolean;
+  onSelectedChange: (payload: SelectStateInputProps) => void;
+}
+
+// State props - derived from Redux state, excluding id which comes from OwnProps
+type StateProps = Omit<Partial<ImportGameItem>, 'id'> & {
+  isExistingGame: boolean;
+};
+
 function createImportGameItemSelector() {
   return createSelector(
-    (_state: AppState, { id }: { id: string }) => id,
+    (_state: AppState, { id }: OwnProps) => id,
     (state: AppState) => state.importGame.items,
-    (id, items): Partial<ImportGameItem> => {
-      return _.find(items, { id }) || {};
+    (id, items): Omit<Partial<ImportGameItem>, 'id'> => {
+      const found = _.find(items, { id });
+      if (!found) return {};
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, ...rest } = found;
+      return rest;
     }
   );
 }
@@ -30,17 +44,13 @@ function createMapStateToProps() {
   return createSelector(
     createImportGameItemSelector(),
     createAllGamesSelector(),
-    (item, games) => {
+    (item, games): StateProps => {
       const selectedGame = item && item.selectedGame;
       const isExistingGame =
         !!selectedGame && _.some(games, { igdbId: selectedGame.igdbId });
 
-      // Exclude id from the spread - id always comes from ownProps, not state
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id: _id, ...itemWithoutId } = item;
-
       return {
-        ...itemWithoutId,
+        ...item,
         isExistingGame,
       };
     }
@@ -52,30 +62,11 @@ const mapDispatchToProps = {
   setImportGameValue,
 };
 
-interface SetImportGameValuePayload {
-  id: string;
-  [key: string]: unknown;
-}
+const connector = connect(createMapStateToProps, mapDispatchToProps);
 
-interface ImportGameRowConnectorProps {
-  rootFolderId: number;
-  id: string;
-  monitor?: string;
-  qualityProfileId?: number;
-  minimumAvailability?: string;
-  relativePath?: string;
-  selectedGame?: ImportGameSelectedGame;
-  isExistingGame?: boolean;
-  items?: ImportGameSelectedGame[];
-  isSelected?: boolean;
-  onSelectedChange: (payload: SelectStateInputProps) => void;
-  queueLookupGame: (payload: {
-    name: string;
-    term: string;
-    topOfQueue?: boolean;
-  }) => void;
-  setImportGameValue: (values: SetImportGameValuePayload) => void;
-}
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type ImportGameRowConnectorProps = OwnProps & PropsFromRedux;
 
 class ImportGameRowConnector extends Component<ImportGameRowConnectorProps> {
   //
@@ -123,10 +114,4 @@ class ImportGameRowConnector extends Component<ImportGameRowConnectorProps> {
   }
 }
 
-// The id is always passed from the parent component (ImportGameTable), not from state
-export default connect(
-  createMapStateToProps,
-  mapDispatchToProps
-)(ImportGameRowConnector) as React.ComponentType<
-  Omit<ImportGameRowConnectorProps, 'queueLookupGame' | 'setImportGameValue'>
->;
+export default connector(ImportGameRowConnector);

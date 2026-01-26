@@ -1,7 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import AddNewGameModalContent from 'AddGame/AddNewGame/AddNewGameModalContent';
+import AddNewGameModalContent, {
+  FormValue,
+} from 'AddGame/AddNewGame/AddNewGameModalContent';
 import { Error } from 'App/State/AppSectionState';
 import { Image } from 'Game/Game';
 import { addGame, setAddGameDefault } from 'Store/Actions/discoverGameActions';
@@ -9,13 +11,6 @@ import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
-import { Failure } from 'typings/pending';
-
-interface FormValue<T> {
-  value: T;
-  errors?: Failure[];
-  warnings?: Failure[];
-}
 
 interface DiscoverGameDefaults {
   rootFolderPath: string;
