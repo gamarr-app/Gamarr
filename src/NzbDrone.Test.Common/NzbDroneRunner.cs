@@ -45,17 +45,19 @@ namespace NzbDrone.Test.Common
 
             GenerateConfigFile(enableAuth);
 
-            string consoleExe;
+            var outputDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "_output", "net8.0");
+
             if (OsInfo.IsWindows)
             {
-                consoleExe = "Gamarr.Console.exe";
+                Start(Path.Combine(outputDir, "Gamarr.Console.exe"), null);
             }
             else
             {
-                consoleExe = "Gamarr";
+                // On non-Windows, use dotnet to run the DLL for better runtime compatibility
+                var homeDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");
+                var dotnetExe = Directory.Exists(homeDotnet) ? Path.Combine(homeDotnet, "dotnet") : "dotnet";
+                Start(dotnetExe, Path.Combine(outputDir, "Gamarr.dll"));
             }
-
-            Start(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "_output", "net8.0", consoleExe));
 
             while (true)
             {
@@ -129,7 +131,7 @@ namespace NzbDrone.Test.Common
             TestBase.DeleteTempFolder(AppData);
         }
 
-        private void Start(string outputGamarrConsoleExe)
+        private void Start(string executable, string dllPath)
         {
             StringDictionary envVars = new ();
 
@@ -168,10 +170,14 @@ namespace NzbDrone.Test.Common
                 TestContext.Progress.WriteLine("Using env vars:\n{0}", envVars.ToJson());
             }
 
-            TestContext.Progress.WriteLine("Starting instance from {0} on port {1}", outputGamarrConsoleExe, Port);
+            // Build command args
+            var args = dllPath != null
+                ? $"\"{dllPath}\" -nobrowser -nosingleinstancecheck -data=\"{AppData}\""
+                : $"-nobrowser -nosingleinstancecheck -data=\"{AppData}\"";
 
-            var args = "-nobrowser -nosingleinstancecheck -data=\"" + AppData + "\"";
-            _nzbDroneProcess = _processProvider.Start(outputGamarrConsoleExe, args, envVars, OnOutputDataReceived, OnOutputDataReceived);
+            TestContext.Progress.WriteLine("Starting instance: {0} {1} on port {2}", executable, args, Port);
+
+            _nzbDroneProcess = _processProvider.Start(executable, args, envVars, OnOutputDataReceived, OnOutputDataReceived);
         }
 
         private void OnOutputDataReceived(string data)
