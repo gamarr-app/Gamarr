@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Component, createRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
 import { CustomFilter, Filter } from 'App/State/AppState';
 import Alert from 'Components/Alert';
@@ -19,6 +19,8 @@ import { SelectStateInputProps } from 'typings/props';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
+
+type GetSelectedIdsFn = typeof getSelectedIds;
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
 import CollectionFooter from './CollectionFooter';
@@ -58,117 +60,59 @@ interface CollectionProps {
   onRefreshGameCollectionsPress: () => void;
 }
 
-interface CollectionState {
-  jumpBarItems: JumpBarItems;
-  jumpToCharacter: string | null;
-  isPosterOptionsModalOpen: boolean;
-  isOverviewOptionsModalOpen: boolean;
-  isConfirmSearchModalOpen: boolean;
-  searchType: string | null;
-  allSelected: boolean;
-  allUnselected: boolean;
-  lastToggled: number | null;
-  selectedState: Record<number, boolean>;
-}
-
 function getViewComponent(_view: string) {
   return CollectionOverviewsConnector;
 }
 
-class Collection extends Component<CollectionProps, CollectionState> {
-  // eslint-disable-next-line react/sort-comp
-  scrollerRef = createRef<HTMLDivElement>();
+function Collection(props: CollectionProps) {
+  const {
+    initialScrollTop,
+    isFetching,
+    isPopulated,
+    isSaving,
+    isAdding,
+    error,
+    saveError,
+    totalItems,
+    items,
+    selectedFilterKey,
+    filters,
+    customFilters,
+    sortKey,
+    sortDirection,
+    view,
+    isRefreshingCollections,
+    onSortSelect,
+    onFilterSelect,
+    onScroll,
+    onUpdateSelectedPress,
+    onRefreshGameCollectionsPress,
+  } = props;
 
-  constructor(props: CollectionProps) {
-    super(props);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
-    this.state = {
-      jumpBarItems: { order: [], characters: {} },
-      jumpToCharacter: null,
-      isPosterOptionsModalOpen: false,
-      isOverviewOptionsModalOpen: false,
-      isConfirmSearchModalOpen: false,
-      searchType: null,
-      allSelected: false,
-      allUnselected: false,
-      lastToggled: null,
-      selectedState: {},
-    };
-  }
+  const [jumpBarItems, setJumpBarItems] = useState<JumpBarItems>({
+    order: [],
+    characters: {},
+  });
+  const [jumpToCharacter, setJumpToCharacter] = useState<string | null>(null);
+  const [isOverviewOptionsModalOpen, setIsOverviewOptionsModalOpen] =
+    useState(false);
+  const [allSelected, setAllSelected] = useState(false);
+  const [allUnselected, setAllUnselected] = useState(false);
+  const [lastToggled, setLastToggled] = useState<number | null>(null);
+  const [selectedState, setSelectedState] = useState<Record<number, boolean>>(
+    {}
+  );
 
-  componentDidMount() {
-    this.setJumpBarItems();
-    this.setSelectedState();
-  }
+  const prevItemsRef = useRef(items);
+  const prevSortKeyRef = useRef(sortKey);
+  const prevSortDirectionRef = useRef(sortDirection);
 
-  componentDidUpdate(prevProps: CollectionProps) {
-    const { items, sortKey, sortDirection } = this.props;
-
-    if (
-      sortKey !== prevProps.sortKey ||
-      sortDirection !== prevProps.sortDirection ||
-      hasDifferentItemsOrOrder(prevProps.items, items)
-    ) {
-      this.setJumpBarItems();
-      this.setSelectedState();
-    }
-
-    if (this.state.jumpToCharacter != null) {
-      this.setState({ jumpToCharacter: null });
-    }
-  }
-
-  //
-  // Control
-
-  getSelectedIds = (): number[] => {
-    if (this.state.allUnselected) {
-      return [];
-    }
-    return getSelectedIds(this.state.selectedState);
-  };
-
-  setSelectedState() {
-    const { items } = this.props;
-
-    const { selectedState } = this.state;
-
-    const newSelectedState: Record<number, boolean> = {};
-
-    items.forEach((collection) => {
-      const isItemSelected = selectedState[collection.id];
-
-      if (isItemSelected) {
-        newSelectedState[collection.id] = isItemSelected;
-      } else {
-        newSelectedState[collection.id] = false;
-      }
-    });
-
-    const selectedCount = getSelectedIds(newSelectedState).length;
-    const newStateCount = Object.keys(newSelectedState).length;
-    let isAllSelected = false;
-    let isAllUnselected = false;
-
-    if (selectedCount === 0) {
-      isAllUnselected = true;
-    } else if (selectedCount === newStateCount) {
-      isAllSelected = true;
-    }
-
-    this.setState({
-      selectedState: newSelectedState,
-      allSelected: isAllSelected,
-      allUnselected: isAllUnselected,
-    });
-  }
-
-  setJumpBarItems() {
-    const { items, sortKey, sortDirection } = this.props;
-
+  const computeJumpBarItems = useCallback(() => {
     // Reset if not sorting by sortTitle
     if (sortKey !== 'sortTitle') {
-      this.setState({ jumpBarItems: { order: [], characters: {} } });
+      setJumpBarItems({ order: [], characters: {} });
       return;
     }
 
@@ -199,230 +143,265 @@ class Collection extends Component<CollectionProps, CollectionState> {
       order.reverse();
     }
 
-    const jumpBarItems: JumpBarItems = {
-      characters,
-      order,
-    };
+    setJumpBarItems({ characters, order });
+  }, [items, sortKey, sortDirection]);
 
-    this.setState({ jumpBarItems });
-  }
+  const computeSelectedState = useCallback(() => {
+    const newSelectedState: Record<number, boolean> = {};
 
-  //
-  // Listeners
+    items.forEach((collection) => {
+      const isItemSelected = selectedState[collection.id];
 
-  onOverviewOptionsPress = () => {
-    this.setState({ isOverviewOptionsModalOpen: true });
-  };
+      if (isItemSelected) {
+        newSelectedState[collection.id] = isItemSelected;
+      } else {
+        newSelectedState[collection.id] = false;
+      }
+    });
 
-  onOverviewOptionsModalClose = () => {
-    this.setState({ isOverviewOptionsModalOpen: false });
-  };
+    const selectedCount = (getSelectedIds as GetSelectedIdsFn)(
+      newSelectedState
+    ).length;
+    const newStateCount = Object.keys(newSelectedState).length;
+    let isAllSelected = false;
+    let isAllUnselected = false;
 
-  onJumpBarItemPress = (jumpToCharacter: string) => {
-    this.setState({ jumpToCharacter });
-  };
+    if (selectedCount === 0) {
+      isAllUnselected = true;
+    } else if (selectedCount === newStateCount) {
+      isAllSelected = true;
+    }
 
-  onSelectAllChange = ({ value }: { value: boolean }) => {
-    this.setState(selectAll(this.state.selectedState, value));
-  };
+    setSelectedState(newSelectedState);
+    setAllSelected(isAllSelected);
+    setAllUnselected(isAllUnselected);
+  }, [items, selectedState]);
 
-  onSelectAllPress = () => {
-    this.onSelectAllChange({ value: !this.state.allSelected });
-  };
+  // Mount effect
+  useEffect(() => {
+    computeJumpBarItems();
+    computeSelectedState();
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  onRefreshGameCollectionsPress = () => {
-    this.props.onRefreshGameCollectionsPress();
-  };
+  // Update effect
+  useEffect(() => {
+    if (
+      sortKey !== prevSortKeyRef.current ||
+      sortDirection !== prevSortDirectionRef.current ||
+      hasDifferentItemsOrOrder(prevItemsRef.current, items)
+    ) {
+      computeJumpBarItems();
+      computeSelectedState();
+    }
 
-  onSelectedChange = ({
-    id,
-    value,
-    shiftKey = false,
-  }: SelectStateInputProps) => {
-    this.setState((state) => {
+    prevItemsRef.current = items;
+    prevSortKeyRef.current = sortKey;
+    prevSortDirectionRef.current = sortDirection;
+  }, [
+    items,
+    sortKey,
+    sortDirection,
+    computeJumpBarItems,
+    computeSelectedState,
+  ]);
+
+  // Reset jumpToCharacter after it's been used
+  useEffect(() => {
+    if (jumpToCharacter != null) {
+      setJumpToCharacter(null);
+    }
+  }, [jumpToCharacter]);
+
+  const getSelectedIdsFn = useCallback((): number[] => {
+    if (allUnselected) {
+      return [];
+    }
+    return (getSelectedIds as GetSelectedIdsFn)(selectedState);
+  }, [allUnselected, selectedState]);
+
+  const onOverviewOptionsPress = useCallback(() => {
+    setIsOverviewOptionsModalOpen(true);
+  }, []);
+
+  const onOverviewOptionsModalClose = useCallback(() => {
+    setIsOverviewOptionsModalOpen(false);
+  }, []);
+
+  const onJumpBarItemPress = useCallback((char: string) => {
+    setJumpToCharacter(char);
+  }, []);
+
+  const onSelectAllChange = useCallback(
+    ({ value }: { value: boolean }) => {
+      const result = selectAll(selectedState, value);
+      setAllSelected(result.allSelected);
+      setAllUnselected(result.allUnselected);
+      setSelectedState(result.selectedState);
+    },
+    [selectedState]
+  );
+
+  const onSelectAllPress = useCallback(() => {
+    onSelectAllChange({ value: !allSelected });
+  }, [allSelected, onSelectAllChange]);
+
+  const onSelectedChange = useCallback(
+    ({ id, value, shiftKey = false }: SelectStateInputProps) => {
+      const state = {
+        allSelected,
+        allUnselected,
+        lastToggled,
+        selectedState,
+      };
       const result = toggleSelected(
         state,
-        this.props.items,
+        items,
         id as number,
         value as boolean,
         shiftKey
       );
-      return {
-        ...result,
-        lastToggled:
-          typeof result.lastToggled === 'number' ? result.lastToggled : null,
-      };
-    });
-  };
+      setAllSelected(result.allSelected);
+      setAllUnselected(result.allUnselected);
+      setLastToggled(
+        typeof result.lastToggled === 'number' ? result.lastToggled : null
+      );
+      setSelectedState(result.selectedState);
+    },
+    [allSelected, allUnselected, lastToggled, selectedState, items]
+  );
 
-  onUpdateSelectedPress = (changes: Record<string, unknown>) => {
-    this.props.onUpdateSelectedPress({
-      collectionIds: this.getSelectedIds(),
-      ...changes,
-    });
-  };
+  const handleUpdateSelectedPress = useCallback(
+    (changes: Record<string, unknown>) => {
+      onUpdateSelectedPress({
+        collectionIds: getSelectedIdsFn(),
+        ...changes,
+      });
+    },
+    [getSelectedIdsFn, onUpdateSelectedPress]
+  );
 
-  //
-  // Render
+  const selectedGameIds = getSelectedIdsFn();
 
-  render() {
-    const {
-      isFetching,
-      isPopulated,
-      error,
-      totalItems,
-      items,
-      selectedFilterKey,
-      filters,
-      customFilters,
-      sortKey,
-      sortDirection,
-      view,
-      onSortSelect,
-      onFilterSelect,
-      initialScrollTop,
-      onScroll,
-      isRefreshingCollections,
-      isSaving,
-      isAdding,
-      saveError,
-    } = this.props;
+  const ViewComponent = getViewComponent(view);
+  const isLoaded = !!(
+    !error &&
+    isPopulated &&
+    items.length &&
+    scrollerRef.current
+  );
+  const hasNoCollection = !totalItems;
 
-    const {
-      jumpBarItems,
-      jumpToCharacter,
-      isOverviewOptionsModalOpen,
-      selectedState,
-      allSelected,
-    } = this.state;
-
-    const selectedGameIds = this.getSelectedIds();
-
-    const ViewComponent = getViewComponent(view);
-    const isLoaded = !!(
-      !error &&
-      isPopulated &&
-      items.length &&
-      this.scrollerRef.current
-    );
-    const hasNoCollection = !totalItems;
-
-    return (
-      <PageContent title={translate('Collections')}>
-        <PageToolbar>
-          <PageToolbarSection>
-            <PageToolbarButton
-              label={translate('RefreshCollections')}
-              iconName={icons.REFRESH}
-              isSpinning={isRefreshingCollections}
-              isDisabled={hasNoCollection}
-              onPress={this.onRefreshGameCollectionsPress}
-            />
-            <PageToolbarButton
-              label={
-                allSelected ? translate('UnselectAll') : translate('SelectAll')
-              }
-              iconName={icons.CHECK_SQUARE}
-              isDisabled={hasNoCollection}
-              onPress={this.onSelectAllPress}
-            />
-          </PageToolbarSection>
-
-          <PageToolbarSection
-            alignContent={align.RIGHT}
-            collapseButtons={false}
-          >
-            {view === 'overview' ? (
-              <PageToolbarButton
-                label={translate('Options')}
-                iconName={icons.OVERVIEW}
-                onPress={this.onOverviewOptionsPress}
-              />
-            ) : null}
-
-            {view === 'posters' || view === 'overview' ? (
-              <PageToolbarSeparator />
-            ) : null}
-
-            <GameCollectionSortMenu
-              sortKey={sortKey}
-              sortDirection={sortDirection}
-              isDisabled={hasNoCollection}
-              onSortSelect={onSortSelect}
-            />
-
-            <GameCollectionFilterMenu
-              selectedFilterKey={selectedFilterKey}
-              filters={filters}
-              customFilters={customFilters}
-              isDisabled={hasNoCollection}
-              onFilterSelect={onFilterSelect}
-            />
-          </PageToolbarSection>
-        </PageToolbar>
-
-        <div className={styles.pageContentBodyWrapper}>
-          <PageContentBody
-            ref={this.scrollerRef}
-            className={styles.contentBody}
-            innerClassName={
-              styles[`${view}InnerContentBody` as keyof typeof styles]
-            }
-            onScroll={onScroll}
-          >
-            {isFetching && !isPopulated && <LoadingIndicator />}
-
-            {!isFetching && !!error && (
-              <Alert kind={kinds.DANGER}>
-                {translate('UnableToLoadCollections')}
-              </Alert>
-            )}
-
-            {isLoaded && this.scrollerRef.current && (
-              <div className={styles.contentBodyContainer}>
-                <ViewComponent
-                  scroller={this.scrollerRef.current}
-                  items={items}
-                  sortKey={sortKey}
-                  sortDirection={sortDirection}
-                  jumpToCharacter={jumpToCharacter}
-                  selectedState={selectedState}
-                  scrollTop={initialScrollTop}
-                  onSelectedChange={this.onSelectedChange}
-                />
-              </div>
-            )}
-
-            {!error && isPopulated && !items.length && (
-              <NoGameCollections totalItems={totalItems} />
-            )}
-          </PageContentBody>
-
-          {isLoaded && !!jumpBarItems.order.length && (
-            <PageJumpBar
-              items={jumpBarItems}
-              onItemPress={this.onJumpBarItemPress}
-            />
-          )}
-        </div>
-
-        {isLoaded && (
-          <CollectionFooter
-            selectedIds={selectedGameIds}
-            isSaving={isSaving}
-            isAdding={isAdding}
-            saveError={saveError}
-            onUpdateSelectedPress={this.onUpdateSelectedPress}
+  return (
+    <PageContent title={translate('Collections')}>
+      <PageToolbar>
+        <PageToolbarSection>
+          <PageToolbarButton
+            label={translate('RefreshCollections')}
+            iconName={icons.REFRESH}
+            isSpinning={isRefreshingCollections}
+            isDisabled={hasNoCollection}
+            onPress={onRefreshGameCollectionsPress}
           />
-        )}
+          <PageToolbarButton
+            label={
+              allSelected ? translate('UnselectAll') : translate('SelectAll')
+            }
+            iconName={icons.CHECK_SQUARE}
+            isDisabled={hasNoCollection}
+            onPress={onSelectAllPress}
+          />
+        </PageToolbarSection>
 
-        <CollectionOverviewOptionsModal
-          isOpen={isOverviewOptionsModalOpen}
-          onModalClose={this.onOverviewOptionsModalClose}
+        <PageToolbarSection alignContent={align.RIGHT} collapseButtons={false}>
+          {view === 'overview' ? (
+            <PageToolbarButton
+              label={translate('Options')}
+              iconName={icons.OVERVIEW}
+              onPress={onOverviewOptionsPress}
+            />
+          ) : null}
+
+          {view === 'posters' || view === 'overview' ? (
+            <PageToolbarSeparator />
+          ) : null}
+
+          <GameCollectionSortMenu
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            isDisabled={hasNoCollection}
+            onSortSelect={onSortSelect}
+          />
+
+          <GameCollectionFilterMenu
+            selectedFilterKey={selectedFilterKey}
+            filters={filters}
+            customFilters={customFilters}
+            isDisabled={hasNoCollection}
+            onFilterSelect={onFilterSelect}
+          />
+        </PageToolbarSection>
+      </PageToolbar>
+
+      <div className={styles.pageContentBodyWrapper}>
+        <PageContentBody
+          ref={scrollerRef}
+          className={styles.contentBody}
+          innerClassName={
+            styles[`${view}InnerContentBody` as keyof typeof styles]
+          }
+          onScroll={onScroll}
+        >
+          {isFetching && !isPopulated && <LoadingIndicator />}
+
+          {!isFetching && !!error && (
+            <Alert kind={kinds.DANGER}>
+              {translate('UnableToLoadCollections')}
+            </Alert>
+          )}
+
+          {isLoaded && scrollerRef.current && (
+            <div className={styles.contentBodyContainer}>
+              <ViewComponent
+                scroller={scrollerRef.current}
+                items={items}
+                sortKey={sortKey}
+                sortDirection={sortDirection}
+                jumpToCharacter={jumpToCharacter}
+                selectedState={selectedState}
+                scrollTop={initialScrollTop}
+                onSelectedChange={onSelectedChange}
+              />
+            </div>
+          )}
+
+          {!error && isPopulated && !items.length && (
+            <NoGameCollections totalItems={totalItems} />
+          )}
+        </PageContentBody>
+
+        {isLoaded && !!jumpBarItems.order.length && (
+          <PageJumpBar items={jumpBarItems} onItemPress={onJumpBarItemPress} />
+        )}
+      </div>
+
+      {isLoaded && (
+        <CollectionFooter
+          selectedIds={selectedGameIds}
+          isSaving={isSaving}
+          isAdding={isAdding}
+          saveError={saveError}
+          onUpdateSelectedPress={handleUpdateSelectedPress}
         />
-      </PageContent>
-    );
-  }
+      )}
+
+      <CollectionOverviewOptionsModal
+        isOpen={isOverviewOptionsModalOpen}
+        onModalClose={onOverviewOptionsModalClose}
+      />
+    </PageContent>
+  );
 }
 
 export default Collection;
