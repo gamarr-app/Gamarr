@@ -1,8 +1,8 @@
 import _ from 'lodash';
+import AppState from 'App/State/AppState';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSectionState<T = Record<string, unknown>>(
-  state: object,
+  state: AppState | object,
   section: string,
   isFullStateTree: boolean = false
 ): T {

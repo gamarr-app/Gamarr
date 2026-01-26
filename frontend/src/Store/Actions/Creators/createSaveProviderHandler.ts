@@ -43,7 +43,7 @@ function createSaveProviderHandler(section: string, url: string) {
 
     const saveData = getProviderState(
       { id, ...otherPayload },
-      getState as unknown as () => Record<string, unknown>,
+      getState,
       section
     );
     const requestUrl = id ? `${url}/${id}` : url;

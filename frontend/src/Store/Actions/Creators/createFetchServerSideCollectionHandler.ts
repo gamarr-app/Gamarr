@@ -51,11 +51,11 @@ function createFetchServerSideCollectionHandler(
   ): void {
     dispatch(set({ section, isFetching: true }));
 
-    const sectionState = getSectionState(
-      getState() as unknown as Record<string, unknown>,
+    const sectionState = getSectionState<SectionState>(
+      getState(),
       section,
       true
-    ) as SectionState;
+    );
     const page = payload.page || sectionState.page || 1;
 
     const data: FetchData = Object.assign(

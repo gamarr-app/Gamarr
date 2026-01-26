@@ -1,9 +1,9 @@
-export interface ImportGameSelectedGame {
+import Game from 'Game/Game';
+
+// The lookup API returns full Game objects, so this extends Partial<Game>
+// with igdbId being the only required field for identification
+export interface ImportGameSelectedGame extends Partial<Game> {
   igdbId: number;
-  title?: string;
-  year?: number;
-  studio?: string;
-  [key: string]: unknown;
 }
 
 export interface ImportGameItem {
@@ -20,6 +20,8 @@ export interface ImportGameItem {
   monitor?: string;
   qualityProfileId?: number;
   minimumAvailability?: string;
+  rootFolderPath?: string;
+  tags?: number[];
 }
 
 export interface ImportError {

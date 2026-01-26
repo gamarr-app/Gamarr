@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
-import GameType from 'Game/Game';
 import {
   filterBuilderTypes,
   filterBuilderValueTypes,
@@ -54,10 +53,9 @@ interface Filter {
   filters: FilterValue[];
 }
 
-interface AddGamePayload {
+interface AddGamePayload extends NewGamePayload {
   igdbId: number;
   title: string;
-  [key: string]: unknown;
 }
 
 interface ToggleMonitoredPayload {
@@ -357,10 +355,9 @@ export const actionHandlers = handleThunks({
 
     const { igdbId, title } = payload;
 
-    const newGame = getNewGame(
-      { igdbId, title } as unknown as GameType,
-      payload as unknown as NewGamePayload
-    );
+    // Create a partial game object with minimum required fields for getNewGame
+    const partialGame = { igdbId, title } as Parameters<typeof getNewGame>[0];
+    const newGame = getNewGame(partialGame, payload);
     newGame.id = 0;
 
     const promise = createAjaxRequest({

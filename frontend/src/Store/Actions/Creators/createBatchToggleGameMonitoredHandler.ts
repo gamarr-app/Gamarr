@@ -29,11 +29,7 @@ function createBatchToggleGameMonitoredHandler(
   ): void {
     const { gameIds, monitored } = payload;
 
-    const state = getSectionState(
-      getState() as unknown as Record<string, unknown>,
-      section,
-      true
-    ) as SectionState;
+    const state = getSectionState<SectionState>(getState(), section, true);
 
     dispatch(
       updateGames(section, state.items as never[], gameIds, {

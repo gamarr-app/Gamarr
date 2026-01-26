@@ -39,11 +39,7 @@ function createTestProviderHandler(section: string, url: string) {
 
     const { queryParams = {}, ...otherPayload } = payload;
 
-    const testData = getProviderState(
-      { ...otherPayload },
-      getState as unknown as () => Record<string, unknown>,
-      section
-    );
+    const testData = getProviderState({ ...otherPayload }, getState, section);
     const params: Record<string, unknown> = { ...queryParams };
 
     if (_.isEqual(testData, lastTestData)) {

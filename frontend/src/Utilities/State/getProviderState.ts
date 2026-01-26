@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import AppState from 'App/State/AppState';
 import getSectionState from 'Utilities/State/getSectionState';
 
 interface Field {
@@ -35,7 +36,7 @@ interface Payload {
   [key: string]: unknown;
 }
 
-type GetState = () => object;
+type GetState = () => AppState;
 
 function getProviderState(
   payload: Payload,
