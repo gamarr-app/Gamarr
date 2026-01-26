@@ -27,11 +27,11 @@ function createSetServerSideCollectionSortHandler(
     payload: SortPayload,
     dispatch: Dispatch
   ): void {
-    const sectionState = getSectionState(
-      getState() as unknown as Record<string, unknown>,
+    const sectionState = getSectionState<SectionState>(
+      getState(),
       section,
       true
-    ) as SectionState;
+    );
     const sortKey = payload.sortKey || sectionState.sortKey;
     let sortDirection = payload.sortDirection;
 

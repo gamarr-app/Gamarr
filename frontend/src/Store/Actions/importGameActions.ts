@@ -2,10 +2,13 @@ import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
+import ImportGameAppState, {
+  ImportGameItem,
+} from 'App/State/ImportGameAppState';
 import Game from 'Game/Game';
 import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
-import getNewGame from 'Utilities/Game/getNewGame';
+import getNewGame, { NewGamePayload } from 'Utilities/Game/getNewGame';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 import { removeItem, set, updateItem } from './baseActions';
@@ -15,19 +18,6 @@ import { fetchRootFolders } from './rootFolderActions';
 type SelectedGame = Partial<Game> & {
   igdbId: number;
 };
-
-interface ImportItem {
-  id: string;
-  term: string;
-  path: string;
-  relativePath: string;
-  isFetching: boolean;
-  isPopulated: boolean;
-  isQueued: boolean;
-  error: unknown;
-  items: SelectedGame[];
-  selectedGame?: SelectedGame;
-}
 
 interface QueuePayload {
   name: string;
@@ -50,14 +40,6 @@ interface SetValuePayload {
   [key: string]: unknown;
 }
 
-interface ImportGameState {
-  isLookingUpGame: boolean;
-  isImporting: boolean;
-  isImported: boolean;
-  importError: unknown;
-  items: ImportItem[];
-}
-
 //
 // Variables
 
@@ -69,11 +51,11 @@ const queue: string[] = [];
 //
 // State
 
-export const defaultState: ImportGameState = {
+export const defaultState: ImportGameAppState = {
   isLookingUpGame: false,
   isImporting: false,
   isImported: false,
-  importError: null,
+  importError: undefined,
   items: [],
 };
 
@@ -119,8 +101,8 @@ export const actionHandlers = handleThunks({
   ) {
     const { name, path, relativePath, term, topOfQueue = false } = payload;
 
-    const state = getState().importGame as ImportGameState;
-    const item: ImportItem = _.find(state.items, { id: name }) || {
+    const state = getState().importGame as ImportGameAppState;
+    const item: ImportGameItem = _.find(state.items, { id: name }) || {
       id: name,
       term,
       path,
@@ -168,7 +150,7 @@ export const actionHandlers = handleThunks({
       return;
     }
 
-    const state = getState().importGame as ImportGameState;
+    const state = getState().importGame as ImportGameAppState;
 
     const { isLookingUpGame, items } = state;
 
@@ -255,7 +237,7 @@ export const actionHandlers = handleThunks({
     _payload: unknown,
     dispatch: AppDispatch
   ) {
-    const state = getState().importGame as ImportGameState;
+    const state = getState().importGame as ImportGameAppState;
 
     if (state.isLookingUpGame) {
       return;
@@ -282,7 +264,7 @@ export const actionHandlers = handleThunks({
     dispatch(set({ section, isImporting: true }));
 
     const ids = payload.ids;
-    const items = (getState().importGame as ImportGameState).items;
+    const items = (getState().importGame as ImportGameAppState).items;
     const addedIds: string[] = [];
 
     const allNewGames = ids.reduce((acc: SelectedGame[], id) => {
@@ -297,9 +279,11 @@ export const actionHandlers = handleThunks({
       // Make sure we have a selected game and
       // the same game hasn't been added yet.
       if (selectedGame && !acc.some((a) => a.igdbId === selectedGame.igdbId)) {
+        // selectedGame comes from the lookup API and contains game data
+        // item contains the import options (monitor, qualityProfileId, rootFolderPath, etc.)
         const newGame = getNewGame(
           _.cloneDeep(selectedGame) as Game,
-          item as unknown as Parameters<typeof getNewGame>[1]
+          item as NewGamePayload
         );
         newGame.path = item.path;
 
@@ -363,7 +347,7 @@ export const actionHandlers = handleThunks({
 
 export const reducers = createHandleActions(
   {
-    [CANCEL_LOOKUP_GAME]: function (state: ImportGameState) {
+    [CANCEL_LOOKUP_GAME]: function (state: ImportGameAppState) {
       queue.splice(0, queue.length);
 
       const items = state.items.map((item) => {
@@ -383,7 +367,7 @@ export const reducers = createHandleActions(
       });
     },
 
-    [CLEAR_IMPORT_GAME]: function (state: ImportGameState) {
+    [CLEAR_IMPORT_GAME]: function (state: ImportGameAppState) {
       if (abortCurrentLookup) {
         abortCurrentLookup();
 
@@ -399,7 +383,7 @@ export const reducers = createHandleActions(
       state: object,
       { payload }: { payload: SetValuePayload }
     ) {
-      const newState = getSectionState<ImportGameState>(state, section);
+      const newState = getSectionState<ImportGameAppState>(state, section);
       const items = newState.items;
       const index = items.findIndex((item) => item.id === payload.id);
 
@@ -410,7 +394,20 @@ export const reducers = createHandleActions(
 
         newState.items.splice(index, 1, { ...item, ...payload });
       } else {
-        newState.items.push({ ...payload } as unknown as ImportItem);
+        // Provide defaults for required ImportGameItem fields
+        // payload.id is used in the spread, so we don't need to specify it separately
+        const newItem: ImportGameItem = {
+          term: '',
+          path: '',
+          relativePath: '',
+          isFetching: false,
+          isPopulated: false,
+          isQueued: false,
+          error: null,
+          items: [],
+          ...payload,
+        };
+        newState.items.push(newItem);
       }
 
       return updateSectionState(state, section, newState);

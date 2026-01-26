@@ -28,11 +28,11 @@ function createSetServerSideCollectionPageHandler(
     payload: PagePayload,
     dispatch: Dispatch
   ): void {
-    const sectionState = getSectionState(
-      getState() as unknown as Record<string, unknown>,
+    const sectionState = getSectionState<SectionState>(
+      getState(),
       section,
       true
-    ) as SectionState;
+    );
     const currentPage = sectionState.page || 1;
     let nextPage = 0;
 

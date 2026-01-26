@@ -21,11 +21,7 @@ function createSaveHandler(section: string, url: string) {
   ): void {
     dispatch(set({ section, isSaving: true }));
 
-    const state = getSectionState(
-      getState() as unknown as Record<string, unknown>,
-      section,
-      true
-    ) as SectionState;
+    const state = getSectionState<SectionState>(getState(), section, true);
     const saveData = Object.assign(
       {},
       state.item,

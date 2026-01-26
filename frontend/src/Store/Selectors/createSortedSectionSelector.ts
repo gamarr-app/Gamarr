@@ -12,11 +12,7 @@ function createSortedSectionSelector<
   return createSelector(
     (state: AppState) => state,
     (state) => {
-      const sectionState = getSectionState(
-        state as unknown as Record<string, unknown>,
-        section,
-        true
-      ) as S;
+      const sectionState = getSectionState<S>(state, section, true);
 
       return {
         ...sectionState,

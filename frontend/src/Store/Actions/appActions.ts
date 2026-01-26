@@ -160,11 +160,8 @@ function pingServerAfterTimeout(
   }
 
   pingTimeout = setTimeout(() => {
-    const state = getState() as unknown as {
-      isRestarting: boolean;
-      isConnected: boolean;
-    };
-    if (!state.isRestarting && state.isConnected) {
+    const { app } = getState();
+    if (!app.isRestarting && app.isConnected) {
       return;
     }
 

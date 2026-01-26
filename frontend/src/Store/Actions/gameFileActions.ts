@@ -5,6 +5,7 @@ import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import AppState from 'App/State/AppState';
 import IconButton from 'Components/Link/IconButton';
+import GameType from 'Game/Game';
 import gameEntities from 'Game/gameEntities';
 import { icons, sortDirections } from 'Helpers/Props';
 import createSetClientSideCollectionSortReducer from 'Store/Actions/Creators/Reducers/createSetClientSideCollectionSortReducer';
@@ -28,13 +29,6 @@ interface GameFile {
   edition?: string;
   releaseGroup?: string;
   indexerFlags?: number;
-  [key: string]: unknown;
-}
-
-interface Game {
-  id: number;
-  gameFileId: number;
-  hasFile: boolean;
   [key: string]: unknown;
 }
 
@@ -177,8 +171,10 @@ export const actionHandlers = handleThunks({
     const deletePromise = deleteGameFileHelper(getState, payload, dispatch);
 
     deletePromise.done(() => {
-      const games = getState().games.items as unknown as Game[];
-      const gamesWithRemovedFiles = _.filter(games, { gameFileId });
+      const games = getState().games.items;
+      const gamesWithRemovedFiles = _.filter(games, {
+        gameFileId,
+      }) as GameType[];
 
       dispatch(
         batchActions([
@@ -212,10 +208,10 @@ export const actionHandlers = handleThunks({
     }).request;
 
     promise.done(() => {
-      const games = getState().games.items as unknown as Game[];
+      const games = getState().games.items;
       const gamesWithRemovedFiles = gameFileIds.reduce(
-        (acc: Game[], gameFileId) => {
-          acc.push(..._.filter(games, { gameFileId }));
+        (acc: GameType[], gameFileId) => {
+          acc.push(...(_.filter(games, { gameFileId }) as GameType[]));
 
           return acc;
         },

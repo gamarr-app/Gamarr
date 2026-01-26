@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect';
-import ModelBase from 'App/ModelBase';
 import {
   AppSectionItemSchemaState,
   AppSectionProviderState,
@@ -97,17 +96,6 @@ function selector<
     pendingChanges,
     item: settings.settings as PendingSection<T>,
   };
-}
-
-export default function createProviderSettingsSelector<
-  T extends ModelBase,
-  S extends AppSectionProviderState<T> & SchemaState<T>
->(sectionName: keyof AppState['settings']) {
-  return createSelector(
-    (_state: AppState, { id }: { id: number }) => id,
-    (state: AppState) => state.settings[sectionName] as unknown as S,
-    (id: number, section: S) => selector(id, section)
-  );
 }
 
 export function createProviderSettingsSelectorHook<

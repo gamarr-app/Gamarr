@@ -35,9 +35,9 @@ export interface GameClientSideCollectionItemsState {
 
 function createUnoptimizedSelector(uiSection: string) {
   return createSelector(
-    createClientSideCollectionSelector('games', uiSection),
+    createClientSideCollectionSelector<Game>('games', uiSection),
     (games): GameClientSideCollectionItemsState => {
-      const items = (games.items as unknown as Game[]).map((s) => {
+      const items = games.items.map((s) => {
         const { id, sortTitle, collection } = s;
 
         return {
