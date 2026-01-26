@@ -19,10 +19,13 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game-v1.0.0-RELOADED", 1, 0, 0, 0)]
         [TestCase("Game_v2.5_REPACK", 2, 5, 0, 0)]
         [TestCase("Game-1.2.3-SKIDROW", 1, 2, 3, 0)]
+        [TestCase("The Witness [v 1.0u4] (2016) PC | RePack", 1, 0, 0, 0)]
         [TestCase("Split.Fiction.v20250317.UPDATE-KaOs", 20250317, 0, 0, 0)]
         [TestCase("Game.v20240101-SKIDROW", 20240101, 0, 0, 0)]
         [TestCase("Hytale (v20260120)", 20260120, 0, 0, 0)]
         [TestCase("Hytale (v2026.01.20)", 2026, 1, 20, 0)]
+        [TestCase("The Outer Worlds 2 Premium Edition (v1030 All DLCs Bonus", 1030, 0, 0, 0)]
+        [TestCase("The Outer Worlds 2: Premium Edition (v.1.0.6.0) + 7 DLC [amd64] [Multi] [Wine]", 1, 0, 6, 0)]
         public void should_parse_version_from_release_title(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
@@ -53,6 +56,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game.Update.5-CODEX", 5, 0, 0, 0)]
         [TestCase("Game.Update.v1.2-SKIDROW", 1, 2, 0, 0)]
         [TestCase("Game.Patch.3.1-PLAZA", 3, 1, 0, 0)]
+        [TestCase("The Witness [Update 18] (2016) PC | RePack", 18, 0, 0, 0)]
         public void should_parse_update_patch_version(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
@@ -147,6 +151,8 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Starfield v1 7 23 0 2 DLCs FitGirl Repack", 1, 7, 23, 0)]
         [TestCase("Baldurs Gate 3 Update v4 1 1 6848561 RUNE", 4, 1, 1, 6848561)]
         [TestCase("Cyberpunk 2077 Update v2 3", 2, 3, 0, 0)]
+        [TestCase("ELDEN RING Shadow of the Erdtree Update v1 16-RUNE", 1, 16, 0, 0)]
+        [TestCase("ELDEN RING Deluxe Edition Shadow of the Erdtree Premium Bundle (v1 16 All DLCs Bonus Content Online Multiplayer MULTi15)", 1, 16, 0, 0)]
         public void should_parse_space_separated_versions(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
@@ -203,6 +209,24 @@ namespace NzbDrone.Core.Test.ParserTests
         // Celeste versions - space delimiter works
         [TestCase("Celeste v1.4.0.0 [Build 6458966] Repack Team-LiL", 1, 4, 0, 0)]
         public void should_parse_celeste_versions(string title, int major, int minor, int patch, int build)
+        {
+            var version = QualityParser.ParseGameVersion(title);
+
+            version.HasValue.Should().BeTrue();
+            version.Major.Should().Be(major);
+            version.Minor.Should().Be(minor);
+            version.Patch.Should().Be(patch);
+            version.Build.Should().Be(build);
+        }
+
+        // Space-delimited versions without v prefix (jc141 style)
+        [TestCase("FEZ 1.12 MULTi9 GNU/Linux Wine jc141 (Appid=224760)", 1, 12, 0, 0)]
+        [TestCase("Limbo 1.3 MULTi18 GNU/Linux Wine jc141", 1, 3, 0, 0)]
+        [TestCase("Braid 1.010 MULTi9 jc141", 1, 10, 0, 0)]
+        [TestCase("Is this Game Trying to Kill Me? 1.0.11 MULTi7 GNU/Linux Wine jc141 (Appid=2658470)", 1, 0, 11, 0)]
+        [TestCase("[DL] Is this Game Trying to Kill Me? [P] [RUS + ENG + 5] (2024, Adventure) (1.0.11) [Portable]", 1, 0, 11, 0)]
+        [TestCase("Is this Game Trying to Kill Me 1 0 11 MULTi7 GNU Linux Wine", 1, 0, 11, 0)]
+        public void should_parse_space_delimited_versions_without_v_prefix(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
 

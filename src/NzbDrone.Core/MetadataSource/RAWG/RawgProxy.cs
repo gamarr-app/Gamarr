@@ -116,6 +116,13 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
                 var metadata = MapRawgGame(game);
                 metadata.SteamAppId = steamAppId;
+
+                // Fetch suggested games for recommendations
+                if (game.Slug != null)
+                {
+                    metadata.RawgRecommendations = GetSuggestedGames(game.Slug, 10);
+                }
+
                 return metadata;
             }
             catch (Exception ex)
