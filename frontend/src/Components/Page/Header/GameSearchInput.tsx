@@ -319,7 +319,7 @@ function GameSearchInput() {
       inputRef.current?.blur();
       reset();
     },
-    [value, suggestions, history, reset]
+    [value, suggestions, navigate, reset]
   );
 
   const handleBlur = useCallback(() => {

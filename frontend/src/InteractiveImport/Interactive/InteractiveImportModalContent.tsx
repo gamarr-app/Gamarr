@@ -60,8 +60,8 @@ import createClientSideCollectionSelector, {
   CollectionResult,
 } from 'Store/Selectors/createClientSideCollectionSelector';
 import { SortCallback } from 'typings/callbacks';
-import { SelectStateInputProps } from 'typings/props';
 import { CheckInputChanged } from 'typings/inputs';
+import { SelectStateInputProps } from 'typings/props';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';

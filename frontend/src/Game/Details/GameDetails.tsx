@@ -366,7 +366,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
       touchStart.current = null;
     },
-    [previousGame, nextGame, history]
+    [previousGame, nextGame, navigate]
   );
 
   const handleTouchCancel = useCallback(() => {
@@ -411,7 +411,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
       isGameHistoryModalOpen,
       previousGame,
       nextGame,
-      history,
+      navigate,
     ]
   );
 
