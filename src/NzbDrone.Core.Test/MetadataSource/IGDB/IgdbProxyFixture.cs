@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             RequireCredentials();
 
             // IGDB ID 1942 is The Witcher 3
-            var result = Subject.GetGameInfo(1942);
+            var result = Subject.GetGameInfoByIgdbId(1942);
 
             result.Should().NotBeNull();
             ValidateGame(result);

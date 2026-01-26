@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Returns(CreateSuccessResponse(100, "Test Game"));
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             result.Title.Should().Be("Test Game");
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             result.Title.Should().Be("Test Game");
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -137,7 +137,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -189,7 +189,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -204,7 +204,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Returns(CreateTypedResponse(HttpStatusCode.Unauthorized));
 
-            Assert.Throws<HttpException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<HttpException>(() => Subject.GetGameInfoByIgdbId(100));
 
             Mocker.GetMock<IHttpClient>()
                   .Verify(v => v.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()), Times.Once());
@@ -219,7 +219,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Returns(CreateTypedResponse(HttpStatusCode.NotFound));
 
-            Assert.Throws<GameNotFoundException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<GameNotFoundException>(() => Subject.GetGameInfoByIgdbId(100));
 
             Mocker.GetMock<IHttpClient>()
                   .Verify(v => v.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()), Times.Once());
@@ -232,7 +232,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Returns(CreateTypedResponse(HttpStatusCode.ServiceUnavailable));
 
-            Assert.Throws<HttpException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<HttpException>(() => Subject.GetGameInfoByIgdbId(100));
 
             // MaxRetries = 3, so total attempts = 4 (0, 1, 2, 3)
             Mocker.GetMock<IHttpClient>()
@@ -260,7 +260,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -286,7 +286,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -312,7 +312,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             callCount.Should().Be(2);
@@ -327,7 +327,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Throws(new InvalidOperationException("Non-transient error"));
 
-            Assert.Throws<InvalidOperationException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<InvalidOperationException>(() => Subject.GetGameInfoByIgdbId(100));
 
             Mocker.GetMock<IHttpClient>()
                   .Verify(v => v.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()), Times.Once());
@@ -340,7 +340,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Throws(new HttpRequestException("Persistent connection error"));
 
-            Assert.Throws<HttpRequestException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<HttpRequestException>(() => Subject.GetGameInfoByIgdbId(100));
 
             // MaxRetries = 3, so 3 retries + the final throw = 4 total attempts
             Mocker.GetMock<IHttpClient>()
@@ -395,7 +395,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Callback<HttpRequest>(r => capturedRequest = r)
                   .Returns(CreateSuccessResponse(100));
 
-            Subject.GetGameInfo(100);
+            Subject.GetGameInfoByIgdbId(100);
 
             capturedRequest.Should().NotBeNull();
             capturedRequest.Headers["Client-ID"].Should().Be("test-client-id");
@@ -444,7 +444,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                       return CreateSuccessResponse(100);
                   });
 
-            var result = Subject.GetGameInfo(100);
+            var result = Subject.GetGameInfoByIgdbId(100);
 
             result.Should().NotBeNull();
             result.Title.Should().Be("Test Game");
@@ -460,7 +460,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Returns(CreateTypedResponse(HttpStatusCode.BadRequest));
 
-            Assert.Throws<HttpException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<HttpException>(() => Subject.GetGameInfoByIgdbId(100));
 
             Mocker.GetMock<IHttpClient>()
                   .Verify(v => v.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()), Times.Once());
@@ -475,7 +475,7 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
                   .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
                   .Returns(CreateTypedResponse(HttpStatusCode.OK, "[]"));
 
-            Assert.Throws<GameNotFoundException>(() => Subject.GetGameInfo(100));
+            Assert.Throws<GameNotFoundException>(() => Subject.GetGameInfoByIgdbId(100));
         }
 
         [Test]

@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.Games
                   .Returns(_gameMetadata);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(It.IsAny<int>()))
+                  .Setup(s => s.GetGameInfoByIgdbId(It.IsAny<int>()))
                   .Returns(_updatedGameInfo);
 
             Mocker.GetMock<IAlternativeTitleService>()
@@ -213,7 +213,7 @@ namespace NzbDrone.Core.Test.Games
         public void should_mark_game_as_deleted_when_game_not_found_exception_thrown()
         {
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(It.IsAny<int>()))
+                  .Setup(s => s.GetGameInfoByIgdbId(It.IsAny<int>()))
                   .Throws(new GameNotFoundException(100));
 
             Subject.Execute(CreateCommand(_game.Id));
@@ -230,7 +230,7 @@ namespace NzbDrone.Core.Test.Games
             _gameMetadata.Status = GameStatusType.Released;
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(It.IsAny<int>()))
+                  .Setup(s => s.GetGameInfoByIgdbId(It.IsAny<int>()))
                   .Throws(new GameNotFoundException(100));
 
             Subject.Execute(CreateCommand(_game.Id));
@@ -247,7 +247,7 @@ namespace NzbDrone.Core.Test.Games
             _gameMetadata.Status = GameStatusType.Deleted;
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(It.IsAny<int>()))
+                  .Setup(s => s.GetGameInfoByIgdbId(It.IsAny<int>()))
                   .Throws(new GameNotFoundException(100));
 
             Subject.Execute(CreateCommand(_game.Id));
@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.GetGameInfoBySteamAppId(12345), Times.Once());
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Verify(v => v.GetGameInfo(It.IsAny<int>()), Times.Never());
+                  .Verify(v => v.GetGameInfoByIgdbId(It.IsAny<int>()), Times.Never());
 
             ExceptionVerification.IgnoreWarns();
         }

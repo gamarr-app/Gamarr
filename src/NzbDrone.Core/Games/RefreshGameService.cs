@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Games
                 }
                 else
                 {
-                    gameInfo = _gameInfo.GetGameInfo(game.IgdbId);
+                    gameInfo = _gameInfo.GetGameInfoByIgdbId(game.IgdbId);
                 }
             }
             catch (GameNotFoundException)

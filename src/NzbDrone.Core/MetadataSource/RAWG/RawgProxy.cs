@@ -50,6 +50,12 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             return null;
         }
 
+        public GameMetadata GetGameInfoByIgdbId(int igdbId)
+        {
+            // RAWG doesn't know IGDB IDs
+            return null;
+        }
+
         public GameMetadata GetGameInfo(int rawgId)
         {
             var apiKey = _configService.RawgApiKey;

@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Test.Games
                   .Returns(_gameMetadata);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(It.IsAny<int>()))
+                  .Setup(s => s.GetGameInfoByIgdbId(It.IsAny<int>()))
                   .Returns(_updatedGameInfo);
 
             Mocker.GetMock<IAlternativeTitleService>()
@@ -274,7 +274,7 @@ namespace NzbDrone.Core.Test.Games
             Subject.Execute(command);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Verify(v => v.GetGameInfo(It.IsAny<int>()), Times.Never());
+                  .Verify(v => v.GetGameInfoByIgdbId(It.IsAny<int>()), Times.Never());
         }
 
         [Test]
@@ -300,7 +300,7 @@ namespace NzbDrone.Core.Test.Games
             Subject.Execute(command);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Verify(v => v.GetGameInfo(It.IsAny<int>()), Times.Once());
+                  .Verify(v => v.GetGameInfoByIgdbId(It.IsAny<int>()), Times.Once());
         }
 
         [Test]
@@ -379,7 +379,7 @@ namespace NzbDrone.Core.Test.Games
             Subject.Execute(command);
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Verify(v => v.GetGameInfo(100), Times.Once());
+                  .Verify(v => v.GetGameInfoByIgdbId(100), Times.Once());
         }
 
         [Test]

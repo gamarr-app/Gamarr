@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.GameTests
         private void GivenValidGame(int igdbId)
         {
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(igdbId))
+                  .Setup(s => s.GetGameInfoByIgdbId(igdbId))
                   .Returns(_fakeGame);
         }
 
@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Test.GameTests
             };
 
             Mocker.GetMock<IProvideGameInfo>()
-                  .Setup(s => s.GetGameInfo(newGame.IgdbId))
+                  .Setup(s => s.GetGameInfoByIgdbId(newGame.IgdbId))
                   .Throws(new GameNotFoundException(newGame.IgdbId));
 
             Mocker.GetMock<IAddGameValidator>()

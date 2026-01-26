@@ -84,7 +84,7 @@ namespace Gamarr.Api.V3.Games
         public GameResource SearchByIgdbId(int igdbId)
         {
             var availDelay = _configService.AvailabilityDelay;
-            var metadata = _gameInfo.GetGameInfo(igdbId);
+            var metadata = _gameInfo.GetGameInfoByIgdbId(igdbId);
 
             if (metadata == null)
             {

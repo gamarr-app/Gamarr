@@ -133,7 +133,7 @@ namespace NzbDrone.Core.Games
 
             try
             {
-                game.GameMetadata = _gameInfo.GetGameInfo(newGame.IgdbId);
+                game.GameMetadata = _gameInfo.GetGameInfoByIgdbId(newGame.IgdbId);
             }
             catch (GameNotFoundException)
             {
