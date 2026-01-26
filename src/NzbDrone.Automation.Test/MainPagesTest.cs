@@ -157,6 +157,15 @@ namespace NzbDrone.Automation.Test
         }
 
         [Test]
+        public async Task Settings_CustomFormats_Page_Loads_Without_Errors()
+        {
+            await NavigateToAsync("/settings/customformats");
+
+            await Expect(Page.Locator("div[class*='CustomFormats']").First).ToBeVisibleAsync();
+            await TakeScreenshotAsync("settings_customformats");
+        }
+
+        [Test]
         public async Task Settings_Indexers_Page_Loads_Without_Errors()
         {
             await NavigateToAsync("/settings/indexers");
@@ -271,6 +280,15 @@ namespace NzbDrone.Automation.Test
 
             await Expect(Page.Locator("div[class*='LogFiles']").First).ToBeVisibleAsync();
             await TakeScreenshotAsync("system_logfiles");
+        }
+
+        [Test]
+        public async Task System_UpdateLogFiles_Page_Loads_Without_Errors()
+        {
+            await NavigateToAsync("/system/logs/files/update");
+
+            await Expect(Page.Locator("div[class*='LogFiles']").First).ToBeVisibleAsync();
+            await TakeScreenshotAsync("system_updatelogfiles");
         }
     }
 }
