@@ -41,6 +41,8 @@ interface GameIndexOverviewInfoProps {
   sizeOnDisk?: number;
   version?: string;
   sortKey: string;
+  // Index signature for dynamic property access
+  [key: string]: unknown;
 }
 
 const infoRowHeight = parseInt(dimensions.gameIndexOverviewInfoRowHeight);
@@ -175,10 +177,8 @@ function GameIndexOverviewInfo(props: GameIndexOverviewInfoProps) {
     return rows.map((row) => {
       const { name, showProp, valueProp } = row;
 
-      const indexableProps = props as unknown as Record<string, unknown>;
       const isVisible =
-        indexableProps[valueProp] != null &&
-        (indexableProps[showProp] || props.sortKey === name);
+        props[valueProp] != null && (props[showProp] || props.sortKey === name);
 
       return {
         ...row,

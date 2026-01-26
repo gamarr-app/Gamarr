@@ -4,22 +4,6 @@ import _ from 'lodash';
 import { Action, Middleware } from 'redux';
 import parseUrl from 'Utilities/String/parseUrl';
 
-interface SentryEvent {
-  transaction: string;
-  exception?: {
-    values: Array<{
-      stacktrace?: {
-        frames: Array<{
-          filename: string;
-        }>;
-      };
-    }>;
-  };
-  request: {
-    url: string;
-  };
-}
-
 interface StackFrame {
   filename?: string;
 }
@@ -44,19 +28,23 @@ function cleanseData(
   event: sentry.Event,
   hint: sentry.EventHint
 ): sentry.Event | null {
-  const result = _.cloneDeep(event) as SentryEvent;
+  const result = _.cloneDeep(event);
 
   const error = hint?.originalException as Error | undefined;
 
-  result.transaction = cleanseUrl(result.transaction);
+  if (result.transaction) {
+    result.transaction = cleanseUrl(result.transaction);
+  }
 
-  if (result.exception) {
+  if (result.exception?.values) {
     result.exception.values.forEach((exception) => {
       const stacktrace = exception.stacktrace;
 
-      if (stacktrace) {
+      if (stacktrace?.frames) {
         stacktrace.frames.forEach((frame) => {
-          frame.filename = cleanseUrl(frame.filename);
+          if (frame.filename) {
+            frame.filename = cleanseUrl(frame.filename);
+          }
         });
       }
     });
@@ -66,9 +54,11 @@ function cleanseData(
     return null;
   }
 
-  result.request.url = cleanseUrl(result.request.url);
+  if (result.request?.url) {
+    result.request.url = cleanseUrl(result.request.url);
+  }
 
-  return result as unknown as sentry.Event;
+  return result;
 }
 
 function identity<T>(stuff: T): T {

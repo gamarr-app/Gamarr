@@ -12,20 +12,27 @@ interface InjectedProps {
   useCurrentPage: boolean;
 }
 
+type ExternalProps<P> = Omit<P, keyof InjectedProps> & WithCurrentPageProps;
+
 function withCurrentPage<P extends InjectedProps>(
   WrappedComponent: ComponentType<P>
-): ComponentType<Omit<P, keyof InjectedProps> & WithCurrentPageProps> {
-  function CurrentPage(
-    props: Omit<P, keyof InjectedProps> & WithCurrentPageProps
-  ) {
-    const { history, ...rest } = props;
+): ComponentType<ExternalProps<P>> {
+  function CurrentPage(props: ExternalProps<P>) {
+    const { history } = props;
+    const useCurrentPage = history.action === 'POP';
 
-    return (
-      <WrappedComponent
-        {...(rest as unknown as P)}
-        useCurrentPage={history.action === 'POP'}
-      />
-    );
+    // Build props by omitting 'history' and adding 'useCurrentPage'
+    // Type assertion is required because TypeScript cannot statically prove
+    // that Omit<ExternalProps<P>, 'history'> & InjectedProps === P
+    const wrappedProps: Record<string, unknown> = {};
+    for (const key in props) {
+      if (key !== 'history') {
+        wrappedProps[key] = props[key as keyof typeof props];
+      }
+    }
+    wrappedProps.useCurrentPage = useCurrentPage;
+
+    return <WrappedComponent {...(wrappedProps as P)} />;
   }
 
   return CurrentPage;

@@ -29,8 +29,10 @@ interface InteractiveImport extends ModelBase {
   game?: Game;
   qualityWeight: number;
   customFormats: CustomFormat[];
+  customFormatScore?: number;
   indexerFlags: number;
   rejections: Rejection[];
+  downloadId?: string;
   gameFileId?: number;
 }
 

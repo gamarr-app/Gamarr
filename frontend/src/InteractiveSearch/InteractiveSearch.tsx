@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
-import ReleasesAppState from 'App/State/ReleasesAppState';
 import Alert from 'Components/Alert';
 import Icon from 'Components/Icon';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -21,6 +19,7 @@ import {
   setReleasesSort,
 } from 'Store/Actions/releaseActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import Release from 'typings/Release';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
 import InteractiveSearchFilterModal from './InteractiveSearchFilterModal';
@@ -131,6 +130,9 @@ interface InteractiveSearchProps {
   searchPayload: InteractiveSearchPayload;
 }
 
+const releasesSelector =
+  createClientSideCollectionSelector<Release>('releases');
+
 function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
   const {
     isFetching,
@@ -138,14 +140,12 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
     error,
     items,
     totalItems,
-    selectedFilterKey,
-    filters,
+    selectedFilterKey = 'all',
+    filters = [],
     customFilters,
     sortKey,
     sortDirection,
-  } = useSelector(
-    createClientSideCollectionSelector('releases')
-  ) as unknown as ReleasesAppState & ClientSideCollectionAppState;
+  } = useSelector(releasesSelector);
 
   const dispatch = useDispatch();
 

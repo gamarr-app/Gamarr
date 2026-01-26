@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Component, ComponentType } from 'react';
+import { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -25,6 +25,10 @@ interface GameItem {
   studio?: string;
 }
 
+interface OwnProps {
+  id: string;
+}
+
 function createMapStateToProps() {
   return createSelector(
     (state: AppState) => state.importGame.isLookingUpGame,
@@ -44,11 +48,6 @@ const mapDispatchToProps = {
 };
 
 const connector = connect(createMapStateToProps, mapDispatchToProps);
-
-interface OwnProps {
-  id: string;
-  isExistingGame: boolean;
-}
 
 interface StateFromSelector {
   isLookingUpGame: boolean;
@@ -99,6 +98,4 @@ class ImportGameSelectGameConnector extends Component<ImportGameSelectGameConnec
   }
 }
 
-export default connector(
-  ImportGameSelectGameConnector
-) as unknown as ComponentType<OwnProps>;
+export default connector(ImportGameSelectGameConnector);

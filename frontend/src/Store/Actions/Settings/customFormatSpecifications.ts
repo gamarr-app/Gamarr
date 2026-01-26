@@ -190,18 +190,14 @@ export default {
 
       const saveData = getProviderState(
         { id, ...otherPayload },
-        getState as unknown as () => Record<string, unknown>,
+        getState,
         section,
         false
       ) as SpecificationItem;
 
       if (!saveData.id) {
         const items = getState().settings.customFormatSpecifications.items;
-        const itemsWithId = items.map((item, index) => ({
-          ...item,
-          id: (item as unknown as { id?: number }).id ?? index + 1,
-        }));
-        saveData.id = getNextId(itemsWithId);
+        saveData.id = getNextId(items);
       }
 
       dispatch(

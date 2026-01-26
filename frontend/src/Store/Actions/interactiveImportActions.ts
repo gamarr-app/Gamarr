@@ -277,9 +277,7 @@ export const actionHandlers = handleThunks({
       ])
     );
 
-    const items = (
-      getState() as unknown as Record<string, InteractiveImportState>
-    )[section].items;
+    const items = getState().interactiveImport.items;
 
     const requestPayload = payload.ids
       .map((id) => {

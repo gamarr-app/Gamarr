@@ -7,6 +7,7 @@ export interface QualityProfileFormatItem {
 }
 
 export interface CustomFormatSpecification {
+  id: number;
   name: string;
   implementation: string;
   implementationName: string;

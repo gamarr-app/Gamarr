@@ -9,7 +9,6 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
-import InteractiveImportAppState from 'App/State/InteractiveImportAppState';
 import * as commandNames from 'Commands/commandNames';
 import SelectInput, { SelectInputOption } from 'Components/Form/SelectInput';
 import Icon from 'Components/Icon';
@@ -57,7 +56,9 @@ import {
   setInteractiveImportSort,
   updateInteractiveImportItems,
 } from 'Store/Actions/interactiveImportActions';
-import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import createClientSideCollectionSelector, {
+  CollectionResult,
+} from 'Store/Selectors/createClientSideCollectionSelector';
 import { SortCallback } from 'typings/callbacks';
 import { CheckInputChanged } from 'typings/inputs';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
@@ -196,6 +197,20 @@ const importModeSelector = createSelector(
   }
 );
 
+interface InteractiveImportCollectionResult
+  extends CollectionResult<InteractiveImport> {
+  originalItems: InteractiveImport[];
+}
+
+const interactiveImportSelector = createSelector(
+  createClientSideCollectionSelector<InteractiveImport>('interactiveImport'),
+  (state: AppState) => state.interactiveImport.originalItems,
+  (collection, originalItems): InteractiveImportCollectionResult => ({
+    ...collection,
+    originalItems,
+  })
+);
+
 export interface InteractiveImportModalContentProps {
   downloadId?: string;
   gameId?: number;
@@ -241,9 +256,7 @@ function InteractiveImportModalContent(
     originalItems,
     sortKey,
     sortDirection,
-  } = useSelector(
-    createClientSideCollectionSelector('interactiveImport')
-  ) as unknown as InteractiveImportAppState;
+  } = useSelector(interactiveImportSelector);
 
   const { isDeleting, deleteError } = useSelector(gameFilesInfoSelector);
   const importMode = useSelector(importModeSelector);

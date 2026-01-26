@@ -21,11 +21,18 @@ import {
 } from 'Store/Actions/settingsActions';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
-import { Failure } from 'typings/pending';
 import translate from 'Utilities/String/translate';
 import styles from './EditRemotePathMappingModalContent.css';
 
-const newRemotePathMapping: Record<string, string> = {
+interface RemotePathMapping {
+  id?: number;
+  host: string;
+  remotePath: string;
+  localPath: string;
+  [key: string]: string | number | undefined;
+}
+
+const newRemotePathMapping: RemotePathMapping = {
   host: '',
   remotePath: '',
   localPath: '',
@@ -79,8 +86,8 @@ function createRemotePathMappingSelector(id: number | undefined) {
           error: AppError | undefined;
           isSaving: boolean;
           saveError: AppError | undefined;
-          pendingChanges: object;
-          items: Array<{ id: number }>;
+          pendingChanges: Partial<RemotePathMapping>;
+          items: RemotePathMapping[];
         };
       };
     }) => state.settings.remotePathMappings,
@@ -89,14 +96,10 @@ function createRemotePathMappingSelector(id: number | undefined) {
       const { isFetching, error, isSaving, saveError, pendingChanges, items } =
         remotePathMappings;
 
-      const mapping = id
-        ? items.find((i) => i.id === id)
+      const mapping: RemotePathMapping = id
+        ? items.find((i) => i.id === id) ?? newRemotePathMapping
         : newRemotePathMapping;
-      const settings = selectSettings(
-        mapping as unknown as Record<string, unknown>,
-        pendingChanges,
-        saveError
-      );
+      const settings = selectSettings(mapping, pendingChanges, saveError);
 
       return {
         id,
@@ -134,19 +137,7 @@ function EditRemotePathMappingModalContent({
     downloadClientHosts,
     id: _id,
     ...otherSettings
-  } = useSelector(createRemotePathMappingSelector(id)) as {
-    isFetching: boolean;
-    error: AppError | undefined;
-    isSaving: boolean;
-    saveError: AppError | undefined;
-    item: Record<
-      string,
-      { value: string; errors?: Failure[]; warnings?: Failure[] }
-    >;
-    downloadClientHosts: Array<{ key: string; value: string; hint: string }>;
-    id: number | undefined;
-    [key: string]: unknown;
-  };
+  } = useSelector(createRemotePathMappingSelector(id));
 
   const prevIsSaving = useRef(isSaving);
 
