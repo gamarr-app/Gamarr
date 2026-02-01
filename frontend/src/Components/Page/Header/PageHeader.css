@@ -64,22 +64,6 @@
   }
 }
 
-.donate {
-  composes: link from '~Components/Link/Link.css';
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  color: var(--themeRed);
-  text-align: center;
-  line-height: 60px;
-
-  &:hover {
-    color: #9c1f30;
-  }
-}
-
 @media only screen and (max-width: $breakpointSmall) {
   .logoContainer {
     flex: 0 0 60px;
@@ -91,7 +75,6 @@
 }
 
 @media only screen and (max-width: $breakpointExtraSmall) {
-  .donate,
   .translate {
     display: none;
   }
