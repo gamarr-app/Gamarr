@@ -54,8 +54,8 @@ namespace NzbDrone.Test.Common
             else
             {
                 // On non-Windows, use dotnet to run the DLL for better runtime compatibility
-                var homeDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");
-                var dotnetExe = Directory.Exists(homeDotnet) ? Path.Combine(homeDotnet, "dotnet") : "dotnet";
+                var homeDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet", "dotnet");
+                var dotnetExe = File.Exists(homeDotnet) ? homeDotnet : "dotnet";
                 Start(dotnetExe, Path.Combine(outputDir, "Gamarr.dll"));
             }
 
@@ -137,7 +137,7 @@ namespace NzbDrone.Test.Common
 
             // Set DOTNET_ROOT if the runtime is in the home directory (common on macOS)
             var homeDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");
-            if (Directory.Exists(homeDotnet))
+            if (File.Exists(Path.Combine(homeDotnet, "dotnet")))
             {
                 envVars.Add("DOTNET_ROOT", homeDotnet);
             }
