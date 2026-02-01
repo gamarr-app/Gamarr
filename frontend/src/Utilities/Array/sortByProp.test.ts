@@ -2,11 +2,7 @@ import sortByProp from './sortByProp';
 
 describe('sortByProp', () => {
   it('should sort objects by string property', () => {
-    const items = [
-      { name: 'Charlie' },
-      { name: 'Alice' },
-      { name: 'Bob' },
-    ];
+    const items = [{ name: 'Charlie' }, { name: 'Alice' }, { name: 'Bob' }];
 
     const sorted = [...items].sort(sortByProp('name'));
     expect(sorted.map((i) => i.name)).toEqual(['Alice', 'Bob', 'Charlie']);
@@ -20,11 +16,7 @@ describe('sortByProp', () => {
     ];
 
     const sorted = [...items].sort(sortByProp('title'));
-    expect(sorted.map((i) => i.title)).toEqual([
-      'Item 1',
-      'Item 2',
-      'Item 10',
-    ]);
+    expect(sorted.map((i) => i.title)).toEqual(['Item 1', 'Item 2', 'Item 10']);
   });
 
   it('should handle equal values', () => {
@@ -47,11 +39,7 @@ describe('sortByProp', () => {
   });
 
   it('should be case-sensitive in sorting', () => {
-    const items = [
-      { name: 'banana' },
-      { name: 'Apple' },
-      { name: 'cherry' },
-    ];
+    const items = [{ name: 'banana' }, { name: 'Apple' }, { name: 'cherry' }];
 
     const sorted = [...items].sort(sortByProp('name'));
     expect(sorted[0].name).toBe('Apple');
