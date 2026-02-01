@@ -209,7 +209,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Gamarr.prodavet. AKA.Gamarr.Shift.2005.DVDRip.x264-HANDJOB.mkv",
             new string[]
             {
-                "Gamarr prodavet  AKA Gamarr Shift",
+                "Gamarr prodavet AKA Gamarr Shift",
                 "Gamarr prodavet",
                 "Gamarr Shift"
             })]
@@ -891,6 +891,59 @@ namespace NzbDrone.Core.Test.ParserTests
                 game.PrimaryGameTitle.Should().Be(title);
                 game.ReleaseGroup.Should().Be(releaseGroup);
             }
+        }
+
+        // Real 1337x top 100 releases - January 2026 batch (uncovered)
+        // FitGirl repacks
+        [TestCase("Cairn: Deluxe Edition (v1.0.299s_1713 + 3 DLCs/Bonuses, MULTi11) [FitGirl Repack]", "Cairn: Deluxe Edition")]
+        [TestCase("Sonic Frontiers: Digital Deluxe Edition (v1.42 + 6 DLCs, MULTi12) [FitGirl Repack]", "Sonic Frontiers: Digital Deluxe Edition")]
+        [TestCase("Cult of the Lamb: The One Who Waits Bundle (v1.5.15.979 + 30 DLCs/Bonuses, MULTi14) [FitGirl Repack]", "Cult of the Lamb: The One Who Waits Bundle")]
+        [TestCase("Disco Elysium: The Final Cut Bundle (GOG Build a0a063ab + Bonus Content, MULTi13) [FitGirl Repack]", "Disco Elysium: The Final Cut Bundle")]
+        [TestCase("Terraria (v1.4.5.0 + Bonus OST, MULTi9) [FitGirl Repack]", "Terraria")]
+        [TestCase("Tennis Elbow 4 (v1.0a Build 154-2026.1.15, MULTi19) [FitGirl Repack]", "Tennis Elbow 4")]
+        [TestCase("Super Woden: Rally Edge (MULTi21) [FitGirl Repack]", "Super Woden: Rally Edge")]
+        [TestCase("Escape from Ever After (v2.7.4, MULTi6) [FitGirl Repack]", "Escape from Ever After")]
+        [TestCase("Weird RPG 2 (MULTi12) [FitGirl Repack]", "Weird RPG 2")]
+        [TestCase("Fighting Force Collection (v1.0.9) [FitGirl Repack]", "Fighting Force Collection")]
+        [TestCase("Solargene (v1.0.43, MULTi23) [FitGirl Repack]", "Solargene")]
+        [TestCase("SnowRunner: 4-Year Anniversary Edition (v39.1 + 46 DLCs + Chill Nature Beats Soundtrack, MULTi30) [FitGirl Repack]", "SnowRunner: 4-Year Anniversary Edition")]
+        [TestCase("Gah! (v1.0.1, MULTi10) [FitGirl Repack]", "Gah!")]
+        [TestCase("One Piece: Pirate Warriors 4 - Legendary Edition (v1.0.8.6 + 18 DLCs, MULTi13) [FitGirl Repack]", "One Piece: Pirate Warriors 4 - Legendary Edition")]
+        [TestCase("Underground Garage (v157/Release, MULTi5) [FitGirl Repack]", "Underground Garage")]
+        [TestCase("Red Passport: Ticket to Russia - Deluxe Edition (+ 5 DLC, MULTi10) [FitGirl Repack]", "Red Passport: Ticket to Russia - Deluxe Edition")]
+        [TestCase("Ancient Farm (v1.0.8, MULTi12) [FitGirl Repack]", "Ancient Farm")]
+        [TestCase("Big Hops (v21207, MULTi5) [FitGirl Repack]", "Big Hops")]
+        [TestCase("ANNO: Mutationem - Collectors Edition (v1.2.00.00 + 2 DLC/Bonuses, MULTi10) [FitGirl Repack]", "ANNO: Mutationem - Collectors Edition")]
+        [TestCase("Cozy Caravan (v1.0.0/Release, MULTi14) [FitGirl Repack]", "Cozy Caravan")]
+        [TestCase("C.A.R.S.: Creating A Ridiculous Shitshow [FitGirl Repack]", "C.A.R.S.: Creating A Ridiculous Shitshow")]
+        [TestCase("Wicked Seed [FitGirl Repack]", "Wicked Seed")]
+
+        // DODI repacks
+        [TestCase("No Rest for the Wicked (Together) (v26737 + MULTi12) [DODI Repack]", "No Rest for the Wicked (Together)")]
+        [TestCase("Sonic Frontiers \u2013 Digital Deluxe Edition (v1.42 + All DLCs + MULTi12) (From 14.4 GB) [DODI Repack]", "Sonic Frontiers \u2013 Digital Deluxe Edition")]
+        [TestCase("Cult of the Lamb: Cultist Edition (v1.5.15.979 + All DLCs + Bonus Content + MULTi14) (From 2.9 GB) [DODI Repack]", "Cult of the Lamb: Cultist Edition")]
+
+        // Scene releases
+        [TestCase("Cairn-RUNE", "Cairn")]
+        [TestCase("Cult of the Lamb Woolhaven-RUNE", "Cult of the Lamb Woolhaven")]
+        [TestCase("DYNASTY WARRIORS ORIGINS Visions of Four Heroes-RUNE", "DYNASTY WARRIORS ORIGINS Visions of Four Heroes")]
+        [TestCase("Microcivilization-TENOKE", "Microcivilization")]
+
+        // IGG/simple releases
+        [TestCase("R.I.P. - Reincarnation Insurance Program (v0.8.1.6)", "R.I.P. - Reincarnation Insurance Program")]
+        [TestCase("Half Sword", "Half Sword")]
+        [TestCase("Dwarves: Glory, Death and Loot", "Dwarves: Glory, Death and Loot")]
+        [TestCase("MineMogul (v2026.01.20)", "MineMogul")]
+        [TestCase("MineMogul (v0.1.3.1)", "MineMogul")]
+        [TestCase("HackHub - Ultimate Hacker Simulator", "HackHub - Ultimate Hacker Simulator")]
+        [TestCase("Second Sun (v1.0.9)", "Second Sun")]
+        [TestCase("The Last Caretaker (v0.6.1.606677)", "The Last Caretaker")]
+        [TestCase("Schedule I (v0.4.2f9)", "Schedule I")]
+        public void should_parse_1337x_january_2026_releases(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
         }
     }
 }

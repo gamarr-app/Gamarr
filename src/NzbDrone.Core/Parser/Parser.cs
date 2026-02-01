@@ -247,11 +247,12 @@ namespace NzbDrone.Core.Parser
             // Fallback: Simple game name without any markers (e.g., "Hytale", "My Winter Car", "StarRupture")
             // Only matches if no other regex matched - must look like a proper game title
             // Requirements:
-            //   - Words start with uppercase followed by 1+ lowercase letters
-            //   - Allows PascalCase (StarRupture), spaces (My Winter Car), and colon separators
+            //   - First word must start with uppercase
+            //   - Subsequent words can be lowercase articles/prepositions (and, the, of, etc.)
+            //   - Allows PascalCase (StarRupture), colons, dashes, commas, and apostrophes in titles
             //   - Optional trailing number/Roman numeral for sequels
             //   - Rejects all-caps, all-lowercase, and random hash strings
-            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:(?::\s+|\s+)[A-Za-z][a-z]+(?:[A-Z][a-z]+)*)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
+            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:(?:[:,]?\s+|\s+-\s+|\s+)[A-Za-z][a-z]*(?:[A-Z][a-z]+)*(?:'[a-z]+)?)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
@@ -768,7 +769,12 @@ namespace NzbDrone.Core.Parser
                 {
                     if (previousAcronym)
                     {
-                        gameName += " ";
+                        // Don't add space if next part starts with punctuation or whitespace
+                        if (part.Length > 0 && !char.IsWhiteSpace(part[0]) && part[0] != ':' && part[0] != '-')
+                        {
+                            gameName += " ";
+                        }
+
                         previousAcronym = false;
                     }
 
@@ -779,6 +785,9 @@ namespace NzbDrone.Core.Parser
             }
 
             gameName = gameName.Trim(' ');
+
+            // Collapse multiple whitespace into single space
+            gameName = Regex.Replace(gameName, @"\s{2,}", " ");
 
             int.TryParse(matchCollection[0].Groups["year"].Value, out var airYear);
 
