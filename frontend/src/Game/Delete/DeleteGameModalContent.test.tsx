@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { ReactNode } from 'react';
 import DeleteGameModalContent from './DeleteGameModalContent';
 
 import '@testing-library/jest-dom';
@@ -70,16 +71,14 @@ jest.mock('Store/Actions/gameActions', () => ({
 
 jest.mock('Components/Form/FormGroup', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
+  default: ({ children }: { children: ReactNode }) => (
     <div data-testid="form-group">{children}</div>
   ),
 }));
 
 jest.mock('Components/Form/FormLabel', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <label>{children}</label>
-  ),
+  default: ({ children }: { children: ReactNode }) => <label>{children}</label>,
 }));
 
 jest.mock('Components/Form/FormInputGroup', () => ({
@@ -108,37 +107,29 @@ jest.mock('Components/Link/Button', () => ({
     children,
     onPress,
   }: {
-    children: React.ReactNode;
+    children: ReactNode;
     onPress?: () => void;
   }) => <button onClick={onPress}>{children}</button>,
 }));
 
 jest.mock('Components/Modal/ModalContent', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 jest.mock('Components/Modal/ModalHeader', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 jest.mock('Components/Modal/ModalBody', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 jest.mock('Components/Modal/ModalFooter', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 jest.mock('./DeleteGameModalContent.css', () => ({
@@ -184,9 +175,7 @@ describe('DeleteGameModalContent', () => {
     );
     const checkbox = screen.getByTestId('check-deleteFiles');
     fireEvent.click(checkbox);
-    expect(
-      screen.getByText(/test-game.*will be deleted/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/test-game.*will be deleted/)).toBeInTheDocument();
   });
 
   it('should call onModalClose when close button is pressed', () => {
