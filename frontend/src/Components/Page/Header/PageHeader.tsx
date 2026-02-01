@@ -77,15 +77,6 @@ function PageHeader({ isSmallScreen }: PageHeaderProps) {
 
       <div className={styles.right}>
         <IconButton
-          className={styles.donate}
-          name={icons.HEART}
-          aria-label={translate('Donate')}
-          to="https://gamarr.video/donate"
-          size={14}
-          title={translate('Donate')}
-        />
-
-        <IconButton
           className={styles.translate}
           title={translate('SuggestTranslationChange')}
           name={icons.TRANSLATE}

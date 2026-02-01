@@ -3,7 +3,6 @@ import PageContentBody from 'Components/Page/PageContentBody';
 import translate from 'Utilities/String/translate';
 import About from './About/About';
 import DiskSpace from './DiskSpace/DiskSpace';
-import Donations from './Donations/Donations';
 import Health from './Health/Health';
 import MoreInfo from './MoreInfo/MoreInfo';
 
@@ -15,7 +14,6 @@ function Status() {
         <DiskSpace />
         <About />
         <MoreInfo />
-        <Donations />
       </PageContentBody>
     </PageContent>
   );
