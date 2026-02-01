@@ -874,5 +874,23 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().NotBeNull($"Failed to parse: {postTitle}");
             result.PrimaryGameTitle.Should().Be(title);
         }
+
+        // Tests for release group extraction after title replacement (Parser.cs title cleanup logic)
+        [TestCase("The.Witcher.3.Wild.Hunt.v4.04-PLAZA", "The Witcher 3 Wild Hunt", "PLAZA")]
+        [TestCase("Cyberpunk.2077.v2.1-CODEX", "Cyberpunk 2077", "CODEX")]
+        [TestCase("Half-Life.2-RELOADED", "Half-Life 2", "RELOADED")]
+        [TestCase("Baldurs.Gate.3.v4.1.1.5009956-EMPRESS", "Baldurs Gate 3", "EMPRESS")]
+        [TestCase("ELDEN RING-PLAZA", "ELDEN RING", "PLAZA")]
+        [TestCase("DARQ: Complete Edition (v1.3 + 2 DLCs, MULTi19) [FitGirl Repack]", "DARQ: Complete Edition", "FitGirl")]
+        public void should_parse_release_group_from_game_title(string postTitle, string title, string releaseGroup)
+        {
+            var game = Parser.Parser.ParseGameTitle(postTitle);
+            using (new AssertionScope())
+            {
+                game.Should().NotBeNull($"Failed to parse: {postTitle}");
+                game.PrimaryGameTitle.Should().Be(title);
+                game.ReleaseGroup.Should().Be(releaseGroup);
+            }
+        }
     }
 }

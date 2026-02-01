@@ -164,7 +164,10 @@ namespace NzbDrone.Core.Notifications.Emby
         {
             _logger.Debug("Looking for error in response: {0}", response);
 
-            // TODO: actually check for the error
+            if (response.HasHttpServerError)
+            {
+                throw new HttpException(response.Request, response);
+            }
         }
     }
 }

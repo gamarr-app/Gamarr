@@ -441,7 +441,6 @@ namespace NzbDrone.Core.Parser
 
                             if (result != null)
                             {
-                                // TODO: Add tests for this!
                                 var simpleReleaseTitle = SimpleReleaseTitleRegex.Replace(releaseTitle, string.Empty);
 
                                 var simpleTitleReplaceString = match[0].Groups["title"].Success ? match[0].Groups["title"].Value : result.PrimaryGameTitle;

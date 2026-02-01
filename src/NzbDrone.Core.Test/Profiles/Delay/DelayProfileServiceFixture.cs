@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Cache;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Test.Framework;
 
@@ -43,11 +44,9 @@ namespace NzbDrone.Core.Test.Profiles.Delay
         }
 
         [Test]
-        public void should_return_all_when_moving_unknown_id()
+        public void should_throw_when_moving_unknown_id()
         {
-            var result = Subject.Reorder(999, 1);
-
-            result.Should().HaveCount(4);
+            Assert.Throws<ModelNotFoundException>(() => Subject.Reorder(999, 1));
         }
 
         [Test]
