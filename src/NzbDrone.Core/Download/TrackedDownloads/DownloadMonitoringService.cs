@@ -97,9 +97,17 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
             catch (Exception ex)
             {
-                // TODO: Stop tracking items for the offline client
                 _downloadClientStatusService.RecordFailure(downloadClient.Definition.Id);
                 _logger.Warn(ex, "Unable to retrieve queue and history items from " + downloadClient.Definition.Name);
+
+                var staleDownloads = _trackedDownloadService.GetTrackedDownloads()
+                    .Where(t => t.DownloadClient == downloadClient.Definition.Id)
+                    .ToList();
+
+                foreach (var trackedDownload in staleDownloads)
+                {
+                    trackedDownload.IsTrackable = false;
+                }
             }
 
             foreach (var downloadItem in downloadClientItems)
