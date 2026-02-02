@@ -157,7 +157,7 @@ namespace NzbDrone.Core.Parser
                 versionString = Regex.Replace(versionString, @"[a-z]\d*$", "", RegexOptions.IgnoreCase);
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.Parser
                 var versionString = match.Groups["dateversion"].Value;
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game date version '{0}' from '{1}'", version, name);
+                    Logger.Trace("Parsed game date version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -179,7 +179,7 @@ namespace NzbDrone.Core.Parser
                 var versionString = match.Groups["version2"].Value;
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from non-prefixed '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from non-prefixed '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -190,7 +190,7 @@ namespace NzbDrone.Core.Parser
                 var versionString = match.Groups["version3"].Value;
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from space-delimited '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from space-delimited '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -203,7 +203,7 @@ namespace NzbDrone.Core.Parser
                 versionString = Regex.Replace(versionString, @"\s+", ".");
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from space-separated '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from space-separated '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -214,7 +214,7 @@ namespace NzbDrone.Core.Parser
                 var versionString = match.Groups["parenversion"].Value;
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from parenthesized '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from parenthesized '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -226,7 +226,7 @@ namespace NzbDrone.Core.Parser
                 versionString = Regex.Replace(versionString, @"\s+", ".");
                 if (GameVersion.TryParse(versionString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from space-separated no-v '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from space-separated no-v '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -237,7 +237,7 @@ namespace NzbDrone.Core.Parser
                 var buildString = "Build " + match.Groups["buildonly"].Value;
                 if (GameVersion.TryParse(buildString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from standalone build '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from standalone build '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -248,7 +248,7 @@ namespace NzbDrone.Core.Parser
                 var buildString = "Build " + match.Groups["build"].Value;
                 if (GameVersion.TryParse(buildString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -259,7 +259,7 @@ namespace NzbDrone.Core.Parser
                 var updateString = match.Groups["update"].Value;
                 if (!string.IsNullOrEmpty(updateString) && GameVersion.TryParse(updateString, out var version))
                 {
-                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, name);
+                    Logger.Trace("Parsed game version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }
@@ -282,42 +282,42 @@ namespace NzbDrone.Core.Parser
             // Check for update/patch only first (most specific)
             if (UpdatePatchOnlyRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected update-only release: {0}", name);
+                Logger.Trace("Detected update-only release: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.UpdateOnly;
             }
 
             // Check for complete/GOTY editions (base game + all DLC) - before DLC-only
             if (CompleteEditionRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected complete edition with all DLC: {0}", name);
+                Logger.Trace("Detected complete edition with all DLC: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.BaseGameWithAllDlc;
             }
 
             // Check for season pass / DLC bundle - before DLC-only
             if (SeasonPassRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected season pass/DLC bundle: {0}", name);
+                Logger.Trace("Detected season pass/DLC bundle: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.SeasonPass;
             }
 
             // Check for expansion packs
             if (ExpansionRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected expansion pack: {0}", name);
+                Logger.Trace("Detected expansion pack: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.Expansion;
             }
 
             // Check for DLC-only releases (explicit "DLC Only", "Addon Only", etc.)
             if (DlcOnlyRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected DLC-only release: {0}", name);
+                Logger.Trace("Detected DLC-only release: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.DlcOnly;
             }
 
             // Check for standalone DLC (just "DLC" but not part of "All DLC", "DLC Bundle", etc.)
             if (StandaloneDlcRegex.IsMatch(normalizedName))
             {
-                Logger.Trace("Detected standalone DLC release: {0}", name);
+                Logger.Trace("Detected standalone DLC release: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.DlcOnly;
             }
 
@@ -327,7 +327,7 @@ namespace NzbDrone.Core.Parser
 
         public static QualityModel ParseQuality(string name)
         {
-            Logger.Debug("Trying to parse quality for '{0}'", name);
+            Logger.Debug("Trying to parse quality for '{0}'", CleanseLogMessage.SanitizeLogParam(name));
 
             if (name.IsNullOrWhiteSpace())
             {
