@@ -1,5 +1,4 @@
 import * as sentry from '@sentry/browser';
-import * as Integrations from '@sentry/integrations';
 import _ from 'lodash';
 import { Action, Middleware } from 'redux';
 import parseUrl from 'Utilities/String/parseUrl';
@@ -25,9 +24,9 @@ function shouldIgnoreException(s: string): RegExp | undefined {
 }
 
 function cleanseData(
-  event: sentry.Event,
+  event: sentry.ErrorEvent,
   hint: sentry.EventHint
-): sentry.Event | null {
+): sentry.ErrorEvent | null {
   const result = _.cloneDeep(event);
 
   const error = hint?.originalException as Error | undefined;
@@ -117,16 +116,14 @@ export default function createSentryMiddleware(): Middleware | undefined {
     sendDefaultPii: true,
     beforeSend: cleanseData,
     integrations: [
-      new Integrations.RewriteFrames({ iteratee: stripUrlBase }),
-      new Integrations.Dedupe(),
+      sentry.rewriteFramesIntegration({ iteratee: stripUrlBase }),
+      sentry.dedupeIntegration(),
     ],
   });
 
-  sentry.configureScope((scope) => {
-    scope.setUser({ username: userHash });
-    scope.setTag('version', version);
-    scope.setTag('production', isProduction);
-  });
+  sentry.setUser({ username: userHash });
+  sentry.setTag('version', version);
+  sentry.setTag('production', isProduction);
 
   return createMiddleware();
 }
