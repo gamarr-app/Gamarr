@@ -4,6 +4,7 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
     <ProjectReference Include="..\NzbDrone.Core\Gamarr.Core.csproj" />
     <ProjectReference Include="..\NzbDrone.Common\Gamarr.Common.csproj" />
   </ItemGroup>
