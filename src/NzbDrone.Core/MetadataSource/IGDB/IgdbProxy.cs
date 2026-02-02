@@ -8,6 +8,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using NLog;
 using NzbDrone.Common.Http;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
@@ -366,7 +367,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error searching for game: {0}", title);
+                _logger.Error(ex, "Error searching for game: {0}", CleanseLogMessage.SanitizeLogParam(title));
                 throw new Exceptions.SearchFailedException($"Search for '{title}' failed: {ex.Message}");
             }
         }

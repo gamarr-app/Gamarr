@@ -8,6 +8,7 @@ using NzbDrone.Common;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
@@ -153,7 +154,7 @@ namespace NzbDrone.Core.RootFolders
 
             if (!_diskProvider.FolderExists(path))
             {
-                _logger.Debug("Path supplied does not exist: {0}", path);
+                _logger.Debug("Path supplied does not exist: {0}", CleanseLogMessage.SanitizeLogParam(path));
                 return results;
             }
 

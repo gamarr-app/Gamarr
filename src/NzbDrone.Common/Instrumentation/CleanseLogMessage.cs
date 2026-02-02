@@ -7,6 +7,7 @@ namespace NzbDrone.Common.Instrumentation
 {
     public class CleanseLogMessage
     {
+        private static readonly Regex ControlCharRegex = new (@"[\x00-\x08\x0A-\x1F\x7F]", RegexOptions.Compiled);
         private static readonly Regex[] CleansingRules =
         {
             // Url
@@ -61,12 +62,20 @@ namespace NzbDrone.Common.Instrumentation
 
         private static readonly Regex CleanseRemoteIPRegex = new (@"(?:Auth-\w+(?<!Failure|Unauthorized) ip|from) (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", RegexOptions.Compiled);
 
+        public static string SanitizeLogParam(string input)
+        {
+            return input?.Replace("\r", "").Replace("\n", "") ?? string.Empty;
+        }
+
         public static string Cleanse(string message)
         {
             if (message.IsNullOrWhiteSpace())
             {
                 return message;
             }
+
+            // Strip control characters (CR, LF, etc.) to prevent log forging
+            message = ControlCharRegex.Replace(message, " ");
 
             foreach (var regex in CleansingRules)
             {

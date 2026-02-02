@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NzbDrone.Common.Http;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.Steam.Resource;
@@ -76,7 +77,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
         public List<Game> SearchForNewGame(string title)
         {
-            _logger.Debug("Searching Steam for '{0}'", title);
+            _logger.Debug("Searching Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
 
             var results = SearchGames(title);
 
@@ -107,7 +108,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
                 if (response.Resource?.Items == null || !response.Resource.Items.Any())
                 {
-                    _logger.Debug("No results from Steam store search for '{0}'", query);
+                    _logger.Debug("No results from Steam store search for '{0}'", CleanseLogMessage.SanitizeLogParam(query));
                     return new List<GameMetadata>();
                 }
 
@@ -138,7 +139,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
             }
             catch (HttpException ex)
             {
-                _logger.Error(ex, "Failed to search Steam for '{0}'", query);
+                _logger.Error(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(query));
                 return new List<GameMetadata>();
             }
         }

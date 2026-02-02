@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using NLog;
 using NzbDrone.Common.Http;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
@@ -315,7 +316,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             }
             catch (HttpException ex)
             {
-                _logger.Error(ex, "Failed to search RAWG for '{0}'", query);
+                _logger.Error(ex, "Failed to search RAWG for '{0}'", CleanseLogMessage.SanitizeLogParam(query));
                 return new List<GameMetadata>();
             }
         }

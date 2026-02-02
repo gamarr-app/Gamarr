@@ -7,6 +7,7 @@ using Mono.Unix.Native;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnsureThat;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
 
@@ -46,7 +47,7 @@ namespace NzbDrone.Mono.Disk
 
             if (mount == null)
             {
-                _logger.Debug("Unable to get free space for '{0}', unable to find suitable drive", path);
+                _logger.Debug("Unable to get free space for '{0}', unable to find suitable drive", CleanseLogMessage.SanitizeLogParam(path));
                 return null;
             }
 

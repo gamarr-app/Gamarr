@@ -139,5 +139,30 @@ namespace NzbDrone.Common.Test.InstrumentationTests
 
             cleansedMessage.Should().Be(message);
         }
+
+        [Test]
+        public void should_strip_control_characters()
+        {
+            var message = "Line1\r\nLine2\nLine3";
+            var cleansedMessage = CleanseLogMessage.Cleanse(message);
+
+            cleansedMessage.Should().NotContain("\r");
+            cleansedMessage.Should().NotContain("\n");
+            cleansedMessage.Should().Contain("Line1");
+            cleansedMessage.Should().Contain("Line2");
+            cleansedMessage.Should().Contain("Line3");
+        }
+
+        [Test]
+        public void sanitize_log_param_should_strip_newlines()
+        {
+            CleanseLogMessage.SanitizeLogParam("foo\r\nbar\nbaz").Should().Be("foobarbaz");
+        }
+
+        [Test]
+        public void sanitize_log_param_should_handle_null()
+        {
+            CleanseLogMessage.SanitizeLogParam(null).Should().Be(string.Empty);
+        }
     }
 }

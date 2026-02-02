@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Collections;
@@ -515,7 +516,7 @@ namespace NzbDrone.Core.MetadataSource
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to lookup IGDB game for '{0}'", title);
+                    _logger.Warn(ex, "Failed to lookup IGDB game for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
                     return new List<Game>();
                 }
             }
@@ -615,7 +616,7 @@ namespace NzbDrone.Core.MetadataSource
             }
             catch (Exception ex)
             {
-                _logger.Warn(ex, "Failed to search Steam for '{0}'", title);
+                _logger.Warn(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
             }
 
             // Search IGDB next (preferred secondary source)
@@ -682,7 +683,7 @@ namespace NzbDrone.Core.MetadataSource
 
             if (!allResults.Any())
             {
-                _logger.Warn("No results found for '{0}' from any metadata source", title);
+                _logger.Warn("No results found for '{0}' from any metadata source", CleanseLogMessage.SanitizeLogParam(title));
             }
 
             return allResults;
