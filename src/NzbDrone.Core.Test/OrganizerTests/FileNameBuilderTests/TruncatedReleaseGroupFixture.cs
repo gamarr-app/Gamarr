@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}-{ReleaseGroup:12}";
 
             var result = Subject.BuildFileName(_game, _gameFile);
-            result.Length.Should().BeLessOrEqualTo(255);
+            result.Length.Should().BeLessThanOrEqualTo(255);
             result.Should().Be("The Fantastic Life of Mr. Sisko (2024) GOG-IWishIWas...");
         }
 
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}-{ReleaseGroup:-17}";
 
             var result = Subject.BuildFileName(_game, _gameFile);
-            result.Length.Should().BeLessOrEqualTo(255);
+            result.Length.Should().BeLessThanOrEqualTo(255);
             result.Should().Be("The Fantastic Life of Mr. Sisko (2024) GOG-...ASixFourImpala");
         }
     }

@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Steam
         {
             var result = Subject.SearchGames("game", limit: 5);
 
-            result.Should().HaveCountLessOrEqualTo(5);
+            result.Should().HaveCountLessThanOrEqualTo(5);
 
             ExceptionVerification.IgnoreWarns();
         }
