@@ -66,7 +66,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dnd-multi-backend": "9.0.0",
     "react-dnd-touch-backend": "^16.0.1",
-    "react-dom": "^19",
+    "react-dom": "19.2.4",
     "react-focus-lock": "2.13.7",
     "react-google-recaptcha": "2.1.0",
     "react-helmet-async": "2.0.5",
