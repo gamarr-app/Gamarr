@@ -145,10 +145,17 @@ namespace NzbDrone.Core.MediaCover
         {
             var updated = false;
             var toResize = new List<Tuple<MediaCover, bool>>();
+            var downloadedTypes = new HashSet<MediaCoverTypes>();
 
             foreach (var cover in game.GameMetadata.Value.Images)
             {
                 if (cover.CoverType == MediaCoverTypes.Unknown)
+                {
+                    continue;
+                }
+
+                // Skip if we already have this cover type (except screenshots which can have multiple)
+                if (cover.CoverType != MediaCoverTypes.Screenshot && downloadedTypes.Contains(cover.CoverType))
                 {
                     continue;
                 }
@@ -165,6 +172,9 @@ namespace NzbDrone.Core.MediaCover
                         DownloadCover(game, cover);
                         updated = true;
                     }
+
+                    // Mark this type as successfully handled (either existed or downloaded)
+                    downloadedTypes.Add(cover.CoverType);
                 }
                 catch (HttpException e)
                 {
