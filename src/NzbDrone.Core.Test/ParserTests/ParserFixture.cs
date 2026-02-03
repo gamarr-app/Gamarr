@@ -438,6 +438,8 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("DL The Witcher 3 Wild Hunt Complete Edition L RUS ENG 14 RUS ENG 6 2015 RPG 4.04a redkit update 2 18 DLC GOG", "The Witcher 3 Wild Hunt Complete Edition")]
         [TestCase("Cyberpunk 2077 GOG", "Cyberpunk 2077")]
         [TestCase("Baldurs Gate 3 live v4 1 1 5932596 76418 win gog", "Baldurs Gate 3")]
+        [TestCase("Paquerette Down the Bunburrows (GOG)", "Paquerette Down the Bunburrows")]
+        [TestCase("Hollow Knight (GOG)", "Hollow Knight")]
         public void should_parse_gog_releases(string postTitle, string title)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle);
