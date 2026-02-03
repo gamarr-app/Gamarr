@@ -213,6 +213,8 @@ namespace NzbDrone.Common.Extensions
 
         public static string GetActualCasing(this string path)
         {
+            Ensure.That(path, () => path).IsValidPath(PathValidationType.CurrentOs);
+
             if (OsInfo.IsNotWindows || path.StartsWith("\\"))
             {
                 return path;

@@ -19,7 +19,18 @@ namespace Gamarr.Http.Middleware
         {
             if (_urlBase.IsNotNullOrWhiteSpace() && context.Request.PathBase.Value.IsNullOrWhiteSpace())
             {
-                context.Response.Redirect($"{_urlBase}{context.Request.Path}{context.Request.QueryString}");
+                // Build redirect path - ensure it's a safe relative redirect
+                var redirectPath = $"{_urlBase}{context.Request.Path}{context.Request.QueryString}";
+
+                // Prevent open redirect by ensuring the path is relative and doesn't start with //
+                // which browsers interpret as protocol-relative URLs
+                if (redirectPath.StartsWith("//") || !redirectPath.StartsWith("/"))
+                {
+                    context.Response.StatusCode = 400;
+                    return;
+                }
+
+                context.Response.Redirect(redirectPath);
                 context.Response.StatusCode = 307;
 
                 return;
