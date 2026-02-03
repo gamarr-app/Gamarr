@@ -101,11 +101,16 @@ namespace NzbDrone.Core.ImportLists
 
                             if (!importListReports.AnyFailure)
                             {
-                                var alreadyMapped = result.Games.Where(x => importListReports.Games.Any(r => r.IgdbId == x.IgdbId));
-                                var listGames = MapGameReports(importListReports.Games.Where(x => result.Games.All(r => r.IgdbId != x.IgdbId))).Where(x => x.IgdbId > 0).ToList();
+                                var alreadyMapped = result.Games.Where(x => importListReports.Games.Any(r =>
+                                    (r.IgdbId > 0 && r.IgdbId == x.IgdbId) ||
+                                    (r.SteamAppId > 0 && r.SteamAppId == x.SteamAppId)));
+                                var listGames = MapGameReports(importListReports.Games.Where(x => result.Games.All(r =>
+                                    (x.IgdbId == 0 || r.IgdbId != x.IgdbId) &&
+                                    (x.SteamAppId == 0 || r.SteamAppId != x.SteamAppId))))
+                                    .Where(x => x.IgdbId > 0 || x.SteamAppId > 0).ToList();
 
                                 listGames.AddRange(alreadyMapped);
-                                listGames = listGames.DistinctBy(x => x.IgdbId).ToList();
+                                listGames = listGames.DistinctBy(x => x.SteamAppId > 0 ? $"steam:{x.SteamAppId}" : $"igdb:{x.IgdbId}").ToList();
                                 listGames.ForEach(m => m.ListId = importList.Definition.Id);
 
                                 result.Games.AddRange(listGames);
@@ -161,8 +166,8 @@ namespace NzbDrone.Core.ImportLists
                     if (!importListReports.AnyFailure)
                     {
                         var listGames = MapGameReports(importListReports.Games)
-                            .Where(x => x.IgdbId > 0)
-                            .DistinctBy(x => x.IgdbId)
+                            .Where(x => x.IgdbId > 0 || x.SteamAppId > 0)
+                            .DistinctBy(x => x.SteamAppId > 0 ? $"steam:{x.SteamAppId}" : $"igdb:{x.IgdbId}")
                             .ToList();
 
                         listGames.ForEach(m => m.ListId = importList.Definition.Id);
@@ -190,9 +195,34 @@ namespace NzbDrone.Core.ImportLists
 
         private List<ImportListGame> MapGameReports(IEnumerable<ImportListGame> reports)
         {
-            var mappedGames = reports.Select(m => _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = m.Title, IgdbId = m.IgdbId, Year = m.Year }))
+            var mappedGames = new List<GameMetadata>();
+
+            foreach (var report in reports)
+            {
+                GameMetadata mapped = null;
+
+                // If we have a SteamAppId, use that for lookup first
+                if (report.SteamAppId > 0)
+                {
+                    _logger.Debug("Looking up game by SteamAppId: {0}", report.SteamAppId);
+                    mapped = _gameInfoService.GetGameBySteamAppId(report.SteamAppId);
+                }
+
+                // Fall back to IGDB lookup by title/id if no SteamAppId or Steam lookup failed
+                if (mapped == null && (report.IgdbId > 0 || !string.IsNullOrWhiteSpace(report.Title)))
+                {
+                    mapped = _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = report.Title, IgdbId = report.IgdbId, Year = report.Year });
+                }
+
+                if (mapped != null)
+                {
+                    mappedGames.Add(mapped);
+                }
+            }
+
+            mappedGames = mappedGames
                 .Where(x => x != null)
-                .DistinctBy(x => x.IgdbId)
+                .DistinctBy(x => x.SteamAppId > 0 ? $"steam:{x.SteamAppId}" : $"igdb:{x.IgdbId}")
                 .ToList();
 
             _gameMetadataService.UpsertMany(mappedGames);
