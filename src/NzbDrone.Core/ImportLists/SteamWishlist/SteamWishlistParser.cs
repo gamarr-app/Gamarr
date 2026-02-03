@@ -29,7 +29,11 @@ namespace NzbDrone.Core.ImportLists.SteamWishlist
 
             return jsonResponse.Response.Items
                 .Where(item => item.AppId > 0)
-                .Select(item => new ImportListGame { SteamAppId = item.AppId })
+                .Select(item => new ImportListGame
+                {
+                    SteamAppId = item.AppId,
+                    Title = $"Steam App {item.AppId}"
+                })
                 .ToList();
         }
     }
