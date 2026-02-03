@@ -146,6 +146,9 @@ namespace NzbDrone.Core.Parser
             // Stop before 'live', version indicators, or 'win/mac/linux' platform
             new Regex(@"^(?<title>(?![(\[]).+?)(?:\s+(?:live|v\s*\d|win|mac|linux|\d{4}\s+(?:Arcade|RPG|Adventure|FPS|TPS|Action|Strategy|Puzzle|Simulation|Sports|Racing|MMORPG)))\b.+?\bGOG\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Simple GOG format with parentheses: "Game Name (GOG)"
+            new Regex(@"^(?<title>(?![(\[]).+?)\s*\(GOG\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // DL prefix format without brackets: "DL Game Name P RUS ENG 8 2017 Arcade..." (for stripped brackets)
             // P = Portable marker, L = some other marker - strip both from title
             new Regex(@"^(?:DL\s+)?(?<title>(?![(\[]).+?)\s+(?:P\s+)?(?:L\s+)?(?:RUS|ENG|MULTi)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
