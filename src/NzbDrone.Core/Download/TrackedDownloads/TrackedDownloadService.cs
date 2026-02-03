@@ -268,7 +268,8 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             var cachedItems = _cache.Values
                 .Where(t =>
                     t.RemoteGame?.Game == null ||
-                    message.Game?.IgdbId == t.RemoteGame.Game.IgdbId)
+                    (message.Game?.IgdbId > 0 && message.Game?.IgdbId == t.RemoteGame.Game.IgdbId) ||
+                    (message.Game?.SteamAppId > 0 && message.Game?.SteamAppId == t.RemoteGame.Game.SteamAppId))
                 .ToList();
 
             if (cachedItems.Any())
@@ -284,7 +285,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             var cachedItems = _cache.Values
                 .Where(t =>
                     t.RemoteGame?.Game != null &&
-                    (t.RemoteGame.Game.Id == message.Game?.Id || t.RemoteGame.Game.IgdbId == message.Game?.IgdbId))
+                    (t.RemoteGame.Game.Id == message.Game?.Id ||
+                     (message.Game?.IgdbId > 0 && t.RemoteGame.Game.IgdbId == message.Game?.IgdbId) ||
+                     (message.Game?.SteamAppId > 0 && t.RemoteGame.Game.SteamAppId == message.Game?.SteamAppId)))
                 .ToList();
 
             if (cachedItems.Any())
@@ -300,7 +303,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             var cachedItems = _cache.Values
                 .Where(t =>
                     t.RemoteGame?.Game != null &&
-                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id || m.IgdbId == t.RemoteGame.Game.IgdbId))
+                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id ||
+                        (m.IgdbId > 0 && m.IgdbId == t.RemoteGame.Game.IgdbId) ||
+                        (m.SteamAppId > 0 && m.SteamAppId == t.RemoteGame.Game.SteamAppId)))
                 .ToList();
 
             if (cachedItems.Any())
@@ -316,7 +321,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             var cachedItems = _cache.Values
                 .Where(t =>
                     t.RemoteGame?.Game != null &&
-                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id || m.IgdbId == t.RemoteGame.Game.IgdbId))
+                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id ||
+                        (m.IgdbId > 0 && m.IgdbId == t.RemoteGame.Game.IgdbId) ||
+                        (m.SteamAppId > 0 && m.SteamAppId == t.RemoteGame.Game.SteamAppId)))
                 .ToList();
 
             if (cachedItems.Any())
