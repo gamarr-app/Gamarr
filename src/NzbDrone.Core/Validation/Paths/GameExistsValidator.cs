@@ -20,5 +20,15 @@ namespace NzbDrone.Core.Validation.Paths
 
             return _gameService.FindByIgdbId(igdbId) == null;
         }
+
+        public bool ValidateSteamAppId(int steamAppId)
+        {
+            if (steamAppId == 0)
+            {
+                return true;
+            }
+
+            return _gameService.FindBySteamAppId(steamAppId) == null;
+        }
     }
 }
