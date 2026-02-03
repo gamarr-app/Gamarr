@@ -33,16 +33,6 @@ namespace NzbDrone.Core.ImportLists.RSSImport
 
                 yield return new ImportListDefinition
                 {
-                    Name = "Steam Wishlist",
-                    Enabled = Enabled,
-                    EnableAuto = true,
-                    QualityProfileId = 1,
-                    Implementation = GetType().Name,
-                    MinRefreshInterval = MinRefreshInterval,
-                    Settings = new RSSImportSettings { Link = "https://store.steampowered.com/wishlist/id/YOURUSERNAME/wishlistdata/" },
-                };
-                yield return new ImportListDefinition
-                {
                     Name = "Custom RSS Feed",
                     Enabled = Enabled,
                     EnableAuto = true,
