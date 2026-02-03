@@ -121,6 +121,7 @@ namespace Gamarr.Api.V3.Games
                 .When(s => s.SteamAppId <= 0);
             PostValidator.RuleFor(s => s.SteamAppId)
                 .GreaterThan(0)
+                .SetSteamAppIdValidator(gamesExistsValidator)
                 .When(s => s.IgdbId <= 0)
                 .WithMessage("Either IgdbId or SteamAppId must be provided");
         }

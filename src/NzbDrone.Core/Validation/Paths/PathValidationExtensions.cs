@@ -89,7 +89,15 @@ namespace NzbDrone.Core.Validation.Paths
             GameExistsValidator validator)
         {
             return ruleBuilder.Must(id => validator.Validate(id))
-                .WithMessage("Game does not exist");
+                .WithMessage("Game already exists");
+        }
+
+        public static IRuleBuilderOptions<T, int> SetSteamAppIdValidator<T>(
+            this IRuleBuilder<T, int> ruleBuilder,
+            GameExistsValidator validator)
+        {
+            return ruleBuilder.Must(id => validator.ValidateSteamAppId(id))
+                .WithMessage("Game already exists");
         }
 
         public static IRuleBuilderOptions<T, string> SetPathValidator<T>(
