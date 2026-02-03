@@ -167,7 +167,7 @@ namespace NzbDrone.Core.ImportLists
 
         protected virtual bool IsValidItem(ImportListGame listItem)
         {
-            if (listItem.Title.IsNullOrWhiteSpace() && listItem.IgdbId == 0)
+            if (listItem.Title.IsNullOrWhiteSpace() && listItem.IgdbId == 0 && listItem.SteamAppId == 0)
             {
                 return false;
             }
