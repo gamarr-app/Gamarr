@@ -13,12 +13,13 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
         List<ImportListExclusion> Add(List<ImportListExclusion> importListExclusions);
         List<ImportListExclusion> All();
         PagingSpec<ImportListExclusion> Paged(PagingSpec<ImportListExclusion> pagingSpec);
-        bool IsGameExcluded(int igdbId);
+        bool IsGameExcluded(int igdbId, int steamAppId);
         void Delete(int id);
         void Delete(List<int> ids);
         ImportListExclusion Get(int id);
         ImportListExclusion Update(ImportListExclusion importListExclusion);
         List<int> AllExcludedIgdbIds();
+        List<int> AllExcludedSteamAppIds();
     }
 
     public class ImportListExclusionService : IImportListExclusionService, IHandleAsync<GamesDeletedEvent>
@@ -35,9 +36,14 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 
         public ImportListExclusion Add(ImportListExclusion importListExclusion)
         {
-            if (_repo.IsGameExcluded(importListExclusion.IgdbId))
+            if (_repo.IsGameExcluded(importListExclusion.IgdbId, importListExclusion.SteamAppId))
             {
-                return _repo.FindByIgdbid(importListExclusion.IgdbId);
+                if (importListExclusion.IgdbId > 0)
+                {
+                    return _repo.FindByIgdbId(importListExclusion.IgdbId);
+                }
+
+                return _repo.FindBySteamAppId(importListExclusion.SteamAppId);
             }
 
             return _repo.Insert(importListExclusion);
@@ -50,9 +56,9 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             return importListExclusions;
         }
 
-        public bool IsGameExcluded(int igdbId)
+        public bool IsGameExcluded(int igdbId, int steamAppId)
         {
-            return _repo.IsGameExcluded(igdbId);
+            return _repo.IsGameExcluded(igdbId, steamAppId);
         }
 
         public void Delete(int id)
@@ -90,6 +96,11 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             return _repo.AllExcludedIgdbIds();
         }
 
+        public List<int> AllExcludedSteamAppIds()
+        {
+            return _repo.AllExcludedSteamAppIds();
+        }
+
         public void HandleAsync(GamesDeletedEvent message)
         {
             if (!message.AddImportListExclusion)
@@ -102,6 +113,7 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             var exclusionsToAdd = DeDupeExclusions(message.Games.Select(m => new ImportListExclusion
             {
                 IgdbId = m.IgdbId,
+                SteamAppId = m.SteamAppId,
                 GameTitle = m.Title,
                 GameYear = m.Year
             }).ToList());
@@ -111,11 +123,13 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 
         private List<ImportListExclusion> DeDupeExclusions(List<ImportListExclusion> exclusions)
         {
-            var existingExclusions = _repo.AllExcludedIgdbIds();
+            var existingIgdbIds = _repo.AllExcludedIgdbIds();
+            var existingSteamAppIds = _repo.AllExcludedSteamAppIds();
 
             return exclusions
-                .DistinctBy(x => x.IgdbId)
-                .Where(x => !existingExclusions.Contains(x.IgdbId))
+                .DistinctBy(x => x.SteamAppId > 0 ? $"steam:{x.SteamAppId}" : $"igdb:{x.IgdbId}")
+                .Where(x => (x.IgdbId == 0 || !existingIgdbIds.Contains(x.IgdbId)) &&
+                            (x.SteamAppId == 0 || !existingSteamAppIds.Contains(x.SteamAppId)))
                 .ToList();
         }
     }

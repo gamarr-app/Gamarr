@@ -8,9 +8,11 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 {
     public interface IImportListExclusionRepository : IBasicRepository<ImportListExclusion>
     {
-        bool IsGameExcluded(int igdbid);
-        ImportListExclusion FindByIgdbid(int igdbid);
+        bool IsGameExcluded(int igdbId, int steamAppId);
+        ImportListExclusion FindByIgdbId(int igdbId);
+        ImportListExclusion FindBySteamAppId(int steamAppId);
         List<int> AllExcludedIgdbIds();
+        List<int> AllExcludedSteamAppIds();
     }
 
     public class ImportListListExclusionRepository : BasicRepository<ImportListExclusion>, IImportListExclusionRepository
@@ -20,21 +22,33 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
         {
         }
 
-        public bool IsGameExcluded(int igdbid)
+        public bool IsGameExcluded(int igdbId, int steamAppId)
         {
-            return Query(x => x.IgdbId == igdbid).Any();
+            return Query(x => (igdbId > 0 && x.IgdbId == igdbId) || (steamAppId > 0 && x.SteamAppId == steamAppId)).Any();
         }
 
-        public ImportListExclusion FindByIgdbid(int igdbid)
+        public ImportListExclusion FindByIgdbId(int igdbId)
         {
-            return Query(x => x.IgdbId == igdbid).SingleOrDefault();
+            return Query(x => x.IgdbId == igdbId).SingleOrDefault();
+        }
+
+        public ImportListExclusion FindBySteamAppId(int steamAppId)
+        {
+            return Query(x => x.SteamAppId == steamAppId).SingleOrDefault();
         }
 
         public List<int> AllExcludedIgdbIds()
         {
             using var conn = _database.OpenConnection();
 
-            return conn.Query<int>("SELECT \"IgdbId\" FROM \"ImportExclusions\"").ToList();
+            return conn.Query<int>("SELECT \"IgdbId\" FROM \"ImportExclusions\" WHERE \"IgdbId\" > 0").ToList();
+        }
+
+        public List<int> AllExcludedSteamAppIds()
+        {
+            using var conn = _database.OpenConnection();
+
+            return conn.Query<int>("SELECT \"SteamAppId\" FROM \"ImportExclusions\" WHERE \"SteamAppId\" > 0").ToList();
         }
     }
 }
