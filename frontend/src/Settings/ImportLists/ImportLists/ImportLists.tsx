@@ -32,8 +32,9 @@ function ImportLists() {
     []
   );
 
-  const { isFetching, isPopulated, items, error } =
-    useSelector(sortedSectionSelector);
+  const { isFetching, isPopulated, items, error } = useSelector(
+    sortedSectionSelector
+  );
 
   const [isAddImportListModalOpen, setIsAddImportListModalOpen] =
     useState(false);
