@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
@@ -58,7 +58,7 @@ function MetadataOptions({
     settings,
     hasSettings,
     hasPendingChanges,
-  } = useSelector(createSettingsSectionSelector(SECTION));
+  } = useSelector(useMemo(() => createSettingsSectionSelector(SECTION), []));
 
   const handleInputChange = useCallback(
     (change: InputChanged) => {

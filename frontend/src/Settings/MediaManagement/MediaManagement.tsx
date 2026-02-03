@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
@@ -113,7 +113,7 @@ function MediaManagement() {
     hasPendingChanges,
     validationErrors,
     validationWarnings,
-  } = useSelector(createSettingsSectionSelector(SECTION));
+  } = useSelector(useMemo(() => createSettingsSectionSelector(SECTION), []));
 
   const handleSavePress = useCallback(() => {
     dispatch(saveMediaManagementSettings());

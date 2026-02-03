@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
@@ -72,7 +72,7 @@ function ImportListOptions({
     error,
     settings,
     hasSettings,
-  } = useSelector(createSettingsSectionSelector(SECTION));
+  } = useSelector(useMemo(() => createSettingsSectionSelector(SECTION), []));
 
   const { listSyncLevel } = settings;
 

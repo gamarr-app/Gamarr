@@ -96,7 +96,7 @@ function ImportListExclusions() {
     totalRecords,
     isDeleting,
     deleteError,
-  } = useSelector(createImportListExclusionsSelector());
+  } = useSelector(useMemo(() => createImportListExclusionsSelector(), []));
 
   const dispatch = useDispatch();
 

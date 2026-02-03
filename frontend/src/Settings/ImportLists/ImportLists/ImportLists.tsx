@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ImportListAppState } from 'App/State/SettingsAppState';
 import Card from 'Components/Card';
@@ -23,12 +23,17 @@ import styles from './ImportLists.css';
 function ImportLists() {
   const dispatch = useDispatch();
 
-  const { isFetching, isPopulated, items, error } = useSelector(
-    createSortedSectionSelector<ImportListModel, ImportListAppState>(
-      'settings.importLists',
-      sortByProp('name')
-    )
+  const sortedSectionSelector = useMemo(
+    () =>
+      createSortedSectionSelector<ImportListModel, ImportListAppState>(
+        'settings.importLists',
+        sortByProp('name')
+      ),
+    []
   );
+
+  const { isFetching, isPopulated, items, error } =
+    useSelector(sortedSectionSelector);
 
   const [isAddImportListModalOpen, setIsAddImportListModalOpen] =
     useState(false);
