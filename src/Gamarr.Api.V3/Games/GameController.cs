@@ -99,7 +99,7 @@ namespace Gamarr.Api.V3.Games
                 .NotEmpty()
                 .IsValidPath()
                 .SetPathValidator(rootFolderExistsValidator)
-                .Must((resource, path) => gameFolderAsRootFolderValidator.IsValid(null, path))
+                .Must((resource, path) => gameFolderAsRootFolderValidator.IsValid(new ValidationContext<object>(resource), path))
                 .WithMessage("Root folder path contains game folder")
                 .When(s => s.Path.IsNullOrWhiteSpace());
 
