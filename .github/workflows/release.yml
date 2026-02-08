@@ -1,14 +1,15 @@
 name: Release
 
 on:
-  # Only release after CI passes
+  # Nightly builds after CI passes on main
   workflow_run:
     workflows: ["CI"]
     types:
       - completed
     branches:
       - main
-  # Or on explicit version tags
+      - develop
+  # Stable releases on version tags
   push:
     tags:
       - 'v*'
@@ -148,7 +149,6 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     needs: build
-    # Always run if build succeeded - build job already has the right conditions
     permissions:
       contents: write
 
@@ -170,17 +170,20 @@ jobs:
             VERSION="${BRANCH#refs/tags/}"
             VERSION="${VERSION#v}"
             PRERELEASE="false"
+            CHANNEL="stable"
+          elif [[ "$BRANCH" == *"develop"* ]]; then
+            VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            PRERELEASE="true"
+            CHANNEL="develop"
           else
             VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
-            if [[ "$BRANCH" == *"develop"* ]]; then
-              PRERELEASE="true"
-            else
-              PRERELEASE="false"
-            fi
+            PRERELEASE="true"
+            CHANNEL="nightly"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION, Prerelease: $PRERELEASE"
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION, Prerelease: $PRERELEASE, Channel: $CHANNEL"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -229,11 +232,16 @@ jobs:
           if [[ "$BRANCH" == refs/tags/v* || "$BRANCH" == v* ]]; then
             VERSION="${BRANCH#refs/tags/}"
             VERSION="${VERSION#v}"
+            CHANNEL="stable"
+          elif [[ "$BRANCH" == *"develop"* ]]; then
+            VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            CHANNEL="develop"
           else
             VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            CHANNEL="nightly"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -255,8 +263,9 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest,enable=${{ contains(steps.version.outputs.branch, 'main') || contains(steps.version.outputs.branch, 'tags/v') }}
-            type=raw,value=develop,enable=${{ contains(steps.version.outputs.branch, 'develop') }}
+            type=raw,value=latest,enable=${{ steps.version.outputs.channel == 'stable' }}
+            type=raw,value=develop,enable=${{ steps.version.outputs.channel == 'develop' }}
+            type=raw,value=nightly,enable=${{ steps.version.outputs.channel == 'nightly' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
