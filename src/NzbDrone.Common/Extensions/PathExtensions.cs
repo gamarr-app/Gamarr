@@ -215,6 +215,9 @@ namespace NzbDrone.Common.Extensions
         {
             Ensure.That(path, () => path).IsValidPath(PathValidationType.CurrentOs);
 
+            // Resolve to full path to prevent path traversal attacks
+            path = Path.GetFullPath(path);
+
             if (OsInfo.IsNotWindows || path.StartsWith("\\"))
             {
                 return path;

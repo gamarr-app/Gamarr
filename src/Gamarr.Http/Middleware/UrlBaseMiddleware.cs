@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NzbDrone.Common.Extensions;
@@ -19,18 +20,23 @@ namespace Gamarr.Http.Middleware
         {
             if (_urlBase.IsNotNullOrWhiteSpace() && context.Request.PathBase.Value.IsNullOrWhiteSpace())
             {
-                // Build redirect path - ensure it's a safe relative redirect
-                var redirectPath = $"{_urlBase}{context.Request.Path}{context.Request.QueryString}";
+                // Build redirect from safe PathString components rather than raw string concatenation
+                var basePath = new PathString(_urlBase);
+                var redirectPath = basePath.Add(context.Request.Path);
+                var redirectUrl = redirectPath.Value + context.Request.QueryString;
 
-                // Prevent open redirect by ensuring the path is relative and doesn't start with //
-                // which browsers interpret as protocol-relative URLs
-                if (redirectPath.StartsWith("//") || !redirectPath.StartsWith("/"))
+                // Validate the final URL is a safe local redirect
+                if (redirectUrl == null ||
+                    redirectUrl.StartsWith("//") ||
+                    redirectUrl.Contains('\\') ||
+                    !redirectUrl.StartsWith("/") ||
+                    !Uri.TryCreate(redirectUrl, UriKind.Relative, out _))
                 {
                     context.Response.StatusCode = 400;
                     return;
                 }
 
-                context.Response.Redirect(redirectPath);
+                context.Response.Redirect(redirectUrl);
                 context.Response.StatusCode = 307;
 
                 return;
