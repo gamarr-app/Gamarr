@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import TextTruncate from 'react-text-truncate';
-import { Navigation } from 'swiper';
+import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { NavigationOptions } from 'swiper/types/modules/navigation';
 import EditGameCollectionModal from 'Collection/Edit/EditGameCollectionModal';
@@ -253,7 +253,6 @@ function CollectionOverview(props: CollectionOverviewProps) {
                 spaceBetween={10}
                 slidesPerGroup={3}
                 loop={false}
-                loopFillGroupWithBlank={true}
                 className="mySwiper"
                 modules={[Navigation]}
                 // eslint-disable-next-line react/jsx-no-bind
