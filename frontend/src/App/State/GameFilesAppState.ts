@@ -6,7 +6,8 @@ import AppSectionState, {
 import { GameFile } from 'GameFile/GameFile';
 
 interface GameFilesAppState
-  extends AppSectionState<GameFile>,
+  extends
+    AppSectionState<GameFile>,
     AppSectionDeleteState,
     AppSectionSaveState,
     TableAppSectionState {}

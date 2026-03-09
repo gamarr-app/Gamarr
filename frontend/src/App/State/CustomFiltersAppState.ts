@@ -5,7 +5,8 @@ import AppSectionState, {
 import { CustomFilter } from './AppState';
 
 interface CustomFiltersAppState
-  extends AppSectionState<CustomFilter>,
+  extends
+    AppSectionState<CustomFilter>,
     AppSectionDeleteState,
     AppSectionSaveState {}
 

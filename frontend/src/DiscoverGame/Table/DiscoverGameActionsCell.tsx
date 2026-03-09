@@ -2,8 +2,10 @@ import VirtualTableRowCell, {
   VirtualTableRowCellProps,
 } from 'Components/Table/Cells/VirtualTableRowCell';
 
-interface DiscoverGameActionsCellProps
-  extends Omit<VirtualTableRowCellProps, 'id'> {
+interface DiscoverGameActionsCellProps extends Omit<
+  VirtualTableRowCellProps,
+  'id'
+> {
   id: number;
 }
 

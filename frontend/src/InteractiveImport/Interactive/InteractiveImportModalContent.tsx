@@ -197,8 +197,7 @@ const importModeSelector = createSelector(
   }
 );
 
-interface InteractiveImportCollectionResult
-  extends CollectionResult<InteractiveImport> {
+interface InteractiveImportCollectionResult extends CollectionResult<InteractiveImport> {
   originalItems: InteractiveImport[];
 }
 
