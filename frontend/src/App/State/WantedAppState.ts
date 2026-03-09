@@ -10,13 +10,15 @@ interface WantedGame extends Game {
 }
 
 interface WantedCutoffUnmetAppState
-  extends AppSectionState<WantedGame>,
+  extends
+    AppSectionState<WantedGame>,
     AppSectionFilterState<WantedGame>,
     PagedAppSectionState,
     TableAppSectionState {}
 
 interface WantedMissingAppState
-  extends AppSectionState<WantedGame>,
+  extends
+    AppSectionState<WantedGame>,
     AppSectionFilterState<WantedGame>,
     PagedAppSectionState,
     TableAppSectionState {}
