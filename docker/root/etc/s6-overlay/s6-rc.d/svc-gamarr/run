@@ -5,12 +5,12 @@ mkdir -p /run/gamarr-temp
 
 if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
     exec \
-        s6-notifyoncheck -d -n 300 -w 1000 \
+        s6-notifyoncheck -d -n 300 -w 1000 -c /etc/s6-overlay/s6-rc.d/svc-gamarr/data/check \
             cd /app/gamarr/bin s6-setuidgid abc /app/gamarr/bin/Gamarr \
             -nobrowser -data=/config
 else
     exec \
-        s6-notifyoncheck -d -n 300 -w 1000 \
+        s6-notifyoncheck -d -n 300 -w 1000 -c /etc/s6-overlay/s6-rc.d/svc-gamarr/data/check \
             cd /app/gamarr/bin /app/gamarr/bin/Gamarr \
             -nobrowser -data=/config
 fi
