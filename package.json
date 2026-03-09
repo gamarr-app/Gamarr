@@ -87,7 +87,7 @@
     "redux-thunk": "2.4.2",
     "reselect": "4.1.8",
     "stacktrace-js": "2.0.2",
-    "swiper": "8.3.2",
+    "swiper": "12.1.2",
     "typescript": "5.9.3",
     "use-debounce": "10.1.0"
   },
@@ -171,6 +171,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "serialize-javascript": "^7.0.3",
+    "minimatch": "^3.1.3"
   }
 }
