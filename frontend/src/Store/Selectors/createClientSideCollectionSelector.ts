@@ -69,8 +69,10 @@ export interface ClientSideCollectionState<T> {
   isSaving?: boolean;
 }
 
-export interface CollectionResult<T>
-  extends Omit<ClientSideCollectionState<T>, 'items'> {
+export interface CollectionResult<T> extends Omit<
+  ClientSideCollectionState<T>,
+  'items'
+> {
   items: T[];
   totalItems: number;
   customFilters: CustomFilter[];

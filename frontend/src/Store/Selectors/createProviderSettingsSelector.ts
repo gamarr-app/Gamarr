@@ -36,7 +36,7 @@ export interface ProviderSettingsResult<T> {
 
 function selector<
   T extends ModelBaseSetting,
-  S extends AppSectionProviderState<T> & SchemaState<T>
+  S extends AppSectionProviderState<T> & SchemaState<T>,
 >(id: number | undefined, section: S) {
   if (id) {
     const {
@@ -100,8 +100,8 @@ function selector<
 
 export function createProviderSettingsSelectorHook<
   T extends ModelBaseSetting,
-  S extends AppSectionProviderState<T> &
-    SchemaState<T> = AppSectionProviderState<T> & SchemaState<T>
+  S extends AppSectionProviderState<T> & SchemaState<T> =
+    AppSectionProviderState<T> & SchemaState<T>,
 >(sectionName: string, id: number | undefined) {
   return createSelector(
     (state: AppState) => state.settings,

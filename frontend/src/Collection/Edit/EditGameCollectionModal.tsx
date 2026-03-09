@@ -6,8 +6,7 @@ import EditGameCollectionModalContent, {
   EditGameCollectionModalContentProps,
 } from './EditGameCollectionModalContent';
 
-interface EditGameCollectionModalProps
-  extends EditGameCollectionModalContentProps {
+interface EditGameCollectionModalProps extends EditGameCollectionModalContentProps {
   isOpen: boolean;
 }
 
