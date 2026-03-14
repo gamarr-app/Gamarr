@@ -1,0 +1,24 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+echo "**** setting up clamav ****"
+
+# create required directories
+mkdir -p /run/clamav /var/lib/clamav /var/log/clamav
+
+# configure freshclam
+sed -i 's/^Example/#Example/' /etc/clamav/freshclam.conf
+sed -i 's|^#DatabaseDirectory.*|DatabaseDirectory /var/lib/clamav|' /etc/clamav/freshclam.conf
+
+# configure clamd
+sed -i 's/^Example/#Example/' /etc/clamav/clamd.conf
+sed -i 's|^#LocalSocket.*|LocalSocket /run/clamav/clamd.sock|' /etc/clamav/clamd.conf
+sed -i 's|^#TCPSocket.*|TCPSocket 3310|' /etc/clamav/clamd.conf
+sed -i 's|^#DatabaseDirectory.*|DatabaseDirectory /var/lib/clamav|' /etc/clamav/clamd.conf
+
+# set permissions
+chown -R abc:abc /run/clamav /var/lib/clamav /var/log/clamav
+
+# download initial virus database
+echo "**** updating clamav database ****"
+s6-setuidgid abc freshclam --quiet || echo "**** freshclam update failed, clamd will retry ****"

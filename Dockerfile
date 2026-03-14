@@ -22,6 +22,9 @@ RUN \
   echo "**** install packages ****" && \
   apk add -U --upgrade --no-cache \
     aspnetcore8-runtime \
+    clamav \
+    clamav-daemon \
+    clamav-libunrar \
     icu-libs \
     sqlite-libs \
     xmlstarlet && \
