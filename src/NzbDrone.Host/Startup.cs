@@ -178,6 +178,7 @@ namespace NzbDrone.Host
             });
 
             services.AddDataProtection()
+                .SetApplicationName("Gamarr")
                 .PersistKeysToFileSystem(new DirectoryInfo(Configuration["dataProtectionFolder"]));
 
             services.AddSingleton<IAuthorizationPolicyProvider, UiAuthorizationPolicyProvider>();
