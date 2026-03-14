@@ -501,7 +501,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
-        public void should_return_rejection_if_nothing_imported_and_contains_executable_file()
+        public void should_not_reject_executable_files_for_games()
         {
             GivenValidGame();
 
@@ -522,8 +522,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             var result = Subject.ProcessPath(path);
 
-            result.Count.Should().Be(1);
-            result.First().Result.Should().Be(ImportResultType.Rejected);
+            result.Should().BeEmpty();
         }
 
         private void VerifyNoImport()
