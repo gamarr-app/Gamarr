@@ -405,14 +405,12 @@ namespace NzbDrone.Core.MediaFiles
         {
             var files = _diskProvider.GetFiles(folder, true);
 
+            // Executables (.exe, .bat, .sh, .dll) are expected in game downloads — don't reject them.
+            // Only flag truly dangerous files (.lnk, .scr, .vbs, etc.) and archives that need extraction.
+
             if (files.Any(file => FileExtensions.DangerousExtensions.Contains(Path.GetExtension(file))))
             {
                 return RejectionResult(ImportRejectionReason.DangerousFile, "Caution: Found potentially dangerous file");
-            }
-
-            if (files.Any(file => FileExtensions.ExecutableExtensions.Contains(Path.GetExtension(file))))
-            {
-                return RejectionResult(ImportRejectionReason.ExecutableFile, "Caution: Found executable file");
             }
 
             if (files.Any(file => FileExtensions.ArchiveExtensions.Contains(Path.GetExtension(file))))
