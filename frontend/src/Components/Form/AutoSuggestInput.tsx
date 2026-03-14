@@ -26,8 +26,10 @@ import { InputChanged } from 'typings/inputs';
 import { asPopperModifier, PopperModifierData } from 'typings/Popper';
 import styles from './AutoSuggestInput.css';
 
-interface AutoSuggestInputProps<T>
-  extends Omit<AutosuggestPropsBase<T>, 'renderInputComponent' | 'inputProps'> {
+interface AutoSuggestInputProps<T> extends Omit<
+  AutosuggestPropsBase<T>,
+  'renderInputComponent' | 'inputProps'
+> {
   ref?: MutableRefObject<Autosuggest<T> | null>;
   className?: string;
   inputContainerClassName?: string;

@@ -8,7 +8,8 @@ import History from 'typings/History';
 export type GameHistoryAppState = AppSectionState<History>;
 
 interface HistoryAppState
-  extends AppSectionState<History>,
+  extends
+    AppSectionState<History>,
     AppSectionFilterState<History>,
     PagedAppSectionState,
     TableAppSectionState {}

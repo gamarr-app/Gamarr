@@ -5,11 +5,10 @@ import EnhancedSelectInput, {
   EnhancedSelectInputValue,
 } from './EnhancedSelectInput';
 
-export interface MonitorGamesSelectInputProps
-  extends Omit<
-    EnhancedSelectInputProps<EnhancedSelectInputValue<string>, string>,
-    'values'
-  > {
+export interface MonitorGamesSelectInputProps extends Omit<
+  EnhancedSelectInputProps<EnhancedSelectInputValue<string>, string>,
+  'values'
+> {
   includeNoChange?: boolean;
   includeMixed?: boolean;
 }

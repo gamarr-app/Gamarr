@@ -39,18 +39,17 @@ interface AddNewGameSuggestion {
   title: string;
 }
 
-export interface SuggestedGame
-  extends Pick<
-    Game,
-    | 'title'
-    | 'year'
-    | 'titleSlug'
-    | 'sortTitle'
-    | 'images'
-    | 'alternateTitles'
-    | 'steamAppId'
-    | 'igdbId'
-  > {
+export interface SuggestedGame extends Pick<
+  Game,
+  | 'title'
+  | 'year'
+  | 'titleSlug'
+  | 'sortTitle'
+  | 'images'
+  | 'alternateTitles'
+  | 'steamAppId'
+  | 'igdbId'
+> {
   firstCharacter: string;
   tags: Tag[];
 }

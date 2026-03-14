@@ -7,8 +7,7 @@ import AddNewGameCollectionGameModalContent, {
   AddNewGameCollectionGameModalContentProps,
 } from './AddNewGameCollectionGameModalContent';
 
-interface AddNewCollectionGameModalProps
-  extends AddNewGameCollectionGameModalContentProps {
+interface AddNewCollectionGameModalProps extends AddNewGameCollectionGameModalContentProps {
   isOpen: boolean;
 }
 

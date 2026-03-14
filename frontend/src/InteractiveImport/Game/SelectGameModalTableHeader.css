@@ -5,14 +5,14 @@
 }
 
 .year {
-  composes: headerCell  from '~Components/Table/VirtualTableHeaderCell.css';
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 0 70px;
 }
 
 .steamAppId,
 .igdbId {
-  composes: headerCell  from '~Components/Table/VirtualTableHeaderCell.css';
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 0 110px;
 }

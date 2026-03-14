@@ -55,9 +55,7 @@ export interface GameIndexAppState {
 }
 
 interface GamesAppState
-  extends AppSectionState<Game>,
-    AppSectionDeleteState,
-    AppSectionSaveState {
+  extends AppSectionState<Game>, AppSectionDeleteState, AppSectionSaveState {
   itemMap: Record<number, number>;
 
   deleteOptions: {

@@ -6,8 +6,10 @@ import PageToolbarButton, {
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 
-interface GameIndexSelectAllButtonProps
-  extends Omit<PageToolbarButtonProps, 'iconName'> {
+interface GameIndexSelectAllButtonProps extends Omit<
+  PageToolbarButtonProps,
+  'iconName'
+> {
   isSelectMode: boolean;
 }
 

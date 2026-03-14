@@ -14,7 +14,8 @@ export interface CollectionOverviewOptions {
 }
 
 interface GameCollectionAppState
-  extends AppSectionState<GameCollection>,
+  extends
+    AppSectionState<GameCollection>,
     AppSectionFilterState<GameCollection>,
     AppSectionSaveState {
   itemMap: Record<number, number>;

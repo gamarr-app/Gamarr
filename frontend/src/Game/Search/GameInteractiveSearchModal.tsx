@@ -12,8 +12,7 @@ import GameInteractiveSearchModalContent, {
   GameInteractiveSearchModalContentProps,
 } from './GameInteractiveSearchModalContent';
 
-interface GameInteractiveSearchModalProps
-  extends GameInteractiveSearchModalContentProps {
+interface GameInteractiveSearchModalProps extends GameInteractiveSearchModalContentProps {
   isOpen: boolean;
 }
 

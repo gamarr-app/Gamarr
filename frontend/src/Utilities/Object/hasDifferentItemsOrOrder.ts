@@ -1,6 +1,6 @@
 function hasDifferentItemsOrOrder<
   T extends Record<K, unknown>,
-  K extends keyof T = 'id' & keyof T
+  K extends keyof T = 'id' & keyof T,
 >(prevItems: T[], currentItems: T[], idProp: K = 'id' as K): boolean {
   if (prevItems === currentItems) {
     return false;

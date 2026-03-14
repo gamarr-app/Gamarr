@@ -34,8 +34,7 @@ export interface Pending<T> {
 }
 
 export interface PendingField<T>
-  extends Field,
-    Omit<Pending<T>, 'previousValue' | 'value'> {
+  extends Field, Omit<Pending<T>, 'previousValue' | 'value'> {
   previousValue?: Field['value'];
 }
 

@@ -97,7 +97,7 @@ function createRemotePathMappingSelector(id: number | undefined) {
         remotePathMappings;
 
       const mapping: RemotePathMapping = id
-        ? items.find((i) => i.id === id) ?? newRemotePathMapping
+        ? (items.find((i) => i.id === id) ?? newRemotePathMapping)
         : newRemotePathMapping;
       const settings = selectSettings(mapping, pendingChanges, saveError);
 

@@ -4,8 +4,9 @@ import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './FilterBuilderRowValueTag.css';
 
-interface FilterBuilderRowValueTagProps<T extends TagBase>
-  extends TagInputTagProps<T> {
+interface FilterBuilderRowValueTagProps<
+  T extends TagBase,
+> extends TagInputTagProps<T> {
   isLastTag: boolean;
 }
 
