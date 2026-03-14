@@ -207,16 +207,31 @@ namespace NzbDrone.Core.Test.MediaFiles.VirusScanning
                   .SetupGet(s => s.VirusScannerPath)
                   .Returns(string.Empty);
 
-            Mocker.GetMock<IDiskProvider>()
-                  .Setup(s => s.FileExists("/usr/bin/clamscan"))
-                  .Returns(false);
+            string expectedPath;
 
-            Mocker.GetMock<IDiskProvider>()
-                  .Setup(s => s.FileExists("/usr/local/bin/clamscan"))
-                  .Returns(true);
+            if (OperatingSystem.IsWindows())
+            {
+                expectedPath = @"C:\Program Files\ClamAV\clamscan.exe";
+
+                Mocker.GetMock<IDiskProvider>()
+                      .Setup(s => s.FileExists(expectedPath))
+                      .Returns(true);
+            }
+            else
+            {
+                expectedPath = "/usr/local/bin/clamscan";
+
+                Mocker.GetMock<IDiskProvider>()
+                      .Setup(s => s.FileExists("/usr/bin/clamscan"))
+                      .Returns(false);
+
+                Mocker.GetMock<IDiskProvider>()
+                      .Setup(s => s.FileExists(expectedPath))
+                      .Returns(true);
+            }
 
             Subject.IsAvailable.Should().BeTrue();
-            Subject.DetectedScannerPath.Should().Be("/usr/local/bin/clamscan");
+            Subject.DetectedScannerPath.Should().Be(expectedPath);
         }
 
         [Test]
