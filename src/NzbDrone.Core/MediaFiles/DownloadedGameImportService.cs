@@ -241,7 +241,7 @@ namespace NzbDrone.Core.MediaFiles
 
             _logger.Debug("Importing game folder: {0}", folderPath);
 
-            var decisions = _importDecisionMaker.GetImportDecisions(new List<string> { folderPath }, game, downloadClientItem, folderInfo, true);
+            var decisions = _importDecisionMaker.GetImportDecisions(new List<string> { folderPath }, game, downloadClientItem, folderInfo, true, false);
 
             // Only run virus scan if there are approved imports (avoid scanning on every check for rejected items)
             if (decisions.Any(d => d.Approved) && _virusScanner.IsAvailable)
@@ -370,7 +370,7 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            var decisions = _importDecisionMaker.GetImportDecisions(new List<string>() { fileInfo.FullName }, game, downloadClientItem, null, true);
+            var decisions = _importDecisionMaker.GetImportDecisions(new List<string>() { fileInfo.FullName }, game, downloadClientItem, null, true, false);
 
             return _importApprovedGame.Import(decisions, true, downloadClientItem, importMode);
         }
