@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                   .Returns(new List<ImportResult>());
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>()))
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>(), It.IsAny<bool>()))
                   .Returns(new List<ImportDecision>());
         }
 
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             var decisions = new List<ImportDecision> { new ImportDecision(localGame) };
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()))
                   .Returns(decisions);
 
             Mocker.GetMock<IImportApprovedGame>()
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             Subject.ProcessPath(_folderPath, ImportMode.Auto, null, _downloadClientItem);
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Contains(_folderPath)), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true), Times.Once());
+                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Contains(_folderPath)), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -133,7 +133,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             Subject.ProcessPath(_filePath, ImportMode.Auto, null, _downloadClientItem);
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Contains(_filePath)), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true), Times.Once());
+                  .Verify(v => v.GetImportDecisions(It.Is<List<string>>(l => l.Contains(_filePath)), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             result.First().Result.Should().Be(ImportResultType.Rejected);
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>()), Times.Never());
+                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
 
             ExceptionVerification.IgnoreWarns();
         }
@@ -235,7 +235,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             result.Should().NotBeEmpty();
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true), Times.Once());
+                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -247,7 +247,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             var localGame = new LocalGame { Path = _folderPath, Game = _game };
             var decisions = new List<ImportDecision> { new ImportDecision(localGame) };
             Mocker.GetMock<IMakeImportDecision>()
-                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()))
                   .Returns(decisions);
 
             Mocker.GetMock<IVirusScannerService>()
@@ -283,7 +283,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             var localGame = new LocalGame { Path = _folderPath, Game = _game };
             var decisions = new List<ImportDecision> { new ImportDecision(localGame) };
             Mocker.GetMock<IMakeImportDecision>()
-                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()))
                   .Returns(decisions);
 
             var quarantineFolder = @"C:\quarantine".AsOsAgnostic();
@@ -350,7 +350,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                       _game,
                       _downloadClientItem,
                       It.IsAny<ParsedGameInfo>(),
-                      true), Times.Once());
+                      true,
+                      It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -391,7 +392,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             GivenGameParsedFromFolder();
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()))
                   .Returns(new List<ImportDecision>());
 
             Mocker.GetMock<IImportApprovedGame>()
@@ -414,7 +415,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             GivenGameParsedFromFolder();
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true))
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()))
                   .Returns(new List<ImportDecision>());
 
             Mocker.GetMock<IImportApprovedGame>()
@@ -498,7 +499,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                   .Verify(v => v.GetGame(It.IsAny<string>()), Times.Never());
 
             Mocker.GetMock<IMakeImportDecision>()
-                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), _game, It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true), Times.Once());
+                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), _game, It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
