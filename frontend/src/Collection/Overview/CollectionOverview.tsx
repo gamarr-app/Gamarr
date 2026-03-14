@@ -253,7 +253,6 @@ function CollectionOverview(props: CollectionOverviewProps) {
                 spaceBetween={10}
                 slidesPerGroup={3}
                 loop={false}
-
                 className="mySwiper"
                 modules={[Navigation]}
                 // eslint-disable-next-line react/jsx-no-bind
