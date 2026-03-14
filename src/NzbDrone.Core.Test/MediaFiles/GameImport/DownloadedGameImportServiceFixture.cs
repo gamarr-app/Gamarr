@@ -401,12 +401,34 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFiles(It.IsAny<string>(), true))
-                  .Returns(new[] { @"C:\downloads\Game\setup.exe".AsOsAgnostic() });
+                  .Returns(new[] { @"C:\downloads\Game\shortcut.lnk".AsOsAgnostic() });
 
             var result = Subject.ProcessPath(_folderPath, ImportMode.Auto, _game, _downloadClientItem);
 
             result.Should().HaveCount(1);
             result.First().Result.Should().Be(ImportResultType.Rejected);
+        }
+
+        [Test]
+        public void should_not_reject_executable_files_for_games()
+        {
+            GivenGameParsedFromFolder();
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), true, It.IsAny<bool>()))
+                  .Returns(new List<ImportDecision>());
+
+            Mocker.GetMock<IImportApprovedGame>()
+                  .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()))
+                  .Returns(new List<ImportResult>());
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(It.IsAny<string>(), true))
+                  .Returns(new[] { @"C:\downloads\Game\setup.exe".AsOsAgnostic() });
+
+            var result = Subject.ProcessPath(_folderPath, ImportMode.Auto, _game, _downloadClientItem);
+
+            result.Should().BeEmpty();
         }
 
         [Test]
