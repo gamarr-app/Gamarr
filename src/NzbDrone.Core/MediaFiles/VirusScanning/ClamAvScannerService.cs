@@ -168,15 +168,19 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                 return _cachedClamScanPath;
             }
 
-            // Try common locations
-            var commonPaths = new[]
-            {
-                "/usr/bin/clamscan",
-                "/usr/local/bin/clamscan",
-                "/opt/homebrew/bin/clamscan",
-                @"C:\Program Files\ClamAV\clamscan.exe",
-                @"C:\Program Files (x86)\ClamAV\clamscan.exe"
-            };
+            // Try common locations (platform-specific to avoid unnecessary file checks)
+            var commonPaths = OperatingSystem.IsWindows()
+                ? new[]
+                {
+                    @"C:\Program Files\ClamAV\clamscan.exe",
+                    @"C:\Program Files (x86)\ClamAV\clamscan.exe"
+                }
+                : new[]
+                {
+                    "/usr/bin/clamscan",
+                    "/usr/local/bin/clamscan",
+                    "/opt/homebrew/bin/clamscan"
+                };
 
             var detectedPath = commonPaths.FirstOrDefault(p => _diskProvider.FileExists(p));
 

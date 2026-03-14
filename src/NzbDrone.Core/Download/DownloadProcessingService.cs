@@ -58,6 +58,13 @@ namespace NzbDrone.Core.Download
                     // Process completed items followed by failed, this allows failed imports to have
                     // their state changed and be processed immediately instead of the next execution.
 
+                    // Reset downloads stuck in Importing state so they can be retried
+                    if (trackedDownload.State == TrackedDownloadState.Importing)
+                    {
+                        _logger.Warn("Download '{0}' was stuck in Importing state, resetting to ImportPending", trackedDownload.DownloadItem.Title);
+                        trackedDownload.State = TrackedDownloadState.ImportPending;
+                    }
+
                     if (enableCompletedDownloadHandling && trackedDownload.State == TrackedDownloadState.ImportPending)
                     {
                         _completedDownloadService.Import(trackedDownload);
