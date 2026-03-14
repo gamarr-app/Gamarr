@@ -39,7 +39,7 @@ function attachAsyncActions<T>(promise: Promise<T>): ExtendedPromise<T> {
   const extendedPromise = promise as ExtendedPromise<T>;
 
   extendedPromise.filter = function <
-    U = T extends Array<infer E> ? E : unknown
+    U = T extends Array<infer E> ? E : unknown,
   >(predicate: (value: U) => boolean): ExtendedPromise<T> {
     const res = this.then((d) => (d as U[]).filter(predicate) as T);
     attachAsyncActions(res);
@@ -48,7 +48,7 @@ function attachAsyncActions<T>(promise: Promise<T>): ExtendedPromise<T> {
 
   extendedPromise.map = function <
     U,
-    E = T extends Array<infer El> ? El : unknown
+    E = T extends Array<infer El> ? El : unknown,
   >(callback: (value: E) => U): ExtendedPromise<U[]> {
     const res = this.then((d) => (d as E[]).map(callback));
     attachAsyncActions(res);
@@ -65,7 +65,7 @@ function attachAsyncActions<T>(promise: Promise<T>): ExtendedPromise<T> {
 
   extendedPromise.forEach = function <
     U,
-    E = T extends Array<infer El> ? El : unknown
+    E = T extends Array<infer El> ? El : unknown,
   >(action: (value: E) => U): ExtendedPromise<U[]> {
     const res = this.then((d) => Promise.all((d as E[]).map(action)));
     attachAsyncActions(res);

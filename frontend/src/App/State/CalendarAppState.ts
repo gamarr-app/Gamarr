@@ -14,8 +14,7 @@ interface CalendarOptions {
 }
 
 interface CalendarAppState
-  extends AppSectionState<CalendarItem>,
-    AppSectionFilterState<CalendarItem> {
+  extends AppSectionState<CalendarItem>, AppSectionFilterState<CalendarItem> {
   searchMissingCommandId: number | null;
   start: string | null;
   end: string | null;
