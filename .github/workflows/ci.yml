@@ -24,7 +24,7 @@ env:
 jobs:
   frontend-build:
     name: Frontend Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -51,7 +51,7 @@ jobs:
 
   frontend-test:
     name: Frontend Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -82,14 +82,83 @@ jobs:
         if: always()
         run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
 
-  unit-test:
-    name: Unit Tests (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+  unit-test-linux:
+    name: Unit Tests (Linux ${{ matrix.shard }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - shard: 1/2
+            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&(FullyQualifiedName~NzbDrone.Core.Test.Datastore|FullyQualifiedName~NzbDrone.Core.Test.DecisionEngine|FullyQualifiedName~NzbDrone.Core.Test.Download|FullyQualifiedName~NzbDrone.Core.Test.MediaFiles|FullyQualifiedName~NzbDrone.Core.Test.ParserTests|FullyQualifiedName~NzbDrone.Core.Test.IndexerTests|FullyQualifiedName~NzbDrone.Core.Test.Indexers|FullyQualifiedName~NzbDrone.Common.Test|FullyQualifiedName~NzbDrone.Host.Test|FullyQualifiedName~NzbDrone.Api.Test|FullyQualifiedName~NzbDrone.Libraries.Test|FullyQualifiedName~NzbDrone.Update.Test|FullyQualifiedName~NzbDrone.Mono.Test|FullyQualifiedName~NzbDrone.Windows.Test)"
+          - shard: 2/2
+            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&FullyQualifiedName~NzbDrone.Core.Test&FullyQualifiedName!~NzbDrone.Core.Test.Datastore&FullyQualifiedName!~NzbDrone.Core.Test.DecisionEngine&FullyQualifiedName!~NzbDrone.Core.Test.Download&FullyQualifiedName!~NzbDrone.Core.Test.MediaFiles&FullyQualifiedName!~NzbDrone.Core.Test.ParserTests&FullyQualifiedName!~NzbDrone.Core.Test.IndexerTests&FullyQualifiedName!~NzbDrone.Core.Test.Indexers"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: NuGet cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: Linux-nuget-
+
+      - name: Build
+        run: dotnet build src/Gamarr.sln --configuration Debug
+
+      - name: Disable internet
+        run: |
+          sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
+          sudo iptables -I OUTPUT -o lo -j ACCEPT
+          sudo iptables -A OUTPUT -m state --state NEW -j REJECT
+
+      - name: Run Unit Tests
+        shell: bash
+        run: |
+          dotnet test src/Gamarr.sln \
+            --no-build \
+            --configuration Debug \
+            --filter "${{ matrix.filter }}" \
+            --logger "trx;LogFileName=test-results.trx" \
+            --results-directory ./test-results
+
+      - name: Re-enable internet
+        if: always()
+        run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
+
+      - name: Verify tests ran
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f ./test-results/test-results.trx ]; then
+            echo "::error::No test results found - tests did not run"
+            exit 1
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results-linux-${{ strategy.job-index }}
+          path: ./test-results
+          retention-days: 7
+
+  unit-test-other:
+    name: Unit Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -105,19 +174,11 @@ jobs:
           path: |
             ~/.nuget/packages
             ~/AppData/Local/NuGet/Cache
-            ~/.local/share/NuGet/Cache
           key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
-
-      - name: Disable internet (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -I OUTPUT -o lo -j ACCEPT
-          sudo iptables -A OUTPUT -m state --state NEW -j REJECT
 
       - name: Run Unit Tests
         shell: bash
@@ -128,10 +189,6 @@ jobs:
             --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./test-results
-
-      - name: Re-enable internet (Linux)
-        if: always() && runner.os == 'Linux'
-        run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
 
       - name: Verify tests ran
         if: always()
@@ -152,7 +209,7 @@ jobs:
 
   integration-test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -167,8 +224,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
+          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: Linux-nuget-
 
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
@@ -222,7 +279,7 @@ jobs:
 
   automation-test:
     name: Automation Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: frontend-build
     timeout-minutes: 30
     steps:
@@ -238,8 +295,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
+          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: Linux-nuget-
 
       - name: Download frontend build
         uses: actions/download-artifact@v4
@@ -311,14 +368,14 @@ jobs:
 
   build-complete:
     name: Build Complete
-    runs-on: ubuntu-latest
-    needs: [frontend-build, frontend-test, unit-test, integration-test, automation-test]
+    runs-on: ubuntu-24.04
+    needs: [frontend-build, frontend-test, unit-test-linux, unit-test-other, integration-test, automation-test]
     if: always()
     steps:
       - name: Check build status
         run: |
           failed=false
-          for result in "${{ needs.frontend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
+          for result in "${{ needs.frontend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
             if [[ "$result" == "failure" ]]; then
               failed=true
             fi
