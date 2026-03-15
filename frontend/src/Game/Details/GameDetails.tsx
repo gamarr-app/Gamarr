@@ -675,7 +675,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       title={translate('ReleaseDates')}
                       body={
                         <GameReleaseDates
-                          igdbId={igdbId}
                           inCinemas={inCinemas}
                           digitalRelease={digitalRelease}
                           physicalRelease={physicalRelease}
