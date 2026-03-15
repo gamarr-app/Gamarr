@@ -20,6 +20,7 @@ permissions:
 env:
   DOTNET_VERSION: '8.0.x'
   NODE_VERSION: '22.x'
+  NUGET_CERT_REVOCATION_MODE: offline
 
 jobs:
   frontend-build:
@@ -57,17 +58,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check .NET SDK
-        id: check-dotnet
-        run: |
-          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup .NET
-        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -76,8 +67,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: Linux-nuget-
+          key: nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: nuget-
+          enableCrossOsArchive: true
 
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
@@ -132,17 +124,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check .NET SDK
-        id: check-dotnet
-        run: |
-          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup .NET
-        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -203,18 +185,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check .NET SDK
-        id: check-dotnet
-        shell: bash
-        run: |
-          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup .NET
-        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -223,8 +194,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
+          key: nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: nuget-
+          enableCrossOsArchive: true
 
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
@@ -265,17 +237,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check .NET SDK
-        id: check-dotnet
-        run: |
-          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup .NET
-        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -335,17 +297,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check .NET SDK
-        id: check-dotnet
-        run: |
-          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup .NET
-        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}

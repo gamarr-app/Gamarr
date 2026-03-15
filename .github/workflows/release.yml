@@ -23,6 +23,7 @@ env:
   DOTNET_VERSION: '8.0.x'
   NODE_VERSION: '22.x'
   MAJOR_VERSION: '0.0.1'
+  NUGET_CERT_REVOCATION_MODE: offline
 
 jobs:
   frontend:
@@ -94,6 +95,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: NuGet cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: nuget-
+          enableCrossOsArchive: true
+
       - name: Calculate version
         id: version
         shell: bash
@@ -111,13 +120,6 @@ jobs:
         shell: bash
         run: |
           sed -i.bak "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>${{ steps.version.outputs.version }}<\/AssemblyVersion>/g" src/Directory.Build.props
-
-      - name: NuGet cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
 
       - name: Build backend
         shell: bash
