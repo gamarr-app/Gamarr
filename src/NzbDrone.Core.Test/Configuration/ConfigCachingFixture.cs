@@ -8,6 +8,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.Configuration
 {
     [TestFixture]
+    [NonParallelizable]
     public class ConfigCachingFixture : CoreTest<ConfigService>
     {
         [SetUp]

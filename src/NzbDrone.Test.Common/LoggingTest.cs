@@ -13,33 +13,37 @@ namespace NzbDrone.Test.Common
 {
     public abstract class LoggingTest
     {
+        private static readonly object _initLock = new object();
         protected static readonly Logger TestLogger = NzbDroneLogger.GetLogger("TestLogger");
 
         protected static void InitLogging()
         {
             new StartupContext();
 
-            if (LogManager.Configuration == null || LogManager.Configuration.AllTargets.None(c => c is ExceptionVerification))
+            lock (_initLock)
             {
-                LogManager.Configuration = new LoggingConfiguration();
-
-                Enum.TryParse<TestLogOutput>(Environment.GetEnvironmentVariable("GAMARR_TESTS_LOG_OUTPUT"), out var logOutput);
-
-                RegisterSentryLogger();
-
-                switch (logOutput)
+                if (LogManager.Configuration == null || LogManager.Configuration.AllTargets.None(c => c is ExceptionVerification))
                 {
-                    case TestLogOutput.Console:
-                        RegisterConsoleLogger();
-                        break;
-                    case TestLogOutput.File:
-                        RegisterFileLogger();
-                        break;
+                    LogManager.Configuration = new LoggingConfiguration();
+
+                    Enum.TryParse<TestLogOutput>(Environment.GetEnvironmentVariable("GAMARR_TESTS_LOG_OUTPUT"), out var logOutput);
+
+                    RegisterSentryLogger();
+
+                    switch (logOutput)
+                    {
+                        case TestLogOutput.Console:
+                            RegisterConsoleLogger();
+                            break;
+                        case TestLogOutput.File:
+                            RegisterFileLogger();
+                            break;
+                    }
+
+                    RegisterExceptionVerification();
+
+                    LogManager.ReconfigExistingLoggers();
                 }
-
-                RegisterExceptionVerification();
-
-                LogManager.ReconfigExistingLoggers();
             }
         }
 

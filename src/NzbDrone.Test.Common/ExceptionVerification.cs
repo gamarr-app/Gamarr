@@ -10,29 +10,33 @@ namespace NzbDrone.Test.Common
 {
     public class ExceptionVerification : Target
     {
-        private static List<LogEventInfo> _logs = new List<LogEventInfo>();
+        private static readonly AsyncLocal<TestLogContext> _context = new AsyncLocal<TestLogContext>();
 
-        private static ManualResetEventSlim _waitEvent = new ManualResetEventSlim();
+        private static TestLogContext CurrentContext
+        {
+            get
+            {
+                _context.Value ??= new TestLogContext();
+                return _context.Value;
+            }
+        }
 
         protected override void Write(LogEventInfo logEvent)
         {
-            lock (_logs)
+            var ctx = CurrentContext;
+            lock (ctx.Logs)
             {
                 if (logEvent.Level >= LogLevel.Warn)
                 {
-                    _logs.Add(logEvent);
-                    _waitEvent.Set();
+                    ctx.Logs.Add(logEvent);
+                    ctx.WaitEvent.Set();
                 }
             }
         }
 
         public static void Reset()
         {
-            lock (_logs)
-            {
-                _logs.Clear();
-                _waitEvent.Reset();
-            }
+            _context.Value = new TestLogContext();
         }
 
         public static void AssertNoUnexpectedLogs()
@@ -61,21 +65,23 @@ namespace NzbDrone.Test.Common
 
         public static void WaitForErrors(int count, int msec)
         {
+            var ctx = CurrentContext;
+
             while (true)
             {
-                lock (_logs)
+                lock (ctx.Logs)
                 {
-                    var levelLogs = _logs.Where(l => l.Level == LogLevel.Error).ToList();
+                    var levelLogs = ctx.Logs.Where(l => l.Level == LogLevel.Error).ToList();
 
                     if (levelLogs.Count >= count)
                     {
                         break;
                     }
 
-                    _waitEvent.Reset();
+                    ctx.WaitEvent.Reset();
                 }
 
-                if (!_waitEvent.Wait(msec))
+                if (!ctx.WaitEvent.Wait(msec))
                 {
                     break;
                 }
@@ -111,13 +117,14 @@ namespace NzbDrone.Test.Common
 
         public static void MarkInconclusive(Type exception)
         {
-            lock (_logs)
+            var ctx = CurrentContext;
+            lock (ctx.Logs)
             {
-                var inconclusiveLogs = _logs.Where(l => l.Exception != null && l.Exception.GetType() == exception).ToList();
+                var inconclusiveLogs = ctx.Logs.Where(l => l.Exception != null && l.Exception.GetType() == exception).ToList();
 
                 if (inconclusiveLogs.Any())
                 {
-                    inconclusiveLogs.ForEach(c => _logs.Remove(c));
+                    inconclusiveLogs.ForEach(c => ctx.Logs.Remove(c));
                     Assert.Inconclusive(GetLogsString(inconclusiveLogs));
                 }
             }
@@ -125,13 +132,14 @@ namespace NzbDrone.Test.Common
 
         public static void MarkInconclusive(string text)
         {
-            lock (_logs)
+            var ctx = CurrentContext;
+            lock (ctx.Logs)
             {
-                var inconclusiveLogs = _logs.Where(l => l.FormattedMessage.ToLower().Contains(text.ToLower())).ToList();
+                var inconclusiveLogs = ctx.Logs.Where(l => l.FormattedMessage.ToLower().Contains(text.ToLower())).ToList();
 
                 if (inconclusiveLogs.Any())
                 {
-                    inconclusiveLogs.ForEach(c => _logs.Remove(c));
+                    inconclusiveLogs.ForEach(c => ctx.Logs.Remove(c));
                     Assert.Inconclusive(GetLogsString(inconclusiveLogs));
                 }
             }
@@ -139,9 +147,10 @@ namespace NzbDrone.Test.Common
 
         private static void Expected(LogLevel level, int count)
         {
-            lock (_logs)
+            var ctx = CurrentContext;
+            lock (ctx.Logs)
             {
-                var levelLogs = _logs.Where(l => l.Level == level).ToList();
+                var levelLogs = ctx.Logs.Where(l => l.Level == level).ToList();
 
                 if (levelLogs.Count != count)
                 {
@@ -158,17 +167,24 @@ namespace NzbDrone.Test.Common
                     Assert.Fail(message);
                 }
 
-                levelLogs.ForEach(c => _logs.Remove(c));
+                levelLogs.ForEach(c => ctx.Logs.Remove(c));
             }
         }
 
         private static void Ignore(LogLevel level)
         {
-            lock (_logs)
+            var ctx = CurrentContext;
+            lock (ctx.Logs)
             {
-                var levelLogs = _logs.Where(l => l.Level == level).ToList();
-                levelLogs.ForEach(c => _logs.Remove(c));
+                var levelLogs = ctx.Logs.Where(l => l.Level == level).ToList();
+                levelLogs.ForEach(c => ctx.Logs.Remove(c));
             }
+        }
+
+        private class TestLogContext
+        {
+            public List<LogEventInfo> Logs { get; } = new List<LogEventInfo>();
+            public ManualResetEventSlim WaitEvent { get; } = new ManualResetEventSlim();
         }
     }
 }
