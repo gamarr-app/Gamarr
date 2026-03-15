@@ -113,22 +113,12 @@ jobs:
       - name: Build backend
         shell: bash
         run: |
-          first=true
           for rid in ${{ matrix.runtimes }}; do
-            if [ "$first" = true ]; then
-              dotnet msbuild -restore src/Gamarr.sln \
-                -p:Configuration=Release \
-                -p:Platform=Posix \
-                -p:RuntimeIdentifiers=$rid \
-                -t:PublishAllRids
-              first=false
-            else
-              dotnet msbuild src/Gamarr.sln \
-                -p:Configuration=Release \
-                -p:Platform=Posix \
-                -p:RuntimeIdentifiers=$rid \
-                -t:PublishAllRids
-            fi
+            dotnet msbuild -restore src/Gamarr.sln \
+              -p:Configuration=Release \
+              -p:Platform=Posix \
+              -p:RuntimeIdentifiers=$rid \
+              -t:PublishAllRids
           done
 
       - name: Download frontend build
