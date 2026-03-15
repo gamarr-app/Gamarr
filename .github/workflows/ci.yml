@@ -367,6 +367,9 @@ jobs:
           name: frontend-build
           path: _output/UI
 
+      - name: Fix artifact permissions
+        run: chmod +x _tests/net8.0/.playwright/node/linux-x64/node
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v5

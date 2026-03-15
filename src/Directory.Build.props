@@ -7,9 +7,9 @@
 	<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <!-- Pin runtime version for reproducible builds -->
-    <RuntimeFrameworkVersion>8.0.25</RuntimeFrameworkVersion>
-    <TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
+    <!-- Pin runtime version for reproducible Release builds only -->
+    <RuntimeFrameworkVersion Condition="'$(Configuration)' == 'Release'">8.0.25</RuntimeFrameworkVersion>
+    <TargetLatestRuntimePatch Condition="'$(Configuration)' != 'Release'">true</TargetLatestRuntimePatch>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <GamarrRootDir>$(MSBuildThisFileDirectory)..\</GamarrRootDir>
@@ -67,9 +67,6 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <SelfContained>false</SelfContained>
-    <!-- Use whatever 8.0.x runtime is available instead of pinned version -->
-    <RuntimeFrameworkVersion></RuntimeFrameworkVersion>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
   </PropertyGroup>
 
   <!-- Set the Product and Version info for our own projects -->
