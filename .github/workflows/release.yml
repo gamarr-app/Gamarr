@@ -58,22 +58,31 @@ jobs:
           retention-days: 1
 
   build:
-    name: Build (${{ matrix.group }})
+    name: Build (${{ matrix.runtime }})
     needs: frontend
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - group: linux
-            os: ubuntu-latest
-            runtimes: linux-x64 linux-arm64 linux-arm linux-musl-x64 linux-musl-arm64
-          - group: windows
+          - runtime: win-x64
             os: windows-latest
-            runtimes: win-x64 win-x86
-          - group: macos
+          - runtime: win-x86
+            os: windows-latest
+          - runtime: linux-x64
+            os: ubuntu-latest
+          - runtime: linux-arm64
+            os: ubuntu-latest
+          - runtime: linux-arm
+            os: ubuntu-latest
+          - runtime: linux-musl-x64
+            os: ubuntu-latest
+          - runtime: linux-musl-arm64
+            os: ubuntu-latest
+          - runtime: osx-x64
             os: macos-latest
-            runtimes: osx-x64 osx-arm64
+          - runtime: osx-arm64
+            os: macos-latest
           # freebsd-x64 disabled: .NET 8.0.25 runtime not yet available in dotnet-bsd-crossbuild feed (latest: 8.0.12)
 
     steps:
@@ -113,13 +122,11 @@ jobs:
       - name: Build backend
         shell: bash
         run: |
-          for rid in ${{ matrix.runtimes }}; do
-            dotnet msbuild -restore src/Gamarr.sln \
-              -p:Configuration=Release \
-              -p:Platform=Posix \
-              -p:RuntimeIdentifiers=$rid \
-              -t:PublishAllRids
-          done
+          dotnet msbuild -restore src/Gamarr.sln \
+            -p:Configuration=Release \
+            -p:Platform=Posix \
+            -p:RuntimeIdentifiers=${{ matrix.runtime }} \
+            -t:PublishAllRids
 
       - name: Download frontend build
         uses: actions/download-artifact@v8
@@ -130,35 +137,40 @@ jobs:
       - name: Package
         shell: bash
         run: |
+          runtime="${{ matrix.runtime }}"
           version="${{ steps.version.outputs.version }}"
-          for runtime in ${{ matrix.runtimes }}; do
-            mkdir -p _artifacts/$runtime
-            cp -r _output/net8.0/$runtime/publish/* _artifacts/$runtime/
-            cp -r _output/UI _artifacts/$runtime/
-            cp LICENSE _artifacts/$runtime/
 
-            # Remove platform-specific files
-            if [[ "$runtime" == win-* ]]; then
-              rm -f _artifacts/$runtime/Gamarr.Mono.* 2>/dev/null || true
-            else
-              rm -f _artifacts/$runtime/Gamarr.Windows.* 2>/dev/null || true
-            fi
+          mkdir -p _artifacts/$runtime
+          cp -r _output/net8.0/$runtime/publish/* _artifacts/$runtime/
+          cp -r _output/UI _artifacts/$runtime/
+          cp LICENSE _artifacts/$runtime/
 
-            # Create archive
-            cd _artifacts
-            if [[ "$runtime" == win-* ]]; then
-              7z a -tzip "Gamarr.${version}.${runtime}.zip" "$runtime"
-            else
-              tar -czvf "Gamarr.${version}.${runtime}.tar.gz" "$runtime"
-            fi
-            cd ..
-          done
+          # Remove platform-specific files
+          if [[ "$runtime" == win-* ]]; then
+            rm -f _artifacts/$runtime/Gamarr.Mono.* 2>/dev/null || true
+          else
+            rm -f _artifacts/$runtime/Gamarr.Windows.* 2>/dev/null || true
+          fi
 
-      - name: Upload artifacts
+      - name: Create archive (Unix)
+        if: ${{ !startsWith(matrix.runtime, 'win-') }}
+        shell: bash
+        run: |
+          cd _artifacts
+          tar -czvf Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.tar.gz ${{ matrix.runtime }}
+
+      - name: Create archive (Windows)
+        if: ${{ startsWith(matrix.runtime, 'win-') }}
+        shell: bash
+        run: |
+          cd _artifacts
+          7z a -tzip Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.zip ${{ matrix.runtime }}
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Gamarr-${{ matrix.group }}
-          path: _artifacts/Gamarr.${{ steps.version.outputs.version }}.*
+          name: Gamarr-${{ matrix.runtime }}
+          path: _artifacts/Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.*
           retention-days: 30
 
   release:
