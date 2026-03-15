@@ -4,14 +4,28 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Test.Common;
 
 namespace NzbDrone.Common.Test.DiskTests
 {
+    public class TestableDiskTransferService : DiskTransferService
+    {
+        protected override void WaitForIO()
+        {
+            // Skip IO wait delay in tests
+        }
+
+        public TestableDiskTransferService(IDiskProvider diskProvider, Logger logger)
+            : base(diskProvider, logger)
+        {
+        }
+    }
+
     [TestFixture]
-    public class DiskTransferServiceFixture : TestBase<DiskTransferService>
+    public class DiskTransferServiceFixture : TestBase<TestableDiskTransferService>
     {
         private readonly string _sourcePath = @"C:\source\my.video.mkv".AsOsAgnostic();
         private readonly string _targetPath = @"C:\target\my.video.mkv".AsOsAgnostic();
