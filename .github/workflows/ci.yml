@@ -152,6 +152,9 @@ jobs:
         with:
           name: backend-build
 
+      - name: Fix artifact permissions
+        run: find _tests/net8.0 -maxdepth 1 -type f -exec file {} + | grep -i 'ELF\|executable' | cut -d: -f1 | xargs -r chmod +x
+
       - name: Run Unit Tests
         shell: bash
         run: |
@@ -281,6 +284,9 @@ jobs:
         with:
           name: backend-build
 
+      - name: Fix artifact permissions
+        run: find _tests/net8.0 _output -maxdepth 1 -type f -exec file {} + | grep -i 'ELF\|executable' | cut -d: -f1 | xargs -r chmod +x
+
       - name: Run Integration Tests
         shell: bash
         run: |
@@ -354,7 +360,9 @@ jobs:
           path: _output/UI
 
       - name: Fix artifact permissions
-        run: chmod +x _tests/net8.0/.playwright/node/linux-x64/node
+        run: |
+          find _tests/net8.0 _output -maxdepth 1 -type f -exec file {} + | grep -i 'ELF\|executable' | cut -d: -f1 | xargs -r chmod +x
+          chmod +x _tests/net8.0/.playwright/node/linux-x64/node
 
       - name: Cache Playwright browsers
         id: playwright-cache
