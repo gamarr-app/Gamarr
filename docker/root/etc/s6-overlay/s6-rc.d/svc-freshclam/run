@@ -2,4 +2,4 @@
 # shellcheck shell=bash
 
 exec \
-    s6-setuidgid abc freshclam --daemon --checks=4
+    s6-setuidgid abc freshclam --daemon --foreground --checks=4
