@@ -140,7 +140,7 @@ function IndexerOptions({
               type={inputTypes.CHECK}
               name="preferIndexerFlags"
               helpText={translate('PreferIndexerFlagsHelpText')}
-              helpLink="https://wiki.servarr.com/gamarr/settings#indexer-flags"
+              helpLink="https://github.com/gamarr-app/Gamarr/wiki/settings#indexer-flags"
               onChange={handleInputChange}
               {...settings.preferIndexerFlags}
             />
@@ -170,7 +170,7 @@ function IndexerOptions({
               unit="minutes"
               helpText={translate('RssSyncIntervalHelpText')}
               helpTextWarning={translate('RssSyncIntervalHelpTextWarning')}
-              helpLink="https://wiki.servarr.com/gamarr/faq#how-does-gamarr-work"
+              helpLink="https://github.com/gamarr-app/Gamarr/wiki/faq#how-does-gamarr-work"
               onChange={handleInputChange}
               {...settings.rssSyncInterval}
             />

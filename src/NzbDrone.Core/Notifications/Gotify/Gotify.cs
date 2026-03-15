@@ -104,8 +104,8 @@ namespace NzbDrone.Core.Notifications.Gotify
                     isMarkdown = true;
 
                     sb.AppendLine("");
-                    sb.AppendLine("[Gamarr.video](https://gamarr.video)");
-                    payload.SetClickUrl("https://gamarr.video");
+                    sb.AppendLine("[Gamarr](https://github.com/gamarr-app/Gamarr)");
+                    payload.SetClickUrl("https://github.com/gamarr-app/Gamarr");
                 }
 
                 payload.Message = sb.ToString();

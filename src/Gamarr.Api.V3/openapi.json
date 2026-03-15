@@ -5,7 +5,7 @@
     "description": "Gamarr API docs",
     "license": {
       "name": "GPL-3.0",
-      "url": "https://github.com/Gamarr/Gamarr/blob/develop/LICENSE"
+      "url": "https://github.com/gamarr-app/Gamarr/blob/develop/LICENSE"
     },
     "version": "3.0.0"
   },

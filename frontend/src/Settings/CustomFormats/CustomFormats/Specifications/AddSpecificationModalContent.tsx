@@ -83,7 +83,7 @@ function AddSpecificationModalContent({
               <div>{translate('SupportedCustomConditions')}</div>
               <div>
                 {translate('VisitTheWikiForMoreDetails')}
-                <Link to="https://wiki.servarr.com/gamarr/settings#custom-formats-2">
+                <Link to="https://github.com/gamarr-app/Gamarr/wiki/settings#custom-formats-2">
                   {translate('Wiki')}
                 </Link>
               </div>

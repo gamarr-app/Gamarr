@@ -111,7 +111,7 @@ namespace NzbDrone.Host
                     License = new OpenApiLicense
                     {
                         Name = "GPL-3.0",
-                        Url = new Uri("https://github.com/Gamarr/Gamarr/blob/develop/LICENSE")
+                        Url = new Uri("https://github.com/gamarr-app/Gamarr/blob/develop/LICENSE")
                     }
                 });
 

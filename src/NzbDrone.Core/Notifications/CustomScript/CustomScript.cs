@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override string Name => _localizationService.GetLocalizedString("NotificationsCustomScriptSettingsName");
 
-        public override string Link => "https://wiki.servarr.com/gamarr/settings#connections";
+        public override string Link => "https://github.com/gamarr-app/Gamarr/wiki/settings#connections";
 
         public override ProviderMessage Message => new ProviderMessage(_localizationService.GetLocalizedString("NotificationsCustomScriptSettingsProviderMessage", new Dictionary<string, object> { { "eventTypeTest", "Test" } }), ProviderMessageType.Warning);
 

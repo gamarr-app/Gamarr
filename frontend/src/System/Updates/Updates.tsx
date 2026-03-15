@@ -284,8 +284,8 @@ function Updates() {
               <div>
                 <InlineMarkdown
                   data={translate('InstallMajorVersionUpdateMessageLink', {
-                    domain: 'gamarr.video',
-                    url: 'https://gamarr.video/#downloads',
+                    domain: 'github.com/gamarr-app/Gamarr',
+                    url: 'https://github.com/gamarr-app/Gamarr/releases',
                   })}
                 />
               </div>

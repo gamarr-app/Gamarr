@@ -32,7 +32,7 @@ function GameReleaseDates({
 
         <InlineMarkdown
           data={translate('NoGameReleaseDatesAvailable', {
-            url: `https://www.thegamedb.org/game/${igdbId}`,
+            url: `https://www.igdb.com/games`,
           })}
         />
       </div>

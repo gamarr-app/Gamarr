@@ -17,7 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
-  "repository": "https://github.com/Gamarr/Gamarr",
+  "repository": "https://github.com/gamarr-app/Gamarr",
   "author": "Team Gamarr",
   "license": "GPL-3.0",
   "readmeFilename": "readme.md",

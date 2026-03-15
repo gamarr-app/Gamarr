@@ -104,7 +104,7 @@ export default function AuthenticationRequiredModalContent() {
                     ? translate('AuthenticationMethodHelpTextWarning')
                     : undefined
                 }
-                helpLink="https://wiki.servarr.com/gamarr/faq#forced-authentication"
+                helpLink="https://github.com/gamarr-app/Gamarr/wiki/faq#forced-authentication"
                 onChange={onInputChange}
                 {...authenticationMethod}
               />
