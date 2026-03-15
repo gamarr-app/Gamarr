@@ -39,7 +39,7 @@ namespace Gamarr.Api.V3
                 Fields = SchemaBuilder.ToSchema(definition.Settings),
 
                 // gamarr/supported is an disambiguation page. the # should be a header on the page with appropriate details/link
-                InfoLink = string.Format("https://wiki.servarr.com/gamarr/supported#{0}",
+                InfoLink = string.Format("https://github.com/gamarr-app/Gamarr/wiki/supported#{0}",
                     definition.Implementation.ToLower())
             };
         }

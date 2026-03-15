@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Notifications.Emby
             {
                 Name = title,
                 Description = message,
-                ImageUrl = "https://raw.github.com/Gamarr/Gamarr/develop/Logo/64.png"
+                ImageUrl = "https://raw.github.com/gamarr-app/Gamarr/develop/Logo/64.png"
             }.ToJson());
 
             try

@@ -135,7 +135,7 @@ function AddNewGame(props: AddNewGameProps) {
             <Alert kind={kinds.DANGER}>{getErrorMessage(error)}</Alert>
 
             <div>
-              <Link to="https://wiki.servarr.com/gamarr/troubleshooting#invalid-response-received-from-igdb">
+              <Link to="https://github.com/gamarr-app/Gamarr/wiki/troubleshooting#invalid-response-received-from-igdb">
                 {translate('WhySearchesCouldBeFailing')}
               </Link>
             </div>
@@ -162,7 +162,7 @@ function AddNewGame(props: AddNewGameProps) {
             </div>
             <div>{translate('YouCanAlsoSearch')}</div>
             <div>
-              <Link to="https://wiki.servarr.com/gamarr/faq#why-can-i-not-add-a-new-game-to-gamarr">
+              <Link to="https://github.com/gamarr-app/Gamarr/wiki/faq#why-can-i-not-add-a-new-game-to-gamarr">
                 {translate('CantFindGame')}
               </Link>
             </div>

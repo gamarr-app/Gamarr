@@ -58,7 +58,7 @@ function UpdateSettings(props: UpdateSettingsProps) {
               ? translate('BranchUpdateMechanism')
               : translate('BranchUpdate')
           }
-          helpLink="https://wiki.servarr.com/gamarr/settings#updates"
+          helpLink="https://github.com/gamarr-app/Gamarr/wiki/settings#updates"
           {...branch}
           values={branchValues}
           readOnly={usingExternalUpdateMechanism}
@@ -96,7 +96,7 @@ function UpdateSettings(props: UpdateSettingsProps) {
             name="updateMechanism"
             values={updateOptions}
             helpText={translate('UpdateMechanismHelpText')}
-            helpLink="https://wiki.servarr.com/gamarr/settings#updates"
+            helpLink="https://github.com/gamarr-app/Gamarr/wiki/settings#updates"
             onChange={onInputChange}
             {...updateMechanism}
           />

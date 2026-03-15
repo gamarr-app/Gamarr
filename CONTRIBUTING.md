@@ -5,7 +5,7 @@ We're always looking for people to help make Gamarr even better, there are a num
 
 # Documentation
 
-Setup guides, [FAQ](/gamarr/faq), the more information we have on the [wiki](https://wiki.servarr.com/gamarr) the better.
+Setup guides, [FAQ](/gamarr/faq), the more information we have on the [wiki](https://github.com/gamarr-app/Gamarr/wiki) the better.
 
 # Development
 
@@ -85,7 +85,7 @@ dotnet msbuild -restore src/Gamarr.sln -p:Configuration=Debug -p:Platform=Posix 
 
 ## Contributing Code
 
-- If you're adding a new, already requested feature, please comment on [GitHub Issues](https://github.com/Gamarr/Gamarr/issues) so work is not duplicated (If you want to add something not already on there, please talk to us first)
+- If you're adding a new, already requested feature, please comment on [GitHub Issues](https://github.com/gamarr-app/Gamarr/issues) so work is not duplicated (If you want to add something not already on there, please talk to us first)
 - Rebase from Gamarr's develop branch, do not merge
 - Make meaningful commits, or squash them
 - Feel free to make a pull request before work is complete, this will let us see where its at and make comments/suggest improvements

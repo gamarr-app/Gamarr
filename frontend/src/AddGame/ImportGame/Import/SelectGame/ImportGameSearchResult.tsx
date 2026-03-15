@@ -34,7 +34,7 @@ function ImportGameSearchResult(props: ImportGameSearchResultProps) {
 
       <Link
         className={styles.igdbLink}
-        to={`https://www.thegamedb.org/game/${igdbId}`}
+        to={`https://www.igdb.com/search?type=1&q=${encodeURIComponent(title)}`}
       >
         <Icon
           className={styles.igdbLinkIcon}

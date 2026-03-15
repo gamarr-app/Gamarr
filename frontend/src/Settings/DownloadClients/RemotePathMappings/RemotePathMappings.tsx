@@ -71,7 +71,7 @@ function RemotePathMappings() {
           <InlineMarkdown
             data={translate('RemotePathMappingsInfo', {
               wikiLink:
-                'https://wiki.servarr.com/gamarr/settings#remote-path-mappings',
+                'https://github.com/gamarr-app/Gamarr/wiki/settings#remote-path-mappings',
             })}
           />
         </Alert>
