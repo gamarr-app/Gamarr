@@ -125,9 +125,9 @@ jobs:
       matrix:
         include:
           - shard: core
-            projects: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
+            assemblies: _tests/net8.0/Gamarr.Core.Test.dll
           - shard: other
-            projects: src/NzbDrone.Common.Test/Gamarr.Common.Test.csproj src/NzbDrone.Host.Test/Gamarr.Host.Test.csproj src/NzbDrone.Api.Test/Gamarr.Api.Test.csproj src/NzbDrone.Libraries.Test/Gamarr.Libraries.Test.csproj src/NzbDrone.Update.Test/Gamarr.Update.Test.csproj src/NzbDrone.Mono.Test/Gamarr.Mono.Test.csproj src/NzbDrone.Windows.Test/Gamarr.Windows.Test.csproj
+            assemblies: _tests/net8.0/Gamarr.Common.Test.dll _tests/net8.0/Gamarr.Host.Test.dll _tests/net8.0/Gamarr.Api.Test.dll _tests/net8.0/Gamarr.Libraries.Test.dll _tests/net8.0/Gamarr.Update.Test.dll _tests/net8.0/Gamarr.Mono.Test.dll _tests/net8.0/Gamarr.Windows.Test.dll
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -162,13 +162,11 @@ jobs:
           exec runuser -u runner -- "$@"
           SCRIPT
           chmod +x /tmp/run-tests.sh
-          for project in ${{ matrix.projects }}; do
+          for assembly in ${{ matrix.assemblies }}; do
             sudo unshare --net -- /tmp/run-tests.sh -- \
-              dotnet test "$project" \
-                --no-build \
-                --configuration Debug \
+              dotnet test "$assembly" \
                 --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
-                --logger "trx;LogFileName=test-results-$(basename $project .csproj).trx" \
+                --logger "trx;LogFileName=test-results-$(basename $assembly .dll).trx" \
                 --results-directory ./test-results
           done
 
@@ -289,9 +287,7 @@ jobs:
           sudo unshare --net -- bash -c '
             ip link set lo up
             runuser -u runner -- \
-              dotnet test src/Gamarr.sln \
-                --no-build \
-                --configuration Debug \
+              dotnet test _tests/net8.0/Gamarr.Integration.Test.dll \
                 --filter "Category=IntegrationTest" \
                 --logger "trx;LogFileName=integration-test-results.trx" \
                 --results-directory ./test-results
@@ -300,9 +296,7 @@ jobs:
       - name: Run External Integration Tests
         shell: bash
         run: |
-          dotnet test src/Gamarr.sln \
-            --no-build \
-            --configuration Debug \
+          dotnet test _tests/net8.0/Gamarr.Integration.Test.dll \
             --filter "Category=ExternalIntegrationTest" \
             --logger "trx;LogFileName=external-integration-test-results.trx" \
             --results-directory ./test-results
@@ -382,9 +376,7 @@ jobs:
           sudo unshare --net -- bash -c '
             ip link set lo up
             runuser -u runner -- \
-              dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
-                --no-build \
-                --configuration Debug \
+              dotnet test _tests/net8.0/Gamarr.Automation.Test.dll \
                 --filter "Category=AutomationTest&Category!=ExternalAutomationTest" \
                 --logger "trx;LogFileName=automation-test-results.trx" \
                 --results-directory ./test-results
@@ -392,9 +384,7 @@ jobs:
 
       - name: Run External Automation Tests
         run: |
-          dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
-            --no-build \
-            --configuration Debug \
+          dotnet test _tests/net8.0/Gamarr.Automation.Test.dll \
             --filter "Category=ExternalAutomationTest" \
             --logger "trx;LogFileName=external-automation-test-results.trx" \
             --results-directory ./test-results
