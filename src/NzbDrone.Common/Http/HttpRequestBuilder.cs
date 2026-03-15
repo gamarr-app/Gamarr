@@ -251,6 +251,13 @@ namespace NzbDrone.Common.Http
             return this;
         }
 
+        public virtual HttpRequestBuilder AllowRedirect(bool allowRedirect = true)
+        {
+            AllowAutoRedirect = allowRedirect;
+
+            return this;
+        }
+
         public virtual HttpRequestBuilder KeepAlive(bool keepAlive = true)
         {
             ConnectionKeepAlive = keepAlive;

@@ -82,7 +82,9 @@ function createMiddleware(): Middleware {
 
       return next(action);
     } catch (err) {
-      console.error(`[sentry] Reporting error to Sentry: ${err}`);
+      if (typeof console !== 'undefined' && typeof console.error === 'function') {
+        console.error(`[sentry] Reporting error to Sentry: ${err}`);
+      }
 
       // Send the report including breadcrumbs.
       sentry.captureException(err, {
