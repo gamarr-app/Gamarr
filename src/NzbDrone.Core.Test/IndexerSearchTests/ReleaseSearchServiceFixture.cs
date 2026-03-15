@@ -235,6 +235,8 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             var result = await Subject.GameSearch(_game, true, false);
 
             result.Should().BeEmpty();
+
+            ExceptionVerification.ExpectedErrors(1);
         }
 
         [Test]
