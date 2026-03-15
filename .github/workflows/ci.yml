@@ -177,7 +177,6 @@ jobs:
     name: Unit Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
-    continue-on-error: ${{ matrix.os == 'windows-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -381,7 +380,7 @@ jobs:
       - name: Check build status
         run: |
           failed=false
-          for result in "${{ needs.frontend-build.result }}" "${{ needs.backend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
+          for result in "${{ needs.frontend-build.result }}" "${{ needs.backend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.unit-test-other.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
             if [[ "$result" == "failure" ]]; then
               failed=true
             fi
