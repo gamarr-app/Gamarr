@@ -113,12 +113,23 @@ jobs:
       - name: Build backend
         shell: bash
         run: |
-          RIDS=$(echo "${{ matrix.runtimes }}" | tr ' ' ';')
-          dotnet msbuild -restore src/Gamarr.sln \
-            -p:Configuration=Release \
-            -p:Platform=Posix \
-            "-p:RuntimeIdentifiers=$RIDS" \
-            -t:PublishAllRids
+          first=true
+          for rid in ${{ matrix.runtimes }}; do
+            if [ "$first" = true ]; then
+              dotnet msbuild -restore src/Gamarr.sln \
+                -p:Configuration=Release \
+                -p:Platform=Posix \
+                -p:RuntimeIdentifiers=$rid \
+                -t:PublishAllRids
+              first=false
+            else
+              dotnet msbuild src/Gamarr.sln \
+                -p:Configuration=Release \
+                -p:Platform=Posix \
+                -p:RuntimeIdentifiers=$rid \
+                -t:PublishAllRids
+            fi
+          done
 
       - name: Download frontend build
         uses: actions/download-artifact@v8
