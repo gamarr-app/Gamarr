@@ -49,39 +49,6 @@ jobs:
           path: _output/UI
           retention-days: 1
 
-  backend-build:
-    name: Backend Build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: NuGet cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: Linux-nuget-
-
-      - name: Build
-        run: dotnet build src/Gamarr.sln --configuration Debug
-
-      - name: Upload backend build
-        uses: actions/upload-artifact@v7
-        with:
-          name: backend-build
-          path: |
-            _output
-            _tests
-          include-hidden-files: true
-          retention-days: 1
-
   frontend-test:
     name: Frontend Test
     runs-on: ubuntu-24.04
@@ -297,7 +264,7 @@ jobs:
   automation-test:
     name: Automation Tests
     runs-on: ubuntu-24.04
-    needs: [frontend-build, backend-build]
+    needs: frontend-build
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -308,16 +275,21 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build
-        uses: actions/download-artifact@v8
+      - name: NuGet cache
+        uses: actions/cache@v5
         with:
-          name: backend-build
+          path: ~/.nuget/packages
+          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: Linux-nuget-
 
       - name: Download frontend build
         uses: actions/download-artifact@v8
         with:
           name: frontend-build
           path: _output/UI
+
+      - name: Build backend
+        run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Cache Playwright browsers
         id: playwright-cache
@@ -375,13 +347,13 @@ jobs:
   build-complete:
     name: Build Complete
     runs-on: ubuntu-24.04
-    needs: [frontend-build, backend-build, frontend-test, unit-test-linux, unit-test-other, integration-test, automation-test]
+    needs: [frontend-build, frontend-test, unit-test-linux, unit-test-other, integration-test, automation-test]
     if: always()
     steps:
       - name: Check build status
         run: |
           failed=false
-          for result in "${{ needs.frontend-build.result }}" "${{ needs.backend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
+          for result in "${{ needs.frontend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
             if [[ "$result" == "failure" ]]; then
               failed=true
             fi
