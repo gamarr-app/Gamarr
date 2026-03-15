@@ -117,7 +117,7 @@ jobs:
           dotnet msbuild -restore src/Gamarr.sln \
             -p:Configuration=Release \
             -p:Platform=Posix \
-            -p:RuntimeIdentifiers="$RIDS" \
+            "-p:RuntimeIdentifiers=$RIDS" \
             -t:PublishAllRids
 
       - name: Download frontend build
