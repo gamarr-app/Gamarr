@@ -22,6 +22,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.DecisionEngineTests
 {
     [TestFixture]
+    [NonParallelizable]
 
     // TODO: Update for custom qualities!
     public class PrioritizeDownloadDecisionFixture : CoreTest<DownloadDecisionPriorizationService>
