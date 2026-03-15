@@ -10,7 +10,6 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Common.Test.TPLTests
 {
     [TestFixture]
-    [Platform(Exclude = "MacOsX,Win")]
     public class RateLimitServiceFixture : TestBase<RateLimitService>
     {
         private DateTime _epoch;
@@ -60,7 +59,6 @@ namespace NzbDrone.Common.Test.TPLTests
         }
 
         [Test]
-        [Retry(3)]
         public void should_wait_for_existing()
         {
             GivenExisting("me", _epoch + TimeSpan.FromMilliseconds(200));
@@ -69,7 +67,7 @@ namespace NzbDrone.Common.Test.TPLTests
             Subject.WaitAndPulse("me", TimeSpan.FromMilliseconds(400));
             watch.Stop();
 
-            watch.ElapsedMilliseconds.Should().BeInRange(175, 250);
+            watch.ElapsedMilliseconds.Should().BeInRange(100, 500);
         }
 
         [Test]

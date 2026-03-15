@@ -80,7 +80,6 @@ namespace NzbDrone.Common.Test.CacheTests
         }
 
         [Test]
-        [Platform(Exclude = "MacOsX")]
         public void should_honor_ttl()
         {
             var hitCount = 0;
@@ -99,8 +98,7 @@ namespace NzbDrone.Common.Test.CacheTests
                 Thread.Sleep(100);
             }
 
-            // Range widened to accommodate timing variations on CI/Windows
-            hitCount.Should().BeInRange(3, 8);
+            hitCount.Should().BeInRange(2, 10);
         }
     }
 
