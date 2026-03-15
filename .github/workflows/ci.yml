@@ -79,6 +79,7 @@ jobs:
           path: |
             _output
             _tests
+          include-hidden-files: true
           retention-days: 1
 
   frontend-test:
