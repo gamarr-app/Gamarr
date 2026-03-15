@@ -472,7 +472,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const {
     id,
     steamAppId,
-    igdbId,
     igdbSlug,
     title,
     originalTitle,
