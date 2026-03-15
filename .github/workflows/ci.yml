@@ -90,10 +90,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - shard: 1/2
-            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&(FullyQualifiedName~NzbDrone.Core.Test.Datastore|FullyQualifiedName~NzbDrone.Core.Test.DecisionEngine|FullyQualifiedName~NzbDrone.Core.Test.Download|FullyQualifiedName~NzbDrone.Core.Test.MediaFiles|FullyQualifiedName~NzbDrone.Core.Test.ParserTests|FullyQualifiedName~NzbDrone.Core.Test.IndexerTests|FullyQualifiedName~NzbDrone.Core.Test.Indexers|FullyQualifiedName~NzbDrone.Common.Test|FullyQualifiedName~NzbDrone.Host.Test|FullyQualifiedName~NzbDrone.Api.Test|FullyQualifiedName~NzbDrone.Libraries.Test|FullyQualifiedName~NzbDrone.Update.Test|FullyQualifiedName~NzbDrone.Mono.Test|FullyQualifiedName~NzbDrone.Windows.Test)"
-          - shard: 2/2
-            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&FullyQualifiedName~NzbDrone.Core.Test&FullyQualifiedName!~NzbDrone.Core.Test.Datastore&FullyQualifiedName!~NzbDrone.Core.Test.DecisionEngine&FullyQualifiedName!~NzbDrone.Core.Test.Download&FullyQualifiedName!~NzbDrone.Core.Test.MediaFiles&FullyQualifiedName!~NzbDrone.Core.Test.ParserTests&FullyQualifiedName!~NzbDrone.Core.Test.IndexerTests&FullyQualifiedName!~NzbDrone.Core.Test.Indexers"
+          - shard: core
+            projects: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
+          - shard: other
+            projects: src/NzbDrone.Common.Test/Gamarr.Common.Test.csproj src/NzbDrone.Host.Test/Gamarr.Host.Test.csproj src/NzbDrone.Api.Test/Gamarr.Api.Test.csproj src/NzbDrone.Libraries.Test/Gamarr.Libraries.Test.csproj src/NzbDrone.Update.Test/Gamarr.Update.Test.csproj src/NzbDrone.Mono.Test/Gamarr.Mono.Test.csproj src/NzbDrone.Windows.Test/Gamarr.Windows.Test.csproj
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -122,12 +122,14 @@ jobs:
       - name: Run Unit Tests
         shell: bash
         run: |
-          dotnet test src/Gamarr.sln \
-            --no-build \
-            --configuration Debug \
-            --filter "${{ matrix.filter }}" \
-            --logger "trx;LogFileName=test-results.trx" \
-            --results-directory ./test-results
+          for project in ${{ matrix.projects }}; do
+            dotnet test "$project" \
+              --no-build \
+              --configuration Debug \
+              --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
+              --logger "trx;LogFileName=test-results-$(basename $project .csproj).trx" \
+              --results-directory ./test-results
+          done
 
       - name: Re-enable internet
         if: always()
@@ -137,7 +139,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [ ! -f ./test-results/test-results.trx ]; then
+          if [ -z "$(ls ./test-results/*.trx 2>/dev/null)" ]; then
             echo "::error::No test results found - tests did not run"
             exit 1
           fi
@@ -146,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: unit-test-results-linux-${{ strategy.job-index }}
+          name: unit-test-results-linux-${{ matrix.shard }}
           path: ./test-results
           retention-days: 7
 
