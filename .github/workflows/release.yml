@@ -25,13 +25,41 @@ env:
   MAJOR_VERSION: '0.0.1'
 
 jobs:
-  build:
-    name: Build (${{ matrix.runtime }})
+  frontend:
+    name: Build Frontend
     # Only run if CI passed (workflow_run), or if triggered by tag/manual
     if: >
       github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install frontend dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build frontend
+        run: yarn build --env production
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-frontend
+          path: _output/UI
+          retention-days: 1
+
+  build:
+    name: Build (${{ matrix.runtime }})
+    needs: frontend
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -69,12 +97,6 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
       - name: Calculate version
         id: version
         shell: bash
@@ -93,12 +115,6 @@ jobs:
         run: |
           sed -i.bak "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>${{ steps.version.outputs.version }}<\/AssemblyVersion>/g" src/Directory.Build.props
 
-      - name: Install frontend dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build frontend
-        run: yarn build --env production
-
       - name: Build backend
         shell: bash
         run: |
@@ -107,6 +123,12 @@ jobs:
             -p:Platform=Posix \
             -p:RuntimeIdentifiers=${{ matrix.runtime }} \
             -t:PublishAllRids
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: release-frontend
+          path: _output/UI
 
       - name: Package
         shell: bash
