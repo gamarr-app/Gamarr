@@ -22,31 +22,6 @@ env:
   NODE_VERSION: '22.x'
 
 jobs:
-  backend-build:
-    name: Backend Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Build
-        run: dotnet build src/Gamarr.sln --configuration Debug
-
-      - name: Upload build output
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: |
-            _output
-            _tests
-          retention-days: 1
-
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
@@ -113,7 +88,6 @@ jobs:
   unit-test:
     name: Unit Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    needs: backend-build
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -128,15 +102,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/download-artifact@v4
+      - name: NuGet cache
+        uses: actions/cache@v4
         with:
-          name: backend-build
-          path: .
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
 
       - name: Build
-        if: matrix.os != 'ubuntu-latest'
         run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Disable internet (Linux)
@@ -180,7 +153,6 @@ jobs:
   integration-test:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: backend-build
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -191,11 +163,15 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build
-        uses: actions/download-artifact@v4
+      - name: NuGet cache
+        uses: actions/cache@v4
         with:
-          name: backend-build
-          path: .
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Disable internet
         run: |
@@ -237,7 +213,6 @@ jobs:
   external-integration-test:
     name: External Integration Tests
     runs-on: ubuntu-latest
-    needs: backend-build
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -248,11 +223,15 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build
-        uses: actions/download-artifact@v4
+      - name: NuGet cache
+        uses: actions/cache@v4
         with:
-          name: backend-build
-          path: .
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Run External Integration Tests
         shell: bash
@@ -275,7 +254,7 @@ jobs:
   automation-test:
     name: Automation Tests
     runs-on: ubuntu-latest
-    needs: [backend-build, frontend-build]
+    needs: frontend-build
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -286,17 +265,21 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build
-        uses: actions/download-artifact@v4
+      - name: NuGet cache
+        uses: actions/cache@v4
         with:
-          name: backend-build
-          path: .
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
 
       - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: _output/UI
+
+      - name: Build backend
+        run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Install Playwright browsers
         run: pwsh _tests/net8.0/playwright.ps1 install --with-deps
@@ -339,7 +322,7 @@ jobs:
   external-automation-test:
     name: External Automation Tests
     runs-on: ubuntu-latest
-    needs: [backend-build, frontend-build]
+    needs: frontend-build
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -350,17 +333,21 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build
-        uses: actions/download-artifact@v4
+      - name: NuGet cache
+        uses: actions/cache@v4
         with:
-          name: backend-build
-          path: .
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
 
       - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: _output/UI
+
+      - name: Build backend
+        run: dotnet build src/Gamarr.sln --configuration Debug
 
       - name: Install Playwright browsers
         run: pwsh _tests/net8.0/playwright.ps1 install --with-deps
@@ -402,6 +389,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: NuGet cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
 
       - name: Build Release
         run: dotnet build src/Gamarr.sln --configuration Release
