@@ -54,5 +54,23 @@ namespace NzbDrone.App.Test
 
             options.Cookie.Name.Should().Be("GamarrAuth");
         }
+
+        [Test]
+        public void data_protection_should_round_trip()
+        {
+            var services = new ServiceCollection();
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.GetTempPath()));
+
+            using var provider = services.BuildServiceProvider();
+            var protector = provider.GetRequiredService<IDataProtectionProvider>()
+                .CreateProtector("test");
+
+            var plaintext = "cookie-payload";
+            var encrypted = protector.Protect(plaintext);
+            var decrypted = protector.Unprotect(encrypted);
+
+            decrypted.Should().Be(plaintext);
+        }
     }
 }
