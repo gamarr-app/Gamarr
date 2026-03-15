@@ -36,8 +36,8 @@ namespace Gamarr.Http.Middleware
                     return;
                 }
 
-                context.Response.Redirect(redirectUrl);
                 context.Response.StatusCode = 307;
+                context.Response.Headers.Location = redirectUrl;
 
                 return;
             }
