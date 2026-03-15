@@ -91,6 +91,9 @@ namespace NzbDrone.Common.Test
             process.Kill();
             process.WaitForExit();
 
+            // Process table cleanup can lag behind WaitForExit on some platforms
+            Thread.Sleep(200);
+
             Subject.Exists(DummyApp.DUMMY_PROCCESS_NAME).Should().BeFalse();
         }
 
