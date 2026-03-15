@@ -151,9 +151,6 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     needs: build
-    if: >
-      always() &&
-      needs.build.result != 'cancelled'
     permissions:
       contents: write
 
@@ -216,7 +213,6 @@ jobs:
     name: Build Docker Images
     runs-on: ubuntu-latest
     needs: release
-    if: always() && needs.release.result == 'success'
     permissions:
       contents: read
       packages: write
