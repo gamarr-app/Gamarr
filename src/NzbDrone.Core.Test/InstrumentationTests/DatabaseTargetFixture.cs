@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using FluentAssertions;
 using NLog;
@@ -39,7 +40,7 @@ namespace NzbDrone.Core.Test.InstrumentationTests
         {
             _logger.Info(_uniqueMessage);
 
-            Thread.Sleep(1000);
+            WaitForLogWrite();
 
             StoredModel.Message.Should().Be(_uniqueMessage);
             VerifyLog(StoredModel, LogLevel.Info);
@@ -56,7 +57,7 @@ namespace NzbDrone.Core.Test.InstrumentationTests
 
             _logger.Info(message);
 
-            Thread.Sleep(1000);
+            WaitForLogWrite();
 
             StoredModel.Message.Should().HaveLength(message.Length);
             StoredModel.Message.Should().Be(message);
@@ -70,7 +71,7 @@ namespace NzbDrone.Core.Test.InstrumentationTests
 
             _logger.Error(ex, _uniqueMessage);
 
-            Thread.Sleep(1000);
+            WaitForLogWrite();
 
             VerifyLog(StoredModel, LogLevel.Error);
             StoredModel.Message.Should().Be(_uniqueMessage + ": " + ex.Message);
@@ -88,7 +89,7 @@ namespace NzbDrone.Core.Test.InstrumentationTests
 
             _logger.Error(ex, _uniqueMessage);
 
-            Thread.Sleep(1000);
+            WaitForLogWrite();
 
             StoredModel.Message.Should().Be(ex.Message);
 
@@ -103,7 +104,8 @@ namespace NzbDrone.Core.Test.InstrumentationTests
             var epFile = new GameFile();
             _logger.Debug("File {0} no longer exists on disk. removing from database.", epFile.RelativePath);
 
-            Thread.Sleep(1000);
+            // Debug level doesn't write to DB, just verify it doesn't throw
+            Thread.Sleep(200);
 
             epFile.RelativePath.Should().BeNull();
         }
@@ -112,6 +114,20 @@ namespace NzbDrone.Core.Test.InstrumentationTests
         public void Teardown()
         {
             Mocker.Resolve<DatabaseTarget>().UnRegister();
+        }
+
+        private void WaitForLogWrite(int expectedCount = 1, int timeoutMs = 2000)
+        {
+            var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+            while (DateTime.UtcNow < deadline)
+            {
+                if (Storage.All().Count() >= expectedCount)
+                {
+                    return;
+                }
+
+                Thread.Sleep(50);
+            }
         }
 
         private void VerifyLog(Log logItem, LogLevel level)
