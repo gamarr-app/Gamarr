@@ -90,10 +90,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - shard: core
-            projects: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
+          - shard: core-1
+            # Core.Test shard 1: Datastore, DecisionEngine, Download, MediaFiles, Parser, Indexer + smaller namespaces for balance
+            project: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
+            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&(FullyQualifiedName~NzbDrone.Core.Test.Datastore|FullyQualifiedName~NzbDrone.Core.Test.DecisionEngine|FullyQualifiedName~NzbDrone.Core.Test.Download|FullyQualifiedName~NzbDrone.Core.Test.MediaFiles|FullyQualifiedName~NzbDrone.Core.Test.ParserTests|FullyQualifiedName~NzbDrone.Core.Test.IndexerTests|FullyQualifiedName~NzbDrone.Core.Test.Indexers|FullyQualifiedName~NzbDrone.Core.Test.InstrumentationTests|FullyQualifiedName~NzbDrone.Core.Test.GameTests|FullyQualifiedName~NzbDrone.Core.Test.Blocklisting|FullyQualifiedName~NzbDrone.Core.Test.Games|FullyQualifiedName~NzbDrone.Core.Test.OrganizerTests|FullyQualifiedName~NzbDrone.Core.Test.ProviderTests)"
+          - shard: core-2
+            # Core.Test shard 2: Housekeeping, MetadataSource, HealthCheck, and remaining namespaces
+            project: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
+            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&FullyQualifiedName!~NzbDrone.Core.Test.Datastore&FullyQualifiedName!~NzbDrone.Core.Test.DecisionEngine&FullyQualifiedName!~NzbDrone.Core.Test.Download&FullyQualifiedName!~NzbDrone.Core.Test.MediaFiles&FullyQualifiedName!~NzbDrone.Core.Test.ParserTests&FullyQualifiedName!~NzbDrone.Core.Test.IndexerTests&FullyQualifiedName!~NzbDrone.Core.Test.Indexers&FullyQualifiedName!~NzbDrone.Core.Test.InstrumentationTests&FullyQualifiedName!~NzbDrone.Core.Test.GameTests&FullyQualifiedName!~NzbDrone.Core.Test.Blocklisting&FullyQualifiedName!~NzbDrone.Core.Test.Games&FullyQualifiedName!~NzbDrone.Core.Test.OrganizerTests&FullyQualifiedName!~NzbDrone.Core.Test.ProviderTests"
           - shard: other
-            projects: src/NzbDrone.Common.Test/Gamarr.Common.Test.csproj src/NzbDrone.Host.Test/Gamarr.Host.Test.csproj src/NzbDrone.Api.Test/Gamarr.Api.Test.csproj src/NzbDrone.Libraries.Test/Gamarr.Libraries.Test.csproj src/NzbDrone.Update.Test/Gamarr.Update.Test.csproj src/NzbDrone.Mono.Test/Gamarr.Mono.Test.csproj src/NzbDrone.Windows.Test/Gamarr.Windows.Test.csproj
+            # All non-Core test assemblies
+            project: src/NzbDrone.Common.Test/Gamarr.Common.Test.csproj src/NzbDrone.Host.Test/Gamarr.Host.Test.csproj src/NzbDrone.Api.Test/Gamarr.Api.Test.csproj src/NzbDrone.Libraries.Test/Gamarr.Libraries.Test.csproj src/NzbDrone.Update.Test/Gamarr.Update.Test.csproj src/NzbDrone.Mono.Test/Gamarr.Mono.Test.csproj src/NzbDrone.Windows.Test/Gamarr.Windows.Test.csproj
+            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -116,11 +124,11 @@ jobs:
       - name: Run Unit Tests
         shell: bash
         run: |
-          for project in ${{ matrix.projects }}; do
+          for project in ${{ matrix.project }}; do
             dotnet test "$project" \
               --no-build \
               --configuration Debug \
-              --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
+              --filter "${{ matrix.filter }}" \
               --logger "trx;LogFileName=test-results-$(basename $project .csproj).trx" \
               --results-directory ./test-results
           done
