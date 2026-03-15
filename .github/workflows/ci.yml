@@ -99,15 +99,13 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Determine NuGet cache path
-        id: nuget-cache-path
-        shell: bash
-        run: echo "path=$(dotnet nuget locals global-packages --list | sed 's/.*: //')" >> $GITHUB_OUTPUT
-
       - name: NuGet cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.nuget-cache-path.outputs.path }}
+          path: |
+            ~/.nuget/packages
+            ~/AppData/Local/NuGet/Cache
+            ~/.local/share/NuGet/Cache
           key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
           restore-keys: ${{ runner.os }}-nuget-
 
