@@ -11,11 +11,10 @@ import styles from './GameReleaseDates.css';
 
 type GameReleaseDatesProps = Pick<
   Game,
-  'igdbId' | 'inCinemas' | 'digitalRelease' | 'physicalRelease'
+  'inCinemas' | 'digitalRelease' | 'physicalRelease'
 >;
 
 function GameReleaseDates({
-  igdbId,
   inCinemas,
   digitalRelease,
   physicalRelease,
