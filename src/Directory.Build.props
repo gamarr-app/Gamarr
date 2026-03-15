@@ -7,9 +7,8 @@
 	<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <!-- Pin runtime version for reproducible Release builds only -->
-    <RuntimeFrameworkVersion Condition="'$(Configuration)' == 'Release'">8.0.25</RuntimeFrameworkVersion>
-    <TargetLatestRuntimePatch Condition="'$(Configuration)' != 'Release'">true</TargetLatestRuntimePatch>
+    <!-- Always use latest runtime patch for security fixes -->
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <GamarrRootDir>$(MSBuildThisFileDirectory)..\</GamarrRootDir>
