@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NLog;
 using NzbDrone.Common.Http;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MetadataSource.IGDB;
 using NzbDrone.Core.MetadataSource.IGDB.Resource;
 using NzbDrone.Core.Test.Framework;
@@ -15,8 +19,30 @@ using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.MetadataSource.IGDB
 {
+    public class TestableIgdbProxy : IgdbProxy
+    {
+        protected override int RetryDelayBaseMs => 0;
+
+        protected override void EnforceRateLimit()
+        {
+            // Skip rate limiting in tests
+        }
+
+        public TestableIgdbProxy(
+            IHttpClient httpClient,
+            IIgdbAuthService authService,
+            IConfigService configService,
+            IGameService gameService,
+            IGameMetadataService gameMetadataService,
+            IGameTranslationService gameTranslationService,
+            Logger logger)
+            : base(httpClient, authService, configService, gameService, gameMetadataService, gameTranslationService, logger)
+        {
+        }
+    }
+
     [TestFixture]
-    public class IgdbProxyRetryFixture : CoreTest<IgdbProxy>
+    public class IgdbProxyRetryFixture : CoreTest<TestableIgdbProxy>
     {
         [SetUp]
         public void Setup()

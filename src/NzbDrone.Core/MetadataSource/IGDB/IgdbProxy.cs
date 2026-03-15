@@ -31,6 +31,8 @@ namespace NzbDrone.Core.MetadataSource.IGDB
         private const int MaxRetries = 3;
         private const int RateLimitRequestsPerSecond = 4;
 
+        protected virtual int RetryDelayBaseMs => 1000;
+
         private const string GameFields = @"
             fields id, name, slug, summary, storyline, category, status,
             first_release_date, aggregated_rating, aggregated_rating_count,
@@ -440,7 +442,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 }
                 catch (Exception ex) when (attempt < MaxRetries && IsTransientException(ex))
                 {
-                    var delay = (int)Math.Pow(2, attempt) * 1000;
+                    var delay = (int)Math.Pow(2, attempt) * RetryDelayBaseMs;
                     _logger.Warn("IGDB request failed (attempt {0}/{1}), retrying in {2}ms: {3}", attempt + 1, MaxRetries + 1, delay, ex.Message);
                     Thread.Sleep(delay);
                     continue;
@@ -461,7 +463,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
                     if (attempt < MaxRetries && RetryableStatusCodes.Contains(response.StatusCode))
                     {
-                        var delay = (int)Math.Pow(2, attempt) * 1000;
+                        var delay = (int)Math.Pow(2, attempt) * RetryDelayBaseMs;
                         _logger.Warn("IGDB API returned {0} (attempt {1}/{2}), retrying in {3}ms", response.StatusCode, attempt + 1, MaxRetries + 1, delay);
                         Thread.Sleep(delay);
                         continue;
@@ -487,7 +489,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
         /// <summary>
         /// Enforces rate limiting of 4 requests per second for IGDB free tier.
         /// </summary>
-        private void EnforceRateLimit()
+        protected virtual void EnforceRateLimit()
         {
             lock (RateLimitLock)
             {
