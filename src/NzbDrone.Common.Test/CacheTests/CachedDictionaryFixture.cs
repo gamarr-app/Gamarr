@@ -50,9 +50,18 @@ namespace NzbDrone.Common.Test.CacheTests
         {
             var result1 = _cachedString.Get("Hi");
 
-            Thread.Sleep(200);
+            // Poll until cache expires (TTL is 100ms) and re-fetches
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (DateTime.UtcNow < deadline)
+            {
+                _cachedString.Get("Hi");
+                if (_worker.HitCount >= 2)
+                {
+                    break;
+                }
 
-            var result2 = _cachedString.Get("Hi");
+                Thread.Sleep(10);
+            }
 
             _worker.HitCount.Should().Be(2);
         }

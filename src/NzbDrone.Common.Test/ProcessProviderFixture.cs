@@ -92,7 +92,11 @@ namespace NzbDrone.Common.Test
             process.WaitForExit();
 
             // Process table cleanup can lag behind WaitForExit on some platforms
-            Thread.Sleep(200);
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (DateTime.UtcNow < deadline && Subject.Exists(DummyApp.DUMMY_PROCCESS_NAME))
+            {
+                Thread.Sleep(50);
+            }
 
             Subject.Exists(DummyApp.DUMMY_PROCCESS_NAME).Should().BeFalse();
         }

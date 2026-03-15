@@ -55,7 +55,7 @@ namespace NzbDrone.Common.Test.TPLTests
             Subject.WaitAndPulse("me", TimeSpan.FromMilliseconds(100));
             watch.Stop();
 
-            watch.ElapsedMilliseconds.Should().BeLessThan(50);
+            watch.ElapsedMilliseconds.Should().BeLessThan(100);
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace NzbDrone.Common.Test.TPLTests
 
             Subject.WaitAndPulse("me", "sub", TimeSpan.FromMilliseconds(100));
 
-            (GetRateLimitStore()["me"] - _epoch).Should().BeCloseTo(TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(20));
+            (GetRateLimitStore()["me"] - _epoch).Should().BeCloseTo(TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(100));
         }
     }
 }

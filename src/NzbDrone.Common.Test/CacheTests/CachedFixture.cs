@@ -85,7 +85,9 @@ namespace NzbDrone.Common.Test.CacheTests
             var hitCount = 0;
             _cachedString = new Cached<string>();
 
-            for (var i = 0; i < 10; i++)
+            // Poll until we get at least 2 cache misses (TTL is 300ms)
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (DateTime.UtcNow < deadline && hitCount < 4)
             {
                 _cachedString.Get("key",
                     () =>
@@ -95,10 +97,10 @@ namespace NzbDrone.Common.Test.CacheTests
                     },
                     TimeSpan.FromMilliseconds(300));
 
-                Thread.Sleep(100);
+                Thread.Sleep(10);
             }
 
-            hitCount.Should().BeInRange(2, 10);
+            hitCount.Should().BeGreaterThanOrEqualTo(2);
         }
     }
 
