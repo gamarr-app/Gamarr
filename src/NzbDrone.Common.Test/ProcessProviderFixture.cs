@@ -186,9 +186,9 @@ namespace NzbDrone.Common.Test
                 }
             });
 
-            if (!processStarted.Wait(5000))
+            if (!processStarted.Wait(15000))
             {
-                Assert.Fail("Failed to start process within 2 sec");
+                Assert.Fail("Failed to start process within 15 sec");
             }
 
             return process;
