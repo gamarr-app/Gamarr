@@ -37,7 +37,7 @@ namespace NzbDrone.Common.Test.TPLTests
         public void should_hold_the_call_for_debounce_duration()
         {
             var counter = new Counter();
-            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(50));
+            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(200));
 
             debounceFunction.Execute();
             debounceFunction.Execute();
@@ -54,7 +54,7 @@ namespace NzbDrone.Common.Test.TPLTests
         public void should_throttle_calls()
         {
             var counter = new Counter();
-            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(50));
+            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(200));
 
             debounceFunction.Execute();
             debounceFunction.Execute();
@@ -77,21 +77,21 @@ namespace NzbDrone.Common.Test.TPLTests
         public void should_hold_the_call_while_paused()
         {
             var counter = new Counter();
-            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(50));
+            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(200));
 
             debounceFunction.Pause();
 
             debounceFunction.Execute();
             debounceFunction.Execute();
 
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             counter.Count.Should().Be(0);
 
             debounceFunction.Execute();
             debounceFunction.Execute();
 
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             counter.Count.Should().Be(0);
 
@@ -106,7 +106,7 @@ namespace NzbDrone.Common.Test.TPLTests
         public void should_handle_pause_reentrancy()
         {
             var counter = new Counter();
-            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(50));
+            var debounceFunction = new Debouncer(counter.Hit, TimeSpan.FromMilliseconds(200));
 
             debounceFunction.Pause();
             debounceFunction.Pause();
@@ -116,7 +116,7 @@ namespace NzbDrone.Common.Test.TPLTests
 
             debounceFunction.Resume();
 
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             counter.Count.Should().Be(0);
 
