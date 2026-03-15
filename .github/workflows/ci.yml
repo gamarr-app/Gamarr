@@ -138,8 +138,15 @@ jobs:
       - name: Run Unit Tests
         shell: bash
         run: |
+          cat > /tmp/run-tests.sh << 'SCRIPT'
+          #!/bin/bash
+          ip link set lo up
+          shift  # drop '--'
+          exec runuser -u runner -- "$@"
+          SCRIPT
+          chmod +x /tmp/run-tests.sh
           for project in ${{ matrix.projects }}; do
-            sudo unshare --net -- runuser -u runner -- \
+            sudo unshare --net -- /tmp/run-tests.sh -- \
               dotnet test "$project" \
                 --no-build \
                 --configuration Debug \
