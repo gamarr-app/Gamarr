@@ -118,6 +118,7 @@ jobs:
   unit-test-linux:
     name: Unit Tests (Linux ${{ matrix.shard }})
     runs-on: ubuntu-24.04
+    needs: [backend-build]
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -146,15 +147,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: NuGet cache
-        uses: actions/cache@v5
+      - name: Download backend build
+        uses: actions/download-artifact@v8
         with:
-          path: ~/.nuget/packages
-          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: Linux-nuget-
-
-      - name: Build
-        run: dotnet build src/Gamarr.sln --configuration Debug
+          name: backend-build
 
       - name: Run Unit Tests
         shell: bash
@@ -261,6 +257,7 @@ jobs:
   integration-test:
     name: Integration Tests
     runs-on: ubuntu-24.04
+    needs: [backend-build]
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -281,15 +278,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: NuGet cache
-        uses: actions/cache@v5
+      - name: Download backend build
+        uses: actions/download-artifact@v8
         with:
-          path: ~/.nuget/packages
-          key: Linux-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: Linux-nuget-
-
-      - name: Build
-        run: dotnet build src/Gamarr.sln --configuration Debug
+          name: backend-build
 
       - name: Run Integration Tests
         shell: bash
