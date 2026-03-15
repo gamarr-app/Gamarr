@@ -67,6 +67,9 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <SelfContained>false</SelfContained>
+    <!-- Use whatever 8.0.x runtime is available instead of pinned version -->
+    <RuntimeFrameworkVersion></RuntimeFrameworkVersion>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
   </PropertyGroup>
 
   <!-- Set the Product and Version info for our own projects -->
