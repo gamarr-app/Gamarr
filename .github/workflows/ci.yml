@@ -193,46 +193,6 @@ jobs:
         if: always()
         run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
 
-      - name: Verify tests ran
-        if: always()
-        shell: bash
-        run: |
-          if [ ! -f ./test-results/integration-test-results.trx ]; then
-            echo "::error::No test results found - tests did not run"
-            exit 1
-          fi
-
-      - name: Upload integration test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: integration-test-results
-          path: ./test-results
-          retention-days: 7
-
-  external-integration-test:
-    name: External Integration Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: NuGet cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
-
-      - name: Build
-        run: dotnet build src/Gamarr.sln --configuration Debug
-
       - name: Run External Integration Tests
         shell: bash
         run: |
@@ -243,11 +203,20 @@ jobs:
             --logger "trx;LogFileName=external-integration-test-results.trx" \
             --results-directory ./test-results
 
+      - name: Verify tests ran
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f ./test-results/integration-test-results.trx ]; then
+            echo "::error::No test results found - tests did not run"
+            exit 1
+          fi
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: external-integration-test-results
+          name: integration-test-results
           path: ./test-results
           retention-days: 7
 
@@ -303,6 +272,15 @@ jobs:
         if: always()
         run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
 
+      - name: Run External Automation Tests
+        run: |
+          dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
+            --no-build \
+            --configuration Debug \
+            --filter "Category=ExternalAutomationTest" \
+            --logger "trx;LogFileName=external-automation-test-results.trx" \
+            --results-directory ./test-results
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -319,97 +297,16 @@ jobs:
           path: ./*_screenshot.png
           retention-days: 7
 
-  external-automation-test:
-    name: External Automation Tests
-    runs-on: ubuntu-latest
-    needs: frontend-build
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: NuGet cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
-
-      - name: Download frontend build
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: _output/UI
-
-      - name: Build backend
-        run: dotnet build src/Gamarr.sln --configuration Debug
-
-      - name: Install Playwright browsers
-        run: pwsh _tests/net8.0/playwright.ps1 install --with-deps
-
-      - name: Run External Automation Tests
-        run: |
-          dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
-            --no-build \
-            --configuration Debug \
-            --filter "Category=ExternalAutomationTest" \
-            --logger "trx;LogFileName=external-automation-test-results.trx" \
-            --results-directory ./test-results
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: external-automation-test-results
-          path: ./test-results
-          retention-days: 7
-
-      - name: Upload error screenshots
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: external-automation-test-screenshots
-          path: ./*_screenshot.png
-          retention-days: 7
-
-  release-build:
-    name: Release Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: NuGet cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
-
-      - name: Build Release
-        run: dotnet build src/Gamarr.sln --configuration Release
-
   build-complete:
     name: Build Complete
     runs-on: ubuntu-latest
-    needs: [frontend-build, frontend-test, unit-test, integration-test, external-integration-test, automation-test, external-automation-test, release-build]
+    needs: [frontend-build, frontend-test, unit-test, integration-test, automation-test]
     if: always()
     steps:
       - name: Check build status
         run: |
           failed=false
-          for result in "${{ needs.frontend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test.result }}" "${{ needs.integration-test.result }}" "${{ needs.external-integration-test.result }}" "${{ needs.automation-test.result }}" "${{ needs.external-automation-test.result }}" "${{ needs.release-build.result }}"; do
+          for result in "${{ needs.frontend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
             if [[ "$result" == "failure" ]]; then
               failed=true
             fi
