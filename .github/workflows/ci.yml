@@ -66,21 +66,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -I OUTPUT -o lo -j ACCEPT
-          sudo iptables -A OUTPUT -m state --state NEW -j REJECT
-
       - name: Lint
-        run: yarn lint
+        run: sudo unshare --net -- runuser -u runner -- yarn lint
 
       - name: Test
-        run: yarn test
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
+        run: sudo unshare --net -- runuser -u runner -- yarn test
 
   unit-test-linux:
     name: Unit Tests (Linux ${{ matrix.shard }})
@@ -90,15 +80,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - shard: core-1
+          - shard: core
             projects: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
-            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&(FullyQualifiedName~NzbDrone.Core.Test.Datastore|FullyQualifiedName~NzbDrone.Core.Test.DecisionEngine|FullyQualifiedName~NzbDrone.Core.Test.Download|FullyQualifiedName~NzbDrone.Core.Test.MediaFiles|FullyQualifiedName~NzbDrone.Core.Test.ParserTests|FullyQualifiedName~NzbDrone.Core.Test.IndexerTests|FullyQualifiedName~NzbDrone.Core.Test.Indexers|FullyQualifiedName~NzbDrone.Core.Test.InstrumentationTests|FullyQualifiedName~NzbDrone.Core.Test.GameTests|FullyQualifiedName~NzbDrone.Core.Test.Blocklisting|FullyQualifiedName~NzbDrone.Core.Test.Games|FullyQualifiedName~NzbDrone.Core.Test.OrganizerTests|FullyQualifiedName~NzbDrone.Core.Test.ProviderTests)"
-          - shard: core-2
-            projects: src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj
-            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest&FullyQualifiedName!~NzbDrone.Core.Test.Datastore&FullyQualifiedName!~NzbDrone.Core.Test.DecisionEngine&FullyQualifiedName!~NzbDrone.Core.Test.Download&FullyQualifiedName!~NzbDrone.Core.Test.MediaFiles&FullyQualifiedName!~NzbDrone.Core.Test.ParserTests&FullyQualifiedName!~NzbDrone.Core.Test.IndexerTests&FullyQualifiedName!~NzbDrone.Core.Test.Indexers&FullyQualifiedName!~NzbDrone.Core.Test.InstrumentationTests&FullyQualifiedName!~NzbDrone.Core.Test.GameTests&FullyQualifiedName!~NzbDrone.Core.Test.Blocklisting&FullyQualifiedName!~NzbDrone.Core.Test.Games&FullyQualifiedName!~NzbDrone.Core.Test.OrganizerTests&FullyQualifiedName!~NzbDrone.Core.Test.ProviderTests"
           - shard: other
             projects: src/NzbDrone.Common.Test/Gamarr.Common.Test.csproj src/NzbDrone.Host.Test/Gamarr.Host.Test.csproj src/NzbDrone.Api.Test/Gamarr.Api.Test.csproj src/NzbDrone.Libraries.Test/Gamarr.Libraries.Test.csproj src/NzbDrone.Update.Test/Gamarr.Update.Test.csproj src/NzbDrone.Mono.Test/Gamarr.Mono.Test.csproj src/NzbDrone.Windows.Test/Gamarr.Windows.Test.csproj
-            filter: "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -122,12 +107,13 @@ jobs:
         shell: bash
         run: |
           for project in ${{ matrix.projects }}; do
-            dotnet test "$project" \
-              --no-build \
-              --configuration Debug \
-              --filter "${{ matrix.filter }}" \
-              --logger "trx;LogFileName=test-results-$(basename $project .csproj).trx" \
-              --results-directory ./test-results
+            sudo unshare --net -- runuser -u runner -- \
+              dotnet test "$project" \
+                --no-build \
+                --configuration Debug \
+                --filter "Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest" \
+                --logger "trx;LogFileName=test-results-$(basename $project .csproj).trx" \
+                --results-directory ./test-results
           done
 
       - name: Verify tests ran
@@ -227,25 +213,19 @@ jobs:
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -I OUTPUT -o lo -j ACCEPT
-          sudo iptables -A OUTPUT -m state --state NEW -j REJECT
-
       - name: Run Integration Tests
         shell: bash
         run: |
-          dotnet test src/Gamarr.sln \
-            --no-build \
-            --configuration Debug \
-            --filter "Category=IntegrationTest" \
-            --logger "trx;LogFileName=integration-test-results.trx" \
-            --results-directory ./test-results
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
+          sudo unshare --net -- bash -c '
+            ip link set lo up
+            runuser -u runner -- \
+              dotnet test src/Gamarr.sln \
+                --no-build \
+                --configuration Debug \
+                --filter "Category=IntegrationTest" \
+                --logger "trx;LogFileName=integration-test-results.trx" \
+                --results-directory ./test-results
+          '
 
       - name: Run External Integration Tests
         shell: bash
@@ -319,24 +299,18 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: pwsh _tests/net8.0/playwright.ps1 install-deps
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -I OUTPUT -o lo -j ACCEPT
-          sudo iptables -A OUTPUT -m state --state NEW -j REJECT
-
       - name: Run Automation Tests
         run: |
-          dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
-            --no-build \
-            --configuration Debug \
-            --filter "Category=AutomationTest&Category!=ExternalAutomationTest" \
-            --logger "trx;LogFileName=automation-test-results.trx" \
-            --results-directory ./test-results
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
+          sudo unshare --net -- bash -c '
+            ip link set lo up
+            runuser -u runner -- \
+              dotnet test src/NzbDrone.Automation.Test/Gamarr.Automation.Test.csproj \
+                --no-build \
+                --configuration Debug \
+                --filter "Category=AutomationTest&Category!=ExternalAutomationTest" \
+                --logger "trx;LogFileName=automation-test-results.trx" \
+                --results-directory ./test-results
+          '
 
       - name: Run External Automation Tests
         run: |
