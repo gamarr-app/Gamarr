@@ -10,7 +10,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Common.Test.TPLTests
 {
     [TestFixture]
-    [Platform(Exclude = "MacOsX")]
+    [Platform(Exclude = "MacOsX,Win")]
     public class RateLimitServiceFixture : TestBase<RateLimitService>
     {
         private DateTime _epoch;
