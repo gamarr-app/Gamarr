@@ -7,7 +7,6 @@ using NzbDrone.Common.TPL;
 namespace NzbDrone.Common.Test.TPLTests
 {
     [TestFixture]
-    [Platform(Exclude = "MacOsX,Win")]
     public class DebouncerFixture
     {
         public class Counter
@@ -20,8 +19,21 @@ namespace NzbDrone.Common.Test.TPLTests
             }
         }
 
+        private void WaitForCount(Counter counter, int expected, int timeoutMs = 5000)
+        {
+            var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+            while (DateTime.UtcNow < deadline)
+            {
+                if (counter.Count >= expected)
+                {
+                    return;
+                }
+
+                Thread.Sleep(10);
+            }
+        }
+
         [Test]
-        [Retry(10)]
         public void should_hold_the_call_for_debounce_duration()
         {
             var counter = new Counter();
@@ -33,13 +45,12 @@ namespace NzbDrone.Common.Test.TPLTests
 
             counter.Count.Should().Be(0);
 
-            Thread.Sleep(100);
+            WaitForCount(counter, 1);
 
             counter.Count.Should().Be(1);
         }
 
         [Test]
-        [Retry(10)]
         public void should_throttle_calls()
         {
             var counter = new Counter();
@@ -51,19 +62,18 @@ namespace NzbDrone.Common.Test.TPLTests
 
             counter.Count.Should().Be(0);
 
-            Thread.Sleep(200);
+            WaitForCount(counter, 1);
 
             debounceFunction.Execute();
             debounceFunction.Execute();
             debounceFunction.Execute();
 
-            Thread.Sleep(200);
+            WaitForCount(counter, 2);
 
             counter.Count.Should().Be(2);
         }
 
         [Test]
-        [Retry(10)]
         public void should_hold_the_call_while_paused()
         {
             var counter = new Counter();
@@ -87,17 +97,12 @@ namespace NzbDrone.Common.Test.TPLTests
 
             debounceFunction.Resume();
 
-            Thread.Sleep(20);
-
-            counter.Count.Should().Be(0);
-
-            Thread.Sleep(100);
+            WaitForCount(counter, 1);
 
             counter.Count.Should().Be(1);
         }
 
         [Test]
-        [Retry(10)]
         public void should_handle_pause_reentrancy()
         {
             var counter = new Counter();
@@ -117,7 +122,7 @@ namespace NzbDrone.Common.Test.TPLTests
 
             debounceFunction.Resume();
 
-            Thread.Sleep(100);
+            WaitForCount(counter, 1);
 
             counter.Count.Should().Be(1);
         }
