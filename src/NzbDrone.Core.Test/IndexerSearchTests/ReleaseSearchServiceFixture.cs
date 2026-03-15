@@ -14,6 +14,7 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.IndexerSearchTests
 {
