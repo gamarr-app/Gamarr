@@ -214,7 +214,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup .NET
-        uses: fast-actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
