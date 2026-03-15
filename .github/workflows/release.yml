@@ -95,11 +95,16 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Compute NuGet cache key
+        id: nuget-key
+        shell: bash
+        run: echo "hash=$(find src -name '*.csproj' | sort | xargs cat | tr -d '\r' | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
       - name: NuGet cache
         uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ hashFiles('src/**/*.csproj') }}
+          key: nuget-${{ steps.nuget-key.outputs.hash }}
           restore-keys: nuget-
           enableCrossOsArchive: true
 
