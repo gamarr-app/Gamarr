@@ -5,10 +5,20 @@ on:
     branches:
       - main
       - develop
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
   pull_request:
     branches:
       - main
       - develop
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -21,6 +31,9 @@ env:
   DOTNET_VERSION: '8.0.x'
   NODE_VERSION: '22.x'
   NUGET_CERT_REVOCATION_MODE: offline
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: true
+  DOTNET_MULTILEVEL_LOOKUP: 0
 
 jobs:
   frontend-build:
@@ -30,6 +43,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -57,6 +72,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -96,6 +113,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -128,6 +147,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -189,6 +210,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -246,6 +269,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -306,6 +331,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
