@@ -57,7 +57,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Check .NET SDK
+        id: check-dotnet
+        run: |
+          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup .NET
+        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -121,7 +131,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Check .NET SDK
+        id: check-dotnet
+        run: |
+          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup .NET
+        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -185,7 +205,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Check .NET SDK
+        id: check-dotnet
+        shell: bash
+        run: |
+          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup .NET
+        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -193,9 +224,7 @@ jobs:
       - name: NuGet cache
         uses: actions/cache@v5
         with:
-          path: |
-            ~/.nuget/packages
-            ~/AppData/Local/NuGet/Cache
+          path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
           restore-keys: ${{ runner.os }}-nuget-
 
@@ -237,7 +266,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Check .NET SDK
+        id: check-dotnet
+        run: |
+          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup .NET
+        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -302,7 +341,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Check .NET SDK
+        id: check-dotnet
+        run: |
+          if dotnet --list-sdks 2>/dev/null | grep -q "^8\.0\."; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup .NET
+        if: steps.check-dotnet.outputs.found != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
