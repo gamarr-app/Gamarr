@@ -55,8 +55,10 @@ jobs:
             os: macos-latest
           - runtime: osx-arm64
             os: macos-latest
-          - runtime: freebsd-x64
-            os: ubuntu-latest
+          # freebsd-x64 disabled: .NET 8.0.25 runtime not yet available in dotnet-bsd-crossbuild feed (latest: 8.0.12)
+          # Re-enable once the feed catches up
+          # - runtime: freebsd-x64
+          #   os: ubuntu-latest
 
     steps:
       - name: Checkout
