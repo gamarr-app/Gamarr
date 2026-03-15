@@ -13,6 +13,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.InstrumentationTests
 {
     [TestFixture]
+    [NonParallelizable]
     public class DatabaseTargetFixture : DbTest<DatabaseTarget, Log>
     {
         private static string _uniqueMessage;
