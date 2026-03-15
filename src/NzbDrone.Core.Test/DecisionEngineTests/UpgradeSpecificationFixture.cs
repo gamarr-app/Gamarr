@@ -14,6 +14,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.DecisionEngineTests
 {
     [TestFixture]
+    [NonParallelizable]
 
     public class UpgradeSpecificationFixture : CoreTest<UpgradableSpecification>
     {

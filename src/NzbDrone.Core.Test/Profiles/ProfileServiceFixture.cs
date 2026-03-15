@@ -17,6 +17,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.Profiles
 {
     [TestFixture]
+    [NonParallelizable]
 
     public class ProfileServiceFixture : CoreTest<QualityProfileService>
     {
