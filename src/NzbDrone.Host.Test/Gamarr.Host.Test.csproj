@@ -3,7 +3,11 @@
     <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\NzbDrone.Host\Gamarr.Host.csproj" />
+    <ProjectReference Include="..\Gamarr.Http\Gamarr.Http.csproj" />
     <ProjectReference Include="..\NzbDrone.Test.Common\Gamarr.Test.Common.csproj" />
   </ItemGroup>
 </Project>
