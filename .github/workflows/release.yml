@@ -21,7 +21,7 @@ permissions:
 
 env:
   DOTNET_VERSION: '8.0.x'
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
   MAJOR_VERSION: '0.0.1'
 
 jobs:
@@ -114,6 +114,13 @@ jobs:
         shell: bash
         run: |
           sed -i.bak "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>${{ steps.version.outputs.version }}<\/AssemblyVersion>/g" src/Directory.Build.props
+
+      - name: NuGet cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
 
       - name: Build backend
         shell: bash
@@ -299,6 +306,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             BUILD_DATE=${{ github.event.repository.updated_at }}
             VERSION=${{ steps.version.outputs.version }}
