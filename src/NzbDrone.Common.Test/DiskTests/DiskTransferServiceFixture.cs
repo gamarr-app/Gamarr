@@ -405,7 +405,6 @@ namespace NzbDrone.Common.Test.DiskTests
         }
 
         [Test]
-        [Retry(5)]
         public void CopyFolder_should_copy_folder()
         {
             WithRealDiskProvider();
