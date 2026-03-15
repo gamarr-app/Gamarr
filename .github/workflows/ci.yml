@@ -113,12 +113,6 @@ jobs:
       - name: Build
         run: dotnet build src/Gamarr.sln --configuration Debug
 
-      - name: Disable internet
-        run: |
-          sudo iptables -I OUTPUT -d 127.0.0.0/8 -j ACCEPT
-          sudo iptables -I OUTPUT -o lo -j ACCEPT
-          sudo iptables -A OUTPUT -m state --state NEW -j REJECT
-
       - name: Run Unit Tests
         shell: bash
         run: |
@@ -130,10 +124,6 @@ jobs:
               --logger "trx;LogFileName=test-results-$(basename $project .csproj).trx" \
               --results-directory ./test-results
           done
-
-      - name: Re-enable internet
-        if: always()
-        run: sudo iptables -D OUTPUT -m state --state NEW -j REJECT
 
       - name: Verify tests ran
         if: always()
