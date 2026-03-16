@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { AppThunk } from 'Store/thunks';
 
 interface PagingOptions {
   page: number;
   totalPages: number;
-  gotoPage: ({ page }: { page: number }) => void;
+  gotoPage: ({ page }: { page: number }) => AppThunk;
 }
 
 function usePaging(options: PagingOptions) {
