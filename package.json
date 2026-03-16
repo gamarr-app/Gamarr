@@ -4,7 +4,7 @@
   "private": true,
   "description": "Gamarr is a PVR for Usenet and BitTorrent users",
   "scripts": {
-    "build": "webpack --config ./frontend/build/webpack.config.js",
+    "build": "yarn lint && yarn format:check && webpack --config ./frontend/build/webpack.config.js",
     "build:clean": "yarn clean && yarn build",
     "analyze": "webpack --config ./frontend/build/webpack.config.js --env production --env analyze",
     "clean": "rimraf ./_output/UI && rimraf --glob \"**/*.js.map\"",

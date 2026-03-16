@@ -12,6 +12,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+
   padding: 8px 15px 0;
 }
 
@@ -19,6 +20,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 15px;
+
   padding: 15px;
 }
 
@@ -29,9 +31,9 @@
   border: 1px solid var(--borderColor);
   border-radius: 4px;
   background-color: var(--inputBackgroundColor);
-  transition: background-color 0.2s ease;
   color: var(--textColor);
   text-decoration: none;
+  transition: background-color 0.2s ease;
 
   &:hover {
     background-color: var(--gameBackgroundColor);
@@ -45,26 +47,26 @@
 
 .dlcPoster {
   flex-shrink: 0;
+  overflow: hidden;
+  margin-right: 12px;
   width: 60px;
   height: 80px;
-  margin-right: 12px;
   border-radius: 3px;
-  overflow: hidden;
 }
 
 .dlcInfo {
   flex: 1;
-  min-width: 0;
   overflow: hidden;
+  min-width: 0;
 }
 
 .dlcTitle {
-  margin: 0 0 4px 0;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
   overflow: hidden;
+  margin: 0 0 4px;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .dlcTitleLink {
@@ -77,14 +79,15 @@
 }
 
 .dlcType {
-  font-size: 12px;
   color: var(--textColorMuted);
+  font-size: 12px;
 }
 
 .dlcStatus {
   display: flex;
   align-items: center;
   gap: 8px;
+
   margin-top: 6px;
 }
 
@@ -107,17 +110,17 @@
 .parentGameInfo {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
   margin-bottom: 10px;
-  background-color: var(--gameBackgroundColor);
+  padding: 12px 15px;
   border: 1px solid var(--borderColor);
   border-radius: 4px;
+  background-color: var(--gameBackgroundColor);
 }
 
 .parentLabel {
-  font-weight: 500;
   margin-right: 8px;
   color: var(--textColorMuted);
+  font-weight: 500;
 }
 
 .parentLink {
@@ -132,23 +135,23 @@
 
 .dlcBadge {
   display: inline-block;
-  padding: 2px 8px;
   margin-left: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  background-color: var(--purple);
-  color: white;
+  padding: 2px 8px;
   border-radius: 3px;
+  background-color: var(--purple);
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 11px;
 }
 
 .gameTypeBadge {
   display: inline-block;
   padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  background-color: var(--purple);
-  color: white;
   border-radius: 3px;
+  background-color: var(--purple);
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 11px;
 }

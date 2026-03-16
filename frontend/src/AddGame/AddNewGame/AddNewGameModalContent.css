@@ -9,10 +9,10 @@
 
 .poster {
   flex: 0 0 170px;
-  width: 170px;
-  margin-right: 20px;
-  height: 250px;
   overflow: hidden;
+  margin-right: 20px;
+  width: 170px;
+  height: 250px;
 }
 
 .poster img {
