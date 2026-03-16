@@ -44,6 +44,11 @@ namespace NzbDrone.Core.MediaFiles
 
         private string GetRecycleBinForPath(string path)
         {
+            if (!_configService.RecycleBinEnabled)
+            {
+                return null;
+            }
+
             var recyclingBin = _configService.RecycleBin;
 
             if (recyclingBin.IsNotNullOrWhiteSpace())
@@ -69,7 +74,7 @@ namespace NzbDrone.Core.MediaFiles
 
             if (string.IsNullOrWhiteSpace(recyclingBin))
             {
-                _logger.Info("No root folder found for '{0}', deleting permanently.", path);
+                _logger.Info("Recycling Bin is disabled, deleting permanently. {0}", path);
                 _diskProvider.DeleteFolder(path, true);
                 _logger.Debug("Folder has been permanently deleted: {0}", path);
             }
@@ -98,7 +103,7 @@ namespace NzbDrone.Core.MediaFiles
 
             if (string.IsNullOrWhiteSpace(recyclingBin))
             {
-                _logger.Info("No root folder found for '{0}', deleting permanently.", path);
+                _logger.Info("Recycling Bin is disabled, deleting permanently. {0}", path);
 
                 if (OsInfo.IsWindows)
                 {
@@ -163,6 +168,12 @@ namespace NzbDrone.Core.MediaFiles
         private List<string> GetAllRecycleBinPaths()
         {
             var paths = new List<string>();
+
+            if (!_configService.RecycleBinEnabled)
+            {
+                return paths;
+            }
+
             var globalBin = _configService.RecycleBin;
 
             if (globalBin.IsNotNullOrWhiteSpace())

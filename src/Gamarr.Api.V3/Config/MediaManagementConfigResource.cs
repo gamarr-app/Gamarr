@@ -8,6 +8,7 @@ namespace Gamarr.Api.V3.Config
     public class MediaManagementConfigResource : RestResource
     {
         public bool AutoUnmonitorPreviouslyDownloadedGames { get; set; }
+        public bool RecycleBinEnabled { get; set; }
         public string RecycleBin { get; set; }
         public int RecycleBinCleanupDays { get; set; }
         public ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
@@ -46,6 +47,7 @@ namespace Gamarr.Api.V3.Config
             return new MediaManagementConfigResource
             {
                 AutoUnmonitorPreviouslyDownloadedGames = model.AutoUnmonitorPreviouslyDownloadedGames,
+                RecycleBinEnabled = model.RecycleBinEnabled,
                 RecycleBin = model.RecycleBin,
                 RecycleBinCleanupDays = model.RecycleBinCleanupDays,
                 DownloadPropersAndRepacks = model.DownloadPropersAndRepacks,
