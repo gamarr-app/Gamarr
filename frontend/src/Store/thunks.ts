@@ -1,4 +1,4 @@
-import { AnyAction } from 'redux';
+import { UnknownAction } from 'redux';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import AppState from 'App/State/AppState';
 
@@ -7,9 +7,9 @@ export type AppThunk<ReturnType = unknown> = ThunkAction<
   ReturnType,
   AppState,
   undefined,
-  AnyAction
+  UnknownAction
 >;
-export type AppDispatch = ThunkDispatch<AppState, undefined, AnyAction>;
+export type AppDispatch = ThunkDispatch<AppState, undefined, UnknownAction>;
 
 export type Thunk<T = unknown> = (
   getState: GetState,
