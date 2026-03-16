@@ -22,7 +22,7 @@ module.exports = {
     browser: true,
     commonjs: true,
     node: true,
-    es6: true
+    es6: true,
   },
 
   globals: {
@@ -30,19 +30,19 @@ module.exports = {
     chai: false,
     sinon: false,
     JSX: true,
-    __webpack_public_path__: true
+    __webpack_public_path__: true,
   },
 
   parserOptions: {
     ecmaVersion: 6,
     sourceType: 'module',
     babelOptions: {
-      configFile: `${frontendFolder}/babel.config.js`
+      configFile: `${frontendFolder}/babel.config.js`,
     },
     ecmaFeatures: {
       modules: true,
-      impliedStrict: true
-    }
+      impliedStrict: true,
+    },
   },
 
   plugins: [
@@ -52,13 +52,13 @@ module.exports = {
     'simple-import-sort',
     'import',
     '@typescript-eslint',
-    'prettier'
+    'prettier',
   ],
 
   settings: {
     react: {
-      version: 'detect'
-    }
+      version: 'detect',
+    },
   },
 
   rules: {
@@ -95,7 +95,7 @@ module.exports = {
 
     // Possible Errors
 
-    'comma-dangle': 'error',
+    'comma-dangle': ['error', 'always-multiline'],
     'no-cond-assign': 'error',
     'no-console': 'off',
     'no-constant-condition': 'warn',
@@ -153,7 +153,7 @@ module.exports = {
       boolean: false,
       number: true,
       string: true,
-      allow: [/* "!!", "~", "*", "+" */]
+      allow: [/* "!!", "~", "*", "+" */],
     }],
     'no-implicit-globals': 'error',
     'no-implied-eval': 'error',
@@ -321,12 +321,12 @@ module.exports = {
     'react/sort-comp': 2,
     'react/jsx-wrap-multilines': 2,
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'error'
+    'react-hooks/exhaustive-deps': 'error',
   },
   overrides: [
     {
       files: [
-        '*.js'
+        '*.js',
       ],
       rules: {
         'simple-import-sort/imports': [
@@ -337,25 +337,25 @@ module.exports = {
               // Absolute Paths
               // Relative Paths
               // Css
-              ['^@?\\w', `^(${dirs})(/.*|$)`, '^\\.', '^\\..*css$']
-            ]
-          }
-        ]
-      }
+              ['^@?\\w', `^(${dirs})(/.*|$)`, '^\\.', '^\\..*css$'],
+            ],
+          },
+        ],
+      },
     },
     {
       files: [
         '*.ts',
-        '*.tsx'
+        '*.tsx',
       ],
 
       parser: '@typescript-eslint/parser',
       parserOptions: {
-        project: './tsconfig.json'
+        project: './tsconfig.json',
       },
 
       extends: [
-        'prettier'
+        'prettier',
       ],
 
       rules: Object.assign(typescriptEslintRecommended.rules, {
@@ -364,8 +364,8 @@ module.exports = {
           {
             args: 'after-used',
             argsIgnorePattern: '^_',
-            ignoreRestSiblings: true
-          }
+            ignoreRestSiblings: true,
+          },
         ],
         '@typescript-eslint/explicit-function-return-type': 'off',
         'no-shadow': 'off',
@@ -378,9 +378,9 @@ module.exports = {
               // Absolute Paths
               // Relative Paths
               // Css
-              ['^@?\\w', `^(${dirs})(/.*|$)`, '^\\.', '^\\..*css$']
-            ]
-          }
+              ['^@?\\w', `^(${dirs})(/.*|$)`, '^\\.', '^\\..*css$'],
+            ],
+          },
         ],
 
         // React Hooks
@@ -393,15 +393,15 @@ module.exports = {
         'react/jsx-boolean-value': ['error', 'always'],
         'react/jsx-curly-brace-presence': [
           'error',
-          { props: 'never', children: 'never' }
+          { props: 'never', children: 'never' },
         ],
         'react/jsx-fragments': 'error',
         'react/jsx-handler-names': [
           'error',
           {
             eventHandlerPrefix: 'on',
-            eventHandlerPropPrefix: 'on'
-          }
+            eventHandlerPropPrefix: 'on',
+          },
         ],
         'react/jsx-no-bind': ['error', { ignoreRefs: true }],
         'react/jsx-no-useless-fragment': ['error', { allowExpressions: true }],
@@ -411,42 +411,42 @@ module.exports = {
           {
             callbacksLast: true,
             noSortAlphabetically: true,
-            reservedFirst: true
-          }
+            reservedFirst: true,
+          },
         ],
         'react/prop-types': 'off',
-        'react/self-closing-comp': 'error'
-      })
+        'react/self-closing-comp': 'error',
+      }),
     },
     {
       files: [
         '*.test.js',
         '*.test.ts',
-        '*.test.tsx'
+        '*.test.tsx',
       ],
       env: {
-        jest: true
+        jest: true,
       },
       parserOptions: {
-        project: null
+        project: null,
       },
       rules: {
         'react/prop-types': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-require-imports': 'off',
         'global-require': 'off',
-        'react/jsx-no-bind': 'off'
-      }
+        'react/jsx-no-bind': 'off',
+      },
     },
     {
       files: [
-        '*.css.d.ts'
+        '*.css.d.ts',
       ],
       rules: {
         'filenames/match-exported': 'off',
         'init-declarations': 'off',
-        'prettier/prettier': 'off'
-      }
-    }
-  ]
+        'prettier/prettier': 'off',
+      },
+    },
+  ],
 };

@@ -30,34 +30,34 @@ module.exports = (env) => {
     target: 'web',
 
     stats: {
-      children: false
+      children: false,
     },
 
     cache: {
       type: 'filesystem',
       buildDependencies: {
-        config: [__filename]
-      }
+        config: [__filename],
+      },
     },
 
     watchOptions: {
-      ignored: /node_modules/
+      ignored: /node_modules/,
     },
 
     entry: {
-      index: 'index.ts'
+      index: 'index.ts',
     },
 
     resolve: {
       extensions: [
         '.ts',
         '.tsx',
-        '.js'
+        '.js',
       ],
       modules: [
         srcFolder,
         path.join(srcFolder, 'Shims'),
-        'node_modules'
+        'node_modules',
       ],
       alias: {},
       fallback: {
@@ -66,15 +66,15 @@ module.exports = (env) => {
         https: false,
         url: false,
         util: false,
-        net: false
-      }
+        net: false,
+      },
     },
 
     output: {
       path: distFolder,
       publicPath: '/',
       filename: isProduction ? '[name]-[contenthash].js' : '[name].js',
-      sourceMapFilename: '[file].map'
+      sourceMapFilename: '[file].map',
     },
 
     optimization: {
@@ -87,38 +87,38 @@ module.exports = (env) => {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendor',
             chunks: 'all',
-            priority: 10
-          }
-        }
-      }
+            priority: 10,
+          },
+        },
+      },
     },
 
     performance: {
       hints: isProduction ? 'warning' : false,
       maxAssetSize: 1024 * 1024,
-      maxEntrypointSize: 1024 * 1024
+      maxEntrypointSize: 1024 * 1024,
     },
 
     experiments: {
-      topLevelAwait: true
+      topLevelAwait: true,
     },
 
     plugins: [
       new webpack.DefinePlugin({
         __DEV__: !isProduction,
-        'process.env.NODE_ENV': isProduction ? JSON.stringify('production') : JSON.stringify('development')
+        'process.env.NODE_ENV': isProduction ? JSON.stringify('production') : JSON.stringify('development'),
       }),
 
       new MiniCssExtractPlugin({
         filename: 'Content/styles.css',
-        chunkFilename: isProduction ? 'Content/[id]-[chunkhash].css' : 'Content/[id].css'
+        chunkFilename: isProduction ? 'Content/[id]-[chunkhash].css' : 'Content/[id].css',
       }),
 
       new HtmlWebpackPlugin({
         template: 'frontend/src/index.ejs',
         filename: 'index.html',
         publicPath: '/',
-        inject: false
+        inject: false,
       }),
 
       new FileManagerPlugin({
@@ -128,53 +128,53 @@ module.exports = (env) => {
               // HTML
               {
                 source: 'frontend/src/*.html',
-                destination: distFolder
+                destination: distFolder,
               },
 
               // Fonts
               {
                 source: 'frontend/src/Content/Fonts/*.*',
-                destination: path.join(distFolder, 'Content/Fonts')
+                destination: path.join(distFolder, 'Content/Fonts'),
               },
 
               // Icon Images
               {
                 source: 'frontend/src/Content/Images/Icons/*.*',
-                destination: path.join(distFolder, 'Content/Images/Icons')
+                destination: path.join(distFolder, 'Content/Images/Icons'),
               },
 
               // Images
               {
                 source: 'frontend/src/Content/Images/*.*',
-                destination: path.join(distFolder, 'Content/Images')
+                destination: path.join(distFolder, 'Content/Images'),
               },
 
               // Robots
               {
                 source: 'frontend/src/Content/robots.txt',
-                destination: path.join(distFolder, 'Content/robots.txt')
+                destination: path.join(distFolder, 'Content/robots.txt'),
               },
 
               // manifest.json and browserconfig.xml
               {
                 source: 'frontend/src/Content/*.(json|xml)',
-                destination: path.join(distFolder, 'Content')
-              }
-            ]
-          }
-        }
+                destination: path.join(distFolder, 'Content'),
+              },
+            ],
+          },
+        },
       }),
 
       new ForkTsCheckerWebpackPlugin(),
 
-      new LiveReloadPlugin()
+      new LiveReloadPlugin(),
     ],
 
     resolveLoader: {
       modules: [
         'node_modules',
-        'frontend/build/webpack/'
-      ]
+        'frontend/build/webpack/',
+      ],
     },
 
     module: {
@@ -196,13 +196,13 @@ module.exports = (env) => {
                       loose: true,
                       debug: false,
                       useBuiltIns: 'entry',
-                      corejs: '3.42'
-                    }
-                  ]
-                ]
-              }
-            }
-          ]
+                      corejs: '3.42',
+                    },
+                  ],
+                ],
+              },
+            },
+          ],
         },
 
         // CSS Modules
@@ -217,19 +217,19 @@ module.exports = (env) => {
               options: {
                 importLoaders: 1,
                 modules: {
-                  localIdentName: isProduction ? '[name]/[local]/[hash:base64:5]' : '[name]/[local]'
-                }
-              }
+                  localIdentName: isProduction ? '[name]/[local]/[hash:base64:5]' : '[name]/[local]',
+                },
+              },
             },
             {
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  config: 'frontend/postcss.config.js'
-                }
-              }
-            }
-          ]
+                  config: 'frontend/postcss.config.js',
+                },
+              },
+            },
+          ],
         },
 
         // Global styles
@@ -239,9 +239,9 @@ module.exports = (env) => {
           use: [
             'style-loader',
             {
-              loader: 'css-loader'
-            }
-          ]
+              loader: 'css-loader',
+            },
+          ],
         },
 
         // Fonts
@@ -254,10 +254,10 @@ module.exports = (env) => {
                 limit: 10240,
                 mimetype: 'application/font-woff',
                 emitFile: false,
-                name: 'Content/Fonts/[name].[ext]'
-              }
-            }
-          ]
+                name: 'Content/Fonts/[name].[ext]',
+              },
+            },
+          ],
         },
 
         {
@@ -267,13 +267,13 @@ module.exports = (env) => {
               loader: 'file-loader',
               options: {
                 emitFile: false,
-                name: 'Content/Fonts/[name].[ext]'
-              }
-            }
-          ]
-        }
-      ]
-    }
+                name: 'Content/Fonts/[name].[ext]',
+              },
+            },
+          ],
+        },
+      ],
+    },
   };
 
   if (isAnalyze) {
@@ -292,10 +292,10 @@ module.exports = (env) => {
             sourceMap: true, // Must be set to true if using source-maps in production
             mangle: false,
             keep_classnames: true,
-            keep_fnames: true
-          }
-        })
-      ]
+            keep_fnames: true,
+          },
+        }),
+      ],
     };
   }
 
