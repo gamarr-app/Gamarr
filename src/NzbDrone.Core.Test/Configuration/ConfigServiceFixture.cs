@@ -4,7 +4,6 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Test.Common;
 
@@ -16,9 +15,6 @@ namespace NzbDrone.Core.Test.Configuration
         [SetUp]
         public void SetUp()
         {
-            Mocker.GetMock<IAppFolderInfo>()
-                .Setup(s => s.AppDataFolder)
-                .Returns("/tmp/gamarr");
         }
 
         [Test]
