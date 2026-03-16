@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.EnsureThat;
+using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Http.Proxy;
 using NzbDrone.Core.Configuration.Events;
 using NzbDrone.Core.Languages;
@@ -23,13 +25,15 @@ namespace NzbDrone.Core.Configuration
     {
         private readonly IConfigRepository _repository;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IAppFolderInfo _appFolderInfo;
         private readonly Logger _logger;
         private static Dictionary<string, string> _cache;
 
-        public ConfigService(IConfigRepository repository, IEventAggregator eventAggregator, Logger logger)
+        public ConfigService(IConfigRepository repository, IEventAggregator eventAggregator, IAppFolderInfo appFolderInfo, Logger logger)
         {
             _repository = repository;
             _eventAggregator = eventAggregator;
+            _appFolderInfo = appFolderInfo;
             _logger = logger;
             _cache = new Dictionary<string, string>();
         }
@@ -92,7 +96,7 @@ namespace NzbDrone.Core.Configuration
 
         public string RecycleBin
         {
-            get { return GetValue("RecycleBin", string.Empty); }
+            get { return GetValue("RecycleBin", Path.Combine(_appFolderInfo.AppDataFolder, "recycle")); }
             set { SetValue("RecycleBin", value); }
         }
 
