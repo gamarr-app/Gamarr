@@ -12,6 +12,8 @@
     "watch": "NODE_OPTIONS='--disable-warning=DEP0169' webpack --watch --config ./frontend/build/webpack.config.js",
     "lint": "eslint --cache --config frontend/.eslintrc.js --ignore-path frontend/.eslintignore frontend/",
     "lint-fix": "yarn lint --fix",
+    "format:check": "prettier --check --config frontend/.prettierrc.json \"frontend/src/**/*.{ts,tsx,js,jsx,json}\"",
+    "format:fix": "prettier --write --config frontend/.prettierrc.json \"frontend/src/**/*.{ts,tsx,js,jsx,json}\"",
     "stylelint-linux": "stylelint $(find frontend -name '*.css') --config frontend/.stylelintrc",
     "stylelint-windows": "stylelint \"frontend/**/*.css\" --config frontend/.stylelintrc",
     "test": "jest",

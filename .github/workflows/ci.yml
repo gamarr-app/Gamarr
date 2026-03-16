@@ -58,6 +58,14 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Verify generated CSS type declarations are up to date
+        run: |
+          if [ -n "$(git diff --name-only -- '*.css.d.ts')" ]; then
+            echo "::error::Generated .css.d.ts files are out of date. Run 'yarn build' and commit the changes."
+            git diff --stat -- '*.css.d.ts'
+            exit 1
+          fi
+
       - name: Upload frontend build
         uses: actions/upload-artifact@v7
         with:
@@ -127,6 +135,12 @@ jobs:
 
       - name: Lint
         run: sudo unshare --net -- runuser -u runner -- yarn lint
+
+      - name: Format check
+        run: sudo unshare --net -- runuser -u runner -- yarn format:check
+
+      - name: Stylelint
+        run: sudo unshare --net -- runuser -u runner -- yarn stylelint-linux
 
       - name: Test
         run: sudo unshare --net -- runuser -u runner -- yarn test
