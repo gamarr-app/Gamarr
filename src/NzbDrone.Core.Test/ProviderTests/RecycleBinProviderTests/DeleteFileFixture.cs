@@ -15,6 +15,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
     {
         private void WithRecycleBin()
         {
+            Mocker.GetMock<IConfigService>().SetupGet(s => s.RecycleBinEnabled).Returns(true);
             Mocker.GetMock<IConfigService>().SetupGet(s => s.RecycleBin).Returns(@"C:\Test\Recycle Bin".AsOsAgnostic());
         }
 

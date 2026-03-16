@@ -37,6 +37,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         [SetUp]
         public void Setup()
         {
+            Mocker.GetMock<IConfigService>().SetupGet(s => s.RecycleBinEnabled).Returns(true);
             Mocker.GetMock<IConfigService>().SetupGet(s => s.RecycleBin).Returns(RecycleBin);
             Mocker.GetMock<IConfigService>().SetupGet(s => s.RecycleBinCleanupDays).Returns(7);
 

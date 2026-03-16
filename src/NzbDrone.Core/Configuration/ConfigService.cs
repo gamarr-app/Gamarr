@@ -90,6 +90,12 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("Retention", value); }
         }
 
+        public bool RecycleBinEnabled
+        {
+            get { return GetValueBoolean("RecycleBinEnabled", true); }
+            set { SetValue("RecycleBinEnabled", value); }
+        }
+
         public string RecycleBin
         {
             get { return GetValue("RecycleBin", string.Empty); }
