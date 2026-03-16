@@ -110,9 +110,8 @@ export default function createSentryMiddleware(): Middleware | undefined {
     return;
   }
 
-  const dsn = isProduction
-    ? 'https://7794f2858478485ea337fb5535624fbd@sentry.servarr.com/12'
-    : 'https://da610619280249f891ec3ee306906793@sentry.servarr.com/13';
+  const dsn =
+    'https://1d7f62665cd76786a7b20ff57c609719@o4511054324629504.ingest.us.sentry.io/4511054337081344';
 
   sentry.init({
     dsn,
