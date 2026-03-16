@@ -23,10 +23,10 @@
   &:global(.colorImpaired) {
     background: repeating-linear-gradient(
       90deg,
-      color-mix(in srgb, var(--dangerColor) 95%, black),
-      color-mix(in srgb, var(--dangerColor) 95%, black) 5px,
-      color-mix(in srgb, var(--dangerColor) 85%, black) 5px,
-      color-mix(in srgb, var(--dangerColor) 85%, black) 10px
+      color-mix(in srgb, var(--dangerColor) 95%, #000),
+      color-mix(in srgb, var(--dangerColor) 95%, #000) 5px,
+      color-mix(in srgb, var(--dangerColor) 85%, #000) 5px,
+      color-mix(in srgb, var(--dangerColor) 85%, #000) 10px
     );
   }
 }
@@ -102,8 +102,8 @@
       45deg,
       var(--warningColor),
       var(--warningColor) 5px,
-      color-mix(in srgb, var(--warningColor) 85%, white) 5px,
-      color-mix(in srgb, var(--warningColor) 85%, white) 10px
+      color-mix(in srgb, var(--warningColor) 85%, #fff) 5px,
+      color-mix(in srgb, var(--warningColor) 85%, #fff) 10px
     );
   }
 }

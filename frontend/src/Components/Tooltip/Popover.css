@@ -8,8 +8,8 @@
 .body {
   overflow-x: hidden;
   overflow-y: auto;
-  max-width: 400px;
   padding: 10px;
+  max-width: 400px;
   background-color: var(--popoverBodyBackgroundColor);
   word-wrap: break-word;
 }
