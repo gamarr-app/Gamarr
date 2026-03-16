@@ -12,5 +12,5 @@ module.exports = {
   intermediateFontSize: '15px',
   largeFontSize: '16px',
 
-  lineHeight: '1.528571429'
+  lineHeight: '1.528571429',
 };

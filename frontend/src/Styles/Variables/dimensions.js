@@ -49,5 +49,5 @@ module.exports = {
   // Game
   gameIndexColumnPadding: '10px',
   gameIndexColumnPaddingSmallScreen: '5px',
-  gameIndexOverviewInfoRowHeight: '21px'
+  gameIndexOverviewInfoRowHeight: '21px',
 };
