@@ -139,19 +139,19 @@ namespace NzbDrone.Core.Qualities
                 new QualityDefinition(Quality.Unknown)      { Weight = 1,  MinSize = 0, MaxSize = null, PreferredSize = null },
                 new QualityDefinition(Quality.Preload)      { Weight = 2,  MinSize = 0, MaxSize = null, PreferredSize = null },
                 new QualityDefinition(Quality.UpdateOnly)   { Weight = 3,  MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Scene)        { Weight = 4,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.MultiLang)    { Weight = 4,  MinSize = 0, MaxSize = null, PreferredSize = null },
                 new QualityDefinition(Quality.SceneCracked) { Weight = 5,  MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Repack)       { Weight = 6,  MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.RepackAllDLC) { Weight = 7,  MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.GOG)          { Weight = 8,  MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Steam)        { Weight = 9,  MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Epic)         { Weight = 10, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Origin)       { Weight = 11, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Uplay)        { Weight = 12, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.ISO)          { Weight = 13, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Retail)       { Weight = 14, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.Portable)     { Weight = 15, MinSize = 0, MaxSize = null, PreferredSize = null },
-                new QualityDefinition(Quality.MultiLang)    { Weight = 16, MinSize = 0, MaxSize = null, PreferredSize = null }
+                new QualityDefinition(Quality.Portable)     { Weight = 6,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Repack)       { Weight = 7,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Scene)        { Weight = 8,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.RepackAllDLC) { Weight = 9,  MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.ISO)          { Weight = 10, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Retail)       { Weight = 11, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Steam)        { Weight = 12, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Epic)         { Weight = 13, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Origin)       { Weight = 14, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.Uplay)        { Weight = 15, MinSize = 0, MaxSize = null, PreferredSize = null },
+                new QualityDefinition(Quality.GOG)          { Weight = 16, MinSize = 0, MaxSize = null, PreferredSize = null }
             };
         }
 
