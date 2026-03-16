@@ -1,5 +1,5 @@
 import { applyMiddleware, compose, Middleware, StoreEnhancer } from 'redux';
-import thunk from 'redux-thunk';
+import { thunk } from 'redux-thunk';
 import createPersistState from './createPersistState';
 import createSentryMiddleware from './createSentryMiddleware';
 

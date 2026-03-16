@@ -1,6 +1,6 @@
 import * as sentry from '@sentry/browser';
 import _ from 'lodash';
-import { Action, Middleware } from 'redux';
+import { Middleware } from 'redux';
 import parseUrl from 'Utilities/String/parseUrl';
 
 interface StackFrame {
@@ -72,12 +72,17 @@ function stripUrlBase(frame: StackFrame): StackFrame {
 }
 
 function createMiddleware(): Middleware {
-  return (store) => (next) => (action: Action) => {
+  return (store) => (next) => (action: unknown) => {
     try {
+      const actionType =
+        typeof action === 'object' && action !== null && 'type' in action
+          ? String((action as { type: unknown }).type)
+          : 'unknown';
+
       // Adds a breadcrumb for reporting later (if necessary).
       sentry.addBreadcrumb({
         category: 'redux',
-        message: action.type,
+        message: actionType,
       });
 
       return next(action);
