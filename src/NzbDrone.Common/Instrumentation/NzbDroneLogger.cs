@@ -70,16 +70,7 @@ namespace NzbDrone.Common.Instrumentation
         {
             string dsn;
 
-            if (updateClient)
-            {
-                dsn = "https://fdefcf5a6a4a4a0db914b5712b5480e0@sentry.servarr.com/11";
-            }
-            else
-            {
-                dsn = RuntimeInfo.IsProduction
-                    ? "https://40f1288c1b4d495cbafdb5c89f7f01be@sentry.servarr.com/9"
-                    : "https://998b4673d4c849ccb5277b5966ed5bc2@sentry.servarr.com/10";
-            }
+            dsn = "https://8d0149a28ed7f4814e65445eda8b8bd2@o4511054324629504.ingest.us.sentry.io/4511054328758272";
 
             var target = new SentryTarget(dsn, appFolderInfo)
             {
