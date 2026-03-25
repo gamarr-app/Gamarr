@@ -1,7 +1,7 @@
 import { throttle } from 'lodash';
-import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import Scroller from 'Components/Scroller/Scroller';
@@ -9,16 +9,10 @@ import Column from 'Components/Table/Column';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
-import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import GameIndexRow from './GameIndexRow';
 import GameIndexTableHeader from './GameIndexTableHeader';
 import styles from './GameIndexTable.css';
-
-const bodyPadding = parseInt(dimensions.pageContentBodyPadding);
-const bodyPaddingSmallScreen = parseInt(
-  dimensions.pageContentBodyPaddingSmallScreen
-);
 
 interface RowItemData {
   items: GameIndexItem[];
@@ -43,9 +37,14 @@ const columnsSelector = createSelector(
   (columns) => columns
 );
 
-function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
-  const { items, sortKey, columns, isSelectMode } = data;
-
+function Row({
+  index,
+  style,
+  items,
+  sortKey,
+  columns,
+  isSelectMode,
+}: RowComponentProps<RowItemData>) {
   if (index >= items.length) {
     return null;
   }
@@ -87,39 +86,12 @@ function GameIndexTable(props: GameIndexTableProps) {
   } = props;
 
   const columns = useSelector(columnsSelector);
-  const listRef = useRef<List<RowItemData>>(null);
-  const [measureRef, bounds] = useMeasure();
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
+  const listRef = useRef<ListImperativeAPI>(null);
+  const [measureRef] = useMeasure();
 
   const rowHeight = useMemo(() => {
     return 38;
   }, []);
-
-  useEffect(() => {
-    const current = scrollerRef?.current as HTMLElement;
-
-    if (isSmallScreen) {
-      setSize({
-        width: windowWidth,
-        height: windowHeight,
-      });
-
-      return;
-    }
-
-    if (current) {
-      const width = current.clientWidth;
-      const padding =
-        (isSmallScreen ? bodyPaddingSmallScreen : bodyPadding) - 5;
-
-      setSize({
-        width: width - padding * 2,
-        height: windowHeight,
-      });
-    }
-  }, [isSmallScreen, windowWidth, windowHeight, scrollerRef, bounds]);
 
   useEffect(() => {
     const currentScrollerRef = scrollerRef.current as HTMLElement;
@@ -132,7 +104,9 @@ function GameIndexTable(props: GameIndexTableProps) {
           ? getWindowScrollTopPosition()
           : currentScrollerRef.scrollTop) - offsetTop;
 
-      listRef.current?.scrollTo(scrollTop);
+      if (listRef.current?.element) {
+        listRef.current.element.scrollTop = scrollTop;
+      }
     }, 10);
 
     currentScrollListener.addEventListener('scroll', handleScroll);
@@ -161,7 +135,9 @@ function GameIndexTable(props: GameIndexTableProps) {
           scrollTop += offset;
         }
 
-        listRef.current?.scrollTo(scrollTop);
+        if (listRef.current?.element) {
+          listRef.current.element.scrollTop = scrollTop;
+        }
         scrollerRef?.current?.scrollTo(0, scrollTop);
       }
     }
@@ -177,25 +153,22 @@ function GameIndexTable(props: GameIndexTableProps) {
           isSelectMode={isSelectMode}
         />
         <List<RowItemData>
-          ref={listRef}
+          listRef={listRef}
           style={{
             width: '100%',
             height: '100%',
             overflow: 'none',
           }}
-          width={size.width}
-          height={size.height}
-          itemCount={items.length}
-          itemSize={rowHeight}
-          itemData={{
+          rowCount={items.length}
+          rowHeight={rowHeight}
+          rowProps={{
             items,
             sortKey,
             columns,
             isSelectMode,
           }}
-        >
-          {Row}
-        </List>
+          rowComponent={Row}
+        />
       </Scroller>
     </div>
   );

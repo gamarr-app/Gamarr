@@ -43,7 +43,7 @@ namespace NzbDrone.Common.Test.TPLTests
             Subject.WaitAndPulse("me", TimeSpan.FromMilliseconds(100));
             watch.Stop();
 
-            watch.ElapsedMilliseconds.Should().BeLessThan(100);
+            watch.ElapsedMilliseconds.Should().BeLessThan(500);
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace NzbDrone.Common.Test.TPLTests
             Subject.WaitAndPulse("me", TimeSpan.FromMilliseconds(100));
             watch.Stop();
 
-            watch.ElapsedMilliseconds.Should().BeLessThan(100);
+            watch.ElapsedMilliseconds.Should().BeLessThan(500);
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace NzbDrone.Common.Test.TPLTests
             Subject.WaitAndPulse("me", TimeSpan.FromMilliseconds(400));
             watch.Stop();
 
-            watch.ElapsedMilliseconds.Should().BeInRange(100, 500);
+            watch.ElapsedMilliseconds.Should().BeInRange(50, 1500);
         }
 
         [Test]

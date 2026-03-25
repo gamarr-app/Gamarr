@@ -1,7 +1,7 @@
 import { throttle } from 'lodash';
-import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import dimensions from 'Styles/Variables/dimensions';
@@ -16,10 +16,6 @@ const columnPaddingSmallScreen = parseInt(
 );
 const progressBarHeight = parseInt(dimensions.progressBarSmallHeight);
 const detailedProgressBarHeight = parseInt(dimensions.progressBarMediumHeight);
-const bodyPadding = parseInt(dimensions.pageContentBodyPadding);
-const bodyPaddingSmallScreen = parseInt(
-  dimensions.pageContentBodyPaddingSmallScreen
-);
 
 interface RowItemData {
   items: GameIndexItem[];
@@ -42,9 +38,12 @@ interface GameIndexOverviewsProps {
   isSmallScreen: boolean;
 }
 
-function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
-  const { items, ...otherData } = data;
-
+function Row({
+  index,
+  style,
+  items,
+  ...otherData
+}: RowComponentProps<RowItemData>) {
   if (index >= items.length) {
     return null;
   }
@@ -75,9 +74,8 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
   const { size: posterSize, detailedProgressBar } = useSelector(
     selectOverviewOptions
   );
-  const listRef = useRef<List>(null);
-  const [measureRef, bounds] = useMeasure();
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const listRef = useRef<ListImperativeAPI>(null);
+  const [measureRef] = useMeasure();
 
   const posterWidth = useMemo(() => {
     const maximumPosterWidth = isSmallScreen ? 152 : 162;
@@ -108,30 +106,6 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
   }, [detailedProgressBar, posterHeight, isSmallScreen]);
 
   useEffect(() => {
-    const current = scrollerRef.current as HTMLElement;
-
-    if (isSmallScreen) {
-      setSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-
-      return;
-    }
-
-    if (current) {
-      const width = current.clientWidth;
-      const padding =
-        (isSmallScreen ? bodyPaddingSmallScreen : bodyPadding) - 5;
-
-      setSize({
-        width: width - padding * 2,
-        height: window.innerHeight,
-      });
-    }
-  }, [isSmallScreen, scrollerRef, bounds]);
-
-  useEffect(() => {
     const currentScrollerRef = scrollerRef.current as HTMLElement;
     const currentScrollListener = isSmallScreen ? window : currentScrollerRef;
 
@@ -142,7 +116,9 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
           ? getWindowScrollTopPosition()
           : currentScrollerRef.scrollTop) - offsetTop;
 
-      listRef.current?.scrollTo(scrollTop);
+      if (listRef.current?.element) {
+        listRef.current.element.scrollTop = scrollTop;
+      }
     }, 10);
 
     currentScrollListener.addEventListener('scroll', handleScroll);
@@ -171,7 +147,9 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
           scrollTop += offset;
         }
 
-        listRef.current?.scrollTo(scrollTop);
+        if (listRef.current?.element) {
+          listRef.current.element.scrollTop = scrollTop;
+        }
         scrollerRef.current?.scrollTo(0, scrollTop);
       }
     }
@@ -180,17 +158,15 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
   return (
     <div ref={measureRef}>
       <List<RowItemData>
-        ref={listRef}
+        listRef={listRef}
         style={{
           width: '100%',
           height: '100%',
           overflow: 'none',
         }}
-        width={size.width}
-        height={size.height}
-        itemCount={items.length}
-        itemSize={rowHeight}
-        itemData={{
+        rowCount={items.length}
+        rowHeight={rowHeight}
+        rowProps={{
           items,
           sortKey,
           posterWidth,
@@ -199,9 +175,8 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
           isSelectMode,
           isSmallScreen,
         }}
-      >
-        {Row}
-      </List>
+        rowComponent={Row}
+      />
     </div>
   );
 }

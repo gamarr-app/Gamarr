@@ -1,7 +1,7 @@
 import { throttle } from 'lodash';
 import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { FixedSizeGrid as Grid, GridChildComponentProps } from 'react-window';
+import { CellComponentProps, Grid, GridImperativeAPI } from 'react-window';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import GameIndexPoster from 'Game/Index/Posters/GameIndexPoster';
@@ -64,10 +64,11 @@ function Cell({
   columnIndex,
   rowIndex,
   style,
-  data,
-}: GridChildComponentProps<CellItemData>) {
-  const { layout, items, sortKey, isSelectMode } = data;
-
+  layout,
+  items,
+  sortKey,
+  isSelectMode,
+}: CellComponentProps<CellItemData>) {
   const { columnCount, padding, posterWidth, posterHeight } = layout;
 
   const index = rowIndex * columnCount + columnIndex;
@@ -111,7 +112,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
   } = props;
 
   const { posterOptions } = useSelector(gameIndexSelector);
-  const ref = useRef<Grid>(null);
+  const ref = useRef<GridImperativeAPI>(null);
   const [measureRef, bounds] = useMeasure();
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -300,7 +301,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
           ? getWindowScrollTopPosition()
           : currentScrollerRef.scrollTop) - offsetTop;
 
-      ref.current?.scrollTo({ scrollLeft: 0, scrollTop });
+      ref.current?.element?.scrollTo({ left: 0, top: scrollTop });
     }, 10);
 
     currentScrollListener.addEventListener('scroll', handleScroll);
@@ -323,7 +324,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
 
         const scrollTop = rowIndex * rowHeight + padding;
 
-        ref.current?.scrollTo({ scrollLeft: 0, scrollTop });
+        ref.current?.element?.scrollTo({ left: 0, top: scrollTop });
         scrollerRef.current?.scrollTo(0, scrollTop);
       }
     }
@@ -340,19 +341,17 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
   return (
     <div ref={measureRef}>
       <Grid<CellItemData>
-        ref={ref}
+        gridRef={ref}
         style={{
           width: '100%',
           height: '100%',
           overflow: 'none',
         }}
-        width={size.width}
-        height={size.height}
         columnCount={columnCount}
         columnWidth={columnWidth}
         rowCount={Math.ceil(items.length / columnCount)}
         rowHeight={rowHeight}
-        itemData={{
+        cellProps={{
           layout: {
             columnCount,
             padding,
@@ -363,9 +362,8 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
           sortKey,
           isSelectMode,
         }}
-      >
-        {Cell}
-      </Grid>
+        cellComponent={Cell}
+      />
     </div>
   );
 }
