@@ -1,7 +1,7 @@
 import { throttle } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
 import TextInput from 'Components/Form/TextInput';
 import Button from 'Components/Link/Button';
 import ModalBody from 'Components/Modal/ModalBody';
@@ -14,7 +14,6 @@ import VirtualTableRowButton from 'Components/Table/VirtualTableRowButton';
 import Game from 'Game/Game';
 import { scrollDirections } from 'Helpers/Props';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
-import dimensions from 'Styles/Variables/dimensions';
 import { InputChanged } from 'typings/inputs';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
@@ -45,8 +44,6 @@ const columns = [
   },
 ];
 
-const bodyPadding = parseInt(dimensions.pageContentBodyPadding);
-
 interface SelectGameModalContentProps {
   modalTitle: string;
   onGameSelect(game: Game): void;
@@ -59,8 +56,12 @@ interface RowItemData {
   onGameSelect(gameId: number): void;
 }
 
-function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
-  const { items, onGameSelect } = data;
+function Row({
+  index,
+  style,
+  items,
+  onGameSelect,
+}: RowComponentProps<RowItemData>) {
   const game = index >= items.length ? null : items[index];
 
   const handlePress = useCallback(() => {
@@ -96,27 +97,10 @@ function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
 function SelectGameModalContent(props: SelectGameModalContentProps) {
   const { modalTitle, onGameSelect, onModalClose } = props;
 
-  const listRef = useRef<List<RowItemData>>(null);
+  const listRef = useRef<ListImperativeAPI>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const allGames: Game[] = useSelector(createAllGamesSelector());
   const [filter, setFilter] = useState('');
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  const windowHeight = window.innerHeight;
-
-  useEffect(() => {
-    const current = scrollerRef?.current as HTMLElement;
-
-    if (current) {
-      const width = current.clientWidth;
-      const height = current.clientHeight;
-      const padding = bodyPadding - 5;
-
-      setSize({
-        width: width - padding * 2,
-        height: height + padding,
-      });
-    }
-  }, [windowHeight, scrollerRef]);
 
   useEffect(() => {
     const currentScrollerRef = scrollerRef.current as HTMLElement;
@@ -126,7 +110,9 @@ function SelectGameModalContent(props: SelectGameModalContentProps) {
       const { offsetTop = 0 } = currentScrollerRef;
       const scrollTop = currentScrollerRef.scrollTop - offsetTop;
 
-      listRef.current?.scrollTo(scrollTop);
+      if (listRef.current?.element) {
+        listRef.current.element.scrollTop = scrollTop;
+      }
     }, 10);
 
     currentScrollListener.addEventListener('scroll', handleScroll);
@@ -198,24 +184,21 @@ function SelectGameModalContent(props: SelectGameModalContentProps) {
         >
           <SelectGameModalTableHeader columns={columns} />
           <List<RowItemData>
-            ref={listRef}
+            listRef={listRef}
             style={{
               width: '100%',
               height: '100%',
               overflow: 'none',
             }}
-            width={size.width}
-            height={size.height}
-            itemCount={items.length}
-            itemSize={38}
-            itemData={{
+            rowCount={items.length}
+            rowHeight={38}
+            rowProps={{
               items,
               columns,
               onGameSelect: onGameSelectWrapper,
             }}
-          >
-            {Row}
-          </List>
+            rowComponent={Row}
+          />
         </Scroller>
       </ModalBody>
 
