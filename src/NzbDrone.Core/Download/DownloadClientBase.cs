@@ -155,7 +155,7 @@ namespace NzbDrone.Core.Download
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Test aborted due to exception");
+                _logger.Debug(ex, "Test aborted due to exception");
                 failures.Add(new ValidationFailure(string.Empty, "Test was aborted due to an error: " + ex.Message));
             }
 

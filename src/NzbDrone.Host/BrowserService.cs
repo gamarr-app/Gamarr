@@ -31,19 +31,26 @@ namespace NzbDrone.Host
             var url = string.Format("http://localhost:{0}", _configFileProvider.Port);
             try
             {
-                if (_runtimeInfo.IsUserInteractive)
-                {
-                    _logger.Info("Starting default browser. {0}", url);
-                    _processProvider.OpenDefaultBrowser(url);
-                }
-                else
+                if (!_runtimeInfo.IsUserInteractive)
                 {
                     _logger.Debug("non-interactive runtime. Won't attempt to open browser.");
+                    return;
                 }
+
+                if (OsInfo.IsLinux &&
+                    string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISPLAY")) &&
+                    string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY")))
+                {
+                    _logger.Debug("No display server detected. Won't attempt to open browser.");
+                    return;
+                }
+
+                _logger.Info("Starting default browser. {0}", url);
+                _processProvider.OpenDefaultBrowser(url);
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Couldn't open default browser to " + url);
+                _logger.Warn(e, "Couldn't open default browser to " + url);
             }
         }
     }

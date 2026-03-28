@@ -287,7 +287,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Unable to test connection");
+                _logger.Debug(ex, "Unable to test connection");
                 switch (ex.Status)
                 {
                     case WebExceptionStatus.ConnectFailure:
@@ -311,7 +311,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to test connection");
+                _logger.Debug(ex, "Failed to test connection");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                        {

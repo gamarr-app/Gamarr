@@ -172,7 +172,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Unable to connect to NZBVortex");
+                _logger.Debug(ex, "Unable to connect to NZBVortex");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                        {
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Unable to connect to NZBVortex");
+                _logger.Debug(ex, "Unable to connect to NZBVortex");
                 return new NzbDroneValidationFailure("Host",  _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }));
             }
 

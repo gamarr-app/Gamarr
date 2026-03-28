@@ -290,7 +290,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Unable to connect to uTorrent");
+                _logger.Debug(ex, "Unable to connect to uTorrent");
                 if (ex.Status == WebExceptionStatus.ConnectFailure)
                 {
                     return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
@@ -303,7 +303,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to test uTorrent");
+                _logger.Debug(ex, "Failed to test uTorrent");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                        {

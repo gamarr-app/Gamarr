@@ -265,7 +265,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to test rTorrent");
+                _logger.Debug(ex, "Failed to test rTorrent");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                        {

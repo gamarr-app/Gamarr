@@ -475,7 +475,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             }
             catch (DownloadClientAuthenticationException ex)
             {
-                _logger.Error(ex, ex.Message);
+                _logger.Debug(ex, ex.Message);
                 return new NzbDroneValidationFailure("Username", _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailure"))
                 {
                     DetailedDescription = _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailureDetail", new Dictionary<string, object> { { "clientName", Name } })
@@ -483,7 +483,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Unable to connect to qBittorrent");
+                _logger.Debug(ex, "Unable to connect to qBittorrent");
                 if (ex.Status == WebExceptionStatus.ConnectFailure)
                 {
                     return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
@@ -496,7 +496,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Unable to test qBittorrent");
+                _logger.Debug(ex, "Unable to test qBittorrent");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                 {
@@ -588,7 +588,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to test qBittorrent");
+                _logger.Debug(ex, "Failed to test qBittorrent");
                 return new NzbDroneValidationFailure(string.Empty, _localizationService.GetLocalizedString("DownloadClientValidationUnknownException", new Dictionary<string, object> { { "exception", ex.Message } }));
             }
 
@@ -603,7 +603,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to get torrents");
+                _logger.Debug(ex, "Failed to get torrents");
                 return new NzbDroneValidationFailure(string.Empty, _localizationService.GetLocalizedString("DownloadClientValidationTestTorrents", new Dictionary<string, object> { { "exceptionMessage", ex.Message } }));
             }
 
