@@ -304,7 +304,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to test");
+                _logger.Debug(ex, "Failed to test");
 
                 return new NzbDroneValidationFailure(string.Empty, _localizationService.GetLocalizedString("DownloadClientValidationUnknownException", new Dictionary<string, object> { { "exception", ex.Message } }));
             }

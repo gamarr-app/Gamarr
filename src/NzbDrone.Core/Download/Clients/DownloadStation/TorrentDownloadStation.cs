@@ -372,7 +372,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Unable to connect to Torrent Download Station");
+                _logger.Debug(ex, "Unable to connect to Torrent Download Station");
 
                 if (ex.Status == WebExceptionStatus.ConnectFailure)
                 {

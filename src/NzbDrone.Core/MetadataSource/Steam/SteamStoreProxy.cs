@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NzbDrone.Common.Http;
@@ -22,6 +23,11 @@ namespace NzbDrone.Core.MetadataSource.Steam
     public class SteamStoreProxy : ISearchForNewGame
     {
         private const string StoreApiBaseUrl = "https://store.steampowered.com/api/";
+
+        // Steam has undocumented rate limits; keep requests to 1 per second
+        private const int RateLimitRequestsPerSecond = 1;
+        private static readonly Queue<DateTime> RequestTimestamps = new Queue<DateTime>();
+        private static readonly object RateLimitLock = new object();
 
         private readonly IHttpClient _httpClient;
         private readonly IGameService _gameService;
@@ -49,6 +55,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
             try
             {
+                EnforceRateLimit();
                 var response = _httpClient.Get(request);
                 var json = JObject.Parse(response.Content);
 
@@ -70,7 +77,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
             }
             catch (HttpException ex)
             {
-                _logger.Error(ex, "Failed to fetch Steam game info for App ID {0}", steamAppId);
+                _logger.Warn(ex, "Failed to fetch Steam game info for App ID {0}", steamAppId);
                 return null;
             }
         }
@@ -104,6 +111,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
             try
             {
+                EnforceRateLimit();
                 var response = _httpClient.Get<SteamSearchResponse>(request);
 
                 if (response.Resource?.Items == null || !response.Resource.Items.Any())
@@ -139,7 +147,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
             }
             catch (HttpException ex)
             {
-                _logger.Error(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(query));
+                _logger.Warn(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(query));
                 return new List<GameMetadata>();
             }
         }
@@ -437,6 +445,8 @@ namespace NzbDrone.Core.MetadataSource.Steam
             {
                 try
                 {
+                    EnforceRateLimit();
+
                     var request = new HttpRequest($"https://store.steampowered.com/api/appdetails?appids={dlcId}")
                     {
                         AllowAutoRedirect = true
@@ -476,6 +486,33 @@ namespace NzbDrone.Core.MetadataSource.Steam
             }
 
             return gameDlcs;
+        }
+
+        private void EnforceRateLimit()
+        {
+            lock (RateLimitLock)
+            {
+                var now = DateTime.UtcNow;
+                var oneSecondAgo = now.AddSeconds(-1);
+
+                while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
+                {
+                    RequestTimestamps.Dequeue();
+                }
+
+                if (RequestTimestamps.Count >= RateLimitRequestsPerSecond)
+                {
+                    var oldestRequest = RequestTimestamps.Peek();
+                    var waitTime = oldestRequest.AddSeconds(1) - now;
+                    if (waitTime.TotalMilliseconds > 0)
+                    {
+                        _logger.Debug("Steam rate limit throttle, waiting {0}ms", (int)waitTime.TotalMilliseconds);
+                        Thread.Sleep((int)waitTime.TotalMilliseconds + 50);
+                    }
+                }
+
+                RequestTimestamps.Enqueue(DateTime.UtcNow);
+            }
         }
 
         private bool IsNonGameContent(string title)

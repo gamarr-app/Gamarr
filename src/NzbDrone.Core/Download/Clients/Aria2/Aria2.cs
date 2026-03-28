@@ -250,7 +250,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to test Aria2");
+                _logger.Debug(ex, "Failed to test Aria2");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", "Aria2" } }))
                 {

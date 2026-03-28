@@ -293,7 +293,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
                     return new ValidationFailure("Username", _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailure"));
                 }
 
-                _logger.Error(ex, "Unable to connect to NZBGet");
+                _logger.Debug(ex, "Unable to connect to NZBGet");
                 return new ValidationFailure("Host",
                     _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect",
                         new Dictionary<string, object> { { "clientName", Name } }));
