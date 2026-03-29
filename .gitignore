@@ -188,4 +188,4 @@ rebuild.sh
 UI
 .eslintcache
 .env
-scripts/sentry-autofix.sh
+.sentry-autofix.log
