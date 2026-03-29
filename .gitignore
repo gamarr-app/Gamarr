@@ -187,4 +187,5 @@ rebuild.sh
 -c
 UI
 .eslintcache
+.env
 scripts/sentry-autofix.sh
