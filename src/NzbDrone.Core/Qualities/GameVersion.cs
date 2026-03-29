@@ -58,10 +58,14 @@ namespace NzbDrone.Core.Qualities
             var versionMatch = VersionRegex.Match(versionString);
             if (versionMatch.Success)
             {
-                var major = int.Parse(versionMatch.Groups["major"].Value);
-                var minor = versionMatch.Groups["minor"].Success ? int.Parse(versionMatch.Groups["minor"].Value) : 0;
-                var patch = versionMatch.Groups["patch"].Success ? int.Parse(versionMatch.Groups["patch"].Value) : 0;
-                var build = versionMatch.Groups["build"].Success ? int.Parse(versionMatch.Groups["build"].Value) : 0;
+                if (!int.TryParse(versionMatch.Groups["major"].Value, out var major))
+                {
+                    return new GameVersion();
+                }
+
+                int.TryParse(versionMatch.Groups["minor"].Value, out var minor);
+                int.TryParse(versionMatch.Groups["patch"].Value, out var patch);
+                int.TryParse(versionMatch.Groups["build"].Value, out var build);
 
                 return new GameVersion(major, minor, patch, build);
             }
@@ -70,7 +74,11 @@ namespace NzbDrone.Core.Qualities
             var buildMatch = BuildRegex.Match(versionString);
             if (buildMatch.Success)
             {
-                var build = int.Parse(buildMatch.Groups["build"].Value);
+                if (!int.TryParse(buildMatch.Groups["build"].Value, out var build))
+                {
+                    return new GameVersion();
+                }
+
                 return new GameVersion(0, 0, 0, build);
             }
 
