@@ -16,7 +16,9 @@ namespace Gamarr.Http.Frontend.Mappers
             _appFolderInfo = appFolderInfo;
         }
 
-        public override string Map(string resourceUrl)
+        public override string FolderPath => _appFolderInfo.GetLogFolder();
+
+        public override string MapPath(string resourceUrl)
         {
             var path = resourceUrl.Replace('/', Path.DirectorySeparatorChar);
             path = Path.GetFileName(path);

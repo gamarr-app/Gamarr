@@ -22,7 +22,9 @@ namespace Gamarr.Http.Frontend.Mappers
 
         protected string FilePath;
 
-        public override string Map(string resourceUrl)
+        public override string FolderPath => Path.GetDirectoryName(FilePath);
+
+        public override string MapPath(string resourceUrl)
         {
             return FilePath;
         }

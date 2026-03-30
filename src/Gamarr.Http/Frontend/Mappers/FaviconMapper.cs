@@ -18,7 +18,9 @@ namespace Gamarr.Http.Frontend.Mappers
             _configFileProvider = configFileProvider;
         }
 
-        public override string Map(string resourceUrl)
+        public override string FolderPath => Path.Combine(_appFolderInfo.StartUpFolder, _configFileProvider.UiFolder);
+
+        public override string MapPath(string resourceUrl)
         {
             var fileName = "favicon.ico";
 

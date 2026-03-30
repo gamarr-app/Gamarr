@@ -15,7 +15,9 @@ namespace Gamarr.Http.Frontend.Mappers
             _backupService = backupService;
         }
 
-        public override string Map(string resourceUrl)
+        public override string FolderPath => _backupService.GetBackupFolder();
+
+        public override string MapPath(string resourceUrl)
         {
             var path = resourceUrl.Replace("/backup/", "").Replace('/', Path.DirectorySeparatorChar);
 
