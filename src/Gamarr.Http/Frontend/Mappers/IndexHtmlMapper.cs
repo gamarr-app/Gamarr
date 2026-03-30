@@ -24,7 +24,9 @@ namespace Gamarr.Http.Frontend.Mappers
             UrlBase = configFileProvider.UrlBase;
         }
 
-        public override string Map(string resourceUrl)
+        public override string FolderPath => Path.GetDirectoryName(HtmlPath);
+
+        public override string MapPath(string resourceUrl)
         {
             return HtmlPath;
         }

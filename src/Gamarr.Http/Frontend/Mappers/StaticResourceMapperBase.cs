@@ -27,13 +27,41 @@ namespace Gamarr.Http.Frontend.Mappers
             _caseSensitive = RuntimeInfo.IsProduction ? DiskProviderBase.PathStringComparison : StringComparison.OrdinalIgnoreCase;
         }
 
-        public abstract string Map(string resourceUrl);
+        public abstract string FolderPath { get; }
+
+        public abstract string MapPath(string resourceUrl);
+
+        public string Map(string resourceUrl)
+        {
+            var mappedPath = MapPath(resourceUrl);
+
+            if (mappedPath == null)
+            {
+                return null;
+            }
+
+            var resolvedPath = Path.GetFullPath(mappedPath);
+            var resolvedFolder = Path.GetFullPath(FolderPath) + Path.DirectorySeparatorChar;
+
+            if (!resolvedPath.StartsWith(resolvedFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("Path traversal attempt blocked: {0} is outside expected folder {1}", resolvedPath, resolvedFolder);
+                return null;
+            }
+
+            return resolvedPath;
+        }
 
         public abstract bool CanHandle(string resourceUrl);
 
         public Task<IActionResult> GetResponse(string resourceUrl)
         {
             var filePath = Map(resourceUrl);
+
+            if (filePath == null)
+            {
+                return Task.FromResult<IActionResult>(null);
+            }
 
             if (_diskProvider.FileExists(filePath, _caseSensitive))
             {

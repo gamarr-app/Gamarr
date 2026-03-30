@@ -22,7 +22,9 @@ namespace Gamarr.Http.Frontend.Mappers
             _diskProvider = diskProvider;
         }
 
-        public override string Map(string resourceUrl)
+        public override string FolderPath => _appFolderInfo.GetAppDataPath();
+
+        public override string MapPath(string resourceUrl)
         {
             var path = resourceUrl.Replace('/', Path.DirectorySeparatorChar);
             path = path.Trim(Path.DirectorySeparatorChar);

@@ -14,7 +14,7 @@ namespace Gamarr.Http.Frontend.Mappers
             FilePath = Path.Combine(appFolderInfo.StartUpFolder, configFileProvider.UiFolder, "Content", "browserconfig.xml");
         }
 
-        public override string Map(string resourceUrl)
+        public override string MapPath(string resourceUrl)
         {
             return FilePath;
         }
