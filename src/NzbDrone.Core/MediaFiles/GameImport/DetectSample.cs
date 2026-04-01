@@ -1,4 +1,3 @@
-using System.IO;
 using NLog;
 using NzbDrone.Core.Games;
 
