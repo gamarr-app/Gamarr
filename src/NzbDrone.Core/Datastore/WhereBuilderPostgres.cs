@@ -75,6 +75,11 @@ namespace NzbDrone.Core.Datastore
                     ParseEndsWith(expression);
                     break;
 
+                case "op_Implicit":
+                    // .NET 10 inserts implicit conversion nodes for enum arrays
+                    Visit(expression.Arguments[0]);
+                    break;
+
                 default:
                     var msg = string.Format("'{0}' expressions are not yet implemented in the where clause expression tree parser.", method);
                     throw new NotImplementedException(msg);
