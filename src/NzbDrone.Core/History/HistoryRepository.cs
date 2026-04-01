@@ -48,7 +48,7 @@ namespace NzbDrone.Core.History
 
         public List<GameHistory> FindDownloadHistory(int gameId, QualityModel quality)
         {
-            var allowed = new[] { (int)GameHistoryEventType.Grabbed, (int)GameHistoryEventType.DownloadFailed, (int)GameHistoryEventType.DownloadFolderImported };
+            var allowed = new List<int> { (int)GameHistoryEventType.Grabbed, (int)GameHistoryEventType.DownloadFailed, (int)GameHistoryEventType.DownloadFolderImported };
 
             return Query(h => h.GameId == gameId &&
                          h.Quality == quality &&
