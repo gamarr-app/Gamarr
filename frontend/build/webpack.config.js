@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+
 const path = require('path');
 const webpack = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -218,6 +218,8 @@ module.exports = (env) => {
                 importLoaders: 1,
                 modules: {
                   localIdentName: isProduction ? '[name]/[local]/[hash:base64:5]' : '[name]/[local]',
+                  namedExport: false,
+                  exportLocalsConvention: 'asIs',
                 },
               },
             },

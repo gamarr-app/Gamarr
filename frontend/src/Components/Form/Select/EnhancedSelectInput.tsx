@@ -7,10 +7,9 @@ import {
   useEffect,
   useId,
   useMemo,
-  useRef,
   useState,
 } from 'react';
-import { Manager, Popper, Reference } from 'react-popper';
+import { usePopper } from 'react-popper';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -22,7 +21,6 @@ import useMeasure from 'Helpers/Hooks/useMeasure';
 import { icons } from 'Helpers/Props';
 import ArrayElement from 'typings/Helpers/ArrayElement';
 import { EnhancedSelectInputChanged, InputChanged } from 'typings/inputs';
-import { asPopperModifier, PopperModifierData } from 'typings/Popper';
 import { isMobile as isMobileUtil } from 'Utilities/browser';
 import * as keyCodes from 'Utilities/Constants/keyCodes';
 import TextInput from '../TextInput';
@@ -164,7 +162,10 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
   } = props;
 
   const [measureRef, { width }] = useMeasure();
-  const updater = useRef<(() => void) | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
+    null
+  );
+  const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
   const buttonId = useId();
   const optionsId = useId();
   const [selectedIndex, setSelectedIndex] = useState(
@@ -190,13 +191,32 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     return '';
   }, [value, values, isMultiSelect]);
 
-  const handleComputeMaxHeight = useCallback((data: PopperModifierData) => {
-    const windowHeight = window.innerHeight;
-
-    data.styles.maxHeight = windowHeight - MINIMUM_DISTANCE_FROM_EDGE;
-
-    return data;
-  }, []);
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: 'bottom-start',
+    modifiers: [
+      {
+        name: 'computeMaxHeight',
+        enabled: true,
+        phase: 'beforeWrite',
+        requires: ['computeStyles'],
+        fn: ({ state }) => {
+          const windowHeight = window.innerHeight;
+          state.styles.popper.maxHeight = `${windowHeight - MINIMUM_DISTANCE_FROM_EDGE}px`;
+        },
+      },
+      {
+        name: 'preventOverflow',
+        enabled: true,
+        options: {
+          boundary: 'clippingParents',
+        },
+      },
+    ],
+  });
 
   const handleWindowClick = useCallback(
     (event: MouseEvent) => {
@@ -390,8 +410,8 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
   );
 
   useEffect(() => {
-    if (updater.current) {
-      updater.current();
+    if (update) {
+      update();
     }
   });
 
@@ -407,158 +427,126 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
 
   return (
     <div>
-      <Manager>
-        <Reference>
-          {({ ref }) => (
-            <div ref={ref} id={buttonId}>
-              <div ref={measureRef}>
-                {isEditable && typeof value === 'string' ? (
-                  <div className={styles.editableContainer}>
-                    <TextInput
-                      className={className}
-                      name={name}
-                      value={value}
-                      readOnly={isDisabled}
-                      hasError={hasError}
-                      hasWarning={hasWarning}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                      onChange={handleEditChange}
-                    />
-                    <Link
-                      className={classNames(
-                        styles.dropdownArrowContainerEditable,
-                        isDisabled
-                          ? styles.dropdownArrowContainerDisabled
-                          : styles.dropdownArrowContainer
-                      )}
-                      onPress={handlePress}
-                    >
-                      {isFetching ? (
-                        <LoadingIndicator
-                          className={styles.loading}
-                          size={20}
-                        />
-                      ) : null}
-
-                      {isFetching ? null : <Icon name={icons.CARET_DOWN} />}
-                    </Link>
-                  </div>
-                ) : (
-                  <Link
-                    className={classNames(
-                      className,
-                      hasError && styles.hasError,
-                      hasWarning && styles.hasWarning,
-                      isDisabled && disabledClassName
-                    )}
-                    isDisabled={isDisabled}
-                    onBlur={handleBlur}
-                    onKeyDown={handleKeyDown}
-                    onPress={handlePress}
-                  >
-                    <SelectedValueComponent
-                      values={values}
-                      {...selectedValueOptions}
-                      selectedValue={selectedValue}
-                      isDisabled={isDisabled}
-                      isMultiSelect={isMultiSelect}
-                    >
-                      {selectedOption ? selectedOption.value : selectedValue}
-                    </SelectedValueComponent>
-
-                    <div
-                      className={
-                        isDisabled
-                          ? styles.dropdownArrowContainerDisabled
-                          : styles.dropdownArrowContainer
-                      }
-                    >
-                      {isFetching ? (
-                        <LoadingIndicator
-                          className={styles.loading}
-                          size={20}
-                        />
-                      ) : null}
-
-                      {isFetching ? null : <Icon name={icons.CARET_DOWN} />}
-                    </div>
-                  </Link>
+      <div ref={setReferenceElement} id={buttonId}>
+        <div ref={measureRef}>
+          {isEditable && typeof value === 'string' ? (
+            <div className={styles.editableContainer}>
+              <TextInput
+                className={className}
+                name={name}
+                value={value}
+                readOnly={isDisabled}
+                hasError={hasError}
+                hasWarning={hasWarning}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onChange={handleEditChange}
+              />
+              <Link
+                className={classNames(
+                  styles.dropdownArrowContainerEditable,
+                  isDisabled
+                    ? styles.dropdownArrowContainerDisabled
+                    : styles.dropdownArrowContainer
                 )}
-              </div>
+                onPress={handlePress}
+              >
+                {isFetching ? (
+                  <LoadingIndicator className={styles.loading} size={20} />
+                ) : null}
+
+                {isFetching ? null : <Icon name={icons.CARET_DOWN} />}
+              </Link>
             </div>
+          ) : (
+            <Link
+              className={classNames(
+                className,
+                hasError && styles.hasError,
+                hasWarning && styles.hasWarning,
+                isDisabled && disabledClassName
+              )}
+              isDisabled={isDisabled}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              onPress={handlePress}
+            >
+              <SelectedValueComponent
+                values={values}
+                {...selectedValueOptions}
+                selectedValue={selectedValue}
+                isDisabled={isDisabled}
+                isMultiSelect={isMultiSelect}
+              >
+                {selectedOption ? selectedOption.value : selectedValue}
+              </SelectedValueComponent>
+
+              <div
+                className={
+                  isDisabled
+                    ? styles.dropdownArrowContainerDisabled
+                    : styles.dropdownArrowContainer
+                }
+              >
+                {isFetching ? (
+                  <LoadingIndicator className={styles.loading} size={20} />
+                ) : null}
+
+                {isFetching ? null : <Icon name={icons.CARET_DOWN} />}
+              </div>
+            </Link>
           )}
-        </Reference>
-        <Portal>
-          <Popper
-            placement="bottom-start"
-            modifiers={{
-              computeMaxHeight: {
-                order: 851,
-                enabled: true,
-                fn: asPopperModifier(handleComputeMaxHeight),
-              },
-              preventOverflow: {
-                enabled: true,
-                boundariesElement: 'viewport',
-              },
-            }}
-          >
-            {({ ref, style, scheduleUpdate }) => {
-              updater.current = scheduleUpdate;
+        </div>
+      </div>
+      <Portal>
+        <div
+          ref={setPopperElement}
+          id={optionsId}
+          className={styles.optionsContainer}
+          style={{
+            ...popperStyles.popper,
+            minWidth: width,
+          }}
+          {...attributes.popper}
+        >
+          {isOpen && !isMobile ? (
+            <Scroller
+              className={styles.options}
+              style={{
+                maxHeight: popperStyles.popper?.maxHeight,
+              }}
+            >
+              {values.map((v, index) => {
+                const hasParent = v.parentKey !== undefined;
+                const depth = hasParent ? 1 : 0;
+                const parentSelected =
+                  v.parentKey !== undefined &&
+                  Array.isArray(value) &&
+                  value.includes(v.parentKey);
 
-              return (
-                <div
-                  ref={ref}
-                  id={optionsId}
-                  className={styles.optionsContainer}
-                  style={{
-                    ...style,
-                    minWidth: width,
-                  }}
-                >
-                  {isOpen && !isMobile ? (
-                    <Scroller
-                      className={styles.options}
-                      style={{
-                        maxHeight: style.maxHeight,
-                      }}
-                    >
-                      {values.map((v, index) => {
-                        const hasParent = v.parentKey !== undefined;
-                        const depth = hasParent ? 1 : 0;
-                        const parentSelected =
-                          v.parentKey !== undefined &&
-                          Array.isArray(value) &&
-                          value.includes(v.parentKey);
+                const { key, ...other } = v;
 
-                        const { key, ...other } = v;
-
-                        return (
-                          <OptionComponent
-                            key={v.key}
-                            id={v.key}
-                            depth={depth}
-                            isSelected={isSelectedItem(index, value, values)}
-                            isDisabled={parentSelected}
-                            isMultiSelect={isMultiSelect}
-                            {...valueOptions}
-                            {...other}
-                            isMobile={false}
-                            onSelect={handleSelect}
-                          >
-                            {v.value}
-                          </OptionComponent>
-                        );
-                      })}
-                    </Scroller>
-                  ) : null}
-                </div>
-              );
-            }}
-          </Popper>
-        </Portal>
-      </Manager>
+                return (
+                  <OptionComponent
+                    key={v.key}
+                    id={v.key}
+                    depth={depth}
+                    isSelected={isSelectedItem(index, value, values)}
+                    isDisabled={parentSelected}
+                    isMultiSelect={isMultiSelect}
+                    {...valueOptions}
+                    {...other}
+                    isMobile={false}
+                    onSelect={handleSelect}
+                  >
+                    {v.value}
+                  </OptionComponent>
+                );
+              })}
+            </Scroller>
+          ) : null}
+        </div>
+      </Portal>
 
       {isMobile ? (
         <Modal

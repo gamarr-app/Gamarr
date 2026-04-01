@@ -23,7 +23,7 @@ function createImportGameItemSelector(id: string) {
     (items): Omit<Partial<ImportGameItem>, 'id'> => {
       const found = _.find(items, { id });
       if (!found) return {};
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       const { id: _id, ...rest } = found;
       return rest;
     }

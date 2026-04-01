@@ -69,7 +69,6 @@ export interface CalendarState {
   filterBuilderProps: FilterBuilderProp[];
 }
 
-// eslint-disable-next-line init-declarations
 declare const window: Window & {
   innerWidth: number;
 };

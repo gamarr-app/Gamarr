@@ -23,9 +23,9 @@ import styles from './CollectionOverview.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dimensions = require('Styles/Variables/dimensions');
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fonts = require('Styles/Variables/fonts');
 
 const columnPadding = parseInt(dimensions.gameIndexColumnPadding);

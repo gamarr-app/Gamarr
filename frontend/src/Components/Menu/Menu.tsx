@@ -1,3 +1,4 @@
+import { Placement } from '@popperjs/core';
 import React, {
   CSSProperties,
   ReactElement,
@@ -5,10 +6,10 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useRef,
+  useMemo,
   useState,
 } from 'react';
-import { Manager, Popper, PopperProps, Reference } from 'react-popper';
+import { usePopper } from 'react-popper';
 import Portal from 'Components/Portal';
 import styles from './Menu.css';
 
@@ -22,30 +23,9 @@ interface MenuContentChildProps {
   isOpen?: boolean;
 }
 
-const sharedPopperOptions = {
-  modifiers: {
-    preventOverflow: {
-      padding: 0,
-    },
-    flip: {
-      padding: 0,
-    },
-  },
-};
-
-const popperOptions: {
-  right: Partial<PopperProps>;
-  left: Partial<PopperProps>;
-} = {
-  right: {
-    ...sharedPopperOptions,
-    placement: 'bottom-end',
-  },
-
-  left: {
-    ...sharedPopperOptions,
-    placement: 'bottom-start',
-  },
+const placementMap: Record<string, Placement> = {
+  right: 'bottom-end',
+  left: 'bottom-start',
 };
 
 interface MenuProps {
@@ -61,11 +41,41 @@ function Menu({
   alignMenu = 'left',
   enforceMaxHeight = true,
 }: MenuProps) {
-  const updater = useRef<(() => void) | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
+    null
+  );
+  const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
   const menuButtonId = useId();
   const menuContentId = useId();
   const [maxHeight, setMaxHeight] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const popperModifiers = useMemo(
+    () => [
+      {
+        name: 'preventOverflow',
+        options: {
+          padding: 0,
+        },
+      },
+      {
+        name: 'flip',
+        options: {
+          padding: 0,
+        },
+      },
+    ],
+    []
+  );
+
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: placementMap[alignMenu],
+    modifiers: popperModifiers,
+  });
 
   const updateMaxHeight = useCallback(() => {
     const menuButton = document.getElementById(menuButtonId);
@@ -151,10 +161,10 @@ function Menu({
   }, [enforceMaxHeight, updateMaxHeight]);
 
   useEffect(() => {
-    if (updater.current && isMenuOpen) {
-      updater.current();
+    if (update && isMenuOpen) {
+      update();
     }
-  }, [isMenuOpen]);
+  }, [isMenuOpen, update]);
 
   useEffect(() => {
     // Listen to resize events on the window and scroll events
@@ -188,34 +198,27 @@ function Menu({
   ]);
 
   return (
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <div ref={ref} id={menuButtonId} className={className}>
-            {button}
-          </div>
-        )}
-      </Reference>
+    <>
+      <div ref={setReferenceElement} id={menuButtonId} className={className}>
+        {button}
+      </div>
       <Portal>
-        <Popper {...popperOptions[alignMenu]}>
-          {({ ref, style, scheduleUpdate }) => {
-            updater.current = scheduleUpdate;
-
-            return React.cloneElement(
-              childrenArray[1] as ReactElement<MenuContentChildProps>,
-              {
-                forwardedRef: ref,
-                style: {
-                  ...style,
-                  maxHeight,
-                },
-                isOpen: isMenuOpen,
-              }
-            );
-          }}
-        </Popper>
+        {React.cloneElement(
+          childrenArray[1] as ReactElement<MenuContentChildProps>,
+          {
+            forwardedRef: (node: HTMLDivElement | null) => {
+              setPopperElement(node);
+            },
+            style: {
+              ...popperStyles.popper,
+              maxHeight,
+            },
+            ...attributes.popper,
+            isOpen: isMenuOpen,
+          }
+        )}
       </Portal>
-    </Manager>
+    </>
   );
 }
 

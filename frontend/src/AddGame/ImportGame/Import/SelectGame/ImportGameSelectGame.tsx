@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Manager, Popper, Reference } from 'react-popper';
+import { usePopper } from 'react-popper';
 import FormInputButton from 'Components/Form/FormInputButton';
 import TextInput from 'Components/Form/TextInput';
 import Icon from 'Components/Icon';
@@ -69,17 +69,36 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
   const gameLookupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-  const scheduleUpdateRef = useRef<(() => void) | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
+    null
+  );
+  const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
   const buttonIdRef = useRef(getUniqueElememtId());
   const contentIdRef = useRef(getUniqueElememtId());
 
   const buttonId = buttonIdRef.current;
   const contentId = contentIdRef.current;
 
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: 'bottom',
+    modifiers: [
+      {
+        name: 'preventOverflow',
+        options: {
+          boundary: 'clippingParents',
+        },
+      },
+    ],
+  });
+
   // Update popper position when content changes
   useEffect(() => {
-    if (scheduleUpdateRef.current) {
-      scheduleUpdateRef.current();
+    if (update) {
+      update();
     }
   });
 
@@ -147,135 +166,113 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
     error && error.responseJSON && error.responseJSON.message;
 
   return (
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <div ref={ref} id={buttonId}>
-            <Link
-              className={styles.button}
-              component="div"
-              onPress={handlePress}
-            >
-              {isLookingUpGame && isQueued && !isPopulated ? (
-                <LoadingIndicator className={styles.loading} size={20} />
-              ) : null}
+    <>
+      <div ref={setReferenceElement} id={buttonId}>
+        <Link className={styles.button} component="div" onPress={handlePress}>
+          {isLookingUpGame && isQueued && !isPopulated ? (
+            <LoadingIndicator className={styles.loading} size={20} />
+          ) : null}
 
-              {isPopulated && selectedGame && isExistingGame ? (
-                <Icon
-                  className={styles.warningIcon}
-                  name={icons.WARNING}
-                  kind={kinds.WARNING}
-                />
-              ) : null}
+          {isPopulated && selectedGame && isExistingGame ? (
+            <Icon
+              className={styles.warningIcon}
+              name={icons.WARNING}
+              kind={kinds.WARNING}
+            />
+          ) : null}
 
-              {isPopulated && selectedGame ? (
-                <ImportGameTitle
-                  title={selectedGame.title}
-                  year={selectedGame.year}
-                  studio={selectedGame.studio}
-                  isExistingGame={isExistingGame}
-                />
-              ) : null}
+          {isPopulated && selectedGame ? (
+            <ImportGameTitle
+              title={selectedGame.title}
+              year={selectedGame.year}
+              studio={selectedGame.studio}
+              isExistingGame={isExistingGame}
+            />
+          ) : null}
 
-              {isPopulated && !selectedGame ? (
-                <div className={styles.noMatches}>
-                  <Icon
-                    className={styles.warningIcon}
-                    name={icons.WARNING}
-                    kind={kinds.WARNING}
-                  />
+          {isPopulated && !selectedGame ? (
+            <div className={styles.noMatches}>
+              <Icon
+                className={styles.warningIcon}
+                name={icons.WARNING}
+                kind={kinds.WARNING}
+              />
 
-                  {translate('NoMatchFound')}
-                </div>
-              ) : null}
+              {translate('NoMatchFound')}
+            </div>
+          ) : null}
 
-              {!isFetching && !!error ? (
-                <div>
-                  <Icon
-                    className={styles.warningIcon}
-                    title={errorMessage}
-                    name={icons.WARNING}
-                    kind={kinds.WARNING}
-                  />
+          {!isFetching && !!error ? (
+            <div>
+              <Icon
+                className={styles.warningIcon}
+                title={errorMessage}
+                name={icons.WARNING}
+                kind={kinds.WARNING}
+              />
 
-                  {translate('SearchFailedPleaseTryAgainLater')}
-                </div>
-              ) : null}
+              {translate('SearchFailedPleaseTryAgainLater')}
+            </div>
+          ) : null}
 
-              <div className={styles.dropdownArrowContainer}>
-                <Icon name={icons.CARET_DOWN} />
-              </div>
-            </Link>
+          <div className={styles.dropdownArrowContainer}>
+            <Icon name={icons.CARET_DOWN} />
           </div>
-        )}
-      </Reference>
+        </Link>
+      </div>
 
       <Portal>
-        <Popper
-          placement="bottom"
-          modifiers={{
-            preventOverflow: {
-              boundariesElement: 'viewport',
-            },
-          }}
+        <div
+          ref={setPopperElement}
+          id={contentId}
+          className={styles.contentContainer}
+          style={popperStyles.popper}
+          {...attributes.popper}
         >
-          {({ ref, style, scheduleUpdate }) => {
-            scheduleUpdateRef.current = scheduleUpdate;
+          {isOpen ? (
+            <div className={styles.content}>
+              <div className={styles.searchContainer}>
+                <div className={styles.searchIconContainer}>
+                  <Icon name={icons.SEARCH} />
+                </div>
 
-            return (
-              <div
-                ref={ref}
-                id={contentId}
-                className={styles.contentContainer}
-                style={style}
-              >
-                {isOpen ? (
-                  <div className={styles.content}>
-                    <div className={styles.searchContainer}>
-                      <div className={styles.searchIconContainer}>
-                        <Icon name={icons.SEARCH} />
-                      </div>
+                <TextInput
+                  className={styles.searchInput}
+                  name={`${id}_textInput`}
+                  value={term}
+                  onChange={handleSearchInputChange}
+                />
 
-                      <TextInput
-                        className={styles.searchInput}
-                        name={`${id}_textInput`}
-                        value={term}
-                        onChange={handleSearchInputChange}
-                      />
-
-                      <FormInputButton
-                        kind={kinds.DEFAULT}
-                        canSpin={true}
-                        isSpinning={isFetching}
-                        onPress={handleRefreshPress}
-                      >
-                        <Icon name={icons.REFRESH} />
-                      </FormInputButton>
-                    </div>
-
-                    <div className={styles.results}>
-                      {items.map((item) => {
-                        return (
-                          <ImportGameSearchResultConnector
-                            key={item.igdbId}
-                            igdbId={item.igdbId}
-                            steamAppId={0}
-                            title={item.title}
-                            year={item.year}
-                            studio={item.studio}
-                            onPress={handleGameSelect}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null}
+                <FormInputButton
+                  kind={kinds.DEFAULT}
+                  canSpin={true}
+                  isSpinning={isFetching}
+                  onPress={handleRefreshPress}
+                >
+                  <Icon name={icons.REFRESH} />
+                </FormInputButton>
               </div>
-            );
-          }}
-        </Popper>
+
+              <div className={styles.results}>
+                {items.map((item) => {
+                  return (
+                    <ImportGameSearchResultConnector
+                      key={item.igdbId}
+                      igdbId={item.igdbId}
+                      steamAppId={0}
+                      title={item.title}
+                      year={item.year}
+                      studio={item.studio}
+                      onPress={handleGameSelect}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+        </div>
       </Portal>
-    </Manager>
+    </>
   );
 }
 

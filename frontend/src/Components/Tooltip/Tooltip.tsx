@@ -1,6 +1,6 @@
+import { Placement } from '@popperjs/core';
 import classNames from 'classnames';
-import { Placement } from 'popper.js';
-import {
+import React, {
   ReactNode,
   useCallback,
   useEffect,
@@ -8,12 +8,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Manager, Popper, Reference } from 'react-popper';
+import { usePopper } from 'react-popper';
 import Portal from 'Components/Portal';
 import { kinds, tooltipPositions } from 'Helpers/Props';
 import { Kind } from 'Helpers/Props/kinds';
 import dimensions from 'Styles/Variables/dimensions';
-import { asPopperModifier, PopperModifierData } from 'typings/Popper';
 import { isMobile as isMobileUtil } from 'Utilities/browser';
 import styles from './Tooltip.css';
 
@@ -38,7 +37,11 @@ function Tooltip(props: TooltipProps) {
   } = props;
 
   const closeTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const updater = useRef<(() => void) | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
+    null
+  );
+  const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
+  const [arrowElement, setArrowElement] = useState<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = useCallback(() => {
@@ -98,33 +101,88 @@ function Tooltip(props: TooltipProps) {
     return 450;
   }, []);
 
-  const computeMaxSize = useCallback(
-    (data: PopperModifierData) => {
-      const { top, right, bottom, left } = data.offsets.reference;
+  const popperModifiers = useMemo(
+    () => [
+      {
+        name: 'arrow',
+        options: {
+          element: arrowElement,
+        },
+      },
+      {
+        name: 'eventListeners',
+        enabled: false,
+      },
+      {
+        name: 'computeMaxSize',
+        enabled: true,
+        phase: 'beforeWrite' as const,
+        requires: ['computeStyles'],
+        fn: ({
+          state,
+        }: {
+          state: {
+            rects: {
+              reference: {
+                x: number;
+                y: number;
+                width: number;
+                height: number;
+              };
+            };
+            placement: string;
+            styles: { popper: Record<string, string> };
+          };
+        }) => {
+          const ref = state.rects.reference;
+          const top = ref.y;
+          const right = ref.x + ref.width;
+          const bottom = ref.y + ref.height;
+          const left = ref.x;
 
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
+          const windowWidth = window.innerWidth;
+          const windowHeight = window.innerHeight;
 
-      if (/^top/.test(data.placement)) {
-        data.styles.maxHeight = top - 20;
-      } else if (/^bottom/.test(data.placement)) {
-        data.styles.maxHeight = windowHeight - bottom - 20;
-      } else if (/^right/.test(data.placement)) {
-        data.styles.maxWidth = Math.min(maxWidth, windowWidth - right - 20);
-        data.styles.maxHeight = top - 20;
-      } else {
-        data.styles.maxWidth = Math.min(maxWidth, left - 20);
-        data.styles.maxHeight = top - 20;
-      }
-
-      return data;
-    },
-    [maxWidth]
+          if (/^top/.test(state.placement)) {
+            state.styles.popper.maxHeight = `${top - 20}px`;
+          } else if (/^bottom/.test(state.placement)) {
+            state.styles.popper.maxHeight = `${windowHeight - bottom - 20}px`;
+          } else if (/^right/.test(state.placement)) {
+            state.styles.popper.maxWidth = `${Math.min(maxWidth, windowWidth - right - 20)}px`;
+            state.styles.popper.maxHeight = `${top - 20}px`;
+          } else {
+            state.styles.popper.maxWidth = `${Math.min(maxWidth, left - 20)}px`;
+            state.styles.popper.maxHeight = `${top - 20}px`;
+          }
+        },
+      },
+      {
+        name: 'preventOverflow',
+        options: {
+          escapeWithReference: false,
+        },
+      },
+      {
+        name: 'flip',
+        enabled: canFlip,
+      },
+    ],
+    [arrowElement, maxWidth, canFlip]
   );
 
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: position as Placement,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    modifiers: popperModifiers as any,
+  });
+
   useEffect(() => {
-    if (updater.current && isOpen) {
-      updater.current();
+    if (update && isOpen) {
+      update();
     }
   });
 
@@ -136,90 +194,56 @@ function Tooltip(props: TooltipProps) {
     };
   }, []);
 
+  const popperPlacement = attributes.popper?.['data-popper-placement']
+    ? (attributes.popper['data-popper-placement'] as string).split('-')[0]
+    : position;
+  const vertical = popperPlacement === 'top' || popperPlacement === 'bottom';
+
   return (
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <span
-            ref={ref}
-            className={className}
-            onClick={handleClick}
-            onMouseEnter={handleMouseEnterAnchor}
-            onMouseLeave={handleMouseLeave}
-          >
-            {anchor}
-          </span>
-        )}
-      </Reference>
+    <>
+      <span
+        ref={setReferenceElement as unknown as React.Ref<HTMLSpanElement>}
+        className={className}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnterAnchor}
+        onMouseLeave={handleMouseLeave}
+      >
+        {anchor}
+      </span>
 
       <Portal>
-        <Popper
-          placement={position as Placement}
-          // Disable events to improve performance when many tooltips
-          // are shown (Quality Definitions for example).
-          eventsEnabled={false}
-          modifiers={{
-            computeMaxHeight: {
-              order: 851,
-              enabled: true,
-              fn: asPopperModifier(computeMaxSize),
-            },
-            preventOverflow: {
-              // Fixes positioning for tooltips in the queue
-              // and likely others.
-              escapeWithReference: false,
-            },
-            flip: {
-              enabled: canFlip,
-            },
-          }}
+        <div
+          ref={setPopperElement}
+          className={classNames(
+            styles.tooltipContainer,
+            vertical ? styles.verticalContainer : styles.horizontalContainer
+          )}
+          style={popperStyles.popper}
+          {...attributes.popper}
+          onMouseEnter={handleMouseEnterTooltip}
+          onMouseLeave={handleMouseLeave}
         >
-          {({ ref, style, placement, arrowProps, scheduleUpdate }) => {
-            updater.current = scheduleUpdate;
-
-            const popperPlacement = placement
-              ? placement.split('-')[0]
-              : position;
-            const vertical =
-              popperPlacement === 'top' || popperPlacement === 'bottom';
-
-            return (
-              <div
-                ref={ref}
-                className={classNames(
-                  styles.tooltipContainer,
-                  vertical
-                    ? styles.verticalContainer
-                    : styles.horizontalContainer
-                )}
-                style={style}
-                onMouseEnter={handleMouseEnterTooltip}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div
-                  ref={arrowProps.ref}
-                  className={
-                    isOpen
-                      ? classNames(
-                          styles.arrow,
-                          styles[kind],
-                          styles[popperPlacement as keyof typeof styles]
-                        )
-                      : styles.arrowDisabled
-                  }
-                  style={arrowProps.style}
-                />
-                {isOpen ? (
-                  <div className={classNames(styles.tooltip, styles[kind])}>
-                    <div className={bodyClassName}>{tooltip}</div>
-                  </div>
-                ) : null}
-              </div>
-            );
-          }}
-        </Popper>
+          <div
+            ref={setArrowElement as unknown as React.Ref<HTMLDivElement>}
+            className={
+              isOpen
+                ? classNames(
+                    styles.arrow,
+                    styles[kind],
+                    styles[popperPlacement as keyof typeof styles]
+                  )
+                : styles.arrowDisabled
+            }
+            style={popperStyles.arrow}
+          />
+          {isOpen ? (
+            <div className={classNames(styles.tooltip, styles[kind])}>
+              <div className={bodyClassName}>{tooltip}</div>
+            </div>
+          ) : null}
+        </div>
       </Portal>
-    </Manager>
+    </>
   );
 }
 
