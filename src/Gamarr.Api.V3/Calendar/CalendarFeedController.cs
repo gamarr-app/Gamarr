@@ -54,7 +54,7 @@ namespace Gamarr.Api.V3.Calendar
                     continue;
                 }
 
-                if (releaseTypes is not { Count: not 0 } || releaseTypes.Contains(CalendarReleaseType.CinemaRelease))
+                if (releaseTypes is not { Count: not 0 } || releaseTypes.Contains(CalendarReleaseType.EarlyAccessRelease))
                 {
                     CreateEvent(calendar, game.GameMetadata, "cinematic");
                 }
@@ -79,8 +79,8 @@ namespace Gamarr.Api.V3.Calendar
         private void CreateEvent(Ical.Net.Calendar calendar, GameMetadata game, string releaseType)
         {
             var date = game.EarlyAccess;
-            var eventType = "_cinemas";
-            var summaryText = "(Theatrical Release)";
+            var eventType = "_earlyaccess";
+            var summaryText = "(Early Access)";
 
             if (releaseType == "digital")
             {

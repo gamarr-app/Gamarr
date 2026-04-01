@@ -64,7 +64,7 @@ namespace NzbDrone.Core.MediaFiles
                         return ChangeFileDate(gameFilePath, releaseDate.Value);
                     }
 
-                case FileDateType.Cinemas:
+                case FileDateType.EarlyAccess:
                     {
                         var airDate = game.GameMetadata.Value.EarlyAccess;
 

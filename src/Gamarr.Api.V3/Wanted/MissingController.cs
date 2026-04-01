@@ -46,7 +46,7 @@ namespace Gamarr.Api.V3.Wanted
                 new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
                     "gameMetadata.digitalRelease",
-                    "gameMetadata.inCinemas",
+                    "gameMetadata.earlyAccess",
                     "gameMetadata.physicalRelease",
                     "gameMetadata.sortTitle",
                     "gameMetadata.year",
