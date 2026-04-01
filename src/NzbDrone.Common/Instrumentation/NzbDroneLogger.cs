@@ -134,13 +134,9 @@ namespace NzbDrone.Common.Instrumentation
             fileTarget.FileName = Path.Combine(appFolderInfo.GetLogFolder(), fileName);
             fileTarget.AutoFlush = true;
             fileTarget.KeepFileOpen = false;
-            fileTarget.ConcurrentWrites = false;
-            fileTarget.ConcurrentWriteAttemptDelay = 50;
-            fileTarget.ConcurrentWriteAttempts = 10;
             fileTarget.ArchiveAboveSize = 1.Megabytes();
             fileTarget.MaxArchiveFiles = maxArchiveFiles;
             fileTarget.EnableFileDelete = true;
-            fileTarget.ArchiveNumbering = ArchiveNumberingMode.Rolling;
             fileTarget.Layout = FileLogLayout;
 
             var loggingRule = new LoggingRule("*", minLogLevel, fileTarget);
@@ -157,9 +153,6 @@ namespace NzbDrone.Common.Instrumentation
             fileTarget.FileName = Path.Combine(appFolderInfo.GetUpdateLogFolder(), DateTime.Now.ToString("yyyy.MM.dd-HH.mm") + ".txt");
             fileTarget.AutoFlush = true;
             fileTarget.KeepFileOpen = false;
-            fileTarget.ConcurrentWrites = false;
-            fileTarget.ConcurrentWriteAttemptDelay = 50;
-            fileTarget.ConcurrentWriteAttempts = 100;
             fileTarget.Layout = FileLogLayout;
 
             var loggingRule = new LoggingRule("*", LogLevel.Trace, fileTarget);
