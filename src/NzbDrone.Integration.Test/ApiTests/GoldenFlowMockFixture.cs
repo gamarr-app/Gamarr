@@ -6,6 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Games.Commands;
 using NzbDrone.Core.IndexerSearch;
 using Gamarr.Api.V3.RootFolders;
+using RestSharp;
 
 namespace NzbDrone.Integration.Test.ApiTests
 {
@@ -160,7 +161,7 @@ namespace NzbDrone.Integration.Test.ApiTests
 
             // Get queue - should be accessible even if empty
             var request = Queue.BuildRequest();
-            request.AddParameter("includeUnknownGameItems", true);
+            request.AddQueryParameter("includeUnknownGameItems", "true");
 
             var queue = Queue.Get<Gamarr.Http.PagingResource<Gamarr.Api.V3.Queue.QueueResource>>(request);
 

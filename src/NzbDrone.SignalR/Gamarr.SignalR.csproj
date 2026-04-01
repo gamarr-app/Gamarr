@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="NLog" Version="6.1.1" />
+    <PackageReference Include="NLog" Version="6.1.2" />
     <ProjectReference Include="..\NzbDrone.Core\Gamarr.Core.csproj" />
     <ProjectReference Include="..\NzbDrone.Common\Gamarr.Common.csproj" />
   </ItemGroup>

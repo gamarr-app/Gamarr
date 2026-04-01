@@ -16,16 +16,15 @@ namespace NzbDrone.Integration.Test
         [TestCase("")]
         public void should_get_json_with_accept_header(string header)
         {
-            var request = new RestRequest("system/status")
-            {
-                RequestFormat = DataFormat.None
-            };
+            var request = new RestRequest("system/status");
             request.AddHeader("Accept", header);
 
             var response = RestClient.Execute(request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.ContentType.Should().Be("application/json; charset=utf-8");
+
+            // In RestSharp v107+, ContentType may not include charset parameter
+            response.ContentType.Should().StartWith("application/json");
         }
 
         [TestCase("application/xml")]
@@ -33,10 +32,7 @@ namespace NzbDrone.Integration.Test
         [TestCase("application/junk")]
         public void should_get_unacceptable_with_accept_header(string header)
         {
-            var request = new RestRequest("system/status")
-            {
-                RequestFormat = DataFormat.None
-            };
+            var request = new RestRequest("system/status");
             request.AddHeader("Accept", header);
 
             var response = RestClient.Execute(request);

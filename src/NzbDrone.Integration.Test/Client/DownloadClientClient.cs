@@ -6,7 +6,7 @@ namespace NzbDrone.Integration.Test.Client
 {
     public class DownloadClientClient : ClientBase<DownloadClientResource>
     {
-        public DownloadClientClient(IRestClient restClient, string apiKey)
+        public DownloadClientClient(RestClient restClient, string apiKey)
             : base(restClient, apiKey)
         {
         }

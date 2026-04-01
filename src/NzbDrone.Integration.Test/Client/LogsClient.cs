@@ -6,7 +6,7 @@ namespace NzbDrone.Integration.Test.Client
 {
     public class LogsClient : ClientBase
     {
-        public LogsClient(IRestClient restClient, string apiKey)
+        public LogsClient(RestClient restClient, string apiKey)
             : base(restClient, apiKey, "log/file")
         {
         }

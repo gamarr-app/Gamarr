@@ -5,7 +5,7 @@ namespace NzbDrone.Integration.Test.Client
 {
     public class QueueClient : ClientBase<QueueResource>
     {
-        public QueueClient(IRestClient restClient, string apiKey)
+        public QueueClient(RestClient restClient, string apiKey)
             : base(restClient, apiKey)
         {
         }
