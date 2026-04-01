@@ -365,7 +365,6 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{Quality Real}"] = m => qualityReal;
         }
 
-
         private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, GameFile gameFile)
         {
             // MediaInfo tokens are registered as empty strings so existing naming formats don't break
