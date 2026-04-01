@@ -33,7 +33,6 @@ using Gamarr.Http.ClientSchema;
 using Gamarr.Http.ErrorManagement;
 using Gamarr.Http.Frontend;
 using Gamarr.Http.Middleware;
-using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace NzbDrone.Host
