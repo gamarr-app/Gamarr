@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.ParserTests.RomanNumeralTests
 
             var expectedValue = _arabicToRomanNumeralsMapping[arabicNumeral];
 
-            Assert.AreEqual(romanNumeral.ToRomanNumeral(), expectedValue);
+            Assert.That(expectedValue, Is.EqualTo(romanNumeral.ToRomanNumeral()));
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.ParserTests.RomanNumeralTests
 
             var expectecdValue = arabicNumeral;
 
-            Assert.AreEqual(romanNumeral.ToInt(), expectecdValue);
+            Assert.That(expectecdValue, Is.EqualTo(romanNumeral.ToInt()));
         }
     }
 }
