@@ -3509,11 +3509,6 @@ dnd-core@^16.0.1:
     "@react-dnd/invariant" "^4.0.1"
     redux "^4.2.0"
 
-dnd-multi-backend@^8.0.3:
-  version "8.1.2"
-  resolved "https://registry.yarnpkg.com/dnd-multi-backend/-/dnd-multi-backend-8.1.2.tgz#bf6a6ea9f6a9f5d58cabe12fd927753a753aeb92"
-  integrity sha512-KPDVEsiM+6gNEegqZYTWJQgJxYV4vB91tUrvoKJjaS0wwWqT/jNU0P7xJAwCue/cbasJNvk2dFZH7tC+bjX1Rg==
-
 dnd-multi-backend@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/dnd-multi-backend/-/dnd-multi-backend-9.0.0.tgz#e5b5e96051c179566f8b1fa3433b69f6a87e6434"

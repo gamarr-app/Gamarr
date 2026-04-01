@@ -44,7 +44,7 @@
     "classnames": "2.5.1",
     "copy-to-clipboard": "3.3.3",
     "dnd-core": "^16.0.1",
-    "dnd-multi-backend": "^8.0.3",
+    "dnd-multi-backend": "^9.0.0",
     "element-class": "0.2.2",
     "filesize": "11",
     "fuse.js": "7.1.0",
