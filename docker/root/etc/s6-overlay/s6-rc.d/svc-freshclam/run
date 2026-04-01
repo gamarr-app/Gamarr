@@ -1,16 +1,11 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-# freshclam daemon is disabled by default since Gamarr uses clamscan (standalone).
-# Signatures are updated by init-clamav-config at startup.
-# Set CLAMAV_DAEMON_ENABLED=true to run freshclam as a persistent daemon.
-if [ "${CLAMAV_DAEMON_ENABLED,,}" != "true" ]; then
-    # Update signatures once daily instead of running as daemon
-    while true; do
-        sleep 86400
-        s6-setuidgid abc freshclam --quiet || true
-    done
-fi
-
-exec \
-    s6-setuidgid abc freshclam --daemon --foreground --checks=4
+# Update virus signatures daily. Runs as a lightweight loop rather than
+# the freshclam daemon, since clamscan loads signatures on each scan.
+# Initial database is downloaded by init-clamav-config at startup.
+while true; do
+    sleep 86400
+    echo "**** updating clamav signatures ****"
+    s6-setuidgid abc freshclam --quiet || echo "**** freshclam update failed ****"
+done
