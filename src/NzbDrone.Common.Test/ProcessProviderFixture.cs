@@ -55,7 +55,7 @@ namespace NzbDrone.Common.Test
 
         [TestCase(0)]
         [TestCase(-1)]
-        [TestCase(9999)]
+        [TestCase(int.MaxValue)]
         public void GetProcessById_should_return_null_for_invalid_process(int processId)
         {
             Subject.GetProcessById(processId).Should().BeNull();
