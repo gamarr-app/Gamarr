@@ -30,7 +30,6 @@ namespace Gamarr.Api.V3.Config
         public string ScriptImportPath { get; set; }
         public bool ImportExtraFiles { get; set; }
         public string ExtraFileExtensions { get; set; }
-        public bool EnableMediaInfo { get; set; }
 
         public bool VirusScanEnabled { get; set; }
         public string VirusScannerPath { get; set; }
@@ -68,7 +67,6 @@ namespace Gamarr.Api.V3.Config
                 ScriptImportPath = model.ScriptImportPath,
                 ImportExtraFiles = model.ImportExtraFiles,
                 ExtraFileExtensions = model.ExtraFileExtensions,
-                EnableMediaInfo = model.EnableMediaInfo,
 
                 VirusScanEnabled = model.VirusScanEnabled,
                 VirusScannerPath = model.VirusScannerPath,

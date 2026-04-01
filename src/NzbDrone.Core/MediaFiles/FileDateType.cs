@@ -3,7 +3,7 @@
     public enum FileDateType
     {
         None = 0,
-        Cinemas = 1,
+        EarlyAccess = 1,
         Release = 2
     }
 }

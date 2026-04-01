@@ -271,13 +271,6 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("CopyUsingHardlinks", value); }
         }
 
-        public bool EnableMediaInfo
-        {
-            get { return GetValueBoolean("EnableMediaInfo", true); }
-
-            set { SetValue("EnableMediaInfo", value); }
-        }
-
         public bool UseScriptImport
         {
             get { return GetValueBoolean("UseScriptImport", false); }

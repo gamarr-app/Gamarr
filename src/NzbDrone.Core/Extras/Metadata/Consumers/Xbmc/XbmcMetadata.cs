@@ -14,7 +14,6 @@ using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Tags;
@@ -286,69 +285,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 details.Add(new XElement("trailer", "plugin://plugin.video.youtube/play/?video_id=" + game.GameMetadata.Value.YouTubeTrailerId));
 
                 details.Add(new XElement("watched", watched));
-
-                if (gameFile.MediaInfo != null)
-                {
-                    var sceneName = gameFile.GetSceneOrFileName();
-
-                    var fileInfo = new XElement("fileinfo");
-                    var streamDetails = new XElement("streamdetails");
-
-                    var video = new XElement("video");
-                    video.Add(new XElement("aspect", (float)gameFile.MediaInfo.Width / (float)gameFile.MediaInfo.Height));
-                    video.Add(new XElement("bitrate", gameFile.MediaInfo.VideoBitrate));
-                    video.Add(new XElement("codec", MediaInfoFormatter.FormatVideoCodec(gameFile.MediaInfo, sceneName)));
-                    video.Add(new XElement("framerate", gameFile.MediaInfo.VideoFps));
-                    video.Add(new XElement("height", gameFile.MediaInfo.Height));
-                    video.Add(new XElement("scantype", gameFile.MediaInfo.ScanType));
-                    video.Add(new XElement("width", gameFile.MediaInfo.Width));
-
-                    if (gameFile.MediaInfo.RunTime != TimeSpan.Zero)
-                    {
-                        video.Add(new XElement("duration", gameFile.MediaInfo.RunTime.TotalMinutes));
-                        video.Add(new XElement("durationinseconds", Math.Round(gameFile.MediaInfo.RunTime.TotalSeconds)));
-                    }
-
-                    if (gameFile.MediaInfo.VideoHdrFormat is HdrFormat.DolbyVision or HdrFormat.DolbyVisionHdr10 or HdrFormat.DolbyVisionHdr10Plus or HdrFormat.DolbyVisionHlg or HdrFormat.DolbyVisionSdr)
-                    {
-                        video.Add(new XElement("hdrtype", "dolbyvision"));
-                    }
-                    else if (gameFile.MediaInfo.VideoHdrFormat is HdrFormat.Hdr10 or HdrFormat.Hdr10Plus or HdrFormat.Pq10)
-                    {
-                        video.Add(new XElement("hdrtype", "hdr10"));
-                    }
-                    else if (gameFile.MediaInfo.VideoHdrFormat == HdrFormat.Hlg10)
-                    {
-                        video.Add(new XElement("hdrtype", "hlg"));
-                    }
-                    else if (gameFile.MediaInfo.VideoHdrFormat == HdrFormat.None)
-                    {
-                        video.Add(new XElement("hdrtype", ""));
-                    }
-
-                    streamDetails.Add(video);
-
-                    var audio = new XElement("audio");
-                    var audioChannelCount = gameFile.MediaInfo.AudioChannels;
-                    audio.Add(new XElement("bitrate", gameFile.MediaInfo.AudioBitrate));
-                    audio.Add(new XElement("channels", audioChannelCount));
-                    audio.Add(new XElement("codec", MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, sceneName)));
-                    audio.Add(new XElement("language", gameFile.MediaInfo.AudioLanguages));
-                    streamDetails.Add(audio);
-
-                    if (gameFile.MediaInfo.Subtitles is { Count: > 0 })
-                    {
-                        foreach (var s in gameFile.MediaInfo.Subtitles)
-                        {
-                            var subtitle = new XElement("subtitle");
-                            subtitle.Add(new XElement("language", s));
-                            streamDetails.Add(subtitle);
-                        }
-                    }
-
-                    fileInfo.Add(streamDetails);
-                    details.Add(fileInfo);
-                }
 
                 var doc = new XDocument(details)
                 {
