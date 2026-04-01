@@ -2,6 +2,7 @@
   z-index: $pageJumpBarZIndex;
   display: flex;
   place-content: stretch center;
+
   align-items: stretch;
   align-self: stretch;
   flex: 0 0 30px;
