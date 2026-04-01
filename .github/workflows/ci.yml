@@ -147,9 +147,9 @@ jobs:
       matrix:
         include:
           - shard: core
-            assemblies: _tests/net8.0/Gamarr.Core.Test.dll
+            assemblies: _tests/net10.0/Gamarr.Core.Test.dll
           - shard: other
-            assemblies: _tests/net8.0/Gamarr.Common.Test.dll _tests/net8.0/Gamarr.Host.Test.dll _tests/net8.0/Gamarr.Api.Test.dll _tests/net8.0/Gamarr.Libraries.Test.dll _tests/net8.0/Gamarr.Update.Test.dll _tests/net8.0/Gamarr.Mono.Test.dll _tests/net8.0/Gamarr.Windows.Test.dll
+            assemblies: _tests/net10.0/Gamarr.Common.Test.dll _tests/net10.0/Gamarr.Host.Test.dll _tests/net10.0/Gamarr.Api.Test.dll _tests/net10.0/Gamarr.Libraries.Test.dll _tests/net10.0/Gamarr.Update.Test.dll _tests/net10.0/Gamarr.Mono.Test.dll _tests/net10.0/Gamarr.Windows.Test.dll
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -168,7 +168,7 @@ jobs:
 
       - name: Fix artifact permissions
         run: |
-          find _tests/net8.0 _output -maxdepth 1 -type f -exec file {} + | grep -iE 'ELF|executable' | cut -d: -f1 | xargs -r chmod +x
+          find _tests/net10.0 _output -maxdepth 1 -type f -exec file {} + | grep -iE 'ELF|executable' | cut -d: -f1 | xargs -r chmod +x
 
       - name: Run Unit Tests
         shell: bash
@@ -290,7 +290,7 @@ jobs:
 
       - name: Fix artifact permissions
         run: |
-          find _tests/net8.0 _output -maxdepth 1 -type f -exec file {} + | grep -iE 'ELF|executable' | cut -d: -f1 | xargs -r chmod +x
+          find _tests/net10.0 _output -maxdepth 1 -type f -exec file {} + | grep -iE 'ELF|executable' | cut -d: -f1 | xargs -r chmod +x
 
       - name: Run Integration Tests
         shell: bash
@@ -298,7 +298,7 @@ jobs:
           sudo unshare --net -- bash -c '
             ip link set lo up
             runuser -u runner -- \
-              dotnet test _tests/net8.0/Gamarr.Integration.Test.dll \
+              dotnet test _tests/net10.0/Gamarr.Integration.Test.dll \
                 --filter "Category=IntegrationTest" \
                 --logger "trx;LogFileName=integration-test-results.trx" \
                 --results-directory ./test-results
@@ -307,7 +307,7 @@ jobs:
       - name: Run External Integration Tests
         shell: bash
         run: |
-          dotnet test _tests/net8.0/Gamarr.Integration.Test.dll \
+          dotnet test _tests/net10.0/Gamarr.Integration.Test.dll \
             --filter "Category=ExternalIntegrationTest" \
             --logger "trx;LogFileName=external-integration-test-results.trx" \
             --results-directory ./test-results
@@ -358,8 +358,8 @@ jobs:
 
       - name: Fix artifact permissions
         run: |
-          find _tests/net8.0 _output -maxdepth 1 -type f -exec file {} + | grep -iE 'ELF|executable' | cut -d: -f1 | xargs -r chmod +x
-          chmod +x _tests/net8.0/.playwright/node/linux-x64/node
+          find _tests/net10.0 _output -maxdepth 1 -type f -exec file {} + | grep -iE 'ELF|executable' | cut -d: -f1 | xargs -r chmod +x
+          chmod +x _tests/net10.0/.playwright/node/linux-x64/node
 
       - name: Cache Playwright browsers
         id: playwright-cache
@@ -370,18 +370,18 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pwsh _tests/net8.0/playwright.ps1 install --with-deps
+        run: pwsh _tests/net10.0/playwright.ps1 install --with-deps
 
       - name: Install Playwright deps only
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pwsh _tests/net8.0/playwright.ps1 install-deps
+        run: pwsh _tests/net10.0/playwright.ps1 install-deps
 
       - name: Run Automation Tests
         run: |
           sudo unshare --net -- bash -c '
             ip link set lo up
             runuser -u runner -- \
-              dotnet test _tests/net8.0/Gamarr.Automation.Test.dll \
+              dotnet test _tests/net10.0/Gamarr.Automation.Test.dll \
                 --filter "Category=AutomationTest&Category!=ExternalAutomationTest" \
                 --logger "trx;LogFileName=automation-test-results.trx" \
                 --results-directory ./test-results
@@ -389,7 +389,7 @@ jobs:
 
       - name: Run External Automation Tests
         run: |
-          dotnet test _tests/net8.0/Gamarr.Automation.Test.dll \
+          dotnet test _tests/net10.0/Gamarr.Automation.Test.dll \
             --filter "Category=ExternalAutomationTest" \
             --logger "trx;LogFileName=external-automation-test-results.trx" \
             --results-directory ./test-results
