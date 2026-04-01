@@ -1,12 +1,11 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-# clamd daemon is disabled by default since Gamarr uses clamscan (standalone).
-# clamd loads ~1GB of virus signatures into RAM and sits idle.
-# Set CLAMAV_DAEMON_ENABLED=true to enable if using clamdscan externally.
-if [ "${CLAMAV_DAEMON_ENABLED,,}" != "true" ]; then
-    exec sleep infinity
+# clamd daemon disabled — Gamarr uses clamscan (standalone) which loads
+# signatures on-demand per scan. No daemon needed.
+# Set CLAMAV_DAEMON=true to run clamd if you need it for external tools.
+if [ "${CLAMAV_DAEMON,,}" = "true" ]; then
+    exec s6-setuidgid abc clamd --foreground
 fi
 
-exec \
-    s6-setuidgid abc clamd --foreground
+exec sleep infinity
