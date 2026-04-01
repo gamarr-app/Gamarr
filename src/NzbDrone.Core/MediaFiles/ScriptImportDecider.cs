@@ -23,7 +23,6 @@ namespace NzbDrone.Core.MediaFiles
     public class ImportScriptService : IImportScript
     {
         private readonly IConfigFileProvider _configFileProvider;
-        private readonly IVideoFileInfoReader _videoFileInfoReader;
         private readonly IProcessProvider _processProvider;
         private readonly IConfigService _configService;
         private readonly ITagRepository _tagRepository;
@@ -31,7 +30,6 @@ namespace NzbDrone.Core.MediaFiles
         private readonly Logger _logger;
 
         public ImportScriptService(IProcessProvider processProvider,
-                                   IVideoFileInfoReader videoFileInfoReader,
                                    IConfigService configService,
                                    IConfigFileProvider configFileProvider,
                                    ITagRepository tagRepository,
@@ -39,7 +37,6 @@ namespace NzbDrone.Core.MediaFiles
                                    Logger logger)
         {
             _processProvider = processProvider;
-            _videoFileInfoReader = videoFileInfoReader;
             _configService = configService;
             _configFileProvider = configFileProvider;
             _tagRepository = tagRepository;
@@ -154,15 +151,15 @@ namespace NzbDrone.Core.MediaFiles
             environmentVariables.Add("Gamarr_Download_Client", downloadClientInfo?.Name ?? string.Empty);
             environmentVariables.Add("Gamarr_Download_Client_Type", downloadClientInfo?.Type ?? string.Empty);
             environmentVariables.Add("Gamarr_Download_Id", downloadId ?? string.Empty);
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioChannels", MediaInfoFormatter.FormatAudioChannels(localGame.MediaInfo).ToString());
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioCodec", MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, null));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioLanguages", gameFile.MediaInfo.AudioLanguages.Distinct().ConcatToString(" / "));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Languages", gameFile.MediaInfo.AudioLanguages.ConcatToString(" / "));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Height", gameFile.MediaInfo.Height.ToString());
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Width", gameFile.MediaInfo.Width.ToString());
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Subtitles", gameFile.MediaInfo.Subtitles.ConcatToString(" / "));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoCodec", MediaInfoFormatter.FormatVideoCodec(gameFile.MediaInfo, null));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoDynamicRangeType", MediaInfoFormatter.FormatVideoDynamicRangeType(gameFile.MediaInfo));
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioChannels", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioCodec", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioLanguages", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Languages", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Height", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Width", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Subtitles", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoCodec", string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoDynamicRangeType", string.Empty);
 
             environmentVariables.Add("Gamarr_GameFile_CustomFormat", string.Join("|", localGame.CustomFormats));
             environmentVariables.Add("Gamarr_GameFile_CustomFormatScore", localGame.CustomFormatScore.ToString());
@@ -204,7 +201,6 @@ namespace NzbDrone.Core.MediaFiles
 
             if (scriptImportInfo.Decision == ScriptImportDecision.RenameRequested)
             {
-                gameFile.MediaInfo = _videoFileInfoReader.GetMediaInfo(mediaFile);
                 gameFile.Path = null;
             }
 

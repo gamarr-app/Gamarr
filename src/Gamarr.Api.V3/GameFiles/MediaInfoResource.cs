@@ -1,5 +1,3 @@
-using System;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles.MediaInfo;
 using Gamarr.Http.REST;
 
@@ -33,36 +31,25 @@ namespace Gamarr.Api.V3.GameFiles
                 return null;
             }
 
+            // Return empty/default values - media info scanning is not applicable for game files
             return new MediaInfoResource
             {
-                AudioBitrate = model.AudioBitrate,
-                AudioChannels = MediaInfoFormatter.FormatAudioChannels(model),
-                AudioLanguages = model.AudioLanguages.ConcatToString("/"),
-                AudioStreamCount = model.AudioStreamCount,
-                AudioCodec = MediaInfoFormatter.FormatAudioCodec(model, sceneName),
-                VideoBitDepth = model.VideoBitDepth,
-                VideoBitrate = model.VideoBitrate,
-                VideoCodec = MediaInfoFormatter.FormatVideoCodec(model, sceneName),
-                VideoFps = Math.Round(model.VideoFps, 3),
-                VideoDynamicRange = MediaInfoFormatter.FormatVideoDynamicRange(model),
-                VideoDynamicRangeType = MediaInfoFormatter.FormatVideoDynamicRangeType(model),
-                Resolution = $"{model.Width}x{model.Height}",
-                RunTime = FormatRuntime(model.RunTime),
-                ScanType = model.ScanType,
-                Subtitles = model.Subtitles.ConcatToString("/")
+                AudioBitrate = 0,
+                AudioChannels = 0,
+                AudioLanguages = string.Empty,
+                AudioStreamCount = 0,
+                AudioCodec = string.Empty,
+                VideoBitDepth = 0,
+                VideoBitrate = 0,
+                VideoCodec = string.Empty,
+                VideoFps = 0,
+                VideoDynamicRange = string.Empty,
+                VideoDynamicRangeType = string.Empty,
+                Resolution = string.Empty,
+                RunTime = string.Empty,
+                ScanType = string.Empty,
+                Subtitles = string.Empty
             };
-        }
-
-        private static string FormatRuntime(TimeSpan runTime)
-        {
-            var hours = (int)runTime.TotalHours;
-
-            if (hours > 0)
-            {
-                return $"{hours}:{runTime.Minutes:00}:{runTime.Seconds:00}";
-            }
-
-            return $"{runTime.Minutes}:{runTime.Seconds:00}";
         }
     }
 }
