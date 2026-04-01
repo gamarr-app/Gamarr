@@ -285,26 +285,24 @@ namespace NzbDrone.Core.Datastore
         private void ParseEnumerableContains(MethodCallExpression body)
         {
             // Fish out the list and the item to compare
-            // It's in a different form for arrays and Lists
+            // It's in a different form for arrays, Lists, and different .NET versions
             var list = body.Object;
             Expression item;
 
-            if (list != null)
+            if (list != null && body.Arguments.Count >= 1)
             {
-                // Generic collection
+                // Instance method: list.Contains(item) or list.Contains(item, comparer)
                 item = body.Arguments[0];
+            }
+            else if (body.Arguments.Count >= 2)
+            {
+                // Static method: Enumerable.Contains(source, item) or similar
+                list = body.Arguments[0];
+                item = body.Arguments[1];
             }
             else
             {
-                // Static method
-                // Must be Enumerable.Contains(source, item) or Array static Contains
-                if (body.Arguments.Count != 2)
-                {
-                    throw new NotSupportedException("Unexpected form of Enumerable.Contains");
-                }
-
-                list = body.Arguments[0];
-                item = body.Arguments[1];
+                throw new NotSupportedException("Unexpected form of Contains expression");
             }
 
             _sb.Append('(');
