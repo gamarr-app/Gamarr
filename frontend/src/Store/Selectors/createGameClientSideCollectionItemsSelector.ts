@@ -1,7 +1,7 @@
 import {
   createSelector,
   createSelectorCreator,
-  defaultMemoize,
+  lruMemoize,
   Selector,
 } from 'reselect';
 import { Error } from 'App/State/AppSectionState';
@@ -63,7 +63,7 @@ function gameListEqual(
 }
 
 const createGameEqualSelector = createSelectorCreator(
-  defaultMemoize,
+  lruMemoize,
   gameListEqual
 );
 
