@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators;
 using NzbDrone.Core.Parser.Model;
 
@@ -21,20 +19,14 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
     {
         private readonly IEnumerable<IAggregateLocalGame> _augmenters;
         private readonly IDiskProvider _diskProvider;
-        private readonly IVideoFileInfoReader _videoFileInfoReader;
-        private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public AggregationService(IEnumerable<IAggregateLocalGame> augmenters,
                                  IDiskProvider diskProvider,
-                                 IVideoFileInfoReader videoFileInfoReader,
-                                 IConfigService configService,
                                  Logger logger)
         {
             _augmenters = augmenters.OrderBy(a => a.Order).ToList();
             _diskProvider = diskProvider;
-            _videoFileInfoReader = videoFileInfoReader;
-            _configService = configService;
             _logger = logger;
         }
 
@@ -66,12 +58,6 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
             }
 
             localGame.SceneName = localGame.SceneSource ? SceneNameCalculator.GetSceneName(localGame) : null;
-
-            // Skip media info for folders - games don't have video media info
-            if (!isFolder && isMediaFile && (!localGame.ExistingFile || _configService.EnableMediaInfo))
-            {
-                localGame.MediaInfo = _videoFileInfoReader.GetMediaInfo(localGame.Path);
-            }
 
             foreach (var augmenter in _augmenters)
             {
