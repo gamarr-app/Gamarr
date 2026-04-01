@@ -21,8 +21,6 @@ updates:
    groups:
      npm-minor-patch:
        update-types: ["minor", "patch"]
-     npm-major:
-       update-types: ["major"]
 
  - package-ecosystem: "nuget"
    directory: "/src"
@@ -31,5 +29,3 @@ updates:
    groups:
      nuget-minor-patch:
        update-types: ["minor", "patch"]
-     nuget-major:
-       update-types: ["major"]
