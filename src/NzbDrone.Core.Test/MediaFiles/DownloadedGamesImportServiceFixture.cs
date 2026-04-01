@@ -282,8 +282,6 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IImportApprovedGame>()
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
                   .Returns(imported.Select(i => new ImportResult(i)).ToList());
-
-
             Subject.ProcessRootFolder(new DirectoryInfo(_droneFactory));
 
             Mocker.GetMock<IDiskProvider>()
@@ -347,8 +345,6 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IImportApprovedGame>()
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
                   .Returns(imported.Select(i => new ImportResult(i)).ToList());
-
-
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFiles(It.IsAny<string>(), true))
                   .Returns(new[] { _videoFiles.First().Replace(".ext", ".rar") });
@@ -450,8 +446,6 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IImportApprovedGame>()
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
                   .Returns(new List<ImportResult>());
-
-
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFileSize(It.IsAny<string>()))
                   .Returns(15.Megabytes());
