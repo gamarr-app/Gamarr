@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '22.x'
   MAJOR_VERSION: '0.0.1'
   NUGET_CERT_REVOCATION_MODE: offline

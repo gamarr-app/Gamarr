@@ -2,7 +2,7 @@
 
 ## .NET SDK
 
-The .NET 8 SDK is installed at `~/.dotnet`. Add to PATH if needed:
+The .NET 10 SDK is installed at `~/.dotnet`. Add to PATH if needed:
 
 ```bash
 export DOTNET_ROOT="$HOME/.dotnet"
