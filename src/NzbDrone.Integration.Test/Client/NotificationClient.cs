@@ -6,7 +6,7 @@ namespace NzbDrone.Integration.Test.Client
 {
     public class NotificationClient : ClientBase<NotificationResource>
     {
-        public NotificationClient(IRestClient restClient, string apiKey)
+        public NotificationClient(RestClient restClient, string apiKey)
             : base(restClient, apiKey)
         {
         }

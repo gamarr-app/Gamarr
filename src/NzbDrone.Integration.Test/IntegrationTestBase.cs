@@ -97,9 +97,17 @@ namespace NzbDrone.Integration.Test
 
         protected virtual void InitRestClients()
         {
-            RestClient = new RestClient(RootUrl + "api/v3/");
-            RestClient.AddDefaultHeader("Authentication", ApiKey);
-            RestClient.AddDefaultHeader("X-Api-Key", ApiKey);
+            RestClient = new RestClient(
+                new RestClientOptions(RootUrl + "api/v3/")
+                {
+                    ThrowOnAnyError = false,
+                    ThrowOnDeserializationError = false
+                },
+                headers =>
+                {
+                    headers.Add("Authentication", ApiKey);
+                    headers.Add("X-Api-Key", ApiKey);
+                });
 
             AutoTagging = new ClientBase<AutoTaggingResource>(RestClient, ApiKey);
             Blocklist = new ClientBase<BlocklistResource>(RestClient, ApiKey);

@@ -7,7 +7,7 @@ namespace NzbDrone.Integration.Test.Client
 {
     public class GameClient : ClientBase<GameResource>
     {
-        public GameClient(IRestClient restClient, string apiKey)
+        public GameClient(RestClient restClient, string apiKey)
             : base(restClient, apiKey)
         {
         }
@@ -35,7 +35,7 @@ namespace NzbDrone.Integration.Test.Client
 
     public class SystemInfoClient : ClientBase<GameResource>
     {
-        public SystemInfoClient(IRestClient restClient, string apiKey)
+        public SystemInfoClient(RestClient restClient, string apiKey)
             : base(restClient, apiKey)
         {
         }

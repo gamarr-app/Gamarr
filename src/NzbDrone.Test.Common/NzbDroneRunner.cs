@@ -19,7 +19,7 @@ namespace NzbDrone.Test.Common
     public class NzbDroneRunner
     {
         private readonly IProcessProvider _processProvider;
-        private readonly IRestClient _restClient;
+        private readonly RestClient _restClient;
         private Process _nzbDroneProcess;
 
         public string AppData { get; private set; }
@@ -72,15 +72,15 @@ namespace NzbDrone.Test.Common
                 request.AddHeader("Authorization", ApiKey);
                 request.AddHeader("X-Api-Key", ApiKey);
 
-                var statusCall = _restClient.Get(request);
+                var statusCall = _restClient.Execute(request);
 
-                if (statusCall.ResponseStatus == ResponseStatus.Completed)
+                if (statusCall.IsSuccessful)
                 {
                     TestContext.Progress.WriteLine($"Gamarr {Port} is started. Running Tests");
                     return;
                 }
 
-                TestContext.Progress.WriteLine("Waiting for Gamarr to start. Response Status : {0}  [{1}] {2}", statusCall.ResponseStatus, statusCall.StatusDescription, statusCall.ErrorException.Message);
+                TestContext.Progress.WriteLine("Waiting for Gamarr to start. Status : {0}  [{1}] {2}", statusCall.StatusCode, statusCall.StatusDescription, statusCall.ErrorException?.Message);
 
                 Thread.Sleep(500);
             }
