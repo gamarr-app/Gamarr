@@ -1,7 +1,7 @@
 import {
   createSelector,
   createSelectorCreator,
-  defaultMemoize,
+  lruMemoize,
   Selector,
 } from 'reselect';
 import AppState, { CustomFilter } from 'App/State/AppState';
@@ -51,7 +51,7 @@ function gameListEqual(a: CollectionResult, b: CollectionResult): boolean {
 }
 
 const createGameEqualSelector = createSelectorCreator(
-  defaultMemoize,
+  lruMemoize,
   gameListEqual
 );
 
