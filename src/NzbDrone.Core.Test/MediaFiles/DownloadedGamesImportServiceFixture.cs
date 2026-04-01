@@ -266,7 +266,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
-        public void should_delete_folder_if_files_were_imported_and_only_sample_files_remain()
+        public void should_delete_folder_if_files_were_imported_and_no_video_files_remain()
         {
             GivenValidGame();
 
@@ -281,7 +281,17 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Mocker.GetMock<IImportApprovedGame>()
                   .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
-                  .Returns(imported.Select(i => new ImportResult(i)).ToList());
+                  .Returns(imported.Select(i => new ImportResult(i)).ToList())
+                  .Callback(() =>
+                  {
+                      Mocker.GetMock<IDiskScanService>().Setup(c => c.GetVideoFiles(It.IsAny<string>(), It.IsAny<bool>()))
+                            .Returns(System.Array.Empty<string>());
+                  });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(It.IsAny<string>(), true))
+                  .Returns(System.Array.Empty<string>());
+
             Subject.ProcessRootFolder(new DirectoryInfo(_droneFactory));
 
             Mocker.GetMock<IDiskProvider>()

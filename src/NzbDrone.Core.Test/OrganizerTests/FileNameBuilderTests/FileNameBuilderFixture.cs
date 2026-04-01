@@ -376,7 +376,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [Test]
-        public void should_format_mediainfo_properly()
+        public void should_return_empty_for_mediainfo_full()
         {
             _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
 
@@ -389,63 +389,11 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             };
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park.H264.DTS[EN+ES].[EN+ES+IT]");
-        }
-
-        [TestCase("nob", "NB")]
-        [TestCase("swe", "SV")]
-        [TestCase("zho", "ZH")]
-        [TestCase("chi", "ZH")]
-        [TestCase("fre", "FR")]
-        [TestCase("rum", "RO")]
-        [TestCase("per", "FA")]
-        [TestCase("ger", "DE")]
-        [TestCase("gsw", "DE")]
-        [TestCase("cze", "CS")]
-        [TestCase("ice", "IS")]
-        [TestCase("dut", "NL")]
-        [TestCase("nor", "NO")]
-        [TestCase("khk", "MN")]
-        [TestCase("mvf", "MN")]
-        [TestCase("geo", "KA")]
-        [TestCase("kat", "KA")]
-        public void should_format_languagecodes_properly(string language, string code)
-        {
-            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
-
-            _gameFile.MediaInfo = new MediaInfoModel()
-            {
-                VideoFormat = "h264",
-                AudioFormat = "dts",
-                AudioChannels = 6,
-                AudioLanguages = new List<string> { "eng" },
-                Subtitles = new List<string> { language },
-                SchemaRevision = 3
-            };
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be($"South.Park.H264.DTS.[{code}]");
+                   .Should().Be("South.Park");
         }
 
         [Test]
-        public void should_exclude_english_in_mediainfo_audio_language()
-        {
-            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
-
-            _gameFile.MediaInfo = new MediaInfoModel()
-            {
-                VideoFormat = "h264",
-                AudioFormat = "dts",
-                AudioLanguages = new List<string> { "eng" },
-                Subtitles = new List<string> { "eng", "spa", "ita" }
-            };
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park.H264.DTS.[EN+ES+IT]");
-        }
-
-        [Test]
-        public void should_format_mediainfo_3d_properly()
+        public void should_return_empty_for_mediainfo_3d_and_simple()
         {
             _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.3D}.{MediaInfo.Simple}";
 
@@ -459,7 +407,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             };
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park.3D.h264.DTS");
+                   .Should().Be("South.Park");
         }
 
         [Test]
@@ -593,10 +541,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _game.Year = 2020;
             GivenMediaInfoModel();
 
-            _namingConfig.StandardGameFormat = "{Game CleanTitle} ({Release Year}) [{Quality Title}] [igdb-{IgdbId}] [{MediaInfo AudioCodec}]";
+            _namingConfig.StandardGameFormat = "{Game CleanTitle} ({Release Year}) [{Quality Title}] [igdb-{IgdbId}]";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park (2020) [Uplay] [igdb-124578] [DTS]");
+                   .Should().Be("South Park (2020) [Uplay] [igdb-124578]");
         }
 
         [Test]
@@ -646,59 +594,49 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                    .Should().Be(releaseGroup);
         }
 
-        [TestCase("eng", "")]
-        [TestCase("eng/deu", "[EN+DE]")]
-        public void should_format_audio_languages(string audioLanguages, string expected)
+        [Test]
+        public void should_return_empty_for_audio_languages()
         {
             _gameFile.ReleaseGroup = null;
 
-            GivenMediaInfoModel(audioLanguages: audioLanguages);
+            GivenMediaInfoModel(audioLanguages: "eng/deu");
 
             _namingConfig.StandardGameFormat = "{MediaInfo AudioLanguages}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(expected);
+                   .Should().BeEmpty();
         }
 
-        [TestCase("eng", "[EN]")]
-        [TestCase("eng/deu", "[EN+DE]")]
-        public void should_format_audio_languages_all(string audioLanguages, string expected)
+        [Test]
+        public void should_return_empty_for_audio_languages_all()
         {
             _gameFile.ReleaseGroup = null;
 
-            GivenMediaInfoModel(audioLanguages: audioLanguages);
+            GivenMediaInfoModel(audioLanguages: "eng/deu");
 
             _namingConfig.StandardGameFormat = "{MediaInfo AudioLanguagesAll}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(expected);
+                   .Should().BeEmpty();
         }
 
-        [TestCase("eng/deu", "", "[EN+DE]")]
-        [TestCase("eng/nld/deu", "", "[EN+NL+DE]")]
-        [TestCase("eng/deu", ":DE", "[DE]")]
-        [TestCase("eng/nld/deu", ":EN+NL", "[EN+NL]")]
-        [TestCase("eng/nld/deu", ":NL+EN", "[NL+EN]")]
-        [TestCase("eng/nld/deu", ":-NL", "[EN+DE]")]
-        [TestCase("eng/nld/deu", ":DE+", "[DE+-]")]
-        [TestCase("eng/nld/deu", ":DE+NO.", "[DE].")]
-        [TestCase("eng/nld/deu", ":-EN-", "[NL+DE]-")]
-        public void should_format_subtitle_languages_all(string subtitleLanguages, string format, string expected)
+        [Test]
+        public void should_return_empty_for_subtitle_languages()
         {
             _gameFile.ReleaseGroup = null;
 
-            GivenMediaInfoModel(subtitles: subtitleLanguages);
+            GivenMediaInfoModel(subtitles: "eng/deu");
 
-            _namingConfig.StandardGameFormat = "{MediaInfo SubtitleLanguages" + format + "}End";
+            _namingConfig.StandardGameFormat = "{MediaInfo SubtitleLanguages}End";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(expected + "End");
+                   .Should().Be("End");
         }
 
-        [TestCase(HdrFormat.None, "South.Park")]
-        [TestCase(HdrFormat.Hlg10, "South.Park.HDR")]
-        [TestCase(HdrFormat.Hdr10, "South.Park.HDR")]
-        public void should_include_hdr_for_mediainfo_videodynamicrange_with_valid_properties(HdrFormat hdrFormat, string expectedName)
+        [TestCase(HdrFormat.None)]
+        [TestCase(HdrFormat.Hlg10)]
+        [TestCase(HdrFormat.Hdr10)]
+        public void should_return_empty_for_mediainfo_videodynamicrange(HdrFormat hdrFormat)
         {
             _namingConfig.StandardGameFormat =
                 "{Game.Title}.{MediaInfo VideoDynamicRange}";
@@ -706,7 +644,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenMediaInfoModel(hdrFormat: hdrFormat);
 
             Subject.BuildFileName(_game, _gameFile)
-                .Should().Be(expectedName);
+                .Should().Be("South.Park");
         }
 
         private void GivenMediaInfoModel(string videoCodec = "h264",
