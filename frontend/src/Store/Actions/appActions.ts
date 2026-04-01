@@ -60,7 +60,6 @@ interface TranslationsState {
   error: string | null;
 }
 
-// eslint-disable-next-line init-declarations
 declare const window: Window & {
   innerWidth: number;
   innerHeight: number;

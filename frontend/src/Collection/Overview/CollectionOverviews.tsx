@@ -9,7 +9,7 @@ import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder'
 import CollectionOverviewConnector from './CollectionOverviewConnector';
 import styles from './CollectionOverviews.css';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dimensions = require('Styles/Variables/dimensions');
 
 // Poster container dimensions
