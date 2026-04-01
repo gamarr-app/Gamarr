@@ -345,6 +345,5 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 return Path.ChangeExtension(gameFilePath, "nfo");
             }
         }
-
     }
 }
