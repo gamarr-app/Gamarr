@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="NLog" Version="5.5.1" />
+    <PackageReference Include="NLog" Version="6.1.1" />
     <PackageReference Include="NLog.Layouts.ClefJsonLayout" Version="1.0.5" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
     <PackageReference Include="Npgsql" Version="9.0.5" />
