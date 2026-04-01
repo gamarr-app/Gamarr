@@ -24,7 +24,6 @@ namespace NzbDrone.Core.Parser.Model
         public string Edition { get; set; }
         public int Year { get; set; }
         public int IgdbId { get; set; }
-        public string HardcodedSubs { get; set; }
         public PlatformFamily Platform { get; set; }
         public string PlatformString { get; set; }
         public GameVersion GameVersion { get; set; }

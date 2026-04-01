@@ -66,8 +66,7 @@ namespace NzbDrone.Core.Test.ParserTests
                 ReleaseHash = "hash123",
                 Edition = "Deluxe Edition",
                 Year = 2023,
-                IgdbId = 12345,
-                HardcodedSubs = "English"
+                IgdbId = 12345
             };
 
             parsed.OriginalTitle.Should().Be("Original Title");
@@ -80,7 +79,6 @@ namespace NzbDrone.Core.Test.ParserTests
             parsed.Edition.Should().Be("Deluxe Edition");
             parsed.Year.Should().Be(2023);
             parsed.IgdbId.Should().Be(12345);
-            parsed.HardcodedSubs.Should().Be("English");
         }
 
         [Test]

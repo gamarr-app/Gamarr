@@ -12,7 +12,6 @@ using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.GameImport;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games;
@@ -41,7 +40,6 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IMediaFileTableCleanupService _mediaFileTableCleanupService;
         private readonly IRootFolderService _rootFolderService;
-        private readonly IUpdateMediaInfo _updateMediaInfoService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
@@ -53,7 +51,6 @@ namespace NzbDrone.Core.MediaFiles
                                IMediaFileService mediaFileService,
                                IMediaFileTableCleanupService mediaFileTableCleanupService,
                                IRootFolderService rootFolderService,
-                               IUpdateMediaInfo updateMediaInfoService,
                                IEventAggregator eventAggregator,
                                Logger logger)
         {
@@ -65,7 +62,6 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileService = mediaFileService;
             _mediaFileTableCleanupService = mediaFileTableCleanupService;
             _rootFolderService = rootFolderService;
-            _updateMediaInfoService = updateMediaInfoService;
             _eventAggregator = eventAggregator;
             _logger = logger;
         }

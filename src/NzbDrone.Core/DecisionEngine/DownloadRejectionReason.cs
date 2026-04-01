@@ -32,7 +32,6 @@ public enum DownloadRejectionReason
     Blocklisted,
     CustomFormatMinimumScore,
     MinimumFreeSpace,
-    HardcodeSubtitles,
     WantedLanguage,
     MaximumSizeExceeded,
     MinimumAge,

@@ -21,9 +21,6 @@ namespace NzbDrone.Core.Parser
         // The old pattern (^.+? + EditionRegex) caused O(n²) or worse performance as the regex engine
         // tried every possible split point in the string when the edition pattern didn't match early.
 
-        private static readonly Regex HardcodedSubsRegex = new Regex(@"\b((?<hcsub>(\w+(?<!SOFT|MULTI|HORRIBLE)SUBS?))|(?<hc>(HC|SUBBED)))\b",
-                                                        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-
         private static readonly Regex[] ReportGameTitleRegex = new[]
         {
             // Scene release with version AND platform suffix: "Sandwalkers.v2.2.3.Linux-I_KnoW" → "Sandwalkers"
@@ -476,8 +473,6 @@ namespace NzbDrone.Core.Parser
                                     result.ReleaseGroup = match[0].Groups["releasegroup"].Value;
                                 }
 
-                                result.HardcodedSubs = ParseHardcodeSubs(title);
-
                                 Logger.Debug("Release Group parsed: {0}", result.ReleaseGroup);
 
                                 // Use simpleReleaseTitle (with title replaced by "A Game") to avoid false positives from language words in titles (e.g. "The Italian Job")
@@ -696,25 +691,6 @@ namespace NzbDrone.Core.Parser
         public static string SimplifyReleaseTitle(this string title)
         {
             return SimpleReleaseTitleRegex.Replace(title, string.Empty);
-        }
-
-        public static string ParseHardcodeSubs(string title)
-        {
-            var subMatch = HardcodedSubsRegex.Matches(title).OfType<Match>().LastOrDefault();
-
-            if (subMatch != null && subMatch.Success)
-            {
-                if (subMatch.Groups["hcsub"].Success)
-                {
-                    return subMatch.Groups["hcsub"].Value;
-                }
-                else if (subMatch.Groups["hc"].Success)
-                {
-                    return "Generic Hardcoded Subs";
-                }
-            }
-
-            return null;
         }
 
         public static bool HasMultipleLanguages(string title)

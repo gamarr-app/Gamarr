@@ -11,7 +11,6 @@ using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser;
@@ -33,7 +32,6 @@ namespace NzbDrone.Core.Organizer
 
         private readonly INamingConfigService _namingConfigService;
         private readonly IQualityDefinitionService _qualityDefinitionService;
-        private readonly IUpdateMediaInfo _mediaInfoUpdater;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly Logger _logger;
@@ -89,14 +87,12 @@ namespace NzbDrone.Core.Organizer
 
         public FileNameBuilder(INamingConfigService namingConfigService,
                                IQualityDefinitionService qualityDefinitionService,
-                               IUpdateMediaInfo mediaInfoUpdater,
                                IGameTranslationService gameTranslationService,
                                ICustomFormatCalculationService formatCalculator,
                                Logger logger)
         {
             _namingConfigService = namingConfigService;
             _qualityDefinitionService = qualityDefinitionService;
-            _mediaInfoUpdater = mediaInfoUpdater;
             _gameTranslationService = gameTranslationService;
             _formatCalculator = formatCalculator;
             _logger = logger;
@@ -123,8 +119,6 @@ namespace NzbDrone.Core.Organizer
 
             var tokenHandlers = new Dictionary<string, Func<TokenMatch, string>>(FileNameBuilderTokenEqualityComparer.Instance);
             var multipleTokens = TitleRegex.Matches(pattern).Count > 1;
-
-            UpdateMediaInfoIfNeeded(pattern, gameFile, game);
 
             AddGameTokens(tokenHandlers, game);
             AddReleaseDateTokens(tokenHandlers, game.Year);
@@ -371,59 +365,30 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{Quality Real}"] = m => qualityReal;
         }
 
-        private static readonly IReadOnlyDictionary<string, int> MinimumMediaInfoSchemaRevisions =
-            new Dictionary<string, int>(FileNameBuilderTokenEqualityComparer.Instance)
-        {
-            { MediaInfoVideoDynamicRangeToken, 5 },
-            { MediaInfoVideoDynamicRangeTypeToken, 13 }
-        };
 
         private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, GameFile gameFile)
         {
-            if (gameFile.MediaInfo == null)
-            {
-                _logger.Trace("Media info is unavailable for {0}", gameFile);
+            // MediaInfo tokens are registered as empty strings so existing naming formats don't break
+            tokenHandlers["{MediaInfo Video}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo VideoCodec}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo VideoBitDepth}"] = m => string.Empty;
 
-                return;
-            }
+            tokenHandlers["{MediaInfo Audio}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo AudioCodec}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo AudioChannels}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo AudioLanguages}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo AudioLanguagesAll}"] = m => string.Empty;
 
-            var sceneName = gameFile.GetSceneOrFileName();
+            tokenHandlers["{MediaInfo SubtitleLanguages}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo SubtitleLanguagesAll}"] = m => string.Empty;
 
-            var videoCodec = MediaInfoFormatter.FormatVideoCodec(gameFile.MediaInfo, sceneName) ?? string.Empty;
-            var audioCodec = MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, sceneName) ?? string.Empty;
-            var audioChannels = MediaInfoFormatter.FormatAudioChannels(gameFile.MediaInfo);
-            var audioLanguages = gameFile.MediaInfo.AudioLanguages ?? new List<string>();
-            var subtitles = gameFile.MediaInfo.Subtitles ?? new List<string>();
+            tokenHandlers["{MediaInfo 3D}"] = m => string.Empty;
 
-            var videoBitDepth = gameFile.MediaInfo.VideoBitDepth > 0 ? gameFile.MediaInfo.VideoBitDepth.ToString() : 8.ToString();
-            var audioChannelsFormatted = audioChannels > 0 ?
-                                audioChannels.ToString("F1", CultureInfo.InvariantCulture) :
-                                string.Empty;
+            tokenHandlers["{MediaInfo Simple}"] = m => string.Empty;
+            tokenHandlers["{MediaInfo Full}"] = m => string.Empty;
 
-            var mediaInfo3D = gameFile.MediaInfo.VideoMultiViewCount > 1 ? "3D" : string.Empty;
-
-            tokenHandlers["{MediaInfo Video}"] = m => videoCodec;
-            tokenHandlers["{MediaInfo VideoCodec}"] = m => videoCodec;
-            tokenHandlers["{MediaInfo VideoBitDepth}"] = m => videoBitDepth;
-
-            tokenHandlers["{MediaInfo Audio}"] = m => audioCodec;
-            tokenHandlers["{MediaInfo AudioCodec}"] = m => audioCodec;
-            tokenHandlers["{MediaInfo AudioChannels}"] = m => audioChannelsFormatted;
-            tokenHandlers["{MediaInfo AudioLanguages}"] = m => GetLanguagesToken(audioLanguages, m.CustomFormat, true, true);
-            tokenHandlers["{MediaInfo AudioLanguagesAll}"] = m => GetLanguagesToken(audioLanguages, m.CustomFormat, false, true);
-
-            tokenHandlers["{MediaInfo SubtitleLanguages}"] = m => GetLanguagesToken(subtitles, m.CustomFormat, false, true);
-            tokenHandlers["{MediaInfo SubtitleLanguagesAll}"] = m => GetLanguagesToken(subtitles, m.CustomFormat, false, true);
-
-            tokenHandlers["{MediaInfo 3D}"] = m => mediaInfo3D;
-
-            tokenHandlers["{MediaInfo Simple}"] = m => $"{videoCodec} {audioCodec}";
-            tokenHandlers["{MediaInfo Full}"] = m => $"{videoCodec} {audioCodec}{GetLanguagesToken(audioLanguages, m.CustomFormat, true, true)} {GetLanguagesToken(subtitles, m.CustomFormat, false, true)}";
-
-            tokenHandlers[MediaInfoVideoDynamicRangeToken] =
-                m => MediaInfoFormatter.FormatVideoDynamicRange(gameFile.MediaInfo);
-            tokenHandlers[MediaInfoVideoDynamicRangeTypeToken] =
-                m => MediaInfoFormatter.FormatVideoDynamicRangeType(gameFile.MediaInfo);
+            tokenHandlers[MediaInfoVideoDynamicRangeToken] = m => string.Empty;
+            tokenHandlers[MediaInfoVideoDynamicRangeTypeToken] = m => string.Empty;
         }
 
         private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Game game, GameFile gameFile, List<CustomFormat> customFormats = null)
@@ -546,26 +511,6 @@ namespace NzbDrone.Core.Organizer
             edition = Regex.Replace(edition, @"((?:\b|_)(?:IMAX|3D|SDR|HDR|DV)(?:\b|_))", match => match.Groups[1].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
 
             return edition;
-        }
-
-        private void UpdateMediaInfoIfNeeded(string pattern, GameFile gameFile, Game game)
-        {
-            if (game.Path.IsNullOrWhiteSpace())
-            {
-                return;
-            }
-
-            var schemaRevision = gameFile.MediaInfo != null ? gameFile.MediaInfo.SchemaRevision : 0;
-            var matches = TitleRegex.Matches(pattern);
-
-            var shouldUpdateMediaInfo = matches.Cast<Match>()
-                .Select(m => MinimumMediaInfoSchemaRevisions.GetValueOrDefault(m.Value, -1))
-                .Any(r => schemaRevision < r);
-
-            if (shouldUpdateMediaInfo)
-            {
-                _mediaInfoUpdater.Update(gameFile, game);
-            }
         }
 
         private string ReplaceTokens(string pattern, Dictionary<string, Func<TokenMatch, string>> tokenHandlers, NamingConfig namingConfig)

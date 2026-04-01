@@ -126,8 +126,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 var selectedSettingsLanguage = Language.FindById(gameMetadataLanguage);
                 var gameTranslation = gameTranslations.FirstOrDefault(mt => mt.Language == selectedSettingsLanguage);
 
-                var watched = GetExistingWatchedStatus(game, gameFile.RelativePath);
-
                 var thumbnail = game.GameMetadata.Value.Images.SingleOrDefault(i => i.CoverType == MediaCoverTypes.Screenshot);
                 var posters = game.GameMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Poster).ToList();
                 var fanarts = game.GameMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Fanart).ToList();
@@ -189,8 +187,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                 details.Add(new XElement("userrating"));
 
-                details.Add(new XElement("top250"));
-
                 details.Add(new XElement("outline"));
 
                 details.Add(new XElement("plot", gameTranslation?.Overview ?? game.GameMetadata.Value.Overview));
@@ -231,10 +227,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 {
                     details.Add(new XElement("mpaa", game.GameMetadata.Value.Certification));
                 }
-
-                details.Add(new XElement("playcount"));
-
-                details.Add(new XElement("lastplayed"));
 
                 details.Add(new XElement("id", game.IgdbId));
 
@@ -283,8 +275,6 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 details.Add(new XElement("studio", game.GameMetadata.Value.Studio));
 
                 details.Add(new XElement("trailer", "plugin://plugin.video.youtube/play/?video_id=" + game.GameMetadata.Value.YouTubeTrailerId));
-
-                details.Add(new XElement("watched", watched));
 
                 var doc = new XDocument(details)
                 {
@@ -356,18 +346,5 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
             }
         }
 
-        private bool GetExistingWatchedStatus(Game game, string gameFilePath)
-        {
-            var fullPath = Path.Combine(game.Path, GetGameMetadataFilename(gameFilePath));
-
-            if (!_diskProvider.FileExists(fullPath))
-            {
-                return false;
-            }
-
-            var fileContent = _diskProvider.ReadAllText(fullPath);
-
-            return Regex.IsMatch(fileContent, "<watched>true</watched>");
-        }
     }
 }
