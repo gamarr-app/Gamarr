@@ -32,7 +32,6 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IParsingService _parsingService;
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly IImportApprovedGame _importApprovedGame;
-        private readonly IDetectSample _detectSample;
         private readonly IReleaseStructureValidator _releaseStructureValidator;
         private readonly IVirusScannerService _virusScanner;
         private readonly IRuntimeInfo _runtimeInfo;
@@ -46,7 +45,6 @@ namespace NzbDrone.Core.MediaFiles
                                                IParsingService parsingService,
                                                IMakeImportDecision importDecisionMaker,
                                                IImportApprovedGame importApprovedGame,
-                                               IDetectSample detectSample,
                                                IReleaseStructureValidator releaseStructureValidator,
                                                IVirusScannerService virusScanner,
                                                IRuntimeInfo runtimeInfo,
@@ -60,7 +58,6 @@ namespace NzbDrone.Core.MediaFiles
             _parsingService = parsingService;
             _importDecisionMaker = importDecisionMaker;
             _importApprovedGame = importApprovedGame;
-            _detectSample = detectSample;
             _releaseStructureValidator = releaseStructureValidator;
             _virusScanner = virusScanner;
             _runtimeInfo = runtimeInfo;
@@ -140,11 +137,9 @@ namespace NzbDrone.Core.MediaFiles
                         return false;
                     }
 
-                    if (_detectSample.IsSample(game.GameMetadata, videoFile) != DetectSampleResult.Sample)
-                    {
-                        _logger.Warn("Non-sample file detected: [{0}]", videoFile);
-                        return false;
-                    }
+                    // All game files are treated as non-samples
+                    _logger.Warn("Non-sample file detected: [{0}]", videoFile);
+                    return false;
                 }
 
                 if (rarFiles.Any(f => _diskProvider.GetFileSize(f) > 10.Megabytes()))

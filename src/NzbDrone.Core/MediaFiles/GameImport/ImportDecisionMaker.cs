@@ -28,7 +28,6 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         private readonly IMediaFileService _mediaFileService;
         private readonly IAggregationService _aggregationService;
         private readonly IDiskProvider _diskProvider;
-        private readonly IDetectSample _detectSample;
         private readonly ITrackedDownloadService _trackedDownloadService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly Logger _logger;
@@ -37,7 +36,6 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                                    IMediaFileService mediaFileService,
                                    IAggregationService aggregationService,
                                    IDiskProvider diskProvider,
-                                   IDetectSample detectSample,
                                    ITrackedDownloadService trackedDownloadService,
                                    ICustomFormatCalculationService formatCalculator,
                                    Logger logger)
@@ -46,7 +44,6 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             _mediaFileService = mediaFileService;
             _aggregationService = aggregationService;
             _diskProvider = diskProvider;
-            _detectSample = detectSample;
             _trackedDownloadService = trackedDownloadService;
             _formatCalculator = formatCalculator;
             _logger = logger;
@@ -210,17 +207,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
 
         private int GetNonSampleVideoFileCount(List<string> videoFiles, GameMetadata game)
         {
-            return videoFiles.Count(file =>
-            {
-                var sample = _detectSample.IsSample(game, file);
-
-                if (sample == DetectSampleResult.Sample)
-                {
-                    return false;
-                }
-
-                return true;
-            });
+            return videoFiles.Count;
         }
     }
 }
