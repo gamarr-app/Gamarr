@@ -9,6 +9,9 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <!-- Always use latest runtime patch for security fixes -->
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <!-- Pin runtime to >= 10.0.6 to patch CVE-2026-32178 (.NET Spoofing Vulnerability).
+         Bump as new patch releases land. -->
+    <RuntimeFrameworkVersion>10.0.8</RuntimeFrameworkVersion>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <GamarrRootDir>$(MSBuildThisFileDirectory)..\</GamarrRootDir>
