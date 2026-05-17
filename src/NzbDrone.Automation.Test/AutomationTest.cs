@@ -139,9 +139,8 @@ namespace NzbDrone.Automation.Test
                 }
             };
 
-            // Set longer timeout for assertions (CI is slower, and on first-time
-            // route entry the SPA may need to download/parse a lazy-loaded chunk).
-            SetDefaultExpectTimeout(60000);
+            // Set longer timeout for assertions (CI is slower)
+            SetDefaultExpectTimeout(30000);
 
             // Listen for page errors (uncaught exceptions)
             Page.PageError += (_, error) =>
@@ -154,19 +153,6 @@ namespace NzbDrone.Automation.Test
                 WaitUntil = WaitUntilState.Commit,
                 Timeout = 60000
             });
-
-            // Wait for the SPA to finish bootstrapping (window.Gamarr populated by
-            // /initialize.json + bootstrap()). Without this, subsequent NavigateToAsync
-            // calls can race with the still-loading bootstrap and leave the page in
-            // a wedged "navigating" state where even ScreenshotAsync hangs.
-            await Page.WaitForFunctionAsync(
-                "() => window.Gamarr && window.Gamarr.apiKey",
-                new PageWaitForFunctionOptions { Timeout = 60000 });
-
-            // And wait for the React app to actually render at least the sidebar.
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Games" }).First
-                .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 60000 });
-
             await WaitForNoSpinner();
         }
 
@@ -175,16 +161,8 @@ namespace NzbDrone.Automation.Test
         {
             if (ConsoleErrors.Count > 0)
             {
-                try
-                {
-                    var screenshotPath = $"./{TestContext.CurrentContext.Test.Name}_error_screenshot.png";
-                    await Page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath });
-                }
-                catch (Exception)
-                {
-                    // page may be wedged; ignore screenshot errors
-                }
-
+                var screenshotPath = $"./{TestContext.CurrentContext.Test.Name}_error_screenshot.png";
+                await Page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath });
                 Assert.Fail($"JavaScript errors detected:\n{string.Join("\n", ConsoleErrors)}");
             }
         }
