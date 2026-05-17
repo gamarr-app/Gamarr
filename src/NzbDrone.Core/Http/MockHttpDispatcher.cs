@@ -278,7 +278,7 @@ namespace NzbDrone.Core.Http
             {
                 Path.Combine(appDir, "MockData"),
                 Path.Combine(appDir, "Files", "MockData"),
-                Path.Combine(appDir, "..", "net8.0", "Files", "MockData"),
+                Path.Combine(appDir, "..", $"net{Environment.Version.Major}.{Environment.Version.Minor}", "Files", "MockData"),
                 Path.Combine(appDir, "..", "NzbDrone.Core.Test", "Files", "MockData"),
                 Path.Combine(appDir, "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
                 Path.Combine(appDir, "..", "..", "..", "NzbDrone.Core.Test", "Files", "MockData"),
