@@ -115,7 +115,7 @@ function UISettings() {
     settings,
     hasSettings,
     hasPendingChanges,
-  } = useSelector(createSettingsSectionSelector(SECTION));
+  } = useSelector(useMemo(() => createSettingsSectionSelector(SECTION), []));
 
   const languagesData = useSelector(filteredLanguagesSelector);
   const languages = languagesData.items || [];

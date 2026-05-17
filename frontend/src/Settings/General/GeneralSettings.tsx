@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
@@ -99,7 +99,7 @@ function GeneralSettings() {
     isWindowsService,
     mode,
     packageUpdateMechanism,
-  } = useSelector(createGeneralSettingsSelector());
+  } = useSelector(useMemo(() => createGeneralSettingsSelector(), []));
 
   const [isRestartRequiredModalOpen, setIsRestartRequiredModalOpen] =
     useState(false);
