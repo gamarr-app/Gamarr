@@ -128,7 +128,11 @@ namespace NzbDrone.Automation.Test
                 ConsoleErrors.Add(error);
             };
 
-            await Page.GotoAsync(BaseUrl);
+            await Page.GotoAsync(BaseUrl, new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.Commit,
+                Timeout = 60000
+            });
             await WaitForNoSpinner();
 
             // Enable debug mode
@@ -180,7 +184,15 @@ namespace NzbDrone.Automation.Test
 
         protected async Task NavigateToAsync(string path)
         {
-            await Page.GotoAsync($"{BaseUrl}{path}");
+            // vendor.js is ~20 MB — even reaching DOMContentLoaded requires Chromium to
+            // download, parse, and execute the bundle. On CI runners that pushes past
+            // Playwright's default 30s GotoAsync timeout. Use Commit (response received,
+            // before parsing) and let WaitForNoSpinner gate "ready for assertions."
+            await Page.GotoAsync($"{BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.Commit,
+                Timeout = 60000
+            });
             await WaitForNoSpinner();
         }
 
