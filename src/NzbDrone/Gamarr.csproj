@@ -4,6 +4,8 @@
     <TargetFrameworks>net10.0-windows</TargetFrameworks>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <UseWindowsForms>true</UseWindowsForms>
+    <!-- Allow Linux runners (Dependabot scanner) to restore this Windows-only project. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationIcon>..\NzbDrone.Host\Gamarr.ico</ApplicationIcon>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
