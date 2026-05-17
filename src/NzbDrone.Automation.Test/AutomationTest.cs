@@ -122,6 +122,19 @@ namespace NzbDrone.Automation.Test
                         return;
                     }
 
+                    // Ignore SignalR negotiation/connection errors. Under Forms auth in
+                    // the test environment, the SignalR access_token query handshake is
+                    // unreliable and falls back to the JS reconnect loop — non-fatal,
+                    // pages still render. Real-time updates aren't part of the page-load
+                    // smoke tests this fixture covers.
+                    if (msg.Text.Contains("[signalR]") ||
+                        msg.Text.Contains("HubConnection") ||
+                        msg.Text.Contains("FailedToNegotiateWithServer") ||
+                        msg.Text.Contains("Failed to complete negotiation"))
+                    {
+                        return;
+                    }
+
                     ConsoleErrors.Add(msg.Text);
                 }
             };
