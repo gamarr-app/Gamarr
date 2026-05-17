@@ -143,7 +143,7 @@ jobs:
             -t:PublishAllRids
 
       - name: Download frontend build
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: release-frontend
           path: _output/UI
@@ -230,7 +230,7 @@ jobs:
           echo "Version: $VERSION, Prerelease: $PRERELEASE, Channel: $CHANNEL"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
           pattern: Gamarr-*
