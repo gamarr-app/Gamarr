@@ -71,6 +71,10 @@ namespace NzbDrone.Test.Common
                 Start(dotnetExe, Path.Combine(outputDir, "Gamarr.dll"));
             }
 
+            // Cap startup polling so a hung backend fails the test loudly instead of
+            // letting CI ride the full 30-minute job timeout with no diagnostics.
+            var startupDeadline = DateTime.UtcNow.AddMinutes(2);
+
             while (true)
             {
                 _nzbDroneProcess.Refresh();
@@ -104,7 +108,38 @@ namespace NzbDrone.Test.Common
                     Assert.Fail(failureMessage.ToString());
                 }
 
-                var request = new RestRequest("system/status");
+                if (DateTime.UtcNow > startupDeadline)
+                {
+                    var capturedOutput = GetCapturedOutput();
+                    var traceLog = TryReadTraceLog();
+
+                    var failureMessage = new StringBuilder();
+                    failureMessage.AppendLine("Gamarr did not become ready within 2 minutes — aborting startup wait.");
+                    failureMessage.AppendLine("--- Captured stdout/stderr ---");
+                    failureMessage.AppendLine(string.IsNullOrWhiteSpace(capturedOutput) ? "(no output captured)" : capturedOutput);
+
+                    if (!string.IsNullOrWhiteSpace(traceLog))
+                    {
+                        failureMessage.AppendLine("--- Gamarr.trace.txt ---");
+                        failureMessage.AppendLine(traceLog);
+                    }
+
+                    try
+                    {
+                        _processProvider.Kill(_nzbDroneProcess.Id);
+                    }
+                    catch
+                    {
+                        // best-effort cleanup; the assertion below is what we want surfaced
+                    }
+
+                    Assert.Fail(failureMessage.ToString());
+                }
+
+                var request = new RestRequest("system/status")
+                {
+                    Timeout = TimeSpan.FromSeconds(5)
+                };
                 request.AddHeader("Authorization", ApiKey);
                 request.AddHeader("X-Api-Key", ApiKey);
 
