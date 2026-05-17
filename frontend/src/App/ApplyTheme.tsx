@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import themes from 'Styles/Themes';
@@ -14,7 +14,7 @@ function createThemeSelector() {
 }
 
 function ApplyTheme() {
-  const theme = useSelector(createThemeSelector());
+  const theme = useSelector(useMemo(() => createThemeSelector(), []));
 
   const updateCSSVariables = useCallback(() => {
     Object.entries(themes[theme]).forEach(([key, value]) => {

@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppUpdatedModal from 'App/AppUpdatedModal';
 import ColorImpairedContext from 'App/ColorImpairedContext';
@@ -29,9 +29,15 @@ function Page({ children }: PageProps) {
   const [isConnectionLostModalOpen, setIsConnectionLostModalOpen] =
     useState(false);
 
-  const { enableColorImpairedMode } = useSelector(createUISettingsSelector());
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
-  const { authentication } = useSelector(createSystemStatusSelector());
+  const { enableColorImpairedMode } = useSelector(
+    useMemo(() => createUISettingsSelector(), [])
+  );
+  const { isSmallScreen } = useSelector(
+    useMemo(() => createDimensionsSelector(), [])
+  );
+  const { authentication } = useSelector(
+    useMemo(() => createSystemStatusSelector(), [])
+  );
   const authenticationEnabled = authentication !== 'none';
   const { isSidebarVisible, isUpdated, isDisconnected, version } = useSelector(
     (state: AppState) => state.app

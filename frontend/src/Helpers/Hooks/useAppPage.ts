@@ -93,7 +93,9 @@ const useAppPage = () => {
       state.app.translations.isPopulated
   );
 
-  const { hasError, errors } = useSelector(createErrorsSelector());
+  const { hasError, errors } = useSelector(
+    useMemo(() => createErrorsSelector(), [])
+  );
 
   const isLocalStorageSupported = useMemo(() => {
     const key = 'gamarrTest';

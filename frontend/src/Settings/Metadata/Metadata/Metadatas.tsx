@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import MetadataAppState from 'App/State/MetadataAppState';
@@ -25,7 +25,7 @@ function createMetadatasSelector() {
 function Metadatas() {
   const dispatch = useDispatch();
   const { isFetching, error, items, ...otherProps } = useSelector(
-    createMetadatasSelector()
+    useMemo(() => createMetadatasSelector(), [])
   );
 
   useEffect(() => {
