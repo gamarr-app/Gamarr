@@ -53,7 +53,9 @@ namespace NzbDrone.Automation.Test
             _runner.UseMockMetadata = UseMockMetadata;
             _runner.MockDataPath = FindMockDataPath();
 
-            _runner.Start(true);
+            // Start without Forms auth — automation tests browse anonymously and
+            // SignalR auth-token negotiation fails when Forms auth is enabled.
+            _runner.Start();
 
             // Wait for server to be ready
             await Task.Delay(2000);
@@ -130,9 +132,6 @@ namespace NzbDrone.Automation.Test
 
             await Page.GotoAsync(BaseUrl);
             await WaitForNoSpinner();
-
-            // Enable debug mode
-            await Page.EvaluateAsync("window.Gamarr.NameViews = true");
         }
 
         [TearDown]
