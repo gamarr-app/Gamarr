@@ -1,5 +1,6 @@
 using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
@@ -59,7 +60,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                     }
                     else
                     {
-                        _logger.Debug("This file isn't a quality upgrade for game. Existing quality: {0}. New Quality {1}. Skipping {2}", gameFile.Quality.Quality, localGame.Quality.Quality, localGame.Path);
+                        _logger.Debug("This file isn't a quality upgrade for game. Existing quality: {0}. New Quality {1}. Skipping {2}", gameFile.Quality.Quality, localGame.Quality.Quality, CleanseLogMessage.SanitizeLogParam(localGame.Path));
                         return ImportSpecDecision.Reject(ImportRejectionReason.NotQualityUpgrade, "Not an upgrade for existing game file. Existing quality: {0}. New Quality {1}.", gameFile.Quality.Quality, localGame.Quality.Quality);
                     }
                 }

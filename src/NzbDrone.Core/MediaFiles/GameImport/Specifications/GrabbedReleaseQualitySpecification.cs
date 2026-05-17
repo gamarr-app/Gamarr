@@ -1,6 +1,7 @@
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Parser.Model;
@@ -42,7 +43,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                 if (item.Quality.Quality != Quality.Unknown && item.Quality != localGame.Quality)
                 {
                     // Log only for info, spec removed due to common webdl/webrip mismatches
-                    _logger.Debug("Quality for grabbed release ({0}) does not match the quality of the file ({1})", item.Quality, localGame.Quality);
+                    _logger.Debug("Quality for grabbed release ({0}) does not match the quality of the file ({1})", CleanseLogMessage.SanitizeLogParam(item.Quality?.ToString()), CleanseLogMessage.SanitizeLogParam(localGame.Quality?.ToString()));
                 }
             }
 
