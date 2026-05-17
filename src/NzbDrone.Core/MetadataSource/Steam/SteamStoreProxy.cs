@@ -120,36 +120,57 @@ namespace NzbDrone.Core.MetadataSource.Steam
                     return new List<GameMetadata>();
                 }
 
-                var candidates = response.Resource.Items
+                return response.Resource.Items
                     .Where(item => item.Type == "app" || item.Type == "game")
                     .Where(item => !IsNonGameContent(item.Name))
-                    .Take(limit * 2) // Take more to account for DLC filtering
+                    .Take(limit)
+                    .Select(MapSearchItem)
                     .ToList();
-
-                // Filter out DLCs and get full metadata for actual games
-                var results = new List<GameMetadata>();
-                foreach (var item in candidates)
-                {
-                    if (results.Count >= limit)
-                    {
-                        break;
-                    }
-
-                    // Get full game info - this filters out DLCs and returns complete metadata
-                    var gameInfo = GetGameInfo(item.Id);
-                    if (gameInfo != null)
-                    {
-                        results.Add(gameInfo);
-                    }
-                }
-
-                return results;
             }
             catch (HttpException ex)
             {
                 _logger.Warn(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(query));
                 return new List<GameMetadata>();
             }
+        }
+
+        private GameMetadata MapSearchItem(SteamSearchItem item)
+        {
+            var metadata = new GameMetadata
+            {
+                SteamAppId = item.Id,
+                Title = item.Name,
+                CleanTitle = item.Name.CleanGameTitle(),
+                SortTitle = GameTitleNormalizer.Normalize(item.Name, item.Id),
+                Platforms = MapPlatforms(item.Platforms),
+                Status = GameStatusType.Released,
+                LastInfoSync = DateTime.UtcNow,
+                GameType = GameType.MainGame,
+                Genres = new List<string>(),
+                Ratings = new Ratings(),
+                Images = new List<MediaCover.MediaCover>()
+            };
+
+            if (!string.IsNullOrEmpty(item.Metascore) && int.TryParse(item.Metascore, out var metascore) && metascore > 0)
+            {
+                metadata.Ratings.Metacritic = new RatingChild
+                {
+                    Value = metascore,
+                    Type = RatingType.Critic
+                };
+            }
+
+            var newCdnPoster = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{item.Id}/library_600x900.jpg";
+            var oldCdnPoster = $"https://steamcdn-a.akamaihd.net/steam/apps/{item.Id}/library_600x900.jpg";
+            metadata.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, newCdnPoster));
+            metadata.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, oldCdnPoster));
+
+            if (!string.IsNullOrEmpty(item.TinyImage))
+            {
+                metadata.Images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, item.TinyImage));
+            }
+
+            return metadata;
         }
 
         public GameMetadata GetGameBySteamAppId(int steamAppId)
