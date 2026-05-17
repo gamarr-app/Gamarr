@@ -2,6 +2,7 @@ using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 using NLog;
@@ -20,6 +21,8 @@ namespace NzbDrone.Test.Common
     {
         private readonly IProcessProvider _processProvider;
         private readonly RestClient _restClient;
+        private readonly object _outputLock = new ();
+        private readonly StringBuilder _capturedOutput = new ();
         private Process _nzbDroneProcess;
 
         public string AppData { get; private set; }
@@ -45,7 +48,16 @@ namespace NzbDrone.Test.Common
 
             GenerateConfigFile(enableAuth);
 
-            var outputDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "_output", "net8.0");
+            // Derive the framework directory name from the currently-executing runtime so this
+            // does not silently break across .NET upgrades (e.g. net8.0 -> net10.0). The test
+            // runner is always built against the same TargetFramework as the app it spawns.
+            var frameworkDir = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+            var outputDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "_output", frameworkDir);
+
+            if (!Directory.Exists(outputDir))
+            {
+                Assert.Fail($"Gamarr output directory not found at '{Path.GetFullPath(outputDir)}'. Build the backend before running integration tests.");
+            }
 
             if (OsInfo.IsWindows)
             {
@@ -65,7 +77,31 @@ namespace NzbDrone.Test.Common
 
                 if (_nzbDroneProcess.HasExited)
                 {
-                    Assert.Fail("Process has exited");
+                    // Give the child a brief moment to flush any final stdout/stderr after exit.
+                    try
+                    {
+                        _nzbDroneProcess.WaitForExit(500);
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+
+                    var capturedOutput = GetCapturedOutput();
+                    var traceLog = TryReadTraceLog();
+
+                    var failureMessage = new StringBuilder();
+                    failureMessage.AppendLine($"Process has exited prematurely with code {SafeExitCode()}.");
+                    failureMessage.AppendLine("--- Captured stdout/stderr ---");
+                    failureMessage.AppendLine(string.IsNullOrWhiteSpace(capturedOutput) ? "(no output captured)" : capturedOutput);
+
+                    if (!string.IsNullOrWhiteSpace(traceLog))
+                    {
+                        failureMessage.AppendLine("--- Gamarr.trace.txt ---");
+                        failureMessage.AppendLine(traceLog);
+                    }
+
+                    Assert.Fail(failureMessage.ToString());
                 }
 
                 var request = new RestRequest("system/status");
@@ -184,10 +220,57 @@ namespace NzbDrone.Test.Common
         {
             TestContext.Progress.WriteLine($" [{Port}] > " + data);
 
-            if (data.Contains("Press enter to exit"))
+            // Capture so we can include it in the failure message if the process dies.
+            if (data != null)
+            {
+                lock (_outputLock)
+                {
+                    _capturedOutput.AppendLine(data);
+                }
+            }
+
+            if (data != null && data.Contains("Press enter to exit"))
             {
                 _nzbDroneProcess.StandardInput.WriteLine(" ");
             }
+        }
+
+        private string GetCapturedOutput()
+        {
+            lock (_outputLock)
+            {
+                return _capturedOutput.ToString();
+            }
+        }
+
+        private int SafeExitCode()
+        {
+            try
+            {
+                return _nzbDroneProcess?.ExitCode ?? -1;
+            }
+            catch (InvalidOperationException)
+            {
+                return -1;
+            }
+        }
+
+        private string TryReadTraceLog()
+        {
+            try
+            {
+                var path = Path.Combine(AppData, "logs", "Gamarr.trace.txt");
+                if (File.Exists(path))
+                {
+                    return File.ReadAllText(path);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return null;
         }
 
         private void GenerateConfigFile(bool enableAuth)
