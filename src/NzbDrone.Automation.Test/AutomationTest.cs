@@ -179,7 +179,14 @@ namespace NzbDrone.Automation.Test
 
         protected async Task NavigateToAsync(string path)
         {
-            await Page.GotoAsync($"{BaseUrl}{path}");
+            // CI runs inside `unshare --net` (loopback-only). Default WaitUntil=Load blocks
+            // until external resources (Sentry CDN, fonts) finish — they never do in the
+            // sandbox, so the navigation times out. DOMContentLoaded fires once the document
+            // is parsed; WaitForNoSpinner() afterwards still ensures the page is interactive.
+            await Page.GotoAsync($"{BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded
+            });
             await WaitForNoSpinner();
         }
 
