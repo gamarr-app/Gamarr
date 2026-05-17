@@ -276,32 +276,24 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 {
                     var idStr = lowerTitle.Split(':')[1].Trim();
 
-                    // Support comma-separated IDs like igdb:123,456,789
+                    // Support comma-separated IDs like igdb:123,456,789 — single batched query
                     if (idStr.Contains(','))
                     {
-                        var results = new List<Game>();
-                        var idParts = idStr.Split(',');
+                        var ids = idStr.Split(',')
+                            .Select(p => int.TryParse(p.Trim(), out var n) ? n : 0)
+                            .Where(n => n > 0)
+                            .Distinct()
+                            .Take(25)
+                            .ToList();
 
-                        foreach (var part in idParts)
+                        if (!ids.Any())
                         {
-                            if (int.TryParse(part.Trim(), out var partId))
-                            {
-                                try
-                                {
-                                    var gameLookup = GetGameInfoByIgdbId(partId);
-                                    if (gameLookup != null)
-                                    {
-                                        results.Add(_gameService.FindByIgdbId(gameLookup.IgdbId) ?? new Game { GameMetadata = gameLookup });
-                                    }
-                                }
-                                catch (GameNotFoundException)
-                                {
-                                    // Skip games not found
-                                }
-                            }
+                            return new List<Game>();
                         }
 
-                        return results;
+                        return GetBulkGameInfo(ids)
+                            .Select(meta => _gameService.FindByIgdbId(meta.IgdbId) ?? new Game { GameMetadata = meta })
+                            .ToList();
                     }
 
                     if (int.TryParse(idStr, out var igdbId))

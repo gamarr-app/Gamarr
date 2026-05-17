@@ -148,17 +148,35 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
         public List<GameMetadata> GetBulkGameInfo(List<int> rawgIds)
         {
-            var games = new List<GameMetadata>();
+            if (rawgIds == null || !rawgIds.Any())
+            {
+                return new List<GameMetadata>();
+            }
 
-            // Limit to 20 to prevent excessive API calls
+            var apiKey = _configService.RawgApiKey;
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return new List<GameMetadata>();
+            }
+
+            // RAWG has no batch endpoint, but bulk callers don't need per-game
+            // recommendations — skip the second per-id call GetGameInfo makes.
+            var games = new List<GameMetadata>();
             foreach (var id in rawgIds.Take(20))
             {
                 try
                 {
-                    var result = GetGameInfo(id);
-                    if (result != null)
+                    var request = new HttpRequestBuilder($"{RawgApiBaseUrl}games/{id}")
+                        .AddQueryParam("key", apiKey)
+                        .Accept(HttpAccept.Json)
+                        .Build();
+
+                    EnforceRateLimit();
+                    var response = _httpClient.Get<RawgGameResource>(request);
+
+                    if (response.Resource != null)
                     {
-                        games.Add(result);
+                        games.Add(MapRawgGame(response.Resource));
                     }
                 }
                 catch (Exception ex)
