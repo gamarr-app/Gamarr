@@ -16,7 +16,13 @@ using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Instrumentation
 {
-    public class ReconfigureLogging : IHandleAsync<ConfigFileSavedEvent>
+    // Handle synchronously so that the logging configuration is fully applied
+    // before HostConfig API requests return. Running this asynchronously
+    // (IHandleAsync) created a race where requests issued immediately after a
+    // log-level change could fire while the appFileTrace rule was still being
+    // toggled, causing the very first Trace log line (e.g. the LoggingMiddleware
+    // "Req:" line) to be silently dropped. See HttpLogFixture.should_log_on_error.
+    public class ReconfigureLogging : IHandle<ConfigFileSavedEvent>
     {
         private readonly IConfigFileProvider _configFileProvider;
 
@@ -155,7 +161,7 @@ namespace NzbDrone.Core.Instrumentation
                        };
         }
 
-        public void HandleAsync(ConfigFileSavedEvent message)
+        public void Handle(ConfigFileSavedEvent message)
         {
             Reconfigure();
         }
