@@ -116,7 +116,7 @@ function createGamesSelector() {
 }
 
 function GameSearchInput() {
-  const games = useSelector(createGamesSelector());
+  const games = useSelector(useMemo(() => createGamesSelector(), []));
   const navigate = useNavigate();
   const { bindShortcut, unbindShortcut } = useKeyboardShortcuts();
 

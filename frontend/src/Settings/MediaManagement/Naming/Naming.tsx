@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -58,7 +58,7 @@ function Naming() {
     hasSettings,
     examples,
     examplesPopulated,
-  } = useSelector(createNamingSelector());
+  } = useSelector(useMemo(() => createNamingSelector(), []));
 
   const dispatch = useDispatch();
 

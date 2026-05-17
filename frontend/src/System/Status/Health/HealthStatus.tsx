@@ -11,7 +11,9 @@ function HealthStatus() {
   const { isConnected, isReconnecting } = useSelector(
     (state: AppState) => state.app
   );
-  const { isPopulated, items } = useSelector(createHealthSelector());
+  const { isPopulated, items } = useSelector(
+    useMemo(() => createHealthSelector(), [])
+  );
 
   const wasReconnecting = usePrevious(isReconnecting);
 
