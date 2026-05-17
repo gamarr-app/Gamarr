@@ -53,9 +53,14 @@ namespace NzbDrone.Automation.Test
             _runner.UseMockMetadata = UseMockMetadata;
             _runner.MockDataPath = FindMockDataPath();
 
-            // Start without Forms auth — automation tests browse anonymously and
-            // SignalR auth-token negotiation fails when Forms auth is enabled.
-            _runner.Start();
+            // Forms auth must be enabled. /initialize.json (the SPA bootstrap fetch)
+            // is gated by [Authorize(Policy = "UI")], which builds its policy off the
+            // configured AuthenticationMethod. With "None", the scheme isn't registered
+            // and the policy denies every request, so the SPA can never bootstrap.
+            // With "Forms" the UI auth handler's "DisabledForLocalAddresses" bypass
+            // kicks in for the loopback test traffic. This matches the last green CI
+            // (SHA 264ea2be).
+            _runner.Start(true);
 
             // Wait for server to be ready
             await Task.Delay(2000);
