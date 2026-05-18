@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as commandNames from 'Commands/commandNames';
 import FormGroup from 'Components/Form/FormGroup';
@@ -24,7 +24,11 @@ function ResetQualityDefinitionsModalContent({
 }: ResetQualityDefinitionsModalContentProps) {
   const dispatch = useDispatch();
   const isResettingQualityDefinitions = useSelector(
-    createCommandExecutingSelector(commandNames.RESET_QUALITY_DEFINITIONS)
+    useMemo(
+      () =>
+        createCommandExecutingSelector(commandNames.RESET_QUALITY_DEFINITIONS),
+      []
+    )
   );
 
   const [resetDefinitionTitles, setResetDefinitionTitles] = useState(false);

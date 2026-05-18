@@ -17,10 +17,10 @@ interface GameIndexRefreshGameButtonProps {
 
 function GameIndexRefreshGameButton(props: GameIndexRefreshGameButtonProps) {
   const isRefreshing = useSelector(
-    createCommandExecutingSelector(REFRESH_GAME)
+    useMemo(() => createCommandExecutingSelector(REFRESH_GAME), [])
   );
   const { items, totalItems } = useSelector(
-    createGameClientSideCollectionItemsSelector('gameIndex')
+    useMemo(() => createGameClientSideCollectionItemsSelector('gameIndex'), [])
   );
 
   const dispatch = useDispatch();

@@ -43,7 +43,7 @@ function GameIndexSelectFooter() {
   const { isSaving, isDeleting, deleteError } = useSelector(gameEditorSelector);
 
   const isOrganizingGames = useSelector(
-    createCommandExecutingSelector(RENAME_GAME)
+    useMemo(() => createCommandExecutingSelector(RENAME_GAME), [])
   );
 
   const dispatch = useDispatch();
