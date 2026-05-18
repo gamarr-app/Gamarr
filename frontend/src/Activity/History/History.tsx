@@ -58,7 +58,9 @@ function History() {
   const { isGamesFetching, isGamesPopulated, gamesError } = useSelector(
     useMemo(() => createGamesFetchingSelector(), [])
   );
-  const customFilters = useSelector(createCustomFiltersSelector('history'));
+  const customFilters = useSelector(
+    useMemo(() => createCustomFiltersSelector('history'), [])
+  );
   const dispatch = useDispatch();
 
   const isFetchingAny = isFetching || isGamesFetching;

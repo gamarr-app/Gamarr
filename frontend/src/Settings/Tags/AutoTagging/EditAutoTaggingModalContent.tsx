@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
@@ -53,7 +53,9 @@ export default function EditAutoTaggingModalContent({
     saveError,
     validationErrors,
     validationWarnings,
-  } = useSelector(createProviderSettingsSelectorHook('autoTaggings', id));
+  } = useSelector(
+    useMemo(() => createProviderSettingsSelectorHook('autoTaggings', id), [id])
+  );
 
   const { isPopulated: specificationsPopulated, items: specifications } =
     useSelector((state: AppState) => state.settings.autoTaggingSpecifications);
