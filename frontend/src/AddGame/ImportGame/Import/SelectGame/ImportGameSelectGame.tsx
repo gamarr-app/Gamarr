@@ -95,12 +95,13 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
     ],
   });
 
-  // Update popper position when content changes
+  // Update popper position when it opens
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (update) {
+    if (update && isOpen) {
       update();
     }
-  });
+  }, [isOpen]);
 
   // Handle click outside to close
   useEffect(() => {

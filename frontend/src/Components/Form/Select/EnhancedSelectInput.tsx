@@ -409,11 +409,12 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     [onChange]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (update) {
+    if (update && isOpen) {
       update();
     }
-  });
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
