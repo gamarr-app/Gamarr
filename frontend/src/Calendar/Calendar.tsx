@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
@@ -44,7 +44,7 @@ function Calendar() {
   );
 
   const isRefreshingGame = useSelector(
-    createCommandExecutingSelector(commandNames.REFRESH_GAME)
+    useMemo(() => createCommandExecutingSelector(commandNames.REFRESH_GAME), [])
   );
 
   const firstDayOfWeek = useSelector(

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import * as commandNames from 'Commands/commandNames';
 import PageContent from 'Components/Page/PageContent';
@@ -18,7 +18,11 @@ import ResetQualityDefinitionsModal from './Reset/ResetQualityDefinitionsModal';
 
 function Quality() {
   const isResettingQualityDefinitions = useSelector(
-    createCommandExecutingSelector(commandNames.RESET_QUALITY_DEFINITIONS)
+    useMemo(
+      () =>
+        createCommandExecutingSelector(commandNames.RESET_QUALITY_DEFINITIONS),
+      []
+    )
   );
 
   const saveOptions = useRef<SaveCallback>(undefined);

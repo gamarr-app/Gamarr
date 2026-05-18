@@ -87,7 +87,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
     sortDirection,
     view,
   }: GameClientSideCollectionItemsState = useSelector(
-    createGameClientSideCollectionItemsSelector('gameIndex')
+    useMemo(() => createGameClientSideCollectionItemsSelector('gameIndex'), [])
   );
 
   const isRssSyncExecuting = useSelector(

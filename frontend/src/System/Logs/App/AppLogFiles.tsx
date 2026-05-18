@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
@@ -14,7 +14,10 @@ function AppLogFiles() {
   );
 
   const isDeleteFilesExecuting = useSelector(
-    createCommandExecutingSelector(commandNames.DELETE_LOG_FILES)
+    useMemo(
+      () => createCommandExecutingSelector(commandNames.DELETE_LOG_FILES),
+      []
+    )
   );
 
   const handleRefreshPress = useCallback(() => {

@@ -81,10 +81,14 @@ function CutoffUnmet() {
   } = useSelector((state: AppState) => state.wanted.cutoffUnmet);
 
   const isSearchingForAllGames = useSelector(
-    createCommandExecutingSelector(commandNames.CUTOFF_UNMET_GAMES_SEARCH)
+    useMemo(
+      () =>
+        createCommandExecutingSelector(commandNames.CUTOFF_UNMET_GAMES_SEARCH),
+      []
+    )
   );
   const isSearchingForSelectedGames = useSelector(
-    createCommandExecutingSelector(commandNames.GAME_SEARCH)
+    useMemo(() => createCommandExecutingSelector(commandNames.GAME_SEARCH), [])
   );
 
   const [selectState, setSelectState] = useSelectState();

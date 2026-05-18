@@ -22,7 +22,7 @@ function GameIndexSearchButton(props: GameIndexSearchButtonProps) {
     useMemo(() => createCommandExecutingSelector(GAME_SEARCH), [])
   );
   const { items } = useSelector(
-    createGameClientSideCollectionItemsSelector('gameIndex')
+    useMemo(() => createGameClientSideCollectionItemsSelector('gameIndex'), [])
   );
 
   const dispatch = useDispatch();
