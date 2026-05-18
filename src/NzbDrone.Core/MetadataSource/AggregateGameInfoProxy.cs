@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
+using NzbDrone.Common.Cache;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
@@ -20,18 +21,22 @@ namespace NzbDrone.Core.MetadataSource
     /// </summary>
     public class AggregateGameInfoProxy : IProvideGameInfo, ISearchForNewGame
     {
+        private static readonly TimeSpan SearchCacheLifetime = TimeSpan.FromMinutes(5);
+
         private readonly SteamStoreProxy _steamProxy;
         private readonly RawgProxy _rawgProxy;
         private readonly IgdbProxy _igdbProxy;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
         private readonly bool _mockEnabled;
+        private readonly ICached<List<Game>> _searchCache;
 
         public AggregateGameInfoProxy(
             SteamStoreProxy steamProxy,
             RawgProxy rawgProxy,
             IgdbProxy igdbProxy,
             IConfigService configService,
+            ICacheManager cacheManager,
             Logger logger)
         {
             _steamProxy = steamProxy;
@@ -40,6 +45,7 @@ namespace NzbDrone.Core.MetadataSource
             _configService = configService;
             _logger = logger;
             _mockEnabled = IsMockMode();
+            _searchCache = cacheManager.GetCache<List<Game>>(GetType(), "search");
 
             if (_mockEnabled)
             {
@@ -502,9 +508,19 @@ namespace NzbDrone.Core.MetadataSource
                 return _igdbProxy.SearchForNewGame(title);
             }
 
+            var lowerTitle = title?.ToLowerInvariant()?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(lowerTitle))
+            {
+                return new List<Game>();
+            }
+
+            return _searchCache.Get(lowerTitle, () => SearchForNewGameUncached(title, lowerTitle), SearchCacheLifetime);
+        }
+
+        private List<Game> SearchForNewGameUncached(string title, string lowerTitle)
+        {
             var allResults = new List<Game>();
             var resultsByNormalizedTitle = new Dictionary<string, Game>(StringComparer.Ordinal);
-            var lowerTitle = title?.ToLowerInvariant()?.Trim() ?? string.Empty;
 
             // Handle direct IGDB ID lookups - these bypass normal search and credentials check
             if (lowerTitle.StartsWith("igdb:") || lowerTitle.StartsWith("igdbid:"))
