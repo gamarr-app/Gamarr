@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
 import TagList from './TagList';
@@ -7,7 +8,7 @@ interface GameTagListProps {
 }
 
 function GameTagList({ tags }: GameTagListProps) {
-  const tagList = useSelector(createTagsSelector());
+  const tagList = useSelector(useMemo(() => createTagsSelector(), []));
 
   return <TagList tags={tags} tagList={tagList} />;
 }

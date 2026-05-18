@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, { CustomFilter, Filter } from 'App/State/AppState';
@@ -40,8 +40,10 @@ export default function CalendarFilterModal({
   onFilterSelect,
   onModalClose,
 }: CalendarFilterModalProps) {
-  const sectionItems = useSelector(createCalendarSelector());
-  const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
+  const sectionItems = useSelector(useMemo(() => createCalendarSelector(), []));
+  const filterBuilderProps = useSelector(
+    useMemo(() => createFilterBuilderPropsSelector(), [])
+  );
   const customFilterType = 'calendar';
 
   const dispatch = useDispatch();

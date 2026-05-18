@@ -78,14 +78,20 @@ function Queue() {
     isRemoving,
   } = useSelector((state: AppState) => state.queue.paged);
 
-  const { count } = useSelector(createQueueStatusSelector());
+  const { count } = useSelector(useMemo(() => createQueueStatusSelector(), []));
   const { isGamesFetching, isGamesPopulated, gamesError } = useSelector(
-    createGamesFetchingSelector()
+    useMemo(() => createGamesFetchingSelector(), [])
   );
   const customFilters = useSelector(createCustomFiltersSelector('queue'));
 
   const isRefreshMonitoredDownloadsExecuting = useSelector(
-    createCommandExecutingSelector(commandNames.REFRESH_MONITORED_DOWNLOADS)
+    useMemo(
+      () =>
+        createCommandExecutingSelector(
+          commandNames.REFRESH_MONITORED_DOWNLOADS
+        ),
+      []
+    )
   );
 
   const shouldBlockRefresh = useRef(false);

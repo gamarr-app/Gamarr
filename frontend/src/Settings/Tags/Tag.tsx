@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Card from 'Components/Card';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
@@ -26,7 +26,7 @@ function Tag({ id, label }: TagProps) {
     downloadClientIds = [],
     autoTagIds = [],
     gameIds = [],
-  } = useSelector(createTagDetailsSelector(id)) ?? {};
+  } = useSelector(useMemo(() => createTagDetailsSelector(id), [id])) ?? {};
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteTagModalOpen, setIsDeleteTagModalOpen] = useState(false);
 

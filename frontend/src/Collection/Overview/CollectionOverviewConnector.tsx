@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameStatus, Image } from 'Game/Game';
 import { toggleCollectionMonitored } from 'Store/Actions/gameCollectionActions';
@@ -52,7 +52,9 @@ interface CollectionOverviewConnectorProps {
 
 function CollectionOverviewConnector(props: CollectionOverviewConnectorProps) {
   const dispatch = useDispatch();
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
+  const { isSmallScreen } = useSelector(
+    useMemo(() => createDimensionsSelector(), [])
+  );
 
   const onMonitorTogglePress = useCallback(
     (monitored: boolean) => {

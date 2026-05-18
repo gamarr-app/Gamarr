@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -13,7 +13,7 @@ function createThemeSelector() {
 }
 
 const useTheme = () => {
-  const selectedTheme = useSelector(createThemeSelector());
+  const selectedTheme = useSelector(useMemo(() => createThemeSelector(), []));
   const [resolvedTheme, setResolvedTheme] = useState(selectedTheme);
 
   useEffect(() => {

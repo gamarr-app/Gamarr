@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import Icon from 'Components/Icon';
 import InlineMarkdown from 'Components/Markdown/InlineMarkdown';
@@ -20,7 +21,7 @@ function GameReleaseDates({
   physicalRelease,
 }: GameReleaseDatesProps) {
   const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
-    useSelector(createUISettingsSelector());
+    useSelector(useMemo(() => createUISettingsSelector(), []));
 
   if (!inCinemas && !physicalRelease && !digitalRelease) {
     return (

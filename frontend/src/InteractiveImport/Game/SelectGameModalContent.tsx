@@ -99,7 +99,9 @@ function SelectGameModalContent(props: SelectGameModalContentProps) {
 
   const listRef = useRef<ListImperativeAPI>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const allGames: Game[] = useSelector(createAllGamesSelector());
+  const allGames: Game[] = useSelector(
+    useMemo(() => createAllGamesSelector(), [])
+  );
   const [filter, setFilter] = useState('');
 
   useEffect(() => {

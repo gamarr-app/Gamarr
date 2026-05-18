@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -69,7 +69,7 @@ function EditImportListExclusionModalContent({
   onDeleteImportListExclusionPress,
 }: EditImportListExclusionModalContentProps) {
   const { isFetching, isSaving, item, error, saveError, ...otherProps } =
-    useSelector(createImportListExclusionSelector(id));
+    useSelector(useMemo(() => createImportListExclusionSelector(id), [id]));
 
   const { gameTitle, gameYear, igdbId } = item;
 

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { CommandBody } from 'Commands/Command';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -32,13 +33,17 @@ export default function QueuedTaskRowNameCell(
   props: QueuedTaskRowNameCellProps
 ) {
   const { commandName, body, clientUserAgent } = props;
-  const gameIds = [...(body.gameIds ?? [])];
+  const gameIds = useMemo(() => {
+    const ids = [...(body.gameIds ?? [])];
+    if (body.gameId) {
+      ids.push(body.gameId);
+    }
+    return ids;
+  }, [body.gameIds, body.gameId]);
 
-  if (body.gameId) {
-    gameIds.push(body.gameId);
-  }
-
-  const games = useSelector(createMultiGamesSelector(gameIds));
+  const games = useSelector(
+    useMemo(() => createMultiGamesSelector(gameIds), [gameIds])
+  );
   const sortedGames = games.sort(sortByProp('sortTitle'));
 
   return (

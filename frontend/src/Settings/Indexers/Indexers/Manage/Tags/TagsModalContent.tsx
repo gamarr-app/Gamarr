@@ -32,7 +32,7 @@ function TagsModalContent(props: TagsModalContentProps) {
   const allIndexers: IndexerAppState = useSelector(
     (state: AppState) => state.settings.indexers
   );
-  const tagList: Tag[] = useSelector(createTagsSelector());
+  const tagList: Tag[] = useSelector(useMemo(() => createTagsSelector(), []));
 
   const [tags, setTags] = useState<number[]>([]);
   const [applyTags, setApplyTags] = useState('add');

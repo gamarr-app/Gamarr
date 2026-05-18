@@ -18,7 +18,9 @@ interface GameIndexSearchButtonProps {
 }
 
 function GameIndexSearchButton(props: GameIndexSearchButtonProps) {
-  const isSearching = useSelector(createCommandExecutingSelector(GAME_SEARCH));
+  const isSearching = useSelector(
+    useMemo(() => createCommandExecutingSelector(GAME_SEARCH), [])
+  );
   const { items } = useSelector(
     createGameClientSideCollectionItemsSelector('gameIndex')
   );

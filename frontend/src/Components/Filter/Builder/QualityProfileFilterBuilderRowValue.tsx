@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -17,7 +18,9 @@ function createQualityProfilesSelector() {
 function QualityProfileFilterBuilderRowValue(
   props: FilterBuilderRowValueProps
 ) {
-  const qualityProfiles = useSelector(createQualityProfilesSelector());
+  const qualityProfiles = useSelector(
+    useMemo(() => createQualityProfilesSelector(), [])
+  );
 
   const tagList = qualityProfiles
     .map(({ id, name }) => ({ id, name }))

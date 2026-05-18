@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -51,7 +51,9 @@ function createDiskSpaceSelector() {
 
 function DiskSpace() {
   const dispatch = useDispatch();
-  const { isFetching, items } = useSelector(createDiskSpaceSelector());
+  const { isFetching, items } = useSelector(
+    useMemo(() => createDiskSpaceSelector(), [])
+  );
 
   useEffect(() => {
     dispatch(fetchDiskSpace());

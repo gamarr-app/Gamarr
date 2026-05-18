@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { createSelector } from 'reselect';
@@ -39,7 +39,10 @@ function AddNewGameConnector() {
     null
   );
 
-  const selector = createAddNewGameSelector(location.search);
+  const selector = useMemo(
+    () => createAddNewGameSelector(location.search),
+    [location.search]
+  );
   const {
     term,
     isFetching,

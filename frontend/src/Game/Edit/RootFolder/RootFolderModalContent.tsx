@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputGroup from 'Components/Form/FormInputGroup';
@@ -32,7 +32,9 @@ interface GameFolder {
 
 function RootFolderModalContent(props: RootFolderModalContentProps) {
   const { gameId, onSavePress, onModalClose } = props;
-  const { isWindows } = useSelector(createSystemStatusSelector());
+  const { isWindows } = useSelector(
+    useMemo(() => createSystemStatusSelector(), [])
+  );
 
   const [rootFolderPath, setRootFolderPath] = useState(props.rootFolderPath);
 

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import { toggleCollectionMonitored } from 'Store/Actions/gameCollectionActions';
@@ -17,8 +17,9 @@ function GameCollectionLabel({ igdbId }: GameCollectionLabelProps) {
     monitored,
     title,
     isSaving = false,
-  } = useSelector(createCollectionSelectorForHook(igdbId)) ||
-  ({} as GameCollection);
+  } = useSelector(
+    useMemo(() => createCollectionSelectorForHook(igdbId), [igdbId])
+  ) || ({} as GameCollection);
 
   const dispatch = useDispatch();
 

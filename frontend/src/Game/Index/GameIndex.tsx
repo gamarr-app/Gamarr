@@ -91,9 +91,11 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
   );
 
   const isRssSyncExecuting = useSelector(
-    createCommandExecutingSelector(RSS_SYNC)
+    useMemo(() => createCommandExecutingSelector(RSS_SYNC), [])
   );
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
+  const { isSmallScreen } = useSelector(
+    useMemo(() => createDimensionsSelector(), [])
+  );
   const dispatch = useDispatch();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);

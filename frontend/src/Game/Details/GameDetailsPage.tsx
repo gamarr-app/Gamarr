@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import NotFound from 'Components/NotFound';
@@ -8,7 +8,7 @@ import translate from 'Utilities/String/translate';
 import GameDetails from './GameDetails';
 
 function GameDetailsPage() {
-  const allGames = useSelector(createAllGamesSelector());
+  const allGames = useSelector(useMemo(() => createAllGamesSelector(), []));
   const { titleSlug } = useParams<{ titleSlug: string }>();
   const navigate = useNavigate();
 

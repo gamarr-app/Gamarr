@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -55,7 +55,9 @@ interface CalendarDayProps {
 
 function CalendarDay({ date, isTodaysDate }: CalendarDayProps) {
   const { time, view } = useSelector((state: AppState) => state.calendar);
-  const events = useSelector(createCalendarEventsConnector(date));
+  const events = useSelector(
+    useMemo(() => createCalendarEventsConnector(date), [date])
+  );
 
   const ref = React.useRef<HTMLDivElement>(null);
 

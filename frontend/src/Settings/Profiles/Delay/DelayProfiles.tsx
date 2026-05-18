@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { Error as AppError } from 'App/State/AppSectionState';
@@ -68,7 +68,7 @@ function createDelayProfilesSelector() {
 function DelayProfiles() {
   const dispatch = useDispatch();
   const { defaultProfile, isFetching, isPopulated, error, items, tagList } =
-    useSelector(createDelayProfilesSelector());
+    useSelector(useMemo(() => createDelayProfilesSelector(), []));
 
   const [isAddDelayProfileModalOpen, setIsAddDelayProfileModalOpen] =
     useState(false);

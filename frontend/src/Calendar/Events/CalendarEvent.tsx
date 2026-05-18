@@ -48,9 +48,13 @@ function CalendarEvent({
   grabbed,
 }: CalendarEventProps) {
   const gameFile = useGameFile(gameFileId);
-  const queueItem = useSelector(createQueueItemSelectorForHook(id));
+  const queueItem = useSelector(
+    useMemo(() => createQueueItemSelectorForHook(id), [id])
+  );
 
-  const { enableColorImpairedMode } = useSelector(createUISettingsSelector());
+  const { enableColorImpairedMode } = useSelector(
+    useMemo(() => createUISettingsSelector(), [])
+  );
 
   const {
     showGameInformation,

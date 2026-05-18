@@ -32,7 +32,7 @@ function TagsModalContent(props: TagsModalContentProps) {
   const allDownloadClients: DownloadClientAppState = useSelector(
     (state: AppState) => state.settings.downloadClients
   );
-  const tagList: Tag[] = useSelector(createTagsSelector());
+  const tagList: Tag[] = useSelector(useMemo(() => createTagsSelector(), []));
 
   const [tags, setTags] = useState<number[]>([]);
   const [applyTags, setApplyTags] = useState('add');

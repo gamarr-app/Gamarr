@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import Alert from 'Components/Alert';
@@ -58,7 +58,7 @@ function DownloadClientOptions({
     hasSettings,
     hasPendingChanges,
     isSaving,
-  } = useSelector(createMapStateSelector());
+  } = useSelector(useMemo(() => createMapStateSelector(), []));
 
   const prevIsSaving = useRef(isSaving);
   const prevHasPendingChanges = useRef(hasPendingChanges);

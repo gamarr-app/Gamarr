@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
 import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
@@ -44,11 +44,15 @@ function GameIndexRow(props: GameIndexRowProps) {
   const { gameId, columns, isSelectMode } = props;
 
   const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
-    useSelector(createGameIndexItemSelector(props.gameId));
+    useSelector(
+      useMemo(() => createGameIndexItemSelector(props.gameId), [props])
+    );
 
   const { showSearchAction } = useSelector(selectTableOptions);
 
-  const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
+  const { gameRuntimeFormat } = useSelector(
+    useMemo(() => createUISettingsSelector(), [])
+  );
 
   const {
     monitored,

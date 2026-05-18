@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import QueueDetails from 'Activity/Queue/QueueDetails';
 import Icon from 'Components/Icon';
@@ -25,7 +26,9 @@ function GameStatus({
 }: GameStatusProps) {
   const { isAvailable, monitored, grabbed = false } = useGame(gameId) as Game;
 
-  const queueItem = useSelector(createQueueItemSelectorForHook(gameId));
+  const queueItem = useSelector(
+    useMemo(() => createQueueItemSelectorForHook(gameId), [gameId])
+  );
   const gameFile = useGameFile(gameFileId);
 
   const hasGameFile = !!gameFile;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { Error as AppError } from 'App/State/AppSectionState';
@@ -157,7 +157,7 @@ function EditDelayProfileModalContent({
     item,
     validationErrors,
     validationWarnings,
-  } = useSelector(createDelayProfileSelector(id));
+  } = useSelector(useMemo(() => createDelayProfileSelector(id), [id]));
 
   const prevIsSaving = useRef(isSaving);
 

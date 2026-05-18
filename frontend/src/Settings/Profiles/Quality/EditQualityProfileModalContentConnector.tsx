@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -161,7 +161,7 @@ function EditQualityProfileModalContentConnector({
     languages,
     isInUse,
     ...otherSettings
-  } = useSelector(createMapStateSelector(id));
+  } = useSelector(useMemo(() => createMapStateSelector(id), [id]));
 
   // The item from createProviderSettingsSelectorHook matches QualityProfilePendingItem
   // since both use the same PendingValue wrapper shape for each property.

@@ -30,10 +30,12 @@ function CalendarHeader() {
   );
 
   const { isSmallScreen, isLargeScreen } = useSelector(
-    createDimensionsSelector()
+    useMemo(() => createDimensionsSelector(), [])
   );
 
-  const { longDateFormat } = useSelector(createUISettingsSelector());
+  const { longDateFormat } = useSelector(
+    useMemo(() => createUISettingsSelector(), [])
+  );
 
   const handleViewChange = useCallback(
     (newView: string) => {

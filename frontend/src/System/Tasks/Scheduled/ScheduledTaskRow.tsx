@@ -42,8 +42,10 @@ function ScheduledTaskRow(props: ScheduledTaskRowProps) {
   const dispatch = useDispatch();
 
   const { showRelativeDates, longDateFormat, shortDateFormat, timeFormat } =
-    useSelector(createUISettingsSelector());
-  const command = useSelector(createCommandSelector(taskName));
+    useSelector(useMemo(() => createUISettingsSelector(), []));
+  const command = useSelector(
+    useMemo(() => createCommandSelector(taskName), [taskName])
+  );
 
   const [time, setTime] = useState(Date.now());
 

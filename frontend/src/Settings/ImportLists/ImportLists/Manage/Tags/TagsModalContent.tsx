@@ -32,7 +32,7 @@ function TagsModalContent(props: TagsModalContentProps) {
   const allImportLists: ImportListAppState = useSelector(
     (state: AppState) => state.settings.importLists
   );
-  const tagList: Tag[] = useSelector(createTagsSelector());
+  const tagList: Tag[] = useSelector(useMemo(() => createTagsSelector(), []));
 
   const [tags, setTags] = useState<number[]>([]);
   const [applyTags, setApplyTags] = useState('add');

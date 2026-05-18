@@ -34,7 +34,9 @@ function DeleteGameModalContent(props: DeleteGameModalContentProps) {
   const { gameIds, onModalClose } = props;
 
   const { addImportExclusion } = useSelector(selectDeleteOptions);
-  const allGames: Game[] = useSelector(createAllGamesSelector());
+  const allGames: Game[] = useSelector(
+    useMemo(() => createAllGamesSelector(), [])
+  );
   const dispatch = useDispatch();
 
   const [deleteFiles, setDeleteFiles] = useState(false);

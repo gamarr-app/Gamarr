@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GAME_SEARCH } from 'Commands/commandNames';
 import IconButton from 'Components/Link/IconButton';
@@ -19,7 +19,9 @@ interface GameSearchCellProps {
 }
 
 function GameSearchCell({ gameId }: GameSearchCellProps) {
-  const executingCommands = useSelector(createExecutingCommandsSelector());
+  const executingCommands = useSelector(
+    useMemo(() => createExecutingCommandsSelector(), [])
+  );
   const isSearching = executingCommands.some(({ name, body }) => {
     const { gameIds = [] } = body;
     return name === GAME_SEARCH && gameIds.indexOf(gameId) > -1;

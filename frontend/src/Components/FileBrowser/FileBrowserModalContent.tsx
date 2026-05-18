@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import { PathInputInternal } from 'Components/Form/PathInput';
@@ -51,9 +51,11 @@ function FileBrowserModalContent(props: FileBrowserModalContentProps) {
 
   const dispatch = useDispatch();
 
-  const { isWindows, mode } = useSelector(createSystemStatusSelector());
+  const { isWindows, mode } = useSelector(
+    useMemo(() => createSystemStatusSelector(), [])
+  );
   const { isFetching, isPopulated, error, parent, directories, files, paths } =
-    useSelector(createPathsSelector());
+    useSelector(useMemo(() => createPathsSelector(), []));
 
   const [currentPath, setCurrentPath] = useState(value);
   const scrollerRef = useRef(null);

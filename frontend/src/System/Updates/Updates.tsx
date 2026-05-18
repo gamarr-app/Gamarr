@@ -53,13 +53,16 @@ function createUpdatesSelector() {
 function Updates() {
   const currentVersion = useSelector((state: AppState) => state.app.version);
   const { packageUpdateMechanismMessage } = useSelector(
-    createSystemStatusSelector()
+    useMemo(() => createSystemStatusSelector(), [])
   );
   const { shortDateFormat, longDateFormat, timeFormat } = useSelector(
-    createUISettingsSelector()
+    useMemo(() => createUISettingsSelector(), [])
   );
   const isInstallingUpdate = useSelector(
-    createCommandExecutingSelector(commandNames.APPLICATION_UPDATE)
+    useMemo(
+      () => createCommandExecutingSelector(commandNames.APPLICATION_UPDATE),
+      []
+    )
   );
 
   const {
@@ -69,7 +72,7 @@ function Updates() {
     generalSettingsError,
     items,
     updateMechanism,
-  } = useSelector(createUpdatesSelector());
+  } = useSelector(useMemo(() => createUpdatesSelector(), []));
 
   const dispatch = useDispatch();
   const [isMajorUpdateModalOpen, setIsMajorUpdateModalOpen] = useState(false);

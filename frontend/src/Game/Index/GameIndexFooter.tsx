@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { ColorImpairedConsumer } from 'App/ColorImpairedContext';
@@ -41,7 +42,7 @@ function createGameSelector() {
 }
 
 export default function GameIndexFooter() {
-  const games = useSelector(createGameSelector());
+  const games = useSelector(useMemo(() => createGameSelector(), []));
   const count = games.length;
   let gameFiles = 0;
   let monitored = 0;
