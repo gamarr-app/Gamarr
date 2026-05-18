@@ -59,7 +59,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
 
   const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
     useSelector(
-      useMemo(() => createGameIndexItemSelector(props.gameId), [props])
+      useMemo(() => createGameIndexItemSelector(props.gameId), [props.gameId])
     );
 
   const overviewOptions = useSelector(selectOverviewOptions);
