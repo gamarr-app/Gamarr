@@ -112,7 +112,7 @@
   <!-- Sentry specific configuration: Only in Release mode -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <!-- https://docs.sentry.io/platforms/dotnet/configuration/msbuild/ -->
-    <!-- OrgSlug, ProjectSlug and AuthToken are required. 
+    <!-- OrgSlug, ProjectSlug and AuthToken are required.
     They can be set below, via argument to 'msbuild -p:' or environment variable -->
     <SentryOrg></SentryOrg>
     <SentryProject></SentryProject>
@@ -120,8 +120,12 @@
     <SentryAuthToken></SentryAuthToken> <!-- Use env var instead: SENTRY_AUTH_TOKEN -->
 
     <!-- Upload PDBs to Sentry, enabling stack traces with line numbers and file paths
-      without the need to deploy the application with PDBs -->
-    <SentryUploadSymbols>true</SentryUploadSymbols>
+      without the need to deploy the application with PDBs.
+      Only when SENTRY_AUTH_TOKEN is set in the environment; Sentry 6.5+ errors out
+      on the upload step rather than skipping, so unauthenticated Release builds
+      (CI artifacts, local Release builds) would otherwise fail. -->
+    <SentryUploadSymbols Condition="'$(SENTRY_AUTH_TOKEN)' != ''">true</SentryUploadSymbols>
+    <SentryUploadSymbols Condition="'$(SENTRY_AUTH_TOKEN)' == ''">false</SentryUploadSymbols>
 
     <!-- Source Link settings -->
     <!-- https://github.com/dotnet/sourcelink/blob/main/docs/README.md#publishrepositoryurl -->
