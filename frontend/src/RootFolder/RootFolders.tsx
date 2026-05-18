@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -36,7 +36,7 @@ const rootFolderColumns: Column[] = [
 
 function RootFolders() {
   const { isFetching, isPopulated, error, items } = useSelector(
-    createRootFoldersSelector()
+    useMemo(() => createRootFoldersSelector(), [])
   );
 
   const dispatch = useDispatch();

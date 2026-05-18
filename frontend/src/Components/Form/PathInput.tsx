@@ -4,6 +4,7 @@ import {
   SyntheticEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import {
@@ -66,7 +67,7 @@ function PathInput(props: PathInputProps) {
 
   const dispatch = useDispatch();
 
-  const paths = useSelector(createPathsSelector());
+  const paths = useSelector(useMemo(() => createPathsSelector(), []));
 
   const handleFetchPaths = useCallback(
     (path: string) => {

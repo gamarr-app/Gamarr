@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import FileBrowserModal from 'Components/FileBrowser/FileBrowserModal';
@@ -11,7 +11,9 @@ import translate from 'Utilities/String/translate';
 import styles from './AddRootFolder.css';
 
 function AddRootFolder() {
-  const { isSaving, saveError } = useSelector(createRootFoldersSelector());
+  const { isSaving, saveError } = useSelector(
+    useMemo(() => createRootFoldersSelector(), [])
+  );
 
   const dispatch = useDispatch();
 

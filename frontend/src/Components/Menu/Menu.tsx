@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { usePopper } from 'react-popper';
@@ -160,11 +161,14 @@ function Menu({
     }
   }, [enforceMaxHeight, updateMaxHeight]);
 
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
   useEffect(() => {
-    if (update && isMenuOpen) {
-      update();
+    if (updateRef.current && isMenuOpen) {
+      updateRef.current();
     }
-  }, [isMenuOpen, update]);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     // Listen to resize events on the window and scroll events
