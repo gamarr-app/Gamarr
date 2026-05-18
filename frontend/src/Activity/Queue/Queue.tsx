@@ -82,7 +82,9 @@ function Queue() {
   const { isGamesFetching, isGamesPopulated, gamesError } = useSelector(
     useMemo(() => createGamesFetchingSelector(), [])
   );
-  const customFilters = useSelector(createCustomFiltersSelector('queue'));
+  const customFilters = useSelector(
+    useMemo(() => createCustomFiltersSelector('queue'), [])
+  );
 
   const isRefreshMonitoredDownloadsExecuting = useSelector(
     useMemo(

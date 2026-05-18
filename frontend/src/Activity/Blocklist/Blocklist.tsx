@@ -66,7 +66,9 @@ function Blocklist() {
     isRemoving,
   } = useSelector((state: AppState) => state.blocklist);
 
-  const customFilters = useSelector(createCustomFiltersSelector('blocklist'));
+  const customFilters = useSelector(
+    useMemo(() => createCustomFiltersSelector('blocklist'), [])
+  );
   const isClearingBlocklistExecuting = useSelector(
     useMemo(
       () => createCommandExecutingSelector(commandNames.CLEAR_BLOCKLIST),

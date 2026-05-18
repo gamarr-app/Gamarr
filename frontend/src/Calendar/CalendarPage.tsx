@@ -98,7 +98,9 @@ function CalendarPage() {
   const isRssSyncExecuting = useSelector(
     useMemo(() => createCommandExecutingSelector(commandNames.RSS_SYNC), [])
   );
-  const customFilters = useSelector(createCustomFiltersSelector('calendar'));
+  const customFilters = useSelector(
+    useMemo(() => createCustomFiltersSelector('calendar'), [])
+  );
   const hasGames = !!useSelector(useMemo(() => createGameCountSelector(), []));
 
   const [pageContentRef, { width }] = useMeasure();

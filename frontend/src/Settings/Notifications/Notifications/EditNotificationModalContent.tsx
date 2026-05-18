@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
@@ -52,7 +52,9 @@ function EditNotificationModalContent({
     saveError,
     item,
     ...otherSettings
-  } = useSelector(createProviderSettingsSelectorHook('notifications', id));
+  } = useSelector(
+    useMemo(() => createProviderSettingsSelectorHook('notifications', id), [id])
+  );
 
   const prevIsSaving = useRef(isSaving);
 
