@@ -8,7 +8,6 @@ namespace NzbDrone.Automation.Test
     /// These tests are slower and depend on external services.
     /// </summary>
     [TestFixture]
-    [Ignore("Temporarily disabled — selector matches AddNewGame-searchResults (container) instead of -searchResult (card); fix selector or restructure when restoring full suite")]
     public class ExternalAutomationTests : AutomationTest
     {
         // Disable mock metadata so tests use real external APIs
@@ -53,7 +52,7 @@ namespace NzbDrone.Automation.Test
                     Console.WriteLine($"[DEBUG] Pressed Enter, waiting for results...");
 
                     // Wait for search results to appear
-                    await Page.Locator("div[class*='searchResult']").First.WaitForAsync(new LocatorWaitForOptions
+                    await Page.Locator("div[class*='AddNewGameSearchResult/searchResult/']").First.WaitForAsync(new LocatorWaitForOptions
                     {
                         State = WaitForSelectorState.Visible,
                         Timeout = 30000
@@ -104,7 +103,7 @@ namespace NzbDrone.Automation.Test
                     Console.WriteLine($"[DEBUG] Search input value: '{inputValue}'");
 
                     // Count how many search results exist (even if hidden)
-                    var resultCount = await Page.Locator("div[class*='searchResult']").CountAsync();
+                    var resultCount = await Page.Locator("div[class*='AddNewGameSearchResult/searchResult/']").CountAsync();
                     Console.WriteLine($"[DEBUG] Search result elements found: {resultCount}");
 
                     // Log first 500 chars of body for inspection
@@ -134,7 +133,7 @@ namespace NzbDrone.Automation.Test
             await TakeScreenshotAsync("add_game_search_results");
 
             // Click on the first search result to open add modal
-            await Page.Locator("div[class*='searchResult']").First.ClickAsync();
+            await Page.Locator("div[class*='AddNewGameSearchResult/searchResult/']").First.ClickAsync();
 
             // Wait for the modal to appear
             await Page.Locator("div[class*='ModalContent']").First.WaitForAsync(new LocatorWaitForOptions
