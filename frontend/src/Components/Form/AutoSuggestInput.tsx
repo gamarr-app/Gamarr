@@ -10,6 +10,8 @@ import {
   SyntheticEvent,
   useCallback,
   useEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 import Autosuggest, {
@@ -92,13 +94,8 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
   const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
   const previousSuggestions = usePrevious(suggestions);
 
-  const {
-    styles: popperStyles,
-    attributes,
-    update,
-  } = usePopper(referenceElement, popperElement, {
-    placement: 'bottom-start',
-    modifiers: [
+  const popperModifiers = useMemo(
+    () => [
       {
         name: 'flip',
         options: {
@@ -108,9 +105,24 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
       {
         name: 'computeMaxHeight',
         enabled: true,
-        phase: 'beforeWrite',
+        phase: 'beforeWrite' as const,
         requires: ['computeStyles'],
-        fn: ({ state }) => {
+        fn: ({
+          state,
+        }: {
+          state: {
+            rects: {
+              reference: {
+                x: number;
+                y: number;
+                width: number;
+                height: number;
+              };
+            };
+            placement: string;
+            styles: { popper: Record<string, string> };
+          };
+        }) => {
           const reference = state.rects.reference;
 
           if (enforceMaxHeight) {
@@ -131,6 +143,17 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
         },
       },
     ],
+    [minHeight, maxHeight, enforceMaxHeight]
+  );
+
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: 'bottom-start',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    modifiers: popperModifiers as any,
   });
 
   const createRenderInputComponent = useCallback(
@@ -225,11 +248,14 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
     suggestionHighlighted: styles.suggestionHighlighted,
   };
 
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
   useEffect(() => {
-    if (update && suggestions !== previousSuggestions) {
-      update();
+    if (updateRef.current && suggestions !== previousSuggestions) {
+      updateRef.current();
     }
-  }, [suggestions, previousSuggestions, update]);
+  }, [suggestions, previousSuggestions]);
 
   return (
     <Autosuggest
