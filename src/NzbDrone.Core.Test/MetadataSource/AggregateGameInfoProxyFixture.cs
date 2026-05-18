@@ -45,6 +45,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
         }
 
@@ -59,6 +60,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
         }
 
@@ -72,6 +74,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
         }
 
@@ -86,6 +89,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
         }
 
@@ -789,6 +793,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
 
             // GetTrendingGames only queries IGDB/RAWG, not Steam
@@ -808,6 +813,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
 
             var result = _subject.GetTrendingGames();
@@ -825,6 +831,7 @@ namespace NzbDrone.Core.Test.MetadataSource
                 _rawgProxy.Object,
                 _igdbProxy.Object,
                 _configService.Object,
+                new NzbDrone.Common.Cache.CacheManager(),
                 TestLogger);
 
             var result = _subject.GetPopularGames();
