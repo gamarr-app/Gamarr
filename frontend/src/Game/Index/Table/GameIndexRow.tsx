@@ -45,7 +45,7 @@ function GameIndexRow(props: GameIndexRowProps) {
 
   const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
     useSelector(
-      useMemo(() => createGameIndexItemSelector(props.gameId), [props])
+      useMemo(() => createGameIndexItemSelector(props.gameId), [props.gameId])
     );
 
   const { showSearchAction } = useSelector(selectTableOptions);
