@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -15,20 +14,19 @@ namespace NzbDrone.Integration.Test
             config.LogLevel = "Trace";
             HostConfig.Put(config);
 
-            var resultGet = Games.All();
-
             var logFile = "gamarr.trace.txt";
-            var logLines = Logs.GetLogFileLines(logFile);
+            var beforeCount = Logs.GetLogFileLines(logFile).Length;
 
-            var resultPost = Games.InvalidPost(new Gamarr.Api.V3.Games.GameResource());
+            Games.InvalidPost(new Gamarr.Api.V3.Games.GameResource());
 
-            // Skip 2 and 1 to ignore the logs endpoint
-            logLines = Logs.GetLogFileLines(logFile).Skip(logLines.Length + 2).ToArray();
-            Array.Resize(ref logLines, logLines.Length - 1);
+            // Only assert on lines written after the POST; the previous slice-based
+            // approach was sensitive to interleaving with the log-fetch endpoint's
+            // own request/response logging and went flaky once timing changed.
+            var newLines = Logs.GetLogFileLines(logFile).Skip(beforeCount).ToArray();
 
-            logLines.Should().Contain(v => v.Contains("|Trace|Http|Req") && v.Contains("/api/v3/game/"));
-            logLines.Should().Contain(v => v.Contains("|Trace|Http|Res") && v.Contains("/api/v3/game/: 400.BadRequest"));
-            logLines.Should().Contain(v => v.Contains("|Debug|Api|") && v.Contains("/api/v3/game/: 400.BadRequest"));
+            newLines.Should().Contain(v => v.Contains("|Trace|Http|Req") && v.Contains("/api/v3/game/"));
+            newLines.Should().Contain(v => v.Contains("|Trace|Http|Res") && v.Contains("/api/v3/game/: 400.BadRequest"));
+            newLines.Should().Contain(v => v.Contains("|Debug|Api|") && v.Contains("/api/v3/game/: 400.BadRequest"));
         }
     }
 }
