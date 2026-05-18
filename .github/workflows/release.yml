@@ -155,7 +155,7 @@ jobs:
           version="${{ steps.version.outputs.version }}"
 
           mkdir -p _artifacts/$runtime
-          cp -r _output/net8.0/$runtime/publish/* _artifacts/$runtime/
+          cp -r _output/net10.0/$runtime/publish/* _artifacts/$runtime/
           cp -r _output/UI _artifacts/$runtime/
           cp LICENSE _artifacts/$runtime/
 
