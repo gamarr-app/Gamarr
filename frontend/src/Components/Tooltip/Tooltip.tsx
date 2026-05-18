@@ -180,10 +180,12 @@ function Tooltip(props: TooltipProps) {
     modifiers: popperModifiers as any,
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
   useEffect(() => {
-    if (update && isOpen) {
-      update();
+    if (updateRef.current && isOpen) {
+      updateRef.current();
     }
   }, [isOpen]);
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
 import FormInputButton from 'Components/Form/FormInputButton';
 import TextInput from 'Components/Form/TextInput';
@@ -79,13 +79,8 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
   const buttonId = buttonIdRef.current;
   const contentId = contentIdRef.current;
 
-  const {
-    styles: popperStyles,
-    attributes,
-    update,
-  } = usePopper(referenceElement, popperElement, {
-    placement: 'bottom',
-    modifiers: [
+  const popperModifiers = useMemo(
+    () => [
       {
         name: 'preventOverflow',
         options: {
@@ -93,13 +88,24 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
         },
       },
     ],
+    []
+  );
+
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: 'bottom',
+    modifiers: popperModifiers,
   });
 
-  // Update popper position when it opens
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
   useEffect(() => {
-    if (update && isOpen) {
-      update();
+    if (updateRef.current && isOpen) {
+      updateRef.current();
     }
   }, [isOpen]);
 
