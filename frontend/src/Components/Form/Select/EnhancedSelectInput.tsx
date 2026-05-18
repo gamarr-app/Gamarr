@@ -7,6 +7,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { usePopper } from 'react-popper';
@@ -191,19 +192,18 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     return '';
   }, [value, values, isMultiSelect]);
 
-  const {
-    styles: popperStyles,
-    attributes,
-    update,
-  } = usePopper(referenceElement, popperElement, {
-    placement: 'bottom-start',
-    modifiers: [
+  const popperModifiers = useMemo(
+    () => [
       {
         name: 'computeMaxHeight',
         enabled: true,
-        phase: 'beforeWrite',
+        phase: 'beforeWrite' as const,
         requires: ['computeStyles'],
-        fn: ({ state }) => {
+        fn: ({
+          state,
+        }: {
+          state: { styles: { popper: Record<string, string> } };
+        }) => {
           const windowHeight = window.innerHeight;
           state.styles.popper.maxHeight = `${windowHeight - MINIMUM_DISTANCE_FROM_EDGE}px`;
         },
@@ -216,6 +216,17 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
         },
       },
     ],
+    []
+  );
+
+  const {
+    styles: popperStyles,
+    attributes,
+    update,
+  } = usePopper(referenceElement, popperElement, {
+    placement: 'bottom-start',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    modifiers: popperModifiers as any,
   });
 
   const handleWindowClick = useCallback(
@@ -409,10 +420,12 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
     [onChange]
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
   useEffect(() => {
-    if (update && isOpen) {
-      update();
+    if (updateRef.current && isOpen) {
+      updateRef.current();
     }
   }, [isOpen]);
 
