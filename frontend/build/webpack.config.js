@@ -109,6 +109,14 @@ module.exports = (env) => {
         'process.env.NODE_ENV': isProduction ? JSON.stringify('production') : JSON.stringify('development'),
       }),
 
+      // Drop moment's full locale set; only English is shipped.
+      // moment defaults to lazy-requiring every locale, which webpack picks up
+      // and emits as a 13 MB chunk.
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/,
+      }),
+
       new MiniCssExtractPlugin({
         filename: 'Content/styles.css',
         chunkFilename: isProduction ? 'Content/[id]-[chunkhash].css' : 'Content/[id].css',
