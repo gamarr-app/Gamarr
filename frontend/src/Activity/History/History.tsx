@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
@@ -56,7 +56,7 @@ function History() {
   } = useSelector((state: AppState) => state.history);
 
   const { isGamesFetching, isGamesPopulated, gamesError } = useSelector(
-    createGamesFetchingSelector()
+    useMemo(() => createGamesFetchingSelector(), [])
   );
   const customFilters = useSelector(createCustomFiltersSelector('history'));
   const dispatch = useDispatch();

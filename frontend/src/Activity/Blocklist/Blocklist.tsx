@@ -68,7 +68,10 @@ function Blocklist() {
 
   const customFilters = useSelector(createCustomFiltersSelector('blocklist'));
   const isClearingBlocklistExecuting = useSelector(
-    createCommandExecutingSelector(commandNames.CLEAR_BLOCKLIST)
+    useMemo(
+      () => createCommandExecutingSelector(commandNames.CLEAR_BLOCKLIST),
+      []
+    )
   );
   const dispatch = useDispatch();
 

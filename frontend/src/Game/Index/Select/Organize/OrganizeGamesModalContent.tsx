@@ -24,7 +24,9 @@ interface OrganizeGamesModalContentProps {
 function OrganizeGamesModalContent(props: OrganizeGamesModalContentProps) {
   const { gameIds, onModalClose } = props;
 
-  const allGames: Game[] = useSelector(createAllGamesSelector());
+  const allGames: Game[] = useSelector(
+    useMemo(() => createAllGamesSelector(), [])
+  );
   const dispatch = useDispatch();
 
   const gameTitles = useMemo(() => {

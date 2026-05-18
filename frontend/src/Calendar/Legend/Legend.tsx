@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import { icons, kinds } from 'Helpers/Props';
@@ -12,7 +13,9 @@ function Legend() {
   const { showCutoffUnmetIcon, fullColorEvents } = useSelector(
     (state: AppState) => state.calendar.options
   );
-  const { enableColorImpairedMode } = useSelector(createUISettingsSelector());
+  const { enableColorImpairedMode } = useSelector(
+    useMemo(() => createUISettingsSelector(), [])
+  );
 
   const iconsToShow = [];
   const isAgendaView = view === 'agenda';

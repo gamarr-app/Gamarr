@@ -120,20 +120,24 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const navigate = useNavigate();
 
   const game = useGame(gameId);
-  const allGames = useSelector(createAllGamesSelector());
+  const allGames = useSelector(useMemo(() => createAllGamesSelector(), []));
 
   const gameFilesSelector = useMemo(createGameFilesSelector, []);
   const { isGameFilesFetching, gameFilesError, hasGameFiles, gameFileVersion } =
     useSelector((state: AppState) =>
       gameFilesSelector(state, game?.gameFileId)
     );
-  const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
+  const { gameRuntimeFormat } = useSelector(
+    useMemo(() => createUISettingsSelector(), [])
+  );
   const isSidebarVisible = useSelector(
     (state: AppState) => state.app.isSidebarVisible
   );
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
+  const { isSmallScreen } = useSelector(
+    useMemo(() => createDimensionsSelector(), [])
+  );
 
-  const commands = useSelector(createCommandsSelector());
+  const commands = useSelector(useMemo(() => createCommandsSelector(), []));
 
   const { isRefreshing, isRenaming, isSearching } = useMemo(() => {
     const gameRefreshingCommand = findCommand(commands, {

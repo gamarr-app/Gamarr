@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -27,7 +27,9 @@ function QualityFilterBuilderRowValueConnector(
   props: FilterBuilderRowValueProps
 ) {
   const dispatch = useDispatch();
-  const { isPopulated, tagList } = useSelector(createQualitiesSelector());
+  const { isPopulated, tagList } = useSelector(
+    useMemo(() => createQualitiesSelector(), [])
+  );
 
   useEffect(() => {
     if (!isPopulated) {

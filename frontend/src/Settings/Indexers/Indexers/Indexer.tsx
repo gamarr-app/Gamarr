@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Card from 'Components/Card';
 import Label from 'Components/Label';
@@ -32,7 +32,7 @@ function Indexer({
   onCloneIndexerPress,
 }: IndexerProps) {
   const dispatch = useDispatch();
-  const tagList = useSelector(createTagsSelector());
+  const tagList = useSelector(useMemo(() => createTagsSelector(), []));
 
   const [isEditIndexerModalOpen, setIsEditIndexerModalOpen] = useState(false);
   const [isDeleteIndexerModalOpen, setIsDeleteIndexerModalOpen] =

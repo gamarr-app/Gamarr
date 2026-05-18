@@ -55,7 +55,9 @@ function AddNewGameCollectionGameModalContent({
 
   const collection = useGameCollection(collectionId)!;
 
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
+  const { isSmallScreen } = useSelector(
+    useMemo(() => createDimensionsSelector(), [])
+  );
   const isWindows = useIsWindows();
 
   const { isAdding, addError, pendingChanges } = useSelector(

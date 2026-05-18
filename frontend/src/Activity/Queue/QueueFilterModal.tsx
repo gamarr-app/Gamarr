@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, { CustomFilter, Filter } from 'App/State/AppState';
@@ -40,8 +40,10 @@ export default function QueueFilterModal({
   onFilterSelect,
   onModalClose,
 }: QueueFilterModalProps) {
-  const sectionItems = useSelector(createQueueSelector());
-  const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
+  const sectionItems = useSelector(useMemo(() => createQueueSelector(), []));
+  const filterBuilderProps = useSelector(
+    useMemo(() => createFilterBuilderPropsSelector(), [])
+  );
   const customFilterType = 'queue';
 
   const dispatch = useDispatch();

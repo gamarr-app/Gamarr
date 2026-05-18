@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -12,7 +13,9 @@ function createGameFileSelector(gameFileId?: number) {
 }
 
 function useGameFile(gameFileId: number | undefined) {
-  return useSelector(createGameFileSelector(gameFileId));
+  return useSelector(
+    useMemo(() => createGameFileSelector(gameFileId), [gameFileId])
+  );
 }
 
 export default useGameFile;

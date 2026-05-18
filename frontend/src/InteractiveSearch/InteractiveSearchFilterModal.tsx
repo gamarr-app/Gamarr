@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState, { CustomFilter, Filter } from 'App/State/AppState';
@@ -40,8 +40,10 @@ export default function InteractiveSearchFilterModal({
   onFilterSelect,
   onModalClose,
 }: InteractiveSearchFilterModalProps) {
-  const sectionItems = useSelector(createReleasesSelector());
-  const filterBuilderProps = useSelector(createFilterBuilderPropsSelector());
+  const sectionItems = useSelector(useMemo(() => createReleasesSelector(), []));
+  const filterBuilderProps = useSelector(
+    useMemo(() => createFilterBuilderPropsSelector(), [])
+  );
 
   const dispatch = useDispatch();
 

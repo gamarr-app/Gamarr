@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Shortcut, shortcuts } from 'Components/keyboardShortcuts';
 import Button from 'Components/Link/Button';
@@ -52,7 +53,9 @@ interface KeyboardShortcutsModalContentProps {
 function KeyboardShortcutsModalContent({
   onModalClose,
 }: KeyboardShortcutsModalContentProps) {
-  const { isOsx } = useSelector(createSystemStatusSelector());
+  const { isOsx } = useSelector(
+    useMemo(() => createSystemStatusSelector(), [])
+  );
   const allShortcuts = getShortcuts();
 
   return (

@@ -28,8 +28,10 @@ interface TagsModalContentProps {
 function TagsModalContent(props: TagsModalContentProps) {
   const { gameIds, onModalClose, onApplyTagsPress } = props;
 
-  const allGames: Game[] = useSelector(createAllGamesSelector());
-  const tagList: Tag[] = useSelector(createTagsSelector());
+  const allGames: Game[] = useSelector(
+    useMemo(() => createAllGamesSelector(), [])
+  );
+  const tagList: Tag[] = useSelector(useMemo(() => createTagsSelector(), []));
 
   const [tags, setTags] = useState<number[]>([]);
   const [applyTags, setApplyTags] = useState('add');

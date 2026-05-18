@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { createSelector } from 'reselect';
@@ -66,10 +66,15 @@ function DlcList({ gameId }: DlcListProps) {
   const parentGameIgdbId = game?.parentGameIgdbId;
 
   const { dlcs, isFetching, isPopulated } = useSelector(
-    createDlcsSelector(igdbId)
+    useMemo(() => createDlcsSelector(igdbId), [igdbId])
   );
 
-  const parentGame = useSelector(createParentGameSelector(parentGameIgdbId));
+  const parentGame = useSelector(
+    useMemo(
+      () => createParentGameSelector(parentGameIgdbId),
+      [parentGameIgdbId]
+    )
+  );
 
   const handleMonitorAll = useCallback(() => {
     dlcs.forEach((dlc) => {

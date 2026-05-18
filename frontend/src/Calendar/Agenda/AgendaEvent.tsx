@@ -48,9 +48,11 @@ function AgendaEvent({
   showDate,
 }: AgendaEventProps) {
   const gameFile = useGameFile(gameFileId);
-  const queueItem = useSelector(createQueueItemSelectorForHook(id));
+  const queueItem = useSelector(
+    useMemo(() => createQueueItemSelectorForHook(id), [id])
+  );
   const { longDateFormat, enableColorImpairedMode } = useSelector(
-    createUISettingsSelector()
+    useMemo(() => createUISettingsSelector(), [])
   );
 
   const { showGameInformation, showCutoffUnmetIcon } = useSelector(

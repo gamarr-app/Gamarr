@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AutoTaggingAppState } from 'App/State/SettingsAppState';
 import Card from 'Components/Card';
@@ -29,7 +29,7 @@ export default function AutoTaggings() {
     )
   );
 
-  const tagList = useSelector(createTagsSelector());
+  const tagList = useSelector(useMemo(() => createTagsSelector(), []));
   const dispatch = useDispatch();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [tagsFromId, setTagsFromId] = useState<number>();

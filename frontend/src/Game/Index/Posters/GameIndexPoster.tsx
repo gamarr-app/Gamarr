@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
 import GameTagList from 'Components/GameTagList';
@@ -40,7 +40,9 @@ function GameIndexPoster(props: GameIndexPosterProps) {
   const { gameId, sortKey, isSelectMode, posterWidth, posterHeight } = props;
 
   const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
-    useSelector(createGameIndexItemSelector(props.gameId));
+    useSelector(
+      useMemo(() => createGameIndexItemSelector(props.gameId), [props])
+    );
 
   const {
     detailedProgressBar,
@@ -58,7 +60,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
   } = useSelector(selectPosterOptions);
 
   const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
-    useSelector(createUISettingsSelector());
+    useSelector(useMemo(() => createUISettingsSelector(), []));
 
   const {
     title,

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import Label from 'Components/Label';
 import { GameStatus } from 'Game/Game';
@@ -71,7 +72,9 @@ function GameStatusLabel({
   status,
   useLabel = false,
 }: GameStatusLabelProps) {
-  const queueItem = useSelector(createQueueItemSelectorForHook(gameId));
+  const queueItem = useSelector(
+    useMemo(() => createQueueItemSelectorForHook(gameId), [gameId])
+  );
 
   let gameStatus = getGameStatus(
     status,

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CommandBody } from 'Commands/Command';
 import Icon, { IconProps } from 'Components/Icon';
@@ -120,7 +120,7 @@ export default function QueuedTaskRow(props: QueuedTaskRowProps) {
 
   const dispatch = useDispatch();
   const { longDateFormat, shortDateFormat, showRelativeDates, timeFormat } =
-    useSelector(createUISettingsSelector());
+    useSelector(useMemo(() => createUISettingsSelector(), []));
 
   const updateTimeTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(
     null

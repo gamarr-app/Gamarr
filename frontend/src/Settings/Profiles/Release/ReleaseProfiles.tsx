@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Card from 'Components/Card';
@@ -24,7 +24,7 @@ function ReleaseProfiles() {
     )
   );
 
-  const tagList = useSelector(createTagsSelector());
+  const tagList = useSelector(useMemo(() => createTagsSelector(), []));
   const indexerList = useSelector(
     (state: AppState) => state.settings.indexers.items
   );

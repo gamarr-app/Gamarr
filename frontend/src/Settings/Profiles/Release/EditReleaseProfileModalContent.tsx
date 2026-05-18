@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -74,7 +74,7 @@ function EditReleaseProfileModalContent({
   onDeleteReleaseProfilePress,
 }: EditReleaseProfileModalContentProps) {
   const { item, isFetching, isSaving, error, saveError, ...otherProps } =
-    useSelector(createReleaseProfileSelector(id));
+    useSelector(useMemo(() => createReleaseProfileSelector(id), [id]));
 
   const { name, enabled, required, ignored, tags, indexerId } = item;
 

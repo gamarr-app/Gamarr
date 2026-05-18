@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -15,7 +16,9 @@ export function createGameCollectionSelector(collectionId?: number) {
 }
 
 function useGameCollection(collectionId: number | undefined) {
-  return useSelector(createGameCollectionSelector(collectionId));
+  return useSelector(
+    useMemo(() => createGameCollectionSelector(collectionId), [collectionId])
+  );
 }
 
 export default useGameCollection;

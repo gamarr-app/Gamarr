@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -89,13 +89,17 @@ function CalendarPage() {
   const { selectedFilterKey, filters } = useSelector(
     (state: AppState) => state.calendar
   );
-  const missingGameIds = useSelector(createMissingGameIdsSelector());
-  const isSearchingForMissing = useSelector(createIsSearchingSelector());
+  const missingGameIds = useSelector(
+    useMemo(() => createMissingGameIdsSelector(), [])
+  );
+  const isSearchingForMissing = useSelector(
+    useMemo(() => createIsSearchingSelector(), [])
+  );
   const isRssSyncExecuting = useSelector(
-    createCommandExecutingSelector(commandNames.RSS_SYNC)
+    useMemo(() => createCommandExecutingSelector(commandNames.RSS_SYNC), [])
   );
   const customFilters = useSelector(createCustomFiltersSelector('calendar'));
-  const hasGames = !!useSelector(createGameCountSelector());
+  const hasGames = !!useSelector(useMemo(() => createGameCountSelector(), []));
 
   const [pageContentRef, { width }] = useMeasure();
   const [isCalendarLinkModalOpen, setIsCalendarLinkModalOpen] = useState(false);

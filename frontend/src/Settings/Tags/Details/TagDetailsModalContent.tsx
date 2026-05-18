@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import ModelBase from 'App/ModelBase';
@@ -83,7 +84,9 @@ function TagDetailsModalContent({
   onModalClose,
   onDeleteTagPress,
 }: TagDetailsModalContentProps) {
-  const games = useSelector(createMatchingGamesSelector(gameIds));
+  const games = useSelector(
+    useMemo(() => createMatchingGamesSelector(gameIds), [gameIds])
+  );
 
   const delayProfiles = useSelector(
     createMatchingItemSelector(

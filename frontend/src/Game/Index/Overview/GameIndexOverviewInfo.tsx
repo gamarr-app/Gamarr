@@ -168,7 +168,7 @@ function getInfoRowProps(
 function GameIndexOverviewInfo(props: GameIndexOverviewInfoProps) {
   const height = props.height;
 
-  const uiSettings = useSelector(createUISettingsSelector());
+  const uiSettings = useSelector(useMemo(() => createUISettingsSelector(), []));
 
   let shownRows = 1;
   const maxRows = Math.floor(height / (infoRowHeight + 4));

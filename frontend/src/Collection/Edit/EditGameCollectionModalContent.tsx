@@ -51,7 +51,9 @@ function EditGameCollectionModalContent({
   const { isSaving, saveError, pendingChanges } = useSelector(
     (state: AppState) => state.gameCollections
   );
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
+  const { isSmallScreen } = useSelector(
+    useMemo(() => createDimensionsSelector(), [])
+  );
 
   const wasSaving = usePrevious(isSaving);
 
