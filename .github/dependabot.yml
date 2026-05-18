@@ -29,3 +29,7 @@ updates:
    groups:
      nuget-minor-patch:
        update-types: ["minor", "patch"]
+   # SixLabors.ImageSharp went commercial-license in 4.0; staying on 3.x.
+   ignore:
+     - dependency-name: "SixLabors.ImageSharp"
+       update-types: ["version-update:semver-major"]
