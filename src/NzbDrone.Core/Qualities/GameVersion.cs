@@ -1,12 +1,13 @@
 using System;
 using System.Text.RegularExpressions;
+using NzbDrone.Core.Datastore;
 
 namespace NzbDrone.Core.Qualities
 {
     /// <summary>
     /// Represents a game version for comparison (e.g., v1.0.1, Build 12345)
     /// </summary>
-    public class GameVersion : IEquatable<GameVersion>, IComparable<GameVersion>
+    public class GameVersion : IEmbeddedDocument, IEquatable<GameVersion>, IComparable<GameVersion>
     {
         private static readonly Regex VersionRegex = new Regex(
             @"^v?(?<major>\d+)(?:\.(?<minor>\d+))?(?:\.(?<patch>\d+))?(?:\.(?<build>\d+))?$",

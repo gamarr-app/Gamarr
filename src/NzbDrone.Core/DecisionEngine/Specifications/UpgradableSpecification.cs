@@ -184,6 +184,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public bool IsVersionUpgrade(GameVersion currentVersion, GameVersion newVersion)
         {
+            // Central opt-out for auto-upgrading to newer game builds. Default on;
+            // users who prefer to pin the build they grabbed can disable it under
+            // Settings -> Media Management.
+            if (!_configService.UpgradeGameVersions)
+            {
+                return false;
+            }
+
             // If new version is null or has no value, it's not an upgrade
             if (newVersion == null || !newVersion.HasValue)
             {

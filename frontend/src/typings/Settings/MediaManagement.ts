@@ -11,6 +11,7 @@ export default interface MediaManagement {
   chmodFolder: string;
   chownGroup: string;
   skipFreeSpaceCheckWhenImporting: boolean;
+  upgradeGameVersions: boolean;
   minimumFreeSpaceWhenImporting: number;
   copyUsingHardlinks: boolean;
   useScriptImport: boolean;

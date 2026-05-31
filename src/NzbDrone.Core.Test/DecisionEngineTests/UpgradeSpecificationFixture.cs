@@ -51,6 +51,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void Setup()
         {
             CustomFormatsTestHelpers.GivenCustomFormats(CustomFormat1, CustomFormat2);
+
+            // Version upgrades are on by default in production; mirror that here
+            // so the existing IsVersionUpgrade cases see the feature enabled.
+            Mocker.GetMock<IConfigService>()
+                  .SetupGet(s => s.UpgradeGameVersions)
+                  .Returns(true);
         }
 
         private void GivenAutoDownloadPropers(ProperDownloadTypes type)
@@ -280,6 +286,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var newVersion = new GameVersion(1, 1, 0, 0);
 
             Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_for_version_upgrade_when_feature_disabled()
+        {
+            Mocker.GetMock<IConfigService>()
+                  .SetupGet(s => s.UpgradeGameVersions)
+                  .Returns(false);
+
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 1, 0, 0);
+
+            Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeFalse();
         }
 
         [Test]
