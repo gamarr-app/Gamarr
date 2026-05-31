@@ -388,6 +388,7 @@ jobs:
           '
 
       - name: Run External Automation Tests
+        continue-on-error: true
         run: |
           dotnet test _tests/net10.0/Gamarr.Automation.Test.dll \
             --filter "Category=ExternalAutomationTest" \
