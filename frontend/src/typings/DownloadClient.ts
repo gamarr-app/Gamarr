@@ -8,6 +8,7 @@ interface DownloadClient extends Provider {
   priority: number;
   removeCompletedDownloads: boolean;
   removeFailedDownloads: boolean;
+  stallTimeoutHours: number;
   tags: number[];
 }
 

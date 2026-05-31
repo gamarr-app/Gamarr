@@ -102,6 +102,7 @@ function EditDownloadClientModalContent({
     priority,
     removeCompletedDownloads,
     removeFailedDownloads,
+    stallTimeoutHours,
     fields,
     tags,
     message,
@@ -223,6 +224,19 @@ function EditDownloadClientModalContent({
                   name="removeFailedDownloads"
                   helpText={translate('RemoveFailedDownloadsHelpText')}
                   {...removeFailedDownloads}
+                  onChange={handleInputChange}
+                />
+              </FormGroup>
+
+              <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+                <FormLabel>{translate('StallTimeout')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.NUMBER}
+                  unit="hours"
+                  name="stallTimeoutHours"
+                  helpText={translate('StallTimeoutHelpText')}
+                  {...stallTimeoutHours}
                   onChange={handleInputChange}
                 />
               </FormGroup>

@@ -10,6 +10,7 @@ namespace Gamarr.Api.V3.DownloadClient
         public int Priority { get; set; }
         public bool RemoveCompletedDownloads { get; set; }
         public bool RemoveFailedDownloads { get; set; }
+        public int StallTimeoutHours { get; set; }
     }
 
     public class DownloadClientResourceMapper : ProviderResourceMapper<DownloadClientResource, DownloadClientDefinition>
@@ -28,6 +29,7 @@ namespace Gamarr.Api.V3.DownloadClient
             resource.Priority = definition.Priority;
             resource.RemoveCompletedDownloads = definition.RemoveCompletedDownloads;
             resource.RemoveFailedDownloads = definition.RemoveFailedDownloads;
+            resource.StallTimeoutHours = definition.StallTimeoutHours;
 
             return resource;
         }
@@ -46,6 +48,7 @@ namespace Gamarr.Api.V3.DownloadClient
             definition.Priority = resource.Priority;
             definition.RemoveCompletedDownloads = resource.RemoveCompletedDownloads;
             definition.RemoveFailedDownloads = resource.RemoveFailedDownloads;
+            definition.StallTimeoutHours = resource.StallTimeoutHours;
 
             return definition;
         }
