@@ -64,6 +64,11 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("The.French.Game.2013.720p.BluRay.x264 - ROUGH[PublicHD]", "The French Game")]
         [TestCase("The.Good.German.2006.720p.BluRay.x264-RlsGrp", "The Good German", Description = "Hardcoded to exclude from German regex")]
 
+        // Dot-separated title with version and no release group (e.g. uploaded with just platform/lang tags)
+        [TestCase("Factorio.v1.1.107.MULTi.x64", "Factorio")]
+        [TestCase("Stardew.Valley.v1.6.15_MULTi", "Stardew Valley")]
+        [TestCase("Factorio.v1.1.107", "Factorio")]
+
         // Game-style release names with version and release groups
         [TestCase("Cyberpunk.2077.v2.1-CODEX", "Cyberpunk 2077")]
         [TestCase("Elden.Ring.v1.10-FitGirl", "Elden Ring")]

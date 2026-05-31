@@ -241,6 +241,12 @@ namespace NzbDrone.Core.Parser
             // As a last resort for games that have ( or [ in their title.
             new Regex(@"^(?<title>.+?)?(?:(?:[-_\W](?<![)\[!]))*(?<year>(1(8|9)|20)\d{2}(?!p|i|\d+|\]|\W\d+)))+(\W+|_|$)(?!\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Dot- or underscore-separated title with version and no release group, e.g.
+            // "Factorio.v1.1.107.MULTi.x64" -> title="Factorio", version="1.1.107"
+            // "Stardew.Valley.v1.6.15_MULTi" -> title="Stardew.Valley", version="1.6.15"
+            // Anything after the version (platform/language tags) is discarded.
+            new Regex(@"^(?<title>(?![(\[])[^v]?[^_.]+?)[._]v(?<version>\d+(?:[._]\d+)+)(?:[._-][^-]*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Game release without version: GameName-GROUP (fallback for scene-style naming, group must be uppercase 4+ chars)
             new Regex(@"^(?<title>[A-Za-z0-9][A-Za-z0-9._-]*?[A-Za-z0-9])-(?<releasegroup>[A-Z]{4,})$", RegexOptions.Compiled),
 
