@@ -128,7 +128,10 @@ namespace NzbDrone.Core.Profiles.Qualities
 
             _logger.Info("Setting up default quality profiles");
 
-            // Any - accepts all game quality types
+            // Any - accepts all game quality types, including Unknown so that
+            // popular bare-title releases (no quality tag in the name) can
+            // compete. The comparator's seeder-first ordering means those
+            // releases only win when they have a clear seeder advantage.
             AddDefaultProfile("Any",
                 Quality.GOG,
                 Quality.Scene,
@@ -143,7 +146,8 @@ namespace NzbDrone.Core.Profiles.Qualities
                 Quality.ISO,
                 Quality.Retail,
                 Quality.Portable,
-                Quality.MultiLang);
+                Quality.MultiLang,
+                Quality.Unknown);
 
             // DRM-Free - prefers GOG and DRM-free releases
             AddDefaultProfile("DRM-Free",
