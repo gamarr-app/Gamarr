@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Messaging.Events;
@@ -21,12 +23,18 @@ namespace NzbDrone.Core.Download
     {
         private readonly IHistoryService _historyService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IDownloadClientFactory _downloadClientFactory;
+        private readonly Logger _logger;
 
         public FailedDownloadService(IHistoryService historyService,
-                                     IEventAggregator eventAggregator)
+                                     IEventAggregator eventAggregator,
+                                     IDownloadClientFactory downloadClientFactory,
+                                     Logger logger)
         {
             _historyService = historyService;
             _eventAggregator = eventAggregator;
+            _downloadClientFactory = downloadClientFactory;
+            _logger = logger;
         }
 
         public void MarkAsFailed(int historyId, bool skipRedownload = false)
@@ -75,7 +83,44 @@ namespace NzbDrone.Core.Download
                 }
 
                 trackedDownload.State = TrackedDownloadState.FailedPending;
+                return;
             }
+
+            CheckForStall(trackedDownload);
+        }
+
+        private void CheckForStall(TrackedDownload trackedDownload)
+        {
+            if (trackedDownload.DownloadItem.RemainingSize <= 0 ||
+                trackedDownload.DownloadItem.Status == DownloadItemStatus.Completed)
+            {
+                return;
+            }
+
+            var clientDef = _downloadClientFactory.Find(trackedDownload.DownloadClient);
+            var timeoutHours = clientDef?.StallTimeoutHours ?? 0;
+
+            if (timeoutHours <= 0 || trackedDownload.RemainingSizeChangedAt is not { } lastProgressAt)
+            {
+                return;
+            }
+
+            var stalledFor = DateTime.UtcNow - lastProgressAt;
+            if (stalledFor < TimeSpan.FromHours(timeoutHours))
+            {
+                return;
+            }
+
+            var grabbedItems = GetGrabbedHistory(trackedDownload.DownloadItem.DownloadId);
+            if (grabbedItems.Empty())
+            {
+                // No grab history — warn but don't fail (we can't blocklist or re-search what we didn't grab).
+                trackedDownload.Warn("Download has been stalled for {0:N1} hours, but wasn't grabbed by Gamarr", stalledFor.TotalHours);
+                return;
+            }
+
+            _logger.Info("Download '{0}' stalled for {1:N1} hours ({2} bytes remaining unchanged); marking as failed", CleanseLogMessage.SanitizeLogParam(trackedDownload.DownloadItem.Title), stalledFor.TotalHours, trackedDownload.LastRemainingSize);
+            trackedDownload.State = TrackedDownloadState.FailedPending;
         }
 
         public void ProcessFailed(TrackedDownload trackedDownload)
