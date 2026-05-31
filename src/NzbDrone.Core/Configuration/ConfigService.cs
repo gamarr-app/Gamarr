@@ -257,6 +257,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("SkipFreeSpaceCheckWhenImporting", value); }
         }
 
+        public bool UpgradeGameVersions
+        {
+            get { return GetValueBoolean("UpgradeGameVersions", true); }
+
+            set { SetValue("UpgradeGameVersions", value); }
+        }
+
         public int MinimumFreeSpaceWhenImporting
         {
             get { return GetValueInt("MinimumFreeSpaceWhenImporting", 100); }

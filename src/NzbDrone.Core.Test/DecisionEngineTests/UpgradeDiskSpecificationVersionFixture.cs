@@ -3,6 +3,7 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
@@ -63,6 +64,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Mocker.GetMock<ICustomFormatCalculationService>()
                 .Setup(x => x.ParseCustomFormat(It.IsAny<GameFile>()))
                 .Returns(new List<CustomFormat>());
+
+            // Version upgrades are on by default in production.
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.UpgradeGameVersions)
+                .Returns(true);
         }
 
         [Test]

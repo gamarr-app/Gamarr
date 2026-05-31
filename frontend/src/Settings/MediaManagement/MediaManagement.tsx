@@ -215,6 +215,18 @@ function MediaManagement() {
 
             {showAdvancedSettings ? (
               <FieldSet legend={translate('Importing')}>
+                <FormGroup size={sizes.MEDIUM}>
+                  <FormLabel>{translate('UpgradeGameVersions')}</FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.CHECK}
+                    name="upgradeGameVersions"
+                    helpText={translate('UpgradeGameVersionsHelpText')}
+                    onChange={handleInputChange}
+                    {...settings.upgradeGameVersions}
+                  />
+                </FormGroup>
+
                 <FormGroup
                   advancedSettings={showAdvancedSettings}
                   isAdvanced={true}

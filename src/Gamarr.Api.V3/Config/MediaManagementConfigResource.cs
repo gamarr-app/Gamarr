@@ -24,6 +24,7 @@ namespace Gamarr.Api.V3.Config
         public string ChownGroup { get; set; }
 
         public bool SkipFreeSpaceCheckWhenImporting { get; set; }
+        public bool UpgradeGameVersions { get; set; }
         public int MinimumFreeSpaceWhenImporting { get; set; }
         public bool CopyUsingHardlinks { get; set; }
         public bool UseScriptImport { get; set; }
@@ -61,6 +62,7 @@ namespace Gamarr.Api.V3.Config
                 ChownGroup = model.ChownGroup,
 
                 SkipFreeSpaceCheckWhenImporting = model.SkipFreeSpaceCheckWhenImporting,
+                UpgradeGameVersions = model.UpgradeGameVersions,
                 MinimumFreeSpaceWhenImporting = model.MinimumFreeSpaceWhenImporting,
                 CopyUsingHardlinks = model.CopyUsingHardlinks,
                 UseScriptImport = model.UseScriptImport,

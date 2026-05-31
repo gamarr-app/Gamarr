@@ -2011,6 +2011,8 @@
   "UpdateSelected": "Update Selected",
   "UpdaterLogFiles": "Updater Log Files",
   "Updates": "Updates",
+  "UpgradeGameVersions": "Upgrade Game Versions",
+  "UpgradeGameVersionsHelpText": "Automatically grab and import a release when it has a newer game version (build) than the one on disk, even when the quality cutoff is already met",
   "UpgradeUntil": "Upgrade Until",
   "UpgradeUntilCustomFormatScore": "Upgrade Until Custom Format Score",
   "UpgradeUntilCustomFormatScoreGameHelpText": "Once the quality cutoff is met or exceeded and this custom format score is reached {appName} will no longer grab or import upgrades for those games",
