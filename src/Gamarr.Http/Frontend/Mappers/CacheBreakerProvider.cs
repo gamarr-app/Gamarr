@@ -37,6 +37,15 @@ namespace Gamarr.Http.Frontend.Mappers
 
             var mapper = _diskMappers.Single(m => m.CanHandle(resourceUrl));
             var pathToFile = mapper.Map(resourceUrl);
+
+            if (pathToFile == null)
+            {
+                // Map returns null when the path-traversal guard in
+                // StaticResourceMapperBase rejects the resource. Fall back
+                // to the un-broken URL rather than NPE-ing on ComputeMd5.
+                return resourceUrl;
+            }
+
             var hash = _hashProvider.ComputeMd5(pathToFile).ToBase64();
 
             return resourceUrl + "?h=" + hash.Trim('=');
