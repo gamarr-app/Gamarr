@@ -243,10 +243,17 @@ jobs:
         id: changelog
         env:
           NEW_TAG: v${{ steps.version.outputs.version }}
+          CHANNEL: ${{ steps.version.outputs.channel }}
           REPO: ${{ github.repository }}
         run: |
-          # Find the most recent existing tag, excluding the one we're about to create.
-          PREV_TAG=$(git tag --sort=-creatordate | grep -Fxv "$NEW_TAG" | head -n1 || true)
+          # For stable releases (e.g. v0.1.4) compare against the previous stable
+          # tag (vX.Y.Z), not the most recent nightly. Otherwise the "What's
+          # Changed" list only spans the gap between nightlies.
+          if [[ "$CHANNEL" == "stable" ]]; then
+            PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -Fxv "$NEW_TAG" | head -n1 || true)
+          else
+            PREV_TAG=$(git tag --sort=-creatordate | grep -Fxv "$NEW_TAG" | head -n1 || true)
+          fi
 
           {
             echo 'body<<CHANGELOG_EOF'
