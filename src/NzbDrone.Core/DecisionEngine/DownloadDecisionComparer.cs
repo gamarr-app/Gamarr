@@ -28,15 +28,21 @@ namespace NzbDrone.Core.DecisionEngine
 
         public int Compare(DownloadDecision x, DownloadDecision y)
         {
+            // ComparePeersIfTorrent runs first: it uses log10 of the seeder
+            // count, so only order-of-magnitude gaps (e.g. 800 vs 60) flip the
+            // decision. Small differences fall through to quality. This matches
+            // the heuristic that a release with a lot of seeders is usually
+            // what the user actually wants, even when a "higher quality" but
+            // dead torrent also exists.
             var comparers = new List<CompareDelegate>
             {
+                ComparePeersIfTorrent,
                 CompareQuality,
                 CompareCustomFormatScore,
                 CompareContentType,
                 CompareProtocol,
                 CompareIndexerPriority,
                 CompareIndexerFlags,
-                ComparePeersIfTorrent,
                 CompareAgeIfUsenet,
                 CompareSize
             };
