@@ -1,13 +1,31 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sentry;
 
 namespace NzbDrone.Common.Instrumentation.Sentry
 {
     public static class SentryCleanser
     {
+        private static readonly Regex Http5xxFailure =
+            new (@"HTTP request failed:\s*\[5\d\d:", RegexOptions.Compiled);
+
+        private static readonly string[] ExternalMetadataLoggers =
+        {
+            "RawgProxy",
+            "IgdbProxy",
+            "SteamStoreProxy",
+            "TwitchProxy",
+        };
+
         public static SentryEvent CleanseEvent(SentryEvent sentryEvent)
         {
+            if (ShouldDrop(sentryEvent))
+            {
+                // Returning null tells the Sentry SDK to drop the event.
+                return null;
+            }
+
             try
             {
                 if (sentryEvent.Message is not null)
@@ -53,6 +71,28 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             }
 
             return sentryEvent;
+        }
+
+        private static bool ShouldDrop(SentryEvent sentryEvent)
+        {
+            // 5xx responses from third-party metadata APIs (Steam, IGDB, RAWG,
+            // Twitch) are operational noise, not bugs in Gamarr. They're already
+            // handled by the calling code (search just degrades to other
+            // sources) — there's no action a maintainer can take.
+            if (sentryEvent.SentryExceptions is null)
+            {
+                return false;
+            }
+
+            var logger = sentryEvent.Logger ?? string.Empty;
+            if (!ExternalMetadataLoggers.Any(l => logger.EndsWith(l, StringComparison.Ordinal)))
+            {
+                return false;
+            }
+
+            return sentryEvent.SentryExceptions.Any(ex =>
+                (ex.Type ?? string.Empty).EndsWith("HttpException", StringComparison.Ordinal) &&
+                Http5xxFailure.IsMatch(ex.Value ?? string.Empty));
         }
 
         public static Breadcrumb CleanseBreadcrumb(Breadcrumb b)
