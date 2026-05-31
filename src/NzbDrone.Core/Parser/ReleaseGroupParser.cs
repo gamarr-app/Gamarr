@@ -11,12 +11,16 @@ public static class ReleaseGroupParser
 
     private static readonly Regex InvalidReleaseGroupRegex = new (@"^([se]\d+|[0-9a-f]{8})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    // Words that look like a "[GROUP]" tag but are really quality / content
-    // markers (e.g. "[PORTABLE]", "[CRACKED]"). Without this guard the
-    // bracket arm of ReleaseGroupRegex would misattribute them as the
-    // release group, so e.g. "Hytale (2026) [PORTABLE]" gets group="PORTABLE".
+    // Words that look like a "[GROUP]" tag but are really quality / content /
+    // category markers (e.g. "[PORTABLE]", "[CRACKED]", RuTracker's "[DL]").
+    // Without this guard the bracket arm of ReleaseGroupRegex would
+    // misattribute them as the release group, so e.g. "Hytale (2026) [PORTABLE]"
+    // gets group="PORTABLE" and "[DL] Split Fiction [...]" gets group="DL".
     private static readonly Regex QualityTagsMasqueradingAsGroupRegex = new (
-        @"^(?:PORTABLE|NOINSTALL|CRACKED|CRACK|REPACK|RIP|UPDATE|PATCH|GOG|STEAM|EPIC|ORIGIN|UPLAY|MULTI\d*|LANGUAGE[._-]?PACK)$",
+        @"^(?:PORTABLE|NOINSTALL|CRACKED|CRACK|REPACK|RIP|UPDATE|PATCH|GOG|STEAM|EPIC|ORIGIN|UPLAY|MULTI\d*|LANGUAGE[._-]?PACK|" +
+        @"DL|UL|SP|CD|DVD|P|L|" +                                  // RuTracker category prefixes
+        @"FREE|REGION[._-]?FREE|EUR[._-]?FREE|US[._-]?FREE|" +     // console region tags
+        @"PS3|PS4|PS5|XBOX|XB360|XBONE|SWITCH|WII|WIIU)$",         // platform tags
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static readonly Regex AnimeReleaseGroupRegex = new (@"^(?:\[(?<subgroup>(?!\s).+?(?<!\s))\](?:_|-|\s|\.)?)",
@@ -55,7 +59,15 @@ public static class ReleaseGroupParser
 
         if (animeMatch.Success)
         {
-            return animeMatch.Groups["subgroup"].Value;
+            var sub = animeMatch.Groups["subgroup"].Value;
+
+            // [DL]/[P]/[CRACKED]/etc at the start of RuTracker / repack titles
+            // aren't release groups even though they look like the anime
+            // "[Subgroup]" convention.
+            if (!QualityTagsMasqueradingAsGroupRegex.IsMatch(sub))
+            {
+                return sub;
+            }
         }
 
         // Check for game repack groups like [DODI Repack], [FitGirl Repack]

@@ -25,11 +25,11 @@ namespace NzbDrone.Core.Parser
         {
             // Scene release with version AND platform suffix: "Sandwalkers.v2.2.3.Linux-I_KnoW" → "Sandwalkers"
             // MUST BE FIRST - Strip version and platform suffix before release group
-            new Regex(@"^(?<title>.+?)[._]v\d+(?:[._]\d+)*[._](?:Linux|MacOS|Mac|Win(?:dows)?|x64|x86)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>.+?)[._]v\d+(?:[._]\d+)*[._](?:Linux|MacOS|Mac|Win(?:dows)?|x64|x86)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|InsaneRamZes|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Scene release with platform suffix (dot-separated, no version): "Lust.Theory.Season.3.MacOS-I_KnoW" → "Lust Theory Season 3"
             // MUST BE EARLY - Strip platform suffix using greedy match
-            new Regex(@"^(?<title>.+?)\.(?:Linux|MacOS|Mac|Win(?:dows)?|x64|x86)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>.+?)\.(?:Linux|MacOS|Mac|Win(?:dows)?|x64|x86)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|InsaneRamZes|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // German language releases: "Game.German-DELiGHT" → "Game"
             // MUST BE EARLY - Strip .German suffix before release group
@@ -188,17 +188,17 @@ namespace NzbDrone.Core.Parser
 
             // Scene release with underscore platform suffix: "Kinsfolk_Linux-bADkARMA" → "Kinsfolk Linux" (keeps platform name)
             // Note: Underscore-separated platform is kept as part of the title (converts to space)
-            new Regex(@"^(?<title>(?![(\[]).+?_(?:Linux|MacOS|Mac|Win(?:dows)?|x64|x86))-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>(?![(\[]).+?_(?:Linux|MacOS|Mac|Win(?:dows)?|x64|x86))-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|InsaneRamZes|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Scene release with hyphenated group: "ELDEN RING-PLAZA" or "Game.Name-CODEX"
             // Match title up to hyphen followed by known scene group
-            new Regex(@"^(?<title>(?![(\[]).+?)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>(?![(\[]).+?)-(?<releasegroup>PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|InsaneRamZes|GOG)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Game releases without year - match title up to known release group at END of string (must be before year patterns to keep years in game titles)
             // Scene groups: CODEX, PLAZA, SKIDROW, CPY, EMPRESS, RELOADED, etc.
             // Repackers: FitGirl, DODI, XATAB, Elamigos, etc.
             // Optional version (v20251216) and REPACK before group are stripped from title
-            new Regex(@"^(?<title>(?![(\[]).+?)(?:[._]v\d+(?:[._]\d+)*)?(?:[._]REPACK)?[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|P2P)(?:[-_. ]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?<title>(?![(\[]).+?)(?:[._]v\d+(?:[._]\d+)*)?(?:[._]REPACK)?[-_. ](?<releasegroup>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE|VREX|HI2U|TENOKE|I_KnoW|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|InsaneRamZes|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|KAOS|MASQUERADE|GOG|STEAM[-_.]?RIP|EPIC[-_.]?RIP|P2P)(?:[-_. ]?REPACK)?(?:\.[a-z0-9]{2,4})?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Russian tracker format: [DL] Title [L] [langs] (year, genre) (date) [source]
             // Example: [DL] The Witness [L] [RUS + ENG + 13 / ENG] (2016, Adventure) (21-12-2017) [GOG]
@@ -247,8 +247,15 @@ namespace NzbDrone.Core.Parser
             // Anything after the version (platform/language tags) is discarded.
             new Regex(@"^(?<title>(?![(\[])[^v]?[^_.]+?)[._]v(?<version>\d+(?:[._]\d+)+)(?:[._-][^-]*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            // Game release without version: GameName-GROUP (fallback for scene-style naming, group must be uppercase 4+ chars)
-            new Regex(@"^(?<title>[A-Za-z0-9][A-Za-z0-9._-]*?[A-Za-z0-9])-(?<releasegroup>[A-Z]{4,})$", RegexOptions.Compiled),
+            // Game release without version: GameName-GROUP (fallback for scene-style naming).
+            // Accepted group shapes (all anchored to end of string):
+            //   - ALL-CAPS, 4+ chars        (CODEX, EMPRESS, RUNE)
+            //   - CamelCase, 2+ "word" pairs (InsaneRamZes, RazorDOX)
+            //   - lowercase letters + digits (jc141)
+            // The CamelCase / lowercase+digit shapes specifically avoid false
+            // positives on real titles like "Half-Life" / "Whack-a-Mole" /
+            // "Spider-Man" which all end in [A-Z][a-z]+ with no second cap-then-letters segment.
+            new Regex(@"^(?<title>[A-Za-z0-9][A-Za-z0-9._-]*?[A-Za-z0-9])-(?<releasegroup>[A-Z]{4,}|[A-Z][a-z]+(?:[A-Z][a-z0-9]+)+|[a-z]{2,}\d+)$", RegexOptions.Compiled),
 
             // Fallback: Simple game name without any markers (e.g., "Hytale", "My Winter Car", "StarRupture")
             // Only matches if no other regex matched - must look like a proper game title

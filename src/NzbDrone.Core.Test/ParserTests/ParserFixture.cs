@@ -69,6 +69,12 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Stardew.Valley.v1.6.15_MULTi", "Stardew Valley")]
         [TestCase("Factorio.v1.1.107", "Factorio")]
 
+        // Title-GROUP fallback: groups beyond plain ALL-CAPS (regression from the bug report)
+        [TestCase("Clair.Obscur.Expedition.33.Deluxe.Edition-InsaneRamZes", "Clair Obscur Expedition 33 Deluxe Edition")]
+        [TestCase("Hades.II-InsaneRamZes", "Hades II")]
+        [TestCase("The.Outer.Worlds.2.Premium.Edition-InsaneRamZes", "The Outer Worlds 2 Premium Edition")]
+        [TestCase("Some.Game-RazorDOX", "Some Game")]
+
         // Game-style release names with version and release groups
         [TestCase("Cyberpunk.2077.v2.1-CODEX", "Cyberpunk 2077")]
         [TestCase("Elden.Ring.v1.10-FitGirl", "Elden Ring")]
@@ -856,12 +862,15 @@ namespace NzbDrone.Core.Test.ParserTests
             result.PrimaryGameTitle.Should().Be(title);
         }
 
-        // Quality / content tags in brackets shouldn't be mistaken for the release group.
-        // Regression: "Hytale (2026) [PORTABLE]" used to come back with ReleaseGroup="PORTABLE".
+        // Quality / content / category tags in brackets shouldn't be mistaken for the release group.
+        // Regression cases: "[PORTABLE]" → group=PORTABLE; "[DL] Title ..." → group=DL.
         [TestCase("Hytale (2026) [PORTABLE]")]
         [TestCase("Game Title (2024) [CRACKED]")]
         [TestCase("Game Title (2024) [MULTI14]")]
         [TestCase("Game Title (2024) [REPACK]")]
+        [TestCase("[DL] Split Fiction [P] [RUS + ENG + 10] (2025, Action) (build 18353366) [Portable]")]
+        [TestCase("[DL] Portal 2 [P] [RUS + ENG + 25] (2011, Puzzle) (Build 11097438) [Portable]")]
+        [TestCase("Portal 2 (2011) [Ps3][EUR-FREE][MULTi5]")]
         public void should_not_treat_quality_tag_as_release_group(string postTitle)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle);
