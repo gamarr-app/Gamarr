@@ -55,8 +55,13 @@ namespace Gamarr.Api.V3.Commands
         {
             var commandType =
                 _knownTypes.GetImplementations(typeof(Command))
-                               .Single(c => c.Name.Replace("Command", "")
+                               .SingleOrDefault(c => c.Name.Replace("Command", "")
                                              .Equals(commandResource.Name, StringComparison.InvariantCultureIgnoreCase));
+
+            if (commandType == null)
+            {
+                throw new BadRequestException($"Unknown command '{commandResource.Name}'");
+            }
 
             Request.Body.Seek(0, SeekOrigin.Begin);
             using (var reader = new StreamReader(Request.Body))
