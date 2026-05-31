@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Instrumentation;
@@ -618,82 +619,97 @@ namespace NzbDrone.Core.MetadataSource
                 return results;
             }
 
-            // Search Steam first (no API key needed - works out of the box!)
-            try
+            // Fan out the three source searches in parallel. Each proxy has its
+            // own independent throttle, so wall-clock cost drops from sum() to
+            // max() of the three legs.
+            var steamTask = Task.Run(() =>
             {
-                var steamResults = _steamProxy.SearchForNewGame(title);
-                foreach (var game in steamResults)
+                try
                 {
-                    var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                    return _steamProxy.SearchForNewGame(title);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                    return new List<Game>();
+                }
+            });
+
+            var igdbTask = HasIgdbCredentials
+                ? Task.Run(() =>
+                {
+                    try
+                    {
+                        return _igdbProxy.SearchForNewGame(title);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to search IGDB for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                        return new List<Game>();
+                    }
+                })
+                : Task.FromResult(new List<Game>());
+
+            var rawgTask = HasRawgCredentials
+                ? Task.Run(() =>
+                {
+                    try
+                    {
+                        return _rawgProxy.SearchForNewGame(title);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to search RAWG for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                        return new List<Game>();
+                    }
+                })
+                : Task.FromResult(new List<Game>());
+
+            Task.WaitAll(steamTask, igdbTask, rawgTask);
+
+            var steamHits = steamTask.Result;
+            var igdbHits = igdbTask.Result;
+            var rawgHits = rawgTask.Result;
+
+            // Steam seeds the dictionary first; IGDB then RAWG merge into existing
+            // entries to preserve the pre-parallel merge precedence.
+            foreach (var game in steamHits)
+            {
+                var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                resultsByNormalizedTitle[normalizedTitle] = game;
+            }
+
+            _logger.Debug("Found {0} games from Steam for '{1}'", steamHits.Count, title);
+
+            foreach (var game in igdbHits)
+            {
+                var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                if (resultsByNormalizedTitle.TryGetValue(normalizedTitle, out var existing))
+                {
+                    MergeGameMetadata(existing, game);
+                }
+                else
+                {
                     resultsByNormalizedTitle[normalizedTitle] = game;
                 }
-
-                _logger.Debug("Found {0} games from Steam for '{1}'", steamResults.Count, title);
             }
-            catch (Exception ex)
+
+            _logger.Debug("Found {0} games from IGDB for '{1}'", igdbHits.Count, title);
+
+            foreach (var game in rawgHits)
             {
-                _logger.Warn(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
-            }
-
-            // Search IGDB next (preferred secondary source)
-            // Merge IGDB metadata into existing results to get best of both sources
-            if (HasIgdbCredentials)
-            {
-                try
+                var normalizedTitle = NormalizeTitleForComparison(game.Title);
+                if (resultsByNormalizedTitle.TryGetValue(normalizedTitle, out var existing))
                 {
-                    var igdbResults = _igdbProxy.SearchForNewGame(title);
-                    foreach (var game in igdbResults)
-                    {
-                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
-                        if (resultsByNormalizedTitle.TryGetValue(normalizedTitle, out var existing))
-                        {
-                            // Merge IGDB data into existing result
-                            MergeGameMetadata(existing, game);
-                            _logger.Debug("Merged IGDB metadata into existing result for '{0}'", game.Title);
-                        }
-                        else
-                        {
-                            resultsByNormalizedTitle[normalizedTitle] = game;
-                        }
-                    }
-
-                    _logger.Debug("Found {0} games from IGDB for '{1}'", igdbResults.Count, title);
+                    MergeGameMetadata(existing, game);
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.Warn(ex, "Failed to search IGDB for '{0}'", title);
+                    resultsByNormalizedTitle[normalizedTitle] = game;
                 }
             }
 
-            // Also search RAWG for additional coverage
-            // Merge RAWG metadata into existing results
-            if (HasRawgCredentials)
-            {
-                try
-                {
-                    var rawgResults = _rawgProxy.SearchForNewGame(title);
-                    foreach (var game in rawgResults)
-                    {
-                        var normalizedTitle = NormalizeTitleForComparison(game.Title);
-                        if (resultsByNormalizedTitle.TryGetValue(normalizedTitle, out var existing))
-                        {
-                            // Merge RAWG data into existing result
-                            MergeGameMetadata(existing, game);
-                            _logger.Debug("Merged RAWG metadata into existing result for '{0}'", game.Title);
-                        }
-                        else
-                        {
-                            resultsByNormalizedTitle[normalizedTitle] = game;
-                        }
-                    }
-
-                    _logger.Debug("Found {0} games from RAWG for '{1}'", rawgResults.Count, title);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn(ex, "Failed to search RAWG for '{0}'", title);
-                }
-            }
+            _logger.Debug("Found {0} games from RAWG for '{1}'", rawgHits.Count, title);
 
             allResults = resultsByNormalizedTitle.Values.ToList();
 
