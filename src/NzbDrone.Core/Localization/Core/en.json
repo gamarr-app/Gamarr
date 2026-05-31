@@ -1869,6 +1869,8 @@
   "StandardGameFormat": "Standard Game Format",
   "StartImport": "Start Import",
   "StartProcessing": "Start Processing",
+  "StallTimeout": "Stall Timeout",
+  "StallTimeoutHelpText": "Hours a download may sit with no progress before {appName} marks it failed, blocklists it, and searches for a replacement. 0 disables the check.",
   "StartSearchForMissingGame": "Start search for missing game",
   "Started": "Started",
   "StartupDirectory": "Startup Directory",
