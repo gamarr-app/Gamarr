@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using NLog;
 using NzbDrone.Common.EnvironmentInfo;
@@ -50,24 +51,26 @@ namespace NzbDrone.Core.Instrumentation
                 return;
             }
 
-            var sentryEvent = new SentryEvent
-            {
-                Message = new SentryMessage { Message = "instance.checkin" },
-                Level = SentryLevel.Info,
-                Logger = "Telemetry"
-            };
-
-            sentryEvent.SetTag("checkin", "true");
-            sentryEvent.SetTag("app_version", BuildInfo.Version.ToString());
-            sentryEvent.SetTag("branch", _configFileProvider.Branch);
-            sentryEvent.SetTag("os", OsInfo.Os.ToString().ToLowerInvariant());
-            sentryEvent.SetTag("os_name", _osInfo.FullName);
-            sentryEvent.SetTag("arch", RuntimeInformation.OSArchitecture.ToString());
-            sentryEvent.SetTag("runtime", $"{PlatformInfo.PlatformName} {_platformInfo.Version}");
-            sentryEvent.SetTag("is_docker", _osInfo.IsDocker.ToString());
-            sentryEvent.SetTag("is_production", RuntimeInfo.IsProduction.ToString());
-
-            SentrySdk.CaptureEvent(sentryEvent);
+            // Record install context as a breadcrumb rather than a captured event.
+            // Capturing it as an event made every startup show up as a Sentry issue
+            // (logger=Telemetry, level=info), which polluted the issues view. As a
+            // breadcrumb the data still rides along with any real error event from
+            // this instance, but no synthetic issue is created on startup.
+            SentrySdk.AddBreadcrumb(
+                "instance.checkin",
+                category: "Telemetry",
+                level: BreadcrumbLevel.Info,
+                data: new Dictionary<string, string>
+                {
+                    { "app_version", BuildInfo.Version.ToString() },
+                    { "branch", _configFileProvider.Branch },
+                    { "os", OsInfo.Os.ToString().ToLowerInvariant() },
+                    { "os_name", _osInfo.FullName },
+                    { "arch", RuntimeInformation.OSArchitecture.ToString() },
+                    { "runtime", $"{PlatformInfo.PlatformName} {_platformInfo.Version}" },
+                    { "is_docker", _osInfo.IsDocker.ToString() },
+                    { "is_production", RuntimeInfo.IsProduction.ToString() },
+                });
         }
 
         public void HandleAsync(ApplicationStartedEvent message)
