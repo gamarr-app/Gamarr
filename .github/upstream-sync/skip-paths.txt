@@ -1,0 +1,50 @@
+# Commits that touch ONLY these path globs are skipped (Movies, TV, etc.
+# have no Gamarr equivalent). One glob per line. Lines starting with #
+# and blank lines are ignored.
+#
+# Format: fnmatch-style glob, matched against full repo-relative path.
+
+# ---- Radarr: movie domain ----
+**/Movies/**
+**/MovieCollection*
+**/Tmdb*/**
+**/Tmdb*
+**/MetadataSource/SkyHook/**
+**/MetadataSource/Tmdb*
+**/ImportLists/Tmdb*/**
+**/ImportLists/Trakt/**
+**/Notifications/Trakt/**
+**/Notifications/Plex/**
+**/Notifications/Emby/**
+**/Notifications/Jellyfin/**
+**/Notifications/MediaBrowser/**
+
+# ---- Sonarr: TV domain ----
+**/Series/**
+**/Episode*
+**/Episode*/**
+**/Season*
+**/Season*/**
+**/Tvdb*/**
+**/Tvdb*
+**/TheTVDB/**
+**/MetadataSource/SkyHook/**
+**/Plex/**
+**/Plexmatch/**
+
+# ---- Both: stuff Gamarr definitively doesn't have ----
+**/Subtitles/**
+**/Languages/**
+frontend/src/Movie/**
+frontend/src/Series/**
+frontend/src/Episode/**
+frontend/src/Season/**
+frontend/src/AddMovie/**
+frontend/src/AddSeries/**
+
+# ---- Build / CI files we manage independently ----
+.github/ISSUE_TEMPLATE/**
+.github/workflows/**
+azure-pipelines.yml
+distribution/**
+Logo/**

@@ -1,0 +1,20 @@
+# Commits whose subject line matches any of these regexes are skipped.
+# Python re.search semantics, case-insensitive. One regex per line.
+
+^Multiple Translations updated by Weblate
+^Translation updated by Weblate
+^chore:\s*updated build images
+^chore:\s*Sonar Cloud version bump
+^Bump version to
+^version bump to
+^Bump to
+# We track our own version/release cadence; ignore upstream version bumps.
+
+# These two we already fixed our own way:
+^Bump dessant
+^Skip proxy tests on MacOsX
+
+# Movie/series-domain features (not bug fixes) we shouldn't auto-pull
+^New: Simkl
+^New: Trakt
+^Anime
