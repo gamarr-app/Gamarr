@@ -24,6 +24,8 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game.v20240101-SKIDROW", 20240101, 0, 0, 0)]
         [TestCase("Hytale (v20260120)", 20260120, 0, 0, 0)]
         [TestCase("Hytale (v2026.01.20)", 2026, 1, 20, 0)]
+        [TestCase("Subnautica 2 (v2026 05 25)", 2026, 5, 25, 0)] // Space-separated date must not collapse to just the year
+        [TestCase("Subnautica 2 (v2026 05)", 2026, 5, 0, 0)]
         [TestCase("The Outer Worlds 2 Premium Edition (v1030 All DLCs Bonus", 1030, 0, 0, 0)]
         [TestCase("The Outer Worlds 2: Premium Edition (v.1.0.6.0) + 7 DLC [amd64] [Multi] [Wine]", 1, 0, 6, 0)]
         public void should_parse_version_from_release_title(string title, int major, int minor, int patch, int build)

@@ -856,6 +856,19 @@ namespace NzbDrone.Core.Test.ParserTests
             result.PrimaryGameTitle.Should().Be(title);
         }
 
+        // Quality / content tags in brackets shouldn't be mistaken for the release group.
+        // Regression: "Hytale (2026) [PORTABLE]" used to come back with ReleaseGroup="PORTABLE".
+        [TestCase("Hytale (2026) [PORTABLE]")]
+        [TestCase("Game Title (2024) [CRACKED]")]
+        [TestCase("Game Title (2024) [MULTI14]")]
+        [TestCase("Game Title (2024) [REPACK]")]
+        public void should_not_treat_quality_tag_as_release_group(string postTitle)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.ReleaseGroup.Should().BeNull();
+        }
+
         // Real 1337x top 100 releases - Crack releases
         // Note: Year is parsed as metadata, title doesn't include the year
         [TestCase("Dead Space Remake (2023)[CRACK 1.1][AMD+Intel]", "Dead Space Remake")]
