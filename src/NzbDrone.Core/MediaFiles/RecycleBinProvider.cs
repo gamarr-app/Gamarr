@@ -70,6 +70,13 @@ namespace NzbDrone.Core.MediaFiles
         public void DeleteFolder(string path)
         {
             _logger.Info("Attempting to send '{0}' to recycling bin", path);
+
+            if (!_diskProvider.FolderExists(path))
+            {
+                _logger.Info("Folder no longer exists, nothing to delete: {0}", path);
+                return;
+            }
+
             var recyclingBin = GetRecycleBinForPath(path);
 
             if (string.IsNullOrWhiteSpace(recyclingBin))
@@ -80,6 +87,19 @@ namespace NzbDrone.Core.MediaFiles
             }
             else
             {
+                if (!_diskProvider.FolderExists(recyclingBin))
+                {
+                    try
+                    {
+                        _diskProvider.CreateFolder(recyclingBin);
+                    }
+                    catch (IOException e)
+                    {
+                        _logger.Error(e, "Unable to create the recycling bin folder '{0}'", recyclingBin);
+                        throw new RecycleBinException($"Unable to create the recycling bin folder '{recyclingBin}'", e);
+                    }
+                }
+
                 var destination = Path.Combine(recyclingBin, new DirectoryInfo(path).Name);
 
                 _logger.Debug("Moving '{0}' to '{1}'", path, destination);
