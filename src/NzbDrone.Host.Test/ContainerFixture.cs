@@ -89,7 +89,7 @@ namespace NzbDrone.App.Test
         }
 
         [Test]
-        [Ignore("Shit appveyor")]
+        [Ignore("Stale: IHandle<ApplicationShutdownRequested> resolves to DatabaseTarget; cast in this test is wrong")]
         public void should_return_same_instance_of_singletons()
         {
             var first = (DownloadMonitoringService)_container.GetRequiredService<IHandle<ApplicationShutdownRequested>>();
