@@ -19,6 +19,14 @@ namespace NzbDrone.Core.Download.TrackedDownloads
         public bool IsTrackable { get; set; }
         public bool HasNotifiedManualInteractionRequired { get; set; }
 
+        // Stall detection: track the remaining bytes seen at the last refresh
+        // and the timestamp of the last time it changed. When the gap between
+        // RemainingSizeChangedAt and now exceeds the client's StallTimeoutHours
+        // the download is failed and re-searched. Reset on app restart (we
+        // accept the worst case: stall clock starts over).
+        public long? LastRemainingSize { get; set; }
+        public DateTime? RemainingSizeChangedAt { get; set; }
+
         public TrackedDownload()
         {
             StatusMessages = Array.Empty<TrackedDownloadStatusMessage>();

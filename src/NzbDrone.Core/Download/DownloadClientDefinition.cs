@@ -16,6 +16,12 @@ namespace NzbDrone.Core.Download
         public bool RemoveCompletedDownloads { get; set; } = true;
         public bool RemoveFailedDownloads { get; set; } = true;
 
+        // 0 disables the check. When > 0, a download whose remaining bytes
+        // have not changed for this many hours is marked as failed so
+        // Gamarr blocklists it and re-searches for the next-best release.
+        // Practical wins: dead torrent swarms, qBittorrent stuck on "stalledDL".
+        public int StallTimeoutHours { get; set; }
+
         public bool Equals(DownloadClientDefinition other)
         {
             return Comparer.Equals(this, other);

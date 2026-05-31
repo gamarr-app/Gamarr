@@ -102,6 +102,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
                 existingItem.DownloadItem = downloadItem;
                 existingItem.IsTrackable = true;
+                UpdateStallTracking(existingItem, downloadItem);
 
                 return existingItem;
             }
@@ -112,8 +113,12 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 DownloadItem = downloadItem,
                 Protocol = downloadClient.Protocol,
                 IsTrackable = true,
-                HasNotifiedManualInteractionRequired = existingItem?.HasNotifiedManualInteractionRequired ?? false
+                HasNotifiedManualInteractionRequired = existingItem?.HasNotifiedManualInteractionRequired ?? false,
+                LastRemainingSize = existingItem?.LastRemainingSize ?? downloadItem.RemainingSize,
+                RemainingSizeChangedAt = existingItem?.RemainingSizeChangedAt ?? DateTime.UtcNow
             };
+
+            UpdateStallTracking(trackedDownload, downloadItem);
 
             try
             {
@@ -228,6 +233,15 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             trackedDownload.RemoteGame = parsedGameInfo == null ? null : _parsingService.Map(parsedGameInfo, 0, 0, null);
 
             _aggregationService.Augment(trackedDownload.RemoteGame);
+        }
+
+        private static void UpdateStallTracking(TrackedDownload trackedDownload, DownloadClientItem downloadItem)
+        {
+            if (trackedDownload.LastRemainingSize != downloadItem.RemainingSize)
+            {
+                trackedDownload.LastRemainingSize = downloadItem.RemainingSize;
+                trackedDownload.RemainingSizeChangedAt = DateTime.UtcNow;
+            }
         }
 
         private static TrackedDownloadState GetStateFromHistory(DownloadHistoryEventType eventType)
