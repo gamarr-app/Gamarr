@@ -18,7 +18,6 @@ using NzbDrone.Core.Datastore.Extensions;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Indexers;
-using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Host;
@@ -89,11 +88,10 @@ namespace NzbDrone.App.Test
         }
 
         [Test]
-        [Ignore("Stale: IHandle<ApplicationShutdownRequested> resolves to DatabaseTarget; cast in this test is wrong")]
         public void should_return_same_instance_of_singletons()
         {
-            var first = (DownloadMonitoringService)_container.GetRequiredService<IHandle<ApplicationShutdownRequested>>();
-            var second = _container.GetServices<IHandle<TrackedDownloadsRemovedEvent>>().OfType<ApplicationShutdownRequested>().Single();
+            var first = _container.GetServices<IHandle<GameGrabbedEvent>>().OfType<DownloadMonitoringService>().Single();
+            var second = _container.GetServices<IHandle<TrackedDownloadsRemovedEvent>>().OfType<DownloadMonitoringService>().Single();
 
             first.Should().BeSameAs(second);
         }

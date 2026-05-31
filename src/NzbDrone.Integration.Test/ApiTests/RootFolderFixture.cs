@@ -15,7 +15,6 @@ namespace NzbDrone.Integration.Test.ApiTests
         }
 
         [Test]
-        [Ignore("ConnectSignalR() in IntegrationTest base never establishes a connection locally or on CI")]
         public void should_add_and_delete_root_folders()
         {
             ConnectSignalR().Wait();
