@@ -11,6 +11,14 @@ public static class ReleaseGroupParser
 
     private static readonly Regex InvalidReleaseGroupRegex = new (@"^([se]\d+|[0-9a-f]{8})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    // Words that look like a "[GROUP]" tag but are really quality / content
+    // markers (e.g. "[PORTABLE]", "[CRACKED]"). Without this guard the
+    // bracket arm of ReleaseGroupRegex would misattribute them as the
+    // release group, so e.g. "Hytale (2026) [PORTABLE]" gets group="PORTABLE".
+    private static readonly Regex QualityTagsMasqueradingAsGroupRegex = new (
+        @"^(?:PORTABLE|NOINSTALL|CRACKED|CRACK|REPACK|RIP|UPDATE|PATCH|GOG|STEAM|EPIC|ORIGIN|UPLAY|MULTI\d*|LANGUAGE[._-]?PACK)$",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     private static readonly Regex AnimeReleaseGroupRegex = new (@"^(?:\[(?<subgroup>(?!\s).+?(?<!\s))\](?:_|-|\s|\.)?)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -86,6 +94,11 @@ public static class ReleaseGroupParser
             }
 
             if (InvalidReleaseGroupRegex.IsMatch(group))
+            {
+                return null;
+            }
+
+            if (QualityTagsMasqueradingAsGroupRegex.IsMatch(group))
             {
                 return null;
             }
