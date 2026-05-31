@@ -31,6 +31,11 @@ namespace Gamarr.Api.V3.ManualImport
                 return _manualImportService.GetMediaFiles(gameId.Value).ToResource().Select(AddQualityWeight).ToList();
             }
 
+            if (folder.IsNullOrWhiteSpace() && downloadId.IsNullOrWhiteSpace() && !gameId.HasValue)
+            {
+                throw new BadRequestException("One of 'folder', 'downloadId', or 'gameId' is required");
+            }
+
             return _manualImportService.GetMediaFiles(folder, downloadId, gameId, filterExistingFiles).ToResource().Select(AddQualityWeight).ToList();
         }
 
