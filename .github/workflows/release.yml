@@ -198,7 +198,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Calculate version
         id: version
@@ -239,13 +239,36 @@ jobs:
       - name: List artifacts
         run: find artifacts -type f
 
+      - name: Build changelog from commits
+        id: changelog
+        env:
+          NEW_TAG: v${{ steps.version.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Find the most recent existing tag, excluding the one we're about to create.
+          PREV_TAG=$(git tag --sort=-creatordate | grep -Fxv "$NEW_TAG" | head -n1 || true)
+
+          {
+            echo 'body<<CHANGELOG_EOF'
+            if [[ -n "$PREV_TAG" ]]; then
+              echo "## What's Changed"
+              git log "${PREV_TAG}..HEAD" --no-merges --pretty=format:'* %s (%h) by @%an'
+              echo
+              echo
+              echo "**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${NEW_TAG}"
+            else
+              echo "Initial release."
+            fi
+            echo CHANGELOG_EOF
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: ${{ steps.version.outputs.version }}
           prerelease: ${{ steps.version.outputs.prerelease }}
-          generate_release_notes: true
+          body: ${{ steps.changelog.outputs.body }}
           files: |
             artifacts/**/*.tar.gz
             artifacts/**/*.zip
