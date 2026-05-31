@@ -167,6 +167,14 @@ namespace NzbDrone.Core.Test.Download.Aggregation.Aggregators
             Mocker.GetMock<IIndexerFactory>().VerifyNoOtherCalls();
         }
 
+        // MULTi-language augmentation coverage. The kephasdev upstream commit
+        // "Augmenting languages for releases with MULTI and other languages"
+        // shipped four tests (two per scenario × Series + Movie flavors).
+        // For Gamarr the two Sonarr-flavored copies (with _remoteEpisode /
+        // _series and "Series.Title.S01E01..." titles) were removed in
+        // e71a0606 — the AggregationService only sees parsed languages and
+        // indexer config; the title format is irrelevant. The two Gamarr-
+        // flavored tests below cover both scenarios.
         [Test]
         public void should_return_multi_languages_when_release_as_specified_language_and_indexer_has_multi_languages_configuration()
         {
