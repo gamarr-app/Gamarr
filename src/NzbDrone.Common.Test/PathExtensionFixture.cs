@@ -216,7 +216,7 @@ namespace NzbDrone.Common.Test
         }
 
         [Test]
-        [Ignore("Parent, not Grandparent")]
+        [Ignore("IsParentPath returns true for any ancestor (grandparent included); test asserts opposite. Decide intended semantics before re-enabling.")]
         public void should_not_be_parent_when_it_is_grandparent()
         {
             var path = Path.Combine(_parent, "parent", "child");

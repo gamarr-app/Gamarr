@@ -36,7 +36,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         }
 
         [Test]
-        [Ignore("Unreliable")]
+        [Ignore("Steam/IGDB/RAWG don't return matches for '*'; assertion expects non-empty results")]
         public void lookup_random_game_using_asterix()
         {
             var game = Games.Lookup("*");
