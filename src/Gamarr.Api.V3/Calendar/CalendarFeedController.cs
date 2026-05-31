@@ -26,7 +26,6 @@ namespace Gamarr.Api.V3.Calendar
         }
 
         [HttpGet("Gamarr.ics")]
-        [HttpGet("feed.ics")]
         public IActionResult GetCalendarFeed(int pastDays = 7, int futureDays = 28, string tags = "", bool unmonitored = false, IReadOnlyCollection<CalendarReleaseType> releaseTypes = null)
         {
             var start = DateTime.Today.AddDays(-pastDays);
