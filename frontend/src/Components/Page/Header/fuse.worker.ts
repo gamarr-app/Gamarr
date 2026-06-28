@@ -1,5 +1,10 @@
 import Fuse from 'fuse.js';
-import { SuggestedGame } from './GameSearchInput';
+import type {
+  FuseWorkerRequest,
+  FuseWorkerResponse,
+  GameSuggestion,
+  SuggestedGame,
+} from './GameSearchInput';
 
 const fuseOptions = {
   shouldSort: true,
@@ -39,10 +44,12 @@ function getSuggestions(games: SuggestedGame[], value: string) {
     suggestions = fuse.search(value, { limit });
   }
 
-  return suggestions;
+  // Fuse results and the single-character shortcut both expose the fields the
+  // UI reads (item, matches); cast to the consumer contract at the boundary.
+  return suggestions as unknown as GameSuggestion[];
 }
 
-onmessage = function (e) {
+onmessage = function (e: MessageEvent<FuseWorkerRequest>) {
   if (!e) {
     return;
   }
@@ -51,7 +58,7 @@ onmessage = function (e) {
 
   const suggestions = getSuggestions(games, value);
 
-  const results = {
+  const results: FuseWorkerResponse = {
     value,
     suggestions,
   };
