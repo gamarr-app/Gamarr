@@ -89,10 +89,14 @@ REST/curl call.
 
 ## Known Gotchas
 
-- **Swashbuckle pinned to 8.x.** 10.x depends on `Microsoft.OpenApi` v2, which
-  moved types out of `Microsoft.OpenApi.Models`. Our annotations still target
-  v1. Don't bump until annotations are migrated. See
-  `src/Gamarr.Api.V3/Gamarr.Api.V3.csproj` and commit `713c9329e3`.
+- **Swashbuckle on 10.x (Microsoft.OpenApi v2).** The Swagger config in
+  `src/NzbDrone.Host/Startup.cs` uses the v2 API: `using Microsoft.OpenApi`
+  (the `.Models` namespace is gone), security schemes carry no inline
+  `Reference`, and `AddSecurityRequirement` takes a
+  `Func<OpenApiDocument, OpenApiSecurityRequirement>` whose entries key off
+  `OpenApiSecuritySchemeReference(id, document)`. The Debug-only OpenAPI doc at
+  `/docs/v3/openapi.json` is the runtime smoke test. History: pinned to 8.x in
+  `713c9329e3`, migrated to 10.x afterward.
 - **`*.css.d.ts` files are generated** by `css-modules-typescript-loader`.
   Don't run Prettier on them (it strips the quoted property names the loader
   emits). They're listed in `.prettierignore` / `frontend/.prettierignore`.
