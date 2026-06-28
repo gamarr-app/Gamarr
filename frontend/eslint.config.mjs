@@ -372,6 +372,10 @@ export default [
       // Spread typescript-eslint recommended rules
       ...tsPlugin.configs.recommended.rules,
 
+      // Catch async functions passed where a void-returning callback is
+      // expected (the returned promise's rejection would be silently dropped).
+      '@typescript-eslint/no-misused-promises': 'error',
+
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -449,6 +453,9 @@ export default [
       '@typescript-eslint/no-require-imports': 'off',
       'global-require': 'off',
       'react/jsx-no-bind': 'off',
+      // Test files are excluded from tsconfig (project: null above), so
+      // type-aware rules can't run on them.
+      '@typescript-eslint/no-misused-promises': 'off',
     },
   },
 

@@ -36,7 +36,7 @@ export default function ClipboardButton({
     };
   }, [state]);
 
-  const handleClick = useCallback(async () => {
+  const copyToClipboard = useCallback(async () => {
     try {
       if ('clipboard' in navigator) {
         await navigator.clipboard.writeText(value);
@@ -50,6 +50,12 @@ export default function ClipboardButton({
       console.error(`Failed to copy to clipboard`, e);
     }
   }, [value]);
+
+  // copyToClipboard handles its own errors; the sync wrapper keeps onClick
+  // void-returning (see @typescript-eslint/no-misused-promises).
+  const handleClick = useCallback(() => {
+    copyToClipboard();
+  }, [copyToClipboard]);
 
   return (
     <FormInputButton
