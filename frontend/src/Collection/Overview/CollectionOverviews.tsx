@@ -198,7 +198,7 @@ function CollectionOverviews(props: CollectionOverviewsProps) {
     ) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (gridRef.current && index != null) {
+      if (gridRef.current && index !== -1) {
         gridScrollToCell({
           rowIndex: index,
           columnIndex: 0,

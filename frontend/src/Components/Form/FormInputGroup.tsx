@@ -270,7 +270,7 @@ function FormInputGroup<T, C extends InputType>(
 
       {!checkInput && helpText ? <FormInputHelpText text={helpText} /> : null}
 
-      {!checkInput && helpTexts ? (
+      {!checkInput && helpTexts.length ? (
         <div>
           {helpTexts.map((text, index) => {
             return (

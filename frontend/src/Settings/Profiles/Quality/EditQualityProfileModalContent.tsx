@@ -216,7 +216,7 @@ function EditQualityProfileModalContent({
         onMeasure={handleHeaderMeasure}
       >
         <ModalHeader>
-          {id
+          {id?.value
             ? translate('EditQualityProfile')
             : translate('AddQualityProfile')}
         </ModalHeader>
@@ -410,7 +410,7 @@ function EditQualityProfileModalContent({
         onMeasure={handleFooterMeasure}
       >
         <ModalFooter>
-          {id ? (
+          {id?.value ? (
             <div
               className={styles.deleteButtonContainer}
               title={

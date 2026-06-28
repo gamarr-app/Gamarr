@@ -69,7 +69,7 @@ function DiscoverGameTable({
 
     const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-    if (index != null) {
+    if (index !== -1) {
       setScrollIndex(index);
     }
   }, [items, jumpToCharacter]);
