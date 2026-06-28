@@ -54,12 +54,26 @@ export interface SuggestedGame extends Pick<
   tags: Tag[];
 }
 
-interface GameSuggestion {
+export interface GameSuggestion {
   title: string;
   indices: number[];
   item: SuggestedGame;
   matches: Match[];
   refIndex: number;
+}
+
+// Message contracts for fuse.worker.ts. Typing both directions keeps the
+// main thread and the worker in sync: a payload that isn't a plain
+// { value: string; games } (e.g. accidentally passing a ref object) is now
+// a compile error rather than a runtime infinite loop.
+export interface FuseWorkerRequest {
+  value: string;
+  games: SuggestedGame[];
+}
+
+export interface FuseWorkerResponse {
+  value: string;
+  suggestions: GameSuggestion[];
 }
 
 interface Section {
@@ -155,7 +169,7 @@ function GameSearchInput() {
   }, [suggestions, value]);
 
   const handleSuggestionsReceived = useCallback(
-    (message: { data: { value: string; suggestions: GameSuggestion[] } }) => {
+    (message: MessageEvent<FuseWorkerResponse>) => {
       const { value, suggestions } = message.data;
 
       if (!isLoading.current) {
@@ -171,12 +185,17 @@ function GameSearchInput() {
         setSuggestions(suggestions);
         setRequestLoading(true);
 
-        const payload = {
-          value: requestValue.current,
-          games,
-        };
+        // A newer request came in while the worker was busy; search for it.
+        // Guard against re-dispatching the value we just got back so a
+        // mismatch can never become an infinite worker round-trip.
+        const pendingValue = requestValue.current;
 
-        worker.current?.postMessage(payload);
+        if (pendingValue && pendingValue !== value) {
+          worker.current?.postMessage({
+            value: pendingValue,
+            games,
+          } satisfies FuseWorkerRequest);
+        }
       }
     },
     [games]
@@ -191,12 +210,10 @@ function GameSearchInput() {
     setRequestLoading(true);
 
     if (!requestLoading) {
-      const payload = {
+      worker.current?.postMessage({
         value,
         games,
-      };
-
-      worker.current?.postMessage(payload);
+      } satisfies FuseWorkerRequest);
     }
   }, 250);
 
