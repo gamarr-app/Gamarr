@@ -11,16 +11,14 @@ function getTranslations() {
 let translations: Record<string, string> = {};
 
 export async function fetchTranslations(): Promise<boolean> {
-  return new Promise(async (resolve) => {
-    try {
-      const data = await getTranslations();
-      translations = data.Strings;
+  try {
+    const data = await getTranslations();
+    translations = data.Strings;
 
-      resolve(true);
-    } catch {
-      resolve(false);
-    }
-  });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export default function translate(

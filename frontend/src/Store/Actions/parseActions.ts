@@ -54,7 +54,7 @@ export const actionHandlers = handleThunks({
       clearTimeout(parseTimeout);
     }
 
-    parseTimeout = window.setTimeout(async () => {
+    const runParse = async () => {
       dispatch(set({ section, isFetching: true }));
 
       if (abortCurrentRequest) {
@@ -95,6 +95,12 @@ export const actionHandlers = handleThunks({
       }
 
       abortCurrentRequest = abortRequest;
+    };
+
+    // runParse handles its own errors; the sync setTimeout callback keeps the
+    // timer void-returning (see @typescript-eslint/no-misused-promises).
+    parseTimeout = window.setTimeout(() => {
+      runParse();
     }, 300);
   },
 });
