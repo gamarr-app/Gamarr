@@ -190,9 +190,10 @@ function TagInput<T extends TagBase>({
 
       if (key === 'Backspace' && !value.length) {
         const index = tags.length - 1;
+        const lastTag = tags[index];
 
-        if (index >= 0) {
-          onTagDelete({ index, id: tags[index].id });
+        if (lastTag) {
+          onTagDelete({ index, id: lastTag.id });
         }
 
         setTimeout(() => {

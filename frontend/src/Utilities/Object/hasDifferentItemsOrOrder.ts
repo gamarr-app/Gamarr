@@ -13,7 +13,8 @@ function hasDifferentItemsOrOrder<
   }
 
   for (let i = 0; i < len; i++) {
-    if (prevItems[i][idProp] !== currentItems[i][idProp]) {
+    // safe: i < len and both arrays share that length, so both are in range
+    if (prevItems[i]![idProp] !== currentItems[i]![idProp]) {
       return true;
     }
   }

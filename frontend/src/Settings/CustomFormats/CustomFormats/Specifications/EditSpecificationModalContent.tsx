@@ -47,6 +47,11 @@ function EditSpecificationModalContent(
   const idValue = id?.value;
   const implementationNameValue = implementationName ?? '';
 
+  // `name` is always present for a specification, but indexed access on the
+  // settings section types it as possibly undefined. Fall back to an empty
+  // value so the required `value` prop on the text input is always satisfied.
+  const nameField = name ?? { value: '' };
+
   return (
     <ModalContent onModalClose={onCancelPress}>
       <ModalHeader>
@@ -96,7 +101,7 @@ function EditSpecificationModalContent(
             <FormInputGroup
               type={inputTypes.TEXT}
               name="name"
-              {...name}
+              {...nameField}
               onChange={onInputChange}
             />
           </FormGroup>

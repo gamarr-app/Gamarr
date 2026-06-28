@@ -8,7 +8,8 @@ function createMultiGamesSelector(gameIds: number[]) {
     (state: AppState) => state.games.items,
     (itemMap, allGames) => {
       return gameIds.reduce((acc: Game[], gameId) => {
-        const game = allGames[itemMap[gameId]];
+        const index = itemMap[gameId];
+        const game = index === undefined ? undefined : allGames[index];
 
         if (game) {
           acc.push(game);

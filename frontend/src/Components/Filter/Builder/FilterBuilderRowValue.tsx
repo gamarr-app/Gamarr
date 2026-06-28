@@ -41,9 +41,9 @@ function getValue(
   if (selectedFilterBuilderProp.valueType === filterBuilderValueTypes.BYTES) {
     const match = input.match(/^(\d+)([kmgt](i?b)?)$/i);
 
-    if (match && match.length > 1) {
-      const [, value, unit] = input.match(/^(\d+)([kmgt](i?b)?)$/i)!;
+    const [, value, unit] = match ?? [];
 
+    if (value !== undefined && unit !== undefined) {
       switch (unit.toLowerCase()) {
         case 'k':
           return convertToBytes(parseInt(value), 1, true);

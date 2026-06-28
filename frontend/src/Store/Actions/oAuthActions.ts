@@ -125,9 +125,11 @@ function showOAuthWindow(
 
     splitQuery.forEach((param) => {
       if (param) {
-        const paramSplit = param.split('=');
+        const [key, value = ''] = param.split('=');
 
-        queryParams[paramSplit[0]] = paramSplit[1];
+        if (key) {
+          queryParams[key] = value;
+        }
       }
     });
 

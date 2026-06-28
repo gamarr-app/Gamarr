@@ -19,7 +19,7 @@ function LanguageSelectInput({
   const mappedValues = useMemo(() => {
     const minId = values.reduce(
       (min: number, v) => (v.key < 1 ? v.key : min),
-      values[0].key
+      values[0]?.key ?? 0
     );
 
     return values.map(({ key, value }) => {

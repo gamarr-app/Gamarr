@@ -245,34 +245,35 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
     : location.pathname;
 
   const activeParent = useMemo(() => {
-    return (
-      LINKS.find((link) => {
-        if (link.to && link.to === pathname) {
-          return true;
+    const activeLink = LINKS.find((link) => {
+      if (link.to && link.to === pathname) {
+        return true;
+      }
+
+      const children = link.children;
+
+      if (children) {
+        const matchingChild = children.find((childLink) => {
+          return pathname.startsWith(childLink.to);
+        });
+
+        if (matchingChild) {
+          return matchingChild;
         }
+      }
 
-        const children = link.children;
+      if (
+        (link.to !== '/' && pathname.startsWith(link.to)) ||
+        (link.alias && pathname.startsWith(link.alias))
+      ) {
+        return true;
+      }
 
-        if (children) {
-          const matchingChild = children.find((childLink) => {
-            return pathname.startsWith(childLink.to);
-          });
+      return false;
+    });
 
-          if (matchingChild) {
-            return matchingChild;
-          }
-        }
-
-        if (
-          (link.to !== '/' && pathname.startsWith(link.to)) ||
-          (link.alias && pathname.startsWith(link.alias))
-        ) {
-          return true;
-        }
-
-        return false;
-      })?.to ?? LINKS[0].to
-    );
+    // safe: LINKS is a non-empty constant literal, so LINKS[0] is defined
+    return activeLink?.to ?? LINKS[0]!.to;
   }, [pathname]);
 
   const handleWindowClick = useCallback(
@@ -322,12 +323,19 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
       const touches = event.touches;
-      const x = touches[0].pageX;
-      const y = touches[0].pageY;
 
       if (touches.length !== 1) {
         return;
       }
+
+      const touch = touches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      const x = touch.pageX;
+      const y = touch.pageY;
 
       if (isSidebarVisible && (x > 210 || x < 180)) {
         return;
@@ -343,8 +351,14 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
 
   const handleTouchMove = useCallback((event: TouchEvent) => {
     const touches = event.touches;
-    const currentTouchX = touches[0].pageX;
-    // const currentTouchY = touches[0].pageY;
+    const touch = touches[0];
+
+    if (!touch) {
+      return;
+    }
+
+    const currentTouchX = touch.pageX;
+    // const currentTouchY = touch.pageY;
     // const isSidebarVisible = this.props.isSidebarVisible;
 
     if (!touchStartX.current) {
@@ -366,7 +380,13 @@ function PageSidebar({ isSidebarVisible, isSmallScreen }: PageSidebarProps) {
   const handleTouchEnd = useCallback(
     (event: TouchEvent) => {
       const touches = event.changedTouches;
-      const currentTouch = touches[0].pageX;
+      const touch = touches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      const currentTouch = touch.pageX;
 
       if (!touchStartX.current) {
         return;

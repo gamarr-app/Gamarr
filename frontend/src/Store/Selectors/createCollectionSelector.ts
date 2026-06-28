@@ -16,9 +16,13 @@ function createCollectionSelector() {
     (state: AppState) => state.gameCollections.itemMap,
     (state: AppState) => state.gameCollections.items,
     (collectionId, itemMap, allCollections) => {
-      return allCollections && itemMap && collectionId in itemMap
-        ? allCollections[itemMap[collectionId]]
-        : undefined;
+      if (!allCollections || !itemMap || !(collectionId in itemMap)) {
+        return undefined;
+      }
+
+      const index = itemMap[collectionId];
+
+      return index === undefined ? undefined : allCollections[index];
     }
   );
 }

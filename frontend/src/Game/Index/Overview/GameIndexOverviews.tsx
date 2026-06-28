@@ -50,6 +50,10 @@ function Row({
 
   const game = items[index];
 
+  if (game === undefined) {
+    return null;
+  }
+
   return (
     <div style={style}>
       <GameIndexOverview gameId={game.id} {...otherData} />

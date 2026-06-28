@@ -38,30 +38,46 @@ function PageJumpBar({
       return order;
     }
 
+    const first = order[0];
+    const last = order[order.length - 1];
+
+    if (first === undefined || last === undefined) {
+      return order;
+    }
+
     // get first, last, and most common in between to make up numbers
-    const result = [order[0]];
+    const result = [first];
 
     const sorted = order
       .slice(1, -1)
-      .map((x) => characters[x])
+      .map((x) => characters[x] ?? 0)
       .sort((a, b) => b - a);
     const minCount = sorted[maximumItems - 3];
-    const greater = sorted.reduce(
-      (acc, value) => acc + (value > minCount ? 1 : 0),
-      0
-    );
+    const greater = sorted.reduce((acc, value) => {
+      if (minCount !== undefined && value > minCount) {
+        return acc + 1;
+      }
+
+      return acc;
+    }, 0);
     let minAllowed = maximumItems - 2 - greater;
 
     for (let i = 1; i < order.length - 1; i++) {
-      if (characters[order[i]] > minCount) {
-        result.push(order[i]);
-      } else if (characters[order[i]] === minCount && minAllowed > 0) {
-        result.push(order[i]);
-        minAllowed--;
+      const key = order[i];
+
+      if (key !== undefined) {
+        const count = characters[key] ?? 0;
+
+        if (minCount !== undefined && count > minCount) {
+          result.push(key);
+        } else if (count === minCount && minAllowed > 0) {
+          result.push(key);
+          minAllowed--;
+        }
       }
     }
 
-    result.push(order[order.length - 1]);
+    result.push(last);
 
     return result;
   }, [items, height, minimumItems]);

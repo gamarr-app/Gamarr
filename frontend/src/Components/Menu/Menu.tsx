@@ -117,11 +117,13 @@ function Menu({
         return;
       }
 
-      if (event.targetTouches.length !== 1) {
+      const touch = event.targetTouches[0];
+
+      if (event.targetTouches.length !== 1 || !touch) {
         return;
       }
 
-      const target = event.targetTouches[0].target;
+      const target = touch.target;
 
       if (
         !menuButton.contains(target as Node) &&

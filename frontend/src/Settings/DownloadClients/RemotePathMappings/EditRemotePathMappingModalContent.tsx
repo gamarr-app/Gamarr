@@ -67,11 +67,11 @@ const selectDownloadClientHosts = createSelector(
       {}
     );
 
-    return Object.keys(hosts).map((host) => {
+    return Object.entries(hosts).map(([host, names]) => {
       return {
         key: host,
         value: host,
-        hint: `${hosts[host].join(', ')}`,
+        hint: `${names.join(', ')}`,
       };
     });
   }

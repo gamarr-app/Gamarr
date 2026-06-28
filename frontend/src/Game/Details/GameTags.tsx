@@ -1,3 +1,4 @@
+import { Tag } from 'App/State/TagsAppState';
 import Label from 'Components/Label';
 import useGame from 'Game/useGame';
 import { kinds, sizes } from 'Helpers/Props';
@@ -14,7 +15,7 @@ function GameTags({ gameId }: GameTagsProps) {
 
   const tags = game.tags
     .map((tagId) => tagList.find((tag) => tag.id === tagId))
-    .filter((tag) => !!tag)
+    .filter((tag): tag is Tag => tag !== undefined)
     .sort(sortByProp('label'))
     .map((tag) => tag.label);
 

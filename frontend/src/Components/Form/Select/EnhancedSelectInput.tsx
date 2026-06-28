@@ -56,7 +56,9 @@ function findIndex<T extends EnhancedSelectInputValue<V>, V>(
       indexToTest = 0;
     }
 
-    if (getSelectedOption(indexToTest, values).isDisabled) {
+    const option = getSelectedOption(indexToTest, values);
+
+    if (option?.isDisabled) {
       indexToTest = indexToTest + direction;
     } else {
       return indexToTest;
@@ -100,11 +102,13 @@ function isSelectedItem<T extends EnhancedSelectInputValue<V>, V>(
   value: V,
   values: T[]
 ) {
+  const item = values[index];
+
   if (Array.isArray(value)) {
-    return value.includes(values[index].key);
+    return item !== undefined && value.includes(item.key);
   }
 
-  return values[index].key === value;
+  return item?.key === value;
 }
 
 export interface EnhancedSelectInputValue<V> {
@@ -343,7 +347,7 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
         if (
           selectedIndex == null ||
           selectedIndex === -1 ||
-          getSelectedOption(selectedIndex, values).isDisabled
+          getSelectedOption(selectedIndex, values)?.isDisabled
         ) {
           if (keyCode === keyCodes.UP_ARROW) {
             nextSelectedIndex = previousIndex(0, values);
@@ -375,12 +379,22 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
       if (keyCode === keyCodes.ENTER) {
         event.preventDefault();
         nextIsOpen = false;
-        handleSelect(values[selectedIndex].key);
+
+        const selectedOption = getSelectedOption(selectedIndex, values);
+
+        if (selectedOption) {
+          handleSelect(selectedOption.key);
+        }
       }
 
       if (keyCode === keyCodes.TAB) {
         nextIsOpen = false;
-        handleSelect(values[selectedIndex].key);
+
+        const selectedOption = getSelectedOption(selectedIndex, values);
+
+        if (selectedOption) {
+          handleSelect(selectedOption.key);
+        }
       }
 
       if (keyCode === keyCodes.ESCAPE) {

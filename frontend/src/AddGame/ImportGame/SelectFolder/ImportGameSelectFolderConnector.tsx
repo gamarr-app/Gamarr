@@ -66,8 +66,10 @@ function ImportGameSelectFolderConnector() {
         (item) => item.id
       );
 
-      if (newRootFolders.length === 1) {
-        navigate(`/add/import/${newRootFolders[0].id}`);
+      const newRootFolder = newRootFolders[0];
+
+      if (newRootFolders.length === 1 && newRootFolder) {
+        navigate(`/add/import/${newRootFolder.id}`);
       }
     }
 

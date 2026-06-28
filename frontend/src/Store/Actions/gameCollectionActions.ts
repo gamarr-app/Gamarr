@@ -156,8 +156,9 @@ export const defaultState = {
       filterValue: unknown,
       type: string
     ): boolean {
+      // safe: `type` is always a valid filter type when predicates are invoked
       const predicate =
-        filterTypePredicates[type as keyof typeof filterTypePredicates];
+        filterTypePredicates[type as keyof typeof filterTypePredicates]!;
 
       const allGenres = item.games.flatMap(({ genres }) => genres);
       const genres = Array.from(new Set(allGenres));
@@ -169,8 +170,9 @@ export const defaultState = {
       filterValue: unknown,
       type: string
     ): boolean {
+      // safe: `type` is always a valid filter type when predicates are invoked
       const predicate =
-        filterTypePredicates[type as keyof typeof filterTypePredicates];
+        filterTypePredicates[type as keyof typeof filterTypePredicates]!;
       const { games } = item;
 
       const totalGames = games.length;

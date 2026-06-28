@@ -14,7 +14,7 @@ function withScrollPosition(
     const navigationType = useNavigationType();
 
     const initialScrollTop =
-      navigationType === 'POP' ? scrollPositions[scrollPositionKey] : 0;
+      navigationType === 'POP' ? (scrollPositions[scrollPositionKey] ?? 0) : 0;
 
     return <WrappedComponent {...props} initialScrollTop={initialScrollTop} />;
   }

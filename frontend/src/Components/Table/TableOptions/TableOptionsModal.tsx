@@ -130,10 +130,13 @@ function TableOptionsModal(props: TableOptionsModalProps) {
     (_item: DragItem, didDrop: boolean) => {
       if (didDrop && dropIndex !== null && dragIndex !== null) {
         const newColumns = _.cloneDeep(columns);
-        const items = newColumns.splice(dragIndex, 1);
-        newColumns.splice(dropIndex, 0, items[0]);
+        const [movedColumn] = newColumns.splice(dragIndex, 1);
 
-        onTableOptionChange({ columns: newColumns });
+        if (movedColumn !== undefined) {
+          newColumns.splice(dropIndex, 0, movedColumn);
+
+          onTableOptionChange({ columns: newColumns });
+        }
       }
 
       setDragIndex(null);

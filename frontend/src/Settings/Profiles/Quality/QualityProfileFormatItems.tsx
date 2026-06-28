@@ -119,7 +119,14 @@ function QualityProfileFormatItems({
             <div className={styles.headerScore}>{translate('Score')}</div>
           </div>
           {order.map((index) => {
-            const { format, name, score } = profileFormatItems[index];
+            const item =
+              index === undefined ? undefined : profileFormatItems[index];
+
+            if (item === undefined) {
+              return null;
+            }
+
+            const { format, name, score } = item;
             return (
               <QualityProfileFormatItem
                 key={format}

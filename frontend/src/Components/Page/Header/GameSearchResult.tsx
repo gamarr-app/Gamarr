@@ -32,7 +32,7 @@ function GameSearchResult(props: GameSearchResultProps) {
   if (match.key === 'alternateTitles.title') {
     alternateTitle = alternateTitles[match.refIndex];
   } else if (match.key === 'tags.label') {
-    tag = tags[match.refIndex];
+    tag = tags[match.refIndex] ?? null;
   }
 
   return (

@@ -161,13 +161,15 @@ export default {
           'settings.customFormats',
           true
         ) as CustomFormatsSectionState;
-        const cf = cfState.items[cfState.itemMap[payload.id]];
-        tags = cf.specifications.map((tag, i) => {
-          return {
-            ...tag,
-            id: i + 1,
-          };
-        });
+        const cfIndex = cfState.itemMap[payload.id];
+        const cf = cfIndex === undefined ? undefined : cfState.items[cfIndex];
+        tags =
+          cf?.specifications.map((tag, i) => {
+            return {
+              ...tag,
+              id: i + 1,
+            };
+          }) ?? [];
       }
 
       dispatch(

@@ -38,9 +38,9 @@ function findEventTarget(event: TouchEvent | MouseEvent) {
       return event.target;
     }
 
-    if (changedTouches.length === 1) {
-      const touch = changedTouches[0];
+    const touch = changedTouches[0];
 
+    if (changedTouches.length === 1 && touch) {
       return document.elementFromPoint(touch.clientX, touch.clientY);
     }
   }

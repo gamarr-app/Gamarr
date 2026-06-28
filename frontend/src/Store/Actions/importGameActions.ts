@@ -389,9 +389,9 @@ export const reducers = createHandleActions(
 
       newState.items = [...items];
 
-      if (index >= 0) {
-        const item = items[index];
+      const item = index >= 0 ? items[index] : undefined;
 
+      if (item !== undefined) {
         newState.items.splice(index, 1, { ...item, ...payload });
       } else {
         // Provide defaults for required ImportGameItem fields

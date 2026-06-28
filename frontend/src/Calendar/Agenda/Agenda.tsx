@@ -68,9 +68,10 @@ function Agenda() {
     <div className={styles.agenda}>
       {events.map((item, index) => {
         const momentDate = moment(item.sortDate);
+        const previousItem = events[index - 1];
         const showDate =
-          index === 0 ||
-          !moment(events[index - 1].sortDate).isSame(momentDate, 'day');
+          previousItem === undefined ||
+          !moment(previousItem.sortDate).isSame(momentDate, 'day');
 
         return <AgendaEvent key={item.id} showDate={showDate} {...item} />;
       })}

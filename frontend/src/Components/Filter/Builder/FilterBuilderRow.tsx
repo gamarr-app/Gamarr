@@ -60,17 +60,21 @@ function getFilterTypeOptions(
     return [];
   }
 
-  return (filterBuilderTypes.possibleFilterTypes as PossibleFilterTypes)[
-    selectedFilterBuilderProp.type
-  ];
+  return (
+    (filterBuilderTypes.possibleFilterTypes as PossibleFilterTypes)[
+      selectedFilterBuilderProp.type
+    ] ?? []
+  );
 }
 
 function getDefaultFilterType(
   selectedFilterBuilderProp: FilterBuilderProp<unknown>
 ): string {
-  return (filterBuilderTypes.possibleFilterTypes as PossibleFilterTypes)[
-    selectedFilterBuilderProp.type
-  ][0].key;
+  const filterTypeOptions = (
+    filterBuilderTypes.possibleFilterTypes as PossibleFilterTypes
+  )[selectedFilterBuilderProp.type];
+
+  return filterTypeOptions?.[0]?.key ?? '';
 }
 
 function getDefaultFilterValue(
@@ -196,6 +200,10 @@ function FilterBuilderRow(props: FilterBuilderRowProps) {
     }
 
     const selectedFilterBuilderProp = filterBuilderProps[0];
+
+    if (!selectedFilterBuilderProp) {
+      return;
+    }
 
     const filter: Filter = {
       key: selectedFilterBuilderProp.name,

@@ -22,9 +22,9 @@ function getSuggestions(games: SuggestedGame[], value: string) {
   if (value.length === 1) {
     for (let i = 0; i < games.length; i++) {
       const m = games[i];
-      if (m.firstCharacter === value.toLowerCase()) {
+      if (m && m.firstCharacter === value.toLowerCase()) {
         suggestions.push({
-          item: games[i],
+          item: m,
           indices: [[0, 0]],
           matches: [
             {

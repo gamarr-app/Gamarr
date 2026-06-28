@@ -26,7 +26,8 @@ let message: string | null = null;
 function LoadingMessage() {
   if (!message) {
     const index = Math.floor(Math.random() * messages.length);
-    message = messages[index];
+    // safe: index is in [0, messages.length) and messages is a non-empty constant
+    message = messages[index]!;
   }
 
   return <div className={styles.loadingMessage}>{message}</div>;

@@ -141,7 +141,7 @@ export default function createHandleActions(
           const items = newState.items;
 
           const itemMap = newState.itemMap ?? createItemMap(items);
-          const index = payload.id in itemMap ? itemMap[payload.id] : -1;
+          const index = itemMap[payload.id] ?? -1;
 
           newState.items = [...items];
 

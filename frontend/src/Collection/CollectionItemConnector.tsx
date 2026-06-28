@@ -2,6 +2,7 @@ import { ComponentType } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
+import Game from 'Game/Game';
 import createCollectionSelector from 'Store/Selectors/createCollectionSelector';
 import GameCollection from 'typings/GameCollection';
 
@@ -30,7 +31,7 @@ function createCollectionItemSelector(collectionId: number) {
         return { id: undefined };
       }
 
-      const allGenres = collection.games.flatMap((game) => game.genres);
+      const allGenres = collection.games.flatMap((game: Game) => game.genres);
 
       return {
         ...collection,

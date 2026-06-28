@@ -14,7 +14,11 @@ function getShortcuts() {
   const allShortcuts: Shortcut[] = [];
 
   Object.keys(shortcuts).forEach((key) => {
-    allShortcuts.push(shortcuts[key]);
+    const shortcut = shortcuts[key];
+
+    if (shortcut) {
+      allShortcuts.push(shortcut);
+    }
   });
 
   return allShortcuts;

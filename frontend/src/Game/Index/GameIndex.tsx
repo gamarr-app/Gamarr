@@ -207,11 +207,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
         char = '#';
       }
 
-      if (char in acc) {
-        acc[char] = acc[char] + 1;
-      } else {
-        acc[char] = 1;
-      }
+      acc[char] = (acc[char] ?? 0) + 1;
 
       return acc;
     }, {});

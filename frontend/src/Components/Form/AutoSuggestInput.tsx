@@ -201,16 +201,18 @@ function AutoSuggestInput<T = unknown>(props: AutoSuggestInputProps<T>) {
 
   const handleInputKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
+      const firstSuggestion = suggestions[0];
+
       if (
         event.key === 'Tab' &&
-        suggestions.length &&
-        suggestions[0] !== value
+        firstSuggestion !== undefined &&
+        firstSuggestion !== value
       ) {
         event.preventDefault();
 
         if (value) {
           onSuggestionSelected?.(event, {
-            suggestion: suggestions[0],
+            suggestion: firstSuggestion,
             suggestionValue: value,
             suggestionIndex: 0,
             sectionIndex: null,

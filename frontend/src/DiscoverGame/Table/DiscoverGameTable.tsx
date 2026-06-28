@@ -78,6 +78,10 @@ function DiscoverGameTable({
     ({ key, rowIndex, style }: RowRendererProps) => {
       const game = items[rowIndex];
 
+      if (game == null) {
+        return null;
+      }
+
       return (
         <VirtualTableRow
           key={key}

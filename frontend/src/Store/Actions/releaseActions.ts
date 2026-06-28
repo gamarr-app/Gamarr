@@ -176,8 +176,9 @@ export const defaultState: ReleasesState = {
       filterValue: unknown,
       type: string
     ) {
+      // safe: type is always a valid filter type key from the filtering system
       const predicate =
-        filterTypePredicates[type as keyof typeof filterTypePredicates];
+        filterTypePredicates[type as keyof typeof filterTypePredicates]!;
 
       const languages = item.languages.map((language) => language.name);
 
@@ -185,8 +186,9 @@ export const defaultState: ReleasesState = {
     },
 
     peers: function (item: ReleaseItem, value: unknown, type: string) {
+      // safe: type is always a valid filter type key from the filtering system
       const predicate =
-        filterTypePredicates[type as keyof typeof filterTypePredicates];
+        filterTypePredicates[type as keyof typeof filterTypePredicates]!;
       const seeders = item.seeders || 0;
       const leechers = item.leechers || 0;
 

@@ -50,6 +50,10 @@ export function handleThunks(handlers: Record<string, Thunk<any>>) {
   const types = Object.keys(handlers);
 
   types.forEach((type) => {
-    thunks[type] = handlers[type];
+    const handler = handlers[type];
+
+    if (handler) {
+      thunks[type] = handler;
+    }
   });
 }
