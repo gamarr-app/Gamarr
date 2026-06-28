@@ -99,7 +99,7 @@ function keyboardShortcuts(
       this._mousetrap.stopCallback = this.stopCallback;
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
       this.unbindAllShortcuts();
       this._mousetrap = null;
     }
@@ -162,7 +162,7 @@ function keyboardShortcuts(
     //
     // Render
 
-    render() {
+    override render() {
       return (
         <WrappedComponent
           {...this.props}

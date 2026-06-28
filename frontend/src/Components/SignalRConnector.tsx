@@ -145,7 +145,7 @@ class SignalRConnector extends Component<PropsFromRedux> {
   //
   // Lifecycle
 
-  componentDidMount() {
+  override componentDidMount() {
     console.log('[signalR] starting');
 
     const url = `${window.Gamarr.urlBase}/signalr/messages`;
@@ -174,7 +174,7 @@ class SignalRConnector extends Component<PropsFromRedux> {
     this.connection.start().then(this.onStart, this.onStartFail);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this.connection) {
       this.connection.stop();
       this.connection = null;
@@ -493,7 +493,7 @@ class SignalRConnector extends Component<PropsFromRedux> {
   //
   // Render
 
-  render() {
+  override render() {
     return null;
   }
 }
