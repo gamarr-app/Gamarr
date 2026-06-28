@@ -172,7 +172,7 @@ function GameSearchInput() {
         setRequestLoading(true);
 
         const payload = {
-          value: requestValue,
+          value: requestValue.current,
           games,
         };
 
