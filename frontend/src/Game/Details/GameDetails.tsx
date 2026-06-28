@@ -545,7 +545,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
           <PageToolbarButton
             label={translate('InteractiveSearch')}
             iconName={icons.INTERACTIVE}
-            isSpinning={isSearching}
             title={undefined}
             onPress={handleInteractiveSearchPress}
           />
