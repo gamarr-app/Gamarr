@@ -25,11 +25,10 @@ function getTagList(
   selectedFilterBuilderProp: FilterBuilderRowValueConnectorProps['selectedFilterBuilderProp']
 ): Tag[] {
   if (
-    ((selectedFilterBuilderProp.type === filterBuilderTypes.NUMBER ||
+    (selectedFilterBuilderProp.type === filterBuilderTypes.NUMBER ||
       selectedFilterBuilderProp.type === filterBuilderTypes.STRING) &&
-      filterType !== filterTypes.EQUAL &&
-      filterType !== filterTypes.NOT_EQUAL) ||
-    !selectedFilterBuilderProp.optionsSelector
+    filterType !== filterTypes.EQUAL &&
+    filterType !== filterTypes.NOT_EQUAL
   ) {
     return [];
   }

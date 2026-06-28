@@ -263,7 +263,7 @@ function DiscoverGamePosters(props: DiscoverGamePostersProps) {
     ) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (gridRef.current && index != null) {
+      if (gridRef.current && index !== -1) {
         const row = Math.floor(index / columnCount);
 
         gridScrollToCell({

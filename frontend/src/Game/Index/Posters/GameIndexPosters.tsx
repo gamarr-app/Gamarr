@@ -323,7 +323,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
     if (jumpToCharacter) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (index != null) {
+      if (index !== -1) {
         const rowIndex = Math.floor(index / columnCount);
 
         const scrollTop = rowIndex * rowHeight + padding;

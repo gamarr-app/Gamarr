@@ -470,7 +470,7 @@ export const actionHandlers = handleThunks({
     const state = getState();
     const view = payload.view;
     const time =
-      view === calendarViews.FORECAST || calendarViews.AGENDA
+      view === calendarViews.FORECAST || view === calendarViews.AGENDA
         ? moment()
         : state.calendar.time;
 

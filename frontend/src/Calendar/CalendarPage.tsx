@@ -101,7 +101,10 @@ function CalendarPage() {
   const customFilters = useSelector(
     useMemo(() => createCustomFiltersSelector('calendar'), [])
   );
-  const hasGames = !!useSelector(useMemo(() => createGameCountSelector(), []));
+  const { count: gameCount } = useSelector(
+    useMemo(() => createGameCountSelector(), [])
+  );
+  const hasGames = gameCount > 0;
 
   const [pageContentRef, { width }] = useMeasure();
   const [isCalendarLinkModalOpen, setIsCalendarLinkModalOpen] = useState(false);

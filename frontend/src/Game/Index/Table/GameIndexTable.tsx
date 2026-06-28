@@ -128,7 +128,7 @@ function GameIndexTable(props: GameIndexTableProps) {
     if (jumpToCharacter) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (index != null) {
+      if (index !== -1) {
         let scrollTop = index * rowHeight;
 
         // If the offset is zero go to the top, otherwise offset
