@@ -69,17 +69,17 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
 
   // Find which IGDB recommendations are NOT in the library
   const missingIgdbIds = useMemo(() => {
-    return igdbIds.filter((igdbId) => !libraryIgdbIds.has(igdbId));
+    return igdbIds.filter((igdbId: number) => !libraryIgdbIds.has(igdbId));
   }, [igdbIds, libraryIgdbIds]);
 
   // Fetch external games from both RAWG and IGDB
   useEffect(() => {
     const igdbIdsToFetch = missingIgdbIds
-      .filter((id) => !fetchedIgdbIdsRef.current.has(id))
+      .filter((id: number) => !fetchedIgdbIdsRef.current.has(id))
       .slice(0, 4);
 
     const rawgIdsToFetch = rawgIds
-      .filter((id) => !fetchedRawgIdsRef.current.has(id))
+      .filter((id: number) => !fetchedRawgIdsRef.current.has(id))
       .slice(0, 4);
 
     if (igdbIdsToFetch.length === 0 && rawgIdsToFetch.length === 0) {
@@ -87,8 +87,8 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
     }
 
     // Mark as fetched immediately to prevent re-fetching
-    igdbIdsToFetch.forEach((id) => fetchedIgdbIdsRef.current.add(id));
-    rawgIdsToFetch.forEach((id) => fetchedRawgIdsRef.current.add(id));
+    igdbIdsToFetch.forEach((id: number) => fetchedIgdbIdsRef.current.add(id));
+    rawgIdsToFetch.forEach((id: number) => fetchedRawgIdsRef.current.add(id));
 
     setIsFetching(true);
 
@@ -98,7 +98,7 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
 
       // Fetch RAWG games first (better recommendations)
       await Promise.all(
-        rawgIdsToFetch.map(async (rawgId) => {
+        rawgIdsToFetch.map(async (rawgId: number) => {
           try {
             const { request } = createAjaxRequest({
               url: `/game/lookup/rawg?rawgId=${rawgId}`,
@@ -125,7 +125,7 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
 
       // Fetch IGDB games
       await Promise.all(
-        igdbIdsToFetch.map(async (igdbId) => {
+        igdbIdsToFetch.map(async (igdbId: number) => {
           try {
             const { request } = createAjaxRequest({
               url: `/game/lookup/igdb?igdbId=${igdbId}`,
@@ -170,8 +170,8 @@ function RecommendationsList({ gameId }: RecommendationsListProps) {
 
   // Check if we're still waiting to fetch external games
   const hasPendingFetches =
-    missingIgdbIds.some((id) => !fetchedIgdbIdsRef.current.has(id)) ||
-    rawgIds.some((id) => !fetchedRawgIdsRef.current.has(id));
+    missingIgdbIds.some((id: number) => !fetchedIgdbIdsRef.current.has(id)) ||
+    rawgIds.some((id: number) => !fetchedRawgIdsRef.current.has(id));
 
   // Don't show if nothing to display and nothing pending
   if (

@@ -15,7 +15,13 @@ export function createGameSelector(gameId?: number) {
     (state: AppState) => state.games.itemMap,
     (state: AppState) => state.games.items,
     (itemMap, allGames) => {
-      return gameId ? allGames[itemMap[gameId]] : undefined;
+      if (gameId === undefined) {
+        return undefined;
+      }
+
+      const index = itemMap[gameId];
+
+      return index === undefined ? undefined : allGames[index];
     }
   );
 }

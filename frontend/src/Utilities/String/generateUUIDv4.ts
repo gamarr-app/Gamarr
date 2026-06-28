@@ -3,7 +3,8 @@ export default function generateUUIDv4(): string {
   return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) =>
     (
       Number(c) ^
-      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (Number(c) / 4)))
+      // safe: getRandomValues fills the length-1 array, so index 0 is defined
+      (crypto.getRandomValues(new Uint8Array(1))[0]! & (15 >> (Number(c) / 4)))
     ).toString(16)
   );
 }

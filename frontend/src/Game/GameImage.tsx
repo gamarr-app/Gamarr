@@ -68,11 +68,10 @@ function GameImage({
   const handleError = useCallback(() => {
     // Try next image of the same type
     const nextIndex = imageIndex + 1;
-    if (nextIndex < availableImages.current.length) {
+    const nextImage = availableImages.current[nextIndex];
+    if (nextImage) {
       setImageIndex(nextIndex);
-      setUrl(
-        getUrl(availableImages.current[nextIndex], coverType, pixelRatio * size)
-      );
+      setUrl(getUrl(nextImage, coverType, pixelRatio * size));
     } else {
       // All images failed, show placeholder
       setHasError(true);
@@ -83,17 +82,18 @@ function GameImage({
 
   useEffect(() => {
     const matchingImages = findImages(images, coverType);
+    const firstMatchingImage = matchingImages[0];
 
-    if (matchingImages.length > 0) {
+    if (firstMatchingImage) {
       const currentUrl =
         availableImages.current[0]?.url ??
         availableImages.current[0]?.remoteUrl;
-      const newUrl = matchingImages[0]?.url ?? matchingImages[0]?.remoteUrl;
+      const newUrl = firstMatchingImage.url ?? firstMatchingImage.remoteUrl;
 
       if (currentUrl !== newUrl) {
         availableImages.current = matchingImages;
         setImageIndex(0);
-        setUrl(getUrl(matchingImages[0], coverType, pixelRatio * size));
+        setUrl(getUrl(firstMatchingImage, coverType, pixelRatio * size));
         setHasError(false);
       }
     } else if (availableImages.current.length > 0) {

@@ -24,7 +24,7 @@ import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import EditGameModal from 'Game/Edit/EditGameModal';
-import { Image, Statistics } from 'Game/Game';
+import { GamePlatform, Image, Statistics } from 'Game/Game';
 import GameCollectionLabel from 'Game/GameCollectionLabel';
 import GameGenres from 'Game/GameGenres';
 import GamePoster from 'Game/GamePoster';
@@ -200,6 +200,15 @@ function GameDetails({ gameId }: GameDetailsProps) {
     const previousGame =
       sortedGames[gameIndex - 1] ?? sortedGames[sortedGames.length - 1];
 
+    // gameIndex !== -1 guarantees sortedGames is non-empty, so the fallbacks
+    // sortedGames[0] / sortedGames[length - 1] are always defined here.
+    if (!nextGame || !previousGame) {
+      return {
+        nextGame: undefined,
+        previousGame: undefined,
+      };
+    }
+
     return {
       nextGame: {
         title: nextGame.title,
@@ -307,8 +316,14 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
       const touches = event.touches;
-      const currentTouch = touches[0].pageX;
-      const touchY = touches[0].pageY;
+      const touch = touches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      const currentTouch = touch.pageX;
+      const touchY = touch.pageY;
 
       // Only change when swipe is on header, we need horizontal scroll on tables
       if (touchY > 470) {
@@ -348,7 +363,13 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const handleTouchEnd = useCallback(
     (event: TouchEvent) => {
       const touches = event.changedTouches;
-      const currentTouch = touches[0].pageX;
+      const touch = touches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      const currentTouch = touch.pageX;
 
       if (!touchStart.current) {
         return;
@@ -884,7 +905,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
                   >
                     <span className={styles.studio}>
                       {platforms
-                        .map((p) => p.abbreviation || p.name)
+                        .map((p: GamePlatform) => p.abbreviation || p.name)
                         .join(', ')}
                     </span>
                   </InfoLabel>

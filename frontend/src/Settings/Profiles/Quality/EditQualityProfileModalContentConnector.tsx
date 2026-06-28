@@ -32,10 +32,12 @@ function parseIndex(index: string): [number | null, number] {
   const split = index.split('.');
 
   if (split.length === 1) {
-    return [null, parseInt(split[0]) - 1];
+    // safe: String.split always returns at least one element
+    return [null, parseInt(split[0]!) - 1];
   }
 
-  return [parseInt(split[0]) - 1, parseInt(split[1]) - 1];
+  // safe: length !== 1 means there are at least two elements
+  return [parseInt(split[0]!) - 1, parseInt(split[1]!) - 1];
 }
 
 function createQualitiesSelector() {
@@ -497,15 +499,15 @@ function EditQualityProfileModalContentConnector({
         let dropGroup: QualityProfileItemValue | null = null;
 
         if (dropGroupIdx != null) {
-          dropGroup = items[dropGroupIdx];
+          dropGroup = items[dropGroupIdx] ?? null;
         }
 
         if (dragGroupIdx == null) {
-          draggedItem = items.splice(dragItemIdx, 1)[0];
+          draggedItem = items.splice(dragItemIdx, 1)[0] ?? null;
         } else {
           const group = items[dragGroupIdx];
-          if (group.items) {
-            draggedItem = group.items.splice(dragItemIdx, 1)[0];
+          if (group?.items) {
+            draggedItem = group.items.splice(dragItemIdx, 1)[0] ?? null;
 
             if (!group.items.length) {
               items.splice(dragGroupIdx, 1);

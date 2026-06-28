@@ -266,7 +266,9 @@ function GameSearchInput() {
         );
       }
 
-      return <GameSearchResult {...item.item} match={item.matches[0]} />;
+      const match = item.matches[0] ?? { key: '', refIndex: -1 };
+
+      return <GameSearchResult {...item.item} match={match} />;
     },
     []
   );
@@ -329,6 +331,10 @@ function GameSearchInput() {
         highlightedSuggestionIndex == null
           ? suggestions[0]
           : suggestions[highlightedSuggestionIndex];
+
+      if (!selectedSuggestion) {
+        return;
+      }
 
       navigate(`/game/${selectedSuggestion.item.titleSlug}`);
 

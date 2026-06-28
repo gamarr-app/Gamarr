@@ -85,9 +85,13 @@ function getSortClause<T extends Record<string, unknown>>(
   sortPredicates?: SortPredicates<T>
 ): (item: T) => unknown {
   if (sortPredicates && sortPredicates.hasOwnProperty(sortKey)) {
-    return function (item: T): unknown {
-      return sortPredicates[sortKey](item, sortDirection);
-    };
+    const sortPredicate = sortPredicates[sortKey];
+
+    if (sortPredicate) {
+      return function (item: T): unknown {
+        return sortPredicate(item, sortDirection);
+      };
+    }
   }
 
   return function (item: T): unknown {
@@ -125,33 +129,40 @@ function filter<T extends Record<string, unknown>>(
       if (filterPredicates && filterPredicates.hasOwnProperty(key)) {
         const predicate = filterPredicates[key];
 
-        if (Array.isArray(value)) {
-          if (
-            type === filterTypes.NOT_CONTAINS ||
-            type === filterTypes.NOT_EQUAL
-          ) {
-            accepted = value.every((v) => predicate(item, v, type));
+        if (predicate) {
+          if (Array.isArray(value)) {
+            if (
+              type === filterTypes.NOT_CONTAINS ||
+              type === filterTypes.NOT_EQUAL
+            ) {
+              accepted = value.every((v) => predicate(item, v, type));
+            } else {
+              accepted = value.some((v) => predicate(item, v, type));
+            }
           } else {
-            accepted = value.some((v) => predicate(item, v, type));
+            accepted = predicate(item, value, type);
           }
-        } else {
-          accepted = predicate(item, value, type);
         }
       } else if (item.hasOwnProperty(key)) {
         const predicate =
           filterTypePredicates[type as keyof typeof filterTypePredicates];
 
-        if (Array.isArray(value)) {
-          if (
-            type === filterTypes.NOT_CONTAINS ||
-            type === filterTypes.NOT_EQUAL
-          ) {
-            accepted = value.every((v) => predicate(item[key], v));
+        if (predicate) {
+          if (Array.isArray(value)) {
+            if (
+              type === filterTypes.NOT_CONTAINS ||
+              type === filterTypes.NOT_EQUAL
+            ) {
+              accepted = value.every((v) => predicate(item[key], v));
+            } else {
+              accepted = value.some((v) => predicate(item[key], v));
+            }
           } else {
-            accepted = value.some((v) => predicate(item[key], v));
+            accepted = predicate(item[key], value);
           }
         } else {
-          accepted = predicate(item[key], value);
+          // No predicate exists for this filter type; treat as untestable
+          accepted = false;
         }
       } else {
         // Default to false if the filter can't be tested

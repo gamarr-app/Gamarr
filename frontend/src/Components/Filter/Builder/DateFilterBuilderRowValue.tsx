@@ -91,7 +91,8 @@ function DateFilterBuilderRowValue(props: DateFilterBuilderRowValueProps) {
         onChange({
           name: NAME,
           value: {
-            time: timeOptions[0].key,
+            // safe: timeOptions is a non-empty module-level constant array
+            time: timeOptions[0]!.key,
             value: null,
           },
         });
@@ -111,7 +112,8 @@ function DateFilterBuilderRowValue(props: DateFilterBuilderRowValueProps) {
       onChange({
         name: NAME,
         value: {
-          time: timeOptions[0].key,
+          // safe: timeOptions is a non-empty module-level constant array
+          time: timeOptions[0]!.key,
           value: null,
         },
       });

@@ -27,7 +27,11 @@ function toggleSelected<T extends Identifiable>(
       const { lower, upper } = getToggledRange(items, id, lastToggled);
 
       for (let i = lower; i < upper; i++) {
-        nextSelectedState[items[i].id] = selected;
+        const item = items[i];
+
+        if (item) {
+          nextSelectedState[item.id] = selected;
+        }
       }
     }
   }

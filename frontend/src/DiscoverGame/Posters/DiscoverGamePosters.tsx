@@ -69,7 +69,9 @@ function calculateColumnWidth(
     return maximumColumnWidth;
   }
 
-  return Math.floor(width / (columns + additionalColumnCount[posterSize]));
+  return Math.floor(
+    width / (columns + (additionalColumnCount[posterSize] ?? 0))
+  );
 }
 
 function calculateRowHeight(

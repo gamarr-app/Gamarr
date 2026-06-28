@@ -163,6 +163,10 @@ function ImportGameTable(props: ImportGameTableProps) {
     ({ key, rowIndex, style }: RowRendererParams) => {
       const item = items[rowIndex];
 
+      if (!item) {
+        return null;
+      }
+
       return (
         <VirtualTableRow key={key} style={style} className="">
           <ImportGameRowConnector

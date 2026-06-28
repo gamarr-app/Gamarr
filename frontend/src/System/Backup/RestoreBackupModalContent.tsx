@@ -121,7 +121,7 @@ function RestoreBackupModalContent(props: RestoreBackupModalContentProps) {
   }, [isRestarting]);
 
   const onPathChange = useCallback(({ value, files }: FileInputChanged) => {
-    setFile(files ? files[0] : null);
+    setFile(files?.[0] ?? null);
     setPath(value);
   }, []);
 

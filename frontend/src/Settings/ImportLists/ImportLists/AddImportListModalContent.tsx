@@ -32,18 +32,17 @@ function AddImportListModalContent({
 
   const listGroups = useMemo(() => {
     const result = schema.reduce<Record<string, ImportList[]>>((acc, item) => {
-      if (!acc[item.listType]) {
-        acc[item.listType] = [];
-      }
+      const group = (acc[item.listType] ??= []);
 
-      acc[item.listType].push(item);
+      group.push(item);
 
       return acc;
     }, {});
 
     // Sort the lists by listOrder after grouping them
     Object.keys(result).forEach((key) => {
-      result[key].sort((a, b) => {
+      // safe: key comes from Object.keys(result), so result[key] is defined
+      result[key]!.sort((a, b) => {
         return a.listOrder - b.listOrder;
       });
     });
@@ -81,7 +80,7 @@ function AddImportListModalContent({
                   })}
                 >
                   <div className={styles.lists}>
-                    {listGroups[key].map((list) => {
+                    {listGroups[key]?.map((list) => {
                       return (
                         <AddImportListItem
                           key={list.implementation}

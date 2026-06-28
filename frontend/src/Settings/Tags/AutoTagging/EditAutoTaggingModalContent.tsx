@@ -146,10 +146,14 @@ export default function EditAutoTaggingModalContent({
                 <FormGroup>
                   <FormLabel>{translate('Name')}</FormLabel>
 
+                  {/* safe: `item` is typed with an index signature
+                      (ModelBaseSetting = Record<string, any>) so `name` is
+                      possibly undefined, but it is always populated by
+                      selectSettings before this form renders */}
                   <FormInputGroup
                     type={inputTypes.TEXT}
                     name="name"
-                    {...name}
+                    {...name!}
                     onChange={handleInputChange}
                   />
                 </FormGroup>
@@ -169,11 +173,15 @@ export default function EditAutoTaggingModalContent({
                 <FormGroup>
                   <FormLabel>{translate('Tags')}</FormLabel>
 
+                  {/* safe: `item` is typed with an index signature
+                      (ModelBaseSetting = Record<string, any>) so `tags` is
+                      possibly undefined, but it is always populated by
+                      selectSettings before this form renders */}
                   <FormInputGroup
                     type={inputTypes.TAG}
                     name="tags"
                     onChange={handleInputChange}
-                    {...tags}
+                    {...tags!}
                   />
                 </FormGroup>
               </Form>

@@ -226,7 +226,7 @@ export const actionHandlers = handleThunks({
     Object.keys(handlers).forEach((key) => {
       const handler = handlers[key];
 
-      if (handler.name === payload.name) {
+      if (handler && handler.name === payload.name) {
         dispatch(
           handler.handler(payload) as unknown as Parameters<AppDispatch>[0]
         );

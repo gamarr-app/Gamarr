@@ -24,7 +24,8 @@ export function createGameSelectorForHook(
     (state: AppState) => state.games.itemMap,
     (state: AppState) => state.games.items,
     (itemMap, allGames) => {
-      return gameId ? allGames[itemMap[gameId]] : undefined;
+      const index = gameId ? itemMap[gameId] : undefined;
+      return index === undefined ? undefined : allGames[index];
     }
   );
 }
@@ -54,7 +55,8 @@ function createGameSelector(): Selector<
     (state: AppState) => state.games.itemMap,
     (state: AppState) => state.games.items,
     (gameId, itemMap, allGames) => {
-      return allGames[itemMap[gameId]];
+      const index = itemMap[gameId];
+      return index === undefined ? undefined : allGames[index];
     }
   );
 }

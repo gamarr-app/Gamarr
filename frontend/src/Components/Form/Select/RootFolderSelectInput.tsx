@@ -149,7 +149,7 @@ function RootFolderSelectInput({
     ) {
       const defaultValue = values[0];
 
-      if (defaultValue.key !== ADD_NEW_KEY) {
+      if (defaultValue && defaultValue.key !== ADD_NEW_KEY) {
         onChange({ name, value: defaultValue.key });
       }
     }
@@ -170,7 +170,7 @@ function RootFolderSelectInput({
   ]);
 
   useEffect(() => {
-    if (value == null && values[0].key === '') {
+    if (value == null && values[0]?.key === '') {
       onChange({ name, value: '' });
     } else if (
       !value ||
@@ -179,7 +179,7 @@ function RootFolderSelectInput({
     ) {
       const defaultValue = values[0];
 
-      if (defaultValue.key === ADD_NEW_KEY) {
+      if (!defaultValue || defaultValue.key === ADD_NEW_KEY) {
         onChange({ name, value: '' });
       } else {
         onChange({ name, value: defaultValue.key });

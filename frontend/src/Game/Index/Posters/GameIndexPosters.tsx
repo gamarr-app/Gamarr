@@ -79,6 +79,10 @@ function Cell({
 
   const game = items[index];
 
+  if (game === undefined) {
+    return null;
+  }
+
   return (
     <div
       style={{
@@ -124,7 +128,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
     return remainder === 0
       ? maximumColumnWidth
       : Math.floor(
-          width / (columns + ADDITIONAL_COLUMN_COUNT[posterOptions.size])
+          width / (columns + (ADDITIONAL_COLUMN_COUNT[posterOptions.size] ?? 0))
         );
   }, [isSmallScreen, posterOptions, size]);
 

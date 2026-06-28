@@ -8,9 +8,17 @@ export function createGameCollectionSelector(collectionId?: number) {
     (state: AppState) => state.gameCollections.itemMap,
     (state: AppState) => state.gameCollections.items,
     (itemMap, allGameCollections) => {
-      return collectionId
-        ? allGameCollections[itemMap[collectionId]]
-        : undefined;
+      if (!collectionId) {
+        return undefined;
+      }
+
+      const index = itemMap[collectionId];
+
+      if (index === undefined) {
+        return undefined;
+      }
+
+      return allGameCollections[index];
     }
   );
 }

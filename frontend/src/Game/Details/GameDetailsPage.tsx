@@ -26,11 +26,13 @@ function GameDetailsPage() {
     }
   }, [gameIndex, previousIndex, navigate]);
 
-  if (gameIndex === -1) {
+  const game = allGames[gameIndex];
+
+  if (gameIndex === -1 || game === undefined) {
     return <NotFound message={translate('GameCannotBeFound')} />;
   }
 
-  return <GameDetails gameId={allGames[gameIndex].id} />;
+  return <GameDetails gameId={game.id} />;
 }
 
 export default GameDetailsPage;

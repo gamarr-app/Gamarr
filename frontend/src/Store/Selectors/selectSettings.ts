@@ -45,8 +45,11 @@ function getFailures(failures: ValidationFailure[], key: string) {
   const result = [];
 
   for (let i = failures.length - 1; i >= 0; i--) {
-    if (failures[i].propertyName.toLowerCase() === key.toLowerCase()) {
-      result.unshift(mapFailure(failures[i]));
+    // safe: i is always within [0, failures.length) given the loop bounds
+    const failure = failures[i]!;
+
+    if (failure.propertyName.toLowerCase() === key.toLowerCase()) {
+      result.unshift(mapFailure(failure));
 
       failures.splice(i, 1);
     }

@@ -204,7 +204,8 @@ function DiscoverGame({
         }
 
         if (char in acc) {
-          acc[char] = acc[char] + 1;
+          // safe: `char in acc` guarantees the entry exists
+          acc[char] = acc[char]! + 1;
         } else {
           acc[char] = 1;
         }

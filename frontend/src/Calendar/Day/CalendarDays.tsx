@@ -38,11 +38,13 @@ function CalendarDays() {
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
       const touches = event.touches;
-      const currentTouch = touches[0].pageX;
+      const firstTouch = touches[0];
 
-      if (touches.length !== 1) {
+      if (touches.length !== 1 || !firstTouch) {
         return;
       }
+
+      const currentTouch = firstTouch.pageX;
 
       if (currentTouch < 50 || isSidebarVisible) {
         return;
@@ -56,11 +58,13 @@ function CalendarDays() {
   const handleTouchEnd = useCallback(
     (event: TouchEvent) => {
       const touches = event.changedTouches;
-      const currentTouch = touches[0].pageX;
+      const firstTouch = touches[0];
 
-      if (!touchStart.current) {
+      if (!firstTouch || !touchStart.current) {
         return;
       }
+
+      const currentTouch = firstTouch.pageX;
 
       if (
         currentTouch > touchStart.current &&

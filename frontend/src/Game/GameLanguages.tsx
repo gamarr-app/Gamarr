@@ -18,12 +18,15 @@ function GameLanguages(props: GameLanguagesProps) {
   }
 
   if (languages.length === 1) {
+    // safe: length checked === 1, so languages[0] is present
+    const language = languages[0]!;
+
     return (
       <Label
         className={className}
         kind={isCutoffNotMet ? kinds.INVERSE : kinds.DEFAULT}
       >
-        {languages[0].name}
+        {language.name}
       </Label>
     );
   }

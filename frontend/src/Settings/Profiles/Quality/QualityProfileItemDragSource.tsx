@@ -100,8 +100,13 @@ function QualityProfileItemDragSource(
       const isDropGroupItem = !!(qualityId && groupId);
 
       const childNodeIndex = isOverCurrent && isDraggingUp ? 1 : 0;
-      const hoverBoundingRect =
-        ref.current.children[childNodeIndex].getBoundingClientRect();
+      const childNode = ref.current.children[childNodeIndex];
+
+      if (!childNode) {
+        return;
+      }
+
+      const hoverBoundingRect = childNode.getBoundingClientRect();
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();

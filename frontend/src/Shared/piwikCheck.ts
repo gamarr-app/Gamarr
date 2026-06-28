@@ -7,5 +7,8 @@ if (window.Gamarr.analytics) {
   g.async = true;
   g.defer = true;
   g.src = '//piwik.sonarr.tv/piwik.js';
-  s.parentNode?.insertBefore(g, s);
+
+  if (s) {
+    s.parentNode?.insertBefore(g, s);
+  }
 }

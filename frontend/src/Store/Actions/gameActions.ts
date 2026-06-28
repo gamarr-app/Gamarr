@@ -225,6 +225,11 @@ export const filterPredicates = {
     type: string
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
+
+    if (!predicate) {
+      return false;
+    }
+
     const { collection } = item;
 
     return predicate(
@@ -239,6 +244,11 @@ export const filterPredicates = {
     type: string
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
+
+    if (!predicate) {
+      return false;
+    }
+
     const { originalLanguage } = item;
 
     return predicate(
@@ -253,6 +263,11 @@ export const filterPredicates = {
     type: string
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
+
+    if (!predicate) {
+      return false;
+    }
+
     const { statistics = {} } = item;
     const { releaseGroups = [] } = statistics;
 
@@ -265,6 +280,11 @@ export const filterPredicates = {
     type: string
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
+
+    if (!predicate) {
+      return false;
+    }
+
     const { statistics = {} } = item;
     const sizeOnDisk =
       statistics && statistics.sizeOnDisk ? statistics.sizeOnDisk : 0;
@@ -311,6 +331,10 @@ export const filterPredicates = {
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
 
+    if (!predicate) {
+      return false;
+    }
+
     const rating = ratings.igdb ? ratings.igdb.value : 0;
 
     return predicate(rating * 10, filterValue);
@@ -323,6 +347,10 @@ export const filterPredicates = {
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
 
+    if (!predicate) {
+      return false;
+    }
+
     const rating = ratings.igdb ? ratings.igdb.votes : 0;
 
     return predicate(rating, filterValue);
@@ -334,6 +362,10 @@ export const filterPredicates = {
     type: string
   ): boolean {
     const predicate = filterTypePredicates[type as FilterPredicateType];
+
+    if (!predicate) {
+      return false;
+    }
 
     const rating = ratings.metacritic ? ratings.metacritic.value : 0;
 
