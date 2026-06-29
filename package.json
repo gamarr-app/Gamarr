@@ -79,7 +79,7 @@
     "redux-thunk": "3.1.0",
     "reselect": "5",
     "stacktrace-js": "2.0.2",
-    "swiper": "12.2.0",
+    "swiper": "14.0.0",
     "typescript": "6",
     "use-debounce": "10.1.1"
   },
