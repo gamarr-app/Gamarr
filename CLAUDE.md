@@ -150,7 +150,9 @@ gh pr create --fill
 gh release list
 
 # Sentry (token from .env; never inline it in commands you commit)
+# Org is `gamarr`; the two projects are `dotnet-aspnetcore` (backend) and
+# `javascript` (frontend) — there is no `gamarr` project.
 set -a; source .env; set +a
 curl -s -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
-  "https://sentry.io/api/0/projects/gamarr/gamarr/issues/?query=is:unresolved&limit=25"
+  "https://sentry.io/api/0/projects/gamarr/dotnet-aspnetcore/issues/?query=is:unresolved&limit=25"
 ```
