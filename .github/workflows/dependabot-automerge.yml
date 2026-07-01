@@ -6,6 +6,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  checks: read
 
 jobs:
   automerge:
@@ -18,9 +19,40 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Auto-merge minor and patch updates
+      # `gh pr merge --auto` only waits for *required* status checks, and this
+      # repo has no branch protection, so `--auto` used to merge immediately —
+      # which let a red-CI dependabot PR (#140, prettier 3.9.1 reformat) land on
+      # main. Instead, wait for the aggregate "Build Complete" check on the PR
+      # head SHA and merge only if it concludes successfully.
+      - name: Wait for CI, then auto-merge minor and patch updates
         if: steps.metadata.outputs.update-type != 'version-update:semver-major'
-        run: gh pr merge "$PR_URL" --squash --auto
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+          CHECK_NAME: Build Complete
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          deadline=$(( $(date +%s) + 1800 ))  # 30-minute budget for CI to finish
+          while :; do
+            read -r ci_status ci_conclusion < <(
+              gh api "repos/$REPO/commits/$HEAD_SHA/check-runs" \
+                --jq ".check_runs[] | select(.name == \"$CHECK_NAME\") | \"\(.status) \(.conclusion)\"" \
+                | head -n1
+            )
+            if [ "$ci_status" = "completed" ]; then
+              echo "'$CHECK_NAME' concluded: $ci_conclusion"
+              if [ "$ci_conclusion" != "success" ]; then
+                echo "CI is not green — leaving PR open for review."
+                exit 1
+              fi
+              break
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "Timed out after 30m waiting for '$CHECK_NAME'."
+              exit 1
+            fi
+            echo "Waiting for '$CHECK_NAME' (status=${ci_status:-pending})..."
+            sleep 30
+          done
+          gh pr merge "$PR_URL" --squash
