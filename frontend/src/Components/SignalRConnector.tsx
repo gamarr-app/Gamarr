@@ -188,8 +188,7 @@ class SignalRConnector extends Component<PropsFromRedux> {
 
     const handlerName = getHandlerName(name) as keyof SignalRConnector;
     const handler = this[handlerName] as
-      | ((body: MessageBody) => void)
-      | undefined;
+      ((body: MessageBody) => void) | undefined;
 
     if (handler && typeof handler === 'function') {
       handler.call(this, body);

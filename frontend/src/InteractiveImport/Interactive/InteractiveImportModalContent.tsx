@@ -69,12 +69,7 @@ import InteractiveImportRow from './InteractiveImportRow';
 import styles from './InteractiveImportModalContent.css';
 
 type SelectType =
-  | 'select'
-  | 'game'
-  | 'releaseGroup'
-  | 'quality'
-  | 'language'
-  | 'indexerFlags';
+  'select' | 'game' | 'releaseGroup' | 'quality' | 'language' | 'indexerFlags';
 
 type InteractiveImportSelectedChangeCallback = (
   props: SelectStateInputProps & { hasGameFileId: boolean }

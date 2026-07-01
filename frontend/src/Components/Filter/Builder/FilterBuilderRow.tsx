@@ -145,11 +145,7 @@ function getRowValueConnector(
 }
 
 type FilterValueType =
-  | string
-  | number
-  | unknown[]
-  | Record<string, unknown>
-  | undefined;
+  string | number | unknown[] | Record<string, unknown> | undefined;
 
 interface Filter {
   key: string;

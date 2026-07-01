@@ -5,11 +5,7 @@ import Language from 'Language/Language';
 export type GameMonitor = 'gameOnly' | 'gameAndCollection' | 'none';
 
 export type GameStatus =
-  | 'tba'
-  | 'announced'
-  | 'inCinemas'
-  | 'released'
-  | 'deleted';
+  'tba' | 'announced' | 'inCinemas' | 'released' | 'deleted';
 
 export type GameAvailability = 'announced' | 'inCinemas' | 'released';
 
