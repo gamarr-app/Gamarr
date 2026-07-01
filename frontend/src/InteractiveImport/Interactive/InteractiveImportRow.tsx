@@ -34,11 +34,7 @@ import InteractiveImportRowCellPlaceholder from './InteractiveImportRowCellPlace
 import styles from './InteractiveImportRow.css';
 
 type SelectType =
-  | 'game'
-  | 'releaseGroup'
-  | 'quality'
-  | 'language'
-  | 'indexerFlags';
+  'game' | 'releaseGroup' | 'quality' | 'language' | 'indexerFlags';
 
 type SelectedChangeProps = SelectStateInputProps & {
   hasGameFileId: boolean;

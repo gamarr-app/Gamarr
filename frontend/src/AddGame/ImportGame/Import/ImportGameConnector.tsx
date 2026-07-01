@@ -52,8 +52,7 @@ function createImportGameSelector(rootFolderId: number) {
 
       if (items.length) {
         const rootFolder = _.find(items, { id: rootFolderId }) as
-          | RootFolderItem
-          | undefined;
+          RootFolderItem | undefined;
 
         return {
           ...result,

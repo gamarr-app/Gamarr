@@ -63,8 +63,7 @@ function QualityProfileItemGroup({
   // ConnectDragSource accepts Element | null but returns ReactElement | null,
   // while RefCallback expects void. The return value is unused when used as a ref.
   const dragRefCallback = useMemo(():
-    | RefCallback<HTMLDivElement>
-    | undefined => {
+    RefCallback<HTMLDivElement> | undefined => {
     if (!dragRef) return undefined;
     return (element: HTMLDivElement | null) => {
       dragRef(element);

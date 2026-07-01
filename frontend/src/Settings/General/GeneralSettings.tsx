@@ -120,8 +120,7 @@ function GeneralSettings() {
     if (!isSaving && !saveError && prevIsSaving.current) {
       const typedSettings = settings as GeneralSettingsValues;
       const typedPrevSettings = prevSettings.current as
-        | GeneralSettingsValues
-        | undefined;
+        GeneralSettingsValues | undefined;
 
       const pendingRestart = _.some(requiresRestartKeys, (key) => {
         const settingKey = key as keyof GeneralSettingsValues;

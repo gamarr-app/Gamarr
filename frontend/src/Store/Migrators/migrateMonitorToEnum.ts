@@ -22,8 +22,7 @@ export default function migrateMonitorToEnum(
   }
 
   const addGame = _.get(persistedState, 'addGame.defaults.monitor') as
-    | string
-    | undefined;
+    string | undefined;
   const discoverGame = _.get(
     persistedState,
     'discoverGame.defaults.monitor'

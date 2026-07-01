@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import TextTruncate from 'react-text-truncate';
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import type { NavigationOptions } from 'swiper/types/modules/navigation';
+import type { NavigationOptions } from 'swiper/types';
 import EditGameCollectionModal from 'Collection/Edit/EditGameCollectionModal';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';

@@ -17,9 +17,7 @@ const SEPARATOR_MARGIN = parseInt(dimensions.toolbarSeparatorMargin);
 const SEPARATOR_WIDTH = 2 * SEPARATOR_MARGIN + 1;
 
 type ToolbarButtonChild =
-  | ReactElement<PageToolbarButtonProps>
-  | ReactElement<never>
-  | null;
+  ReactElement<PageToolbarButtonProps> | ReactElement<never> | null;
 
 export interface PageToolbarSectionProps {
   children?: ToolbarButtonChild | ToolbarButtonChild[];

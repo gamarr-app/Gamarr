@@ -89,8 +89,7 @@ export default {
       const after =
         moveIndex > 0
           ? (_.find(delayProfiles, { order: moveIndex }) as
-              | DelayProfile
-              | undefined)
+              DelayProfile | undefined)
           : null;
       const afterQueryParam = after ? `after=${after.id}` : '';
 
