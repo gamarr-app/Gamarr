@@ -36,9 +36,9 @@ namespace NzbDrone.Core.Test.MetadataSource
             _configService.SetupGet(c => c.RawgApiKey).Returns(string.Empty);
 
             // Create mocks of the concrete proxies (methods aren't virtual, so we use loose mocking)
-            _steamProxy = new Mock<SteamStoreProxy>(MockBehavior.Loose, null, null, null);
-            _igdbProxy = new Mock<IgdbProxy>(MockBehavior.Loose, null, null, null, null, null, null, null);
-            _rawgProxy = new Mock<RawgProxy>(MockBehavior.Loose, null, null, null, null, null);
+            _steamProxy = new Mock<SteamStoreProxy>(MockBehavior.Loose, null, null, null, null);
+            _igdbProxy = new Mock<IgdbProxy>(MockBehavior.Loose, null, null, null, null, null, null, null, null);
+            _rawgProxy = new Mock<RawgProxy>(MockBehavior.Loose, null, null, null, null, null, null);
 
             _subject = new AggregateGameInfoProxy(
                 _steamProxy.Object,

@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation;
+using NzbDrone.Common.TPL;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
@@ -29,7 +30,6 @@ namespace NzbDrone.Core.MetadataSource.IGDB
     {
         private const string IgdbApiBaseUrl = "https://api.igdb.com/v4/";
         private const int MaxRetries = 3;
-        private const int RateLimitRequestsPerSecond = 4;
 
         protected virtual int RetryDelayBaseMs => 1000;
 
@@ -57,6 +57,9 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             websites.*, external_games.*;
         ";
 
+        // IGDB free tier allows 4 requests per second
+        private static readonly TimeSpan RateLimitInterval = TimeSpan.FromMilliseconds(250);
+
         private static readonly HttpStatusCode[] RetryableStatusCodes =
         {
             HttpStatusCode.TooManyRequests,
@@ -66,16 +69,13 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             HttpStatusCode.GatewayTimeout
         };
 
-        // Rate limiting: Track request timestamps to enforce 4 req/sec limit
-        private static readonly object RateLimitLock = new object();
-        private static readonly Queue<DateTime> RequestTimestamps = new Queue<DateTime>();
-
         private readonly IHttpClient _httpClient;
         private readonly IIgdbAuthService _authService;
         private readonly IConfigService _configService;
         private readonly IGameService _gameService;
         private readonly IGameMetadataService _gameMetadataService;
         private readonly IGameTranslationService _gameTranslationService;
+        private readonly IRateLimitService _rateLimitService;
         private readonly Logger _logger;
         private readonly bool _mockEnabled;
         private readonly string _mockDataPath;
@@ -87,6 +87,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             IGameService gameService,
             IGameMetadataService gameMetadataService,
             IGameTranslationService gameTranslationService,
+            IRateLimitService rateLimitService,
             Logger logger)
         {
             _httpClient = httpClient;
@@ -95,6 +96,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             _gameService = gameService;
             _gameMetadataService = gameMetadataService;
             _gameTranslationService = gameTranslationService;
+            _rateLimitService = rateLimitService;
             _logger = logger;
             _mockEnabled = IsMockMode();
             _mockDataPath = _mockEnabled ? FindMockDataPath() : null;
@@ -478,45 +480,9 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                    ex is TimeoutException;
         }
 
-        /// <summary>
-        /// Enforces rate limiting of 4 requests per second for IGDB free tier.
-        /// </summary>
-        protected virtual void EnforceRateLimit()
+        private void EnforceRateLimit()
         {
-            lock (RateLimitLock)
-            {
-                var now = DateTime.UtcNow;
-                var oneSecondAgo = now.AddSeconds(-1);
-
-                // Remove timestamps older than 1 second
-                while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
-                {
-                    RequestTimestamps.Dequeue();
-                }
-
-                // If we've made 4+ requests in the last second, wait
-                if (RequestTimestamps.Count >= RateLimitRequestsPerSecond)
-                {
-                    var oldestRequest = RequestTimestamps.Peek();
-                    var waitTime = oldestRequest.AddSeconds(1) - now;
-                    if (waitTime.TotalMilliseconds > 0)
-                    {
-                        _logger.Debug("IGDB rate limit reached, waiting {0}ms", (int)waitTime.TotalMilliseconds);
-                        Thread.Sleep((int)waitTime.TotalMilliseconds + 10); // Add 10ms buffer
-                    }
-
-                    // Clean up again after waiting
-                    now = DateTime.UtcNow;
-                    oneSecondAgo = now.AddSeconds(-1);
-                    while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
-                    {
-                        RequestTimestamps.Dequeue();
-                    }
-                }
-
-                // Record this request
-                RequestTimestamps.Enqueue(DateTime.UtcNow);
-            }
+            _rateLimitService.WaitAndPulse("igdb_api", RateLimitInterval);
         }
 
         private List<T> LoadMockData<T>(string query)
