@@ -28,7 +28,7 @@ namespace NzbDrone.Core.CustomFormats
 
         protected override bool IsSatisfiedByWithoutNegate(CustomFormatInput input)
         {
-            var year = input.GameInfo?.Year ?? input.Game?.GameMetadata?.Value?.Year;
+            var year = input.GameInfo?.Year is > 0 ? input.GameInfo.Year : input.Game?.GameMetadata?.Value?.Year;
 
             return year >= Min && year <= Max;
         }
