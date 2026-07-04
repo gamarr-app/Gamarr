@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -90,7 +90,10 @@ function ProviderOptionSelectInput({
   const [isRefetchRequired, setIsRefetchRequired] = useState(false);
   const previousProviderData = usePrevious(providerData);
   const { isFetching, values } = useSelector(
-    createProviderOptionsSelector(selectOptionsProviderAction)
+    useMemo(
+      () => createProviderOptionsSelector(selectOptionsProviderAction),
+      [selectOptionsProviderAction]
+    )
   );
 
   const handleOpen = useCallback(() => {

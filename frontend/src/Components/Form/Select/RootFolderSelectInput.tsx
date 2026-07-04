@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import FileBrowserModal from 'Components/FileBrowser/FileBrowserModal';
@@ -106,11 +106,15 @@ function RootFolderSelectInput({
 }: RootFolderSelectInputProps) {
   const dispatch = useDispatch();
   const { values, isSaving, saveError } = useSelector(
-    createRootFolderOptionsSelector(
-      value,
-      includeMissingValue,
-      includeNoChange,
-      includeNoChangeDisabled
+    useMemo(
+      () =>
+        createRootFolderOptionsSelector(
+          value,
+          includeMissingValue,
+          includeNoChange,
+          includeNoChangeDisabled
+        ),
+      [value, includeMissingValue, includeNoChange, includeNoChangeDisabled]
     )
   );
   const [isAddNewRootFolderModalOpen, setIsAddNewRootFolderModalOpen] =
@@ -179,9 +183,15 @@ function RootFolderSelectInput({
     ) {
       const defaultValue = values[0];
 
+      // Only dispatch when the value actually changes. With no root folders
+      // configured this effect used to re-dispatch { value: '' } on every
+      // run, and each dispatch re-rendered the form, re-firing the effect —
+      // an infinite setState loop (Sentry JAVASCRIPT-1).
       if (!defaultValue || defaultValue.key === ADD_NEW_KEY) {
-        onChange({ name, value: '' });
-      } else {
+        if (value !== '') {
+          onChange({ name, value: '' });
+        }
+      } else if (defaultValue.key !== value) {
         onChange({ name, value: defaultValue.key });
       }
     }

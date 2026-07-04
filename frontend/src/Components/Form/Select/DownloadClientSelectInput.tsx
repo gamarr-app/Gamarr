@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
@@ -69,7 +69,10 @@ function DownloadClientSelectInput({
 }: DownloadClientSelectInputProps) {
   const dispatch = useDispatch();
   const { isFetching, isPopulated, values } = useSelector(
-    createDownloadClientsSelector(includeAny, protocol)
+    useMemo(
+      () => createDownloadClientsSelector(includeAny, protocol),
+      [includeAny, protocol]
+    )
   );
 
   useEffect(() => {
