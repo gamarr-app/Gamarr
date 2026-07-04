@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation;
+using NzbDrone.Common.TPL;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
@@ -20,15 +20,13 @@ namespace NzbDrone.Core.MetadataSource.RAWG
         private const string RawgApiBaseUrl = "https://api.rawg.io/api/";
 
         // Conservative rate limit to be a good API citizen (2 requests per second)
-        private const int RateLimitRequestsPerSecond = 2;
-
-        private static readonly Queue<DateTime> RequestTimestamps = new Queue<DateTime>();
-        private static readonly object RateLimitLock = new object();
+        private static readonly TimeSpan RateLimitInterval = TimeSpan.FromMilliseconds(500);
 
         private readonly IHttpClient _httpClient;
         private readonly IConfigService _configService;
         private readonly IGameService _gameService;
         private readonly IGameMetadataService _gameMetadataService;
+        private readonly IRateLimitService _rateLimitService;
         private readonly Logger _logger;
 
         public RawgProxy(
@@ -36,12 +34,14 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             IConfigService configService,
             IGameService gameService,
             IGameMetadataService gameMetadataService,
+            IRateLimitService rateLimitService,
             Logger logger)
         {
             _httpClient = httpClient;
             _configService = configService;
             _gameService = gameService;
             _gameMetadataService = gameMetadataService;
+            _rateLimitService = rateLimitService;
             _logger = logger;
         }
 
@@ -670,40 +670,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
         private void EnforceRateLimit()
         {
-            lock (RateLimitLock)
-            {
-                var now = DateTime.UtcNow;
-                var oneSecondAgo = now.AddSeconds(-1);
-
-                // Remove timestamps older than 1 second
-                while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
-                {
-                    RequestTimestamps.Dequeue();
-                }
-
-                // If we've made too many requests, wait
-                if (RequestTimestamps.Count >= RateLimitRequestsPerSecond)
-                {
-                    var oldestRequest = RequestTimestamps.Peek();
-                    var waitTime = oldestRequest.AddSeconds(1) - now;
-                    if (waitTime.TotalMilliseconds > 0)
-                    {
-                        _logger.Debug("RAWG rate limit reached, waiting {0}ms", (int)waitTime.TotalMilliseconds);
-                        Thread.Sleep((int)waitTime.TotalMilliseconds + 10); // Add 10ms buffer
-                    }
-
-                    // Clean up again after waiting
-                    now = DateTime.UtcNow;
-                    oneSecondAgo = now.AddSeconds(-1);
-                    while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
-                    {
-                        RequestTimestamps.Dequeue();
-                    }
-                }
-
-                // Record this request
-                RequestTimestamps.Enqueue(DateTime.UtcNow);
-            }
+            _rateLimitService.WaitAndPulse("rawg_api", RateLimitInterval);
         }
     }
 }

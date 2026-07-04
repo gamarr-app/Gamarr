@@ -21,6 +21,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
     {
         private const string TokenUrl = "https://id.twitch.tv/oauth2/token";
 
+        private readonly object _fetchLock = new object();
         private readonly IConfigService _configService;
         private readonly IHttpClient _httpClient;
         private readonly ICached<IgdbToken> _tokenCache;
@@ -56,12 +57,24 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 return cachedToken.AccessToken;
             }
 
-            var newToken = FetchNewToken();
-            if (newToken != null)
+            lock (_fetchLock)
             {
-                // Cache with 1 hour buffer before expiry
-                _tokenCache.Set("igdb_token", newToken, TimeSpan.FromSeconds(newToken.ExpiresIn - 3600));
-                return newToken.AccessToken;
+                // Another thread may have refreshed the token while we waited for the lock
+                cachedToken = _tokenCache.Find("igdb_token");
+                if (cachedToken != null && !cachedToken.IsExpired)
+                {
+                    return cachedToken.AccessToken;
+                }
+
+                var newToken = FetchNewToken();
+                if (newToken != null)
+                {
+                    // Refresh 1 hour before expiry (Twitch tokens usually last ~60 days),
+                    // but never cache for less than a minute
+                    var cacheSeconds = Math.Max(newToken.ExpiresIn - 3600, 60);
+                    _tokenCache.Set("igdb_token", newToken, TimeSpan.FromSeconds(cacheSeconds));
+                    return newToken.AccessToken;
+                }
             }
 
             _logger.Error("Failed to obtain IGDB access token");

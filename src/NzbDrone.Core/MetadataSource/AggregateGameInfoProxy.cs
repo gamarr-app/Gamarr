@@ -515,7 +515,22 @@ namespace NzbDrone.Core.MetadataSource
                 return new List<Game>();
             }
 
-            return _searchCache.Get(lowerTitle, () => SearchForNewGameUncached(title, lowerTitle), SearchCacheLifetime);
+            var cached = _searchCache.Find(lowerTitle);
+            if (cached != null)
+            {
+                return cached;
+            }
+
+            var results = SearchForNewGameUncached(title, lowerTitle);
+
+            // Only cache non-empty results; an empty list can mean "all providers
+            // failed" and shouldn't pin "no results" for the next five minutes
+            if (results.Count > 0)
+            {
+                _searchCache.Set(lowerTitle, results, SearchCacheLifetime);
+            }
+
+            return results;
         }
 
         private List<Game> SearchForNewGameUncached(string title, string lowerTitle)

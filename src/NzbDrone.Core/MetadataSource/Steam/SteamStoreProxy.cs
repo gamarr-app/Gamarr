@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation;
+using NzbDrone.Common.TPL;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.Steam.Resource;
@@ -25,21 +25,22 @@ namespace NzbDrone.Core.MetadataSource.Steam
         private const string StoreApiBaseUrl = "https://store.steampowered.com/api/";
 
         // Steam has undocumented rate limits; keep requests to 1 per second
-        private const int RateLimitRequestsPerSecond = 1;
-        private static readonly Queue<DateTime> RequestTimestamps = new Queue<DateTime>();
-        private static readonly object RateLimitLock = new object();
+        private static readonly TimeSpan RateLimitInterval = TimeSpan.FromSeconds(1);
 
         private readonly IHttpClient _httpClient;
         private readonly IGameService _gameService;
+        private readonly IRateLimitService _rateLimitService;
         private readonly Logger _logger;
 
         public SteamStoreProxy(
             IHttpClient httpClient,
             IGameService gameService,
+            IRateLimitService rateLimitService,
             Logger logger)
         {
             _httpClient = httpClient;
             _gameService = gameService;
+            _rateLimitService = rateLimitService;
             _logger = logger;
         }
 
@@ -60,13 +61,13 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 var json = JObject.Parse(response.Content);
 
                 var appData = json[steamAppId.ToString()];
-                if (appData == null || !appData["success"].Value<bool>())
+                if (appData?["success"]?.Value<bool>() != true)
                 {
                     _logger.Warn("Steam returned no data for App ID {0}", steamAppId);
                     return null;
                 }
 
-                var data = appData["data"].ToObject<SteamGameData>();
+                var data = appData["data"]?.ToObject<SteamGameData>();
                 if (data == null || (data.Type != "game" && data.Type != "dlc"))
                 {
                     _logger.Debug("Steam App ID {0} is not a game or DLC (type: {1})", steamAppId, data?.Type);
@@ -454,29 +455,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
         private void EnforceRateLimit()
         {
-            lock (RateLimitLock)
-            {
-                var now = DateTime.UtcNow;
-                var oneSecondAgo = now.AddSeconds(-1);
-
-                while (RequestTimestamps.Count > 0 && RequestTimestamps.Peek() < oneSecondAgo)
-                {
-                    RequestTimestamps.Dequeue();
-                }
-
-                if (RequestTimestamps.Count >= RateLimitRequestsPerSecond)
-                {
-                    var oldestRequest = RequestTimestamps.Peek();
-                    var waitTime = oldestRequest.AddSeconds(1) - now;
-                    if (waitTime.TotalMilliseconds > 0)
-                    {
-                        _logger.Debug("Steam rate limit throttle, waiting {0}ms", (int)waitTime.TotalMilliseconds);
-                        Thread.Sleep((int)waitTime.TotalMilliseconds + 50);
-                    }
-                }
-
-                RequestTimestamps.Enqueue(DateTime.UtcNow);
-            }
+            _rateLimitService.WaitAndPulse("steam_store", RateLimitInterval);
         }
 
         private bool IsNonGameContent(string title)

@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using NLog;
 using NzbDrone.Common.Http;
+using NzbDrone.Common.TPL;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games;
@@ -23,11 +24,6 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
     {
         protected override int RetryDelayBaseMs => 0;
 
-        protected override void EnforceRateLimit()
-        {
-            // Skip rate limiting in tests
-        }
-
         public TestableIgdbProxy(
             IHttpClient httpClient,
             IIgdbAuthService authService,
@@ -35,8 +31,9 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             IGameService gameService,
             IGameMetadataService gameMetadataService,
             IGameTranslationService gameTranslationService,
+            IRateLimitService rateLimitService,
             Logger logger)
-            : base(httpClient, authService, configService, gameService, gameMetadataService, gameTranslationService, logger)
+            : base(httpClient, authService, configService, gameService, gameMetadataService, gameTranslationService, rateLimitService, logger)
         {
         }
     }
