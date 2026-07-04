@@ -64,9 +64,10 @@ namespace NzbDrone.Core.CustomFormats
 
             var gameInfo = new ParsedGameInfo
             {
-                GameTitles = new List<string>() { game.Title },
+                GameTitles = new List<string> { game.Title },
                 SimpleReleaseTitle = parsed?.SimpleReleaseTitle ?? blocklist.SourceTitle.SimplifyReleaseTitle(),
                 ReleaseTitle = parsed?.ReleaseTitle ?? blocklist.SourceTitle,
+                Year = game.Year,
                 Edition = parsed?.Edition,
                 Quality = blocklist.Quality,
                 Languages = blocklist.Languages,
@@ -94,9 +95,10 @@ namespace NzbDrone.Core.CustomFormats
 
             var gameInfo = new ParsedGameInfo
             {
-                GameTitles = new List<string>() { game.Title },
+                GameTitles = new List<string> { game.Title },
                 SimpleReleaseTitle = parsed?.SimpleReleaseTitle ?? history.SourceTitle.SimplifyReleaseTitle(),
                 ReleaseTitle = parsed?.ReleaseTitle ?? history.SourceTitle,
+                Year = game.Year,
                 Edition = parsed?.Edition,
                 Quality = history.Quality,
                 Languages = history.Languages,
@@ -119,9 +121,10 @@ namespace NzbDrone.Core.CustomFormats
         {
             var gameInfo = new ParsedGameInfo
             {
-                GameTitles = new List<string>() { localGame.Game.Title },
+                GameTitles = new List<string> { localGame.Game.Title },
                 SimpleReleaseTitle = localGame.SceneName.IsNotNullOrWhiteSpace() ? localGame.SceneName.SimplifyReleaseTitle() : Path.GetFileName(localGame.Path).SimplifyReleaseTitle(),
                 ReleaseTitle = localGame.SceneName,
+                Year = localGame.Game.Year,
                 Quality = localGame.Quality,
                 Edition = localGame.Edition,
                 Languages = localGame.Languages,
@@ -191,8 +194,9 @@ namespace NzbDrone.Core.CustomFormats
 
             var gameInfo = new ParsedGameInfo
             {
-                GameTitles = new List<string>() { game.Title },
+                GameTitles = new List<string> { game.Title },
                 SimpleReleaseTitle = releaseTitle.SimplifyReleaseTitle(),
+                Year = game.Year,
                 Quality = gameFile.Quality,
                 Languages = gameFile.Languages,
                 ReleaseGroup = gameFile.ReleaseGroup,
