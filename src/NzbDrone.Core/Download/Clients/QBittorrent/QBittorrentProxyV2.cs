@@ -363,17 +363,17 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private string ProcessRequest(HttpRequestBuilder requestBuilder, QBittorrentSettings settings)
         {
-            var request = requestBuilder.Build();
-            request.LogResponseContent = true;
-
             // API key auth: send the request as-is with the Bearer header set
             // in BuildRequest, and translate 401/403 to an auth failure rather
             // than falling through to cookie-based re-login.
             if (settings.ApiKey.IsNotNullOrWhiteSpace())
             {
+                var apiKeyRequest = requestBuilder.Build();
+                apiKeyRequest.LogResponseContent = true;
+
                 try
                 {
-                    return _httpClient.Execute(request).Content;
+                    return _httpClient.Execute(apiKeyRequest).Content;
                 }
                 catch (HttpException ex)
                 {
@@ -392,8 +392,13 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 }
             }
 
+            // Authenticate before building so the session cookie set on the
+            // builder makes it into the request; building first meant every
+            // call went 403 -> re-login -> retry.
             AuthenticateClient(requestBuilder, settings);
 
+            var request = requestBuilder.Build();
+            request.LogResponseContent = true;
             request.SuppressHttpErrorStatusCodes = new[] { HttpStatusCode.Forbidden };
 
             try
