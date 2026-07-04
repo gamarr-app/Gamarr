@@ -91,8 +91,13 @@ namespace NzbDrone.Core.Download
 
         private void CheckForStall(TrackedDownload trackedDownload)
         {
+            // Paused and queued downloads aren't expected to make progress, so
+            // they can't stall. Actual stalled torrents surface as Downloading
+            // or Warning (e.g. qBittorrent's stalledDL) and stay eligible.
             if (trackedDownload.DownloadItem.RemainingSize <= 0 ||
-                trackedDownload.DownloadItem.Status == DownloadItemStatus.Completed)
+                trackedDownload.DownloadItem.Status is DownloadItemStatus.Completed
+                    or DownloadItemStatus.Paused
+                    or DownloadItemStatus.Queued)
             {
                 return;
             }
