@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { QualityProfilesAppState } from 'App/State/SettingsAppState';
@@ -79,10 +79,14 @@ function QualityProfileSelectInput({
   ...otherProps
 }: QualityProfileSelectInputProps) {
   const values = useSelector(
-    createQualityProfilesSelector(
-      includeNoChange,
-      includeNoChangeDisabled,
-      includeMixed
+    useMemo(
+      () =>
+        createQualityProfilesSelector(
+          includeNoChange,
+          includeNoChangeDisabled,
+          includeMixed
+        ),
+      [includeNoChange, includeNoChangeDisabled, includeMixed]
     )
   );
 
@@ -94,10 +98,7 @@ function QualityProfileSelectInput({
   );
 
   useEffect(() => {
-    if (
-      !value ||
-      !values.some((option) => option.key === value || option.key === value)
-    ) {
+    if (!value || !values.some((option) => option.key === value)) {
       const firstValue = values.find(
         (option) => typeof option.key === 'number'
       );
