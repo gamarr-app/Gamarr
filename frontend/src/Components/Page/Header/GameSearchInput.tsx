@@ -201,6 +201,16 @@ function GameSearchInput() {
     [games]
   );
 
+  const handleWorkerError = useCallback((error: ErrorEvent) => {
+    // If the worker dies mid-search the pending request will never resolve;
+    // clear the loading state so the spinner doesn't stick around forever.
+    console.error('Game search worker error', error.message, error);
+    requestValue.current = null;
+    isLoading.current = false;
+    setRequestLoading(false);
+    setSuggestions([]);
+  }, []);
+
   const requestSuggestions = useDebouncedCallback((value: string) => {
     if (!isLoading.current) {
       return;
@@ -416,6 +426,7 @@ function GameSearchInput() {
       handleSuggestionsReceived,
       false
     );
+    worker.current?.addEventListener('error', handleWorkerError, false);
 
     return () => {
       if (worker.current) {
@@ -424,9 +435,10 @@ function GameSearchInput() {
           handleSuggestionsReceived,
           false
         );
+        worker.current.removeEventListener('error', handleWorkerError, false);
       }
     };
-  }, [handleSuggestionsReceived]);
+  }, [handleSuggestionsReceived, handleWorkerError]);
 
   useEffect(() => {
     bindShortcut('focusGameSearchInput', focusInput);
