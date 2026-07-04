@@ -114,14 +114,20 @@ namespace NzbDrone.Core.MediaFiles.VirusScanning
                     result.ScannedFileCount = int.Parse(summaryMatch.Groups[1].Value);
                 }
 
-                result.IsClean = result.InfectedFiles.Count == 0;
+                // Exit code 1 means virus found, 0 means clean, 2 means error.
+                // The exit code is authoritative: if clamscan reports a virus but the
+                // output couldn't be parsed, still fail closed rather than import.
+                result.IsClean = processOutput.ExitCode == 0 && result.InfectedFiles.Count == 0;
 
-                // Exit code 1 means virus found, 0 means clean, 2 means error
                 if (processOutput.ExitCode == 2)
                 {
                     result.ScanCompleted = false;
                     result.ErrorMessage = "ClamAV encountered an error during scan";
                     _logger.Warn("ClamAV scan error. Output: {0}", output);
+                }
+                else if (processOutput.ExitCode == 1 && result.InfectedFiles.Count == 0)
+                {
+                    _logger.Warn("ClamAV reported an infection in {0} but no infected files could be parsed from its output: {1}", path, output);
                 }
                 else if (result.InfectedFiles.Any())
                 {
