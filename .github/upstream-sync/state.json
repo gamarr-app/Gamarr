@@ -2,13 +2,13 @@
   "radarr": {
     "remote": "https://github.com/Radarr/Radarr.git",
     "branch": "develop",
-    "last_sha": "cf3775621be8e39c011cdff63f6939400a108bb5",
-    "last_sha_note": "As of 2026-05-31 the Radarr 6.1.1+ delta was reviewed and applicable fixes are already in (most via 26f765b15c, plus the QB 5.2 login fix in e6e843b16e). Future runs of catchup.py advance this cursor forward."
+    "last_sha": "d944e0e4c9753604513b0b1823cb2bfd5f68e53d",
+    "last_sha_note": "As of 2026-07-04 the delta since cf3775621b was reviewed by hand: ported 104fbe7e3f (custom format year), 4dcc7c7831 (qBit basic auth), 520bf4215a (SQLite BusyTimeout 1000ms). Skipped: Simkl fix (no Simkl list in Gamarr), FFprobe bump (not used), StyleCop Unstable bump (tooling churn), version bumps."
   },
   "sonarr": {
     "remote": "https://github.com/Sonarr/Sonarr.git",
     "branch": "develop",
-    "last_sha": "4c66cc2c330050131fa31b4be8667415ebe28b7e",
-    "last_sha_note": "Sonarr is consulted opportunistically; this cursor starts at 2026-05-31 head, so catchup.py only considers commits after that."
+    "last_sha": "97d24acf06e636ddc888babc3df8f689da879304",
+    "last_sha_note": "As of 2026-07-04 the delta since 4c66cc2c33 was reviewed by hand: e0d2d25070 (qBit cookie reuse) landed independently as dff2d0252b, basic-auth fix ported via the Radarr twin. Skipped: FFprobe, MailKit bump (dependabot), version bump."
   }
 }
