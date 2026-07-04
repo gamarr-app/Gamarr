@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Games
                 return value;
             }
 
-            return Parser.Parser.NormalizeTitle(title).ToLower();
+            return Parser.Parser.NormalizeTitle(title);
         }
     }
 }

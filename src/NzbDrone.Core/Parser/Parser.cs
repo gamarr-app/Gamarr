@@ -683,7 +683,7 @@ namespace NzbDrone.Core.Parser
             title = PunctuationRegex.Replace(title, " ");
             title = DuplicateSpacesRegex.Replace(title, " ");
 
-            return title.Trim().ToLower();
+            return title.Trim().ToLowerInvariant();
         }
 
         public static string NormalizeTitle(string title)
@@ -698,7 +698,7 @@ namespace NzbDrone.Core.Parser
             title = DuplicateSpacesRegex.Replace(title, " ");
             title = SpecialCharRegex.Replace(title, string.Empty);
 
-            return title.Trim().ToLower();
+            return title.Trim().ToLowerInvariant();
         }
 
         public static string SimplifyReleaseTitle(this string title)
