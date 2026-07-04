@@ -82,6 +82,39 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
         }
 
         [Test]
+        public void should_not_fail_when_paused()
+        {
+            _trackedDownload.DownloadItem.Status = DownloadItemStatus.Paused;
+            WithStallTimeout(6);
+
+            Subject.Check(_trackedDownload);
+
+            _trackedDownload.State.Should().Be(TrackedDownloadState.Downloading);
+        }
+
+        [Test]
+        public void should_not_fail_when_queued()
+        {
+            _trackedDownload.DownloadItem.Status = DownloadItemStatus.Queued;
+            WithStallTimeout(6);
+
+            Subject.Check(_trackedDownload);
+
+            _trackedDownload.State.Should().Be(TrackedDownloadState.Downloading);
+        }
+
+        [Test]
+        public void should_fail_when_stalled_with_warning_status()
+        {
+            _trackedDownload.DownloadItem.Status = DownloadItemStatus.Warning;
+            WithStallTimeout(6);
+
+            Subject.Check(_trackedDownload);
+
+            _trackedDownload.State.Should().Be(TrackedDownloadState.FailedPending);
+        }
+
+        [Test]
         public void should_not_fail_when_already_completed()
         {
             _trackedDownload.DownloadItem.RemainingSize = 0;
