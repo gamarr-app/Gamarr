@@ -3,6 +3,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 
@@ -15,6 +16,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         bool CutoffNotMet(QualityProfile profile, QualityModel currentQuality, List<CustomFormat> currentFormats, QualityModel newQuality = null);
         bool IsRevisionUpgrade(QualityModel currentQuality, QualityModel newQuality);
         bool IsVersionUpgrade(GameVersion currentVersion, GameVersion newVersion);
+        bool IsVersionUpgrade(Game game, GameVersion currentVersion, GameVersion newVersion);
         bool IsUpgradeAllowed(QualityProfile qualityProfile, QualityModel currentQuality, List<CustomFormat> currentCustomFormats, QualityModel newQuality, List<CustomFormat> newCustomFormats);
     }
 
@@ -180,6 +182,20 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             }
 
             return false;
+        }
+
+        public bool IsVersionUpgrade(Game game, GameVersion currentVersion, GameVersion newVersion)
+        {
+            // Per-game opt-out for auto-grabbing updates. The global
+            // UpgradeGameVersions toggle (checked below) remains the kill
+            // switch; this only tightens it for individual games.
+            if (game != null && !game.MonitorUpdates)
+            {
+                _logger.Debug("Updates are not monitored for {0}, not treating newer version as an upgrade", game);
+                return false;
+            }
+
+            return IsVersionUpgrade(currentVersion, newVersion);
         }
 
         public bool IsVersionUpgrade(GameVersion currentVersion, GameVersion newVersion)

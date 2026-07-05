@@ -48,7 +48,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     subject.ParsedGameInfo.Quality))
             {
                 // Cutoff is met, but still check if it's a version upgrade
-                if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                 {
                     _logger.Debug(
                         "Cutoff met, but new release has newer game version {0} vs {1}, accepting",
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 case UpgradeableRejectReason.BetterQuality:
                     // Quality is lower, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                     {
                         _logger.Debug(
                             "New release has newer game version {0} vs {1}, accepting despite lower quality",
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 case UpgradeableRejectReason.BetterRevision:
                     // Revision is lower, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                     {
                         _logger.Debug(
                             "New release has newer game version {0} vs {1}, accepting despite lower revision",
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 case UpgradeableRejectReason.QualityCutoff:
                     // Quality cutoff met, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                     {
                         _logger.Debug(
                             "New release has newer game version {0} vs {1}, accepting despite quality cutoff met",
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 case UpgradeableRejectReason.CustomFormatCutoff:
                     // Custom format cutoff met, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                     {
                         _logger.Debug(
                             "New release has newer game version {0} vs {1}, accepting despite custom format cutoff met",
@@ -131,7 +131,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 case UpgradeableRejectReason.CustomFormatScore:
                     // Custom format score is not better, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                     {
                         _logger.Debug(
                             "New release has newer game version {0} vs {1}, accepting despite same custom format score",
@@ -144,7 +144,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 case UpgradeableRejectReason.MinCustomFormatScore:
                     // Min custom format score not met, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
                     {
                         _logger.Debug(
                             "New release has newer game version {0} vs {1}, accepting despite custom format score increment",

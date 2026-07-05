@@ -14,11 +14,19 @@ namespace NzbDrone.Core.Games
         {
             Tags = new HashSet<int>();
             GameMetadata = new GameMetadata();
+            MonitorUpdates = true;
         }
 
         public int GameMetadataId { get; set; }
 
         public bool Monitored { get; set; }
+
+        /// <summary>
+        /// Whether newer game versions (updates/patches) should be grabbed
+        /// automatically for this game. Only applies when the global
+        /// UpgradeGameVersions toggle is enabled. Defaults to true.
+        /// </summary>
+        public bool MonitorUpdates { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
         public int QualityProfileId { get; set; }
 
@@ -168,6 +176,7 @@ namespace NzbDrone.Core.Games
             QualityProfileId = otherGame.QualityProfileId;
 
             Monitored = otherGame.Monitored;
+            MonitorUpdates = otherGame.MonitorUpdates;
             MinimumAvailability = otherGame.MinimumAvailability;
 
             RootFolderPath = otherGame.RootFolderPath;

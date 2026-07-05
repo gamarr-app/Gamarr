@@ -49,6 +49,7 @@ namespace Gamarr.Api.V3.Games
         public GameResource()
         {
             Monitored = true;
+            MonitorUpdates = true;
             MinimumAvailability = GameStatusType.Released;
         }
 
@@ -91,6 +92,11 @@ namespace Gamarr.Api.V3.Games
 
         // Editing Only
         public bool Monitored { get; set; }
+
+        /// <summary>
+        /// Whether newer game versions (updates/patches) should be grabbed automatically
+        /// </summary>
+        public bool MonitorUpdates { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
         public bool IsAvailable { get; set; }
         public string FolderName { get; set; }
@@ -246,6 +252,7 @@ namespace Gamarr.Api.V3.Games
                 QualityProfileId = model.QualityProfileId,
 
                 Monitored = model.Monitored,
+                MonitorUpdates = model.MonitorUpdates,
                 MinimumAvailability = model.MinimumAvailability,
 
                 IsAvailable = model.IsAvailable(availDelay),
@@ -348,6 +355,7 @@ namespace Gamarr.Api.V3.Games
                 QualityProfileId = resource.QualityProfileId,
 
                 Monitored = resource.Monitored,
+                MonitorUpdates = resource.MonitorUpdates,
                 MinimumAvailability = resource.MinimumAvailability,
 
                 RootFolderPath = resource.RootFolderPath,

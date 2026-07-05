@@ -54,7 +54,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                 if (qualityCompare < 0)
                 {
                     // Quality is lower, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(existingVersion, newVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(localGame.Game, existingVersion, newVersion))
                     {
                         _logger.Debug("New file has newer game version {0} vs {1}, accepting despite lower quality", newVersion, existingVersion);
                     }
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                     localGame.Quality.Revision.CompareTo(gameFile.Quality.Revision) < 0)
                 {
                     // Revision is lower, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(existingVersion, newVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(localGame.Game, existingVersion, newVersion))
                     {
                         _logger.Debug("New file has newer game version {0} vs {1}, accepting despite lower revision", newVersion, existingVersion);
                     }
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                 if (qualityCompare == 0 && newFormatScore < currentFormatScore)
                 {
                     // Custom format score is lower, but check if it's a version upgrade
-                    if (_upgradableSpecification.IsVersionUpgrade(existingVersion, newVersion))
+                    if (_upgradableSpecification.IsVersionUpgrade(localGame.Game, existingVersion, newVersion))
                     {
                         _logger.Debug("New file has newer game version {0} vs {1}, accepting despite lower custom format score", newVersion, existingVersion);
                     }

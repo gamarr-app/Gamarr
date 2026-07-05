@@ -39,6 +39,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             };
 
             var fakeGame = Builder<Game>.CreateNew()
+                .With(g => g.MonitorUpdates = true)
                 .With(g => g.QualityProfile = new QualityProfile
                 {
                     UpgradeAllowed = true,
@@ -180,6 +181,38 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 1, 0);
+
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_reject_version_upgrade_when_game_does_not_monitor_updates()
+        {
+            // Cutoff met and new release has a newer game version, but the
+            // game has opted out of update monitoring
+            _remoteGame.Game.MonitorUpdates = false;
+
+            _existingFile.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
+            _existingFile.GameVersion = new GameVersion(1, 0, 0);
+
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
+            _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(2, 0, 0);
+
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+        }
+
+        [Test]
+        public void should_accept_quality_upgrade_when_game_does_not_monitor_updates()
+        {
+            // MonitorUpdates only gates version upgrades; a normal quality
+            // upgrade should still be accepted
+            _remoteGame.Game.MonitorUpdates = false;
+
+            _existingFile.Quality = new QualityModel(Quality.Scene, new Revision(version: 2));
+            _existingFile.GameVersion = new GameVersion(1, 0, 0);
+
+            _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
+            _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 0, 0);
 
             _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
