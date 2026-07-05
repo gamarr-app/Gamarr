@@ -12,7 +12,6 @@ interface CssExports {
   'externalLinks': string;
   'genres': string;
   'igdbRating': string;
-  'inCinemas': string;
   'isPopular': string;
   'isRecommendation': string;
   'isTrending': string;
