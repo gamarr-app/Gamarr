@@ -1,0 +1,17 @@
+# Example docker-compose for Gamarr.
+# Copy next to your other *arr services and adjust the volume paths.
+services:
+  gamarr:
+    image: ghcr.io/gamarr-app/gamarr:latest
+    container_name: gamarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./gamarr-config:/config
+      - /path/to/games:/games        # your game library
+      - /path/to/downloads:/downloads # your download client's completed folder
+    ports:
+      - "6767:6767"
+    restart: unless-stopped
