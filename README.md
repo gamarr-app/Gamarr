@@ -5,35 +5,68 @@
 [![GitHub Downloads](https://img.shields.io/github/downloads/gamarr-app/Gamarr/total.svg)](https://github.com/gamarr-app/Gamarr/releases)
 [![License](https://img.shields.io/github/license/gamarr-app/Gamarr)](http://www.gnu.org/licenses/gpl.html)
 
-Gamarr is a game collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new games and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available.
+Gamarr is a game collection manager for Usenet and BitTorrent users — Radarr, but for your game library. It monitors RSS feeds and indexers for the games you want, hands grabs to your download client, and imports, renames, and organizes the results. Because games aren't movies, Gamarr also understands the things only games do: **it recognizes versions, updates, and DLC, and can automatically upgrade your library when a newer version or a more complete repack shows up.**
 
-## Major Features Include
+## Screenshots
 
-* Adding new games with lots of information, such as trailers, ratings, platforms, genres, and more
-* Support for major platforms: Windows, Linux, macOS, Raspberry Pi, etc.
-* Can watch for better quality of the games you have and do an automatic upgrade
-* Automatic failed download handling will try another release if one fails
-* Manual search so you can pick any release or to see why a release was not downloaded automatically
-* Full integration with SABnzbd and NZBGet
-* Automatically searching for releases as well as RSS Sync
-* Automatically importing downloaded games
-* Recognizing game versions, updates, and DLC
-* Identifying releases with AKA game names
-* SABnzbd, NZBGet, QBittorrent, Deluge, rTorrent, Transmission, uTorrent, and other download clients are supported and integrated
-* Full integration with Kodi and Plex (notifications, library updates)
-* Adding metadata such as posters and information for Kodi and others to use
-* Advanced customization for profiles, such that Gamarr will always download the copy you want
-* Game discovery with recommendations based on your library
-* Multiple metadata sources: IGDB, RAWG, and Steam
-* A beautiful UI
+| Library | Game details |
+| --- | --- |
+| ![Library](docs/screenshots/library.png) | ![Game details](docs/screenshots/game-details.png) |
+
+| Add a game | Game-native qualities |
+| --- | --- |
+| ![Add new game](docs/screenshots/add-game.png) | ![Quality settings](docs/screenshots/quality-settings.png) |
+
+## Getting Started
+
+The easiest way to run Gamarr is Docker:
+
+```yaml
+services:
+  gamarr:
+    image: ghcr.io/gamarr-app/gamarr:latest
+    container_name: gamarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./gamarr-config:/config
+      - /path/to/games:/games
+      - /path/to/downloads:/downloads
+    ports:
+      - "6767:6767"
+    restart: unless-stopped
+```
+
+Then open `http://localhost:6767`. A copy of this file ships as
+[`docker-compose.example.yml`](docker-compose.example.yml). Standalone builds
+for Windows, Linux, macOS, and ARM (including Raspberry Pi) are on the
+[releases page](https://github.com/gamarr-app/Gamarr/releases).
+
+Point your indexers at Gamarr via [Prowlarr](https://github.com/Prowlarr/Prowlarr)
+or Jackett using a Torznab feed with game categories (1000 = Console,
+4000 = PC), add a download client, and add your first game.
+
+## Major Features
+
+* Game-native quality model: Scene, GOG (DRM-free), Repack, ISO, Retail, Portable — not video resolutions
+* Recognizes game versions, updates, and DLC in release names; can upgrade when a newer version releases
+* Steam library and Steam wishlist import lists — point Gamarr at your account and it monitors your backlog
+* Game discovery: popular, trending, and recommendations based on your library
+* Metadata from three sources — Steam (no key needed), IGDB, and RAWG — merged into one record
+* Manual and automatic search, failed-download handling, and RSS sync, same as the rest of the *arr family
+* Works with SABnzbd, NZBGet, qBittorrent, Deluge, rTorrent, Transmission, uTorrent, and more
+* Optional virus scanning of imports via ClamAV, with quarantine
+* Notifications: Discord, Telegram, Slack, Webhook, Apprise, Notifiarr, and ~20 others
+* Renaming with game-aware tokens ({Game Title}, {Edition Tags}, {SteamAppId}, …)
+* SQLite by default, PostgreSQL optional
 
 ## Metadata Sources
 
-Gamarr uses multiple metadata providers to give you comprehensive game information:
-
-* **Steam** - Primary source for PC games, no API key required
-* **IGDB** - Comprehensive game database with detailed metadata (requires free API credentials)
-* **RAWG** - Additional game data and recommendations (requires free API key)
+* **Steam** — primary source for PC games, no API key required
+* **IGDB** — comprehensive game database with detailed metadata (free API credentials)
+* **RAWG** — additional game data and recommendations (free API key)
 
 ## Support
 
@@ -50,4 +83,3 @@ This project exists thanks to all the people who contribute.
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
 * Copyright 2010-2026
-
