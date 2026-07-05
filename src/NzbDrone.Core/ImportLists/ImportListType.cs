@@ -7,6 +7,7 @@ namespace NzbDrone.Core.ImportLists
         Plex,
         Steam,
         Other,
-        Advanced
+        Advanced,
+        GOG
     }
 }
