@@ -11,7 +11,7 @@ namespace GamarrLibrary
 {
     /// <summary>
     /// Playnite library plugin that imports the local game library managed by
-    /// a Gamarr server (https://github.com/gamarr/gamarr).
+    /// a Gamarr server (https://github.com/gamarr-app/Gamarr).
     /// </summary>
     public class GamarrLibraryPlugin : LibraryPlugin
     {

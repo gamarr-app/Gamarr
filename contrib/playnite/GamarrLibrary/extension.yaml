@@ -6,4 +6,4 @@ Module: GamarrLibrary.dll
 Type: GameLibrary
 Links:
   - Name: Gamarr
-    Url: https://github.com/gamarr/gamarr
+    Url: https://github.com/gamarr-app/Gamarr
