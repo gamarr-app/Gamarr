@@ -20,7 +20,12 @@ and a local Gamarr build:
   schema and Gamarr accepts the test indexer via `POST /api/v3/indexer/test`)
 - Application add + `ApplicationIndexerSync` command complete cleanly
 
-## Submitting upstream
+## Status
+
+Submitted upstream as [Prowlarr/Prowlarr#2725](https://github.com/Prowlarr/Prowlarr/pull/2725)
+(2026-07-05, from the gamarr-bot2 fork). This directory stays until it merges.
+
+## Submitting upstream (for reference)
 
 ```bash
 git clone https://github.com/Prowlarr/Prowlarr.git
