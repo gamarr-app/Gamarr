@@ -27,9 +27,6 @@ namespace NzbDrone.Core.Organizer
 
     public class FileNameBuilder : IBuildFileNames
     {
-        private const string MediaInfoVideoDynamicRangeToken = "{MediaInfo VideoDynamicRange}";
-        private const string MediaInfoVideoDynamicRangeTypeToken = "{MediaInfo VideoDynamicRangeType}";
-
         private readonly INamingConfigService _namingConfigService;
         private readonly IQualityDefinitionService _qualityDefinitionService;
         private readonly IGameTranslationService _gameTranslationService;
@@ -124,7 +121,6 @@ namespace NzbDrone.Core.Organizer
             AddReleaseDateTokens(tokenHandlers, game.Year);
             AddIdTokens(tokenHandlers, game);
             AddQualityTokens(tokenHandlers, game, gameFile);
-            AddMediaInfoTokens(tokenHandlers, gameFile);
             AddGameFileTokens(tokenHandlers, gameFile, multipleTokens);
             AddEditionTagsTokens(tokenHandlers, gameFile);
             AddCustomFormats(tokenHandlers, game, gameFile, customFormats);
@@ -363,31 +359,6 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{Quality Title}"] = m => qualityTitle;
             tokenHandlers["{Quality Proper}"] = m => qualityProper;
             tokenHandlers["{Quality Real}"] = m => qualityReal;
-        }
-
-        private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, GameFile gameFile)
-        {
-            // MediaInfo tokens are registered as empty strings so existing naming formats don't break
-            tokenHandlers["{MediaInfo Video}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo VideoCodec}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo VideoBitDepth}"] = m => string.Empty;
-
-            tokenHandlers["{MediaInfo Audio}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo AudioCodec}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo AudioChannels}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo AudioLanguages}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo AudioLanguagesAll}"] = m => string.Empty;
-
-            tokenHandlers["{MediaInfo SubtitleLanguages}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo SubtitleLanguagesAll}"] = m => string.Empty;
-
-            tokenHandlers["{MediaInfo 3D}"] = m => string.Empty;
-
-            tokenHandlers["{MediaInfo Simple}"] = m => string.Empty;
-            tokenHandlers["{MediaInfo Full}"] = m => string.Empty;
-
-            tokenHandlers[MediaInfoVideoDynamicRangeToken] = m => string.Empty;
-            tokenHandlers[MediaInfoVideoDynamicRangeTypeToken] = m => string.Empty;
         }
 
         private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Game game, GameFile gameFile, List<CustomFormat> customFormats = null)
