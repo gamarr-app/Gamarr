@@ -35,7 +35,6 @@ interface DiscoverGameRowProps {
   folder?: string;
   images: Image[];
   studio?: string;
-  inCinemas?: string;
   physicalRelease?: string;
   digitalRelease?: string;
   runtime?: number;
@@ -64,7 +63,6 @@ function DiscoverGameRow({
   title,
   originalLanguage,
   studio,
-  inCinemas,
   physicalRelease,
   digitalRelease,
   runtime,
@@ -210,18 +208,6 @@ function DiscoverGameRow({
             >
               {studio}
             </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'inCinemas') {
-          return (
-            <RelativeDateCell
-              key={name}
-              className={styles[name as keyof typeof styles]}
-              date={inCinemas}
-              timeForToday={false}
-              component={VirtualTableRowCell}
-            />
           );
         }
 

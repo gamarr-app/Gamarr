@@ -20,7 +20,6 @@ interface AgendaEventProps {
   title: string;
   titleSlug: string;
   genres: string[];
-  inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
   sortDate: moment.Moment;
@@ -37,7 +36,6 @@ function AgendaEvent({
   title,
   titleSlug,
   genres = [],
-  inCinemas,
   digitalRelease,
   physicalRelease,
   sortDate,
@@ -76,20 +74,12 @@ function AgendaEvent({
       };
     }
 
-    if (inCinemas && sortDate.isSame(moment(inCinemas), 'day')) {
-      return {
-        eventDate: inCinemas,
-        eventTitle: translate('InDevelopment'),
-        releaseIcon: icons.IN_CINEMAS,
-      };
-    }
-
     return {
       eventDate: null,
       eventTitle: null,
       releaseIcon: null,
     };
-  }, [inCinemas, digitalRelease, physicalRelease, sortDate]);
+  }, [digitalRelease, physicalRelease, sortDate]);
 
   const downloading = !!(queueItem || grabbed);
   const statusStyle = getStatusStyle(

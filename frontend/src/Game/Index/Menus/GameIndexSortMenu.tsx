@@ -42,7 +42,7 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('Studio')}
+          {translate('Developer')}
         </SortMenuItem>
 
         <SortMenuItem
@@ -70,15 +70,6 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
           onPress={onSortSelect}
         >
           {translate('Year')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="inCinemas"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('InDevelopment')}
         </SortMenuItem>
 
         <SortMenuItem

@@ -35,7 +35,6 @@ interface GameItem {
     };
   };
   year?: number;
-  inCinemas?: string;
   physicalRelease?: string;
   digitalRelease?: string;
   releaseDate?: string;
@@ -292,14 +291,6 @@ export const filterPredicates = {
     return predicate(sizeOnDisk, filterValue);
   },
 
-  inCinemas: function (
-    item: GameItem,
-    filterValue: DateFilterValue,
-    type: string
-  ): boolean {
-    return dateFilterPredicate(item.inCinemas, filterValue, type);
-  },
-
   physicalRelease: function (
     item: GameItem,
     filterValue: DateFilterValue,
@@ -391,7 +382,7 @@ export const sortPredicates = {
       result++;
     }
 
-    if (item.status === 'inCinemas') {
+    if (item.status === 'earlyAccess') {
       result += 2;
     }
 
@@ -430,20 +421,6 @@ export const sortPredicates = {
 
   year: function (item: GameItem): number | undefined {
     return item.year || undefined;
-  },
-
-  inCinemas: function (item: GameItem, direction: string): number {
-    const { inCinemas } = item;
-
-    if (inCinemas) {
-      return moment(inCinemas).unix();
-    }
-
-    if (direction === sortDirections.DESCENDING) {
-      return -1 * Number.MAX_VALUE;
-    }
-
-    return Number.MAX_VALUE;
   },
 
   physicalRelease: function (item: GameItem, direction: string): number {

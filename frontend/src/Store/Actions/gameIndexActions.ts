@@ -78,7 +78,6 @@ export const defaultState = {
     showTitle: false,
     showMonitored: true,
     showQualityProfile: true,
-    showCinemaRelease: false,
     showDigitalRelease: false,
     showPhysicalRelease: false,
     showReleaseDate: false,
@@ -143,7 +142,7 @@ export const defaultState = {
     },
     {
       name: 'studio',
-      label: () => translate('Studio'),
+      label: () => translate('Developer'),
       isSortable: true,
       isVisible: true,
     },
@@ -168,12 +167,6 @@ export const defaultState = {
     {
       name: 'year',
       label: () => translate('Year'),
-      isSortable: true,
-      isVisible: false,
-    },
-    {
-      name: 'inCinemas',
-      label: () => translate('InDevelopment'),
       isSortable: true,
       isVisible: false,
     },
@@ -417,7 +410,7 @@ export const defaultState = {
     },
     {
       name: 'studio',
-      label: () => translate('Studio'),
+      label: () => translate('Developer'),
       type: filterBuilderTypes.EXACT,
       optionsSelector: function (items: Game[]): OptionItem[] {
         const tagList = items.reduce((acc: OptionItem[], game) => {
@@ -469,12 +462,6 @@ export const defaultState = {
       name: 'year',
       label: () => translate('Year'),
       type: filterBuilderTypes.NUMBER,
-    },
-    {
-      name: 'inCinemas',
-      label: () => translate('InDevelopment'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE,
     },
     {
       name: 'physicalRelease',

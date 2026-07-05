@@ -5,9 +5,9 @@ import Language from 'Language/Language';
 export type GameMonitor = 'gameOnly' | 'gameAndCollection' | 'none';
 
 export type GameStatus =
-  'tba' | 'announced' | 'inCinemas' | 'released' | 'deleted';
+  'tba' | 'announced' | 'earlyAccess' | 'released' | 'deleted';
 
-export type GameAvailability = 'announced' | 'inCinemas' | 'released';
+export type GameAvailability = 'announced' | 'earlyAccess' | 'released';
 
 export type CoverType = 'poster' | 'fanart' | 'headshot';
 
@@ -107,7 +107,6 @@ interface Game extends ModelBase {
   qualityProfileId: number;
   added: string;
   year: number;
-  inCinemas?: string;
   physicalRelease?: string;
   digitalRelease?: string;
   releaseDate?: string;

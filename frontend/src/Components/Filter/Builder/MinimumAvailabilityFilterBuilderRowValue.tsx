@@ -10,7 +10,7 @@ const protocols = [
     },
   },
   {
-    id: 'inCinemas',
+    id: 'earlyAccess',
     get name() {
       return translate('InDevelopment');
     },

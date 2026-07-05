@@ -22,7 +22,6 @@ interface CalendarEventProps {
   genres: string[];
   certification?: string;
   date: string;
-  inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
   isAvailable: boolean;
@@ -39,7 +38,6 @@ function CalendarEvent({
   genres = [],
   certification,
   date,
-  inCinemas,
   digitalRelease,
   physicalRelease,
   isAvailable,
@@ -58,7 +56,6 @@ function CalendarEvent({
 
   const {
     showGameInformation,
-    showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
     showCutoffUnmetIcon,
@@ -81,14 +78,6 @@ function CalendarEvent({
     const types = [];
 
     if (
-      showCinemaRelease &&
-      inCinemas &&
-      momentDate.isSame(moment(inCinemas), 'day')
-    ) {
-      types.push('Cinemas');
-    }
-
-    if (
       showDigitalRelease &&
       digitalRelease &&
       momentDate.isSame(moment(digitalRelease), 'day')
@@ -107,10 +96,8 @@ function CalendarEvent({
     return types;
   }, [
     date,
-    showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
-    inCinemas,
     digitalRelease,
     physicalRelease,
   ]);

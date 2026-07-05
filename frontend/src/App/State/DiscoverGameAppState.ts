@@ -14,7 +14,6 @@ export interface DiscoverGameItem {
   genres: string[];
   collection?: { title?: string; igdbId?: number };
   originalLanguage?: { name: string };
-  inCinemas?: string;
   physicalRelease?: string;
   digitalRelease?: string;
   ratings?: {

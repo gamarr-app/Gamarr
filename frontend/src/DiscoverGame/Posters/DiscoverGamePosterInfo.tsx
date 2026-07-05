@@ -12,7 +12,6 @@ import styles from './DiscoverGamePosterInfo.css';
 interface DiscoverGamePosterInfoProps {
   status?: string;
   studio?: string;
-  inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
   certification?: string;
@@ -31,7 +30,6 @@ function DiscoverGamePosterInfo(props: DiscoverGamePosterInfoProps) {
   const {
     status,
     studio,
-    inCinemas,
     digitalRelease,
     physicalRelease,
     certification,
@@ -56,24 +54,8 @@ function DiscoverGamePosterInfo(props: DiscoverGamePosterInfoProps) {
 
   if (sortKey === 'studio' && studio) {
     return (
-      <div className={styles.info} title={translate('Studio')}>
+      <div className={styles.info} title={translate('Developer')}>
         {studio}
-      </div>
-    );
-  }
-
-  if (sortKey === 'inCinemas' && inCinemas) {
-    const inCinemasDate = getRelativeDate({
-      date: inCinemas,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false,
-    });
-
-    return (
-      <div className={styles.info} title={translate('InDevelopment')}>
-        <Icon name={icons.IN_CINEMAS} /> {inCinemasDate}
       </div>
     );
   }

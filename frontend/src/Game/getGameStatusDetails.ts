@@ -15,7 +15,7 @@ export default function getGameStatusDetails(status: GameStatus) {
       title: translate('Deleted'),
       message: translate('DeletedGameDescription'),
     };
-  } else if (status === 'inCinemas') {
+  } else if (status === 'earlyAccess') {
     statusDetails = {
       icon: icons.IN_CINEMAS,
       title: translate('InDevelopment'),

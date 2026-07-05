@@ -17,17 +17,9 @@ function Agenda() {
 
   const events = useMemo(() => {
     const result = items.map((item): AgendaGame => {
-      const { inCinemas, digitalRelease, physicalRelease } = item;
+      const { digitalRelease, physicalRelease } = item;
 
       const dates = [];
-
-      if (inCinemas) {
-        const inCinemasMoment = moment(inCinemas);
-
-        if (inCinemasMoment.isAfter(start) && inCinemasMoment.isBefore(end)) {
-          dates.push(inCinemasMoment);
-        }
-      }
 
       if (digitalRelease) {
         const digitalReleaseMoment = moment(digitalRelease);

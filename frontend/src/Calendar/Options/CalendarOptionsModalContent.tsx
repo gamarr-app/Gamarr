@@ -35,7 +35,6 @@ function CalendarOptionsModalContent({
 
   const {
     showGameInformation,
-    showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
     showCutoffUnmetIcon,
@@ -103,23 +102,6 @@ function CalendarOptionsModalContent({
             </FormGroup>
 
             <FormGroup>
-              <FormLabel>{translate('ShowCinemaRelease')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showCinemaRelease"
-                value={showCinemaRelease}
-                helpText={translate('ShowCinemaReleaseCalendarHelpText')}
-                isDisabled={
-                  showCinemaRelease &&
-                  !showDigitalRelease &&
-                  !showPhysicalRelease
-                }
-                onChange={handleOptionInputChange}
-              />
-            </FormGroup>
-
-            <FormGroup>
               <FormLabel>{translate('ShowDigitalRelease')}</FormLabel>
 
               <FormInputGroup
@@ -127,11 +109,7 @@ function CalendarOptionsModalContent({
                 name="showDigitalRelease"
                 value={showDigitalRelease}
                 helpText={translate('ShowDigitalReleaseCalendarHelpText')}
-                isDisabled={
-                  !showCinemaRelease &&
-                  showDigitalRelease &&
-                  !showPhysicalRelease
-                }
+                isDisabled={showDigitalRelease && !showPhysicalRelease}
                 onChange={handleOptionInputChange}
               />
             </FormGroup>
@@ -144,11 +122,7 @@ function CalendarOptionsModalContent({
                 name="showPhysicalRelease"
                 value={showPhysicalRelease}
                 helpText={translate('ShowPhysicalReleaseCalendarHelpText')}
-                isDisabled={
-                  !showCinemaRelease &&
-                  !showDigitalRelease &&
-                  showPhysicalRelease
-                }
+                isDisabled={!showDigitalRelease && showPhysicalRelease}
                 onChange={handleOptionInputChange}
               />
             </FormGroup>

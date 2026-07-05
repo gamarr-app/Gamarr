@@ -12,7 +12,6 @@ import styles from './MissingRow.css';
 interface MissingRowProps {
   id: number;
   gameFileId?: number;
-  inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
   lastSearchTime?: string;
@@ -27,7 +26,6 @@ interface MissingRowProps {
 function MissingRow({
   id,
   gameFileId,
-  inCinemas,
   digitalRelease,
   physicalRelease,
   lastSearchTime,
@@ -67,16 +65,6 @@ function MissingRow({
 
         if (name === 'gameMetadata.year') {
           return <TableRowCell key={name}>{year}</TableRowCell>;
-        }
-
-        if (name === 'gameMetadata.inCinemas') {
-          return (
-            <RelativeDateCell
-              key={name}
-              date={inCinemas}
-              timeForToday={false}
-            />
-          );
         }
 
         if (name === 'gameMetadata.digitalRelease') {

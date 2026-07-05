@@ -49,7 +49,6 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     showTitle,
     showMonitored,
     showQualityProfile,
-    showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
     showReleaseDate,
@@ -76,7 +75,6 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     studio,
     added,
     year,
-    inCinemas,
     physicalRelease,
     digitalRelease,
     releaseDate,
@@ -251,25 +249,6 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         </div>
       ) : null}
 
-      {showCinemaRelease && inCinemas ? (
-        <div
-          className={styles.title}
-          title={`${translate('InDevelopment')}: ${formatDate(
-            inCinemas,
-            longDateFormat
-          )}`}
-        >
-          <Icon name={icons.IN_CINEMAS} />{' '}
-          {getRelativeDate({
-            date: inCinemas,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
       {showDigitalRelease && digitalRelease ? (
         <div
           className={styles.title}
@@ -353,7 +332,6 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         added={added}
         year={year}
         showQualityProfile={showQualityProfile}
-        showCinemaRelease={showCinemaRelease}
         showDigitalRelease={showDigitalRelease}
         showPhysicalRelease={showPhysicalRelease}
         showReleaseDate={showReleaseDate}
@@ -361,7 +339,6 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         shortDateFormat={shortDateFormat}
         longDateFormat={longDateFormat}
         timeFormat={timeFormat}
-        inCinemas={inCinemas}
         physicalRelease={physicalRelease}
         digitalRelease={digitalRelease}
         releaseDate={releaseDate}

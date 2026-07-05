@@ -10,20 +10,16 @@ import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import translate from 'Utilities/String/translate';
 import styles from './GameReleaseDates.css';
 
-type GameReleaseDatesProps = Pick<
-  Game,
-  'inCinemas' | 'digitalRelease' | 'physicalRelease'
->;
+type GameReleaseDatesProps = Pick<Game, 'digitalRelease' | 'physicalRelease'>;
 
 function GameReleaseDates({
-  inCinemas,
   digitalRelease,
   physicalRelease,
 }: GameReleaseDatesProps) {
   const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
     useSelector(useMemo(() => createUISettingsSelector(), []));
 
-  if (!inCinemas && !physicalRelease && !digitalRelease) {
+  if (!physicalRelease && !digitalRelease) {
     return (
       <div>
         <div className={styles.dateIcon}>
@@ -41,27 +37,6 @@ function GameReleaseDates({
 
   return (
     <>
-      {inCinemas ? (
-        <div
-          title={`${translate('InDevelopment')}: ${formatDate(
-            inCinemas,
-            longDateFormat
-          )}`}
-        >
-          <div className={styles.dateIcon}>
-            <Icon name={icons.IN_CINEMAS} />
-          </div>
-
-          {getRelativeDate({
-            date: inCinemas,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
       {digitalRelease ? (
         <div
           title={`${translate('DigitalRelease')}: ${formatDate(
