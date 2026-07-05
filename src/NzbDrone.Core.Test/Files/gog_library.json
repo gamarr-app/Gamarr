@@ -1,0 +1,43 @@
+{
+  "page": 1,
+  "limit": 50,
+  "pages": 1,
+  "total": 3,
+  "_links": {
+    "self": { "href": "http://www.gog.com/u/chandra/games/stats?sort=recent_playtime&order=asc&page=1" }
+  },
+  "_embedded": {
+    "items": [
+      {
+        "game": {
+          "id": "1207187357",
+          "title": "Pathfinder: Wrath of the Righteous",
+          "url": "/en/game/pathfinder_wrath_of_the_righteous",
+          "achievementSupport": true,
+          "image": "https://images.gog-statics.com/a482.png"
+        },
+        "stats": {
+          "49982067613933467": {
+            "achievementsPercentage": 5,
+            "playtime": 1720,
+            "lastSession": "2023-12-17T15:19:11+00:00"
+          }
+        }
+      },
+      {
+        "game": {
+          "id": "1423049311",
+          "title": "Cyberpunk 2077",
+          "url": "/en/game/cyberpunk_2077",
+          "achievementSupport": true,
+          "image": "https://images.gog-statics.com/5a51.png"
+        },
+        "stats": {}
+      },
+      {
+        "game": null,
+        "stats": {}
+      }
+    ]
+  }
+}

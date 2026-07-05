@@ -18,6 +18,7 @@ namespace NzbDrone.Core.Test.ImportListTests
             // Game-specific list types
             values.Should().Contain(ImportListType.IGDB);
             values.Should().Contain(ImportListType.Steam);
+            values.Should().Contain(ImportListType.GOG);
             values.Should().Contain(ImportListType.Plex);
         }
 
@@ -62,6 +63,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         [TestCase(ImportListType.Program, "Program")]
         [TestCase(ImportListType.IGDB, "IGDB")]
         [TestCase(ImportListType.Steam, "Steam")]
+        [TestCase(ImportListType.GOG, "GOG")]
         [TestCase(ImportListType.Plex, "Plex")]
         [TestCase(ImportListType.Other, "Other")]
         [TestCase(ImportListType.Advanced, "Advanced")]
