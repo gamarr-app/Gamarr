@@ -45,7 +45,7 @@ function DiscoverGameSortMenu({
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('Studio')}
+          {translate('Developer')}
         </SortMenuItem>
 
         <SortMenuItem
@@ -55,15 +55,6 @@ function DiscoverGameSortMenu({
           onPress={onSortSelect}
         >
           {translate('Year')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="inCinemas"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('InDevelopment')}
         </SortMenuItem>
 
         <SortMenuItem

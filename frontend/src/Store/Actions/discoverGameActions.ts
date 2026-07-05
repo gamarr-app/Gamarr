@@ -108,7 +108,6 @@ interface DiscoverGameItem {
   genres: string[];
   collection?: { title?: string; igdbId?: number };
   originalLanguage?: { name: string };
-  inCinemas?: string;
   physicalRelease?: string;
   digitalRelease?: string;
   ratings?: {
@@ -251,7 +250,7 @@ export const defaultState: DiscoverGameState = {
     },
     {
       name: 'studio',
-      label: () => translate('Studio'),
+      label: () => translate('Developer'),
       isSortable: true,
       isVisible: true,
     },
@@ -260,12 +259,6 @@ export const defaultState: DiscoverGameState = {
       label: () => translate('Year'),
       isSortable: true,
       isVisible: false,
-    },
-    {
-      name: 'inCinemas',
-      label: () => translate('InDevelopment'),
-      isSortable: true,
-      isVisible: true,
     },
     {
       name: 'digitalRelease',
@@ -341,7 +334,7 @@ export const defaultState: DiscoverGameState = {
         result++;
       }
 
-      if (item.status === 'inCinemas') {
+      if (item.status === 'earlyAccess') {
         result += 2;
       }
 
@@ -368,18 +361,6 @@ export const defaultState: DiscoverGameState = {
       const studio = item.studio;
 
       return studio ? studio.toLowerCase() : '';
-    },
-
-    inCinemas: function (item: DiscoverGameItem, direction?: string) {
-      if (item.inCinemas) {
-        return moment(item.inCinemas).unix();
-      }
-
-      if (direction === sortDirections.DESCENDING) {
-        return -1 * Number.MAX_VALUE;
-      }
-
-      return Number.MAX_VALUE;
     },
 
     physicalRelease: function (item: DiscoverGameItem, direction?: string) {
@@ -474,7 +455,7 @@ export const defaultState: DiscoverGameState = {
     },
     {
       name: 'studio',
-      label: () => translate('Studio'),
+      label: () => translate('Developer'),
       type: filterBuilderTypes.ARRAY,
       optionsSelector: function (items: DiscoverGameItem[]) {
         const tagList = items.reduce(
@@ -535,12 +516,6 @@ export const defaultState: DiscoverGameState = {
 
         return collectionList.sort(sortByProp('name'));
       },
-    },
-    {
-      name: 'inCinemas',
-      label: () => translate('InDevelopment'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE,
     },
     {
       name: 'physicalRelease',

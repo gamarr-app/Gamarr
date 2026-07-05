@@ -44,14 +44,19 @@ function createMissingGameIdsSelector() {
     (state: AppState) => state.queue.details.items,
     (start, end, games, queueDetails) => {
       return games.reduce<number[]>((acc, game) => {
-        const { inCinemas } = game;
+        const { digitalRelease, physicalRelease } = game;
+
+        const hasMissedRelease = [digitalRelease, physicalRelease].some(
+          (releaseDate) =>
+            releaseDate &&
+            moment(releaseDate).isAfter(start) &&
+            moment(releaseDate).isBefore(end) &&
+            isBefore(releaseDate)
+        );
 
         if (
           !game.gameFileId &&
-          inCinemas &&
-          moment(inCinemas).isAfter(start) &&
-          moment(inCinemas).isBefore(end) &&
-          isBefore(inCinemas) &&
+          hasMissedRelease &&
           !queueDetails.some(
             (details) => !!details.game && details.game.id === game.id
           )

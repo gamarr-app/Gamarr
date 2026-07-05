@@ -66,7 +66,6 @@ function GameIndexRow(props: GameIndexRowProps) {
     added,
     statistics = {} as Statistics,
     year,
-    inCinemas,
     digitalRelease,
     physicalRelease,
     releaseDate,
@@ -239,18 +238,6 @@ function GameIndexRow(props: GameIndexRowProps) {
             <VirtualTableRowCell key={name} className={styles[name]}>
               {year > 0 ? year : null}
             </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'inCinemas') {
-          return (
-            <RelativeDateCell
-              key={name}
-              className={styles[name as keyof typeof styles]}
-              date={inCinemas}
-              timeForToday={false}
-              component={VirtualTableRowCell}
-            />
           );
         }
 

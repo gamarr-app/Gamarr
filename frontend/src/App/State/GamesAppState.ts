@@ -20,7 +20,6 @@ export interface GameIndexAppState {
     showTitle: boolean;
     showMonitored: boolean;
     showQualityProfile: boolean;
-    showCinemaRelease: boolean;
     showDigitalRelease: boolean;
     showPhysicalRelease: boolean;
     showReleaseDate: boolean;

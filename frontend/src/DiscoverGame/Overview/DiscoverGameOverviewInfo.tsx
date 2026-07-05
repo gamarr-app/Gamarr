@@ -106,7 +106,7 @@ function getInfoRowProps(
 
   if (name === 'studio') {
     return {
-      title: translate('Studio'),
+      title: translate('Developer'),
       iconName: icons.STUDIO,
       label: props.studio ?? null,
     };

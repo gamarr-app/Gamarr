@@ -19,7 +19,6 @@ interface GameIndexPosterInfoProps {
   qualityProfile?: QualityProfile;
   added?: string;
   year: number;
-  inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
   releaseDate?: string;
@@ -32,7 +31,6 @@ interface GameIndexPosterInfoProps {
   tags: number[];
   sortKey: string;
   showRelativeDates: boolean;
-  showCinemaRelease: boolean;
   showDigitalRelease: boolean;
   showPhysicalRelease: boolean;
   showReleaseDate: boolean;
@@ -51,7 +49,6 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     qualityProfile,
     added,
     year,
-    inCinemas,
     digitalRelease,
     physicalRelease,
     releaseDate,
@@ -64,7 +61,6 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     tags = [],
     sortKey,
     showRelativeDates,
-    showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
     showReleaseDate,
@@ -78,7 +74,7 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
 
   if (sortKey === 'studio' && studio) {
     return (
-      <div className={styles.info} title={translate('Studio')}>
+      <div className={styles.info} title={translate('Developer')}>
         {studio}
       </div>
     );
@@ -119,28 +115,6 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     return (
       <div className={styles.info} title={translate('Year')}>
         {year}
-      </div>
-    );
-  }
-
-  if (sortKey === 'inCinemas' && inCinemas && !showCinemaRelease) {
-    const inCinemasDate = getRelativeDate({
-      date: inCinemas,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false,
-    });
-
-    return (
-      <div
-        className={styles.info}
-        title={`${translate('InDevelopment')}: ${formatDate(
-          inCinemas,
-          longDateFormat
-        )}`}
-      >
-        <Icon name={icons.IN_CINEMAS} /> {inCinemasDate}
       </div>
     );
   }

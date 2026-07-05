@@ -148,7 +148,6 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
       showTitle,
       showMonitored,
       showQualityProfile,
-      showCinemaRelease,
       showDigitalRelease,
       showPhysicalRelease,
       showReleaseDate,
@@ -172,10 +171,6 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
     }
 
     if (showQualityProfile) {
-      heights.push(19);
-    }
-
-    if (showCinemaRelease) {
       heights.push(19);
     }
 
@@ -215,11 +210,6 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
         break;
       case 'qualityProfileId':
         if (!showQualityProfile) {
-          heights.push(19);
-        }
-        break;
-      case 'inCinemas':
-        if (!showCinemaRelease) {
           heights.push(19);
         }
         break;

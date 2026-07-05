@@ -68,12 +68,6 @@ export const defaultState: WantedState = {
         isVisible: true,
       },
       {
-        name: 'gameMetadata.inCinemas',
-        label: () => translate('InDevelopment'),
-        isSortable: true,
-        isVisible: false,
-      },
-      {
         name: 'gameMetadata.digitalRelease',
         label: () => translate('DigitalRelease'),
         isSortable: true,
@@ -152,12 +146,6 @@ export const defaultState: WantedState = {
         label: () => translate('Year'),
         isSortable: true,
         isVisible: true,
-      },
-      {
-        name: 'gameMetadata.inCinemas',
-        label: () => translate('InDevelopment'),
-        isSortable: true,
-        isVisible: false,
       },
       {
         name: 'gameMetadata.digitalRelease',

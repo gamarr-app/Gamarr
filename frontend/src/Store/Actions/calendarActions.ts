@@ -37,7 +37,6 @@ const viewRanges: Record<string, string> = {
 
 interface CalendarOptions {
   showGameInformation: boolean;
-  showCinemaRelease: boolean;
   showDigitalRelease: boolean;
   showPhysicalRelease: boolean;
   showCutoffUnmetIcon: boolean;
@@ -87,7 +86,6 @@ export const defaultState: CalendarState = {
 
   options: {
     showGameInformation: true,
-    showCinemaRelease: true,
     showDigitalRelease: true,
     showPhysicalRelease: true,
     showCutoffUnmetIcon: false,

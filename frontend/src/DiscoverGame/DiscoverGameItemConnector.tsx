@@ -17,7 +17,6 @@ interface DiscoverGame {
     metacritic?: { value: number };
   };
   certification?: string;
-  inCinemas?: string;
   physicalRelease?: string;
   digitalRelease?: string;
   runtime?: number;

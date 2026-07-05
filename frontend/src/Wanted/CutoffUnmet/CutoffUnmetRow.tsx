@@ -13,7 +13,6 @@ import styles from './CutoffUnmetRow.css';
 interface CutoffUnmetRowProps {
   id: number;
   gameFileId?: number;
-  inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
   lastSearchTime?: string;
@@ -28,7 +27,6 @@ interface CutoffUnmetRowProps {
 function CutoffUnmetRow({
   id,
   gameFileId,
-  inCinemas,
   digitalRelease,
   physicalRelease,
   lastSearchTime,
@@ -68,16 +66,6 @@ function CutoffUnmetRow({
 
         if (name === 'gameMetadata.year') {
           return <TableRowCell key={name}>{year}</TableRowCell>;
-        }
-
-        if (name === 'gameMetadata.inCinemas') {
-          return (
-            <RelativeDateCell
-              key={name}
-              date={inCinemas}
-              timeForToday={false}
-            />
-          );
         }
 
         if (name === 'gameMetadata.digitalRelease') {

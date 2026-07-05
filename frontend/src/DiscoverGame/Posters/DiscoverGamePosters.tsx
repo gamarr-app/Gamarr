@@ -107,7 +107,6 @@ function calculateRowHeight(
 
   switch (sortKey) {
     case 'studio':
-    case 'inCinemas':
     case 'digitalRelease':
     case 'physicalRelease':
     case 'runtime':

@@ -52,7 +52,6 @@ function GameIndexPosterOptionsModalContent(
     showTitle,
     showMonitored,
     showQualityProfile,
-    showCinemaRelease,
     showDigitalRelease,
     showPhysicalRelease,
     showReleaseDate,
@@ -133,18 +132,6 @@ function GameIndexPosterOptionsModalContent(
               name="showQualityProfile"
               value={showQualityProfile}
               helpText={translate('ShowQualityProfileHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowCinemaReleaseDate')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showCinemaRelease"
-              value={showCinemaRelease}
-              helpText={translate('ShowCinemaReleaseDatePosterHelpText')}
               onChange={onPosterOptionChange}
             />
           </FormGroup>

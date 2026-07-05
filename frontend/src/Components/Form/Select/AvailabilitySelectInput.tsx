@@ -27,7 +27,7 @@ const gameAvailabilityOptions: IGameAvailabilityOption[] = [
     },
   },
   {
-    key: 'inCinemas',
+    key: 'earlyAccess',
     get value() {
       return translate('InDevelopment');
     },

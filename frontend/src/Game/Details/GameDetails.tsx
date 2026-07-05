@@ -501,7 +501,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
     title,
     originalTitle,
     year,
-    inCinemas,
     physicalRelease,
     digitalRelease,
     runtime,
@@ -698,7 +697,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       title={translate('ReleaseDates')}
                       body={
                         <GameReleaseDates
-                          inCinemas={inCinemas}
                           digitalRelease={digitalRelease}
                           physicalRelease={physicalRelease}
                         />
@@ -838,7 +836,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
                 {studio && !isSmallScreen ? (
                   <InfoLabel
                     className={styles.detailsInfoLabel}
-                    name={translate('Studio')}
+                    name={translate('Developer')}
                     size={sizes.LARGE}
                   >
                     <span className={styles.studio}>{studio}</span>

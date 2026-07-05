@@ -16,7 +16,7 @@ const statusTagList = [
     },
   },
   {
-    id: 'inCinemas',
+    id: 'earlyAccess',
     get name() {
       return translate('InDevelopment');
     },

@@ -9,12 +9,17 @@ import CalendarEvent from 'Calendar/Events/CalendarEvent';
 import { CalendarEvent as CalendarEventModel } from 'typings/Calendar';
 import styles from './CalendarDay.css';
 
+function getEventDate(item: CalendarEventModel) {
+  const dates = [item.digitalRelease, item.physicalRelease]
+    .filter((date): date is string => !!date)
+    .map((date) => moment(date).unix());
+
+  return dates.length ? Math.min(...dates) : Number.MAX_VALUE;
+}
+
 function sort(items: CalendarEventModel[]) {
   return items.sort((a, b) => {
-    const aDate = moment(a.inCinemas).unix();
-    const bDate = moment(b.inCinemas).unix();
-
-    return aDate - bDate;
+    return getEventDate(a) - getEventDate(b);
   });
 }
 
@@ -23,25 +28,19 @@ function createCalendarEventsConnector(date: string) {
     (state: AppState) => state.calendar.items,
     (state: AppState) => state.calendar.options,
     (items, options) => {
-      const { showCinemaRelease, showDigitalRelease, showPhysicalRelease } =
-        options;
+      const { showDigitalRelease, showPhysicalRelease } = options;
       const momentDate = moment(date);
 
-      const filtered = items.filter(
-        ({ inCinemas, digitalRelease, physicalRelease }) => {
-          return (
-            (showCinemaRelease &&
-              inCinemas &&
-              momentDate.isSame(moment(inCinemas), 'day')) ||
-            (showDigitalRelease &&
-              digitalRelease &&
-              momentDate.isSame(moment(digitalRelease), 'day')) ||
-            (showPhysicalRelease &&
-              physicalRelease &&
-              momentDate.isSame(moment(physicalRelease), 'day'))
-          );
-        }
-      );
+      const filtered = items.filter(({ digitalRelease, physicalRelease }) => {
+        return (
+          (showDigitalRelease &&
+            digitalRelease &&
+            momentDate.isSame(moment(digitalRelease), 'day')) ||
+          (showPhysicalRelease &&
+            physicalRelease &&
+            momentDate.isSame(moment(physicalRelease), 'day'))
+        );
+      });
 
       return sort(filtered);
     }
