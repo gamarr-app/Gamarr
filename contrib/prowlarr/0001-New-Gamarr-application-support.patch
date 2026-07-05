@@ -1,0 +1,699 @@
+From d589bc5b598abbb6f384f292ba5111c06af7b604 Mon Sep 17 00:00:00 2001
+From: Claude <ptarjan@gmail.com>
+Date: Sat, 4 Jul 2026 20:38:19 -0600
+Subject: [PATCH] New: Gamarr application support
+
+Adds Gamarr (https://github.com/gamarr-app/Gamarr) as an application
+type so Prowlarr can sync indexers to it. Gamarr is a Radarr fork for
+game libraries; its indexer API is contract-compatible with Radarr v3
+(/api/v3/indexer with Newznab/Torznab implementations), so this follows
+the existing Whisparr/Radarr application pattern with game-appropriate
+default sync categories (Console 1000s, PC 4000s).
+---
+ .../Applications/Gamarr/Gamarr.cs             | 268 ++++++++++++++++++
+ .../Applications/Gamarr/GamarrField.cs        |  17 ++
+ .../Applications/Gamarr/GamarrIndexer.cs      |  68 +++++
+ .../Applications/Gamarr/GamarrSettings.cs     |  57 ++++
+ .../Applications/Gamarr/GamarrStatus.cs       |   7 +
+ .../Applications/Gamarr/GamarrV3Proxy.cs      | 217 ++++++++++++++
+ 6 files changed, 634 insertions(+)
+ create mode 100644 src/NzbDrone.Core/Applications/Gamarr/Gamarr.cs
+ create mode 100644 src/NzbDrone.Core/Applications/Gamarr/GamarrField.cs
+ create mode 100644 src/NzbDrone.Core/Applications/Gamarr/GamarrIndexer.cs
+ create mode 100644 src/NzbDrone.Core/Applications/Gamarr/GamarrSettings.cs
+ create mode 100644 src/NzbDrone.Core/Applications/Gamarr/GamarrStatus.cs
+ create mode 100644 src/NzbDrone.Core/Applications/Gamarr/GamarrV3Proxy.cs
+
+diff --git a/src/NzbDrone.Core/Applications/Gamarr/Gamarr.cs b/src/NzbDrone.Core/Applications/Gamarr/Gamarr.cs
+new file mode 100644
+index 0000000..83fcd70
+--- /dev/null
++++ b/src/NzbDrone.Core/Applications/Gamarr/Gamarr.cs
+@@ -0,0 +1,268 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Net;
++using FluentValidation.Results;
++using Newtonsoft.Json;
++using Newtonsoft.Json.Linq;
++using NLog;
++using NzbDrone.Common.Cache;
++using NzbDrone.Common.Extensions;
++using NzbDrone.Common.Http;
++using NzbDrone.Core.Configuration;
++using NzbDrone.Core.Indexers;
++
++namespace NzbDrone.Core.Applications.Gamarr
++{
++    public class Gamarr : ApplicationBase<GamarrSettings>
++    {
++        public override string Name => "Gamarr";
++
++        private readonly IGamarrV3Proxy _gamarrV3Proxy;
++        private readonly ICached<List<GamarrIndexer>> _schemaCache;
++        private readonly IConfigFileProvider _configFileProvider;
++
++        public Gamarr(ICacheManager cacheManager, IGamarrV3Proxy gamarrV3Proxy, IConfigFileProvider configFileProvider, IAppIndexerMapService appIndexerMapService, IIndexerFactory indexerFactory, Logger logger)
++            : base(appIndexerMapService, indexerFactory, logger)
++        {
++            _schemaCache = cacheManager.GetCache<List<GamarrIndexer>>(GetType());
++            _gamarrV3Proxy = gamarrV3Proxy;
++            _configFileProvider = configFileProvider;
++        }
++
++        public override ValidationResult Test()
++        {
++            var failures = new List<ValidationFailure>();
++
++            var testIndexer = new IndexerDefinition
++            {
++                Id = 0,
++                Name = "Test",
++                Protocol = DownloadProtocol.Usenet,
++                Capabilities = new IndexerCapabilities()
++            };
++
++            foreach (var cat in NewznabStandardCategory.AllCats)
++            {
++                testIndexer.Capabilities.Categories.AddCategoryMapping(1, cat);
++            }
++
++            try
++            {
++                failures.AddIfNotNull(_gamarrV3Proxy.TestConnection(BuildGamarrIndexer(testIndexer, testIndexer.Capabilities, DownloadProtocol.Usenet), Settings));
++            }
++            catch (HttpException ex)
++            {
++                switch (ex.Response.StatusCode)
++                {
++                    case HttpStatusCode.Unauthorized:
++                        _logger.Warn(ex, "API Key is invalid");
++                        failures.AddIfNotNull(new ValidationFailure("ApiKey", "API Key is invalid"));
++                        break;
++                    case HttpStatusCode.BadRequest:
++                        _logger.Warn(ex, "Prowlarr URL is invalid");
++                        failures.AddIfNotNull(new ValidationFailure("ProwlarrUrl", "Prowlarr URL is invalid, Gamarr cannot connect to Prowlarr"));
++                        break;
++                    case HttpStatusCode.SeeOther:
++                    case HttpStatusCode.TemporaryRedirect:
++                        _logger.Warn(ex, "Gamarr returned redirect and is invalid");
++                        failures.AddIfNotNull(new ValidationFailure("BaseUrl", "Gamarr URL is invalid, Prowlarr cannot connect to Gamarr - are you missing a URL base?"));
++                        break;
++                    default:
++                        _logger.Warn(ex, "Unable to complete application test");
++                        failures.AddIfNotNull(new ValidationFailure("BaseUrl", $"Unable to complete application test, cannot connect to Gamarr. {ex.Message}"));
++                        break;
++                }
++            }
++            catch (JsonReaderException ex)
++            {
++                _logger.Error(ex, "Unable to parse JSON response from application");
++                failures.AddIfNotNull(new ValidationFailure("BaseUrl", $"Unable to parse JSON response from application. {ex.Message}"));
++            }
++            catch (Exception ex)
++            {
++                _logger.Warn(ex, "Unable to complete application test");
++                failures.AddIfNotNull(new ValidationFailure("BaseUrl", $"Unable to complete application test, cannot connect to Gamarr. {ex.Message}"));
++            }
++
++            return new ValidationResult(failures);
++        }
++
++        public override List<AppIndexerMap> GetIndexerMappings()
++        {
++            var indexers = _gamarrV3Proxy.GetIndexers(Settings)
++                .Where(i => i.Implementation is "Newznab" or "Torznab");
++
++            var mappings = new List<AppIndexerMap>();
++
++            foreach (var indexer in indexers)
++            {
++                var baseUrl = (string)indexer.Fields.FirstOrDefault(x => x.Name == "baseUrl")?.Value ?? string.Empty;
++
++                if (!baseUrl.StartsWith(Settings.ProwlarrUrl.TrimEnd('/')) &&
++                    (string)indexer.Fields.FirstOrDefault(x => x.Name == "apiKey")?.Value != _configFileProvider.ApiKey)
++                {
++                    continue;
++                }
++
++                var match = AppIndexerRegex.Match(baseUrl);
++
++                if (match.Groups["indexer"].Success && int.TryParse(match.Groups["indexer"].Value, out var indexerId))
++                {
++                    // Add parsed mapping if it's mapped to a Indexer in this Prowlarr instance
++                    mappings.Add(new AppIndexerMap { IndexerId = indexerId, RemoteIndexerId = indexer.Id });
++                }
++            }
++
++            return mappings;
++        }
++
++        public override void AddIndexer(IndexerDefinition indexer)
++        {
++            var indexerCapabilities = GetIndexerCapabilities(indexer);
++
++            if (indexerCapabilities.Categories.SupportedCategories(Settings.SyncCategories.ToArray()).Empty())
++            {
++                _logger.Trace("Skipping add for indexer {0} [{1}] due to no app Sync Categories supported by the indexer", indexer.Name, indexer.Id);
++
++                return;
++            }
++
++            _logger.Trace("Adding indexer {0} [{1}]", indexer.Name, indexer.Id);
++
++            var gamarrIndexer = BuildGamarrIndexer(indexer, indexerCapabilities, indexer.Protocol);
++
++            var remoteIndexer = _gamarrV3Proxy.AddIndexer(gamarrIndexer, Settings);
++
++            if (remoteIndexer == null)
++            {
++                _logger.Debug("Failed to add {0} [{1}]", indexer.Name, indexer.Id);
++
++                return;
++            }
++
++            _appIndexerMapService.Insert(new AppIndexerMap { AppId = Definition.Id, IndexerId = indexer.Id, RemoteIndexerId = remoteIndexer.Id });
++        }
++
++        public override void RemoveIndexer(int indexerId)
++        {
++            var appMappings = _appIndexerMapService.GetMappingsForApp(Definition.Id);
++
++            var indexerMapping = appMappings.FirstOrDefault(m => m.IndexerId == indexerId);
++
++            if (indexerMapping != null)
++            {
++                //Remove Indexer remotely and then remove the mapping
++                _gamarrV3Proxy.RemoveIndexer(indexerMapping.RemoteIndexerId, Settings);
++                _appIndexerMapService.Delete(indexerMapping.Id);
++            }
++        }
++
++        public override void UpdateIndexer(IndexerDefinition indexer, bool forceSync = false)
++        {
++            _logger.Debug("Updating indexer {0} [{1}]", indexer.Name, indexer.Id);
++
++            var indexerCapabilities = GetIndexerCapabilities(indexer);
++            var appMappings = _appIndexerMapService.GetMappingsForApp(Definition.Id);
++            var indexerMapping = appMappings.FirstOrDefault(m => m.IndexerId == indexer.Id);
++
++            var gamarrIndexer = BuildGamarrIndexer(indexer, indexerCapabilities, indexer.Protocol, indexerMapping?.RemoteIndexerId ?? 0);
++
++            var remoteIndexer = _gamarrV3Proxy.GetIndexer(indexerMapping.RemoteIndexerId, Settings);
++
++            if (remoteIndexer != null)
++            {
++                _logger.Debug("Remote indexer {0} [{1}] found", remoteIndexer.Name, remoteIndexer.Id);
++
++                if (!gamarrIndexer.Equals(remoteIndexer) || forceSync)
++                {
++                    _logger.Debug("Syncing remote indexer with current settings");
++
++                    if (indexerCapabilities.Categories.SupportedCategories(Settings.SyncCategories.ToArray()).Any())
++                    {
++                        // Retain user fields not-affiliated with Prowlarr
++                        gamarrIndexer.Fields.AddRange(remoteIndexer.Fields.Where(f => gamarrIndexer.Fields.All(s => s.Name != f.Name)));
++
++                        // Retain user tags not-affiliated with Prowlarr
++                        gamarrIndexer.Tags.UnionWith(remoteIndexer.Tags);
++
++                        // Retain user settings not-affiliated with Prowlarr
++                        gamarrIndexer.DownloadClientId = remoteIndexer.DownloadClientId;
++
++                        // Update the indexer if it still has categories that match
++                        _gamarrV3Proxy.UpdateIndexer(gamarrIndexer, Settings);
++                    }
++                    else
++                    {
++                        // Else remove it, it no longer should be used
++                        _gamarrV3Proxy.RemoveIndexer(remoteIndexer.Id, Settings);
++                        _appIndexerMapService.Delete(indexerMapping.Id);
++                    }
++                }
++            }
++            else
++            {
++                _appIndexerMapService.Delete(indexerMapping.Id);
++
++                if (indexerCapabilities.Categories.SupportedCategories(Settings.SyncCategories.ToArray()).Any())
++                {
++                    _logger.Debug("Remote indexer not found, re-adding {0} [{1}] to Gamarr", indexer.Name, indexer.Id);
++                    gamarrIndexer.Id = 0;
++                    var newRemoteIndexer = _gamarrV3Proxy.AddIndexer(gamarrIndexer, Settings);
++                    _appIndexerMapService.Insert(new AppIndexerMap { AppId = Definition.Id, IndexerId = indexer.Id, RemoteIndexerId = newRemoteIndexer.Id });
++                }
++                else
++                {
++                    _logger.Debug("Remote indexer not found for {0} [{1}], skipping re-add to Gamarr due to indexer capabilities", indexer.Name, indexer.Id);
++                }
++            }
++        }
++
++        private GamarrIndexer BuildGamarrIndexer(IndexerDefinition indexer, IndexerCapabilities indexerCapabilities, DownloadProtocol protocol, int id = 0)
++        {
++            var cacheKey = $"{Settings.BaseUrl}";
++            var schemas = _schemaCache.Get(cacheKey, () => _gamarrV3Proxy.GetIndexerSchema(Settings), TimeSpan.FromDays(7));
++            var syncFields = new[] { "baseUrl", "apiPath", "apiKey", "categories", "minimumSeeders", "seedCriteria.seedRatio", "seedCriteria.seedTime", "rejectBlocklistedTorrentHashesWhileGrabbing" };
++
++            var newznab = schemas.First(i => i.Implementation == "Newznab");
++            var torznab = schemas.First(i => i.Implementation == "Torznab");
++
++            var schema = protocol == DownloadProtocol.Usenet ? newznab : torznab;
++
++            var gamarrIndexer = new GamarrIndexer
++            {
++                Id = id,
++                Name = $"{indexer.Name} (Prowlarr)",
++                EnableRss = indexer.Enable && indexer.AppProfile.Value.EnableRss,
++                EnableAutomaticSearch = indexer.Enable && indexer.AppProfile.Value.EnableAutomaticSearch,
++                EnableInteractiveSearch = indexer.Enable && indexer.AppProfile.Value.EnableInteractiveSearch,
++                Priority = indexer.Priority,
++                Implementation = indexer.Protocol == DownloadProtocol.Usenet ? "Newznab" : "Torznab",
++                ConfigContract = schema.ConfigContract,
++                Fields = new List<GamarrField>(),
++                Tags = new HashSet<int>()
++            };
++
++            gamarrIndexer.Fields.AddRange(schema.Fields.Where(x => syncFields.Contains(x.Name)));
++
++            gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "baseUrl").Value = $"{Settings.ProwlarrUrl.TrimEnd('/')}/{indexer.Id}/";
++            gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "apiPath").Value = "/api";
++            gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "apiKey").Value = _configFileProvider.ApiKey;
++            gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "categories").Value = JArray.FromObject(indexerCapabilities.Categories.SupportedCategories(Settings.SyncCategories.ToArray()));
++
++            if (indexer.Protocol == DownloadProtocol.Torrent)
++            {
++                gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "minimumSeeders").Value = ((ITorrentIndexerSettings)indexer.Settings).TorrentBaseSettings.AppMinimumSeeders ?? indexer.AppProfile.Value.MinimumSeeders;
++                gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedRatio").Value = ((ITorrentIndexerSettings)indexer.Settings).TorrentBaseSettings.SeedRatio;
++                gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedTime").Value = ((ITorrentIndexerSettings)indexer.Settings).TorrentBaseSettings.SeedTime;
++
++                if (gamarrIndexer.Fields.Any(x => x.Name == "rejectBlocklistedTorrentHashesWhileGrabbing"))
++                {
++                    gamarrIndexer.Fields.FirstOrDefault(x => x.Name == "rejectBlocklistedTorrentHashesWhileGrabbing").Value = Settings.SyncRejectBlocklistedTorrentHashesWhileGrabbing;
++                }
++            }
++
++            return gamarrIndexer;
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core/Applications/Gamarr/GamarrField.cs b/src/NzbDrone.Core/Applications/Gamarr/GamarrField.cs
+new file mode 100644
+index 0000000..3135caa
+--- /dev/null
++++ b/src/NzbDrone.Core/Applications/Gamarr/GamarrField.cs
+@@ -0,0 +1,17 @@
++namespace NzbDrone.Core.Applications.Gamarr
++{
++    public class GamarrField
++    {
++        public string Name { get; set; }
++        public object Value { get; set; }
++        public string Type { get; set; }
++        public bool Advanced { get; set; }
++        public string Section { get; set; }
++        public string Hidden { get; set; }
++
++        public GamarrField Clone()
++        {
++            return (GamarrField)MemberwiseClone();
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core/Applications/Gamarr/GamarrIndexer.cs b/src/NzbDrone.Core/Applications/Gamarr/GamarrIndexer.cs
+new file mode 100644
+index 0000000..69716f5
+--- /dev/null
++++ b/src/NzbDrone.Core/Applications/Gamarr/GamarrIndexer.cs
+@@ -0,0 +1,68 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using Newtonsoft.Json.Linq;
++
++namespace NzbDrone.Core.Applications.Gamarr
++{
++    public class GamarrIndexer
++    {
++        public int Id { get; set; }
++        public bool EnableRss { get; set; }
++        public bool EnableAutomaticSearch { get; set; }
++        public bool EnableInteractiveSearch { get; set; }
++        public int Priority { get; set; }
++        public string Name { get; set; }
++        public string ImplementationName { get; set; }
++        public string Implementation { get; set; }
++        public string ConfigContract { get; set; }
++        public string InfoLink { get; set; }
++        public int? DownloadClientId { get; set; }
++        public HashSet<int> Tags { get; set; }
++        public List<GamarrField> Fields { get; set; }
++
++        public bool Equals(GamarrIndexer other)
++        {
++            if (ReferenceEquals(null, other))
++            {
++                return false;
++            }
++
++            var baseUrl = (string)Fields.FirstOrDefault(x => x.Name == "baseUrl").Value == (string)other.Fields.FirstOrDefault(x => x.Name == "baseUrl").Value;
++            var cats = JToken.DeepEquals((JArray)Fields.FirstOrDefault(x => x.Name == "categories").Value, (JArray)other.Fields.FirstOrDefault(x => x.Name == "categories").Value);
++
++            var apiKey = (string)Fields.FirstOrDefault(x => x.Name == "apiKey")?.Value;
++            var otherApiKey = (string)other.Fields.FirstOrDefault(x => x.Name == "apiKey")?.Value;
++            var apiKeyCompare = apiKey == otherApiKey || otherApiKey == "********";
++
++            var apiPath = Fields.FirstOrDefault(x => x.Name == "apiPath")?.Value == null ? null : Fields.FirstOrDefault(x => x.Name == "apiPath").Value;
++            var otherApiPath = other.Fields.FirstOrDefault(x => x.Name == "apiPath")?.Value == null ? null : other.Fields.FirstOrDefault(x => x.Name == "apiPath").Value;
++            var apiPathCompare = apiPath.Equals(otherApiPath);
++
++            var minimumSeeders = Fields.FirstOrDefault(x => x.Name == "minimumSeeders")?.Value == null ? null : (int?)Convert.ToInt32(Fields.FirstOrDefault(x => x.Name == "minimumSeeders").Value);
++            var otherMinimumSeeders = other.Fields.FirstOrDefault(x => x.Name == "minimumSeeders")?.Value == null ? null : (int?)Convert.ToInt32(other.Fields.FirstOrDefault(x => x.Name == "minimumSeeders").Value);
++            var minimumSeedersCompare = minimumSeeders == otherMinimumSeeders;
++
++            var seedTime = Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedTime")?.Value == null ? null : (int?)Convert.ToInt32(Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedTime").Value);
++            var otherSeedTime = other.Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedTime")?.Value == null ? null : (int?)Convert.ToInt32(other.Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedTime").Value);
++            var seedTimeCompare = seedTime == otherSeedTime;
++
++            var seedRatio = Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedRatio")?.Value == null ? null : (double?)Convert.ToDouble(Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedRatio").Value);
++            var otherSeedRatio = other.Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedRatio")?.Value == null ? null : (double?)Convert.ToDouble(other.Fields.FirstOrDefault(x => x.Name == "seedCriteria.seedRatio").Value);
++            var seedRatioCompare = seedRatio == otherSeedRatio;
++
++            var rejectBlocklistedTorrentHashesWhileGrabbing = Fields.FirstOrDefault(x => x.Name == "rejectBlocklistedTorrentHashesWhileGrabbing")?.Value == null ? null : (bool?)Convert.ToBoolean(Fields.FirstOrDefault(x => x.Name == "rejectBlocklistedTorrentHashesWhileGrabbing").Value);
++            var otherRejectBlocklistedTorrentHashesWhileGrabbing = other.Fields.FirstOrDefault(x => x.Name == "rejectBlocklistedTorrentHashesWhileGrabbing")?.Value == null ? null : (bool?)Convert.ToBoolean(other.Fields.FirstOrDefault(x => x.Name == "rejectBlocklistedTorrentHashesWhileGrabbing").Value);
++            var rejectBlocklistedTorrentHashesWhileGrabbingCompare = rejectBlocklistedTorrentHashesWhileGrabbing == otherRejectBlocklistedTorrentHashesWhileGrabbing;
++
++            return other.EnableRss == EnableRss &&
++                other.EnableAutomaticSearch == EnableAutomaticSearch &&
++                other.EnableInteractiveSearch == EnableInteractiveSearch &&
++                other.Name == Name &&
++                other.Implementation == Implementation &&
++                other.Priority == Priority &&
++                other.Id == Id &&
++                apiKeyCompare && apiPathCompare && baseUrl && cats && minimumSeedersCompare && seedRatioCompare && seedTimeCompare && rejectBlocklistedTorrentHashesWhileGrabbingCompare;
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core/Applications/Gamarr/GamarrSettings.cs b/src/NzbDrone.Core/Applications/Gamarr/GamarrSettings.cs
+new file mode 100644
+index 0000000..68c5dd7
+--- /dev/null
++++ b/src/NzbDrone.Core/Applications/Gamarr/GamarrSettings.cs
+@@ -0,0 +1,57 @@
++using System.Collections.Generic;
++using FluentValidation;
++using NzbDrone.Core.Annotations;
++using NzbDrone.Core.Indexers;
++using NzbDrone.Core.Validation;
++
++namespace NzbDrone.Core.Applications.Gamarr
++{
++    public class GamarrSettingsValidator : AbstractValidator<GamarrSettings>
++    {
++        public GamarrSettingsValidator()
++        {
++            RuleFor(c => c.BaseUrl).IsValidUrl();
++            RuleFor(c => c.ProwlarrUrl).IsValidUrl();
++            RuleFor(c => c.ApiKey).NotEmpty();
++            RuleFor(c => c.SyncCategories).NotEmpty();
++        }
++    }
++
++    public class GamarrSettings : IApplicationSettings
++    {
++        private static readonly GamarrSettingsValidator Validator = new();
++
++        public GamarrSettings()
++        {
++            ProwlarrUrl = "http://localhost:9696";
++            BaseUrl = "http://localhost:6767";
++            SyncCategories = new[] { 1000, 1010, 1020, 1030, 1040, 1050, 1060, 1070, 1080, 1090, 1110, 1120, 1130, 1140, 1180, 4000, 4010, 4020, 4030, 4050 };
++        }
++
++        [FieldDefinition(0, Label = "Prowlarr Server", HelpText = "Prowlarr server URL as Gamarr sees it, including http(s)://, port, and urlbase if needed", Placeholder = "http://localhost:9696")]
++        public string ProwlarrUrl { get; set; }
++
++        [FieldDefinition(1, Label = "Gamarr Server", HelpText = "URL used to connect to Gamarr server, including http(s)://, port, and urlbase if required", Placeholder = "http://localhost:6767")]
++        public string BaseUrl { get; set; }
++
++        [FieldDefinition(2, Label = "API Key", Privacy = PrivacyLevel.ApiKey, HelpText = "The ApiKey generated by Gamarr in Settings/General")]
++        public string ApiKey { get; set; }
++
++        [FieldDefinition(3, Label = "ApplicationAuthUsername", HelpText = "ApplicationAuthUsernameHelpText", Privacy = PrivacyLevel.UserName, Advanced = true)]
++        public string AuthUsername { get; set; }
++
++        [FieldDefinition(4, Label = "ApplicationAuthPassword", HelpText = "ApplicationAuthPasswordHelpText", Type = FieldType.Password, Privacy = PrivacyLevel.Password, Advanced = true)]
++        public string AuthPassword { get; set; }
++
++        [FieldDefinition(5, Label = "Sync Categories", Type = FieldType.Select, SelectOptions = typeof(NewznabCategoryFieldConverter), HelpText = "Only Indexers that support these categories will be synced", Advanced = true)]
++        public IEnumerable<int> SyncCategories { get; set; }
++
++        [FieldDefinition(6, Type = FieldType.Checkbox, Label = "ApplicationSettingsSyncRejectBlocklistedTorrentHashes", HelpText = "ApplicationSettingsSyncRejectBlocklistedTorrentHashesHelpText", Advanced = true)]
++        public bool SyncRejectBlocklistedTorrentHashesWhileGrabbing { get; set; }
++
++        public NzbDroneValidationResult Validate()
++        {
++            return new NzbDroneValidationResult(Validator.Validate(this));
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core/Applications/Gamarr/GamarrStatus.cs b/src/NzbDrone.Core/Applications/Gamarr/GamarrStatus.cs
+new file mode 100644
+index 0000000..a8bbb82
+--- /dev/null
++++ b/src/NzbDrone.Core/Applications/Gamarr/GamarrStatus.cs
+@@ -0,0 +1,7 @@
++namespace NzbDrone.Core.Applications.Gamarr
++{
++    public class GamarrStatus
++    {
++        public string Version { get; set; }
++    }
++}
+diff --git a/src/NzbDrone.Core/Applications/Gamarr/GamarrV3Proxy.cs b/src/NzbDrone.Core/Applications/Gamarr/GamarrV3Proxy.cs
+new file mode 100644
+index 0000000..4fcc703
+--- /dev/null
++++ b/src/NzbDrone.Core/Applications/Gamarr/GamarrV3Proxy.cs
+@@ -0,0 +1,217 @@
++using System;
++using System.Collections.Generic;
++using System.Net;
++using System.Net.Http;
++using FluentValidation.Results;
++using Newtonsoft.Json;
++using NLog;
++using NzbDrone.Common.Extensions;
++using NzbDrone.Common.Http;
++using NzbDrone.Common.Serializer;
++
++namespace NzbDrone.Core.Applications.Gamarr
++{
++    public interface IGamarrV3Proxy
++    {
++        GamarrIndexer AddIndexer(GamarrIndexer indexer, GamarrSettings settings);
++        List<GamarrIndexer> GetIndexers(GamarrSettings settings);
++        GamarrIndexer GetIndexer(int indexerId, GamarrSettings settings);
++        List<GamarrIndexer> GetIndexerSchema(GamarrSettings settings);
++        void RemoveIndexer(int indexerId, GamarrSettings settings);
++        GamarrIndexer UpdateIndexer(GamarrIndexer indexer, GamarrSettings settings);
++        ValidationFailure TestConnection(GamarrIndexer indexer, GamarrSettings settings);
++    }
++
++    public class GamarrV3Proxy : IGamarrV3Proxy
++    {
++        private const string AppApiRoute = "/api/v3";
++        private const string AppIndexerApiRoute = $"{AppApiRoute}/indexer";
++        private readonly IHttpClient _httpClient;
++        private readonly Logger _logger;
++
++        public GamarrV3Proxy(IHttpClient httpClient, Logger logger)
++        {
++            _httpClient = httpClient;
++            _logger = logger;
++        }
++
++        public GamarrStatus GetStatus(GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppApiRoute}/system/status", HttpMethod.Get);
++            return Execute<GamarrStatus>(request);
++        }
++
++        public List<GamarrIndexer> GetIndexers(GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppIndexerApiRoute}", HttpMethod.Get);
++            return Execute<List<GamarrIndexer>>(request);
++        }
++
++        public GamarrIndexer GetIndexer(int indexerId, GamarrSettings settings)
++        {
++            try
++            {
++                var request = BuildRequest(settings, $"{AppIndexerApiRoute}/{indexerId}", HttpMethod.Get);
++                return Execute<GamarrIndexer>(request);
++            }
++            catch (HttpException ex)
++            {
++                if (ex.Response.StatusCode != HttpStatusCode.NotFound)
++                {
++                    throw;
++                }
++            }
++
++            return null;
++        }
++
++        public void RemoveIndexer(int indexerId, GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppIndexerApiRoute}/{indexerId}", HttpMethod.Delete);
++            _httpClient.Execute(request);
++        }
++
++        public List<GamarrIndexer> GetIndexerSchema(GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppIndexerApiRoute}/schema", HttpMethod.Get);
++            return Execute<List<GamarrIndexer>>(request);
++        }
++
++        public GamarrIndexer AddIndexer(GamarrIndexer indexer, GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppIndexerApiRoute}", HttpMethod.Post);
++
++            request.SetContent(indexer.ToJson());
++            request.ContentSummary = indexer.ToJson(Formatting.None);
++
++            try
++            {
++                return ExecuteIndexerRequest(request);
++            }
++            catch (HttpException ex) when (ex.Response.StatusCode == HttpStatusCode.BadRequest)
++            {
++                request.Url = request.Url.AddQueryParam("forceSave", "true");
++
++                return ExecuteIndexerRequest(request);
++            }
++        }
++
++        public GamarrIndexer UpdateIndexer(GamarrIndexer indexer, GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppIndexerApiRoute}/{indexer.Id}", HttpMethod.Put);
++
++            request.SetContent(indexer.ToJson());
++            request.ContentSummary = indexer.ToJson(Formatting.None);
++
++            try
++            {
++                return ExecuteIndexerRequest(request);
++            }
++            catch (HttpException ex) when (ex.Response.StatusCode == HttpStatusCode.BadRequest)
++            {
++                _logger.Debug("Retrying to update indexer forcefully");
++
++                request.Url = request.Url.AddQueryParam("forceSave", "true");
++
++                return ExecuteIndexerRequest(request);
++            }
++        }
++
++        public ValidationFailure TestConnection(GamarrIndexer indexer, GamarrSettings settings)
++        {
++            var request = BuildRequest(settings, $"{AppIndexerApiRoute}/test", HttpMethod.Post);
++
++            request.SetContent(indexer.ToJson());
++            request.ContentSummary = indexer.ToJson(Formatting.None);
++
++            _httpClient.Post(request);
++
++            return null;
++        }
++
++        private GamarrIndexer ExecuteIndexerRequest(HttpRequest request)
++        {
++            try
++            {
++                return Execute<GamarrIndexer>(request);
++            }
++            catch (HttpException ex)
++            {
++                switch (ex.Response.StatusCode)
++                {
++                    case HttpStatusCode.Unauthorized:
++                        _logger.Warn(ex, "API Key is invalid");
++                        break;
++                    case HttpStatusCode.BadRequest:
++                        if (ex.Response.Content.Contains("Query successful, but no results in the configured categories were returned from your indexer.", StringComparison.InvariantCultureIgnoreCase))
++                        {
++                            _logger.Warn(ex, "No Results in configured categories. See FAQ Entry: Prowlarr will not sync X Indexer to App");
++                            break;
++                        }
++
++                        _logger.Error(ex, "Invalid Request");
++                        break;
++                    case HttpStatusCode.SeeOther:
++                    case HttpStatusCode.TemporaryRedirect:
++                        _logger.Warn(ex, "App returned redirect and is invalid. Check App URL");
++                        break;
++                    case HttpStatusCode.NotFound:
++                        _logger.Warn(ex, "Remote indexer not found");
++                        break;
++                    default:
++                        _logger.Error(ex, "Unexpected response status code: {0}", ex.Response.StatusCode);
++                        break;
++                }
++
++                throw;
++            }
++            catch (JsonReaderException ex)
++            {
++                _logger.Error(ex, "Unable to parse JSON response from application");
++                throw;
++            }
++            catch (Exception ex)
++            {
++                _logger.Error(ex, "Unable to add or update indexer");
++                throw;
++            }
++        }
++
++        private HttpRequest BuildRequest(GamarrSettings settings, string resource, HttpMethod method)
++        {
++            var baseUrl = settings.BaseUrl.TrimEnd('/');
++
++            var requestBuilder = new HttpRequestBuilder(baseUrl)
++                .Resource(resource)
++                .Accept(HttpAccept.Json)
++                .SetHeader("X-Api-Key", settings.ApiKey);
++
++            if (settings.AuthUsername.IsNotNullOrWhiteSpace() || settings.AuthPassword.IsNotNullOrWhiteSpace())
++            {
++                requestBuilder.NetworkCredential = new BasicNetworkCredential(settings.AuthUsername, settings.AuthPassword);
++            }
++
++            var request = requestBuilder.Build();
++
++            request.Headers.ContentType = "application/json";
++
++            request.Method = method;
++            request.AllowAutoRedirect = true;
++
++            return request;
++        }
++
++        private TResource Execute<TResource>(HttpRequest request)
++             where TResource : new()
++        {
++            var response = _httpClient.Execute(request);
++
++            if ((int)response.StatusCode >= 300)
++            {
++                throw new HttpException(response);
++            }
++
++            return Json.Deserialize<TResource>(response.Content);
++        }
++    }
++}
+-- 
+2.53.0
+
