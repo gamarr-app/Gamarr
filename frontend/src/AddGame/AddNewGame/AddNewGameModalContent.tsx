@@ -35,6 +35,7 @@ interface AddNewGameModalContentProps {
   addError?: object;
   rootFolderPath?: FormValue<string>;
   monitor: FormValue<string>;
+  monitorUpdates: FormValue<boolean>;
   qualityProfileId?: FormValue<number>;
   minimumAvailability: FormValue<string>;
   searchForGame: FormValue<boolean>;
@@ -56,6 +57,7 @@ function AddNewGameModalContent(props: AddNewGameModalContentProps) {
     isAdding,
     rootFolderPath,
     monitor,
+    monitorUpdates,
     qualityProfileId,
     minimumAvailability,
     searchForGame,
@@ -140,6 +142,18 @@ function AddNewGameModalContent(props: AddNewGameModalContentProps) {
                   name="monitor"
                   onChange={onInputChange}
                   {...monitor}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>{translate('MonitorUpdates')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="monitorUpdates"
+                  helpText={translate('MonitorUpdatesHelpText')}
+                  onChange={onInputChange}
+                  {...monitorUpdates}
                 />
               </FormGroup>
 

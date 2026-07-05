@@ -82,6 +82,7 @@ function AddNewGameModalContentConnector(
     isWindows,
     rootFolderPath,
     monitor,
+    monitorUpdates,
     qualityProfileId,
     minimumAvailability,
     searchForGame,
@@ -93,6 +94,7 @@ function AddNewGameModalContentConnector(
     isWindows: boolean;
     rootFolderPath?: FormValue<string>;
     monitor: FormValue<string>;
+    monitorUpdates: FormValue<boolean>;
     qualityProfileId?: FormValue<number>;
     minimumAvailability: FormValue<string>;
     searchForGame: FormValue<boolean>;
@@ -113,6 +115,7 @@ function AddNewGameModalContentConnector(
         steamAppId,
         rootFolderPath: rootFolderPath?.value || '',
         monitor: monitor.value,
+        monitorUpdates: monitorUpdates.value,
         qualityProfileId: qualityProfileId?.value || 0,
         minimumAvailability: minimumAvailability.value,
         searchForGame: searchForGame.value,
@@ -125,6 +128,7 @@ function AddNewGameModalContentConnector(
     steamAppId,
     rootFolderPath,
     monitor,
+    monitorUpdates,
     qualityProfileId,
     minimumAvailability,
     searchForGame,
@@ -141,6 +145,7 @@ function AddNewGameModalContentConnector(
       addError={addError}
       rootFolderPath={rootFolderPath}
       monitor={monitor}
+      monitorUpdates={monitorUpdates}
       qualityProfileId={qualityProfileId}
       minimumAvailability={minimumAvailability}
       searchForGame={searchForGame}

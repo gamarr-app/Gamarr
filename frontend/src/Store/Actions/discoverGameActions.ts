@@ -37,6 +37,7 @@ export const section = 'discoverGame';
 interface DiscoverGameDefaults {
   rootFolderPath: string;
   monitor: string;
+  monitorUpdates: boolean;
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
@@ -173,6 +174,7 @@ export const defaultState: DiscoverGameState = {
   defaults: {
     rootFolderPath: '',
     monitor: 'gameOnly',
+    monitorUpdates: true,
     qualityProfileId: 0,
     minimumAvailability: 'released',
     searchForGame: true,

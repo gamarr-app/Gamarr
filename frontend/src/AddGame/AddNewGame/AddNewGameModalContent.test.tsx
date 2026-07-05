@@ -180,6 +180,7 @@ describe('AddNewGameModalContent', () => {
     addError: undefined,
     rootFolderPath: { value: '/games' },
     monitor: { value: 'gameOnly' },
+    monitorUpdates: { value: true },
     qualityProfileId: { value: 1 },
     minimumAvailability: { value: 'released' },
     searchForGame: { value: true },
@@ -222,6 +223,7 @@ describe('AddNewGameModalContent', () => {
 
     expect(screen.getByTestId('form-input-rootFolderPath')).toBeInTheDocument();
     expect(screen.getByTestId('form-input-monitor')).toBeInTheDocument();
+    expect(screen.getByTestId('form-input-monitorUpdates')).toBeInTheDocument();
     expect(
       screen.getByTestId('form-input-minimumAvailability')
     ).toBeInTheDocument();

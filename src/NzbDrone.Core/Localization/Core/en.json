@@ -1106,6 +1106,8 @@
   "MonitorGame": "Monitor Game",
   "MonitorGames": "Monitor Games",
   "MonitorSelected": "Monitor Selected",
+  "MonitorUpdates": "Monitor Updates",
+  "MonitorUpdatesHelpText": "Automatically upgrade to releases with a newer game version (update/patch) when one is found",
   "Monitored": "Monitored",
   "MonitorAll": "Monitor All",
   "MonitoredCollectionHelpText": "Monitor to automatically have games from this collection added to the library",

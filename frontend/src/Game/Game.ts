@@ -96,6 +96,7 @@ interface Game extends ModelBase {
   overview: string;
   youTubeTrailerId?: string;
   monitored: boolean;
+  monitorUpdates: boolean;
   status: GameStatus;
   title: string;
   titleSlug: string;

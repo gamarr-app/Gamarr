@@ -13,6 +13,7 @@ import { InputChanged } from 'typings/inputs';
 interface DiscoverGameDefaults {
   rootFolderPath: string;
   monitor: string;
+  monitorUpdates: boolean;
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
@@ -82,6 +83,7 @@ function AddNewDiscoverGameModalContentConnector({
   const {
     rootFolderPath,
     monitor,
+    monitorUpdates,
     qualityProfileId,
     minimumAvailability,
     searchForGame,
@@ -101,6 +103,7 @@ function AddNewDiscoverGameModalContentConnector({
         igdbId,
         rootFolderPath: rootFolderPath.value,
         monitor: monitor.value,
+        monitorUpdates: monitorUpdates.value,
         qualityProfileId: qualityProfileId.value,
         minimumAvailability: minimumAvailability.value,
         searchForGame: searchForGame.value,
@@ -114,6 +117,7 @@ function AddNewDiscoverGameModalContentConnector({
     igdbId,
     rootFolderPath,
     monitor,
+    monitorUpdates,
     qualityProfileId,
     minimumAvailability,
     searchForGame,
@@ -132,6 +136,7 @@ function AddNewDiscoverGameModalContentConnector({
       isWindows={isWindows}
       rootFolderPath={rootFolderPath}
       monitor={monitor}
+      monitorUpdates={monitorUpdates}
       qualityProfileId={qualityProfileId}
       minimumAvailability={minimumAvailability}
       searchForGame={searchForGame}
