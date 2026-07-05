@@ -9,7 +9,6 @@ interface CssExports {
   'gameStatus': string;
   'genres': string;
   'igdbRating': string;
-  'inCinemas': string;
   'keywords': string;
   'metacriticRating': string;
   'minimumAvailability': string;
