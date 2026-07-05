@@ -5,6 +5,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Profiles;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -384,6 +385,89 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var newVersion = new GameVersion(0, 0, 0, 200);
 
             Subject.IsVersionUpgrade(currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_true_for_version_upgrade_when_game_monitors_updates()
+        {
+            var game = new Game { MonitorUpdates = true };
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 1, 0, 0);
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_for_version_upgrade_when_game_does_not_monitor_updates()
+        {
+            var game = new Game { MonitorUpdates = false };
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 1, 0, 0);
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_game_monitors_updates_but_feature_disabled()
+        {
+            Mocker.GetMock<IConfigService>()
+                  .SetupGet(s => s.UpgradeGameVersions)
+                  .Returns(false);
+
+            var game = new Game { MonitorUpdates = true };
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 1, 0, 0);
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_use_global_behavior_when_game_is_null()
+        {
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 1, 0, 0);
+
+            Subject.IsVersionUpgrade(null, currentVersion, newVersion).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_when_game_monitors_updates_but_new_version_is_lower()
+        {
+            var game = new Game { MonitorUpdates = true };
+            var currentVersion = new GameVersion(2, 0, 0, 0);
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_game_monitors_updates_but_versions_are_equal()
+        {
+            var game = new Game { MonitorUpdates = true };
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_game_monitors_updates_but_new_version_is_empty()
+        {
+            var game = new Game { MonitorUpdates = true };
+            var currentVersion = new GameVersion(1, 0, 0, 0);
+            var newVersion = new GameVersion();
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_game_does_not_monitor_updates_and_current_version_is_empty()
+        {
+            var game = new Game { MonitorUpdates = false };
+            var currentVersion = new GameVersion();
+            var newVersion = new GameVersion(1, 0, 0, 0);
+
+            Subject.IsVersionUpgrade(game, currentVersion, newVersion).Should().BeFalse();
         }
     }
 }
