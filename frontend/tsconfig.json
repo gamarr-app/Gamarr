@@ -4,6 +4,7 @@
     "allowJs": true,
     "checkJs": false,
     "baseUrl": "src",
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "node",
