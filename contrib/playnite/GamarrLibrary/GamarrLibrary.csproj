@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Standalone Playnite library plugin. Intentionally NOT part of src/Gamarr.sln;
+    it targets net462 because Playnite (Windows-only, WPF) loads plugins into a
+    .NET Framework 4.6.2 host. Builds cross-platform via the implicit
+    Microsoft.NETFramework.ReferenceAssemblies targeting pack.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>GamarrLibrary</RootNamespace>
+    <AssemblyName>GamarrLibrary</AssemblyName>
+    <Version>0.1.0</Version>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Keep this project out of any repo-wide Directory.Build.props conventions. -->
+    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PlayniteSDK" Version="6.16.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <!-- WPF reference assemblies for the code-only settings view (no XAML compile needed). -->
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="extension.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

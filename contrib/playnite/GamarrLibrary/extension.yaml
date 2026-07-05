@@ -1,0 +1,9 @@
+Id: GamarrLibrary_0a571af3-a11a-48f5-bd02-5ef0068460f2
+Name: Gamarr Library
+Author: Gamarr
+Version: 0.1.0
+Module: GamarrLibrary.dll
+Type: GameLibrary
+Links:
+  - Name: Gamarr
+    Url: https://github.com/gamarr/gamarr
