@@ -26,7 +26,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
     /// IGDB API Proxy - Handles all communication with the IGDB API.
     /// See https://api-docs.igdb.com/ for API documentation.
     /// </summary>
-    public class IgdbProxy : IProvideGameInfo, ISearchForNewGame
+    public class IgdbProxy : IProvideGameInfo, ISearchForNewGame, IProvideExternalGameIdMapping
     {
         private const string IgdbApiBaseUrl = "https://api.igdb.com/v4/";
         private const int MaxRetries = 3;
@@ -145,6 +145,44 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             {
                 result.SteamAppId = steamAppId;
             }
+
+            return result;
+        }
+
+        public Dictionary<long, int> GetIgdbIdsByGogIds(ICollection<long> gogIds)
+        {
+            var result = new Dictionary<long, int>();
+
+            if (gogIds == null || gogIds.Count == 0)
+            {
+                return result;
+            }
+
+            // IGDB tracks GOG product ids via the external_games endpoint
+            // Category 5 = GOG. Batched: one query resolves up to 400 ids.
+            foreach (var chunk in gogIds.Distinct().Chunk(400))
+            {
+                var uidList = string.Join(",", chunk.Select(id => $"\"{id}\""));
+                var query = $"fields game, uid; where category = 5 & uid = ({uidList}); limit 500;";
+                var externalGames = ExecuteQuery<IgdbExternalGameResource>("external_games", query);
+
+                if (externalGames == null)
+                {
+                    continue;
+                }
+
+                foreach (var externalGame in externalGames)
+                {
+                    if (externalGame.Game.HasValue &&
+                        long.TryParse(externalGame.Uid, out var gogId) &&
+                        !result.ContainsKey(gogId))
+                    {
+                        result[gogId] = externalGame.Game.Value;
+                    }
+                }
+            }
+
+            _logger.Debug("Resolved {0} of {1} GOG product ids to IGDB ids", result.Count, gogIds.Count);
 
             return result;
         }
