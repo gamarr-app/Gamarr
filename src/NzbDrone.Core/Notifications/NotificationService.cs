@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Notifications
             _logger = logger;
         }
 
-        private string GetMessage(Game game, QualityModel quality)
+        private string GetMessage(Game game, QualityModel quality, GameVersion gameVersion = null)
         {
             var qualityString = quality.Quality.ToString();
 
@@ -53,6 +53,13 @@ namespace NzbDrone.Core.Notifications
             if (quality.Revision.Version > 1)
             {
                 qualityString += " Proper";
+            }
+
+            // Include the parsed game version (update/patch level) when known
+            // so grab notifications distinguish updates from fresh grabs.
+            if (gameVersion != null && gameVersion.HasValue)
+            {
+                qualityString += $" {gameVersion}";
             }
 
             return string.Format("{0} ({1}) [{2}] {3}",
@@ -103,7 +110,7 @@ namespace NzbDrone.Core.Notifications
         {
             var grabMessage = new GrabMessage
             {
-                Message = GetMessage(message.Game.Game, message.Game.ParsedGameInfo.Quality),
+                Message = GetMessage(message.Game.Game, message.Game.ParsedGameInfo.Quality, message.Game.ParsedGameInfo.GameVersion),
                 Quality = message.Game.ParsedGameInfo.Quality,
                 Game = message.Game.Game,
                 RemoteGame = message.Game,
