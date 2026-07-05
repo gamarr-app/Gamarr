@@ -1,7 +1,7 @@
 # Gamarr Playnite Library Plugin
 
 A [Playnite](https://playnite.link) library plugin that imports your
-[Gamarr](https://github.com/gamarr/gamarr) game library into Playnite.
+[Gamarr](https://github.com/gamarr-app/Gamarr) game library into Playnite.
 Every game that Gamarr has downloaded shows up in Playnite with its title,
 release date, install directory, platforms, genres, developer/publisher,
 description, poster cover, and links to Steam/IGDB/RAWG and back to Gamarr.
