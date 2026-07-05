@@ -3,6 +3,7 @@ import { GameAddOptions, GameAvailability, GameMonitor } from 'Game/Game';
 export interface NewGamePayload {
   rootFolderPath: string;
   monitor: GameMonitor;
+  monitorUpdates?: boolean;
   qualityProfileId: number;
   minimumAvailability: GameAvailability;
   tags: number[];
@@ -13,6 +14,7 @@ export interface NewGamePayload {
 interface NewGameAddedProps {
   addOptions: GameAddOptions;
   monitored: boolean;
+  monitorUpdates: boolean;
   qualityProfileId: number;
   minimumAvailability: GameAvailability;
   rootFolderPath: string;
@@ -27,6 +29,7 @@ function getNewGame<T extends object>(
   const {
     rootFolderPath,
     monitor,
+    monitorUpdates = true,
     qualityProfileId,
     minimumAvailability,
     tags,
@@ -41,6 +44,7 @@ function getNewGame<T extends object>(
   const result = game as T & NewGameAddedProps;
   result.addOptions = addOptions;
   result.monitored = monitor !== 'none';
+  result.monitorUpdates = monitorUpdates;
   result.qualityProfileId = qualityProfileId;
   result.minimumAvailability = minimumAvailability;
   result.rootFolderPath = rootFolderPath;

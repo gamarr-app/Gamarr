@@ -24,6 +24,7 @@ let abortCurrentRequest: (() => void) | null = null;
 interface AddGameDefaults {
   rootFolderPath: string;
   monitor: string;
+  monitorUpdates: boolean;
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
@@ -53,6 +54,7 @@ export const defaultState: AddGameState = {
   defaults: {
     rootFolderPath: '',
     monitor: 'gameOnly',
+    monitorUpdates: true,
     qualityProfileId: 0,
     minimumAvailability: 'released',
     searchForGame: true,

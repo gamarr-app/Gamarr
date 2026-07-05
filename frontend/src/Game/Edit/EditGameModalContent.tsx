@@ -48,6 +48,7 @@ function EditGameModalContent({
   const {
     title,
     monitored,
+    monitorUpdates,
     minimumAvailability,
     qualityProfileId,
     path,
@@ -73,6 +74,7 @@ function EditGameModalContent({
     return selectSettings(
       {
         monitored,
+        monitorUpdates,
         minimumAvailability,
         qualityProfileId,
         path,
@@ -83,6 +85,7 @@ function EditGameModalContent({
     );
   }, [
     monitored,
+    monitorUpdates,
     minimumAvailability,
     qualityProfileId,
     path,
@@ -168,6 +171,18 @@ function EditGameModalContent({
               name="monitored"
               helpText={translate('MonitoredGameHelpText')}
               {...settings.monitored}
+              onChange={handleInputChange}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('MonitorUpdates')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="monitorUpdates"
+              helpText={translate('MonitorUpdatesHelpText')}
+              {...settings.monitorUpdates}
               onChange={handleInputChange}
             />
           </FormGroup>
