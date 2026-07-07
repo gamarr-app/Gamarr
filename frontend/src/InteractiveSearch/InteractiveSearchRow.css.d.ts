@@ -5,6 +5,7 @@ interface CssExports {
   'blocklist': string;
   'customFormatScore': string;
   'download': string;
+  'downloadButton': string;
   'downloadIcon': string;
   'history': string;
   'indexer': string;

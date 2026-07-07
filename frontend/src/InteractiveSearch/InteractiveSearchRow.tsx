@@ -334,6 +334,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
 
       <TableRowCell className={styles.download}>
         <SpinnerIconButton
+          className={styles.downloadButton}
           name={getDownloadIcon(isGrabbing, isGrabbed, grabError)}
           kind={getDownloadKind(isGrabbed, grabError)}
           title={getDownloadTooltip(isGrabbing, isGrabbed, grabError)}
