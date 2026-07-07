@@ -77,16 +77,27 @@
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
   width: 80px;
+  white-space: nowrap;
 }
 
+/* Align the grab button's left edge with the header icon (both 8px from the
+   column edge); IconButton otherwise adds a 2px leading margin. */
+.downloadButton {
+  composes: button from '~Components/Link/IconButton.css';
+
+  margin-left: 0;
+}
+
+/* Same box height as IconButton so the composite override icon sits on the
+   same centerline as the grab icon instead of sagging a couple of pixels. */
 .manualDownloadContent {
   position: relative;
   display: inline-block;
   margin: 0 2px;
   width: 22px;
-  height: 20.39px;
+  height: 21px;
   vertical-align: middle;
-  line-height: 20.39px;
+  line-height: 21px;
 
   &:hover {
     color: var(--iconButtonHoverColor);
@@ -97,7 +108,6 @@
   position: absolute;
   top: 4px;
   left: 0;
-  /* width: 100%; */
   text-align: center;
 }
 
@@ -105,6 +115,5 @@
   position: absolute;
   top: 7px;
   left: 8px;
-  /* width: 100%; */
   text-align: center;
 }
