@@ -17,12 +17,14 @@ interface GameStatusProps {
   gameEntity?: GameEntity;
   gameFileId: number | undefined;
   showMissingStatus?: boolean;
+  className?: string;
 }
 
 function GameStatus({
   gameId,
   gameFileId,
   showMissingStatus = true,
+  className = styles.center,
 }: GameStatusProps) {
   const { isAvailable, monitored, grabbed = false } = useGame(gameId) as Game;
 
@@ -40,7 +42,7 @@ function GameStatus({
     const progress = size ? 100 - (sizeLeft / size) * 100 : 0;
 
     return (
-      <div className={styles.center}>
+      <div className={className}>
         <QueueDetails
           {...queueItem}
           progressBar={
@@ -56,7 +58,7 @@ function GameStatus({
 
   if (grabbed && showMissingStatus) {
     return (
-      <div className={styles.center}>
+      <div className={className}>
         <Icon name={icons.DOWNLOADING} title={translate('GameIsDownloading')} />
       </div>
     );
@@ -67,7 +69,7 @@ function GameStatus({
     const isCutoffNotMet = gameFile.qualityCutoffNotMet;
 
     return (
-      <div className={styles.center}>
+      <div className={className}>
         <GameQuality
           quality={quality}
           size={gameFile.size}
@@ -84,7 +86,7 @@ function GameStatus({
 
   if (!monitored) {
     return (
-      <div className={styles.center}>
+      <div className={className}>
         <Icon
           name={icons.UNMONITORED}
           kind={kinds.DISABLED}
@@ -96,14 +98,14 @@ function GameStatus({
 
   if (isAvailable) {
     return (
-      <div className={styles.center}>
+      <div className={className}>
         <Icon name={icons.MISSING} title={translate('GameMissingFromDisk')} />
       </div>
     );
   }
 
   return (
-    <div className={styles.center}>
+    <div className={className}>
       <Icon name={icons.NOT_AIRED} title={translate('GameIsNotAvailable')} />
     </div>
   );
