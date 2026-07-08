@@ -358,6 +358,10 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 Keywords = resource.Tags?.Select(t => t.Name).ToList() ?? new List<string>(),
                 Platforms = MapPlatforms(resource.Platforms),
                 Developer = resource.Developers?.FirstOrDefault()?.Name,
+
+                // Studio drives the "Developer" column/sort in the UI (same
+                // convention as the IGDB mapper)
+                Studio = resource.Developers?.FirstOrDefault()?.Name,
                 Publisher = resource.Publishers?.FirstOrDefault()?.Name,
                 Certification = resource.Esrb_Rating?.Name,
                 LastInfoSync = DateTime.UtcNow
