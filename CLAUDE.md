@@ -32,22 +32,34 @@ installed .NET 10 satisfies it.
 
 ## Build Commands
 
+Prefer the Makefile targets — each one prints a single `OK`/`FAILED` line and
+exits non-zero on real failure, so there is no need to pipe through
+`grep`/`tail` (which masks exit codes; that trap has produced stale-binary
+false verification more than once):
+
 ```bash
-# Backend
-dotnet build src/Gamarr.sln
-
-# Frontend
-yarn install
-yarn build
-
-# Run tests (skip slow Playwright-based automation tests)
-dotnet test src/Gamarr.sln --filter "Category!=AutomationTest"
-
-# Frontend lint / format / unit tests
-yarn lint
-yarn format:check
-yarn test
+make backend      # dotnet build src/Gamarr.sln (prints the output dll mtime)
+make frontend     # yarn build (production UI into _output/UI)
+make build        # both
+make check        # yarn lint + tsc + jest
+make test         # backend unit tests — MUST run with the sandbox disabled:
+                  # the Claude Code sandbox SIGKILLs dotnet testhost children
+make smoke        # throwaway instance on :6968, auth disabled, prints API key
+make seed         # seed it: 10 Steam games, 1 imported file, fake Torznab
+make smoke-stop   # stop + clean the smoke instance
 ```
+
+Raw commands (when you need a custom filter): `dotnet build src/Gamarr.sln`,
+`dotnet test src/Gamarr.sln --filter "Category!=AutomationTest"`, `yarn build`,
+`yarn lint`, `yarn format:check`, `yarn test`. If you pipe them, remember the
+pipeline exit code is the LAST command's — check `$pipestatus`/log files, or
+just use make.
+
+The smoke tooling lives in `scripts/dev/`: `smoke.sh` (start/stop/status),
+`seed.sh`, and `fake-torznab.py` (canned Torznab indexer on :9899 so
+interactive search returns rows without a real tracker). Ports 6767 (live
+docker Gamarr) and 9696 (live Prowlarr) are usually taken on this machine —
+the smoke instance uses 6968.
 
 ## Folder Layout
 
