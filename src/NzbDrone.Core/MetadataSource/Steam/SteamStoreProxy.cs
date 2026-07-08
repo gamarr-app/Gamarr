@@ -200,6 +200,10 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 Genres = data.Genres?.Select(g => g.Description).ToList() ?? new List<string>(),
                 Platforms = MapPlatforms(data.Platforms),
                 Developer = data.Developers?.FirstOrDefault(),
+
+                // Studio drives the "Developer" column/sort in the UI (same
+                // convention as the IGDB mapper)
+                Studio = data.Developers?.FirstOrDefault(),
                 Publisher = data.Publishers?.FirstOrDefault(),
                 Certification = MapAgeRating(data.Required_Age),
                 LastInfoSync = DateTime.UtcNow,
