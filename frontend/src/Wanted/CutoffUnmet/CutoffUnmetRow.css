@@ -4,3 +4,10 @@
 
   width: 100px;
 }
+
+/* Left-align the status icon with the column header (GameStatus centers by
+   default for the details-page usage) */
+.statusContent {
+  display: flex;
+  justify-content: flex-start;
+}

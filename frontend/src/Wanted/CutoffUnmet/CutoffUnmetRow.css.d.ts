@@ -3,6 +3,7 @@
 interface CssExports {
   'languages': string;
   'status': string;
+  'statusContent': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

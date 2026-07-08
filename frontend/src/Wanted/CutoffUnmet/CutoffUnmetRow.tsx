@@ -110,6 +110,7 @@ function CutoffUnmetRow({
           return (
             <TableRowCell key={name} className={styles.status}>
               <GameStatus
+                className={styles.statusContent}
                 gameId={id}
                 gameFileId={gameFileId}
                 gameEntity="wanted.cutoffUnmet"
