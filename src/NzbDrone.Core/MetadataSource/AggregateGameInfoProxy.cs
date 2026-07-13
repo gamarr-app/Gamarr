@@ -627,7 +627,7 @@ namespace NzbDrone.Core.MetadataSource
                     }
                     else
                     {
-                        _logger.Warn("Invalid Steam App ID: '{0}'", idPart);
+                        _logger.Warn("Invalid Steam App ID: '{0}'", CleanseLogMessage.SanitizeLogParam(idPart));
                     }
                 }
 
@@ -694,7 +694,7 @@ namespace NzbDrone.Core.MetadataSource
                 resultsByNormalizedTitle[normalizedTitle] = game;
             }
 
-            _logger.Debug("Found {0} games from Steam for '{1}'", steamHits.Count, title);
+            _logger.Debug("Found {0} games from Steam for '{1}'", steamHits.Count, CleanseLogMessage.SanitizeLogParam(title));
 
             foreach (var game in igdbHits)
             {
@@ -709,7 +709,7 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
-            _logger.Debug("Found {0} games from IGDB for '{1}'", igdbHits.Count, title);
+            _logger.Debug("Found {0} games from IGDB for '{1}'", igdbHits.Count, CleanseLogMessage.SanitizeLogParam(title));
 
             foreach (var game in rawgHits)
             {
@@ -724,7 +724,7 @@ namespace NzbDrone.Core.MetadataSource
                 }
             }
 
-            _logger.Debug("Found {0} games from RAWG for '{1}'", rawgHits.Count, title);
+            _logger.Debug("Found {0} games from RAWG for '{1}'", rawgHits.Count, CleanseLogMessage.SanitizeLogParam(title));
 
             allResults = resultsByNormalizedTitle.Values.ToList();
 
