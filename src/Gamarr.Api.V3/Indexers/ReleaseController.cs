@@ -5,7 +5,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using NzbDrone.Common.Cache;
-using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
@@ -76,9 +75,20 @@ namespace Gamarr.Api.V3.Indexers
             {
                 if (release.ShouldOverride == true)
                 {
-                    Ensure.That(release.GameId, () => release.GameId).IsNotNull();
-                    Ensure.That(release.Quality, () => release.Quality).IsNotNull();
-                    Ensure.That(release.Languages, () => release.Languages).IsNotNull();
+                    if (release.GameId == null)
+                    {
+                        throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Game must be provided when overriding a grab");
+                    }
+
+                    if (release.Quality == null)
+                    {
+                        throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Quality must be provided when overriding a grab");
+                    }
+
+                    if (release.Languages == null)
+                    {
+                        throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Languages must be provided when overriding a grab");
+                    }
 
                     // Clone the remote episode so we don't overwrite anything on the original
                     remoteGame = new RemoteGame

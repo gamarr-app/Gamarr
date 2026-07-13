@@ -56,7 +56,10 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "TerminateApplicationException",
 
             // User config issue, root folder missing, etc.
-            "DirectoryNotFoundException"
+            "DirectoryNotFoundException",
+
+            // A remote server (indexer, Prowlarr, etc.) told us to back off
+            "TooManyRequestsException"
         };
 
         public static readonly List<string> FilteredExceptionMessages = new List<string>
@@ -301,9 +304,15 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                             return false;
                         }
 
-                        if (FilteredExceptionTypeNames.Contains(ex.GetType().Name))
+                        // Check the whole inner exception chain so filtered exceptions
+                        // wrapped by e.g. ReleaseDownloadException are still filtered
+                        for (var inner = ex; inner != null; inner = inner.InnerException)
                         {
-                            isSentry = false;
+                            if (FilteredExceptionTypeNames.Contains(inner.GetType().Name))
+                            {
+                                isSentry = false;
+                                break;
+                            }
                         }
 
                         if (FilteredExceptionMessages.Any(x => ex.Message.Contains(x)))
