@@ -45,7 +45,16 @@ namespace NzbDrone.Core.Messaging.Commands
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error(ex, "Error occurred while executing task {0}", command.Name);
+                        if (_cancellationTokenSource.IsCancellationRequested)
+                        {
+                            // Shutdown was requested mid-command; the container may already be
+                            // disposed, so resolution/execution failures here aren't app bugs.
+                            _logger.Debug(ex, "Error occurred while executing task {0} during shutdown", command.Name);
+                        }
+                        else
+                        {
+                            _logger.Error(ex, "Error occurred while executing task {0}", command.Name);
+                        }
                     }
                 }
             }
