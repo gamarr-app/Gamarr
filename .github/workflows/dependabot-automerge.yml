@@ -35,11 +35,16 @@ jobs:
         run: |
           deadline=$(( $(date +%s) + 1800 ))  # 30-minute budget for CI to finish
           while :; do
-            read -r ci_status ci_conclusion < <(
-              gh api "repos/$REPO/commits/$HEAD_SHA/check-runs" \
+            # The check-run doesn't exist yet when this job starts (this workflow
+            # triggers on PR open, before CI registers its checks). An empty
+            # result must not kill the loop — `read` exits non-zero on empty
+            # input, which under `set -e` failed every run before the first poll.
+            ci_line=$(
+              gh api "repos/$REPO/commits/$HEAD_SHA/check-runs?per_page=100" \
                 --jq ".check_runs[] | select(.name == \"$CHECK_NAME\") | \"\(.status) \(.conclusion)\"" \
                 | head -n1
-            )
+            ) || ci_line=""
+            read -r ci_status ci_conclusion <<< "$ci_line" || true
             if [ "$ci_status" = "completed" ]; then
               echo "'$CHECK_NAME' concluded: $ci_conclusion"
               if [ "$ci_conclusion" != "success" ]; then
