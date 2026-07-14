@@ -65,7 +65,7 @@ namespace NzbDrone.Core.MediaFiles
 
                     mediaFile = match.Groups["fileName"].Value;
 
-                    if (!MediaFileExtensions.Extensions.Contains(Path.GetExtension(mediaFile)))
+                    if (!MediaFileExtensions.IsGameFileExtension(Path.GetExtension(mediaFile)))
                     {
                         throw new ScriptImportException("Script output contains invalid media file: {0}", mediaFile);
                     }

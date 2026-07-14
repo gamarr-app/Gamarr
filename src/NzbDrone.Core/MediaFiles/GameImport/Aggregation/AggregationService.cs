@@ -33,7 +33,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
         public LocalGame Augment(LocalGame localGame, DownloadClientItem downloadClientItem)
         {
             var isFolder = _diskProvider.FolderExists(localGame.Path);
-            var isMediaFile = !isFolder && MediaFileExtensions.Extensions.Contains(Path.GetExtension(localGame.Path));
+            var isMediaFile = !isFolder && MediaFileExtensions.IsGameFileExtension(Path.GetExtension(localGame.Path));
 
             if (localGame.DownloadClientGameInfo == null &&
                 localGame.FolderGameInfo == null &&

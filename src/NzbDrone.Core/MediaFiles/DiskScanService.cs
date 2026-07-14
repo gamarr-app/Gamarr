@@ -218,7 +218,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
-            var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.Extensions.Contains(Path.GetExtension(file)))
+            var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)))
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
@@ -233,7 +233,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
-            var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.Extensions.Contains(Path.GetExtension(file)))
+            var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)))
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);

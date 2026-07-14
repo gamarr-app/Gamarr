@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles
@@ -33,10 +34,6 @@ namespace NzbDrone.Core.MediaFiles
                 // GOG installer format
                 { ".gog", Quality.GOG },
 
-                // Common game archive formats used by repacks
-                { ".bin.001", Quality.Repack },
-                { ".part01.rar", Quality.Repack },
-
                 // DODI Repack format
                 { ".doi", Quality.Repack },
 
@@ -45,8 +42,25 @@ namespace NzbDrone.Core.MediaFiles
             };
         }
 
+        // Split-volume archive parts: .001-.999 (7z/HJSplit), .r00-.r99
+        // (old-style RAR sets), .z01-.z99 (split zip). These can't live in the
+        // extension map: the parser strips trailing Extensions members from
+        // release titles, which would eat version suffixes like "v1.001".
+        private static readonly Regex SplitVolumeRegex = new (@"^\.(?:\d{3}|r\d{2}|z\d{2})$",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         public static HashSet<string> Extensions => new HashSet<string>(_fileExtensions.Keys, StringComparer.OrdinalIgnoreCase);
         public static HashSet<string> DiskExtensions => new HashSet<string>(new[] { ".iso", ".bin", ".img", ".mdf", ".nrg" }, StringComparer.OrdinalIgnoreCase);
+
+        public static bool IsGameFileExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                return false;
+            }
+
+            return _fileExtensions.ContainsKey(extension) || SplitVolumeRegex.IsMatch(extension);
+        }
 
         public static Quality GetQualityForExtension(string extension)
         {

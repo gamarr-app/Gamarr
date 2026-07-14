@@ -342,7 +342,7 @@ namespace NzbDrone.Core.MediaFiles
                 };
             }
 
-            if (extension.IsNullOrWhiteSpace() || !MediaFileExtensions.Extensions.Contains(extension))
+            if (!MediaFileExtensions.IsGameFileExtension(extension))
             {
                 _logger.Debug("[{0}] has an unsupported extension: '{1}'", fileInfo.FullName, extension);
 
