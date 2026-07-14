@@ -159,8 +159,11 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             }
 
             // IGDB tracks GOG product ids via the external_games endpoint
-            // Category 5 = GOG. Batched: one query resolves up to 400 ids.
-            foreach (var chunk in gogIds.Distinct().Chunk(400))
+            // Category 5 = GOG. Batched: one query resolves up to 200 ids.
+            // Chunks are kept well under the 500-row response limit because a
+            // single uid can match multiple external_games rows (regional and
+            // re-release entries); rows past the limit would be silently lost.
+            foreach (var chunk in gogIds.Distinct().Chunk(200))
             {
                 var uidList = string.Join(",", chunk.Select(id => $"\"{id}\""));
                 var query = $"fields game, uid; where category = 5 & uid = ({uidList}); limit 500;";

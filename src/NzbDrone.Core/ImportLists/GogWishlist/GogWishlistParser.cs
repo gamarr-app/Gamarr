@@ -74,14 +74,20 @@ namespace NzbDrone.Core.ImportLists.GogWishlist
                 return new List<GogProduct>();
             }
 
+            // Non-game products (movies, DLC) map to empty placeholders instead
+            // of being filtered out: IsFullPage decides whether to fetch the next
+            // page from the returned count, so dropping items here would end
+            // paging early whenever a full page contains a single non-game.
+            // Placeholders carry no title or ids and are discarded by IsValidItem.
             return data.Products
-                .Where(p => p.Id > 0 && p.IsGame)
-                .Select(p => new GogProduct
-                {
-                    GogId = p.Id,
-                    Title = p.Title,
-                    Year = GetYear(p.ReleaseDate)
-                })
+                .Select(p => p.Id > 0 && p.IsGame
+                    ? new GogProduct
+                    {
+                        GogId = p.Id,
+                        Title = p.Title,
+                        Year = GetYear(p.ReleaseDate)
+                    }
+                    : new GogProduct())
                 .ToList();
         }
 
@@ -120,7 +126,9 @@ namespace NzbDrone.Core.ImportLists.GogWishlist
                 return (int)value;
             }
 
-            if (value > 100000000)
+            // Upper bound keeps FromUnixTimeSeconds from throwing (and aborting
+            // the whole fetch) if GOG ever switches to millisecond timestamps.
+            if (value is > 100000000 and <= 253402300799)
             {
                 return DateTimeOffset.FromUnixTimeSeconds(value).Year;
             }
