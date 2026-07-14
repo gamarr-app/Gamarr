@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.ImportListTests.GogTests
 
             var products = Subject.ParseProducts(response);
 
-            products.Should().HaveCount(3);
+            products.Should().HaveCount(4);
 
             products[0].GogId.Should().Be(1456460669);
             products[0].Title.Should().Be("Baldur's Gate 3");
@@ -37,19 +37,23 @@ namespace NzbDrone.Core.Test.ImportListTests.GogTests
             products[1].Title.Should().Be("The End of the Sun");
             products[1].Year.Should().Be(0);
 
-            products[2].GogId.Should().Be(1207666633);
-            products[2].Title.Should().Be("Upcoming Game");
-            products[2].Year.Should().Be(2026);
+            products[3].GogId.Should().Be(1207666633);
+            products[3].Title.Should().Be("Upcoming Game");
+            products[3].Year.Should().Be(2026);
         }
 
         [Test]
-        public void should_exclude_non_game_products()
+        public void should_return_placeholder_for_non_game_products_to_preserve_page_count()
         {
+            // Paging stops on the first non-full page, so filtering items out
+            // here would end paging early; non-games become empty placeholders.
             var response = GivenResponse(ReadAllText("Files/gog_wishlist.html"));
 
             var products = Subject.ParseProducts(response);
 
             products.Should().NotContain(p => p.Title == "Some Documentary");
+            products[2].GogId.Should().Be(0);
+            products[2].Title.Should().BeNull();
         }
 
         [Test]
@@ -59,7 +63,7 @@ namespace NzbDrone.Core.Test.ImportListTests.GogTests
 
             var games = Subject.ParseResponse(response);
 
-            games.Should().HaveCount(3);
+            games.Should().HaveCount(4);
             games[0].Title.Should().Be("Baldur's Gate 3");
             games[0].Year.Should().Be(2023);
         }

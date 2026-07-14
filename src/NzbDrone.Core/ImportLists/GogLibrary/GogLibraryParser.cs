@@ -66,13 +66,18 @@ namespace NzbDrone.Core.ImportLists.GogLibrary
                 return new List<GogProduct>();
             }
 
+            // Delisted titles arrive as "game": null; map them to empty
+            // placeholders instead of filtering, so IsFullPage still sees the
+            // server's true page size and keeps paging. Placeholders carry no
+            // title or ids and are discarded by IsValidItem.
             return data.Embedded.Items
-                .Where(i => i.Game != null && long.TryParse(i.Game.Id, out var id) && id > 0)
-                .Select(i => new GogProduct
-                {
-                    GogId = long.Parse(i.Game.Id),
-                    Title = i.Game.Title
-                })
+                .Select(i => i.Game != null && long.TryParse(i.Game.Id, out var id) && id > 0
+                    ? new GogProduct
+                    {
+                        GogId = id,
+                        Title = i.Game.Title
+                    }
+                    : new GogProduct())
                 .ToList();
         }
 

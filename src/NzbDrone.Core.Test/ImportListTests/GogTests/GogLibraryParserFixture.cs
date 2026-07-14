@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.ImportListTests.GogTests
 
             var products = Subject.ParseProducts(response);
 
-            products.Should().HaveCount(2);
+            products.Should().HaveCount(3);
 
             products[0].GogId.Should().Be(1207187357);
             products[0].Title.Should().Be("Pathfinder: Wrath of the Righteous");
@@ -35,6 +35,11 @@ namespace NzbDrone.Core.Test.ImportListTests.GogTests
 
             products[1].GogId.Should().Be(1423049311);
             products[1].Title.Should().Be("Cyberpunk 2077");
+
+            // Delisted title ("game": null) becomes an empty placeholder so the
+            // page-fullness check still sees the server's true page size.
+            products[2].GogId.Should().Be(0);
+            products[2].Title.Should().BeNull();
         }
 
         [Test]
@@ -44,7 +49,7 @@ namespace NzbDrone.Core.Test.ImportListTests.GogTests
 
             var games = Subject.ParseResponse(response);
 
-            games.Should().HaveCount(2);
+            games.Should().HaveCount(3);
             games[0].Title.Should().Be("Pathfinder: Wrath of the Righteous");
         }
 
