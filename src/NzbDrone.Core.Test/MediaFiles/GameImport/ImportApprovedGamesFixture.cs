@@ -100,6 +100,45 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         }
 
         [Test]
+        public void should_store_parsed_game_version_on_imported_file()
+        {
+            GivenExistingFileOnDisk();
+
+            _approvedDecisions.First().LocalGame.FileGameInfo = new ParsedGameInfo
+            {
+                GameVersion = new GameVersion(1, 5)
+            };
+
+            Subject.Import(_approvedDecisions, false);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(f => f.GameVersion != null && f.GameVersion.HasValue && f.GameVersion.CompareTo(new GameVersion(1, 5)) == 0)), Times.Once());
+        }
+
+        [Test]
+        public void should_fall_back_to_download_client_version_when_file_has_none()
+        {
+            GivenExistingFileOnDisk();
+
+            // ParseGameVersion always returns a GameVersion object; a name
+            // without a version token yields HasValue == false, which must not
+            // shadow the version parsed from the download client item's title.
+            _approvedDecisions.First().LocalGame.FileGameInfo = new ParsedGameInfo
+            {
+                GameVersion = new GameVersion()
+            };
+            _approvedDecisions.First().LocalGame.DownloadClientGameInfo = new ParsedGameInfo
+            {
+                GameVersion = new GameVersion(2, 0)
+            };
+
+            Subject.Import(_approvedDecisions, false);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(f => f.GameVersion != null && f.GameVersion.CompareTo(new GameVersion(2, 0)) == 0)), Times.Once());
+        }
+
+        [Test]
         public void should_only_import_approved()
         {
             GivenExistingFileOnDisk();

@@ -177,7 +177,8 @@ namespace NzbDrone.Core.MediaFiles
                         Languages = sourceFile?.Languages ?? new List<Language> { Language.Unknown },
                         IndexerFlags = sourceFile?.IndexerFlags ?? 0,
                         ReleaseGroup = sourceFile?.ReleaseGroup,
-                        SceneName = sourceFile?.SceneName
+                        SceneName = sourceFile?.SceneName,
+                        GameVersion = sourceFile?.GameVersion
                     };
 
                     _mediaFileService.Add(folderGameFile);

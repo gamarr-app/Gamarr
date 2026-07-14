@@ -42,6 +42,33 @@ namespace NzbDrone.Core.Parser.Model
         public bool ShouldImportExtras { get; set; }
         public List<string> PossibleExtraFiles { get; set; }
 
+        // Best parsed game version across the available sources. A parsed info
+        // always carries a GameVersion object (never null), so pick the first
+        // one that actually parsed a version token (HasValue) instead of
+        // null-coalescing, which would stop at a valueless file version.
+        public GameVersion GameVersion
+        {
+            get
+            {
+                if (FileGameInfo?.GameVersion?.HasValue == true)
+                {
+                    return FileGameInfo.GameVersion;
+                }
+
+                if (DownloadClientGameInfo?.GameVersion?.HasValue == true)
+                {
+                    return DownloadClientGameInfo.GameVersion;
+                }
+
+                if (FolderGameInfo?.GameVersion?.HasValue == true)
+                {
+                    return FolderGameInfo.GameVersion;
+                }
+
+                return null;
+            }
+        }
+
         public override string ToString()
         {
             return Path;
