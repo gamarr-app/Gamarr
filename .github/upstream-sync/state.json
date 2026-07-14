@@ -2,13 +2,13 @@
   "radarr": {
     "remote": "https://github.com/Radarr/Radarr.git",
     "branch": "develop",
-    "last_sha": "d944e0e4c9753604513b0b1823cb2bfd5f68e53d",
-    "last_sha_note": "As of 2026-07-04 the delta since cf3775621b was reviewed by hand: ported 104fbe7e3f (custom format year), 4dcc7c7831 (qBit basic auth), 520bf4215a (SQLite BusyTimeout 1000ms). Skipped: Simkl fix (no Simkl list in Gamarr), FFprobe bump (not used), StyleCop Unstable bump (tooling churn), version bumps."
+    "last_sha": "c7cf91c14ac42096a013e1bbb1875bd73b6c509f",
+    "last_sha_note": "As of 2026-07-13 the delta since d944e0e4c9 was reviewed by hand; nothing ported. Skipped: c7cf91c1 Trakt null-TMDB crash (Gamarr has no Trakt import lists), 32d9cd9e streaming-extension probe exclusion (MediaFileExtensions is repurposed for game formats; no .strm/.m3u and VideoFileInfoReader is uncalled), f5102d31 azure-pipelines disk space (we use GitHub Actions), Weblate translations."
   },
   "sonarr": {
     "remote": "https://github.com/Sonarr/Sonarr.git",
     "branch": "develop",
-    "last_sha": "97d24acf06e636ddc888babc3df8f689da879304",
-    "last_sha_note": "As of 2026-07-04 the delta since 4c66cc2c33 was reviewed by hand: e0d2d25070 (qBit cookie reuse) landed independently as dff2d0252b, basic-auth fix ported via the Radarr twin. Skipped: FFprobe, MailKit bump (dependabot), version bump."
+    "last_sha": "4ff1b780010d3d9ec76a4864dce96b6494e9caea",
+    "last_sha_note": "As of 2026-07-13 the delta since 97d24acf06 was only the 4.0.19 version bump; nothing to port."
   }
 }
