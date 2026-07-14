@@ -48,7 +48,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                 var qualityCompare = qualityComparer.Compare(localGame.Quality.Quality, gameFile.Quality.Quality);
 
                 // Get version info for version upgrade checks
-                var newVersion = localGame.FileGameInfo?.GameVersion ?? localGame.DownloadClientGameInfo?.GameVersion;
+                var newVersion = localGame.GameVersion;
                 var existingVersion = gameFile.GameVersion;
 
                 if (qualityCompare < 0)

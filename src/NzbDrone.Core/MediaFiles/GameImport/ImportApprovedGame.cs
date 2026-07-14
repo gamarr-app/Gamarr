@@ -106,6 +106,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     gameFile.Game = localGame.Game;
                     gameFile.ReleaseGroup = localGame.ReleaseGroup;
                     gameFile.Edition = localGame.Edition;
+                    gameFile.GameVersion = localGame.GameVersion;
 
                     if (downloadClientItem?.DownloadId.IsNotNullOrWhiteSpace() == true)
                     {
