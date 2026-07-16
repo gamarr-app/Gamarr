@@ -972,6 +972,23 @@ namespace NzbDrone.Core.MetadataSource
                 existing.Genres = secondary.Genres;
             }
 
+            // Add developer/studio/publisher if missing (Studio drives the
+            // UI's Developer column and sort)
+            if (string.IsNullOrEmpty(existing.Developer) && !string.IsNullOrEmpty(secondary.Developer))
+            {
+                existing.Developer = secondary.Developer;
+            }
+
+            if (string.IsNullOrEmpty(existing.Studio) && !string.IsNullOrEmpty(secondary.Studio))
+            {
+                existing.Studio = secondary.Studio;
+            }
+
+            if (string.IsNullOrEmpty(existing.Publisher) && !string.IsNullOrEmpty(secondary.Publisher))
+            {
+                existing.Publisher = secondary.Publisher;
+            }
+
             // Add RAWG recommendations if missing (keep separate from IGDB recommendations)
             if ((existing.RawgRecommendations == null || !existing.RawgRecommendations.Any()) &&
                 secondary.RawgRecommendations != null && secondary.RawgRecommendations.Any())
