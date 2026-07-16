@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Parser
             @"[._\-\s\[\(]v[\.\s]?(?<version>\d+(?:\.\d+){1,3}[a-z]?\d*)(?![._]?\d*\s*[GMKT]i?B)(?=[._\-\s\]\)<,]|$)|" +
             @"[._\-\s\[\(]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?=[\s\-._\]\),]|$)|" +   // before dateversion so "v2026 05 25" doesn't collapse to just "2026"
             @"[._\-\s\[\(]v(?<dateversion>\d{4,})(?=[._\-\s\]\)<,]|$)|" +
-            @"[._\-](?<version2>\d+(?:\.\d+){2,3})(?![._]?\d*\s*[GMKT]i?B)[._\-]|" +
+            @"[._\-](?<version2>\d+(?:\.\d+){2,3})(?![._]?\d*\s*[GMKT]i?B)(?=[._\-]|\.[A-Za-z0-9]{2,5}$)|" +
             @"[\s\?\!](?<version3>\d+(?:\.\d+)+)(?![._]?\d*\s*[GMKT]i?B)(?=\s|$)|" +
             @"\((?<parenversion>\d+(?:\.\d+)+)\)|" +
             @"[\s\?\!](?<spacenov>\d+(?:\s+\d+){2,3})(?=\s|$)|" +

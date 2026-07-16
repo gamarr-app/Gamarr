@@ -80,6 +80,9 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Some.Game-RazorDOX", "Some Game")]
 
         // Game-style release names with version and release groups
+        [TestCase("Owlboy 1.3.7013.40181 (35964)", "Owlboy")]
+        [TestCase("Owlboy.v1.3.6613.28019.MULTI13-SiMPLEX", "Owlboy")]
+        [TestCase("[PS4] Owlboy [EUR/RUS] (v1.00)", "Owlboy")]
         [TestCase("Cyberpunk.2077.v2.1-CODEX", "Cyberpunk 2077")]
         [TestCase("Elden.Ring.v1.10-FitGirl", "Elden Ring")]
         [TestCase("The.Witcher.3.Wild.Hunt.v4.04-PLAZA", "The Witcher 3 Wild Hunt")]
