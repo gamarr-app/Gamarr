@@ -32,6 +32,7 @@ export interface FileEditSavePayload {
   indexerFlags: number;
   edition: string;
   releaseGroup: string;
+  version: string;
 }
 
 interface FileEditModalContentProps {
@@ -39,6 +40,7 @@ interface FileEditModalContentProps {
   relativePath: string;
   edition: string;
   releaseGroup: string;
+  version: string;
   languageIds: number[];
   languages: Language[];
   indexerFlags: number;
@@ -65,6 +67,7 @@ function FileEditModalContent(props: FileEditModalContentProps) {
     indexerFlags: initialIndexerFlags,
     edition: initialEdition,
     releaseGroup: initialReleaseGroup,
+    version: initialVersion,
   } = props;
 
   const [qualityId, setQualityId] = useState(initialQualityId);
@@ -72,6 +75,7 @@ function FileEditModalContent(props: FileEditModalContentProps) {
   const [indexerFlags, setIndexerFlags] = useState(initialIndexerFlags);
   const [edition, setEdition] = useState(initialEdition);
   const [releaseGroup, setReleaseGroup] = useState(initialReleaseGroup);
+  const [version, setVersion] = useState(initialVersion);
 
   const onQualityChange = useCallback(({ value }: { value: number }) => {
     setQualityId(value);
@@ -91,6 +95,9 @@ function FileEditModalContent(props: FileEditModalContentProps) {
       case 'releaseGroup':
         setReleaseGroup(value as string);
         break;
+      case 'version':
+        setVersion(value as string);
+        break;
       default:
         break;
     }
@@ -103,6 +110,7 @@ function FileEditModalContent(props: FileEditModalContentProps) {
       indexerFlags,
       edition,
       releaseGroup,
+      version,
     });
   }, [
     onSaveInputs,
@@ -111,6 +119,7 @@ function FileEditModalContent(props: FileEditModalContentProps) {
     indexerFlags,
     edition,
     releaseGroup,
+    version,
   ]);
 
   const qualityOptions: SelectOption[] = qualities.map(({ id, name }) => ({
@@ -191,6 +200,17 @@ function FileEditModalContent(props: FileEditModalContentProps) {
                 type={inputTypes.TEXT}
                 name="releaseGroup"
                 value={releaseGroup}
+                onChange={onInputChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>{translate('Version')}</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.TEXT}
+                name="version"
+                value={version}
                 onChange={onInputChange}
               />
             </FormGroup>
