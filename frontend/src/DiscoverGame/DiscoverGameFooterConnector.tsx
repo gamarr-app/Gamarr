@@ -11,6 +11,7 @@ interface DiscoverGameDefaults {
   minimumAvailability: string;
   rootFolderPath: string;
   searchForGame: boolean;
+  monitorUpdates: boolean;
 }
 
 interface DiscoverGameState {
@@ -40,6 +41,7 @@ interface OwnProps {
       minimumAvailability?: string;
       rootFolderPath?: string;
       searchForGame?: boolean;
+      monitorUpdates?: boolean;
     };
   }) => void;
   onExcludeGamesPress: () => void;
@@ -57,6 +59,7 @@ function createMapStateToProps() {
         minimumAvailability: defaultMinimumAvailability,
         rootFolderPath: defaultRootFolderPath,
         searchForGame: defaultSearchForGame,
+        monitorUpdates: defaultMonitorUpdates,
       } = discoverGame.defaults;
 
       const { isAdding } = discoverGame;
@@ -72,6 +75,7 @@ function createMapStateToProps() {
         defaultMinimumAvailability,
         defaultRootFolderPath,
         defaultSearchForGame,
+        defaultMonitorUpdates,
       };
     }
   );

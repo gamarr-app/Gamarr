@@ -26,12 +26,20 @@ function GameStatus({
   showMissingStatus = true,
   className = styles.center,
 }: GameStatusProps) {
-  const { isAvailable, monitored, grabbed = false } = useGame(gameId) as Game;
+  const game = useGame(gameId) as Game | undefined;
 
   const queueItem = useSelector(
     useMemo(() => createQueueItemSelectorForHook(gameId), [gameId])
   );
   const gameFile = useGameFile(gameFileId);
+
+  // A Wanted/CutoffUnmet row can outlive its game: a SignalR delete event
+  // removes the game from the store without refreshing those collections.
+  if (!game) {
+    return null;
+  }
+
+  const { isAvailable, monitored, grabbed = false } = game;
 
   const hasGameFile = !!gameFile;
   const isQueued = !!queueItem;

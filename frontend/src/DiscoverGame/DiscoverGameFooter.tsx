@@ -21,6 +21,7 @@ interface DiscoverGameFooterProps {
   defaultMinimumAvailability?: string;
   defaultRootFolderPath?: string;
   defaultSearchForGame?: boolean;
+  defaultMonitorUpdates?: boolean;
   onInputChange: (change: InputChanged) => void;
   onAddGamesPress: (options: { addOptions: AddOptions }) => void;
   onExcludeGamesPress: () => void;
@@ -32,6 +33,7 @@ interface AddOptions {
   minimumAvailability: string | undefined;
   rootFolderPath: string | undefined;
   searchForGame: boolean | undefined;
+  monitorUpdates: boolean | undefined;
 }
 
 function DiscoverGameFooter({
@@ -44,6 +46,7 @@ function DiscoverGameFooter({
   defaultMinimumAvailability,
   defaultRootFolderPath,
   defaultSearchForGame,
+  defaultMonitorUpdates,
   onInputChange,
   onAddGamesPress,
   onExcludeGamesPress,
@@ -57,6 +60,7 @@ function DiscoverGameFooter({
   );
   const [rootFolderPath, setRootFolderPath] = useState(defaultRootFolderPath);
   const [searchForGame, setSearchForGame] = useState(defaultSearchForGame);
+  const [monitorUpdates, setMonitorUpdates] = useState(defaultMonitorUpdates);
   const [isExcludeGameModalOpen, setIsExcludeGameModalOpen] = useState(false);
 
   useEffect(() => {
@@ -79,17 +83,23 @@ function DiscoverGameFooter({
     if (searchForGame !== defaultSearchForGame) {
       setSearchForGame(defaultSearchForGame);
     }
+
+    if (monitorUpdates !== defaultMonitorUpdates) {
+      setMonitorUpdates(defaultMonitorUpdates);
+    }
   }, [
     defaultMonitor,
     defaultQualityProfileId,
     defaultMinimumAvailability,
     defaultRootFolderPath,
     defaultSearchForGame,
+    defaultMonitorUpdates,
     monitor,
     qualityProfileId,
     minimumAvailability,
     rootFolderPath,
     searchForGame,
+    monitorUpdates,
   ]);
 
   const handleExcludeGameModalClose = useCallback(() => {
@@ -103,6 +113,7 @@ function DiscoverGameFooter({
       minimumAvailability,
       rootFolderPath,
       searchForGame,
+      monitorUpdates,
     };
 
     onAddGamesPress({ addOptions });
@@ -112,6 +123,7 @@ function DiscoverGameFooter({
     minimumAvailability,
     rootFolderPath,
     searchForGame,
+    monitorUpdates,
     onAddGamesPress,
   ]);
 
