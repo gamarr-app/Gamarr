@@ -47,8 +47,12 @@ namespace NzbDrone.Core.Parser
 
             // Game release with version (but NOT Update releases): GameName.v1.2.3-GROUP or GameName.v1.4.0g-GROUP
             // Negative lookbehind ensures we don't match if title ends with ".Update" or "_Update"
-            // Handles letter suffixes like v1.4.0g, v0.4.2f7
-            new Regex(@"^(?<title>(?![(\[]).+?(?<![._]Update))[._]v(?<version>\d+(?:\.\d+)*[a-z]*\d*)[._-](?<releasegroup>[A-Za-z0-9_]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Handles letter suffixes like v1.4.0g, v0.4.2f7, and an optional
+            // .REPACK token between version and group (GameName.v1.2.Repack-GROUP).
+            // The group must contain at least one letter so a trailing version
+            // component can't be backtracked into it (Factorio.v1.1.107 must not
+            // parse as version=1.1, group=107).
+            new Regex(@"^(?<title>(?![(\[]).+?(?<![._]Update))[._]v(?<version>\d+(?:\.\d+)*[a-z]*\d*)(?:[._]REPACK)?[._-](?<releasegroup>(?=[A-Za-z0-9_]*[A-Za-z])[A-Za-z0-9_]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Game release with date-based version: "Hades II v2025.08.03" or "Game Name v2025.06.18"
             // Must be before year patterns to avoid v2025 being parsed as year
@@ -129,7 +133,11 @@ namespace NzbDrone.Core.Parser
             // Russian repacker format: "Game Name 2016 PC RePack от xatab" or "Game Name v1.0 2022 PC RePack от R.G. Механики"
             // Title stops at version indicator (v followed by digits) or year before PC
             // Version pattern handles formats like "v 1.03u5" (letter+digit suffixes), DLC with or without count
-            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+v\s*\d|\s+(19|20)\d{2}\s+PC)(?:\s+v[\s\d.]+(?:[a-z]+\d*)*(?:\s+(?:\d+\s+)?DLCs?)?)?(?:\s+(?<year>(19|20)\d{2}))?\s+PC\s+(?:RePack|Rip)\s+(?:от|by|from)\s+(?:xatab|R\.?G\.?\s*(?:Механики|Механіки|Mechanics|Catalyst|Freedom|SteamGames)?|FitGirl|DODI|Chovka|Decepticon|Wanterlude|Let.?sPlay)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // NOTE: the version-suffix group must stay unambiguous. The previous
+            // (?:[a-z]+\d*)* form was a nested quantifier over letter runs and
+            // backtracked exponentially (2^n) on any title with a long word after
+            // "v1.0", freezing search threads on indexer-controlled input.
+            new Regex(@"^(?<title>(?![(\[]).+?)(?=\s+v\s*\d|\s+(19|20)\d{2}\s+PC)(?:\s+v[\s\d.]+(?:[a-z]+(?:\d+[a-z]+)*\d*)?(?:\s+(?:\d+\s+)?DLCs?)?)?(?:\s+(?<year>(19|20)\d{2}))?\s+PC\s+(?:RePack|Rip)\s+(?:от|by|from)\s+(?:xatab|R\.?G\.?\s*(?:Механики|Механіки|Mechanics|Catalyst|Freedom|SteamGames)?|FitGirl|DODI|Chovka|Decepticon|Wanterlude|Let.?sPlay)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Switch emulator format: "Nintendo Switch Game Name NSP/NSZ RUS Multi10" or "Game Name Switch Emulators"
             // Stop title at version number (v1 or similar) or at Switch marker if no version
@@ -243,9 +251,12 @@ namespace NzbDrone.Core.Parser
 
             // Dot- or underscore-separated title with version and no release group, e.g.
             // "Factorio.v1.1.107.MULTi.x64" -> title="Factorio", version="1.1.107"
-            // "Stardew.Valley.v1.6.15_MULTi" -> title="Stardew.Valley", version="1.6.15"
+            // "Euro.Truck.Simulator.2.v1.50.MULTi.x64" -> title="Euro.Truck.Simulator.2"
             // Anything after the version (platform/language tags) is discarded.
-            new Regex(@"^(?<title>(?![(\[])[^v]?[^_.]+?)[._]v(?<version>\d+(?:[._]\d+)+)(?:[._-][^-]*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // The title must be a lazy .+? like every other regex in this array —
+            // the previous [^v]?[^_.]+? class forbade dots/underscores after the
+            // first character, so no multi-dot title could ever match.
+            new Regex(@"^(?<title>(?![(\[]).+?)[._]v(?<version>\d+(?:[._]\d+)+)(?:[._-][^-]*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Game release without version: GameName-GROUP (fallback for scene-style naming).
             // Accepted group shapes (all anchored to end of string):
@@ -265,7 +276,12 @@ namespace NzbDrone.Core.Parser
             //   - Allows PascalCase (StarRupture), colons, dashes, commas, and apostrophes in titles
             //   - Optional trailing number/Roman numeral for sequels
             //   - Rejects all-caps, all-lowercase, and random hash strings
-            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:(?:[:,]?\s+|\s+-\s+|\s+)[A-Za-z][a-z]*(?:[A-Z][a-z]+)*(?:'[a-z]+)?)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
+            // NOTE: the word separator must keep its alternatives disjoint. With
+            // an optional [:,]? the first branch degenerated to \s+ (identical to
+            // the last), giving 2^(word count) backtracking on long capitalized
+            // titles that end up not matching — this is the last regex in the
+            // array, so every otherwise-unparseable title paid that cost.
+            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:(?:[:,]\s+|\s+-\s+|\s+)[A-Za-z][a-z]*(?:[A-Z][a-z]+)*(?:'[a-z]+)?)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
@@ -390,7 +406,7 @@ namespace NzbDrone.Core.Parser
                     var titleWithoutExtension = FileExtensions.RemoveFileExtension(title).ToCharArray();
                     Array.Reverse(titleWithoutExtension);
 
-                    title = $"{titleWithoutExtension}{title.Substring(titleWithoutExtension.Length)}";
+                    title = $"{new string(titleWithoutExtension)}{title.Substring(titleWithoutExtension.Length)}";
 
                     Logger.Debug("Reversed name detected. Converted to '{0}'", title);
                 }
@@ -480,8 +496,12 @@ namespace NzbDrone.Core.Parser
                                     result.ReleaseGroup = subGroup;
                                 }
 
-                                // Check for release group from game-style release regex
-                                if (match[0].Groups["releasegroup"].Success && !match[0].Groups["releasegroup"].Value.IsNullOrWhiteSpace())
+                                // Check for release group from game-style release regex.
+                                // Purely numeric captures are version components the
+                                // regex backtracked into the group (Game.v1.2 -> "2");
+                                // ReleaseGroupParser applies the same guard.
+                                if (match[0].Groups["releasegroup"].Success && !match[0].Groups["releasegroup"].Value.IsNullOrWhiteSpace() &&
+                                    !int.TryParse(match[0].Groups["releasegroup"].Value, out _))
                                 {
                                     result.ReleaseGroup = match[0].Groups["releasegroup"].Value;
                                 }
