@@ -267,8 +267,12 @@ namespace NzbDrone.Core.Parser
 
                 foreach (var title in gameTitlesToCheck)
                 {
+                    // Keep digit-bearing words regardless of length: dropping the
+                    // "2" from "Half-Life 2" would make any Half-Life release
+                    // (Alyx, HL1) satisfy the all-words check and be grabbed as
+                    // the searched sequel.
                     var titleWords = Regex.Split(title.ToLowerInvariant(), @"[^a-z0-9]+")
-                        .Where(w => w.Length >= 2)
+                        .Where(w => w.Length >= 2 || w.Any(char.IsDigit))
                         .ToList();
 
                     if (titleWords.Count >= 2 && titleWords.All(w => releaseWords.Contains(w)))
