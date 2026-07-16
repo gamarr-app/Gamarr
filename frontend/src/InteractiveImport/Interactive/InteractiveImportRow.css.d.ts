@@ -7,6 +7,7 @@ interface CssExports {
   'quality': string;
   'relativePath': string;
   'reprocessing': string;
+  'version': string;
 }
 export const cssExports: CssExports;
 export default cssExports;
