@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex ProperRegex = new (@"\b(?<proper>PROPER)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex VersionRegex = new (@"[._-]v?(?<version>\d+(?:\.\d+)+)[._-]|[._-](?:BUILD|B)[._-]?(?<version>\d+)",
+        private static readonly Regex VersionRegex = new (@"[._\s-]v?(?<version>\d+(?:\.\d+)+)(?:[._\s-]|$)|[._\s-](?:BUILD|B)[._\s-]?(?<version>\d+)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex RealRegex = new (@"\b(?<real>REAL|PROPER[._-]?FIX)\b",
@@ -503,7 +503,9 @@ namespace NzbDrone.Core.Parser
         {
             var result = new QualityModel { Quality = Quality.Unknown };
 
-            var versionRegexResult = VersionRegex.Match(normalizedName);
+            // Match against the raw name: the regex needs the [._-] delimiters and
+            // literal dots that normalization has already replaced with spaces.
+            var versionRegexResult = VersionRegex.Match(name);
 
             if (versionRegexResult.Success)
             {

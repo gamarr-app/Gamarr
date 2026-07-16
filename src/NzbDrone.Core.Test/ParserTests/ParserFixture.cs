@@ -68,6 +68,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Factorio.v1.1.107.MULTi.x64", "Factorio")]
         [TestCase("Stardew.Valley.v1.6.15_MULTi", "Stardew Valley")]
         [TestCase("Factorio.v1.1.107", "Factorio")]
+        [TestCase("Euro.Truck.Simulator.2.v1.50.MULTi.x64", "Euro Truck Simulator 2")]
+
+        // Version followed by a REPACK token before the group
+        [TestCase("Hades.v1.38116.Repack-FAKE", "Hades")]
 
         // Title-GROUP fallback: groups beyond plain ALL-CAPS (regression from the bug report)
         [TestCase("Clair.Obscur.Expedition.33.Deluxe.Edition-InsaneRamZes", "Clair Obscur Expedition 33 Deluxe Edition")]
@@ -346,6 +350,32 @@ namespace NzbDrone.Core.Test.ParserTests
             var result = Parser.Parser.ParseGameTitle(postTitle);
             result.Should().NotBeNull($"Failed to parse: {postTitle}");
             result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Regression guard for the search-freeze regexes: both inputs previously
+        // triggered exponential backtracking (2^n in word/letter count) — the
+        // Russian-repacker pattern via its version-suffix group and the final
+        // simple-title fallback via its ambiguous word separator. Whether these
+        // parse or not is irrelevant; they must return in bounded time.
+        [TestCase("Game v1.0 phantomlibertyultimateeditionrepack by mechanics trailing")]
+        [TestCase("One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen Fifteen Sixteen Seventeen Eighteen Nineteen Twenty Twentyone Twentytwo Twentythree Twentyfour Twentyfive Twentysix 99999")]
+        public void should_not_backtrack_catastrophically_on_pathological_titles(string postTitle)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            Parser.Parser.ParseGameTitle(postTitle);
+
+            watch.Stop();
+            watch.ElapsedMilliseconds.Should().BeLessThan(2000, $"parsing hung on: {postTitle}");
+        }
+
+        [TestCase("Factorio.v1.1.107", null)]
+        [TestCase("Some.Game.v1.2", null)]
+        public void should_not_capture_version_component_as_release_group(string postTitle, string expectedGroup)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.ReleaseGroup.Should().Be(expectedGroup);
         }
 
         // Real-world FitGirl Repack releases (high seeder count)

@@ -56,6 +56,13 @@ namespace NzbDrone.Host
 
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+                // Backstop against catastrophic regex backtracking: parsing runs
+                // dozens of patterns over indexer-controlled release titles, and a
+                // single pathological title would otherwise spin a thread forever
+                // (the pre-2026-07 search freezes). 10s is far above any legitimate
+                // match; regexes without an explicit timeout inherit this default.
+                AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromSeconds(10));
+
                 var appMode = GetApplicationMode(startupContext);
                 var config = GetConfiguration(startupContext);
 
