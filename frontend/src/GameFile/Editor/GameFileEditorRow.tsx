@@ -77,6 +77,11 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
     setIsFileEditModalOpen(false);
   }, []);
 
+  const fallbackPath =
+    sceneName ||
+    path?.split(/[/\\]/).filter(Boolean).pop() ||
+    translate('GameFolder');
+
   return (
     <TableRow>
       {columns.map((column) => {
@@ -88,14 +93,18 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
 
         if (name === 'relativePath') {
           // Empty relativePath means this is a folder-based GameFile
-          const displayPath = relativePath || translate('GameFolder');
+          const displayPath = relativePath || fallbackPath;
           const isFolder = !relativePath;
 
           return (
             <TableRowCell
               key={name}
               className={styles.relativePath}
-              title={isFolder ? translate('GameFolderTooltip') : relativePath}
+              title={
+                isFolder
+                  ? path || sceneName || translate('GameFolderTooltip')
+                  : relativePath
+              }
             >
               {displayPath}
             </TableRowCell>
