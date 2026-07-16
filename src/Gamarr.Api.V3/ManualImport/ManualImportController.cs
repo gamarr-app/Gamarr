@@ -50,13 +50,14 @@ namespace Gamarr.Api.V3.ManualImport
 
             foreach (var item in items)
             {
-                var processedItem = _manualImportService.ReprocessItem(item.Path, item.DownloadId, item.GameId, item.ReleaseGroup, item.Quality, item.Languages, item.IndexerFlags);
+                var processedItem = _manualImportService.ReprocessItem(item.Path, item.DownloadId, item.GameId, item.ReleaseGroup, item.Version, item.Quality, item.Languages, item.IndexerFlags);
 
                 item.Game = processedItem.Game.ToResource(0);
                 item.IndexerFlags = processedItem.IndexerFlags;
                 item.Rejections = processedItem.Rejections.Select(r => r.ToResource());
                 item.CustomFormats = processedItem.CustomFormats.ToResource(false);
                 item.CustomFormatScore = processedItem.CustomFormatScore;
+                item.Version = processedItem.Version;
 
                 // Only set the language/quality if they're unknown and languages were returned.
                 if (item.Languages?.Count <= 1 && (item.Languages?.SingleOrDefault() ?? Language.Unknown) == Language.Unknown && processedItem.Languages.Any())
