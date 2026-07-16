@@ -81,6 +81,11 @@ namespace NzbDrone.Core.MediaFiles
                 // For folders, move contents directly into game.Path
                 // TransferFolder will move the contents of sourcePath into destinationPath
                 destinationPath = localGame.Game.Path;
+
+                // Guards against recreating the game folder on the local OS disk
+                // when the root folder (NAS/external mount) is missing, and
+                // publishes GameFolderCreatedEvent for new folders.
+                EnsureGameFolder(gameFile, localGame, destinationPath);
             }
             else
             {
@@ -105,6 +110,9 @@ namespace NzbDrone.Core.MediaFiles
                 // For folders, copy contents directly into game.Path
                 // TransferFolder will copy the contents of sourcePath into destinationPath
                 destinationPath = localGame.Game.Path;
+
+                // Same unmounted-root-folder guard as the move path.
+                EnsureGameFolder(gameFile, localGame, destinationPath);
             }
             else
             {
@@ -136,12 +144,8 @@ namespace NzbDrone.Core.MediaFiles
                     throw new DirectoryNotFoundException($"Game folder path does not exist: {sourcePath}");
                 }
 
-                // For folder imports, destinationPath is game.Path - we move contents INTO it
-                // Ensure the game folder exists
-                if (!_diskProvider.FolderExists(destinationPath))
-                {
-                    _diskProvider.CreateFolder(destinationPath);
-                }
+                // destinationPath is game.Path; EnsureGameFolder (called by every
+                // TransferGamePath caller) has already root-checked and created it.
 
                 // Move or copy the folder contents using DiskTransferService
                 _diskTransferService.TransferFolder(sourcePath, destinationPath, mode);
@@ -232,6 +236,15 @@ namespace NzbDrone.Core.MediaFiles
         {
             var gameFileFolder = Path.GetDirectoryName(filePath);
             var gameFolder = game.Path;
+
+            // Folder-based game files pass the game folder itself as filePath;
+            // its "directory" would be the root folder, which must never be
+            // (re)created here — only the game folder is.
+            if (filePath.PathEquals(gameFolder))
+            {
+                gameFileFolder = gameFolder;
+            }
+
             var rootFolder = _rootFolderService.GetBestRootFolderPath(gameFolder);
 
             if (rootFolder.IsNullOrWhiteSpace())

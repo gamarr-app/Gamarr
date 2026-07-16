@@ -54,9 +54,16 @@ namespace NzbDrone.Core.Extras.Files
 
         protected TExtraFile ImportFile(Game game, GameFile gameFile, string path, bool readOnly, string extension, string fileNameSuffix = null)
         {
-            var gameFilePath = Path.Combine(game.Path, gameFile.RelativePath);
-            var newFolder = Path.GetDirectoryName(gameFilePath);
-            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(gameFile.RelativePath));
+            // Folder-based game files (empty RelativePath means "the game folder
+            // itself") keep extras inside the game folder, named after it. The
+            // file-based math would resolve to "<library root>/.nfo" and then
+            // throw computing the relative path after the move.
+            var isFolderGameFile = gameFile.RelativePath.IsNullOrWhiteSpace();
+            var gameFilePath = isFolderGameFile ? game.Path : Path.Combine(game.Path, gameFile.RelativePath);
+            var newFolder = isFolderGameFile ? game.Path : Path.GetDirectoryName(gameFilePath);
+            var filenameBuilder = new StringBuilder(isFolderGameFile
+                ? Path.GetFileName(game.Path)
+                : Path.GetFileNameWithoutExtension(gameFile.RelativePath));
 
             if (fileNameSuffix.IsNotNullOrWhiteSpace())
             {
@@ -95,8 +102,11 @@ namespace NzbDrone.Core.Extras.Files
         {
             _logger.Trace("Renaming extra file: {0}", extraFile);
 
-            var newFolder = Path.GetDirectoryName(Path.Combine(game.Path, gameFile.RelativePath));
-            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(gameFile.RelativePath));
+            var isFolderGameFile = gameFile.RelativePath.IsNullOrWhiteSpace();
+            var newFolder = isFolderGameFile ? game.Path : Path.GetDirectoryName(Path.Combine(game.Path, gameFile.RelativePath));
+            var filenameBuilder = new StringBuilder(isFolderGameFile
+                ? Path.GetFileName(game.Path)
+                : Path.GetFileNameWithoutExtension(gameFile.RelativePath));
 
             if (fileNameSuffix.IsNotNullOrWhiteSpace())
             {

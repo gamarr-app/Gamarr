@@ -243,6 +243,21 @@ namespace NzbDrone.Core.MediaFiles
             {
                 var scanResult = _virusScanner.ScanPath(directoryInfo.FullName);
 
+                // Fail closed: scanning is enabled and the scanner is present, so
+                // an errored scan (missing virus DB, I/O failure) must not import
+                // as if it were clean. The import retries on the next processing
+                // pass once scanning works again.
+                if (!scanResult.ScanCompleted)
+                {
+                    _logger.Warn("Virus scan did not complete for release '{0}': {1}", cleanedUpName, scanResult.ErrorMessage ?? "unknown error");
+
+                    return new List<ImportResult>
+                    {
+                        RejectionResult(ImportRejectionReason.VirusScanFailed,
+                            $"Virus scan could not be completed: {scanResult.ErrorMessage ?? "unknown error"}")
+                    };
+                }
+
                 if (scanResult.ScanCompleted && !scanResult.IsClean)
                 {
                     var infectedFiles = string.Join(", ", scanResult.InfectedFiles.Select(f => $"{Path.GetFileName(f.FilePath)} ({f.ThreatName})").Take(3));

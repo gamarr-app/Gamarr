@@ -68,7 +68,13 @@ namespace NzbDrone.Core.Extras
                                                                      .Insert(0, "."))
                                                                      .ToList();
 
-            var sourceFolder = _diskProvider.GetParentFolder(localGame.Path);
+            // Games usually import as whole folders, in which case the release
+            // folder itself is the extras source. Taking its parent (the Radarr
+            // single-file assumption) would scan the download client's entire
+            // completed directory and could move files out of sibling downloads.
+            var sourceFolder = _diskProvider.FolderExists(localGame.Path)
+                ? localGame.Path
+                : _diskProvider.GetParentFolder(localGame.Path);
             var files = _diskProvider.GetFiles(sourceFolder, folderSearchOption);
             var managedFiles = _extraFileManagers.Select((i) => new List<string>()).ToArray();
 

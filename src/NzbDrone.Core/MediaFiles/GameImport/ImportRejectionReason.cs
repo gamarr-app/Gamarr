@@ -28,5 +28,6 @@ public enum ImportRejectionReason
     NotCustomFormatUpgrade,
     SuspiciousReleaseStructure,
     ReleaseGroupMismatch,
-    VirusDetected
+    VirusDetected,
+    VirusScanFailed
 }

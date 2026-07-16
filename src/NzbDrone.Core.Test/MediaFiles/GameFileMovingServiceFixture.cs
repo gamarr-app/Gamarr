@@ -52,6 +52,19 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IBuildFileNames>()
                   .Setup(s => s.BuildFilePath(It.IsAny<Game>(), It.IsAny<string>(), It.IsAny<string>()))
                   .Returns(@"C:\Games\TestGame\TestGame.exe".AsOsAgnostic());
+
+            // Folder moves run the same root-folder-unmounted guard as file
+            // moves. Trailing separator matters: CreateFolder's recursion walks
+            // parents via OsPath.Directory.FullPath, which keeps one.
+            var rootFolder = @"C:\Games\".AsOsAgnostic();
+
+            Mocker.GetMock<IRootFolderService>()
+                  .Setup(s => s.GetBestRootFolderPath(It.IsAny<string>(), It.IsAny<List<RootFolder>>()))
+                  .Returns(rootFolder);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(rootFolder))
+                  .Returns(true);
         }
 
         [Test]
