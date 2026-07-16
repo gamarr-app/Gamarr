@@ -8,6 +8,7 @@ namespace Gamarr.Http.Middleware
     public class VersionMiddleware
     {
         private const string VERSIONHEADER = "X-Application-Version";
+        private const string COMPATIBLEVERSION = "5.0.0.0";
 
         private readonly RequestDelegate _next;
         private readonly string _version;
@@ -22,7 +23,7 @@ namespace Gamarr.Http.Middleware
         {
             if (context.Request.IsApiRequest() && !context.Response.Headers.ContainsKey(VERSIONHEADER))
             {
-                context.Response.Headers[VERSIONHEADER] = _version;
+                context.Response.Headers[VERSIONHEADER] = context.Request.IsProwlarrIndexerTestRequest() ? COMPATIBLEVERSION : _version;
             }
 
             await _next(context);
