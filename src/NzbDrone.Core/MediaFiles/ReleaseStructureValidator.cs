@@ -55,6 +55,7 @@ namespace NzbDrone.Core.MediaFiles
             {
                 RequiredPatterns = new[] { @"^setup.*\.exe$" },
                 OptionalPatterns = new[] { @"^dodi-.*\.bin$", @"DODi Repacks\.url$", @"^Data[\\/]" },
+                DetectionPatterns = new[] { @"^dodi-.*\.bin$", @"DODi Repacks\.url$", @"dodi" },
                 ForbiddenPatterns = new[] { @"^fg-.*\.bin$" },
                 Description = "DODI Repack"
             },
@@ -145,6 +146,7 @@ namespace NzbDrone.Core.MediaFiles
             {
                 RequiredPatterns = new[] { @"^setup.*\.exe$" },
                 OptionalPatterns = new[] { @"ElAmigos", @"elamigos", @"\.bin$" },
+                DetectionPatterns = new[] { @"elamigos" },
                 ForbiddenPatterns = new[] { @"^fg-", @"codex\.nfo$" },
                 Description = "ElAmigos Repack"
             },
@@ -154,6 +156,7 @@ namespace NzbDrone.Core.MediaFiles
             {
                 RequiredPatterns = new[] { @"^setup.*\.exe$|^autorun\.exe$" },
                 OptionalPatterns = new[] { @"XATAB", @"xatab" },
+                DetectionPatterns = new[] { @"xatab" },
                 ForbiddenPatterns = new[] { @"^fg-", @"codex\.nfo$" },
                 Description = "XATAB Repack"
             },
@@ -163,6 +166,7 @@ namespace NzbDrone.Core.MediaFiles
             {
                 RequiredPatterns = new[] { @"^setup.*\.exe$" },
                 OptionalPatterns = new[] { @"R\.G\. ?Mechanics", @"rg.mechanics" },
+                DetectionPatterns = new[] { @"R\.G\. ?Mechanics|rg.mechanics" },
                 ForbiddenPatterns = new[] { @"^fg-", @"codex\.nfo$" },
                 Description = "R.G. Mechanics Repack"
             },
@@ -245,6 +249,30 @@ namespace NzbDrone.Core.MediaFiles
                 result.Message = $"Found suspicious files that may be malware: {string.Join(", ", result.SuspiciousFiles.Take(5))}";
                 Logger.Warn("Release contains suspicious files: {0}", string.Join(", ", result.SuspiciousFiles));
                 return result;
+            }
+
+            // If the release claims a known group and its structure validates as
+            // that group, trust the claim. Generic detection cannot distinguish
+            // groups that share markers (DODI, GOG, ElAmigos, XATAB and
+            // R.G. Mechanics all ship a root setup*.exe), so detecting first
+            // would flag every legitimate GOG installer as a DODI mismatch.
+            if (!string.IsNullOrWhiteSpace(releaseGroup))
+            {
+                var claimedKey = NormalizeGroupName(releaseGroup);
+
+                if (KnownGroups.TryGetValue(claimedKey, out var claimedPattern))
+                {
+                    var claimedValidation = ValidateAgainstPattern(relativeFiles, claimedPattern, claimedKey);
+
+                    if (claimedValidation.isValid)
+                    {
+                        result.DetectedGroup = KnownGroups.Keys.First(k => string.Equals(k, claimedKey, StringComparison.OrdinalIgnoreCase));
+                        result.IsValid = true;
+                        result.Confidence = ReleaseStructureConfidence.High;
+                        result.Message = claimedValidation.message;
+                        return result;
+                    }
+                }
             }
 
             // Try to detect the actual release group from file structure
@@ -370,6 +398,17 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (hasAllRequired)
                 {
+                    // Groups whose required patterns are generic (a plain root
+                    // setup*.exe is shared by DODI/GOG/ElAmigos/XATAB/...) also
+                    // need a group-specific marker before we positively claim
+                    // the detection; a wrong detection hard-rejects the import
+                    // as a claimed-vs-detected mismatch.
+                    if (pattern.DetectionPatterns.Any() &&
+                        !pattern.DetectionPatterns.Any(p => files.Any(f => Regex.IsMatch(f, p, RegexOptions.IgnoreCase))))
+                    {
+                        continue;
+                    }
+
                     // Verify no forbidden patterns
                     var hasForbidden = pattern.ForbiddenPatterns?.Any(p =>
                         files.Any(f => Regex.IsMatch(f, p, RegexOptions.IgnoreCase))) ?? false;
@@ -463,7 +502,11 @@ namespace NzbDrone.Core.MediaFiles
                 "RGMECHANICS" => "RG.MECHANICS",
                 "DARKSIDERS" => "DARKSiDERS",
                 "TINYISO" => "TiNYiSO",
-                _ => groupName // Return original if no mapping
+
+                // Keep the punctuation-stripped form: returning the original here
+                // threw the normalization away, so "Razor-1911" never compared
+                // equal to a detected "RAZOR1911".
+                _ => normalized
             };
         }
     }
@@ -472,6 +515,11 @@ namespace NzbDrone.Core.MediaFiles
     {
         public string[] RequiredPatterns { get; set; } = Array.Empty<string>();
         public string[] OptionalPatterns { get; set; } = Array.Empty<string>();
+
+        // Group-specific markers required (any one) before DetectReleaseGroup
+        // may positively identify this group. Groups whose RequiredPatterns are
+        // already distinctive (fg-*.bin, codex.nfo, ...) leave this empty.
+        public string[] DetectionPatterns { get; set; } = Array.Empty<string>();
         public string[] ForbiddenPatterns { get; set; } = Array.Empty<string>();
         public int MinBinFiles { get; set; }
         public string Description { get; set; }
