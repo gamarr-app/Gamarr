@@ -32,6 +32,8 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Subnautica 2 (v2026 05)", 2026, 5, 0, 0)]
         [TestCase("The Outer Worlds 2 Premium Edition (v1030 All DLCs Bonus", 1030, 0, 0, 0)]
         [TestCase("The Outer Worlds 2: Premium Edition (v.1.0.6.0) + 7 DLC [amd64] [Multi] [Wine]", 1, 0, 6, 0)]
+        [TestCase("setup_monster_prom_2_monster_camp_2.31.a_(88979).exe", 2, 31, 0, 0)]
+        [TestCase("monster_prom_2_monster_camp_2_31_a_88980.sh", 2, 31, 0, 0)]
         public void should_parse_version_from_release_title(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);
