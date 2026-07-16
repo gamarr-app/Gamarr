@@ -162,7 +162,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             localGame.Path = path;
             localGame.SceneSource = SceneSource(game, rootFolder);
             localGame.ExistingFile = game.Path.IsParentPath(path);
-            localGame.Size = _diskProvider.GetFileSize(path);
+            localGame.Size = _diskProvider.FolderExists(path)
+                ? _diskProvider.GetFolderSize(path)
+                : _diskProvider.GetFileSize(path);
             localGame.ReleaseGroup = finalReleaseGroup;
             localGame.Languages = finalLanguages;
             localGame.Quality = finalQuality;
@@ -243,10 +245,11 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             }
 
             var folderInfo = Parser.Parser.ParseGameTitle(directoryInfo.Name);
-            var gameFiles = SceneSource(game, baseFolder)
+            var sceneSource = SceneSource(game, baseFolder);
+            var importPaths = sceneSource
                 ? new List<string> { baseFolder }
                 : _diskScanService.FilterPaths(rootFolder, _diskScanService.GetVideoFiles(baseFolder).ToList());
-            var decisions = _importDecisionMaker.GetImportDecisions(gameFiles, game, downloadClientItem, folderInfo, SceneSource(game, baseFolder), filterExistingFiles);
+            var decisions = _importDecisionMaker.GetImportDecisions(importPaths, game, downloadClientItem, folderInfo, sceneSource, filterExistingFiles);
 
             return decisions.Select(decision => MapItem(decision, rootFolder, downloadId, directoryInfo.Name)).ToList();
         }
@@ -358,9 +361,12 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
 
         private string GetImportRelativePath(string rootFolder, string path)
         {
-            if (rootFolder.PathEquals(path))
+            var normalizedRootFolder = rootFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var normalizedPath = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            if (normalizedRootFolder.PathEquals(normalizedPath))
             {
-                return Path.GetFileName(path);
+                return Path.GetFileName(normalizedPath);
             }
 
             return rootFolder.GetRelativePath(path);
