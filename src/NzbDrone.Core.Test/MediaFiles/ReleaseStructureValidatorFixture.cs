@@ -193,6 +193,59 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_accept_gog_installer_and_not_misdetect_it_as_dodi()
+        {
+            // GOG installers ship a root setup_*.exe, which also satisfies
+            // DODI's generic required pattern; detection order used to hard-
+            // reject every GOG release as "Claimed 'GOG' but structure matches 'DODI'".
+            GivenFolderExists();
+            GivenFiles("setup_some_game_1.0.exe", "setup_some_game_1.0-1.bin", "goggame-1207658930.info");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, "GOG", "setup_some_game_1.0");
+
+            result.IsValid.Should().BeTrue();
+            result.Confidence.Should().Be(ReleaseStructureConfidence.High);
+        }
+
+        [Test]
+        public void should_accept_elamigos_release_with_generic_setup_exe()
+        {
+            GivenFolderExists();
+            GivenFiles("setup.exe", "data1.bin", "ElAmigos.url");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, "ElAmigos", "Some.Game-ElAmigos");
+
+            result.IsValid.Should().BeTrue();
+            result.Confidence.Should().Be(ReleaseStructureConfidence.High);
+        }
+
+        [Test]
+        public void should_not_detect_generic_setup_exe_as_dodi_without_dodi_markers()
+        {
+            GivenFolderExists();
+            GivenFiles("setup.exe", "data1.bin");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, null, "Some.Game");
+
+            result.DetectedGroup.Should().BeNull();
+            result.IsValid.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_normalize_punctuated_claimed_group_when_comparing_to_detected()
+        {
+            // "Razor-1911" must normalize to RAZOR1911 for the mismatch check;
+            // the normalization result used to be discarded for unmapped groups.
+            GivenFolderExists();
+            GivenFiles("razor1911.nfo", "rzr-game.iso", "Crack/game.exe");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, "Razor-1911", "Some.Game-Razor-1911");
+
+            result.IsValid.Should().BeTrue();
+            result.Confidence.Should().Be(ReleaseStructureConfidence.High);
+        }
+
+        [Test]
         public void should_flag_hta_file_as_suspicious()
         {
             GivenFolderExists();
