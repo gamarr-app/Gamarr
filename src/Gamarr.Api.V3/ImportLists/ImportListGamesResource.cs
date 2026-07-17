@@ -33,6 +33,7 @@ namespace Gamarr.Api.V3.ImportLists
 
         public int Runtime { get; set; }
         public int IgdbId { get; set; }
+        public int SteamAppId { get; set; }
         public string Folder { get; set; }
         public string Certification { get; set; }
         public float Popularity { get; set; }
@@ -60,6 +61,7 @@ namespace Gamarr.Api.V3.ImportLists
             return new ImportListGamesResource
             {
                 IgdbId = model.IgdbId,
+                SteamAppId = model.SteamAppId,
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
@@ -96,6 +98,7 @@ namespace Gamarr.Api.V3.ImportLists
             return new ImportListGamesResource
             {
                 IgdbId = model.IgdbId,
+                SteamAppId = model.SteamAppId,
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
