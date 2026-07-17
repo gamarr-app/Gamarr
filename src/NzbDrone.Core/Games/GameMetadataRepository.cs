@@ -63,16 +63,19 @@ namespace NzbDrone.Core.Games
             {
                 GameMetadata existingMetadata = null;
 
-                // Try to find by SteamAppId first (primary identifier)
+                // Try to find by SteamAppId first (primary identifier).
+                // FirstOrDefault: if duplicate rows ever share an id, matching
+                // the first is recoverable; SingleOrDefault threw and wedged
+                // every subsequent refresh permanently.
                 if (metadata.SteamAppId > 0)
                 {
-                    existingMetadata = existingBySteamId.SingleOrDefault(x => x.SteamAppId == metadata.SteamAppId);
+                    existingMetadata = existingBySteamId.FirstOrDefault(x => x.SteamAppId == metadata.SteamAppId);
                 }
 
                 // Fall back to IgdbId if no Steam match and IgdbId is set
                 if (existingMetadata == null && metadata.IgdbId > 0)
                 {
-                    existingMetadata = existingByIgdbId.SingleOrDefault(x => x.IgdbId == metadata.IgdbId);
+                    existingMetadata = existingByIgdbId.FirstOrDefault(x => x.IgdbId == metadata.IgdbId);
                 }
 
                 if (existingMetadata != null)
