@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using NLog;
 using NzbDrone.Common.Cloud;
 using NzbDrone.Common.EnvironmentInfo;
@@ -34,11 +36,7 @@ namespace NzbDrone.Core.Update
         {
             try
             {
-                var request = _requestBuilder.Create()
-                                             .Resource("releases")
-                                             .Build();
-
-                var releases = _httpClient.Get<List<GitHubRelease>>(request).Resource;
+                var releases = GetReleases();
 
                 if (releases == null || !releases.Any())
                 {
@@ -47,8 +45,8 @@ namespace NzbDrone.Core.Update
 
                 // Find the latest release (not prerelease unless on develop branch)
                 var release = branch.Equals("develop", StringComparison.OrdinalIgnoreCase)
-                    ? releases.FirstOrDefault()
-                    : releases.FirstOrDefault(r => !r.Prerelease);
+                    ? releases.FirstOrDefault(r => !r.Draft)
+                    : releases.FirstOrDefault(r => !r.Draft && !r.Prerelease);
 
                 if (release == null)
                 {
@@ -61,13 +59,26 @@ namespace NzbDrone.Core.Update
                     return null;
                 }
 
+                // Pick the archive built for this runtime (assets are named
+                // Gamarr.{version}.{runtime}.tar.gz / .zip).
+                var runtime = RuntimeInformation.RuntimeIdentifier;
+                var asset = release.Assets?.FirstOrDefault(a => a.Name?.Contains($".{runtime}.", StringComparison.OrdinalIgnoreCase) == true &&
+                                                                !a.Name.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase));
+
+                if (asset == null)
+                {
+                    _logger.Warn("Update {0} is available but has no package for runtime '{1}'", releaseVersion, runtime);
+                    return null;
+                }
+
                 return new UpdatePackage
                 {
                     Version = releaseVersion,
                     Branch = branch,
                     ReleaseDate = release.PublishedAt,
-                    FileName = release.TagName,
-                    Url = release.HtmlUrl,
+                    FileName = asset.Name,
+                    Url = asset.BrowserDownloadUrl,
+                    Hash = GetAssetHash(release, asset),
                     Changes = new UpdateChanges { New = new List<string> { release.Body } }
                 };
             }
@@ -82,11 +93,7 @@ namespace NzbDrone.Core.Update
         {
             try
             {
-                var request = _requestBuilder.Create()
-                                             .Resource("releases")
-                                             .Build();
-
-                var releases = _httpClient.Get<List<GitHubRelease>>(request).Resource;
+                var releases = GetReleases();
 
                 if (releases == null || !releases.Any())
                 {
@@ -94,7 +101,7 @@ namespace NzbDrone.Core.Update
                 }
 
                 return releases
-                    .Where(r => !r.Prerelease || branch.Equals("develop", StringComparison.OrdinalIgnoreCase))
+                    .Where(r => !r.Draft && (!r.Prerelease || branch.Equals("develop", StringComparison.OrdinalIgnoreCase)))
                     .Select(r => new UpdatePackage
                     {
                         Version = ParseVersion(r.TagName),
@@ -112,6 +119,40 @@ namespace NzbDrone.Core.Update
             {
                 _logger.Debug(ex, "Failed to get recent updates from GitHub");
                 return new List<UpdatePackage>();
+            }
+        }
+
+        private List<GitHubRelease> GetReleases()
+        {
+            var request = _requestBuilder.Create()
+                                         .Resource("releases")
+                                         .Build();
+
+            return _httpClient.Get<List<GitHubRelease>>(request).Resource;
+        }
+
+        private string GetAssetHash(GitHubRelease release, GitHubAsset asset)
+        {
+            // Releases publish a {asset}.sha256 sidecar ("<hash>  <filename>");
+            // older releases don't have one — verification is skipped for those.
+            var checksumAsset = release.Assets?.FirstOrDefault(a =>
+                a.Name?.Equals($"{asset.Name}.sha256", StringComparison.OrdinalIgnoreCase) == true);
+
+            if (checksumAsset == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var content = _httpClient.Get(new HttpRequest(checksumAsset.BrowserDownloadUrl)).Content;
+
+                return content?.Split((char[])null, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Failed to fetch checksum for update package {0}", asset.Name);
+                return null;
             }
         }
 
@@ -142,14 +183,36 @@ namespace NzbDrone.Core.Update
         }
     }
 
+    // GitHub's REST API serializes with snake_case; explicit mappings are
+    // required (the default resolver is not underscore-insensitive, so
+    // TagName/HtmlUrl/PublishedAt silently deserialized to null before).
     public class GitHubRelease
     {
+        [JsonProperty("tag_name")]
         public string TagName { get; set; }
+
         public string Name { get; set; }
         public string Body { get; set; }
         public bool Prerelease { get; set; }
         public bool Draft { get; set; }
+
+        [JsonProperty("published_at")]
         public DateTime PublishedAt { get; set; }
+
+        [JsonProperty("html_url")]
         public string HtmlUrl { get; set; }
+
+        [JsonProperty("assets")]
+        public List<GitHubAsset> Assets { get; set; }
+    }
+
+    public class GitHubAsset
+    {
+        public string Name { get; set; }
+
+        [JsonProperty("browser_download_url")]
+        public string BrowserDownloadUrl { get; set; }
+
+        public long Size { get; set; }
     }
 }
