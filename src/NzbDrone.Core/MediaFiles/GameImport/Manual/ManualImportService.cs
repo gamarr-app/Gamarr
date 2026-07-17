@@ -160,7 +160,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             localGame.Path = path;
             localGame.SceneSource = SceneSource(game, rootFolder);
             localGame.ExistingFile = game.Path.IsParentPath(path);
-            localGame.Size = _diskProvider.GetFileSize(path);
+            localGame.Size = GetItemSize(path);
             localGame.ReleaseGroup = finalReleaseGroup;
             localGame.Languages = finalLanguages;
             localGame.Quality = finalQuality;
@@ -353,18 +353,32 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             return null;
         }
 
+        // Manual import items are frequently folders (games import as whole
+        // folders); GetFileSize throws FileNotFoundException for a directory.
+        private long GetItemSize(string path)
+        {
+            return _diskProvider.FolderExists(path)
+                ? _diskProvider.GetFolderSize(path)
+                : _diskProvider.GetFileSize(path);
+        }
+
         private ManualImportItem MapItem(ImportDecision decision, string rootFolder, string downloadId, string folderName)
         {
             var item = new ManualImportItem();
 
             item.Path = decision.LocalGame.Path;
             item.FolderName = folderName;
-            item.RelativePath = rootFolder.GetRelativePath(decision.LocalGame.Path);
+
+            // The item can BE the root folder (games import as whole folders);
+            // GetRelativePath throws NotParentException on equal paths.
+            item.RelativePath = rootFolder.PathEquals(decision.LocalGame.Path)
+                ? Path.GetFileName(decision.LocalGame.Path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                : rootFolder.GetRelativePath(decision.LocalGame.Path);
             item.Name = Path.GetFileNameWithoutExtension(decision.LocalGame.Path);
             item.DownloadId = downloadId;
 
             item.Quality = decision.LocalGame.Quality;
-            item.Size = _diskProvider.GetFileSize(decision.LocalGame.Path);
+            item.Size = GetItemSize(decision.LocalGame.Path);
             item.Languages = decision.LocalGame.Languages;
             item.ReleaseGroup = decision.LocalGame.ReleaseGroup;
             item.Rejections = decision.Rejections;
@@ -394,7 +408,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             item.Quality = gameFile.Quality;
             item.Languages = gameFile.Languages;
             item.IndexerFlags = (int)gameFile.IndexerFlags;
-            item.Size = _diskProvider.GetFileSize(item.Path);
+            item.Size = GetItemSize(item.Path);
             item.Rejections = Enumerable.Empty<ImportRejection>();
             item.GameFileId = gameFile.Id;
             item.CustomFormats = _formatCalculator.ParseCustomFormat(gameFile, game);

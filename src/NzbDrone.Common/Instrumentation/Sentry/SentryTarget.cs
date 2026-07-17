@@ -68,7 +68,14 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "Jackett.Common.IndexerException",
 
             // Fix openflixr being stupid with permissions
-            "openflixr"
+            "openflixr",
+
+            // Environmental network failures reaching download clients/indexers
+            // (service down, host renamed, DNS broken) — user setup, not code.
+            "Connection refused",
+            "No route to host",
+            "Name or service not known",
+            "No such host is known"
         };
 
         // exception types in this list will additionally have the exception message added to the

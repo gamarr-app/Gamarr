@@ -126,7 +126,9 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
                 var selectedSettingsLanguage = Language.FindById(gameMetadataLanguage);
                 var gameTranslation = gameTranslations.FirstOrDefault(mt => mt.Language == selectedSettingsLanguage);
 
-                var thumbnail = game.GameMetadata.Value.Images.SingleOrDefault(i => i.CoverType == MediaCoverTypes.Screenshot);
+                // Games regularly have multiple screenshots (Steam ships several);
+                // SingleOrDefault would throw for any such game.
+                var thumbnail = game.GameMetadata.Value.Images.FirstOrDefault(i => i.CoverType == MediaCoverTypes.Screenshot);
                 var posters = game.GameMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Poster).ToList();
                 var fanarts = game.GameMetadata.Value.Images.Where(i => i.CoverType == MediaCoverTypes.Fanart).ToList();
 
@@ -336,6 +338,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
         private string GetGameMetadataFilename(string gameFilePath)
         {
+            // Folder-based game files have an empty relative path (the game
+            // folder itself); the nfo goes into the folder root. The file-based
+            // math would pass GetDirectoryName's null into Path.Combine.
+            if (gameFilePath.IsNullOrWhiteSpace())
+            {
+                return "game.nfo";
+            }
+
             if (Settings.UseGameNfo)
             {
                 return Path.Combine(Path.GetDirectoryName(gameFilePath), "game.nfo");
