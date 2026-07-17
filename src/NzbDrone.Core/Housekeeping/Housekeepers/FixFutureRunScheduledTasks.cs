@@ -22,6 +22,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
             if (BuildInfo.IsDebug)
             {
                 _logger.Debug("Not running scheduled task last execution cleanup during debug");
+                return;
             }
 
             using var mapper = _database.OpenConnection();
