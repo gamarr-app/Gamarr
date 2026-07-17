@@ -208,6 +208,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                 {
                     _logger.Warn(e, "Unable to match game by title");
                 }
+
+                game ??= _gameService.FindByTitle(directoryInfo.Name);
             }
 
             if (downloadId.IsNotNullOrWhiteSpace())
