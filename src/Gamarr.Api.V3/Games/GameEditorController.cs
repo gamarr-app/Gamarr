@@ -56,6 +56,11 @@ namespace Gamarr.Api.V3.Games
                     game.Monitored = resource.Monitored.Value;
                 }
 
+                if (resource.MonitorUpdates.HasValue)
+                {
+                    game.MonitorUpdates = resource.MonitorUpdates.Value;
+                }
+
                 if (resource.QualityProfileId.HasValue)
                 {
                     game.QualityProfileId = resource.QualityProfileId.Value;

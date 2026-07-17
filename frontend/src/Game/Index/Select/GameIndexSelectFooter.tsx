@@ -21,6 +21,7 @@ import styles from './GameIndexSelectFooter.css';
 
 interface SavePayload {
   monitored?: boolean;
+  monitorUpdates?: boolean;
   qualityProfileId?: number;
   rootFolderPath?: string;
   moveFiles?: boolean;
