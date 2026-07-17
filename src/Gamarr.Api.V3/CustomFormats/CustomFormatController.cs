@@ -117,7 +117,15 @@ namespace Gamarr.Api.V3.CustomFormats
         [HttpGet("schema")]
         public object GetTemplates()
         {
-            var schema = _specifications.OrderBy(x => x.Order).Select(x => x.ToSchema()).ToList();
+            // Resolution is a movie-era leftover: every game quality has
+            // Resolution = 0, so the condition can never match (and negated it
+            // matches everything). Hidden from new formats; existing serialized
+            // specs still deserialize.
+            var schema = _specifications
+                .Where(x => x is not NzbDrone.Core.CustomFormats.ResolutionSpecification)
+                .OrderBy(x => x.Order)
+                .Select(x => x.ToSchema())
+                .ToList();
 
             var presets = GetPresets().ToList();
 
