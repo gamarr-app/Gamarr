@@ -484,6 +484,7 @@ export const defaultState = {
   isDeleting: false,
   deleteError: null as unknown,
   items: [] as GameItem[],
+  itemMap: {} as Record<number, number>,
   sortKey: 'sortTitle',
   sortDirection: sortDirections.ASCENDING,
   pendingChanges: {},

@@ -47,7 +47,9 @@ function createUnoptimizedSelector(uiSection: string) {
 }
 
 function gameListEqual(a: CollectionResult, b: CollectionResult): boolean {
-  return hasDifferentItemsOrOrder(a.items, b.items);
+  // Equality check: true means "same inputs, reuse the cached result";
+  // see createGameClientSideCollectionItemsSelector.
+  return !hasDifferentItemsOrOrder(a.items, b.items);
 }
 
 const createGameEqualSelector = createSelectorCreator(

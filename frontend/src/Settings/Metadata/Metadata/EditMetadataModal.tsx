@@ -27,7 +27,7 @@ function EditMetadataModal({
   );
 
   const handleModalClose = useCallback(() => {
-    dispatch(clearPendingChanges({ section: 'metadata' }));
+    dispatch(clearPendingChanges({ section: 'settings.metadata' }));
     onModalClose();
   }, [dispatch, onModalClose]);
 
