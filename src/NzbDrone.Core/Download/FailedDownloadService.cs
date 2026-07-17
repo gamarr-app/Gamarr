@@ -125,7 +125,11 @@ namespace NzbDrone.Core.Download
             }
 
             _logger.Info("Download '{0}' stalled for {1:N1} hours ({2} bytes remaining unchanged); marking as failed", CleanseLogMessage.SanitizeLogParam(trackedDownload.DownloadItem.Title), stalledFor.TotalHours, trackedDownload.LastRemainingSize);
-            trackedDownload.State = TrackedDownloadState.FailedPending;
+
+            // Fail() (not a bare state change) also sets CanBeRemoved, without
+            // which DownloadEventHub skips RemoveFailedDownloads and the dead
+            // torrent stays in the client forever, holding its partial data.
+            trackedDownload.Fail();
         }
 
         public void ProcessFailed(TrackedDownload trackedDownload)

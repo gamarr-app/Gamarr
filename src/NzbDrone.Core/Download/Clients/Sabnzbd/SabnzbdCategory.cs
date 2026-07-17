@@ -25,7 +25,14 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         public string complete_dir { get; set; }
         public string[] tv_categories { get; set; }
         public bool enable_tv_sorting { get; set; }
+
+        // SABnzbd's API still serves these under the movie_* names; the
+        // game_* rename made them deserialize to null/false, silently
+        // disabling the sorting-mode validation.
+        [JsonProperty("movie_categories")]
         public string[] game_categories { get; set; }
+
+        [JsonProperty("enable_movie_sorting")]
         public bool enable_game_sorting { get; set; }
         [JsonConverter(typeof(SabnzbdStringArrayConverter))]
         public string[] date_categories { get; set; }

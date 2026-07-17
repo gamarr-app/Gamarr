@@ -195,7 +195,12 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 items.Add(item);
             }
 
-            if (ignoredCount > 0 && _hasAttemptedReconnecting)
+            // First occurrence: try reconnecting the web UI to its daemon (the
+            // usual cause of hashless/nameless torrents). Only warn if the
+            // problem persists after a reconnect attempt. The old condition
+            // required _hasAttemptedReconnecting before ever setting it, so
+            // neither branch could run.
+            if (ignoredCount > 0)
             {
                 if (_hasAttemptedReconnecting)
                 {
@@ -203,6 +208,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 }
                 else
                 {
+                    _hasAttemptedReconnecting = true;
                     _proxy.ReconnectToDaemon(Settings);
                 }
             }

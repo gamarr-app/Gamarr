@@ -237,7 +237,11 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
         private static void UpdateStallTracking(TrackedDownload trackedDownload, DownloadClientItem downloadItem)
         {
-            if (trackedDownload.LastRemainingSize != downloadItem.RemainingSize)
+            // Paused/queued items legitimately make no progress; keep advancing
+            // the clock so the first refresh after they resume doesn't see
+            // hours of "stall" and blocklist a healthy download.
+            if (trackedDownload.LastRemainingSize != downloadItem.RemainingSize ||
+                downloadItem.Status is DownloadItemStatus.Paused or DownloadItemStatus.Queued)
             {
                 trackedDownload.LastRemainingSize = downloadItem.RemainingSize;
                 trackedDownload.RemainingSizeChangedAt = DateTime.UtcNow;
