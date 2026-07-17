@@ -91,7 +91,13 @@ function Calendar() {
       dispatch(fetchCalendar({ time, view }));
     };
 
-    registerPagePopulator(repopulate, ['gameFileUpdated', 'gameFileDeleted']);
+    // gameUpdated covers edits/monitor toggles/metadata refreshes broadcast
+    // over SignalR; without it the open calendar never reflects them.
+    registerPagePopulator(repopulate, [
+      'gameUpdated',
+      'gameFileUpdated',
+      'gameFileDeleted',
+    ]);
 
     return () => {
       unregisterPagePopulator(repopulate);

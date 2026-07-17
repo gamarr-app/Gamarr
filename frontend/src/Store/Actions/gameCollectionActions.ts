@@ -90,6 +90,7 @@ export const defaultState = {
   isPopulated: false,
   error: null as unknown,
   items: [] as Collection[],
+  itemMap: {} as Record<number, number>,
   isSaving: false,
   saveError: null as unknown,
   isAdding: false,
@@ -368,34 +369,36 @@ export const actionHandlers = handleThunks({
       data: JSON.stringify(newGame),
     }).request;
 
-    promise.done((data: Game & { collection: { igdbId: number } }) => {
+    promise.done((data: Game & { collection?: { igdbId: number } }) => {
+      // The add succeeded server-side regardless of whether the local
+      // collection can be found; bailing out before resetting isAdding left
+      // the modal spinning forever and hid the added game.
+      const actions = [
+        updateItem({ section: 'games', ...data }),
+
+        set({
+          section,
+          isAdding: false,
+          isAdded: true,
+          addError: null,
+        }),
+      ];
+
       const collectionToUpdate = getState().gameCollections.items.find(
-        (collection) => collection.igdbId === data.collection.igdbId
+        (collection) => collection.igdbId === data.collection?.igdbId
       );
 
-      if (!collectionToUpdate) {
-        return;
+      if (collectionToUpdate) {
+        actions.push(
+          updateItem({
+            section,
+            ...collectionToUpdate,
+            missingGames: Math.max(0, collectionToUpdate.missingGames - 1),
+          })
+        );
       }
 
-      const collectionData = {
-        ...collectionToUpdate,
-        missingGames: Math.max(0, collectionToUpdate.missingGames - 1),
-      };
-
-      dispatch(
-        batchActions([
-          updateItem({ section: 'games', ...data }),
-
-          set({
-            section,
-            isAdding: false,
-            isAdded: true,
-            addError: null,
-          }),
-
-          updateItem({ section, ...collectionData }),
-        ])
-      );
+      dispatch(batchActions(actions));
     });
 
     promise.fail((xhr: unknown) => {

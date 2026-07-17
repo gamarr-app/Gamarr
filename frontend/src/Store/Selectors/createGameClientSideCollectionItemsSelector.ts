@@ -59,7 +59,11 @@ function gameListEqual(
   a: GameClientSideCollectionItemsState,
   b: GameClientSideCollectionItemsState
 ): boolean {
-  return hasDifferentItemsOrOrder(a.items, b.items);
+  // Equality check: true means "same inputs, reuse the cached result".
+  // Returning hasDifferentItemsOrOrder un-negated served STALE results
+  // exactly when the list changed (add/delete/sort/filter) — the frozen
+  // Game Index.
+  return !hasDifferentItemsOrOrder(a.items, b.items);
 }
 
 const createGameEqualSelector = createSelectorCreator(
