@@ -29,7 +29,25 @@ namespace NzbDrone.Common.Composition
             var startupPath = AppDomain.CurrentDomain.BaseDirectory;
 
             return toLoad
-                .Select(x => AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(startupPath, $"{x}.dll")))
+                .Select(x =>
+                {
+                    var assemblyPath = Path.Combine(startupPath, $"{x}.dll");
+
+                    if (!File.Exists(assemblyPath))
+                    {
+                        // Almost always a self-built package: publishing without
+                        // -p:Platform=Posix (or =Windows) skips the platform
+                        // assembly and the app crash-loops at startup with an
+                        // unhelpful loader error.
+                        throw new FileNotFoundException(
+                            $"Required assembly '{x}.dll' is missing from '{startupPath}'. " +
+                            "If this is a self-built package, build with -p:Platform=Posix (Linux/macOS) " +
+                            "or -p:Platform=Windows so the platform assembly is included, or use an official release package.",
+                            assemblyPath);
+                    }
+
+                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+                })
                 .ToList();
         }
 
