@@ -32,8 +32,14 @@ namespace NzbDrone.Core.Indexers.Newznab
                 return;
             }
 
-            var code = Convert.ToInt32(error.Attribute("code").Value);
-            var errorMessage = error.Attribute("description").Value;
+            // Some feeds embed <error> elements without the newznab attributes;
+            // don't let a malformed one abort the whole fetch with an NRE.
+            if (!int.TryParse(error.Attribute("code")?.Value, out var code))
+            {
+                return;
+            }
+
+            var errorMessage = error.Attribute("description")?.Value ?? "Unknown error";
 
             if (code >= 100 && code <= 199)
             {
@@ -234,7 +240,7 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         protected string TryGetNewznabAttribute(XElement item, string key, string defaultValue = "")
         {
-            var attrElement = item.Elements(ns + "attr").FirstOrDefault(e => e.Attribute("name").Value.Equals(key, StringComparison.OrdinalIgnoreCase));
+            var attrElement = item.Elements(ns + "attr").FirstOrDefault(e => key.Equals(e.Attribute("name")?.Value, StringComparison.OrdinalIgnoreCase));
             if (attrElement != null)
             {
                 var attrValue = attrElement.Attribute("value");
@@ -249,7 +255,7 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         protected List<string> TryGetMultipleNewznabAttributes(XElement item, string key)
         {
-            var attrElements = item.Elements(ns + "attr").Where(e => e.Attribute("name").Value.Equals(key, StringComparison.OrdinalIgnoreCase));
+            var attrElements = item.Elements(ns + "attr").Where(e => key.Equals(e.Attribute("name")?.Value, StringComparison.OrdinalIgnoreCase));
             var results = new List<string>();
 
             foreach (var element in attrElements)

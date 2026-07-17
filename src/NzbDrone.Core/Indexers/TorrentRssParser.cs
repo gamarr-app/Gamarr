@@ -167,8 +167,14 @@ namespace NzbDrone.Core.Indexers
 
             if (PeersElementName.IsNotNullOrWhiteSpace())
             {
-                var itempeers = item.FindDecendants(PeersElementName).SingleOrDefault();
-                return int.Parse(itempeers.Value);
+                // Items missing (or duplicating) the peers element must not NRE
+                // and drop the release.
+                var itempeers = item.FindDecendants(PeersElementName).FirstOrDefault();
+
+                if (itempeers != null && int.TryParse(itempeers.Value, out var peers))
+                {
+                    return peers;
+                }
             }
 
             return null;
