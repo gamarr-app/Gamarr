@@ -15,6 +15,7 @@ import styles from './EditGamesModalContent.css';
 
 interface SavePayload {
   monitored?: boolean;
+  monitorUpdates?: boolean;
   qualityProfileId?: number;
   minimumAvailability?: string;
   rootFolderPath?: string;
@@ -51,10 +52,33 @@ const monitoredOptions = [
   },
 ];
 
+const monitorUpdatesOptions = [
+  {
+    key: NO_CHANGE,
+    get value() {
+      return translate('NoChange');
+    },
+    isDisabled: true,
+  },
+  {
+    key: 'enabled',
+    get value() {
+      return translate('Enabled');
+    },
+  },
+  {
+    key: 'disabled',
+    get value() {
+      return translate('Disabled');
+    },
+  },
+];
+
 function EditGamesModalContent(props: EditGamesModalContentProps) {
   const { gameIds, onSavePress, onModalClose } = props;
 
   const [monitored, setMonitored] = useState(NO_CHANGE);
+  const [monitorUpdates, setMonitorUpdates] = useState(NO_CHANGE);
   const [qualityProfileId, setQualityProfileId] = useState<string | number>(
     NO_CHANGE
   );
@@ -70,6 +94,11 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
       if (monitored !== NO_CHANGE) {
         hasChanges = true;
         payload.monitored = monitored === 'monitored';
+      }
+
+      if (monitorUpdates !== NO_CHANGE) {
+        hasChanges = true;
+        payload.monitorUpdates = monitorUpdates === 'enabled';
       }
 
       if (qualityProfileId !== NO_CHANGE) {
@@ -96,6 +125,7 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
     },
     [
       monitored,
+      monitorUpdates,
       qualityProfileId,
       minimumAvailability,
       rootFolderPath,
@@ -109,6 +139,9 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
       switch (name) {
         case 'monitored':
           setMonitored(value as string);
+          break;
+        case 'monitorUpdates':
+          setMonitorUpdates(value as string);
           break;
         case 'qualityProfileId':
           setQualityProfileId(value as string);
@@ -163,6 +196,19 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
             name="monitored"
             value={monitored}
             values={monitoredOptions}
+            onChange={onInputChange}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormLabel>{translate('MonitorUpdates')}</FormLabel>
+
+          <FormInputGroup
+            type={inputTypes.SELECT}
+            name="monitorUpdates"
+            value={monitorUpdates}
+            values={monitorUpdatesOptions}
+            helpText={translate('MonitorUpdatesHelpText')}
             onChange={onInputChange}
           />
         </FormGroup>
