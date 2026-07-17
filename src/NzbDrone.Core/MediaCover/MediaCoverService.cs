@@ -22,7 +22,7 @@ namespace NzbDrone.Core.MediaCover
         Dictionary<string, FileInfo> GetCoverFileInfos();
         void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers, Dictionary<string, FileInfo> fileInfos = null);
         void ConvertToLocalUrls(IEnumerable<Tuple<int, IEnumerable<MediaCover>>> items, Dictionary<string, FileInfo> coverFileInfos);
-        string GetCoverPath(int gameId, MediaCoverTypes coverType, int? height = null);
+        string GetCoverPath(int gameId, MediaCoverTypes coverType, int? height = null, int index = 0);
     }
 
     public class MediaCoverService :
@@ -67,11 +67,17 @@ namespace NzbDrone.Core.MediaCover
             _coverRootFolder = appFolderInfo.GetMediaCoverPath();
         }
 
-        public string GetCoverPath(int gameId, MediaCoverTypes coverType, int? height = null)
+        public string GetCoverPath(int gameId, MediaCoverTypes coverType, int? height = null, int index = 0)
         {
             var heightSuffix = height.HasValue ? "-" + height.ToString() : "";
 
-            return Path.Combine(GetGameCoverPath(gameId), coverType.ToString().ToLower() + heightSuffix + GetExtension(coverType));
+            // Games have multiple screenshots; without an index they all mapped
+            // to the same screenshot.jpg (each refresh re-downloaded every one,
+            // overwriting the last). The first keeps the unindexed name so
+            // existing installs don't re-fetch it.
+            var indexSuffix = index >= 2 ? index.ToString() : "";
+
+            return Path.Combine(GetGameCoverPath(gameId), coverType.ToString().ToLower() + indexSuffix + heightSuffix + GetExtension(coverType));
         }
 
         public Dictionary<string, FileInfo> GetCoverFileInfos()
@@ -98,6 +104,8 @@ namespace NzbDrone.Core.MediaCover
             }
             else
             {
+                var screenshotCount = 0;
+
                 foreach (var mediaCover in covers)
                 {
                     if (mediaCover.CoverType == MediaCoverTypes.Unknown)
@@ -105,9 +113,14 @@ namespace NzbDrone.Core.MediaCover
                         continue;
                     }
 
-                    var filePath = GetCoverPath(gameId, mediaCover.CoverType);
+                    // Must match the index assignment in EnsureCovers (both
+                    // enumerate the images list in order).
+                    var index = mediaCover.CoverType == MediaCoverTypes.Screenshot ? ++screenshotCount : 0;
+                    var indexSuffix = index >= 2 ? index.ToString() : "";
 
-                    mediaCover.Url = _configFileProvider.UrlBase + @"/MediaCover/" + gameId + "/" + mediaCover.CoverType.ToString().ToLower() + GetExtension(mediaCover.CoverType);
+                    var filePath = GetCoverPath(gameId, mediaCover.CoverType, null, index);
+
+                    mediaCover.Url = _configFileProvider.UrlBase + @"/MediaCover/" + gameId + "/" + mediaCover.CoverType.ToString().ToLower() + indexSuffix + GetExtension(mediaCover.CoverType);
 
                     DateTime? lastWrite = null;
 
@@ -144,8 +157,9 @@ namespace NzbDrone.Core.MediaCover
         private bool EnsureCovers(Game game)
         {
             var updated = false;
-            var toResize = new List<Tuple<MediaCover, bool>>();
+            var toResize = new List<Tuple<MediaCover, bool, int>>();
             var downloadedTypes = new HashSet<MediaCoverTypes>();
+            var screenshotCount = 0;
 
             foreach (var cover in game.GameMetadata.Value.Images)
             {
@@ -160,7 +174,10 @@ namespace NzbDrone.Core.MediaCover
                     continue;
                 }
 
-                var fileName = GetCoverPath(game.Id, cover.CoverType);
+                // Per-screenshot index; must match ConvertToLocalUrls.
+                var index = cover.CoverType == MediaCoverTypes.Screenshot ? ++screenshotCount : 0;
+
+                var fileName = GetCoverPath(game.Id, cover.CoverType, null, index);
                 var alreadyExists = false;
 
                 try
@@ -169,7 +186,7 @@ namespace NzbDrone.Core.MediaCover
 
                     if (!alreadyExists)
                     {
-                        DownloadCover(game, cover);
+                        DownloadCover(game, cover, fileName);
                         updated = true;
                     }
 
@@ -189,7 +206,7 @@ namespace NzbDrone.Core.MediaCover
                     _logger.Error(e, "Couldn't download media cover for {0}", game);
                 }
 
-                toResize.Add(Tuple.Create(cover, alreadyExists));
+                toResize.Add(Tuple.Create(cover, alreadyExists, index));
             }
 
             try
@@ -198,7 +215,7 @@ namespace NzbDrone.Core.MediaCover
 
                 foreach (var tuple in toResize)
                 {
-                    EnsureResizedCovers(game, tuple.Item1, !tuple.Item2);
+                    EnsureResizedCovers(game, tuple.Item1, !tuple.Item2, tuple.Item3);
                 }
             }
             finally
@@ -209,15 +226,13 @@ namespace NzbDrone.Core.MediaCover
             return updated;
         }
 
-        private void DownloadCover(Game game, MediaCover cover)
+        private void DownloadCover(Game game, MediaCover cover, string fileName)
         {
-            var fileName = GetCoverPath(game.Id, cover.CoverType);
-
             _logger.Info("Downloading {0} for {1} {2}", cover.CoverType, game, cover.RemoteUrl);
             _httpClient.DownloadFile(cover.RemoteUrl, fileName);
         }
 
-        private void EnsureResizedCovers(Game game, MediaCover cover, bool forceResize)
+        private void EnsureResizedCovers(Game game, MediaCover cover, bool forceResize, int index = 0)
         {
             int[] heights;
 
@@ -243,8 +258,8 @@ namespace NzbDrone.Core.MediaCover
 
             foreach (var height in heights)
             {
-                var mainFileName = GetCoverPath(game.Id, cover.CoverType);
-                var resizeFileName = GetCoverPath(game.Id, cover.CoverType, height);
+                var mainFileName = GetCoverPath(game.Id, cover.CoverType, null, index);
+                var resizeFileName = GetCoverPath(game.Id, cover.CoverType, height, index);
 
                 if (forceResize || !_diskProvider.FileExists(resizeFileName) || _diskProvider.GetFileSize(resizeFileName) == 0)
                 {
