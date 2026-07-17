@@ -89,6 +89,15 @@ namespace NzbDrone.Core.Games
                 else
                 {
                     gameInfo = _gameInfo.GetGameInfoByIgdbId(game.IgdbId);
+
+                    // The aggregate proxy returns null (rather than throwing)
+                    // when every source failed or IGDB credentials are unset;
+                    // dereferencing it crashed the whole refresh command.
+                    if (gameInfo == null)
+                    {
+                        _logger.Warn("Could not refresh game info for {0} (IGDB: {1}); metadata sources returned nothing", game.Title, game.IgdbId);
+                        return game;
+                    }
                 }
             }
             catch (GameNotFoundException)
@@ -296,7 +305,11 @@ namespace NzbDrone.Core.Games
                 foreach (var game in allGames)
                 {
                     var gameLocal = game;
-                    if ((updatedIgdbGames.Count == 0 && _checkIfGameShouldBeRefreshed.ShouldRefresh(game.GameMetadata)) || updatedIgdbGames.Contains(game.IgdbId) || message.Trigger == CommandTrigger.Manual)
+
+                    // Steam-only games (IgdbId == 0) can never be in the IGDB
+                    // changed set; they must still fall back to ShouldRefresh or
+                    // they silently stop receiving scheduled metadata updates.
+                    if (((updatedIgdbGames.Count == 0 || game.IgdbId == 0) && _checkIfGameShouldBeRefreshed.ShouldRefresh(game.GameMetadata)) || updatedIgdbGames.Contains(game.IgdbId) || message.Trigger == CommandTrigger.Manual)
                     {
                         try
                         {

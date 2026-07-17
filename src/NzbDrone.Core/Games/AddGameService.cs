@@ -131,11 +131,22 @@ namespace NzbDrone.Core.Games
                 return game;
             }
 
+            GameMetadata igdbMetadata;
+
             try
             {
-                game.GameMetadata = _gameInfo.GetGameInfoByIgdbId(newGame.IgdbId);
+                igdbMetadata = _gameInfo.GetGameInfoByIgdbId(newGame.IgdbId);
             }
             catch (GameNotFoundException)
+            {
+                igdbMetadata = null;
+            }
+
+            // The aggregate proxy returns null (rather than throwing) when the
+            // game wasn't found or IGDB credentials are unset; wrapping null in
+            // the lazy metadata crashed later with an NRE instead of a
+            // validation error (and killed whole import-list sync batches).
+            if (igdbMetadata == null)
             {
                 _logger.Error("IgdbId {0} was not found, it may have been removed from IGDB. Path: {1}", newGame.IgdbId, newGame.Path);
 
@@ -145,6 +156,7 @@ namespace NzbDrone.Core.Games
                                               });
             }
 
+            game.GameMetadata = igdbMetadata;
             game.ApplyChanges(newGame);
 
             return game;

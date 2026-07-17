@@ -68,6 +68,15 @@ namespace NzbDrone.Core.Games
                 throw;
             }
 
+            // The aggregate proxy returns null (rather than throwing) when the
+            // fetch failed or IGDB credentials are unset; dereferencing it
+            // crashed the whole collection refresh command.
+            if (collectionInfo == null)
+            {
+                _logger.Warn("Could not refresh collection info for {0} (IGDB: {1}); metadata sources returned nothing", collection.Title, collection.IgdbId);
+                return collection;
+            }
+
             collection.Title = collectionInfo.Title;
             collection.Overview = collectionInfo.Overview;
             collection.CleanTitle = collectionInfo.CleanTitle;
@@ -86,12 +95,33 @@ namespace NzbDrone.Core.Games
             {
                 var existing = existingMetaForCollection.FirstOrDefault(e => e.IgdbId == remoteGame.IgdbId);
 
-                if (existingMetaForCollection.Any(x => x.IgdbId == remoteGame.IgdbId))
+                if (existing != null)
                 {
                     existingMetaForCollection.Remove(existing);
                 }
 
-                updateList.Add(remoteGame);
+                // The collection payload is sparse (no Steam/RAWG ids, no full
+                // images), and UpsertMany replaces whole rows. Overwriting an
+                // existing metadata row here would permanently zero its
+                // SteamAppId/RawgId and wipe its images — existing rows only
+                // need their collection membership stamped; their own refresh
+                // owns the rest.
+                var existingAnywhere = existing ?? _gameMetadataService.FindByIgdbId(remoteGame.IgdbId);
+
+                if (existingAnywhere != null)
+                {
+                    if (existingAnywhere.CollectionIgdbId != collection.IgdbId ||
+                        existingAnywhere.CollectionTitle != collection.Title)
+                    {
+                        existingAnywhere.CollectionIgdbId = collection.IgdbId;
+                        existingAnywhere.CollectionTitle = collection.Title;
+                        updateList.Add(existingAnywhere);
+                    }
+                }
+                else
+                {
+                    updateList.Add(remoteGame);
+                }
             }
 
             _gameMetadataService.UpsertMany(updateList);
