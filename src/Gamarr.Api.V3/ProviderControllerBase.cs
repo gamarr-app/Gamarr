@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
@@ -87,9 +88,28 @@ namespace Gamarr.Api.V3
                 Test(providerDefinition, !forceSave);
             }
 
-            providerDefinition = _providerFactory.Create(providerDefinition);
+            try
+            {
+                providerDefinition = _providerFactory.Create(providerDefinition);
+            }
+            catch (Exception ex) when (IsNameUniqueViolation(ex))
+            {
+                // Two concurrent submits (e.g. a double-clicked save) can both
+                // pass the SharedValidator uniqueness rule before either row
+                // exists; surface the DB constraint as the same validation
+                // error instead of a 500.
+                throw new ValidationException(new List<ValidationFailure> { new ("Name", "Should be unique") });
+            }
 
             return Created(providerDefinition.Id);
+        }
+
+        private static bool IsNameUniqueViolation(Exception ex)
+        {
+            var message = ex.Message;
+
+            return message.Contains("Name") &&
+                   (message.Contains("UNIQUE constraint failed") || message.Contains("duplicate key"));
         }
 
         [RestPutById]
