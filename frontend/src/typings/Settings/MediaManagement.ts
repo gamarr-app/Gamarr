@@ -5,6 +5,8 @@ export default interface MediaManagement {
   downloadPropersAndRepacks: string;
   createEmptyGameFolders: boolean;
   deleteEmptyFolders: boolean;
+  updateRetentionCount: number;
+  updateRetentionKeepOnePerMajor: boolean;
   fileDate: string;
   rescanAfterRefresh: string;
   setPermissionsLinux: boolean;
