@@ -87,6 +87,7 @@ function AddNewGameModalContentConnector(
     minimumAvailability,
     searchForGame,
     tags,
+    platform,
   } = useSelector(addNewGameModalContentSelector) as {
     isAdding: boolean;
     addError?: Error;
@@ -99,6 +100,7 @@ function AddNewGameModalContentConnector(
     minimumAvailability: FormValue<string>;
     searchForGame: FormValue<boolean>;
     tags: FormValue<number[]>;
+    platform?: FormValue<string>;
   };
 
   const onInputChange = useCallback(
@@ -120,6 +122,7 @@ function AddNewGameModalContentConnector(
         minimumAvailability: minimumAvailability.value,
         searchForGame: searchForGame.value,
         tags: tags.value,
+        platform: platform?.value ?? 'unknown',
       })
     );
   }, [
@@ -133,6 +136,7 @@ function AddNewGameModalContentConnector(
     minimumAvailability,
     searchForGame,
     tags,
+    platform,
   ]);
 
   return (
@@ -149,6 +153,7 @@ function AddNewGameModalContentConnector(
       qualityProfileId={qualityProfileId}
       minimumAvailability={minimumAvailability}
       searchForGame={searchForGame}
+      platform={platform}
       folder={folder}
       tags={tags}
       isSmallScreen={isSmallScreen}

@@ -98,6 +98,7 @@ namespace Gamarr.Api.V3.Games
         /// </summary>
         public bool MonitorUpdates { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
+        public PlatformFamily Platform { get; set; }
         public bool IsAvailable { get; set; }
         public string FolderName { get; set; }
 
@@ -254,6 +255,7 @@ namespace Gamarr.Api.V3.Games
                 Monitored = model.Monitored,
                 MonitorUpdates = model.MonitorUpdates,
                 MinimumAvailability = model.MinimumAvailability,
+                Platform = model.Platform,
 
                 IsAvailable = model.IsAvailable(availDelay),
                 FolderName = model.FolderName(),
@@ -357,6 +359,7 @@ namespace Gamarr.Api.V3.Games
                 Monitored = resource.Monitored,
                 MonitorUpdates = resource.MonitorUpdates,
                 MinimumAvailability = resource.MinimumAvailability,
+                Platform = resource.Platform,
 
                 RootFolderPath = resource.RootFolderPath,
 
