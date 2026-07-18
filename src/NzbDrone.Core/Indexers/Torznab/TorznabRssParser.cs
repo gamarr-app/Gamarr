@@ -35,8 +35,14 @@ namespace NzbDrone.Core.Indexers.Torznab
                 return true;
             }
 
-            var code = Convert.ToInt32(error.Attribute("code").Value);
-            var errorMessage = error.Attribute("description").Value;
+            // Some trackers embed <error> elements without the newznab attributes;
+            // don't let a malformed one abort the whole fetch with an NRE.
+            if (!int.TryParse(error.Attribute("code")?.Value, out var code))
+            {
+                return true;
+            }
+
+            var errorMessage = error.Attribute("description")?.Value ?? "Unknown error";
 
             if (code >= 100 && code <= 199)
             {
@@ -206,11 +212,12 @@ namespace NzbDrone.Core.Indexers.Torznab
 
         protected override int? GetSeeders(XElement item)
         {
-            var seeders = TryGetTorznabAttribute(item, "seeders");
-
-            if (seeders.IsNotNullOrWhiteSpace())
+            // Tolerant parse: junk values ("n/a", "1,234") must not throw and
+            // drop the release (a dropped item also shrinks the page below
+            // PageSize, silently ending pagination early).
+            if (int.TryParse(TryGetTorznabAttribute(item, "seeders"), out var seeders))
             {
-                return int.Parse(seeders);
+                return seeders;
             }
 
             return base.GetSeeders(item);
@@ -218,19 +225,15 @@ namespace NzbDrone.Core.Indexers.Torznab
 
         protected override int? GetPeers(XElement item)
         {
-            var peers = TryGetTorznabAttribute(item, "peers");
-
-            if (peers.IsNotNullOrWhiteSpace())
+            if (int.TryParse(TryGetTorznabAttribute(item, "peers"), out var peers))
             {
-                return int.Parse(peers);
+                return peers;
             }
 
-            var seeders = TryGetTorznabAttribute(item, "seeders");
-            var leechers = TryGetTorznabAttribute(item, "leechers");
-
-            if (seeders.IsNotNullOrWhiteSpace() && leechers.IsNotNullOrWhiteSpace())
+            if (int.TryParse(TryGetTorznabAttribute(item, "seeders"), out var seeders) &&
+                int.TryParse(TryGetTorznabAttribute(item, "leechers"), out var leechers))
             {
-                return int.Parse(seeders) + int.Parse(leechers);
+                return seeders + leechers;
             }
 
             return base.GetPeers(item);
@@ -285,14 +288,10 @@ namespace NzbDrone.Core.Indexers.Torznab
 
         protected string TryGetTorznabAttribute(XElement item, string key, string defaultValue = "")
         {
-            var attr = item.Elements(ns + "attr").FirstOrDefault(e => e.Attribute("name").Value.Equals(key, StringComparison.CurrentCultureIgnoreCase));
+            var attr = item.Elements(ns + "attr")
+                           .FirstOrDefault(e => key.Equals(e.Attribute("name")?.Value, StringComparison.CurrentCultureIgnoreCase));
 
-            if (attr != null)
-            {
-                return attr.Attribute("value").Value;
-            }
-
-            return defaultValue;
+            return attr?.Attribute("value")?.Value ?? defaultValue;
         }
 
         protected float TryGetFloatTorznabAttribute(XElement item, string key, float defaultValue = 0)
@@ -309,7 +308,7 @@ namespace NzbDrone.Core.Indexers.Torznab
 
         protected List<string> TryGetMultipleTorznabAttributes(XElement item, string key)
         {
-            var attrElements = item.Elements(ns + "attr").Where(e => e.Attribute("name").Value.Equals(key, StringComparison.OrdinalIgnoreCase));
+            var attrElements = item.Elements(ns + "attr").Where(e => key.Equals(e.Attribute("name")?.Value, StringComparison.OrdinalIgnoreCase));
             var results = new List<string>();
 
             foreach (var element in attrElements)

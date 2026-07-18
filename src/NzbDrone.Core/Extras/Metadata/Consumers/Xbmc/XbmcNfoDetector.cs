@@ -22,6 +22,14 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
         public bool IsXbmcNfoFile(string path)
         {
+            // The candidate list is built before the extras pipeline runs, so a
+            // file another importer already consumed/renamed may be gone by now;
+            // that must not abort the whole scan event.
+            if (!_diskProvider.FileExists(path))
+            {
+                return false;
+            }
+
             // Lets make sure we're not reading huge files.
             if (_diskProvider.GetFileSize(path) > 10.Megabytes())
             {

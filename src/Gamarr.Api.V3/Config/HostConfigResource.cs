@@ -82,6 +82,11 @@ namespace Gamarr.Api.V3.Config
             resource.UpdateAutomatically = configFile.UpdateAutomatically;
             resource.UpdateMechanism = configFile.UpdateMechanism;
             resource.UpdateScriptPath = configFile.UpdateScriptPath;
+
+            // Not mapping this reset it to false on every Settings save (the
+            // save endpoint reflects the whole resource back into config.xml),
+            // silently breaking auth bypass for users behind CGNAT.
+            resource.TrustCgnatIpAddresses = configFile.TrustCgnatIpAddresses;
         }
 
         private static void MapFromConfigService(HostConfigResource resource, IConfigService configService)

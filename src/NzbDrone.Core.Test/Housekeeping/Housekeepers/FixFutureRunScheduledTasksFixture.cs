@@ -24,7 +24,16 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
 
             Subject.Clean();
 
-            AllStoredModels.ToList().ForEach(t => t.LastExecution.Should().NotBeAfter(DateTime.UtcNow));
+            // The cleanup deliberately no-ops on debug builds (developers set
+            // future times on purpose); assert accordingly per configuration.
+            if (NzbDrone.Common.EnvironmentInfo.BuildInfo.IsDebug)
+            {
+                AllStoredModels.ToList().ForEach(t => t.LastExecution.Should().BeAfter(DateTime.UtcNow));
+            }
+            else
+            {
+                AllStoredModels.ToList().ForEach(t => t.LastExecution.Should().NotBeAfter(DateTime.UtcNow));
+            }
         }
 
         [Test]

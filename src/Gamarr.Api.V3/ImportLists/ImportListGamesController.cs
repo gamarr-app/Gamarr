@@ -68,6 +68,7 @@ namespace Gamarr.Api.V3.ImportLists
                 var gameLanguage = (Language)_configService.GameInfoLanguage;
                 var listExclusions = _importListExclusionService.All();
                 var existingIgdbIds = _gameService.AllGameIgdbIds();
+                var existingSteamAppIds = _gameService.AllGameSteamAppIds();
 
                 if (includeRecommendations)
                 {
@@ -146,7 +147,14 @@ namespace Gamarr.Api.V3.ImportLists
                     _logger.Warn(ex, "Failed to get import list games");
                 }
 
-                var groupedListGames = realResults.GroupBy(x => x.IgdbId);
+                // Group by whichever external id the item actually has. Grouping
+                // on IgdbId alone collapsed every Steam/GOG item without an IGDB
+                // match (IgdbId == 0) into a single arbitrary row, and one
+                // Steam-only library game marked all of them as existing.
+                var groupedListGames = realResults.GroupBy(x =>
+                    x.IgdbId > 0 ? $"igdb-{x.IgdbId}"
+                    : x.SteamAppId > 0 ? $"steam-{x.SteamAppId}"
+                    : $"title-{x.Title}-{x.Year}");
 
                 // Distinct Games
                 realResults = groupedListGames.Select(x =>
@@ -154,8 +162,12 @@ namespace Gamarr.Api.V3.ImportLists
                     var game = x.First();
 
                     game.Lists = x.SelectMany(m => m.Lists).ToHashSet();
-                    game.IsExcluded = listExclusions.Any(e => e.IgdbId == game.IgdbId);
-                    game.IsExisting = existingIgdbIds.Any(e => e == game.IgdbId);
+                    game.IsExcluded = listExclusions.Any(e =>
+                        (game.IgdbId > 0 && e.IgdbId == game.IgdbId) ||
+                        (game.SteamAppId > 0 && e.SteamAppId == game.SteamAppId));
+                    game.IsExisting =
+                        (game.IgdbId > 0 && existingIgdbIds.Contains(game.IgdbId)) ||
+                        (game.SteamAppId > 0 && existingSteamAppIds.Contains(game.SteamAppId));
                     game.IsRecommendation = x.Any(m => m.IsRecommendation);
                     game.IsPopular = x.Any(m => m.IsPopular);
                     game.IsTrending = x.Any(m => m.IsTrending);

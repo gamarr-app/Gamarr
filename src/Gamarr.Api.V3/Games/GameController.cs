@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles.Events;
@@ -131,8 +133,10 @@ namespace Gamarr.Api.V3.Games
         {
             var gamesResources = new List<GameResource>();
 
+            // User-supplied id: an unknown value is a bad request, not a 500.
             var translationLanguage = languageId is > 0
-                ? Language.All.Single(l => l.Id == languageId.Value)
+                ? Language.All.SingleOrDefault(l => l.Id == languageId.Value) ??
+                  throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Unknown language id {0}", languageId.Value)
                 : (Language)_configService.GameInfoLanguage;
 
             if (igdbId.HasValue)

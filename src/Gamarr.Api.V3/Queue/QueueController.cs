@@ -273,7 +273,7 @@ namespace Gamarr.Api.V3.Queue
 
             if (pagingSpec.Records.Empty() && pagingSpec.Page > 1)
             {
-                pagingSpec.Page = (int)Math.Max(Math.Ceiling((decimal)(pagingSpec.TotalRecords / pagingSpec.PageSize)), 1);
+                pagingSpec.Page = (int)Math.Max(Math.Ceiling(pagingSpec.TotalRecords / (decimal)pagingSpec.PageSize), 1);
                 pagingSpec.Records = ordered.Skip((pagingSpec.Page - 1) * pagingSpec.PageSize).Take(pagingSpec.PageSize).ToList();
             }
 

@@ -66,6 +66,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_return_subsequent_pages()
         {
+            // Game search must be explicitly advertised (default caps are text-search only)
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
+
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(3);
@@ -80,6 +83,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_not_get_unlimited_pages()
         {
+            // Game search must be explicitly advertised (default caps are text-search only)
+            _capabilities.SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
+
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(3);

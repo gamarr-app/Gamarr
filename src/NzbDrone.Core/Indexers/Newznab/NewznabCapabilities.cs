@@ -18,7 +18,14 @@ namespace NzbDrone.Core.Indexers.Newznab
             DefaultPageSize = 100;
             MaxPageSize = 100;
             SupportedSearchParameters = new[] { "q" };
-            SupportedGameSearchParameters = new[] { "q", "steamappid", "igdbid" };
+
+            // Deliberately null: game-search must be explicitly advertised by the
+            // indexer's caps. Claiming it by default sent t=game to every indexer
+            // whose caps request failed or omitted <searching>, and since no
+            // mainstream Newznab/Torznab implementation supports t=game yet, each
+            // RSS sync/search then errored and escalated the indexer's backoff.
+            // With null the request generator degrades to plain t=search.
+            SupportedGameSearchParameters = null;
             SupportsAggregateIdSearch = false;
             TextSearchEngine = "sphinx"; // This should remain 'sphinx' for older newznab installs
             GameTextSearchEngine = "sphinx"; // This should remain 'sphinx' for older newznab installs

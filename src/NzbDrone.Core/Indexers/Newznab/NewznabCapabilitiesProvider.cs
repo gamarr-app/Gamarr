@@ -114,15 +114,24 @@ namespace NzbDrone.Core.Indexers.Newznab
             var xmlLimits = xmlRoot.Element("limits");
             if (xmlLimits != null)
             {
-                capabilities.DefaultPageSize = int.Parse(xmlLimits.Attribute("default").Value);
-                capabilities.MaxPageSize = int.Parse(xmlLimits.Attribute("max").Value);
+                // Keep the defaults when the attributes are absent or junk;
+                // a malformed <limits/> must not fail the whole caps parse.
+                if (int.TryParse(xmlLimits.Attribute("default")?.Value, out var defaultPageSize))
+                {
+                    capabilities.DefaultPageSize = defaultPageSize;
+                }
+
+                if (int.TryParse(xmlLimits.Attribute("max")?.Value, out var maxPageSize))
+                {
+                    capabilities.MaxPageSize = maxPageSize;
+                }
             }
 
             var xmlSearching = xmlRoot.Element("searching");
             if (xmlSearching != null)
             {
                 var xmlBasicSearch = xmlSearching.Element("search");
-                if (xmlBasicSearch == null || xmlBasicSearch.Attribute("available").Value != "yes")
+                if (xmlBasicSearch == null || xmlBasicSearch.Attribute("available")?.Value != "yes")
                 {
                     capabilities.SupportedSearchParameters = null;
                 }
@@ -137,12 +146,16 @@ namespace NzbDrone.Core.Indexers.Newznab
                 }
 
                 var xmlGameSearch = xmlSearching.Element("game-search");
-                if (xmlGameSearch == null || xmlGameSearch.Attribute("available").Value != "yes")
+                if (xmlGameSearch == null || xmlGameSearch.Attribute("available")?.Value != "yes")
                 {
                     capabilities.SupportedGameSearchParameters = null;
                 }
                 else
                 {
+                    // game-search advertised without an explicit param list:
+                    // assume plain text search only.
+                    capabilities.SupportedGameSearchParameters = new[] { "q" };
+
                     if (xmlGameSearch.Attribute("supportedParams") != null)
                     {
                         capabilities.SupportedGameSearchParameters = xmlGameSearch.Attribute("supportedParams").Value.Split(',');

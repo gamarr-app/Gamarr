@@ -87,9 +87,24 @@ namespace Gamarr.Api.V3.GameFiles
         public ActionResult<GameFileResource> SetGameFile([FromBody] GameFileResource gameFileResource)
         {
             var gameFile = _mediaFileService.GetGame(gameFileResource.Id);
-            gameFile.IndexerFlags = (IndexerFlags)gameFileResource.IndexerFlags;
-            gameFile.Quality = gameFileResource.Quality;
-            gameFile.Languages = gameFileResource.Languages;
+
+            // Omitted fields must keep their current values (the bulk endpoint
+            // below already does this); casting a null IndexerFlags was a 500.
+            if (gameFileResource.IndexerFlags.HasValue)
+            {
+                gameFile.IndexerFlags = (IndexerFlags)gameFileResource.IndexerFlags;
+            }
+
+            if (gameFileResource.Quality != null)
+            {
+                gameFile.Quality = gameFileResource.Quality;
+            }
+
+            if (gameFileResource.Languages != null)
+            {
+                gameFile.Languages = gameFileResource.Languages;
+            }
+
             gameFile.Edition = gameFileResource.Edition;
             if (gameFileResource.ReleaseGroup != null)
             {

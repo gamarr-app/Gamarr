@@ -214,11 +214,15 @@ namespace NzbDrone.Core.Notifications.Discord
                         break;
                     case DiscordImportFieldType.Languages:
                         discordField.Name = "Languages";
-                        discordField.Value = message.GameFile.MediaInfo.AudioLanguages.ConcatToString("/");
+
+                        // Game files carry no ffprobe media info (always null);
+                        // an NRE here fails every import notification and
+                        // eventually blocks the whole Discord provider.
+                        discordField.Value = message.GameFile.MediaInfo?.AudioLanguages?.ConcatToString("/") ?? string.Empty;
                         break;
                     case DiscordImportFieldType.Subtitles:
                         discordField.Name = "Subtitles";
-                        discordField.Value = message.GameFile.MediaInfo.Subtitles.ConcatToString("/");
+                        discordField.Value = message.GameFile.MediaInfo?.Subtitles?.ConcatToString("/") ?? string.Empty;
                         break;
                     case DiscordImportFieldType.Release:
                         discordField.Name = "Release";
