@@ -8,6 +8,7 @@ namespace NzbDrone.Core.Games.Components
     public interface IGameComponentRepository : IBasicRepository<GameComponent>
     {
         List<GameComponent> GetByGame(int gameId);
+        List<GameComponent> GetMonitoredDlc();
         GameComponent Find(int gameId, GameComponentType type, string key);
         void DeleteByGame(int gameId);
     }
@@ -22,6 +23,11 @@ namespace NzbDrone.Core.Games.Components
         public List<GameComponent> GetByGame(int gameId)
         {
             return Query(c => c.GameId == gameId);
+        }
+
+        public List<GameComponent> GetMonitoredDlc()
+        {
+            return Query(c => c.Monitored == true && c.ComponentType == GameComponentType.Dlc);
         }
 
         public GameComponent Find(int gameId, GameComponentType type, string key)
