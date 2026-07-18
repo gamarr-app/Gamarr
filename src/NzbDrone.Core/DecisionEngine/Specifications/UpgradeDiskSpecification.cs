@@ -49,9 +49,38 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
+        private static string StripNonAlphanumeric(string value)
+        {
+            return new string(value.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
+        }
+
         public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
             var qualityProfile = subject.Game.QualityProfile;
+
+            var contentType = subject.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
+
+            // A DLC-only release doesn't upgrade the base file — it fills its
+            // own slot (#149). Comparing it against the base file's quality
+            // either wrongly rejects it (cutoff met) or wrongly grabs it as a
+            // base upgrade. Gate it on whether that DLC is already on disk.
+            if (contentType is ReleaseContentType.DlcOnly or ReleaseContentType.SeasonPass)
+            {
+                var dlcFolders = (_mediaFileService.GetFilesByGame(subject.Game.Id) ?? new System.Collections.Generic.List<GameFile>())
+                    .Where(f => f.RelativePath.IsNotNullOrWhiteSpace() &&
+                                f.RelativePath.Replace('\\', '/').StartsWith("DLC/"))
+                    .Select(f => StripNonAlphanumeric(f.RelativePath))
+                    .ToList();
+
+                var cleanParsedTitle = StripNonAlphanumeric(subject.ParsedGameInfo.PrimaryGameTitle);
+
+                if (cleanParsedTitle.IsNotNullOrWhiteSpace() && dlcFolders.Any(f => f.Contains(cleanParsedTitle)))
+                {
+                    return DownloadSpecDecision.Reject(DownloadRejectionReason.DiskCutoffMet, "DLC is already on disk");
+                }
+
+                return DownloadSpecDecision.Accept();
+            }
 
             var file = subject.Game.GameFile;
 

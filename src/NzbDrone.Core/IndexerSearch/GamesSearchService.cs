@@ -7,16 +7,20 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Components;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Queue;
 
 namespace NzbDrone.Core.IndexerSearch
 {
-    public class GameSearchService : IExecute<GamesSearchCommand>, IExecute<MoviesSearchCommand>, IExecute<MissingGamesSearchCommand>, IExecute<CutoffUnmetGamesSearchCommand>
+    public class GameSearchService : IExecute<GamesSearchCommand>, IExecute<MoviesSearchCommand>, IExecute<MissingGamesSearchCommand>, IExecute<CutoffUnmetGamesSearchCommand>, IExecute<GameComponentSearchCommand>
     {
         private readonly IGameService _gameService;
         private readonly IGameCutoffService _gameCutoffService;
+        private readonly IGameComponentService _componentService;
         private readonly ISearchForReleases _releaseSearchService;
         private readonly IProcessDownloadDecisions _processDownloadDecisions;
         private readonly IQueueService _queueService;
@@ -24,6 +28,7 @@ namespace NzbDrone.Core.IndexerSearch
 
         public GameSearchService(IGameService gameService,
                                    IGameCutoffService gameCutoffService,
+                                   IGameComponentService componentService,
                                    ISearchForReleases releaseSearchService,
                                    IProcessDownloadDecisions processDownloadDecisions,
                                    IQueueService queueService,
@@ -31,6 +36,7 @@ namespace NzbDrone.Core.IndexerSearch
         {
             _gameService = gameService;
             _gameCutoffService = gameCutoffService;
+            _componentService = componentService;
             _releaseSearchService = releaseSearchService;
             _processDownloadDecisions = processDownloadDecisions;
             _queueService = queueService;
@@ -101,6 +107,64 @@ namespace NzbDrone.Core.IndexerSearch
             var missing = games.Where(e => !queue.Contains(e.Id)).ToList();
 
             SearchForBulkGames(missing, message.Trigger == CommandTrigger.Manual).GetAwaiter().GetResult();
+        }
+
+        public void Execute(GameComponentSearchCommand message)
+        {
+            var component = _componentService.Get(message.ComponentId);
+
+            var decisions = _releaseSearchService.GameComponentSearch(message.GameId, message.ComponentId, message.Trigger == CommandTrigger.Manual, false)
+                                                 .GetAwaiter().GetResult();
+
+            var scoped = FilterDecisionsToComponent(decisions, component);
+
+            _logger.ProgressInfo("Component search for {0} returned {1} reports, {2} match the component", component.Title, decisions.Count, scoped.Count);
+
+            var processed = _processDownloadDecisions.ProcessDecisions(scoped).GetAwaiter().GetResult();
+
+            _logger.ProgressInfo("Completed component search for {0}. {1} reports downloaded.", component.Title, processed.Grabbed.Count);
+        }
+
+        // A game-wide search returns base, update and DLC releases mixed
+        // together; only auto-grab the ones that fill the requested slot.
+        internal static List<DownloadDecision> FilterDecisionsToComponent(List<DownloadDecision> decisions, GameComponent component)
+        {
+            return decisions.Where(d =>
+            {
+                var contentType = d.RemoteGame?.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
+
+                switch (component.ComponentType)
+                {
+                    case GameComponentType.Base:
+                        return contentType.IncludesBaseGame();
+
+                    case GameComponentType.Update:
+                        return contentType == ReleaseContentType.UpdateOnly;
+
+                    case GameComponentType.Dlc:
+                        return contentType.IncludesDlc() && !contentType.IncludesBaseGame() && ReleaseMatchesDlcTitle(d, component);
+
+                    default:
+                        return false;
+                }
+            }).ToList();
+        }
+
+        private static bool ReleaseMatchesDlcTitle(DownloadDecision decision, GameComponent component)
+        {
+            var releaseTitle = decision.RemoteGame?.Release?.Title;
+
+            if (string.IsNullOrWhiteSpace(releaseTitle) || string.IsNullOrWhiteSpace(component.Title))
+            {
+                return false;
+            }
+
+            // Dots are stripped (not word-broken) by the scene-title cleaner, so
+            // dotted release names lose their separators; compare separator-free.
+            var cleanRelease = SearchCriteriaBase.GetCleanSceneTitle(releaseTitle).Replace("+", string.Empty).ToLowerInvariant();
+            var cleanDlc = SearchCriteriaBase.GetCleanSceneTitle(component.Title).Replace("+", string.Empty).ToLowerInvariant();
+
+            return cleanDlc.Length > 0 && cleanRelease.Contains(cleanDlc);
         }
 
         private async Task SearchForBulkGames(List<Game> games, bool userInvokedSearch)

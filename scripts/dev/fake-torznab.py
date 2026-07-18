@@ -43,6 +43,7 @@ RELEASES = [
     ("Hades.v1.0.GOG", 5_100_000_000, 40, 44),
     ("Hades.Update.v1.38290-FAKE", 500_000_000, 25, 30),
     ("Hades.MULTi10.Repack.All.DLC-FAKE", 5_900_000_000, 12, 20),
+    ("Hades.The.Blood.Price.DLC-FAKE", 200_000_000, 18, 22),
 ]
 
 
@@ -60,6 +61,24 @@ class Handler(http.server.BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(parsed.query)
         t = (qs.get("t") or ["search"])[0]
+
+        # Serve a minimal valid single-file torrent so grabs (e.g. into a
+        # blackhole download client) succeed end-to-end.
+        if parsed.path.startswith("/dl/"):
+            n = parsed.path[len("/dl/") :].split(".")[0]
+            name = f"fake-release-{n}".encode()
+            pieces = (int(n or 0) % 256).to_bytes(1, "big") * 20
+            data = (
+                b"d8:announce27:http://localhost:9899/announce"
+                b"4:infod6:lengthi1024e4:name" + str(len(name)).encode() + b":" + name +
+                b"12:piece lengthi16384e6:pieces20:" + pieces + b"ee"
+            )
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-bittorrent")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
 
         if t == "caps":
             body = CAPS

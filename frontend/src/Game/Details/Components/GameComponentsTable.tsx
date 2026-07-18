@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { GAME_COMPONENT_SEARCH } from 'Commands/commandNames';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
+import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -8,6 +11,8 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import TableRow from 'Components/Table/TableRow';
 import { icons, kinds } from 'Helpers/Props';
+import { executeCommand } from 'Store/Actions/commandActions';
+import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import formatBytes from 'Utilities/Number/formatBytes';
 import translate from 'Utilities/String/translate';
@@ -30,6 +35,7 @@ const columns = [
   { name: 'size', label: () => translate('Size'), isVisible: true },
   { name: 'status', label: () => translate('Status'), isVisible: true },
   { name: 'monitored', label: '', isVisible: true },
+  { name: 'actions', label: '', isVisible: true },
 ];
 
 const typeKinds: Record<
@@ -86,12 +92,34 @@ function GameComponentRow({
   isSaving,
   onMonitorPress,
 }: GameComponentRowProps) {
+  const dispatch = useDispatch();
+
+  const isSearching = useSelector(
+    useMemo(
+      () =>
+        createCommandExecutingSelector(GAME_COMPONENT_SEARCH, {
+          componentId: component.id,
+        }),
+      [component.id]
+    )
+  );
+
   const handleMonitorPress = useCallback(
     (value: boolean) => {
       onMonitorPress(component.id, value);
     },
     [component.id, onMonitorPress]
   );
+
+  const handleSearchPress = useCallback(() => {
+    dispatch(
+      executeCommand({
+        name: GAME_COMPONENT_SEARCH,
+        gameId: component.gameId,
+        componentId: component.id,
+      })
+    );
+  }, [dispatch, component.gameId, component.id]);
 
   return (
     <TableRow>
@@ -114,6 +142,15 @@ function GameComponentRow({
           monitored={component.monitored}
           isSaving={isSaving}
           onPress={handleMonitorPress}
+        />
+      </TableRowCell>
+
+      <TableRowCell>
+        <SpinnerIconButton
+          name={icons.SEARCH}
+          title={translate('Search')}
+          isSpinning={isSearching}
+          onPress={handleSearchPress}
         />
       </TableRowCell>
     </TableRow>

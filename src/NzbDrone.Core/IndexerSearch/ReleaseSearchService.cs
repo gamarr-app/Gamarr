@@ -10,6 +10,7 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
@@ -20,6 +21,7 @@ namespace NzbDrone.Core.IndexerSearch
     {
         Task<List<DownloadDecision>> GameSearch(int gameId, bool userInvokedSearch, bool interactiveSearch);
         Task<List<DownloadDecision>> GameSearch(Game game, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> GameComponentSearch(int gameId, int componentId, bool userInvokedSearch, bool interactiveSearch);
     }
 
     public class ReleaseSearchService : ISearchForReleases
@@ -27,6 +29,7 @@ namespace NzbDrone.Core.IndexerSearch
         private readonly IIndexerFactory _indexerFactory;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
         private readonly IGameService _gameService;
+        private readonly IGameComponentService _componentService;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly IQualityProfileService _qualityProfileService;
         private readonly Logger _logger;
@@ -34,6 +37,7 @@ namespace NzbDrone.Core.IndexerSearch
         public ReleaseSearchService(IIndexerFactory indexerFactory,
                                 IMakeDownloadDecision makeDownloadDecision,
                                 IGameService gameService,
+                                IGameComponentService componentService,
                                 IGameTranslationService gameTranslationService,
                                 IQualityProfileService qualityProfileService,
                                 Logger logger)
@@ -41,6 +45,7 @@ namespace NzbDrone.Core.IndexerSearch
             _indexerFactory = indexerFactory;
             _makeDownloadDecision = makeDownloadDecision;
             _gameService = gameService;
+            _componentService = componentService;
             _gameTranslationService = gameTranslationService;
             _qualityProfileService = qualityProfileService;
             _logger = logger;
@@ -64,6 +69,50 @@ namespace NzbDrone.Core.IndexerSearch
             downloadDecisions.AddRange(decisions);
 
             return DeDupeDecisions(downloadDecisions);
+        }
+
+        public async Task<List<DownloadDecision>> GameComponentSearch(int gameId, int componentId, bool userInvokedSearch, bool interactiveSearch)
+        {
+            var game = _gameService.GetGame(gameId);
+            game.GameMetadata.Value.Translations = _gameTranslationService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
+
+            var component = _componentService.Get(componentId);
+            var searchSpec = Get<GameSearchCriteria>(game, userInvokedSearch, interactiveSearch);
+
+            if (component.ComponentType == GameComponentType.Dlc)
+            {
+                // Indexer queries for a DLC need the DLC name: releases are named
+                // "<Game> <DLC name> DLC-GRP", so "<game title> <dlc name>" finds
+                // them where the bare game title drowns them in base-game results.
+                var dlcTitle = GetComponentSearchTitle(component);
+
+                searchSpec.SceneTitles = searchSpec.SceneTitles
+                    .Select(t => $"{t} {dlcTitle}")
+                    .Concat(new[] { dlcTitle })
+                    .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                    .ToList();
+            }
+
+            // Update slots need no query scoping: update releases carry the base
+            // title ("Game.Update.vX"), so the regular queries surface them.
+            var decisions = await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
+
+            return DeDupeDecisions(decisions.ToList());
+        }
+
+        // Imported DLC slots are titled by their release folder
+        // ("Hades.The.Blood.Price.DLC-FAKE"); parse that back into words for a
+        // usable query. Metadata (igdb:) slots already have a clean name.
+        private static string GetComponentSearchTitle(GameComponent component)
+        {
+            if (!component.Key.StartsWith("import:"))
+            {
+                return component.Title;
+            }
+
+            var parsed = Parser.Parser.ParseGameTitle(component.Title);
+
+            return parsed?.GameTitle ?? component.Title.Replace('.', ' ');
         }
 
         // Matches common update/patch suffixes appended by metadata sources (e.g. RAWG)
