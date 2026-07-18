@@ -6,6 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.GameTests
@@ -101,6 +102,32 @@ namespace NzbDrone.Core.Test.GameTests
 
             Mocker.GetMock<IGameComponentRepository>()
                   .Verify(r => r.InsertMany(It.IsAny<IList<GameComponent>>()), Times.Never());
+        }
+
+        [Test]
+        public void should_reconcile_components_when_a_file_is_added_by_import()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetGame(_game.Id))
+                  .Returns(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile>
+                  {
+                      new GameFile { Id = 2, GameId = _game.Id, RelativePath = "Updates/v1.5" }
+                  });
+
+            List<GameComponent> captured = null;
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.InsertMany(It.IsAny<IList<GameComponent>>()))
+                  .Callback<IList<GameComponent>>(list => captured = list.ToList());
+
+            Subject.Handle(new GameFileAddedEvent(new GameFile { Id = 2, GameId = _game.Id, RelativePath = "Updates/v1.5" }));
+
+            captured.Should().NotBeNull();
+            captured.Should().Contain(c => c.ComponentType == GameComponentType.Update && c.Key == "v1.5");
         }
 
         [Test]

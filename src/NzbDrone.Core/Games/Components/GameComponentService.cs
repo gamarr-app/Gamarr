@@ -21,18 +21,22 @@ namespace NzbDrone.Core.Games.Components
     public class GameComponentService : IGameComponentService,
                                         IHandle<GameUpdatedEvent>,
                                         IHandle<GameScannedEvent>,
+                                        IHandle<GameFileAddedEvent>,
                                         IHandle<GamesDeletedEvent>
     {
         private readonly IGameComponentRepository _componentRepository;
         private readonly IMediaFileService _mediaFileService;
+        private readonly IGameService _gameService;
         private readonly Logger _logger;
 
         public GameComponentService(IGameComponentRepository componentRepository,
                                     IMediaFileService mediaFileService,
+                                    IGameService gameService,
                                     Logger logger)
         {
             _componentRepository = componentRepository;
             _mediaFileService = mediaFileService;
+            _gameService = gameService;
             _logger = logger;
         }
 
@@ -189,6 +193,20 @@ namespace NzbDrone.Core.Games.Components
         public void Handle(GameScannedEvent message)
         {
             EnsureComponents(message.Game);
+        }
+
+        // Imports (downloaded-folder scans, manual imports) add files without
+        // raising a scan/update event, so reconcile here too.
+        public void Handle(GameFileAddedEvent message)
+        {
+            var game = message.GameFile.Game ?? _gameService.GetGame(message.GameFile.GameId);
+
+            if (game == null)
+            {
+                return;
+            }
+
+            EnsureComponents(game);
         }
 
         public void Handle(GamesDeletedEvent message)

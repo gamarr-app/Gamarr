@@ -73,6 +73,7 @@ import {
   unregisterPagePopulator,
 } from 'Utilities/pagePopulator';
 import translate from 'Utilities/String/translate';
+import GameComponentsTable from './Components/GameComponentsTable';
 import DlcList from './Dlc/DlcList';
 import GameDetailsLinks from './GameDetailsLinks';
 import GameReleaseDates from './GameReleaseDates';
@@ -938,6 +939,10 @@ function GameDetails({ gameId }: GameDetailsProps) {
               {translate('LoadingGameFilesFailed')}
             </Alert>
           ) : null}
+
+          <FieldSet legend={translate('Components')}>
+            <GameComponentsTable gameId={id} />
+          </FieldSet>
 
           <FieldSet legend={translate('Files')}>
             <GameStatus
