@@ -22,6 +22,7 @@ namespace Gamarr.Api.V3.ManualImport
         public GameResource Game { get; set; }
         public int? GameFileId { get; set; }
         public string ReleaseGroup { get; set; }
+        public string Version { get; set; }
         public QualityModel Quality { get; set; }
         public List<Language> Languages { get; set; }
         public int QualityWeight { get; set; }
@@ -55,6 +56,7 @@ namespace Gamarr.Api.V3.ManualImport
                 Game = model.Game.ToResource(0),
                 GameFileId = model.GameFileId,
                 ReleaseGroup = model.ReleaseGroup,
+                Version = model.Version,
                 Quality = model.Quality,
                 Languages = model.Languages,
                 CustomFormats = customFormats.ToResource(false),

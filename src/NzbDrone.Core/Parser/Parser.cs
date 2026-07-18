@@ -54,6 +54,20 @@ namespace NzbDrone.Core.Parser
             // parse as version=1.1, group=107).
             new Regex(@"^(?<title>(?![(\[]).+?(?<![._]Update))[._]v(?<version>\d+(?:\.\d+)*[a-z]*\d*)(?:[._]REPACK)?[._-](?<releasegroup>(?=[A-Za-z0-9_]*[A-Za-z])[A-Za-z0-9_]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
+            // Scene release with version, MULTi language marker, then group:
+            // "Owlboy.v1.3.6613.28019.MULTI13-SiMPLEX" -> "Owlboy".
+            // Must be before the generic MULTi/Repack fallback, otherwise the
+            // version is captured as part of the title.
+            new Regex(@"^(?<title>(?![(\[]).+?)[._]v(?<version>\d+(?:\.\d+){1,3})[._]MULTI?\d*-(?<releasegroup>[A-Za-z0-9_]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Plain tracker release with title, dotted version, and numeric build/id:
+            // "Owlboy 1.3.7013.40181 (35964)" -> "Owlboy".
+            new Regex(@"^(?<title>(?![(\[]).+?)\s+\d+(?:\.\d+){1,3}\s+\(\d+\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Bracketed platform/language tracker release:
+            // "[PS4] Owlboy [EUR/RUS] (v1.00)" -> "Owlboy".
+            new Regex(@"^\[(?:PS\d|PSP|VITA|XBOX(?:\s*360|\s*ONE|\s*SERIES)?|SWITCH|NSW|PC|WIN(?:DOWS)?)\]\s*(?<title>[^\[]+?)\s*(?:\[[^\]]+\]\s*)*\(v\d+(?:\.\d+)*\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Game release with date-based version: "Hades II v2025.08.03" or "Game Name v2025.06.18"
             // Must be before year patterns to avoid v2025 being parsed as year
             new Regex(@"^(?<title>(?![(\[]).+?)\s+v(?<year>\d{4})\.(?<version>\d{2}\.\d{2})$", RegexOptions.IgnoreCase | RegexOptions.Compiled),

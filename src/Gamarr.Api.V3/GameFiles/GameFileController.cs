@@ -13,6 +13,7 @@ using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Qualities;
 using NzbDrone.SignalR;
 using Gamarr.Http;
 using Gamarr.Http.REST;
@@ -188,6 +189,11 @@ namespace Gamarr.Api.V3.GameFiles
                 if (resourceGameFile.ReleaseGroup != null)
                 {
                     gameFile.ReleaseGroup = resourceGameFile.ReleaseGroup;
+                }
+
+                if (resourceGameFile.Version != null)
+                {
+                    gameFile.GameVersion = GameVersion.Parse(resourceGameFile.Version);
                 }
 
                 if (resourceGameFile.IndexerFlags.HasValue)

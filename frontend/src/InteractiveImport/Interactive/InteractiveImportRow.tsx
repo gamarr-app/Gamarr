@@ -18,6 +18,7 @@ import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexe
 import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
+import SelectVersionModal from 'InteractiveImport/Version/SelectVersionModal';
 import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import {
@@ -34,7 +35,7 @@ import InteractiveImportRowCellPlaceholder from './InteractiveImportRowCellPlace
 import styles from './InteractiveImportRow.css';
 
 type SelectType =
-  'game' | 'releaseGroup' | 'quality' | 'language' | 'indexerFlags';
+  'game' | 'releaseGroup' | 'version' | 'quality' | 'language' | 'indexerFlags';
 
 type SelectedChangeProps = SelectStateInputProps & {
   hasGameFileId: boolean;
@@ -46,6 +47,7 @@ interface InteractiveImportRowProps {
   relativePath: string;
   game?: Game;
   releaseGroup?: string;
+  version?: string;
   quality?: QualityModel;
   languages?: Language[];
   size: number;
@@ -71,6 +73,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     quality,
     languages,
     releaseGroup,
+    version,
     size,
     customFormats,
     customFormatScore,
@@ -227,6 +230,27 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     [id, dispatch, setSelectModalOpen, selectRowAfterChange]
   );
 
+  const onSelectVersionPress = useCallback(() => {
+    setSelectModalOpen('version');
+  }, [setSelectModalOpen]);
+
+  const onVersionSelect = useCallback(
+    (version: string) => {
+      dispatch(
+        updateInteractiveImportItem({
+          id,
+          version,
+        })
+      );
+
+      dispatch(reprocessInteractiveImportItems({ ids: [id] }));
+
+      setSelectModalOpen(null);
+      selectRowAfterChange();
+    },
+    [id, dispatch, setSelectModalOpen, selectRowAfterChange]
+  );
+
   const onSelectLanguagePress = useCallback(() => {
     setSelectModalOpen('language');
   }, [setSelectModalOpen]);
@@ -273,6 +297,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
 
   const showGamePlaceholder = isSelected && !game;
   const showReleaseGroupPlaceholder = isSelected && !releaseGroup;
+  const showVersionPlaceholder = isSelected && !version;
   const showQualityPlaceholder = isSelected && !quality;
   const showLanguagePlaceholder = isSelected && !languages;
   const showIndexerFlagsPlaceholder = isSelected && !indexerFlags;
@@ -311,6 +336,18 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
           <InteractiveImportRowCellPlaceholder isOptional={true} />
         ) : (
           releaseGroup
+        )}
+      </TableRowCellButton>
+
+      <TableRowCellButton
+        className={styles.version}
+        title={translate('ClickToChangeVersion')}
+        onPress={onSelectVersionPress}
+      >
+        {showVersionPlaceholder ? (
+          <InteractiveImportRowCellPlaceholder isOptional={true} />
+        ) : (
+          version
         )}
       </TableRowCellButton>
 
@@ -410,6 +447,14 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
         releaseGroup={releaseGroup ?? ''}
         modalTitle={modalTitle}
         onReleaseGroupSelect={onReleaseGroupSelect}
+        onModalClose={onSelectModalClose}
+      />
+
+      <SelectVersionModal
+        isOpen={selectModalOpen === 'version'}
+        version={version ?? ''}
+        modalTitle={modalTitle}
+        onVersionSelect={onVersionSelect}
         onModalClose={onSelectModalClose}
       />
 

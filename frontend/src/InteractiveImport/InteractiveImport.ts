@@ -10,6 +10,7 @@ export interface InteractiveImportCommandOptions {
   folderName: string;
   gameId: number;
   releaseGroup?: string;
+  version?: string;
   quality: QualityModel;
   languages: Language[];
   indexerFlags: number;
@@ -24,6 +25,7 @@ interface InteractiveImport extends ModelBase {
   name: string;
   size: number;
   releaseGroup: string;
+  version?: string;
   quality: QualityModel;
   languages: Language[];
   game?: Game;

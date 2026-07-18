@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
     {
         List<ManualImportItem> GetMediaFiles(int gameId);
         List<ManualImportItem> GetMediaFiles(string path, string downloadId, int? gameId, bool filterExistingFiles);
-        ManualImportItem ReprocessItem(string path, string downloadId, int gameId, string releaseGroup, QualityModel quality, List<Language> languages, int indexerFlags);
+        ManualImportItem ReprocessItem(string path, string downloadId, int gameId, string releaseGroup, string version, QualityModel quality, List<Language> languages, int indexerFlags);
     }
 
     public class ManualImportService : IExecute<ManualImportCommand>, IManualImportService
@@ -129,7 +129,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             return ProcessFolder(path, path, downloadId, gameId, filterExistingFiles);
         }
 
-        public ManualImportItem ReprocessItem(string path, string downloadId, int gameId, string releaseGroup, QualityModel quality, List<Language> languages, int indexerFlags)
+        public ManualImportItem ReprocessItem(string path, string downloadId, int gameId, string releaseGroup, string version, QualityModel quality, List<Language> languages, int indexerFlags)
         {
             var rootFolder = Path.GetDirectoryName(path);
             var game = _gameService.GetGame(gameId);
@@ -147,6 +147,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                 ? ReleaseGroupParser.ParseReleaseGroup(path)
                 : releaseGroup;
             var finalQuality = (quality?.Quality ?? Quality.Unknown) == Quality.Unknown ? QualityParser.ParseQuality(path) : quality;
+            var finalVersion = ParseManualVersion(version, path);
             var finalLanguages =
                 languages?.Count <= 1 && (languages?.SingleOrDefault() ?? Language.Unknown) == Language.Unknown
                     ? languageParse
@@ -154,7 +155,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
 
             var localGame = new LocalGame();
             localGame.Game = game;
-            localGame.FileGameInfo = Parser.Parser.ParseGamePath(path);
+            localGame.FileGameInfo = Parser.Parser.ParseGamePath(path) ?? new ParsedGameInfo();
+            localGame.FileGameInfo.GameVersion = finalVersion ?? localGame.FileGameInfo.GameVersion;
             localGame.DownloadClientGameInfo = downloadClientItem == null ? null : Parser.Parser.ParseGameTitle(downloadClientItem.Title);
             localGame.DownloadItem = downloadClientItem;
             localGame.Path = path;
@@ -178,6 +180,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             localGame.Quality = finalQuality;
             localGame.Languages = finalLanguages;
             localGame.IndexerFlags = (IndexerFlags)indexerFlags;
+            localGame.FileGameInfo.GameVersion = finalVersion ?? localGame.FileGameInfo.GameVersion;
 
             return MapItem(_importDecisionMaker.GetDecision(localGame, downloadClientItem), rootFolder, downloadId, null);
         }
@@ -203,6 +206,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                 {
                     _logger.Warn(e, "Unable to match game by title");
                 }
+
+                game ??= _gameService.FindByTitle(directoryInfo.Name);
             }
 
             if (downloadId.IsNotNullOrWhiteSpace())
@@ -240,8 +245,33 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             }
 
             var folderInfo = Parser.Parser.ParseGameTitle(directoryInfo.Name);
-            var gameFiles = _diskScanService.FilterPaths(rootFolder, _diskScanService.GetVideoFiles(baseFolder).ToList());
-            var decisions = _importDecisionMaker.GetImportDecisions(gameFiles, game, downloadClientItem, folderInfo, SceneSource(game, baseFolder), filterExistingFiles);
+            var sceneSource = SceneSource(game, baseFolder);
+
+            // External folders (an installed/extracted game the user points at)
+            // import as one folder unit. Download-client folders keep per-file
+            // candidates: a completed download can contain several releases,
+            // and FilterExistingFiles operates on file paths.
+            var treatAsSingleItem = sceneSource && downloadId.IsNullOrWhiteSpace();
+            var importPaths = treatAsSingleItem
+                ? new List<string> { baseFolder }
+                : _diskScanService.FilterPaths(rootFolder, _diskScanService.GetVideoFiles(baseFolder).ToList());
+            var decisions = _importDecisionMaker.GetImportDecisions(importPaths, game, downloadClientItem, folderInfo, sceneSource, filterExistingFiles);
+
+            if (treatAsSingleItem)
+            {
+                foreach (var decision in decisions)
+                {
+                    decision.LocalGame.FileGameInfo ??= new ParsedGameInfo();
+
+                    // The version parsed from the folder's own name wins; a scan
+                    // of the files inside is only a fallback (a stray patch
+                    // installer must not override the release's version).
+                    if (decision.LocalGame.FileGameInfo.GameVersion?.HasValue != true)
+                    {
+                        decision.LocalGame.FileGameInfo.GameVersion = GetFolderVersion(baseFolder) ?? decision.LocalGame.FileGameInfo.GameVersion;
+                    }
+                }
+            }
 
             return decisions.Select(decision => MapItem(decision, rootFolder, downloadId, directoryInfo.Name)).ToList();
         }
@@ -381,6 +411,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             item.Size = GetItemSize(decision.LocalGame.Path);
             item.Languages = decision.LocalGame.Languages;
             item.ReleaseGroup = decision.LocalGame.ReleaseGroup;
+            item.Version = GetVersionString(decision.LocalGame);
             item.Rejections = decision.Rejections;
             item.IndexerFlags = (int)decision.LocalGame.IndexerFlags;
 
@@ -407,6 +438,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             item.ReleaseGroup = gameFile.ReleaseGroup;
             item.Quality = gameFile.Quality;
             item.Languages = gameFile.Languages;
+            item.Version = gameFile.GameVersion?.ToString();
             item.IndexerFlags = (int)gameFile.IndexerFlags;
             item.Size = GetItemSize(item.Path);
             item.Rejections = Enumerable.Empty<ImportRejection>();
@@ -430,6 +462,12 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                 var file = message.Files[i];
                 var game = _gameService.GetGame(file.GameId);
                 var fileGameInfo = Parser.Parser.ParseGamePath(file.Path) ?? new ParsedGameInfo();
+
+                // user-chosen ?? item's own name (via ParseManualVersion) ??
+                // scan of files inside the folder. Computed once; GetFolderVersion
+                // walks the whole folder.
+                var finalVersion = ParseManualVersion(file.Version, file.Path) ?? GetFolderVersion(file.Path);
+                fileGameInfo.GameVersion = finalVersion ?? fileGameInfo.GameVersion;
                 var existingFile = game.Path.IsParentPath(file.Path);
                 TrackedDownload trackedDownload = null;
 
@@ -468,6 +506,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                 localGame.Quality = file.Quality;
                 localGame.Languages = file.Languages;
                 localGame.IndexerFlags = (IndexerFlags)file.IndexerFlags;
+                localGame.FileGameInfo.GameVersion = finalVersion ?? localGame.FileGameInfo.GameVersion;
 
                 localGame.CustomFormats = _formatCalculator.ParseCustomFormat(localGame);
                 localGame.CustomFormatScore = localGame.Game.QualityProfile?.CalculateCustomFormatScore(localGame.CustomFormats) ?? 0;
@@ -518,6 +557,47 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                     _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, importGame.Id));
                 }
             }
+        }
+
+        private static string GetVersionString(LocalGame localGame)
+        {
+            var version = localGame.GameVersion;
+
+            if (version?.HasValue == true)
+            {
+                return version.ToString();
+            }
+
+            var filenameVersion = QualityParser.ParseGameVersion(Path.GetFileName(localGame.Path));
+
+            return filenameVersion.HasValue ? filenameVersion.ToString() : null;
+        }
+
+        private static GameVersion ParseManualVersion(string version, string path)
+        {
+            if (GameVersion.TryParse(version, out var parsedVersion))
+            {
+                return parsedVersion;
+            }
+
+            var filenameVersion = QualityParser.ParseGameVersion(Path.GetFileName(path));
+
+            return filenameVersion.HasValue ? filenameVersion : null;
+        }
+
+        private GameVersion GetFolderVersion(string path)
+        {
+            if (!_diskProvider.FolderExists(path))
+            {
+                return null;
+            }
+
+            // Ordered so the result doesn't depend on filesystem enumeration
+            // order when several files inside carry version tokens.
+            return _diskProvider.GetFiles(path, true)
+                .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
+                .Select(file => QualityParser.ParseGameVersion(Path.GetFileName(file)))
+                .FirstOrDefault(version => version.HasValue);
         }
     }
 }
