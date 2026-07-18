@@ -28,6 +28,10 @@ namespace NzbDrone.Core.Games
         /// </summary>
         public bool MonitorUpdates { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
+
+        // Per-entry platform (Unknown = any). Enables one library entry per
+        // platform for the same title, with releases filtered to match (#150).
+        public PlatformFamily Platform { get; set; }
         public int QualityProfileId { get; set; }
 
         public string Path { get; set; }
@@ -178,6 +182,7 @@ namespace NzbDrone.Core.Games
             Monitored = otherGame.Monitored;
             MonitorUpdates = otherGame.MonitorUpdates;
             MinimumAvailability = otherGame.MinimumAvailability;
+            Platform = otherGame.Platform;
 
             RootFolderPath = otherGame.RootFolderPath;
             Tags = otherGame.Tags;

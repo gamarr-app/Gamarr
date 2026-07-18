@@ -8,6 +8,7 @@ export interface NewGamePayload {
   minimumAvailability: GameAvailability;
   tags: number[];
   searchForGame?: boolean;
+  platform?: string;
 }
 
 // Properties added by getNewGame to any game-like object
@@ -19,6 +20,7 @@ interface NewGameAddedProps {
   minimumAvailability: GameAvailability;
   rootFolderPath: string;
   tags: number[];
+  platform: string;
 }
 
 // Input type - accepts any object, returns it with added properties
@@ -34,6 +36,7 @@ function getNewGame<T extends object>(
     minimumAvailability,
     tags,
     searchForGame = false,
+    platform = 'unknown',
   } = payload;
 
   const addOptions: GameAddOptions = {
@@ -49,6 +52,7 @@ function getNewGame<T extends object>(
   result.minimumAvailability = minimumAvailability;
   result.rootFolderPath = rootFolderPath;
   result.tags = tags;
+  result.platform = platform;
 
   return result;
 }

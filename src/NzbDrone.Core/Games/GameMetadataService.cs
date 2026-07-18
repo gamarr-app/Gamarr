@@ -9,6 +9,7 @@ namespace NzbDrone.Core.Games
         GameMetadata FindByIgdbId(int igdbId);
         List<GameMetadata> GetGamesWithCollections();
         List<GameMetadata> GetGamesByCollectionIgdbId(int collectionId);
+        GameMetadata Insert(GameMetadata metadata);
         bool Upsert(GameMetadata game);
         bool UpsertMany(List<GameMetadata> games);
         void DeleteMany(List<GameMetadata> games);
@@ -45,6 +46,11 @@ namespace NzbDrone.Core.Games
         public GameMetadata Get(int id)
         {
             return _gameMetadataRepository.Get(id);
+        }
+
+        public GameMetadata Insert(GameMetadata metadata)
+        {
+            return _gameMetadataRepository.Insert(metadata);
         }
 
         public bool Upsert(GameMetadata game)

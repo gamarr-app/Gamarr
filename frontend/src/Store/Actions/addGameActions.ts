@@ -28,6 +28,7 @@ interface AddGameDefaults {
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
+  platform: string;
   tags: number[];
 }
 
@@ -58,6 +59,7 @@ export const defaultState: AddGameState = {
     qualityProfileId: 0,
     minimumAvailability: 'released',
     searchForGame: true,
+    platform: 'unknown',
     tags: [],
   },
 };

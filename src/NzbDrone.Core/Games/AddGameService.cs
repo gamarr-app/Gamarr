@@ -54,6 +54,19 @@ namespace NzbDrone.Core.Games
             _logger.Info("Adding Game {0} Path: [{1}]", newGame, newGame.Path);
 
             _gameMetadataService.Upsert(newGame.GameMetadata.Value);
+
+            // Platform-specific duplicate adds (#150): Games.GameMetadataId is
+            // unique, so a second entry for the same title gets its own copy of
+            // the metadata row (each entry refreshes its copy independently).
+            if (newGame.Platform != PlatformFamily.Unknown &&
+                _gameService.GetAllGames().Any(g => g.GameMetadataId == newGame.GameMetadata.Value.Id))
+            {
+                var metadataCopy = newGame.GameMetadata.Value.JsonClone();
+                metadataCopy.Id = 0;
+
+                newGame.GameMetadata = _gameMetadataService.Insert(metadataCopy);
+            }
+
             newGame.GameMetadataId = newGame.GameMetadata.Value.Id;
 
             _gameService.UpdateTags(newGame);

@@ -34,6 +34,36 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             var preferredPlatforms = subject.Game.QualityProfile.PreferredPlatforms;
             var releasePlatform = subject.ParsedGameInfo.Platform;
 
+            // Per-entry platform (#150) takes precedence over profile
+            // preferences: a PS4 entry only accepts PS4-tagged releases, etc.
+            // PC-family entries accept untagged releases (scene PC releases
+            // rarely carry a platform token); console entries require an
+            // explicit tag since console releases always declare one.
+            var gamePlatform = subject.Game.Platform;
+
+            if (gamePlatform != PlatformFamily.Unknown)
+            {
+                if (releasePlatform == gamePlatform)
+                {
+                    return DownloadSpecDecision.Accept();
+                }
+
+                var isPcFamily = gamePlatform is PlatformFamily.PC or PlatformFamily.Linux or PlatformFamily.Mac;
+
+                if (releasePlatform == PlatformFamily.Unknown && isPcFamily)
+                {
+                    return DownloadSpecDecision.Accept();
+                }
+
+                _logger.Debug("Release platform {0} does not match this entry's platform {1}, rejecting.", releasePlatform, gamePlatform);
+
+                return DownloadSpecDecision.Reject(
+                    DownloadRejectionReason.WantedPlatform,
+                    "Release platform {0} does not match this entry's platform {1}",
+                    releasePlatform,
+                    gamePlatform);
+            }
+
             // If platform preferences are set, use them
             if (preferredPlatforms != null && preferredPlatforms.Any())
             {

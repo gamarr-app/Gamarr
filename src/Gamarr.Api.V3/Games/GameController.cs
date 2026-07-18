@@ -115,15 +115,18 @@ namespace Gamarr.Api.V3.Games
 
             PostValidator.RuleFor(s => s.Title).NotEmpty().When(s => s.IgdbId <= 0 && s.SteamAppId <= 0);
 
-            // Allow either IgdbId or SteamAppId (for Steam-only games)
+            // Allow either IgdbId or SteamAppId (for Steam-only games). The
+            // exists check is platform-aware: the same title may be added once
+            // per platform (#150).
             PostValidator.RuleFor(s => s.IgdbId)
                 .NotNull()
                 .NotEmpty()
-                .SetPathValidator(gamesExistsValidator)
+                .Must((resource, igdbId) => gamesExistsValidator.Validate(igdbId, resource.Platform))
+                .WithMessage("Game already exists")
                 .When(s => s.SteamAppId <= 0);
             PostValidator.RuleFor(s => s.SteamAppId)
                 .GreaterThan(0)
-                .SetSteamAppIdValidator(gamesExistsValidator)
+                .Must((resource, steamAppId) => gamesExistsValidator.ValidateSteamAppId(steamAppId, resource.Platform))
                 .When(s => s.IgdbId <= 0)
                 .WithMessage("Either IgdbId or SteamAppId must be provided");
         }

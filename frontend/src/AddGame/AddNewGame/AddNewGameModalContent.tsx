@@ -39,6 +39,7 @@ interface AddNewGameModalContentProps {
   qualityProfileId?: FormValue<number>;
   minimumAvailability: FormValue<string>;
   searchForGame: FormValue<boolean>;
+  platform?: FormValue<string>;
   folder: string;
   tags: FormValue<number[]>;
   isSmallScreen: boolean;
@@ -47,6 +48,16 @@ interface AddNewGameModalContentProps {
   onInputChange: (change: InputChanged) => void;
   onAddGamePress: () => void;
 }
+
+const platformOptions = [
+  { key: 'unknown', value: 'Any' },
+  { key: 'pc', value: 'PC (Windows)' },
+  { key: 'linux', value: 'Linux' },
+  { key: 'mac', value: 'macOS' },
+  { key: 'playStation', value: 'PlayStation' },
+  { key: 'xbox', value: 'Xbox' },
+  { key: 'nintendo', value: 'Nintendo' },
+];
 
 function AddNewGameModalContent(props: AddNewGameModalContentProps) {
   const {
@@ -61,6 +72,7 @@ function AddNewGameModalContent(props: AddNewGameModalContentProps) {
     qualityProfileId,
     minimumAvailability,
     searchForGame,
+    platform,
     folder,
     tags,
     isSmallScreen,
@@ -189,6 +201,19 @@ function AddNewGameModalContent(props: AddNewGameModalContentProps) {
                   errors={qualityProfileId?.errors}
                   warnings={qualityProfileId?.warnings}
                   onChange={onQualityProfileIdChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>{translate('Platform')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.SELECT}
+                  name="platform"
+                  value={platform?.value ?? 'unknown'}
+                  values={platformOptions}
+                  helpText={translate('PlatformHelpText')}
+                  onChange={onInputChange}
                 />
               </FormGroup>
 

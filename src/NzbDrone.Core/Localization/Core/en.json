@@ -1504,6 +1504,8 @@
   "Permissions": "Permissions",
   "PhysicalRelease": "Physical Release",
   "PhysicalReleaseDate": "Physical Release Date",
+  "Platform": "Platform",
+  "PlatformHelpText": "Only grab releases for this platform. 'Any' accepts everything; the same title can be added once per platform with its own root folder",
   "Platforms": "Platforms",
   "Popular": "Popular",
   "Popularity": "Popularity",
