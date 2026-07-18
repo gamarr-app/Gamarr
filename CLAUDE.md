@@ -134,6 +134,13 @@ REST/curl call.
   `Gamarr*` project root namespaces to `NzbDrone*`. Don't "fix" it.
 - **Don't `--amend`** failed-hook commits — see the harness rules; create a
   new commit instead.
+- **UI folder depends on build config.** Debug binaries serve `_output/UI`
+  (fresh `yarn build` output); Release binaries serve `_output/net10.0/UI`
+  (`ConfigFileProvider.UiFolder`). A stale copy there once made smoke tests
+  silently exercise months-old frontend code (phantom repro of an
+  already-fixed freeze). `_output/net10.0/UI` is now a symlink to `../UI` on
+  this machine — if UI changes don't show up in smoke, hash-compare
+  `curl :6968/frontend_src_bootstrap_tsx.js` against `_output/UI/` first.
 
 ## CI quirks
 

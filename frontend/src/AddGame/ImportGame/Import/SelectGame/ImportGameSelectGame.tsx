@@ -228,15 +228,18 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
         </Link>
       </div>
 
+      {/* Mount the popper only while open: with one select per row, idle
+          popper instances (default `hide` modifier) can degenerate into a
+          synchronous forceUpdate loop that freezes the page. */}
       <Portal>
-        <div
-          ref={setPopperElement}
-          id={contentId}
-          className={styles.contentContainer}
-          style={popperStyles.popper}
-          {...attributes.popper}
-        >
-          {isOpen ? (
+        {isOpen ? (
+          <div
+            ref={setPopperElement}
+            id={contentId}
+            className={styles.contentContainer}
+            style={popperStyles.popper}
+            {...attributes.popper}
+          >
             <div className={styles.content}>
               <div className={styles.searchContainer}>
                 <div className={styles.searchIconContainer}>
@@ -276,8 +279,8 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
                 })}
               </div>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </Portal>
     </>
   );
