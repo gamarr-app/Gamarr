@@ -28,6 +28,9 @@ namespace NzbDrone.Core.MediaFiles
         public List<Language> Languages { get; set; }
         public Qualities.GameVersion GameVersion { get; set; }
 
+        // Component slot this file belongs to (#149); 0 = unassigned.
+        public int ComponentId { get; set; }
+
         public override string ToString()
         {
             return string.Format("[{0}] {1}", Id, RelativePath);
