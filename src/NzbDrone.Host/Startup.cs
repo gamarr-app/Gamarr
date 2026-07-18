@@ -53,9 +53,20 @@ namespace NzbDrone.Host
                 b.ClearProviders();
                 b.SetMinimumLevel(LogLevel.Trace);
                 b.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
-                b.AddFilter("Gamarr.Http.Authentication.ApiKeyAuthenticationHandler", LogLevel.Information);
+
+                // Warning, not Information: a single abandoned browser tab
+                // holding a stale API key retries SignalR forever, and the
+                // framework's "API was challenged" line (Information) turns
+                // that into tens of thousands of log lines a day. The caller
+                // still sees the 401.
+                b.AddFilter("Gamarr.Http.Authentication.ApiKeyAuthenticationHandler", LogLevel.Warning);
                 b.AddFilter("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager", LogLevel.Error);
-                b.AddNLog();
+
+                // NLog's provider defaults to RemoveLoggerFactoryFilter=true,
+                // which registers a provider-specific allow-all rule that
+                // outranks the category filters above. Keep the filters
+                // authoritative.
+                b.AddNLog(new NLogProviderOptions { RemoveLoggerFactoryFilter = false });
             });
 
             services.Configure<ForwardedHeadersOptions>(options =>
