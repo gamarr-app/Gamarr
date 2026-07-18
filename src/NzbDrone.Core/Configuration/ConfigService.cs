@@ -223,6 +223,22 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("DeleteEmptyFolders", value); }
         }
 
+        // Update components retained per game (#149): newest N update folders
+        // are kept when a new one imports; 0 keeps everything.
+        public int UpdateRetentionCount
+        {
+            get { return GetValueInt("UpdateRetentionCount", 3); }
+
+            set { SetValue("UpdateRetentionCount", value); }
+        }
+
+        public bool UpdateRetentionKeepOnePerMajor
+        {
+            get { return GetValueBoolean("UpdateRetentionKeepOnePerMajor", true); }
+
+            set { SetValue("UpdateRetentionKeepOnePerMajor", value); }
+        }
+
         public FileDateType FileDate
         {
             get { return GetValueEnum("FileDate", FileDateType.None); }
