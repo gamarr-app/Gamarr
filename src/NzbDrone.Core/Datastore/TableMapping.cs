@@ -111,6 +111,8 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<GameFile>("GameFiles").RegisterModel()
                   .Ignore(f => f.Path);
 
+            Mapper.Entity<NzbDrone.Core.Games.Components.GameComponent>("GameComponents").RegisterModel();
+
             Mapper.Entity<Game>("Games").RegisterModel()
                   .Ignore(s => s.RootFolderPath)
                   .Ignore(s => s.Title)
