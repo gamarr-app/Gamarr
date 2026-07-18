@@ -39,6 +39,14 @@ namespace Gamarr.Http.Extensions
             return request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase);
         }
 
+        public static bool IsProwlarrIndexerTestRequest(this HttpRequest request)
+        {
+            return HttpMethods.IsPost(request.Method) &&
+                   request.Path.StartsWithSegments("/api/v3/indexer/test", StringComparison.InvariantCultureIgnoreCase) &&
+                   request.Headers.TryGetValue("User-Agent", out var userAgent) &&
+                   userAgent.ToString().Contains("Prowlarr", StringComparison.InvariantCultureIgnoreCase);
+        }
+
         public static bool GetBooleanQueryParameter(this HttpRequest request, string parameter, bool defaultValue = false)
         {
             var parameterValue = request.Query[parameter];
