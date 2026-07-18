@@ -75,7 +75,8 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "Connection refused",
             "No route to host",
             "Name or service not known",
-            "No such host is known"
+            "No such host is known",
+            "Resource temporarily unavailable"
         };
 
         // exception types in this list will additionally have the exception message added to the
