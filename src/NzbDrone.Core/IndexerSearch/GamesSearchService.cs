@@ -7,7 +7,6 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
-using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
@@ -152,19 +151,7 @@ namespace NzbDrone.Core.IndexerSearch
 
         private static bool ReleaseMatchesDlcTitle(DownloadDecision decision, GameComponent component)
         {
-            var releaseTitle = decision.RemoteGame?.Release?.Title;
-
-            if (string.IsNullOrWhiteSpace(releaseTitle) || string.IsNullOrWhiteSpace(component.Title))
-            {
-                return false;
-            }
-
-            // Dots are stripped (not word-broken) by the scene-title cleaner, so
-            // dotted release names lose their separators; compare separator-free.
-            var cleanRelease = SearchCriteriaBase.GetCleanSceneTitle(releaseTitle).Replace("+", string.Empty).ToLowerInvariant();
-            var cleanDlc = SearchCriteriaBase.GetCleanSceneTitle(component.Title).Replace("+", string.Empty).ToLowerInvariant();
-
-            return cleanDlc.Length > 0 && cleanRelease.Contains(cleanDlc);
+            return GameComponentMatcher.ReleaseMatchesDlcTitle(decision.RemoteGame?.Release?.Title, component.Title);
         }
 
         private async Task SearchForBulkGames(List<Game> games, bool userInvokedSearch)

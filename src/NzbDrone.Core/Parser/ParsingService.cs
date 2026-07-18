@@ -76,28 +76,34 @@ namespace NzbDrone.Core.Parser
                 return result.Game;
             }
 
-            // DLC/update/season-pass titles embed the addon's own name
-            // ("Hades The Blood Price"), so the exact-title lookup fails.
-            // For base-requiring content, match the library game whose clean
-            // title is the longest PREFIX of the release's clean title (#149).
-            if (parsedGameInfo.ContentType.RequiresBaseGame())
+            return TryGetGameByTitlePrefix(parsedGameInfo);
+        }
+
+        // DLC/update/season-pass titles embed the addon's own name
+        // ("Hades The Blood Price"), so the exact-title lookup fails.
+        // For base-requiring content, match the library game whose clean
+        // title is the longest PREFIX of the release's clean title (#149).
+        private Game TryGetGameByTitlePrefix(ParsedGameInfo parsedGameInfo)
+        {
+            if (!parsedGameInfo.ContentType.RequiresBaseGame())
             {
-                var cleanReleaseTitle = parsedGameInfo.PrimaryGameTitle.CleanGameTitle();
-
-                var prefixMatch = _gameService.GetAllGames()
-                    .Where(g => g.GameMetadata.Value.CleanTitle.IsNotNullOrWhiteSpace() &&
-                                cleanReleaseTitle.StartsWith(g.GameMetadata.Value.CleanTitle))
-                    .OrderByDescending(g => g.GameMetadata.Value.CleanTitle.Length)
-                    .FirstOrDefault();
-
-                if (prefixMatch != null)
-                {
-                    _logger.Debug("Matched base-requiring release '{0}' to game '{1}' by title prefix", parsedGameInfo.PrimaryGameTitle, prefixMatch.Title);
-                    return prefixMatch;
-                }
+                return null;
             }
 
-            return null;
+            var cleanReleaseTitle = parsedGameInfo.PrimaryGameTitle.CleanGameTitle();
+
+            var prefixMatch = _gameService.GetAllGames()
+                .Where(g => g.GameMetadata.Value.CleanTitle.IsNotNullOrWhiteSpace() &&
+                            cleanReleaseTitle.StartsWith(g.GameMetadata.Value.CleanTitle))
+                .OrderByDescending(g => g.GameMetadata.Value.CleanTitle.Length)
+                .FirstOrDefault();
+
+            if (prefixMatch != null)
+            {
+                _logger.Debug("Matched base-requiring release '{0}' to game '{1}' by title prefix", parsedGameInfo.PrimaryGameTitle, prefixMatch.Title);
+            }
+
+            return prefixMatch;
         }
 
         public RemoteGame Map(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, SearchCriteriaBase searchCriteria = null)
@@ -172,6 +178,18 @@ namespace NzbDrone.Core.Parser
                 else
                 {
                     result = TryGetGameByTitleAndOrYear(parsedGameInfo);
+                }
+            }
+
+            // RSS has no search criteria; base-requiring releases still need
+            // the prefix fallback to find their game (#149).
+            if (result == null)
+            {
+                var prefixMatch = TryGetGameByTitlePrefix(parsedGameInfo);
+
+                if (prefixMatch != null)
+                {
+                    result = new FindGameResult(prefixMatch, GameMatchType.Title);
                 }
             }
 
