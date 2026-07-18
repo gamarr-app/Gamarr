@@ -17,6 +17,7 @@ namespace Gamarr.Api.V3.Config
                 Id = model.Id,
 
                 RenameGames = model.RenameGames,
+                RenameProfile = model.RenameProfile,
                 ReplaceIllegalCharacters = model.ReplaceIllegalCharacters,
                 ColonReplacementFormat = model.ColonReplacementFormat,
                 StandardGameFormat = model.StandardGameFormat,
@@ -31,6 +32,7 @@ namespace Gamarr.Api.V3.Config
                 Id = resource.Id,
 
                 RenameGames = resource.RenameGames,
+                RenameProfile = resource.RenameProfile,
                 ReplaceIllegalCharacters = resource.ReplaceIllegalCharacters,
                 ColonReplacementFormat = resource.ColonReplacementFormat,
                 StandardGameFormat = resource.StandardGameFormat,
