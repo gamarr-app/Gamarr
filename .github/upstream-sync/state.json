@@ -3,12 +3,12 @@
     "remote": "https://github.com/Radarr/Radarr.git",
     "branch": "develop",
     "last_sha": "5e8e532cd3cecdd3645a4c44148a88a3c26713b1",
-    "last_sha_note": "As of 2026-07-18 the delta since c7cf91c1 was one commit: 5e8e532c fixed the should_parse_malformed_cloudflare_cookie time bomb (expires 13-Jul-26 became a past date); ported same-day."
+    "last_sha_note": "As of 2026-07-18 (second check): no new commits since 5e8e532c."
   },
   "sonarr": {
     "remote": "https://github.com/Sonarr/Sonarr.git",
     "branch": "develop",
     "last_sha": "4ff1b780010d3d9ec76a4864dce96b6494e9caea",
-    "last_sha_note": "As of 2026-07-13 the delta since 97d24acf06 was only the 4.0.19 version bump; nothing to port."
+    "last_sha_note": "As of 2026-07-18: no new commits since 4ff1b780 (the 4.0.19 bump)."
   }
 }
