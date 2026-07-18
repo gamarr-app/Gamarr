@@ -131,6 +131,67 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
+        public void should_link_imported_dlc_file_to_matching_metadata_slot()
+        {
+            var metadataSlot = new GameComponent { Id = 12, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:111", Title = "The Blood Price", Monitored = false };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent>
+                  {
+                      new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" },
+                      metadataSlot,
+                      new GameComponent { Id = 13, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:222", Title = "Warm Winds" }
+                  });
+
+            var dlcFile = new GameFile { Id = 3, GameId = _game.Id, RelativePath = "DLC/Hades.The.Blood.Price.DLC-GRP" };
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { dlcFile });
+
+            Subject.EnsureComponents(_game);
+
+            dlcFile.ComponentId.Should().Be(12);
+            metadataSlot.Monitored.Should().BeTrue();
+
+            // No duplicate import: slot for a DLC the metadata already tracks
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Verify(r => r.InsertMany(It.IsAny<IList<GameComponent>>()), Times.Never());
+        }
+
+        [Test]
+        public void should_merge_existing_import_slot_into_matching_metadata_slot()
+        {
+            var metadataSlot = new GameComponent { Id = 12, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:111", Title = "The Blood Price", Monitored = false };
+            var importSlot = new GameComponent { Id = 20, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "import:Hades.The.Blood.Price.DLC-GRP", Title = "Hades.The.Blood.Price.DLC-GRP", Monitored = true };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent>
+                  {
+                      new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" },
+                      metadataSlot,
+                      importSlot,
+                      new GameComponent { Id = 13, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:222", Title = "Warm Winds" }
+                  });
+
+            var dlcFile = new GameFile { Id = 3, GameId = _game.Id, RelativePath = "DLC/Hades.The.Blood.Price.DLC-GRP", ComponentId = 20 };
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { dlcFile });
+
+            Subject.EnsureComponents(_game);
+
+            dlcFile.ComponentId.Should().Be(12);
+            metadataSlot.Monitored.Should().BeTrue();
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Verify(r => r.Delete(importSlot), Times.Once());
+        }
+
+        [Test]
         public void should_link_files_to_their_existing_components()
         {
             Mocker.GetMock<IGameComponentRepository>()
