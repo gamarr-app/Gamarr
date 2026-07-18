@@ -19,7 +19,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var minScore = subject.Game.QualityProfile.MinFormatScore;
+            var minScore = subject.EffectiveQualityProfile.MinFormatScore;
             var score = subject.CustomFormatScore;
 
             if (score < minScore)

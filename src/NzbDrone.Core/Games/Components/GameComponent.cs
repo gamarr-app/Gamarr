@@ -33,6 +33,10 @@ namespace NzbDrone.Core.Games.Components
         // External id for metadata-driven components (IGDB/Steam DLC id).
         public int ExternalId { get; set; }
 
+        // 0 inherits the game's quality profile; a concrete id overrides it
+        // for releases matched to this slot.
+        public int QualityProfileId { get; set; }
+
         public DateTime Added { get; set; }
     }
 }

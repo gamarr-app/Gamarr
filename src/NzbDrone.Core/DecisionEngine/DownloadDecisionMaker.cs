@@ -9,7 +9,9 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download.Aggregation;
+using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -28,6 +30,8 @@ namespace NzbDrone.Core.DecisionEngine
         private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IRemoteGameAggregationService _aggregationService;
+        private readonly IGameComponentService _componentService;
+        private readonly IQualityProfileService _qualityProfileService;
         private readonly Logger _logger;
 
         public DownloadDecisionMaker(IEnumerable<IDownloadDecisionEngineSpecification> specifications,
@@ -35,6 +39,8 @@ namespace NzbDrone.Core.DecisionEngine
                                      IConfigService configService,
                                      ICustomFormatCalculationService formatCalculator,
                                      IRemoteGameAggregationService aggregationService,
+                                     IGameComponentService componentService,
+                                     IQualityProfileService qualityProfileService,
                                      Logger logger)
         {
             _specifications = specifications;
@@ -42,6 +48,8 @@ namespace NzbDrone.Core.DecisionEngine
             _configService = configService;
             _formatCalculator = formatCalculator;
             _aggregationService = aggregationService;
+            _componentService = componentService;
+            _qualityProfileService = qualityProfileService;
             _logger = logger;
         }
 
@@ -67,6 +75,7 @@ namespace NzbDrone.Core.DecisionEngine
             }
 
             var reportNumber = 1;
+            var componentCache = new Dictionary<int, List<GameComponent>>();
 
             foreach (var report in reports)
             {
@@ -90,10 +99,12 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                         else
                         {
+                            ApplyComponentQualityProfile(remoteGame, componentCache);
+
                             _aggregationService.Augment(remoteGame);
 
                             remoteGame.CustomFormats = _formatCalculator.ParseCustomFormat(remoteGame, remoteGame.Release.Size);
-                            remoteGame.CustomFormatScore = remoteGame?.Game?.QualityProfile?.CalculateCustomFormatScore(remoteGame.CustomFormats) ?? 0;
+                            remoteGame.CustomFormatScore = remoteGame?.EffectiveQualityProfile?.CalculateCustomFormatScore(remoteGame.CustomFormats) ?? 0;
 
                             _logger.Trace("Custom Format Score of '{0}' [{1}] calculated for '{2}'", remoteGame.CustomFormatScore, remoteGame.CustomFormats?.ConcatToString(), report.Title);
 
@@ -169,6 +180,44 @@ namespace NzbDrone.Core.DecisionEngine
 
                     yield return decision;
                 }
+            }
+        }
+
+        // A DLC release matched to a slot with its own quality profile is
+        // judged against that profile instead of the game's (#149). Updates
+        // aren't slot-stable (a new version has no existing slot), so they
+        // keep the game profile.
+        private void ApplyComponentQualityProfile(RemoteGame remoteGame, Dictionary<int, List<GameComponent>> cache)
+        {
+            var contentType = remoteGame.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
+
+            if (contentType != ReleaseContentType.DlcOnly && contentType != ReleaseContentType.SeasonPass)
+            {
+                return;
+            }
+
+            if (!cache.TryGetValue(remoteGame.Game.Id, out var slots))
+            {
+                slots = _componentService.GetByGame(remoteGame.Game.Id);
+                cache[remoteGame.Game.Id] = slots;
+            }
+
+            var slot = slots.FirstOrDefault(c => c.ComponentType == GameComponentType.Dlc &&
+                                                 c.QualityProfileId > 0 &&
+                                                 (GameComponentMatcher.ReleaseMatchesDlcTitle(remoteGame.Release.Title, c.Title) ||
+                                                  GameComponentMatcher.ReleaseMatchesDlcTitle(remoteGame.ParsedGameInfo.PrimaryGameTitle, c.Title)));
+
+            if (slot == null)
+            {
+                return;
+            }
+
+            var profile = _qualityProfileService.Get(slot.QualityProfileId);
+
+            if (profile != null)
+            {
+                _logger.Debug("Using quality profile '{0}' from DLC slot '{1}' for {2}", profile.Name, slot.Title, remoteGame.Release.Title);
+                remoteGame.ComponentQualityProfile = profile;
             }
         }
 
