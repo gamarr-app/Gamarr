@@ -25,29 +25,27 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             var contentType = subject.ParsedGameInfo.ContentType;
 
-            // Reject DLC-only releases when searching for base game
-            if (contentType == ReleaseContentType.DlcOnly)
+            if (!contentType.RequiresBaseGame())
             {
-                _logger.Debug("Release is DLC-only, requires base game. Rejecting: {0}", subject.Release.Title);
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.DlcOnly, "DLC-only release, requires base game");
+                // Expansion packs (may be standalone) and full releases
+                return DownloadSpecDecision.Accept();
             }
 
-            // Reject update/patch-only releases
-            if (contentType == ReleaseContentType.UpdateOnly)
+            // Updates, DLC and season passes are importable ALONGSIDE an
+            // existing base game (#149 phase 0) — only reject when the game
+            // has no base on disk to apply them to.
+            if (subject.Game?.HasFile == true)
             {
-                _logger.Debug("Release is update/patch-only, requires base game. Rejecting: {0}", subject.Release.Title);
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.UpdateOnly, "Update/patch-only release, requires base game");
+                _logger.Debug("Release requires the base game and one is on disk, accepting: {0}", subject.Release.Title);
+                return DownloadSpecDecision.Accept();
             }
 
-            // Reject season pass releases (DLC bundle without base game)
-            if (contentType == ReleaseContentType.SeasonPass)
+            return contentType switch
             {
-                _logger.Debug("Release is season pass/DLC bundle only, requires base game. Rejecting: {0}", subject.Release.Title);
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.SeasonPassOnly, "Season pass/DLC bundle, requires base game");
-            }
-
-            // Accept expansion packs (they may be standalone) and everything else
-            return DownloadSpecDecision.Accept();
+                ReleaseContentType.DlcOnly => DownloadSpecDecision.Reject(DownloadRejectionReason.DlcOnly, "DLC-only release, requires base game (none on disk)"),
+                ReleaseContentType.SeasonPass => DownloadSpecDecision.Reject(DownloadRejectionReason.SeasonPassOnly, "Season pass/DLC bundle, requires base game (none on disk)"),
+                _ => DownloadSpecDecision.Reject(DownloadRejectionReason.UpdateOnly, "Update/patch-only release, requires base game (none on disk)")
+            };
         }
     }
 }

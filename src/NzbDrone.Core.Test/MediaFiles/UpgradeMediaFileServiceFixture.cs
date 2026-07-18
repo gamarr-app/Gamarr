@@ -89,6 +89,25 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_import_dlc_release_alongside_existing_file_into_dlc_subfolder()
+        {
+            GivenSingleGameWithSingleGameFile();
+
+            _localGame.Path = @"C:\Downloads\Game.Beach.Pack.DLC-GROUP".AsOsAgnostic();
+            _localGame.Quality = new NzbDrone.Core.Qualities.QualityModel(NzbDrone.Core.Qualities.Quality.Scene);
+            _localGame.FileGameInfo = new ParsedGameInfo
+            {
+                ContentType = ReleaseContentType.DlcOnly
+            };
+
+            Subject.UpgradeGameFile(_gameFile, _localGame);
+
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+            _localGame.ImportSubfolder.Should().Be(Path.Combine("DLC", "Game.Beach.Pack.DLC-GROUP"));
+            Mocker.GetMock<IMoveGameFiles>().Verify(v => v.MoveGameFile(_gameFile, _localGame), Times.Once());
+        }
+
+        [Test]
         public void should_replace_existing_file_for_full_release_even_when_versioned()
         {
             GivenSingleGameWithSingleGameFile();
