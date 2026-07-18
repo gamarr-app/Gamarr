@@ -10,6 +10,22 @@ import styles from './VirtualTable.css';
 
 const ROW_HEIGHT = 38;
 
+// Static objects: Grid is a PureComponent, so fresh style objects every render
+// would defeat its memoization.
+const GRID_STYLE = {
+  boxSizing: undefined,
+  direction: undefined,
+  height: undefined,
+  position: undefined,
+  willChange: undefined,
+  overflow: undefined,
+  width: undefined,
+};
+
+const CONTAINER_STYLE = {
+  position: undefined,
+};
+
 function overscanIndicesGetter(options: {
   cellCount: number;
   overscanCellsCount: number;
@@ -64,20 +80,6 @@ function VirtualTable<T extends ModelBase>({
   const previousItems = usePrevious(items);
 
   const width = bounds.width;
-
-  const gridStyle = {
-    boxSizing: undefined,
-    direction: undefined,
-    height: undefined,
-    position: undefined,
-    willChange: undefined,
-    overflow: undefined,
-    width: undefined,
-  };
-
-  const containerStyle = {
-    position: undefined,
-  };
 
   const handleScrollToPosition = useCallback(
     ({
@@ -183,8 +185,8 @@ function VirtualTable<T extends ModelBase>({
                   scrollToAlignment="start"
                   isScrollingOptout={true}
                   className={styles.tableBodyContainer}
-                  style={gridStyle}
-                  containerStyle={containerStyle}
+                  style={GRID_STYLE}
+                  containerStyle={CONTAINER_STYLE}
                   onScroll={onChildScroll}
                 />
               </div>

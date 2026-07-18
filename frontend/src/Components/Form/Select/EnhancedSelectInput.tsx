@@ -526,54 +526,60 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
           )}
         </div>
       </div>
+      {/* Mount the popper only while open: idle popper instances can
+          degenerate into a synchronous forceUpdate/flushSync loop that
+          freezes the page when many selects render at once (e.g. one per
+          import row). */}
       <Portal>
-        <div
-          ref={setPopperElement}
-          id={optionsId}
-          className={styles.optionsContainer}
-          style={{
-            ...popperStyles.popper,
-            minWidth: width,
-          }}
-          {...attributes.popper}
-        >
-          {isOpen && !isMobile ? (
-            <Scroller
-              className={styles.options}
-              style={{
-                maxHeight: popperStyles.popper?.maxHeight,
-              }}
-            >
-              {values.map((v, index) => {
-                const hasParent = v.parentKey !== undefined;
-                const depth = hasParent ? 1 : 0;
-                const parentSelected =
-                  v.parentKey !== undefined &&
-                  Array.isArray(value) &&
-                  value.includes(v.parentKey);
+        {isOpen ? (
+          <div
+            ref={setPopperElement}
+            id={optionsId}
+            className={styles.optionsContainer}
+            style={{
+              ...popperStyles.popper,
+              minWidth: width,
+            }}
+            {...attributes.popper}
+          >
+            {!isMobile ? (
+              <Scroller
+                className={styles.options}
+                style={{
+                  maxHeight: popperStyles.popper?.maxHeight,
+                }}
+              >
+                {values.map((v, index) => {
+                  const hasParent = v.parentKey !== undefined;
+                  const depth = hasParent ? 1 : 0;
+                  const parentSelected =
+                    v.parentKey !== undefined &&
+                    Array.isArray(value) &&
+                    value.includes(v.parentKey);
 
-                const { key, ...other } = v;
+                  const { key, ...other } = v;
 
-                return (
-                  <OptionComponent
-                    key={v.key}
-                    id={v.key}
-                    depth={depth}
-                    isSelected={isSelectedItem(index, value, values)}
-                    isDisabled={parentSelected}
-                    isMultiSelect={isMultiSelect}
-                    {...valueOptions}
-                    {...other}
-                    isMobile={false}
-                    onSelect={handleSelect}
-                  >
-                    {v.value}
-                  </OptionComponent>
-                );
-              })}
-            </Scroller>
-          ) : null}
-        </div>
+                  return (
+                    <OptionComponent
+                      key={v.key}
+                      id={v.key}
+                      depth={depth}
+                      isSelected={isSelectedItem(index, value, values)}
+                      isDisabled={parentSelected}
+                      isMultiSelect={isMultiSelect}
+                      {...valueOptions}
+                      {...other}
+                      isMobile={false}
+                      onSelect={handleSelect}
+                    >
+                      {v.value}
+                    </OptionComponent>
+                  );
+                })}
+              </Scroller>
+            ) : null}
+          </div>
+        ) : null}
       </Portal>
 
       {isMobile ? (

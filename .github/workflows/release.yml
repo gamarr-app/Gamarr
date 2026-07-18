@@ -43,6 +43,10 @@ jobs:
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Optional: when set, release builds upload frontend sourcemaps to
+      # Sentry so production JS errors are readable.
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -60,6 +64,35 @@ jobs:
 
       - name: Build frontend
         run: yarn build --env production
+
+      # Matches the backend's version calculation (same run_number) so the
+      # Sentry release name equals BuildInfo.Release: "<version>-Release-dev".
+      - name: Calculate version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          else
+            VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Upload sourcemaps to Sentry
+        if: env.SENTRY_AUTH_TOKEN != ''
+        run: |
+          npx --yes @sentry/cli@2 sourcemaps inject _output/UI
+          npx --yes @sentry/cli@2 sourcemaps upload \
+            --org gamarr \
+            --project javascript \
+            --release "${{ steps.version.outputs.version }}-Release-dev" \
+            _output/UI
+
+      # Sourcemaps only need to reach Sentry; keep them out of the shipped
+      # packages.
+      - name: Remove sourcemaps from build output
+        run: find _output/UI -name '*.map' -delete
 
       - name: Upload frontend build
         uses: actions/upload-artifact@v7
