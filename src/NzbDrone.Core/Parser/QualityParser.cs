@@ -70,8 +70,12 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex DlcOnlyRegex = new (@"\b(?<dlconly>DLC[\s._-]?ONLY|ADDON[\s._-]?ONLY|EXPANSION[\s._-]?ONLY)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        // Standalone DLC (not part of "All DLC", "DLC Bundle", etc.)
-        private static readonly Regex StandaloneDlcRegex = new (@"(?<!ALL[\s._-])(?<!INCLUDES[\s._-])(?<!WITH[\s._-])[\s._-]DLC(?:[\s._-]|$)(?!BUNDLE|PACK|UNLOCKER|S[\s._-])",
+        // Standalone DLC (not part of "All DLC", "DLC Bundle", etc.). The
+        // separator before DLC is part of the match, so the lookbehinds must
+        // check for the qualifier word directly adjacent to it — with the
+        // separator inside the lookbehind ("ALL[\s._-]") nothing ever matched
+        // it and "Game.All.DLC" was misread as standalone DLC.
+        private static readonly Regex StandaloneDlcRegex = new (@"(?<!ALL)(?<!INCLUDES?)(?<!WITH)[\s._-]DLC(?:[\s._-]|$)(?!BUNDLE|PACK|UNLOCKER|S[\s._-])",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Season pass / DLC bundle
@@ -83,7 +87,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Complete/GOTY editions (base game + all DLC)
-        private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?ALL[\s._-]?DLC[sS]?|ALL[\s._-]?DLC[sS]?[\s._-]?(?:INCL(?:UDED)?|PACK))\b",
+        private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?ALL[\s._-]?DLC[sS]?|ALL[\s._-]?DLC[sS]?\b(?![\s._-]?(?:BUNDLE|ONLY)))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Update/Patch only (requires base game)

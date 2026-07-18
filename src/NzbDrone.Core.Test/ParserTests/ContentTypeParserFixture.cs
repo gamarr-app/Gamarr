@@ -54,9 +54,17 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game.Name.With.All.DLCs-SKIDROW", ReleaseContentType.BaseGameWithAllDlc)]
         [TestCase("Game.Name.All.DLCs.Included-RELOADED", ReleaseContentType.BaseGameWithAllDlc)]
         [TestCase("Game.Name.Premium.Edition-GOG", ReleaseContentType.BaseGameWithAllDlc)]
+        [TestCase("Game.Name.MULTi10.Repack.All.DLC-FAKE", ReleaseContentType.BaseGameWithAllDlc)]
+        [TestCase("Game.Name.v2.1.All.DLC-EMPRESS", ReleaseContentType.BaseGameWithAllDlc)]
         public void should_detect_complete_edition_releases(string title, ReleaseContentType expected)
         {
             QualityParser.ParseContentType(title).Should().Be(expected);
+        }
+
+        [Test]
+        public void all_dlc_bundle_should_remain_season_pass()
+        {
+            QualityParser.ParseContentType("Game.Name.All.DLC.Bundle-CODEX").Should().Be(ReleaseContentType.SeasonPass);
         }
 
         [TestCase("Game.Name-CODEX")]
