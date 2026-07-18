@@ -42,6 +42,11 @@ namespace NzbDrone.Core.Parser.Model
         public bool ShouldImportExtras { get; set; }
         public List<string> PossibleExtraFiles { get; set; }
 
+        // Transient import routing: when set, the folder import lands in this
+        // subfolder of the game folder (update-alongside imports, #149 phase 0)
+        // instead of the game folder root.
+        public string ImportSubfolder { get; set; }
+
         // Best parsed game version across the available sources. A parsed info
         // always carries a GameVersion object (never null), so pick the first
         // one that actually parsed a version token (HasValue) instead of

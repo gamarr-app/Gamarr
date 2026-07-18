@@ -502,11 +502,22 @@ namespace NzbDrone.Core.Games
         public void Handle(GameFileAddedEvent message)
         {
             var game = message.GameFile.Game;
-            game.GameFileId = message.GameFile.Id;
-            _gameRepository.Update(game);
 
-            // _gameRepository.SetFileId(message.GameFile.Id, message.GameFile.Game.Value.Id);
-            _logger.Info("Assigning file [{0}] to game [{1}]", message.GameFile.RelativePath, message.GameFile.Game);
+            // Base imports (empty RelativePath = the game folder itself) always
+            // become the primary file. Subfolder units (Updates/<version>,
+            // imported alongside the base) only claim primary when the game has
+            // no file yet — an update must not displace the base game.
+            if (message.GameFile.RelativePath.IsNullOrWhiteSpace() || game.GameFileId == 0)
+            {
+                game.GameFileId = message.GameFile.Id;
+                _gameRepository.Update(game);
+
+                _logger.Info("Assigning file [{0}] to game [{1}]", message.GameFile.RelativePath, message.GameFile.Game);
+            }
+            else
+            {
+                _logger.Info("Imported additional file [{0}] alongside existing primary for game [{1}]", message.GameFile.RelativePath, message.GameFile.Game);
+            }
         }
 
         public void Handle(GameFileDeletedEvent message)

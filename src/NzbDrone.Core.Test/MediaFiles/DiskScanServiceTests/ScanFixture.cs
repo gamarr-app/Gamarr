@@ -279,11 +279,17 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                            Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
                        });
 
-            // Existing file-based GameFile (has non-empty RelativePath)
+            // Existing file-based GameFile (has non-empty RelativePath). The
+            // legacy file is still on disk, so it goes through migration
+            // (ManualOverride) rather than missing-from-disk cleanup.
             var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = "old_file.exe" };
             Mocker.GetMock<IMediaFileService>()
                   .Setup(s => s.GetFilesByGame(_game.Id))
                   .Returns(new List<GameFile> { existingFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FileExists(Path.Combine(_game.Path, "old_file.exe")))
+                  .Returns(true);
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFolderSize(_game.Path))

@@ -1,3 +1,4 @@
+using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
@@ -15,16 +16,19 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
         private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _formatService;
         private readonly IUpgradableSpecification _upgradableSpecification;
+        private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
         public UpgradeSpecification(IConfigService configService,
                                     ICustomFormatCalculationService formatService,
                                     IUpgradableSpecification upgradableSpecification,
+                                    IMediaFileService mediaFileService,
                                     Logger logger)
         {
             _configService = configService;
             _formatService = formatService;
             _upgradableSpecification = upgradableSpecification;
+            _mediaFileService = mediaFileService;
             _logger = logger;
         }
 
@@ -47,9 +51,23 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
 
                 var qualityCompare = qualityComparer.Compare(localGame.Quality.Quality, gameFile.Quality.Quality);
 
-                // Get version info for version upgrade checks
+                // Get version info for version upgrade checks. The version on
+                // disk is the highest across ALL of the game's files — update
+                // releases import alongside the base (#149 phase 0), so the
+                // primary's version alone would re-accept an already-imported
+                // update.
                 var newVersion = localGame.GameVersion;
-                var existingVersion = gameFile.GameVersion;
+                var existingVersions = (_mediaFileService.GetFilesByGame(localGame.Game.Id) ?? new System.Collections.Generic.List<GameFile>())
+                    .Select(f => f.GameVersion)
+                    .Where(v => v?.HasValue == true)
+                    .ToList();
+
+                if (gameFile.GameVersion?.HasValue == true)
+                {
+                    existingVersions.Add(gameFile.GameVersion);
+                }
+
+                var existingVersion = existingVersions.OrderByDescending(v => v).FirstOrDefault();
 
                 if (qualityCompare < 0)
                 {
