@@ -31,6 +31,8 @@ namespace NzbDrone.Core.Configuration
         ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
         bool CreateEmptyGameFolders { get; set; }
         bool DeleteEmptyFolders { get; set; }
+        int UpdateRetentionCount { get; set; }
+        bool UpdateRetentionKeepOnePerMajor { get; set; }
         FileDateType FileDate { get; set; }
         bool SkipFreeSpaceCheckWhenImporting { get; set; }
         bool UpgradeGameVersions { get; set; }
