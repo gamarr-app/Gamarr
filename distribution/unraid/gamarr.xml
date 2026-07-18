@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Gamarr</Name>
+  <Repository>ghcr.io/gamarr-app/gamarr:latest</Repository>
+  <Registry>https://github.com/gamarr-app/Gamarr/pkgs/container/gamarr</Registry>
+  <Network>bridge</Network>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/gamarr-app/Gamarr/issues</Support>
+  <Project>https://github.com/gamarr-app/Gamarr</Project>
+  <Overview>Gamarr is a PVR for games - Radarr for your game backlog. It monitors your Steam and GOG wishlists (and other import lists), searches your Usenet indexers and torrent trackers through Prowlarr or directly, grabs releases with your download client, and imports them into an organized library. It tracks game versions and can automatically upgrade to newer builds and updates, is DLC-aware, and pulls rich metadata (covers, screenshots, developer info) from Steam, IGDB and RAWG. Works with qBittorrent, SABnzbd, Transmission, Deluge, NZBGet and the rest of the usual *arr download clients.</Overview>
+  <Category>Downloaders: MediaApp:Other Status:Stable</Category>
+  <WebUI>http://[IP]:[PORT:6767]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/gamarr-app/Gamarr/main/distribution/unraid/gamarr.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/gamarr-app/Gamarr/main/Logo/256.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="WebUI Port" Target="6767" Default="6767" Mode="tcp" Description="Port for the Gamarr web interface." Type="Port" Display="always" Required="true" Mask="false">6767</Config>
+  <Config Name="Config" Target="/config" Default="/mnt/user/appdata/gamarr" Mode="rw" Description="Gamarr configuration and database." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gamarr</Config>
+  <Config Name="Games Library" Target="/games" Default="/mnt/user/games" Mode="rw" Description="Your organized game library (where imports end up)." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/games</Config>
+  <Config Name="Downloads" Target="/downloads" Default="/mnt/user/downloads" Mode="rw" Description="Your download client's completed downloads folder. Use the same host path your download client container uses so imports can hardlink/move." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/downloads</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID for file permissions." Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID for file permissions." Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+  <Config Name="TZ" Target="TZ" Default="Etc/UTC" Mode="" Description="Timezone (e.g. America/Denver)." Type="Variable" Display="advanced" Required="false" Mask="false">Etc/UTC</Config>
+</Container>
