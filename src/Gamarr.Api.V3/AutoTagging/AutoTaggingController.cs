@@ -89,7 +89,15 @@ namespace Gamarr.Api.V3.AutoTagging
         [HttpGet("schema")]
         public object GetTemplates()
         {
-            var schema = _specifications.OrderBy(x => x.Order).Select(x => x.ToSchema()).ToList();
+            // OriginalLanguage is a movie-era leftover: no game metadata source
+            // populates it (it's hardcoded English), so the condition matches
+            // either every game or none. Hidden from new rules; existing
+            // serialized specs still deserialize.
+            var schema = _specifications
+                .Where(x => x is not NzbDrone.Core.AutoTagging.Specifications.OriginalLanguageSpecification)
+                .OrderBy(x => x.Order)
+                .Select(x => x.ToSchema())
+                .ToList();
 
             return schema;
         }
