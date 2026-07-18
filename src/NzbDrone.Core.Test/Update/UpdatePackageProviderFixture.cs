@@ -209,8 +209,6 @@ namespace NzbDrone.Core.Test.Update
         [Test]
         public void should_not_offer_update_without_an_asset_for_this_runtime()
         {
-            ExceptionVerification.IgnoreWarns();
-
             GivenReleases(new List<GitHubRelease>
             {
                 new GitHubRelease
@@ -228,6 +226,8 @@ namespace NzbDrone.Core.Test.Update
             });
 
             Subject.GetLatestUpdate("main", new Version(1, 0, 0)).Should().BeNull();
+
+            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }
