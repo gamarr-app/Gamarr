@@ -41,6 +41,7 @@ interface DiscoverGameDefaults {
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
+  platform: string;
   tags: number[];
 }
 
@@ -178,6 +179,7 @@ export const defaultState: DiscoverGameState = {
     qualityProfileId: 0,
     minimumAvailability: 'released',
     searchForGame: true,
+    platform: 'unknown',
     tags: [],
   },
 
