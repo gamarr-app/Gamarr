@@ -19,6 +19,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game-v1.0.0-RELOADED", 1, 0, 0, 0)]
         [TestCase("Game_v2.5_REPACK", 2, 5, 0, 0)]
         [TestCase("Game-1.2.3-SKIDROW", 1, 2, 3, 0)]
+        [TestCase("setup_owlboy_2.0.0.3.exe", 2, 0, 0, 3)]
+        [TestCase("Owlboy 1.3.7013.40181 (35964)", 1, 3, 7013, 40181)]
+        [TestCase("Owlboy.v1.3.6613.28019.MULTI13-SiMPLEX", 1, 3, 6613, 28019)]
+        [TestCase("[PS4] Owlboy [EUR/RUS] (v1.00)", 1, 0, 0, 0)]
         [TestCase("The Witness [v 1.0u4] (2016) PC | RePack", 1, 0, 0, 0)]
         [TestCase("Split.Fiction.v20250317.UPDATE-KaOs", 20250317, 0, 0, 0)]
         [TestCase("Game.v20240101-SKIDROW", 20240101, 0, 0, 0)]
@@ -28,6 +32,9 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Subnautica 2 (v2026 05)", 2026, 5, 0, 0)]
         [TestCase("The Outer Worlds 2 Premium Edition (v1030 All DLCs Bonus", 1030, 0, 0, 0)]
         [TestCase("The Outer Worlds 2: Premium Edition (v.1.0.6.0) + 7 DLC [amd64] [Multi] [Wine]", 1, 0, 6, 0)]
+        [TestCase("setup_monster_prom_2_monster_camp_2.31.a_(88979).exe", 2, 31, 0, 0)]
+        [TestCase("monster_prom_2_monster_camp_2_31_a_88980.sh", 2, 31, 0, 0)]
+        [TestCase("setup_cyberpunk_2077_2.31a_(64bit)_(85116).exe", 2, 31, 0, 0)]
         public void should_parse_version_from_release_title(string title, int major, int minor, int patch, int build)
         {
             var version = QualityParser.ParseGameVersion(title);

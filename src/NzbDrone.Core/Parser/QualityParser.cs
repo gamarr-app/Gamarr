@@ -123,6 +123,8 @@ namespace NzbDrone.Core.Parser
             @"[._\-\s\[\(]v[\.\s]?(?<version>\d+(?:\.\d+){1,3}[a-z]?\d*)(?![._]?\d*\s*[GMKT]i?B)(?=[._\-\s\]\)<,]|$)|" +
             @"[._\-\s\[\(]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?=[\s\-._\]\),]|$)|" +   // before dateversion so "v2026 05 25" doesn't collapse to just "2026"
             @"[._\-\s\[\(]v(?<dateversion>\d{4,})(?=[._\-\s\]\)<,]|$)|" +
+            @"[._\-\s\[\(](?<alphaversion>\d+(?:[._]\d+){1,3})[._][a-z](?=[._\-\s\]\)<,]|$)|" +
+            @"[._\-\s\[\(](?<alphasuffix>\d+(?:\.\d+){1,3})[a-z](?=[._\-\s\]\)<,]|$)|" +
             @"[._\-](?<version2>\d+(?:\.\d+){2,3})(?![._]?\d*\s*[GMKT]i?B)[._\-]|" +
             @"[\s\?\!](?<version3>\d+(?:\.\d+)+)(?![._]?\d*\s*[GMKT]i?B)(?=\s|$)|" +
             @"\((?<parenversion>\d+(?:\.\d+)+)\)|" +
@@ -169,6 +171,27 @@ namespace NzbDrone.Core.Parser
                 if (GameVersion.TryParse(versionString, out var version))
                 {
                     Logger.Trace("Parsed game date version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
+                    return version;
+                }
+            }
+
+            // Try alpha-suffixed GOG style versions (2.31.a -> 2.31, 2_31_a -> 2.31)
+            if (match.Groups["alphaversion"].Success)
+            {
+                var versionString = match.Groups["alphaversion"].Value.Replace('_', '.');
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed alpha-suffixed game version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
+                    return version;
+                }
+            }
+
+            if (match.Groups["alphasuffix"].Success)
+            {
+                var versionString = match.Groups["alphasuffix"].Value;
+                if (GameVersion.TryParse(versionString, out var version))
+                {
+                    Logger.Trace("Parsed alpha-suffixed game version '{0}' from '{1}'", version, CleanseLogMessage.SanitizeLogParam(name));
                     return version;
                 }
             }

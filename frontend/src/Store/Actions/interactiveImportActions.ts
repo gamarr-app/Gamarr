@@ -28,6 +28,7 @@ interface ImportItem {
   quality?: unknown;
   languages?: unknown[];
   releaseGroup?: string;
+  version?: string;
   indexerFlags?: number;
   downloadId?: string;
   isReprocessing?: boolean;
@@ -294,6 +295,7 @@ export const actionHandlers = handleThunks({
           quality: item.quality,
           languages: item.languages,
           releaseGroup: item.releaseGroup,
+          version: item.version,
           indexerFlags: item.indexerFlags,
           downloadId: item.downloadId,
         };

@@ -44,6 +44,7 @@ function createMapStateToProps(gameFileId: number) {
         indexerFlags: gameFile?.indexerFlags ?? 0,
         edition: gameFile?.edition ?? '',
         releaseGroup: gameFile?.releaseGroup ?? '',
+        version: gameFile?.version ?? '',
         relativePath: gameFile?.relativePath ?? '',
       };
     }
@@ -71,6 +72,7 @@ function FileEditModalContentConnector(
     indexerFlags,
     edition,
     releaseGroup,
+    version,
     relativePath,
   } = useSelector(selector);
 
@@ -87,6 +89,7 @@ function FileEditModalContentConnector(
         languageIds: payloadLanguageIds,
         edition: payloadEdition,
         releaseGroup: payloadReleaseGroup,
+        version: payloadVersion,
         indexerFlags: payloadIndexerFlags,
       } = payload;
 
@@ -120,6 +123,7 @@ function FileEditModalContentConnector(
               indexerFlags: payloadIndexerFlags,
               edition: payloadEdition,
               releaseGroup: payloadReleaseGroup,
+              version: payloadVersion,
               quality: {
                 quality,
                 revision,
@@ -146,6 +150,7 @@ function FileEditModalContentConnector(
       indexerFlags={indexerFlags}
       edition={edition}
       releaseGroup={releaseGroup}
+      version={version}
       relativePath={relativePath}
       onSaveInputs={onSaveInputs}
       onModalClose={onModalClose}

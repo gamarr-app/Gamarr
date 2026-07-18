@@ -41,6 +41,7 @@ import InteractiveImport, {
 import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
+import SelectVersionModal from 'InteractiveImport/Version/SelectVersionModal';
 import Language from 'Language/Language';
 import { QualityModel } from 'Quality/Quality';
 import { executeCommand } from 'Store/Actions/commandActions';
@@ -69,7 +70,13 @@ import InteractiveImportRow from './InteractiveImportRow';
 import styles from './InteractiveImportModalContent.css';
 
 type SelectType =
-  'select' | 'game' | 'releaseGroup' | 'quality' | 'language' | 'indexerFlags';
+  | 'select'
+  | 'game'
+  | 'releaseGroup'
+  | 'version'
+  | 'quality'
+  | 'language'
+  | 'indexerFlags';
 
 type InteractiveImportSelectedChangeCallback = (
   props: SelectStateInputProps & { hasGameFileId: boolean }
@@ -91,6 +98,11 @@ const COLUMNS = [
   {
     name: 'releaseGroup',
     label: () => translate('ReleaseGroup'),
+    isVisible: true,
+  },
+  {
+    name: 'version',
+    label: () => translate('Version'),
     isVisible: true,
   },
   {
@@ -316,6 +328,10 @@ function InteractiveImportModalContent(
         value: translate('SelectReleaseGroup'),
       },
       {
+        key: 'version',
+        value: translate('SelectVersion'),
+      },
+      {
         key: 'language',
         value: translate('SelectLanguage'),
       },
@@ -468,6 +484,7 @@ function InteractiveImportModalContent(
         const {
           game,
           releaseGroup,
+          version,
           quality,
           languages,
           indexerFlags,
@@ -504,6 +521,7 @@ function InteractiveImportModalContent(
             existingFiles.push({
               id: gameFileId,
               releaseGroup,
+              version,
               quality,
               languages,
               indexerFlags,
@@ -518,6 +536,7 @@ function InteractiveImportModalContent(
           folderName: item.folderName,
           gameId: game.id,
           releaseGroup,
+          version,
           quality,
           languages,
           indexerFlags,
@@ -650,6 +669,22 @@ function InteractiveImportModalContent(
         updateInteractiveImportItems({
           ids: selectedIds,
           languages: newLanguages,
+        })
+      );
+
+      dispatch(reprocessInteractiveImportItems({ ids: selectedIds }));
+
+      setSelectModalOpen(null);
+    },
+    [selectedIds, dispatch]
+  );
+
+  const onVersionSelect = useCallback(
+    (version: string) => {
+      dispatch(
+        updateInteractiveImportItems({
+          ids: selectedIds,
+          version,
         })
       );
 
@@ -853,6 +888,14 @@ function InteractiveImportModalContent(
         languageIds={[0]}
         modalTitle={modalTitle}
         onLanguagesSelect={onLanguagesSelect}
+        onModalClose={onSelectModalClose}
+      />
+
+      <SelectVersionModal
+        isOpen={selectModalOpen === 'version'}
+        version=""
+        modalTitle={modalTitle}
+        onVersionSelect={onVersionSelect}
         onModalClose={onSelectModalClose}
       />
 

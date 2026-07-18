@@ -18,6 +18,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
         public QualityModel Quality { get; set; }
         public List<Language> Languages { get; set; }
         public string ReleaseGroup { get; set; }
+        public string Version { get; set; }
         public string DownloadId { get; set; }
         public List<CustomFormat> CustomFormats { get; set; }
         public int CustomFormatScore { get; set; }

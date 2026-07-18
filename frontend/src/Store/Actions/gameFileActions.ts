@@ -28,6 +28,7 @@ interface GameFile {
   quality?: unknown;
   edition?: string;
   releaseGroup?: string;
+  version?: string;
   indexerFlags?: number;
   [key: string]: unknown;
 }
@@ -286,6 +287,7 @@ export const actionHandlers = handleThunks({
               props.quality = gameFile.quality;
               props.edition = gameFile.edition;
               props.releaseGroup = gameFile.releaseGroup;
+              props.version = gameFile.version;
               props.indexerFlags = gameFile.indexerFlags;
             }
 
