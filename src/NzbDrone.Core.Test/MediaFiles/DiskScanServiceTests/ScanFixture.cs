@@ -325,5 +325,124 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IEventAggregator>()
                 .Verify(v => v.PublishEvent(It.IsAny<GameScannedEvent>()), Times.Once());
         }
+
+        [Test]
+        public void should_move_versioned_nested_update_folder_into_updates_layout()
+        {
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(_game.Path, "update_1.7.1", "update.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(_game.Path))
+                  .Returns(new[] { Path.Combine(_game.Path, "update_1.7.1").AsOsAgnostic() });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.MoveFolder(
+                      Path.Combine(_game.Path, "update_1.7.1").AsOsAgnostic(),
+                      Path.Combine(_game.Path, "Updates", "v1.7.1").AsOsAgnostic(),
+                      false), Times.Once());
+        }
+
+        [Test]
+        public void should_not_move_unversioned_folders_or_game_content()
+        {
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(_game.Path))
+                  .Returns(new[]
+                  {
+                      Path.Combine(_game.Path, "patch").AsOsAgnostic(),
+                      Path.Combine(_game.Path, "DLC").AsOsAgnostic(),
+                      Path.Combine(_game.Path, "data_1.5").AsOsAgnostic(),
+                  });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.MoveFolder(It.IsAny<string>(), It.IsAny<string>(), false), Times.Never());
+        }
+
+        [Test]
+        public void should_adopt_untracked_component_folder_as_game_file()
+        {
+            GivenGameFolder();
+
+            var updatesContainer = Path.Combine(_game.Path, "Updates").AsOsAgnostic();
+            var updateDir = Path.Combine(_game.Path, "Updates", "v1.7.1").AsOsAgnostic();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(updateDir, "update.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(updatesContainer))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(updatesContainer))
+                  .Returns(new[] { updateDir });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == Path.Combine("Updates", "v1.7.1") &&
+                      gf.GameVersion.HasValue)), Times.Once());
+        }
+
+        [Test]
+        public void should_not_adopt_component_folder_that_is_already_tracked()
+        {
+            GivenGameFolder();
+
+            var updatesContainer = Path.Combine(_game.Path, "Updates").AsOsAgnostic();
+            var updateDir = Path.Combine(_game.Path, "Updates", "v1.7.1").AsOsAgnostic();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(updateDir, "update.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(updatesContainer))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(updateDir))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(updatesContainer))
+                  .Returns(new[] { updateDir });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(It.IsAny<int>()))
+                  .Returns(new List<GameFile>
+                  {
+                      new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty },
+                      new GameFile { Id = 2, GameId = _game.Id, RelativePath = Path.Combine("Updates", "v1.7.1") }
+                  });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath.Contains("Updates"))), Times.Never());
+        }
     }
 }
