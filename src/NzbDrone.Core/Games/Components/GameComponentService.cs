@@ -69,6 +69,9 @@ namespace NzbDrone.Core.Games.Components
         {
             var existing = _componentRepository.GetByGame(game.Id);
             var files = _mediaFileService.GetFilesByGame(game.Id);
+
+            MergeDuplicateDlcSlots(existing, files);
+
             var toInsert = new List<GameComponent>();
             var filesToUpdate = new List<GameFile>();
 
@@ -131,7 +134,46 @@ namespace NzbDrone.Core.Games.Components
             }
         }
 
-        private static GameComponent GetComponentForFile(List<GameComponent> existing, List<GameComponent> toInsert, Game game, GameFile file, GameComponent baseComponent)
+        // An imported DLC folder ("Hades.The.Blood.Price.DLC-GRP") and a
+        // metadata slot ("igdb:111 The Blood Price") describe the same DLC.
+        // Point files of matching import-keyed slots at the metadata slot and
+        // drop the duplicate, so one DLC never shows as both downloaded and
+        // missing.
+        private void MergeDuplicateDlcSlots(List<GameComponent> existing, List<GameFile> files)
+        {
+            var metadataSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("igdb:")).ToList();
+            var importSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("import:")).ToList();
+
+            foreach (var importSlot in importSlots)
+            {
+                var match = metadataSlots.FirstOrDefault(m => GameComponentMatcher.ReleaseMatchesDlcTitle(importSlot.Title, m.Title));
+
+                if (match == null)
+                {
+                    continue;
+                }
+
+                var relinked = files.Where(f => f.ComponentId == importSlot.Id).ToList();
+                relinked.ForEach(f => f.ComponentId = match.Id);
+
+                if (relinked.Any())
+                {
+                    _mediaFileService.Update(relinked);
+                }
+
+                if (importSlot.Monitored && !match.Monitored)
+                {
+                    match.Monitored = true;
+                    _componentRepository.Update(match);
+                }
+
+                _componentRepository.Delete(importSlot);
+                existing.Remove(importSlot);
+                _logger.Debug("Merged imported DLC slot '{0}' into metadata slot '{1}'", importSlot.Title, match.Title);
+            }
+        }
+
+        private GameComponent GetComponentForFile(List<GameComponent> existing, List<GameComponent> toInsert, Game game, GameFile file, GameComponent baseComponent)
         {
             if (file.RelativePath.IsNullOrWhiteSpace())
             {
@@ -151,8 +193,28 @@ namespace NzbDrone.Core.Games.Components
             {
                 var name = normalized.Substring("DLC/".Length).Split('/')[0];
 
-                // Imported DLC keyed by its folder name; a later metadata match
-                // could merge it with an igdb-keyed slot (future work).
+                // Prefer an existing metadata slot for the same DLC over
+                // creating an import-keyed duplicate. Having the file on disk
+                // implies the user wants this DLC, so the slot turns monitored.
+                var metadataSlot = existing.Concat(toInsert)
+                    .Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("igdb:"))
+                    .FirstOrDefault(c => GameComponentMatcher.ReleaseMatchesDlcTitle(name, c.Title));
+
+                if (metadataSlot != null)
+                {
+                    if (!metadataSlot.Monitored)
+                    {
+                        metadataSlot.Monitored = true;
+
+                        if (metadataSlot.Id > 0)
+                        {
+                            _componentRepository.Update(metadataSlot);
+                        }
+                    }
+
+                    return metadataSlot;
+                }
+
                 return FindOrStage(existing, toInsert, game, GameComponentType.Dlc, $"import:{name}", name, monitored: true);
             }
 
