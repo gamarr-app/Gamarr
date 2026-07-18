@@ -108,6 +108,33 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
+        public void should_accept_dlc_only_release_even_when_base_file_meets_cutoff()
+        {
+            // Base file at cutoff quality would normally reject; a DLC release
+            // fills its own slot and must not be compared against the base.
+            _parseResultSingle.ParsedGameInfo.ContentType = ReleaseContentType.DlcOnly;
+            _parseResultSingle.ParsedGameInfo.GameTitles = new List<string> { "Hades The Blood Price" };
+
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_reject_dlc_only_release_when_dlc_is_already_on_disk()
+        {
+            _parseResultSingle.ParsedGameInfo.ContentType = ReleaseContentType.DlcOnly;
+            _parseResultSingle.ParsedGameInfo.GameTitles = new List<string> { "Hades The Blood Price" };
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(It.IsAny<int>()))
+                  .Returns(new List<GameFile>
+                  {
+                      new GameFile { RelativePath = "DLC/Hades.The.Blood.Price.DLC-GRP" }
+                  });
+
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+        }
+
+        [Test]
         public void should_be_upgradable_if_only_game_is_upgradable()
         {
             WithFirstFileUpgradable();

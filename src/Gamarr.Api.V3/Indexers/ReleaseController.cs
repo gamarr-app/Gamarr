@@ -136,21 +136,23 @@ namespace Gamarr.Api.V3.Indexers
 
         [HttpGet]
         [Produces("application/json")]
-        public async Task<List<ReleaseResource>> GetReleases(int? gameId)
+        public async Task<List<ReleaseResource>> GetReleases(int? gameId, int? componentId)
         {
             if (gameId.HasValue)
             {
-                return await GetGameReleases(gameId.Value);
+                return await GetGameReleases(gameId.Value, componentId);
             }
 
             return await GetRss();
         }
 
-        private async Task<List<ReleaseResource>> GetGameReleases(int gameId)
+        private async Task<List<ReleaseResource>> GetGameReleases(int gameId, int? componentId)
         {
             try
             {
-                var decisions = await _releaseSearchService.GameSearch(gameId, true, true);
+                var decisions = componentId.HasValue
+                    ? await _releaseSearchService.GameComponentSearch(gameId, componentId.Value, true, true)
+                    : await _releaseSearchService.GameSearch(gameId, true, true);
                 var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisionsForGames(decisions);
 
                 return MapDecisions(prioritizedDecisions);

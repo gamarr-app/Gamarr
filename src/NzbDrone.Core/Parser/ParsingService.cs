@@ -271,6 +271,18 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
+            // DLC/update/season-pass titles embed the addon's own name
+            // ("Hades The Blood Price"), so the exact-title check fails. For
+            // base-requiring content, accept the searched game when its clean
+            // title is a prefix of the release's clean title (#149) — same
+            // fallback GetGame applies outside of search.
+            if (parsedGameInfo.ContentType.RequiresBaseGame() &&
+                possibleTitles.Any(pt => pt.IsNotNullOrWhiteSpace() && cleanTitles.Any(ct => ct.StartsWith(pt))))
+            {
+                _logger.Debug("Matched base-requiring release '{0}' to searched game '{1}' by title prefix", parsedGameInfo.PrimaryGameTitle, searchCriteria.Game.Title);
+                return new FindGameResult(searchCriteria.Game, GameMatchType.Title);
+            }
+
             // Fallback: check if ALL significant words from the game title appear in the release title.
             // This handles cases where DLC/expansion names are inside parentheses and stripped by the parser.
             // e.g. "Factorio (v2.0.7 + Space Age DLC) [FitGirl Repack]" should match "Factorio: Space Age"
