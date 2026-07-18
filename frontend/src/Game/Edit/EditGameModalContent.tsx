@@ -39,6 +39,16 @@ export interface EditGameModalContentProps {
   onDeleteGamePress: () => void;
 }
 
+const platformOptions = [
+  { key: 'unknown', value: 'Any' },
+  { key: 'pc', value: 'PC (Windows)' },
+  { key: 'linux', value: 'Linux' },
+  { key: 'mac', value: 'macOS' },
+  { key: 'playStation', value: 'PlayStation' },
+  { key: 'xbox', value: 'Xbox' },
+  { key: 'nintendo', value: 'Nintendo' },
+];
+
 function EditGameModalContent({
   gameId,
   onModalClose,
@@ -53,6 +63,7 @@ function EditGameModalContent({
     qualityProfileId,
     path,
     tags,
+    platform,
     rootFolderPath: initialRootFolderPath,
   } = useGame(gameId)!;
 
@@ -79,6 +90,7 @@ function EditGameModalContent({
         qualityProfileId,
         path,
         tags,
+        platform,
       },
       pendingChanges,
       saveError
@@ -90,6 +102,7 @@ function EditGameModalContent({
     qualityProfileId,
     path,
     tags,
+    platform,
     pendingChanges,
     saveError,
   ]);
@@ -183,6 +196,19 @@ function EditGameModalContent({
               name="monitorUpdates"
               helpText={translate('MonitorUpdatesHelpText')}
               {...settings.monitorUpdates}
+              onChange={handleInputChange}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('Platform')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.SELECT}
+              name="platform"
+              values={platformOptions}
+              helpText={translate('PlatformHelpText')}
+              {...settings.platform}
               onChange={handleInputChange}
             />
           </FormGroup>
