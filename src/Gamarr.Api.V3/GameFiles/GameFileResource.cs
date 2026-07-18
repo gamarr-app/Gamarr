@@ -22,6 +22,11 @@ namespace Gamarr.Api.V3.GameFiles
         public string ReleaseGroup { get; set; }
         public string Edition { get; set; }
         public string Version { get; set; }
+
+        // Derived component classification (#149): "base" (the game folder
+        // itself), "update" (Updates/<version> unit), "dlc" (DLC/<name> unit),
+        // or "file" (legacy file-based record).
+        public string ComponentType { get; set; }
         public List<Language> Languages { get; set; }
         public QualityModel Quality { get; set; }
         public List<CustomFormatResource> CustomFormats { get; set; }
@@ -59,9 +64,30 @@ namespace Gamarr.Api.V3.GameFiles
                 ReleaseGroup = model.ReleaseGroup,
                 Edition = model.Edition,
                 Version = model.GameVersion?.ToString(),
+                ComponentType = GetComponentType(model.RelativePath),
                 MediaInfo = model.MediaInfo.ToResource(model.SceneName),
                 OriginalFilePath = model.OriginalFilePath
             };
+        }
+
+        private static string GetComponentType(string relativePath)
+        {
+            if (relativePath.IsNullOrWhiteSpace())
+            {
+                return "base";
+            }
+
+            if (relativePath.StartsWith("Updates/") || relativePath.StartsWith("Updates\\"))
+            {
+                return "update";
+            }
+
+            if (relativePath.StartsWith("DLC/") || relativePath.StartsWith("DLC\\"))
+            {
+                return "dlc";
+            }
+
+            return "file";
         }
 
         public static GameFileResource ToResource(this GameFile model, NzbDrone.Core.Games.Game game, IUpgradableSpecification upgradableSpecification, ICustomFormatCalculationService formatCalculationService)
@@ -86,6 +112,7 @@ namespace Gamarr.Api.V3.GameFiles
                 Edition = model.Edition,
                 ReleaseGroup = model.ReleaseGroup,
                 Version = model.GameVersion?.ToString(),
+                ComponentType = GetComponentType(model.RelativePath),
                 MediaInfo = model.MediaInfo.ToResource(model.SceneName),
                 QualityCutoffNotMet = upgradableSpecification?.QualityCutoffNotMet(game.QualityProfile, model.Quality) ?? false,
                 OriginalFilePath = model.OriginalFilePath,

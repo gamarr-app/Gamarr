@@ -47,6 +47,31 @@ namespace NzbDrone.Core.Parser.Model
         // instead of the game folder root.
         public string ImportSubfolder { get; set; }
 
+        // Best parsed release content type across the available sources
+        // (same precedence as GameVersion above).
+        public ReleaseContentType ContentType
+        {
+            get
+            {
+                if (FileGameInfo?.ContentType is { } fileType && fileType != ReleaseContentType.Unknown)
+                {
+                    return fileType;
+                }
+
+                if (DownloadClientGameInfo?.ContentType is { } clientType && clientType != ReleaseContentType.Unknown)
+                {
+                    return clientType;
+                }
+
+                if (FolderGameInfo?.ContentType is { } folderType && folderType != ReleaseContentType.Unknown)
+                {
+                    return folderType;
+                }
+
+                return ReleaseContentType.Unknown;
+            }
+        }
+
         // Best parsed game version across the available sources. A parsed info
         // always carries a GameVersion object (never null), so pick the first
         // one that actually parsed a version token (HasValue) instead of

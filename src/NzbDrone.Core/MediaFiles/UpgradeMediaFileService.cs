@@ -52,14 +52,21 @@ namespace NzbDrone.Core.MediaFiles
                 throw new RootFolderNotFoundException($"Root folder '{rootFolder}' was not found.");
             }
 
-            // Update-only releases import ALONGSIDE the existing game instead of
-            // replacing it (gamarr-app/Gamarr#149 phase 0): the base stays, the
-            // update lands in an Updates/<version> subfolder with its own record.
-            if (existingFile != null && localGame.Quality?.Quality?.Modifier == Modifier.UPDATE_ONLY)
-            {
-                localGame.ImportSubfolder = Path.Combine("Updates", GetUpdateFolderName(localGame));
+            // Releases that require the base game (updates, DLC, season passes)
+            // import ALONGSIDE the existing game instead of replacing it
+            // (gamarr-app/Gamarr#149 phase 0): the base stays, and the release
+            // lands in a typed subfolder with its own record.
+            var contentType = localGame.ContentType;
+            var importsAlongside = contentType.RequiresBaseGame() ||
+                                   localGame.Quality?.Quality?.Modifier == Modifier.UPDATE_ONLY;
 
-                _logger.Debug("Importing update release alongside existing game into {0}", localGame.ImportSubfolder);
+            if (existingFile != null && importsAlongside)
+            {
+                localGame.ImportSubfolder = contentType is ReleaseContentType.DlcOnly or ReleaseContentType.SeasonPass
+                    ? Path.Combine("DLC", GetDlcFolderName(localGame))
+                    : Path.Combine("Updates", GetUpdateFolderName(localGame));
+
+                _logger.Debug("Importing {0} release alongside existing game into {1}", contentType, localGame.ImportSubfolder);
 
                 moveFileResult.GameFile = copyOnly
                     ? _gameFileMover.CopyGameFile(gameFile, localGame)
@@ -133,6 +140,15 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             return "v-unknown-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+        }
+
+        private static string GetDlcFolderName(LocalGame localGame)
+        {
+            // The release's own folder/file name is the most honest identifier
+            // for a DLC until metadata-driven DLC components exist (#149).
+            var name = Path.GetFileName(localGame.Path?.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) ?? string.Empty);
+
+            return name.IsNotNullOrWhiteSpace() ? name : "dlc-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
         }
     }
 }

@@ -76,6 +76,27 @@ namespace NzbDrone.Core.Parser
                 return result.Game;
             }
 
+            // DLC/update/season-pass titles embed the addon's own name
+            // ("Hades The Blood Price"), so the exact-title lookup fails.
+            // For base-requiring content, match the library game whose clean
+            // title is the longest PREFIX of the release's clean title (#149).
+            if (parsedGameInfo.ContentType.RequiresBaseGame())
+            {
+                var cleanReleaseTitle = parsedGameInfo.PrimaryGameTitle.CleanGameTitle();
+
+                var prefixMatch = _gameService.GetAllGames()
+                    .Where(g => g.GameMetadata.Value.CleanTitle.IsNotNullOrWhiteSpace() &&
+                                cleanReleaseTitle.StartsWith(g.GameMetadata.Value.CleanTitle))
+                    .OrderByDescending(g => g.GameMetadata.Value.CleanTitle.Length)
+                    .FirstOrDefault();
+
+                if (prefixMatch != null)
+                {
+                    _logger.Debug("Matched base-requiring release '{0}' to game '{1}' by title prefix", parsedGameInfo.PrimaryGameTitle, prefixMatch.Title);
+                    return prefixMatch;
+                }
+            }
+
             return null;
         }
 

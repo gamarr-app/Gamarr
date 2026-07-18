@@ -47,6 +47,30 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             result.Reason.Should().Be(DownloadRejectionReason.DlcOnly);
         }
 
+        [TestCase(ReleaseContentType.DlcOnly)]
+        [TestCase(ReleaseContentType.UpdateOnly)]
+        [TestCase(ReleaseContentType.SeasonPass)]
+        public void should_accept_base_requiring_release_when_base_game_is_on_disk(ReleaseContentType contentType)
+        {
+            // Updates/DLC import alongside the base (#149 phase 0), so they're
+            // grabbable whenever a base exists to apply them to.
+            _remoteGame.Game = new NzbDrone.Core.Games.Game { GameFileId = 1 };
+            _remoteGame.ParsedGameInfo.ContentType = contentType;
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
+
+        [TestCase(ReleaseContentType.DlcOnly)]
+        [TestCase(ReleaseContentType.UpdateOnly)]
+        [TestCase(ReleaseContentType.SeasonPass)]
+        public void should_reject_base_requiring_release_when_no_base_game_on_disk(ReleaseContentType contentType)
+        {
+            _remoteGame.Game = new NzbDrone.Core.Games.Game { GameFileId = 0 };
+            _remoteGame.ParsedGameInfo.ContentType = contentType;
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+        }
+
         [Test]
         public void should_reject_with_update_only_reason_when_content_type_is_update_only()
         {
