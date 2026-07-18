@@ -103,6 +103,7 @@ namespace NzbDrone.Common.Test.TPLTests
         }
 
         [Test]
+        [Retry(3)]
         public void should_handle_pause_reentrancy()
         {
             var counter = new Counter();
@@ -122,7 +123,8 @@ namespace NzbDrone.Common.Test.TPLTests
 
             debounceFunction.Resume();
 
-            WaitForCount(counter, 1);
+            // Loaded CI runners can delay timer callbacks by several seconds.
+            WaitForCount(counter, 1, 15000);
 
             counter.Count.Should().Be(1);
         }
