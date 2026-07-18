@@ -1,8 +1,11 @@
+using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
 {
@@ -10,15 +13,37 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
     {
         private readonly UpgradableSpecification _upgradableSpecification;
         private readonly ICustomFormatCalculationService _formatService;
+        private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
         public UpgradeDiskSpecification(UpgradableSpecification upgradableSpecification,
                                         ICustomFormatCalculationService formatService,
+                                        IMediaFileService mediaFileService,
                                         Logger logger)
         {
             _upgradableSpecification = upgradableSpecification;
             _formatService = formatService;
+            _mediaFileService = mediaFileService;
             _logger = logger;
+        }
+
+        // With update releases importing alongside the base (#149 phase 0), the
+        // version on disk is the highest across ALL of the game's files, not
+        // the primary's — comparing against the base alone would re-grab an
+        // update that's already imported.
+        private GameVersion GetHighestVersionOnDisk(RemoteGame subject, GameVersion primaryVersion)
+        {
+            var versions = (_mediaFileService.GetFilesByGame(subject.Game.Id) ?? new System.Collections.Generic.List<GameFile>())
+                .Select(f => f.GameVersion)
+                .Where(v => v?.HasValue == true)
+                .ToList();
+
+            if (primaryVersion?.HasValue == true)
+            {
+                versions.Add(primaryVersion);
+            }
+
+            return versions.OrderByDescending(v => v).FirstOrDefault();
         }
 
         public SpecificationPriority Priority => SpecificationPriority.Default;
@@ -47,13 +72,15 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     _formatService.ParseCustomFormat(file),
                     subject.ParsedGameInfo.Quality))
             {
+                var highestVersionOnDisk = GetHighestVersionOnDisk(subject, file.GameVersion);
+
                 // Cutoff is met, but still check if it's a version upgrade
-                if (_upgradableSpecification.IsVersionUpgrade(subject.Game, file.GameVersion, subject.ParsedGameInfo.GameVersion))
+                if (_upgradableSpecification.IsVersionUpgrade(subject.Game, highestVersionOnDisk, subject.ParsedGameInfo.GameVersion))
                 {
                     _logger.Debug(
                         "Cutoff met, but new release has newer game version {0} vs {1}, accepting",
                         subject.ParsedGameInfo.GameVersion,
-                        file.GameVersion);
+                        highestVersionOnDisk);
                 }
                 else
                 {

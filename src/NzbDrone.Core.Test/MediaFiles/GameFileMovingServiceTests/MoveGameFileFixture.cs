@@ -38,6 +38,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
 
             _localGame = Builder<LocalGame>.CreateNew()
                                                  .With(l => l.Game = _game)
+                                                 .With(l => l.ImportSubfolder = null)
                                                  .Build();
 
             Mocker.GetMock<IBuildFileNames>()
@@ -137,6 +138,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
             _localGame = Builder<LocalGame>.CreateNew()
                 .With(l => l.Game = _game)
                 .With(l => l.Path = _sourceFolderPath)
+                .With(l => l.ImportSubfolder = null)
                 .Build();
 
             var rootFolder = @"C:\Test\Games\".AsOsAgnostic();

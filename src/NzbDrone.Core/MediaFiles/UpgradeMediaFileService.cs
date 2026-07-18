@@ -1,9 +1,12 @@
+using System;
+using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles
 {
@@ -47,6 +50,24 @@ namespace NzbDrone.Core.MediaFiles
             if (existingFile != null && !_diskProvider.FolderExists(rootFolder))
             {
                 throw new RootFolderNotFoundException($"Root folder '{rootFolder}' was not found.");
+            }
+
+            // Update-only releases import ALONGSIDE the existing game instead of
+            // replacing it (gamarr-app/Gamarr#149 phase 0): the base stays, the
+            // update lands in an Updates/<version> subfolder with its own record.
+            if (existingFile != null && localGame.Quality?.Quality?.Modifier == Modifier.UPDATE_ONLY)
+            {
+                localGame.ImportSubfolder = Path.Combine("Updates", GetUpdateFolderName(localGame));
+
+                _logger.Debug("Importing update release alongside existing game into {0}", localGame.ImportSubfolder);
+
+                moveFileResult.GameFile = copyOnly
+                    ? _gameFileMover.CopyGameFile(gameFile, localGame)
+                    : _gameFileMover.MoveGameFile(gameFile, localGame);
+
+                localGame.OldFiles = moveFileResult.OldFiles;
+
+                return moveFileResult;
             }
 
             if (existingFile != null)
@@ -99,6 +120,19 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             return moveFileResult;
+        }
+
+        private static string GetUpdateFolderName(LocalGame localGame)
+        {
+            var version = localGame.GameVersion;
+
+            if (version?.HasValue == true)
+            {
+                // "v1.5" / "Build 12345" -> filesystem-safe folder name
+                return version.ToString().Replace(' ', '-');
+            }
+
+            return "v-unknown-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
         }
     }
 }

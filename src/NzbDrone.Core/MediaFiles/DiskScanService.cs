@@ -139,6 +139,32 @@ namespace NzbDrone.Core.MediaFiles
                 // Folder has content - treat the entire folder as a single GameFile
                 var folderSize = _diskProvider.GetFolderSize(game.Path);
 
+                // Subfolder units (update releases imported alongside the base,
+                // RelativePath like Updates/<version>) are reconciled by their
+                // own folder's existence and must not be absorbed or deleted by
+                // the base-file logic below.
+                var subfolderUnits = existingGameFiles
+                    .Where(f => f.RelativePath.IsNotNullOrWhiteSpace() &&
+                                _diskProvider.FolderExists(Path.Combine(game.Path, f.RelativePath)))
+                    .ToList();
+
+                var vanishedSubfolderUnits = existingGameFiles
+                    .Where(f => f.RelativePath.IsNotNullOrWhiteSpace() &&
+                                !_diskProvider.FolderExists(Path.Combine(game.Path, f.RelativePath)) &&
+                                !_diskProvider.FileExists(Path.Combine(game.Path, f.RelativePath)))
+                    .ToList();
+
+                foreach (var vanished in vanishedSubfolderUnits)
+                {
+                    _logger.Debug("Removing GameFile record for missing path: {0}", vanished.RelativePath);
+                    _mediaFileService.Delete(vanished, DeleteMediaFileReason.MissingFromDisk);
+                }
+
+                existingGameFiles = existingGameFiles
+                    .Except(subfolderUnits)
+                    .Except(vanishedSubfolderUnits)
+                    .ToList();
+
                 // Check if we already have a folder-based GameFile (RelativePath is empty)
                 var existingFolderFile = existingGameFiles.FirstOrDefault(f => f.RelativePath.IsNullOrWhiteSpace());
 

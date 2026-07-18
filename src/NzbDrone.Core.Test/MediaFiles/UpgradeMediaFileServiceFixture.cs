@@ -66,6 +66,47 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_import_update_release_alongside_existing_file_without_deleting()
+        {
+            GivenSingleGameWithSingleGameFile();
+
+            _localGame.Quality = new NzbDrone.Core.Qualities.QualityModel(NzbDrone.Core.Qualities.Quality.UpdateOnly);
+            _localGame.FileGameInfo = new ParsedGameInfo
+            {
+                GameVersion = new NzbDrone.Core.Qualities.GameVersion(1, 5)
+            };
+
+            Subject.UpgradeGameFile(_gameFile, _localGame);
+
+            // Base game must remain untouched
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+
+            // The update gets its own subfolder unit
+            _localGame.ImportSubfolder.Should().Be(Path.Combine("Updates", "v1.5"));
+            Mocker.GetMock<IMoveGameFiles>().Verify(v => v.MoveGameFile(_gameFile, _localGame), Times.Once());
+        }
+
+        [Test]
+        public void should_replace_existing_file_for_full_release_even_when_versioned()
+        {
+            GivenSingleGameWithSingleGameFile();
+
+            _localGame.Quality = new NzbDrone.Core.Qualities.QualityModel(NzbDrone.Core.Qualities.Quality.Repack);
+            _localGame.FileGameInfo = new ParsedGameInfo
+            {
+                GameVersion = new NzbDrone.Core.Qualities.GameVersion(2, 0)
+            };
+
+            Subject.UpgradeGameFile(_gameFile, _localGame);
+
+            // Full releases (repack of the whole game at a newer version)
+            // still replace, exactly as before phase 0.
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<GameFile>(), DeleteMediaFileReason.Upgrade), Times.Once());
+        }
+
+        [Test]
         public void should_delete_game_file_from_database()
         {
             GivenSingleGameWithSingleGameFile();

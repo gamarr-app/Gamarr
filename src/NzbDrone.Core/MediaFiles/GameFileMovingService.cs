@@ -78,9 +78,12 @@ namespace NzbDrone.Core.MediaFiles
             string destinationPath;
             if (isFolder)
             {
-                // For folders, move contents directly into game.Path
-                // TransferFolder will move the contents of sourcePath into destinationPath
-                destinationPath = localGame.Game.Path;
+                // For folders, move contents into game.Path — or, when an
+                // import subfolder is set (update-alongside imports), into
+                // that subfolder of the game folder.
+                destinationPath = localGame.ImportSubfolder.IsNotNullOrWhiteSpace()
+                    ? Path.Combine(localGame.Game.Path, localGame.ImportSubfolder)
+                    : localGame.Game.Path;
 
                 // Guards against recreating the game folder on the local OS disk
                 // when the root folder (NAS/external mount) is missing, and
@@ -107,9 +110,10 @@ namespace NzbDrone.Core.MediaFiles
             string destinationPath;
             if (isFolder)
             {
-                // For folders, copy contents directly into game.Path
-                // TransferFolder will copy the contents of sourcePath into destinationPath
-                destinationPath = localGame.Game.Path;
+                // Same subfolder routing as the move path.
+                destinationPath = localGame.ImportSubfolder.IsNotNullOrWhiteSpace()
+                    ? Path.Combine(localGame.Game.Path, localGame.ImportSubfolder)
+                    : localGame.Game.Path;
 
                 // Same unmounted-root-folder guard as the move path.
                 EnsureGameFolder(gameFile, localGame, destinationPath);
@@ -144,14 +148,22 @@ namespace NzbDrone.Core.MediaFiles
                     throw new DirectoryNotFoundException($"Game folder path does not exist: {sourcePath}");
                 }
 
-                // destinationPath is game.Path; EnsureGameFolder (called by every
-                // TransferGamePath caller) has already root-checked and created it.
+                // EnsureGameFolder (called by every TransferGamePath caller) has
+                // already root-checked and created the game folder; subfolder
+                // destinations (update-alongside imports) still need their leaf.
+                var importSubfolder = localGame?.ImportSubfolder;
+
+                if (importSubfolder.IsNotNullOrWhiteSpace() && !_diskProvider.FolderExists(destinationPath))
+                {
+                    CreateFolder(destinationPath);
+                }
 
                 // Move or copy the folder contents using DiskTransferService
                 _diskTransferService.TransferFolder(sourcePath, destinationPath, mode);
 
-                // Folder-based GameFile has empty RelativePath (the folder itself IS the game)
-                gameFile.RelativePath = string.Empty;
+                // Empty RelativePath means the game folder itself IS the file;
+                // update-alongside imports keep their Updates/<version> subfolder.
+                gameFile.RelativePath = importSubfolder.IsNotNullOrWhiteSpace() ? importSubfolder : string.Empty;
 
                 if (localGame is not null)
                 {
