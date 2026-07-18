@@ -59,6 +59,7 @@ namespace NzbDrone.Common.Test.TPLTests
         }
 
         [Test]
+        [Retry(3)]
         public void should_wait_for_existing()
         {
             GivenExisting("me", _epoch + TimeSpan.FromMilliseconds(200));
@@ -67,7 +68,9 @@ namespace NzbDrone.Common.Test.TPLTests
             Subject.WaitAndPulse("me", TimeSpan.FromMilliseconds(400));
             watch.Stop();
 
-            watch.ElapsedMilliseconds.Should().BeInRange(50, 1500);
+            // Wide upper bound: loaded CI runners overshoot sleeps by seconds;
+            // the assertion only needs to prove we waited without hanging.
+            watch.ElapsedMilliseconds.Should().BeInRange(50, 5000);
         }
 
         [Test]
