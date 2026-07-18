@@ -56,7 +56,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var qualityProfile = subject.Game.QualityProfile;
+            var qualityProfile = subject.EffectiveQualityProfile;
 
             var contentType = subject.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
 

@@ -14,6 +14,14 @@ namespace NzbDrone.Core.Parser.Model
         public int CustomFormatScore { get; set; }
         public GameMatchType GameMatchType { get; set; }
         public Game Game { get; set; }
+
+        // Per-component quality profile (#149): set when the release matches
+        // a component slot that overrides the game's profile; null means the
+        // game-wide profile applies.
+        public Profiles.Qualities.QualityProfile ComponentQualityProfile { get; set; }
+
+        public Profiles.Qualities.QualityProfile EffectiveQualityProfile => ComponentQualityProfile ?? Game?.QualityProfile;
+
         public bool GameRequested { get; set; }
         public bool DownloadAllowed { get; set; }
         public TorrentSeedConfiguration SeedConfiguration { get; set; }

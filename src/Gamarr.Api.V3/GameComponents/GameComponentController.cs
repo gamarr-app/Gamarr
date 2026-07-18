@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Profiles.Qualities;
 using Gamarr.Http;
 using Gamarr.Http.REST;
 
@@ -13,12 +14,15 @@ namespace Gamarr.Api.V3.GameComponents
     {
         private readonly IGameComponentService _componentService;
         private readonly IMediaFileService _mediaFileService;
+        private readonly IQualityProfileService _qualityProfileService;
 
         public GameComponentController(IGameComponentService componentService,
-                                       IMediaFileService mediaFileService)
+                                       IMediaFileService mediaFileService,
+                                       IQualityProfileService qualityProfileService)
         {
             _componentService = componentService;
             _mediaFileService = mediaFileService;
+            _qualityProfileService = qualityProfileService;
         }
 
         [HttpGet]
@@ -44,7 +48,12 @@ namespace Gamarr.Api.V3.GameComponents
         [Produces("application/json")]
         public GameComponentResource SetComponent(int id, [FromBody] GameComponentResource resource)
         {
-            var component = _componentService.SetMonitored(id, resource.Monitored);
+            if (resource.QualityProfileId != 0 && !_qualityProfileService.Exists(resource.QualityProfileId))
+            {
+                throw new BadRequestException("Quality profile does not exist");
+            }
+
+            var component = _componentService.SetComponentOptions(id, resource.Monitored, resource.QualityProfileId);
             var files = _mediaFileService.GetFilesByGame(component.GameId);
 
             return component.ToResource(files);

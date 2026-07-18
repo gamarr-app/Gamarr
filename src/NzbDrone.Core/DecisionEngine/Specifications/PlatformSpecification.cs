@@ -31,7 +31,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var preferredPlatforms = subject.Game.QualityProfile.PreferredPlatforms;
+            var preferredPlatforms = subject.EffectiveQualityProfile.PreferredPlatforms;
             var releasePlatform = subject.ParsedGameInfo.Platform;
 
             // Per-entry platform (#150) takes precedence over profile

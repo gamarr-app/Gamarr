@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Games.Components
         List<GameComponent> GetByGame(int gameId);
         List<GameComponent> GetMonitoredMissingDlc();
         GameComponent Get(int id);
-        GameComponent SetMonitored(int id, bool monitored);
+        GameComponent SetComponentOptions(int id, bool monitored, int qualityProfileId);
         void EnsureComponents(Game game);
     }
 
@@ -70,10 +70,11 @@ namespace NzbDrone.Core.Games.Components
             return _componentRepository.Get(id);
         }
 
-        public GameComponent SetMonitored(int id, bool monitored)
+        public GameComponent SetComponentOptions(int id, bool monitored, int qualityProfileId)
         {
             var component = _componentRepository.Get(id);
             component.Monitored = monitored;
+            component.QualityProfileId = qualityProfileId;
 
             return _componentRepository.Update(component);
         }

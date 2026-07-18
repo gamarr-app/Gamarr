@@ -42,7 +42,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             }
 
             var cdhEnabled = _configService.EnableCompletedDownloadHandling;
-            var qualityProfile = subject.Game.QualityProfile;
+            var qualityProfile = subject.EffectiveQualityProfile;
 
             _logger.Debug("Performing history status check on report");
 
@@ -61,13 +61,13 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 var customFormats = _formatService.ParseCustomFormat(mostRecent, subject.Game);
 
                 var cutoffUnmet = _upgradableSpecification.CutoffNotMet(
-                    subject.Game.QualityProfile,
+                    subject.EffectiveQualityProfile,
                     mostRecent.Quality,
                     customFormats,
                     subject.ParsedGameInfo.Quality);
 
                 var upgradeableRejectReason = _upgradableSpecification.IsUpgradable(
-                    subject.Game.QualityProfile,
+                    subject.EffectiveQualityProfile,
                     mostRecent.Quality,
                     customFormats,
                     subject.ParsedGameInfo.Quality,
