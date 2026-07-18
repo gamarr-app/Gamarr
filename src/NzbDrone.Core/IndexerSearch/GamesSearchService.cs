@@ -82,10 +82,26 @@ namespace NzbDrone.Core.IndexerSearch
 
             var games = _gameService.GamesWithoutFiles(pagingSpec).Records.ToList();
 
-            var queue = _queueService.GetQueue().Where(q => q.Game != null).Select(q => q.Game.Id);
+            var queue = _queueService.GetQueue().Where(q => q.Game != null).Select(q => q.Game.Id).ToList();
             var missing = games.Where(e => !queue.Contains(e.Id)).ToList();
 
             SearchForBulkGames(missing, message.Trigger == CommandTrigger.Manual).GetAwaiter().GetResult();
+
+            // Monitored DLC slots without a file are missing too; games-only
+            // enumeration never sees them because their game has its base.
+            var missingDlc = _componentService.GetMonitoredMissingDlc()
+                                              .Where(c => !queue.Contains(c.GameId))
+                                              .ToList();
+
+            if (missingDlc.Any())
+            {
+                _logger.ProgressInfo("Performing search for {0} missing DLC component(s)", missingDlc.Count);
+
+                foreach (var slot in missingDlc)
+                {
+                    SearchForComponent(slot, message.Trigger == CommandTrigger.Manual);
+                }
+            }
         }
 
         public void Execute(CutoffUnmetGamesSearchCommand message)
@@ -112,16 +128,28 @@ namespace NzbDrone.Core.IndexerSearch
         {
             var component = _componentService.Get(message.ComponentId);
 
-            var decisions = _releaseSearchService.GameComponentSearch(message.GameId, message.ComponentId, message.Trigger == CommandTrigger.Manual, false)
-                                                 .GetAwaiter().GetResult();
+            SearchForComponent(component, message.Trigger == CommandTrigger.Manual);
+        }
 
-            var scoped = FilterDecisionsToComponent(decisions, component);
+        private void SearchForComponent(GameComponent component, bool userInvokedSearch)
+        {
+            try
+            {
+                var decisions = _releaseSearchService.GameComponentSearch(component.GameId, component.Id, userInvokedSearch, false)
+                                                     .GetAwaiter().GetResult();
 
-            _logger.ProgressInfo("Component search for {0} returned {1} reports, {2} match the component", component.Title, decisions.Count, scoped.Count);
+                var scoped = FilterDecisionsToComponent(decisions, component);
 
-            var processed = _processDownloadDecisions.ProcessDecisions(scoped).GetAwaiter().GetResult();
+                _logger.ProgressInfo("Component search for {0} returned {1} reports, {2} match the component", component.Title, decisions.Count, scoped.Count);
 
-            _logger.ProgressInfo("Completed component search for {0}. {1} reports downloaded.", component.Title, processed.Grabbed.Count);
+                var processed = _processDownloadDecisions.ProcessDecisions(scoped).GetAwaiter().GetResult();
+
+                _logger.ProgressInfo("Completed component search for {0}. {1} reports downloaded.", component.Title, processed.Grabbed.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Unable to search for component: {0}", component.Title);
+            }
         }
 
         // A game-wide search returns base, update and DLC releases mixed

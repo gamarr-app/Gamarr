@@ -131,6 +131,28 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
+        public void should_return_monitored_dlc_slots_without_files_as_missing()
+        {
+            var linked = new GameComponent { Id = 12, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:111", Title = "The Blood Price", Monitored = true };
+            var missing = new GameComponent { Id = 13, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:222", Title = "Warm Winds", Monitored = true };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetMonitoredDlc())
+                  .Returns(new List<GameComponent> { linked, missing });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile>
+                  {
+                      new GameFile { Id = 3, GameId = _game.Id, RelativePath = "DLC/The.Blood.Price", ComponentId = 12 }
+                  });
+
+            var result = Subject.GetMonitoredMissingDlc();
+
+            result.Should().ContainSingle(c => c.Id == 13);
+        }
+
+        [Test]
         public void should_link_imported_dlc_file_to_matching_metadata_slot()
         {
             var metadataSlot = new GameComponent { Id = 12, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:111", Title = "The Blood Price", Monitored = false };

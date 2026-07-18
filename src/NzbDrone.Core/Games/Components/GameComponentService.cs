@@ -13,6 +13,7 @@ namespace NzbDrone.Core.Games.Components
     public interface IGameComponentService
     {
         List<GameComponent> GetByGame(int gameId);
+        List<GameComponent> GetMonitoredMissingDlc();
         GameComponent Get(int id);
         GameComponent SetMonitored(int id, bool monitored);
         void EnsureComponents(Game game);
@@ -43,6 +44,25 @@ namespace NzbDrone.Core.Games.Components
         public List<GameComponent> GetByGame(int gameId)
         {
             return _componentRepository.GetByGame(gameId);
+        }
+
+        // Monitored DLC slots with no file linked — the component-level
+        // analog of "wanted: missing".
+        public List<GameComponent> GetMonitoredMissingDlc()
+        {
+            var slots = _componentRepository.GetMonitoredDlc();
+            var missing = new List<GameComponent>();
+
+            foreach (var gameSlots in slots.GroupBy(s => s.GameId))
+            {
+                var linkedIds = _mediaFileService.GetFilesByGame(gameSlots.Key)
+                                                 .Select(f => f.ComponentId)
+                                                 .ToHashSet();
+
+                missing.AddRange(gameSlots.Where(s => !linkedIds.Contains(s.Id)));
+            }
+
+            return missing;
         }
 
         public GameComponent Get(int id)
