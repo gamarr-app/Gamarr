@@ -40,7 +40,9 @@ services:
 ```
 
 Then open `http://localhost:6767`. A copy of this file ships as
-[`docker-compose.example.yml`](docker-compose.example.yml). Standalone builds
+[`docker-compose.example.yml`](docker-compose.example.yml). The image is also
+mirrored to Docker Hub as [`gamarr/gamarr`](https://hub.docker.com/r/gamarr/gamarr)
+(GHCR is the canonical source; it has no pull rate limits). Standalone builds
 for Windows, Linux, macOS, and ARM (including Raspberry Pi) are on the
 [releases page](https://github.com/gamarr-app/Gamarr/releases).
 
