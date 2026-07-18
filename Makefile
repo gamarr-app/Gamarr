@@ -26,7 +26,7 @@ $(LOG_DIR):
 
 backend: | $(LOG_DIR)
 	@$(DOTNET) build src/Gamarr.sln > $(LOG_DIR)/backend.log 2>&1 \
-		&& echo "backend: OK ($$(ls -la _output/net10.0/Gamarr.Core.dll | awk '{print $$6, $$7, $$8}'))" \
+		&& echo "backend: OK (newest dll: $$(ls -t _output/net10.0/Gamarr*.dll | head -1 | xargs ls -la | awk '{print $$6, $$7, $$8}'))" \
 		|| { grep -E " error " $(LOG_DIR)/backend.log | head -20; echo "backend: FAILED (full log: $(LOG_DIR)/backend.log)"; exit 1; }
 
 frontend: | $(LOG_DIR)
