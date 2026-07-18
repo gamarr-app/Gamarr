@@ -230,6 +230,7 @@ describe('AddNewGameModalContent', () => {
     expect(
       screen.getByTestId('form-input-qualityProfileId')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('form-input-platform')).toBeInTheDocument();
     expect(screen.getByTestId('form-input-tags')).toBeInTheDocument();
   });
 
