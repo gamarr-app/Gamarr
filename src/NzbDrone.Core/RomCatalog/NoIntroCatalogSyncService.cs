@@ -146,6 +146,10 @@ namespace NzbDrone.Core.RomCatalog
             AddDefaultSource(sources, "No-Intro Nintendo Game Boy Color", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy%20Color.dat");
             AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy%20Advance.dat");
             AddDefaultSource(sources, "No-Intro Nintendo DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS.dat");
+            AddDefaultSource(sources, "No-Intro Nintendo 3DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%203DS.dat");
+            AddDefaultSource(sources, "No-Intro Nintendo 3DS Digital", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%203DS%20%28Digital%29.dat");
+            AddDefaultSource(sources, "No-Intro New Nintendo 3DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20New%20Nintendo%203DS.dat");
+            AddDefaultSource(sources, "No-Intro New Nintendo 3DS Digital", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20New%20Nintendo%203DS%20%28Digital%29.dat");
             AddDefaultSource(sources, "No-Intro Nintendo DS Download Play", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS%20%28Download%20Play%29.dat");
             AddDefaultSource(sources, "No-Intro Nintendo DS DSvision SD Cards", "datomatic://system/319");
             AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Multiboot", "datomatic://system/137");
@@ -315,6 +319,12 @@ namespace NzbDrone.Core.RomCatalog
                 "nintendo---game-boy-advance-video" => PlatformFamily.NintendoGBA,
                 "nintendo---game-boy-advance--video" => PlatformFamily.NintendoGBA,
                 "nintendo---nintendo-ds" => PlatformFamily.NintendoDS,
+                "nintendo---nintendo-3ds" => PlatformFamily.Nintendo3DS,
+                "nintendo---nintendo-3ds-digital" => PlatformFamily.Nintendo3DS,
+                "nintendo---nintendo-3ds--digital" => PlatformFamily.Nintendo3DS,
+                "nintendo---new-nintendo-3ds" => PlatformFamily.Nintendo3DS,
+                "nintendo---new-nintendo-3ds-digital" => PlatformFamily.Nintendo3DS,
+                "nintendo---new-nintendo-3ds--digital" => PlatformFamily.Nintendo3DS,
                 "nintendo---nintendo-ds-download-play" => PlatformFamily.NintendoDS,
                 "nintendo---nintendo-ds--download-play" => PlatformFamily.NintendoDS,
                 "nintendo---nintendo-ds-dsvision-sd-cards" => PlatformFamily.NintendoDS,

@@ -57,13 +57,18 @@ namespace NzbDrone.Core.Test.GameTests
             return captured ?? new List<GameComponent>();
         }
 
-        private static NoIntroCatalogEntry Entry(string canonicalName, PlatformFamily platform, string numberedCanonicalFileName = null)
+        private static NoIntroCatalogEntry Entry(string canonicalName, PlatformFamily platform, string numberedCanonicalFileName = null, string extension = "nds")
         {
             return new NoIntroCatalogEntry
             {
-                SystemKey = platform == PlatformFamily.NintendoDS ? "nintendo---nintendo-ds" : "nintendo---game-boy-advance",
+                SystemKey = platform switch
+                {
+                    PlatformFamily.Nintendo3DS => "nintendo---nintendo-3ds",
+                    PlatformFamily.NintendoDS => "nintendo---nintendo-ds",
+                    _ => "nintendo---game-boy-advance"
+                },
                 CanonicalName = canonicalName,
-                CanonicalFileName = $"{canonicalName}.nds",
+                CanonicalFileName = $"{canonicalName}.{extension}",
                 NumberedCanonicalFileName = numberedCanonicalFileName,
                 PlatformFamily = platform
             };
@@ -180,6 +185,29 @@ namespace NzbDrone.Core.Test.GameTests
 
             inserted.Should().Contain(c => c.ComponentType == GameComponentType.NoIntroRetailRom && c.Title == "USA, Europe (NDSi Enhanced)");
             inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Should().ContainSingle();
+        }
+
+        [Test]
+        public void should_create_3ds_nointro_components_for_matching_game_title_and_platform()
+        {
+            _game.Platform = PlatformFamily.Nintendo3DS;
+            _game.GameMetadata.Value.Title = "Mario Kart 7";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.All())
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mario Kart 7 (Europe) (En,Fr,De,Es,It,Nl,Pt,Ru)", PlatformFamily.Nintendo3DS, extension: "3ds"),
+                      Entry("Mario Kart 7 (USA) (En,Fr,Es)", PlatformFamily.Nintendo3DS, extension: "3ds"),
+                      Entry("Mario Kart DS (USA)", PlatformFamily.NintendoDS)
+                  });
+
+            var inserted = CapturedInserts();
+
+            inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Select(c => c.Title).Should().BeEquivalentTo(
+                "Europe (En,Fr,De,Es,It,Nl,Pt,Ru)",
+                "USA (En,Fr,Es)");
         }
 
         [Test]

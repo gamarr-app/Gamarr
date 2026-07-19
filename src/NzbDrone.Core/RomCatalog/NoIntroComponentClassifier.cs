@@ -43,7 +43,17 @@ namespace NzbDrone.Core.RomCatalog
                 return Exact(NoIntroRomComponentType.Video);
             }
 
-            if (Contains(path, "GBA") || Contains(path, "GBA (by-id)") || Contains(path, "/zip/") || Contains(path, "/nds/") || EndsWithFolder(path, "zip") || EndsWithFolder(path, "nds"))
+            if (Contains(path, "GBA") ||
+                Contains(path, "GBA (by-id)") ||
+                Contains(path, "3DS") ||
+                Contains(path, "/zip/") ||
+                Contains(path, "/nds/") ||
+                Contains(path, "/3ds/") ||
+                Contains(path, "/cia/") ||
+                EndsWithFolder(path, "zip") ||
+                EndsWithFolder(path, "nds") ||
+                EndsWithFolder(path, "3ds") ||
+                EndsWithFolder(path, "cia"))
             {
                 return Exact(NoIntroRomComponentType.RetailRom);
             }
