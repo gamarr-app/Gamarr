@@ -7,6 +7,9 @@ export interface GameFile extends ModelBase {
   gameId: number;
   relativePath: string;
   path: string;
+  componentType: string;
+  componentKey?: string;
+  componentTitle?: string;
   size: number;
   dateAdded: string;
   sceneName: string;
