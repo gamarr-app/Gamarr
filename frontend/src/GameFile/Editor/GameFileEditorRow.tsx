@@ -122,6 +122,14 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
     file: 'FILE',
   };
 
+  const fallbackComponentLabels: Record<string, string> = {
+    nointroretailrom: 'REGIONAL VARIANT',
+    nointromultiboot: 'RELEASE VARIANT',
+    nointrovideo: 'VIDEO',
+    nointrobios: 'BIOS',
+    nointroromhackorunverified: 'UNVERIFIED',
+  };
+
   return (
     <TableRow>
       {columns.map((column) => {
@@ -172,7 +180,9 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
             <TableRowCell key={name} className={styles.component}>
               <div className={styles.componentContent}>
                 <Label kind={componentKinds[componentType] ?? kinds.DEFAULT}>
-                  {componentLabels[componentType] ?? componentType}
+                  {componentLabels[componentType] ??
+                    fallbackComponentLabels[componentType.toLowerCase()] ??
+                    componentType}
                 </Label>
 
                 <span className={styles.componentTitle}>{componentTitle}</span>

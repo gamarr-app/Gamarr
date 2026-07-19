@@ -24,15 +24,7 @@ import GameInteractiveSearchModal from '../../Search/GameInteractiveSearchModal'
 interface GameComponent {
   id: number;
   gameId: number;
-  componentType:
-    | 'base'
-    | 'update'
-    | 'dlc'
-    | 'noIntroRetailRom'
-    | 'noIntroMultiboot'
-    | 'noIntroVideo'
-    | 'noIntroBios'
-    | 'noIntroRomhackOrUnverified';
+  componentType: string;
   key: string;
   title: string;
   monitored: boolean;
@@ -72,7 +64,7 @@ const columns = [
 ];
 
 const typeKinds: Record<
-  GameComponent['componentType'],
+  string,
   'info' | 'success' | 'primary' | 'warning' | 'danger'
 > = {
   base: 'info',
@@ -85,7 +77,7 @@ const typeKinds: Record<
   noIntroRomhackOrUnverified: 'danger',
 };
 
-const typeLabels: Record<GameComponent['componentType'], string> = {
+const typeLabels: Record<string, string> = {
   base: 'BASE',
   update: 'UPDATE',
   dlc: 'DLC',
@@ -95,6 +87,22 @@ const typeLabels: Record<GameComponent['componentType'], string> = {
   noIntroBios: 'BIOS',
   noIntroRomhackOrUnverified: 'UNVERIFIED',
 };
+
+const fallbackTypeLabels: Record<string, string> = {
+  nointroretailrom: 'REGIONAL VARIANT',
+  nointromultiboot: 'RELEASE VARIANT',
+  nointrovideo: 'VIDEO',
+  nointrobios: 'BIOS',
+  nointroromhackorunverified: 'UNVERIFIED',
+};
+
+function getTypeLabel(componentType: string) {
+  return (
+    typeLabels[componentType] ??
+    fallbackTypeLabels[componentType.toLowerCase()] ??
+    componentType
+  );
+}
 
 const noIntroSystemNames: Record<string, string> = {
   'nintendo---game-boy': 'Nintendo Game Boy',
@@ -254,8 +262,8 @@ function GameComponentRow({
   return (
     <TableRow>
       <TableRowCell>
-        <Label kind={typeKinds[component.componentType]}>
-          {typeLabels[component.componentType]}
+        <Label kind={typeKinds[component.componentType] ?? 'info'}>
+          {getTypeLabel(component.componentType)}
         </Label>
       </TableRowCell>
 
