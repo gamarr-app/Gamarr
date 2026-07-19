@@ -16,6 +16,7 @@ namespace NzbDrone.Core.RomCatalog
 
     public class NoIntroCatalogDocumentClient : INoIntroCatalogDocumentClient
     {
+        private const string DatOMaticSourceUrlPrefix = "datomatic://system/";
         private static readonly Regex DownloadTokenRegex = new Regex("<input type=\"submit\" name=\"(?<token>[0-9a-f]{32})\" value=\"Download!!\"", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private readonly IHttpClient _httpClient;
 
@@ -26,6 +27,12 @@ namespace NzbDrone.Core.RomCatalog
 
         public string Fetch(string sourceUrl)
         {
+            if (sourceUrl.StartsWith(DatOMaticSourceUrlPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                var systemId = int.Parse(sourceUrl.Substring(DatOMaticSourceUrlPrefix.Length));
+                return FetchDatOMaticNumbered(systemId);
+            }
+
             return _httpClient.Get(new HttpRequest(sourceUrl)).Content;
         }
 
