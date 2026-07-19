@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.RomCatalog;
 
 namespace NzbDrone.Core.Games.Components
@@ -21,7 +23,8 @@ namespace NzbDrone.Core.Games.Components
                 .Where(entry => entry.PlatformFamily == game.Platform)
                 .ToList();
             var plan = _componentClassifier.BuildCatalogPlan(platformEntries);
-            var gamePlans = plan.Games.Where(x => x.GameTitle == game.Title).ToList();
+            var titleKeys = BuildTitleKeys(game);
+            var gamePlans = plan.Games.Where(x => titleKeys.Contains(CleanTitleKey(x.GameTitle))).ToList();
 
             if (gamePlans.Count == 0)
             {
@@ -35,6 +38,49 @@ namespace NzbDrone.Core.Games.Components
             return gamePlans.SelectMany(gamePlan => gamePlan.RegionLanguageComponents.Concat(gamePlan.DownloadPlayComponents))
                 .Select(slot => ToSlot(slot, entriesByCanonicalName))
                 .ToList();
+        }
+
+        private static HashSet<string> BuildTitleKeys(Game game)
+        {
+            var titleKeys = new HashSet<string>();
+
+            AddTitleKey(titleKeys, game.Title);
+            AddTitleKey(titleKeys, game.GameMetadata.Value.OriginalTitle);
+
+            foreach (var alternativeTitle in game.GameMetadata.Value.AlternativeTitles)
+            {
+                AddTitleKey(titleKeys, alternativeTitle.Title);
+            }
+
+            return titleKeys;
+        }
+
+        private static void AddTitleKey(HashSet<string> titleKeys, string title)
+        {
+            var titleKey = CleanTitleKey(title);
+
+            if (titleKey.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+
+            titleKeys.Add(titleKey);
+
+            const string versionSuffix = "version";
+
+            if (titleKey.EndsWith(versionSuffix))
+            {
+                titleKeys.Add(titleKey.Substring(0, titleKey.Length - versionSuffix.Length));
+            }
+            else
+            {
+                titleKeys.Add(titleKey + versionSuffix);
+            }
+        }
+
+        private static string CleanTitleKey(string title)
+        {
+            return title.CleanGameTitle();
         }
 
         public NoIntroGameComponentSlot FindSlotForFile(Game game, List<NoIntroCatalogEntry> entries, GameFile file)

@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
@@ -152,6 +153,33 @@ namespace NzbDrone.Core.Test.GameTests
 
             inserted.Should().Contain(c => c.ComponentType == GameComponentType.NoIntroRetailRom && c.Title == "Europe (En,Fr,De,Es,It)");
             inserted.Should().Contain(c => c.ComponentType == GameComponentType.NoIntroMultiboot && c.Title == "Europe (Demo) (Download Station Vol. 1)");
+        }
+
+        [Test]
+        public void should_create_nointro_components_from_alternative_titles()
+        {
+            _game.Platform = PlatformFamily.NintendoDS;
+            _game.GameMetadata.Value.Title = "Pokémon Weiß";
+            _game.GameMetadata.Value.OriginalTitle = "Pokémon White Version";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+            _game.GameMetadata.Value.AlternativeTitles = new List<AlternativeTitle>
+            {
+                new AlternativeTitle("Pokemon White"),
+                new AlternativeTitle("Pocket Monsters White")
+            };
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.All())
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Pokemon - White Version (USA, Europe) (NDSi Enhanced)", PlatformFamily.NintendoDS),
+                      Entry("Pokemon - Black Version (USA, Europe) (NDSi Enhanced)", PlatformFamily.NintendoDS)
+                  });
+
+            var inserted = CapturedInserts();
+
+            inserted.Should().Contain(c => c.ComponentType == GameComponentType.NoIntroRetailRom && c.Title == "USA, Europe (NDSi Enhanced)");
+            inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Should().ContainSingle();
         }
 
         [Test]
