@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using NLog;
-using NzbDrone.Core.Games;
 using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.RomCatalog
@@ -112,7 +111,7 @@ namespace NzbDrone.Core.RomCatalog
                 SystemKey = snapshot.SystemKey,
                 CanonicalName = entry.CanonicalName,
                 ParentCanonicalName = entry.ParentCanonicalName,
-                PlatformFamily = MapPlatformFamily(snapshot.SystemKey),
+                PlatformFamily = NoIntroCatalogDefaults.MapPlatformFamily(snapshot.SystemKey),
                 CanonicalFileName = entry.CanonicalFileName,
                 ReleaseNumber = entry.ReleaseNumber,
                 NumberedCanonicalFileName = entry.NumberedCanonicalFileName
@@ -142,20 +141,10 @@ namespace NzbDrone.Core.RomCatalog
 
         private void EnsureDefaultSources(List<NoIntroCatalogSource> sources)
         {
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Color", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy%20Color.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy%20Advance.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo 3DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%203DS.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo 3DS Digital", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%203DS%20%28Digital%29.dat");
-            AddDefaultSource(sources, "No-Intro New Nintendo 3DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20New%20Nintendo%203DS.dat");
-            AddDefaultSource(sources, "No-Intro New Nintendo 3DS Digital", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20New%20Nintendo%203DS%20%28Digital%29.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo DS Download Play", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS%20%28Download%20Play%29.dat");
-            AddDefaultSource(sources, "No-Intro Nintendo DS DSvision SD Cards", "datomatic://system/319");
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Multiboot", "datomatic://system/137");
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance e-Reader", "datomatic://system/41");
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Play-Yan", "datomatic://system/148");
-            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Video", "datomatic://system/297");
+            foreach (var source in NoIntroCatalogDefaults.Sources)
+            {
+                AddDefaultSource(sources, source.Name, source.SourceUrl);
+            }
         }
 
         private void AddDefaultSource(List<NoIntroCatalogSource> sources, string name, string sourceUrl)
@@ -300,36 +289,6 @@ namespace NzbDrone.Core.RomCatalog
                 "nintendo---game-boy-advance" => "https://advanscene.com/offline/datas/ADVANsCEne_GBA.zip",
                 "nintendo---nintendo-ds" => "https://advanscene.com/offline/datas/ADVANsCEne_NDS_S.zip",
                 _ => null
-            };
-        }
-
-        private static PlatformFamily MapPlatformFamily(string systemKey)
-        {
-            return systemKey switch
-            {
-                "nintendo---game-boy" => PlatformFamily.NintendoGB,
-                "nintendo---game-boy-color" => PlatformFamily.NintendoGBC,
-                "nintendo---game-boy-advance" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance-multiboot" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance--multiboot" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance-e-reader" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance--e-reader" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance-play-yan" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance--play-yan" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance-video" => PlatformFamily.NintendoGBA,
-                "nintendo---game-boy-advance--video" => PlatformFamily.NintendoGBA,
-                "nintendo---nintendo-ds" => PlatformFamily.NintendoDS,
-                "nintendo---nintendo-3ds" => PlatformFamily.Nintendo3DS,
-                "nintendo---nintendo-3ds-digital" => PlatformFamily.Nintendo3DS,
-                "nintendo---nintendo-3ds--digital" => PlatformFamily.Nintendo3DS,
-                "nintendo---new-nintendo-3ds" => PlatformFamily.Nintendo3DS,
-                "nintendo---new-nintendo-3ds-digital" => PlatformFamily.Nintendo3DS,
-                "nintendo---new-nintendo-3ds--digital" => PlatformFamily.Nintendo3DS,
-                "nintendo---nintendo-ds-download-play" => PlatformFamily.NintendoDS,
-                "nintendo---nintendo-ds--download-play" => PlatformFamily.NintendoDS,
-                "nintendo---nintendo-ds-dsvision-sd-cards" => PlatformFamily.NintendoDS,
-                "nintendo---nintendo-ds--dsvision-sd-cards" => PlatformFamily.NintendoDS,
-                _ => PlatformFamily.Nintendo
             };
         }
     }
