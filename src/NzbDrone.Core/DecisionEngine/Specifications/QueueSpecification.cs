@@ -45,7 +45,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             foreach (var queueItem in matchingGames)
             {
                 var remoteGame = queueItem.RemoteGame;
-                var qualityProfile = subject.Game.QualityProfile;
+                var qualityProfile = subject.EffectiveQualityProfile;
 
                 // To avoid a race make sure it's not FailedPending (failed awaiting removal/search).
                 // Failed items (already searching for a replacement) won't be part of the queue since

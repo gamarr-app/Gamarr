@@ -64,6 +64,63 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
+        public void should_use_component_quality_profile_for_matched_dlc_release()
+        {
+            GivenSpecifications(_pass1);
+
+            _reports[0].Title = "Hades.The.Blood.Price.DLC-FAKE";
+            _remoteEpisode.Game = new Game
+            {
+                Id = 5,
+                QualityProfile = new NzbDrone.Core.Profiles.Qualities.QualityProfile { Id = 1, Name = "Game profile", FormatItems = new List<NzbDrone.Core.Profiles.ProfileFormatItem>() }
+            };
+            _remoteEpisode.ParsedGameInfo = new ParsedGameInfo
+            {
+                ContentType = ReleaseContentType.DlcOnly,
+                GameTitles = new List<string> { "Hades The Blood Price" }
+            };
+
+            Mocker.GetMock<NzbDrone.Core.Games.Components.IGameComponentService>()
+                  .Setup(s => s.GetByGame(5))
+                  .Returns(new List<NzbDrone.Core.Games.Components.GameComponent>
+                  {
+                      new NzbDrone.Core.Games.Components.GameComponent
+                      {
+                          ComponentType = NzbDrone.Core.Games.Components.GameComponentType.Dlc,
+                          Title = "The Blood Price",
+                          QualityProfileId = 7
+                      }
+                  });
+
+            Mocker.GetMock<NzbDrone.Core.Profiles.Qualities.IQualityProfileService>()
+                  .Setup(s => s.Get(7))
+                  .Returns(new NzbDrone.Core.Profiles.Qualities.QualityProfile { Id = 7, Name = "DLC profile", FormatItems = new List<NzbDrone.Core.Profiles.ProfileFormatItem>() });
+
+            var decisions = Subject.GetRssDecision(_reports);
+
+            decisions.First().RemoteGame.EffectiveQualityProfile.Id.Should().Be(7);
+        }
+
+        [Test]
+        public void should_keep_game_profile_for_non_dlc_releases()
+        {
+            GivenSpecifications(_pass1);
+
+            _remoteEpisode.Game = new Game
+            {
+                Id = 5,
+                QualityProfile = new NzbDrone.Core.Profiles.Qualities.QualityProfile { Id = 1, Name = "Game profile", FormatItems = new List<NzbDrone.Core.Profiles.ProfileFormatItem>() }
+            };
+
+            var decisions = Subject.GetRssDecision(_reports);
+
+            decisions.First().RemoteGame.EffectiveQualityProfile.Id.Should().Be(1);
+
+            Mocker.GetMock<NzbDrone.Core.Games.Components.IGameComponentService>()
+                  .Verify(s => s.GetByGame(It.IsAny<int>()), Times.Never());
+        }
+
+        [Test]
         public void should_call_all_specifications()
         {
             GivenSpecifications(_pass1, _pass2, _pass3, _fail1, _fail2, _fail3);

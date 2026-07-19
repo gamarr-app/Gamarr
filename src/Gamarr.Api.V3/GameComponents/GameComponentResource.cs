@@ -15,6 +15,9 @@ namespace Gamarr.Api.V3.GameComponents
         public bool Monitored { get; set; }
         public int ExternalId { get; set; }
 
+        // 0 inherits the game's quality profile.
+        public int QualityProfileId { get; set; }
+
         // Derived: whether any imported file belongs to this slot. A monitored
         // component without a file is "missing".
         public bool HasFile { get; set; }
@@ -36,6 +39,7 @@ namespace Gamarr.Api.V3.GameComponents
                 Title = model.Title,
                 Monitored = model.Monitored,
                 ExternalId = model.ExternalId,
+                QualityProfileId = model.QualityProfileId,
                 HasFile = files.Any(),
                 SizeOnDisk = files.Sum(f => f.Size)
             };

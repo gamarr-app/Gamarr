@@ -15,6 +15,7 @@ using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.RootFolders;
 
@@ -136,6 +137,9 @@ namespace NzbDrone.Core.MediaFiles
 
             if (folderHasContent)
             {
+                NormalizeNestedUpdateFolders(game);
+                AdoptUntrackedComponentFolders(game, existingGameFiles);
+
                 // Folder has content - treat the entire folder as a single GameFile
                 var folderSize = _diskProvider.GetFolderSize(game.Path);
 
@@ -225,6 +229,89 @@ namespace NzbDrone.Core.MediaFiles
 
             RemoveEmptyGameFolder(game.Path);
             CompletedScanning(game, possibleExtraFiles);
+        }
+
+        // Some releases ship the base game with separate update packages
+        // inside ("game.iso" + "update_1.7.1/update.iso"). After such a
+        // release imports as the base, those folders sit at the game root;
+        // move them into the canonical Updates/<version> layout so they become
+        // their own components (#149). Only VERSIONED update-style names are
+        // touched — a bare "patch"/"DLC" folder is often integral game content
+        // and must not be relocated.
+        private static readonly Regex NestedUpdateFolderRegex = new (@"^(update|patch|hotfix)e?s?(?=[\s._-]|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private void NormalizeNestedUpdateFolders(Game game)
+        {
+            foreach (var dir in _diskProvider.GetDirectories(game.Path))
+            {
+                var name = Path.GetFileName(dir);
+
+                if (!NestedUpdateFolderRegex.IsMatch(name))
+                {
+                    continue;
+                }
+
+                // Pad: the version regexes require a leading delimiter, which a bare
+                // folder name like "update_1.7.1" lacks.
+                var version = QualityParser.ParseGameVersion($" {name} ");
+
+                if (version?.HasValue != true)
+                {
+                    continue;
+                }
+
+                var destination = Path.Combine(game.Path, "Updates", version.ToString().Replace(' ', '-'));
+
+                if (_diskProvider.FolderExists(destination))
+                {
+                    continue;
+                }
+
+                _diskProvider.CreateFolder(Path.Combine(game.Path, "Updates"));
+                _diskProvider.MoveFolder(dir, destination);
+                _logger.Info("Moved nested update package '{0}' to '{1}'", name, destination);
+            }
+        }
+
+        // Canonical component subfolders (Updates/<version>, DLC/<name>) that
+        // exist on disk without a GameFile record — from the normalization
+        // above or dropped in manually — get adopted as tracked units.
+        private void AdoptUntrackedComponentFolders(Game game, List<GameFile> existingGameFiles)
+        {
+            foreach (var container in new[] { "Updates", "DLC" })
+            {
+                var containerPath = Path.Combine(game.Path, container);
+
+                if (!_diskProvider.FolderExists(containerPath))
+                {
+                    continue;
+                }
+
+                foreach (var dir in _diskProvider.GetDirectories(containerPath))
+                {
+                    var relativePath = Path.Combine(container, Path.GetFileName(dir));
+
+                    if (existingGameFiles.Any(f => f.RelativePath.IsNotNullOrWhiteSpace() && f.RelativePath.PathEquals(relativePath)))
+                    {
+                        continue;
+                    }
+
+                    var adopted = new GameFile
+                    {
+                        GameId = game.Id,
+                        RelativePath = relativePath,
+                        Size = _diskProvider.GetFolderSize(dir),
+                        DateAdded = DateTime.UtcNow,
+                        Quality = new QualityModel { Quality = Quality.Unknown },
+                        Languages = new List<Language> { Language.Unknown },
+                        GameVersion = container == "Updates" ? QualityParser.ParseGameVersion($" {Path.GetFileName(dir)} ") : null
+                    };
+
+                    _logger.Info("Adopting untracked component folder as {0}", relativePath);
+                    _mediaFileService.Add(adopted);
+                    existingGameFiles.Add(adopted);
+                }
+            }
         }
 
         private void CleanMediaFiles(Game game, List<string> mediaFileList)
