@@ -156,6 +156,12 @@ namespace NzbDrone.Core.Test.RomCatalog
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Color");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo DS Download Play");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo DS DSvision SD Cards" && x.SourceUrl == "datomatic://system/319");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Multiboot" && x.SourceUrl == "datomatic://system/137");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance e-Reader" && x.SourceUrl == "datomatic://system/41");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Play-Yan" && x.SourceUrl == "datomatic://system/148");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Video" && x.SourceUrl == "datomatic://system/297");
             sources.Should().ContainSingle(x => x.SourceUrl == existingSource.SourceUrl);
         }
 

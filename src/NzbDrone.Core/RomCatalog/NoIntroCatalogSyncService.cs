@@ -56,7 +56,17 @@ namespace NzbDrone.Core.RomCatalog
 
             foreach (var source in sources)
             {
-                SyncSource(source);
+                try
+                {
+                    SyncSource(source);
+                }
+                catch
+                {
+                    if (catalogSourceId.HasValue)
+                    {
+                        throw;
+                    }
+                }
             }
         }
 
@@ -136,6 +146,12 @@ namespace NzbDrone.Core.RomCatalog
             AddDefaultSource(sources, "No-Intro Nintendo Game Boy Color", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy%20Color.dat");
             AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Game%20Boy%20Advance.dat");
             AddDefaultSource(sources, "No-Intro Nintendo DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS.dat");
+            AddDefaultSource(sources, "No-Intro Nintendo DS Download Play", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS%20%28Download%20Play%29.dat");
+            AddDefaultSource(sources, "No-Intro Nintendo DS DSvision SD Cards", "datomatic://system/319");
+            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Multiboot", "datomatic://system/137");
+            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance e-Reader", "datomatic://system/41");
+            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Play-Yan", "datomatic://system/148");
+            AddDefaultSource(sources, "No-Intro Nintendo Game Boy Advance Video", "datomatic://system/297");
         }
 
         private void AddDefaultSource(List<NoIntroCatalogSource> sources, string name, string sourceUrl)
@@ -256,7 +272,19 @@ namespace NzbDrone.Core.RomCatalog
                 "nintendo---game-boy" => 46,
                 "nintendo---game-boy-color" => 47,
                 "nintendo---game-boy-advance" => 23,
+                "nintendo---game-boy-advance-multiboot" => 137,
+                "nintendo---game-boy-advance--multiboot" => 137,
+                "nintendo---game-boy-advance-e-reader" => 41,
+                "nintendo---game-boy-advance--e-reader" => 41,
+                "nintendo---game-boy-advance-play-yan" => 148,
+                "nintendo---game-boy-advance--play-yan" => 148,
+                "nintendo---game-boy-advance-video" => 297,
+                "nintendo---game-boy-advance--video" => 297,
                 "nintendo---nintendo-ds" => 28,
+                "nintendo---nintendo-ds-download-play" => 65,
+                "nintendo---nintendo-ds--download-play" => 65,
+                "nintendo---nintendo-ds-dsvision-sd-cards" => 319,
+                "nintendo---nintendo-ds--dsvision-sd-cards" => 319,
                 _ => null
             };
         }
@@ -278,7 +306,19 @@ namespace NzbDrone.Core.RomCatalog
                 "nintendo---game-boy" => PlatformFamily.NintendoGB,
                 "nintendo---game-boy-color" => PlatformFamily.NintendoGBC,
                 "nintendo---game-boy-advance" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance-multiboot" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance--multiboot" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance-e-reader" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance--e-reader" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance-play-yan" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance--play-yan" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance-video" => PlatformFamily.NintendoGBA,
+                "nintendo---game-boy-advance--video" => PlatformFamily.NintendoGBA,
                 "nintendo---nintendo-ds" => PlatformFamily.NintendoDS,
+                "nintendo---nintendo-ds-download-play" => PlatformFamily.NintendoDS,
+                "nintendo---nintendo-ds--download-play" => PlatformFamily.NintendoDS,
+                "nintendo---nintendo-ds-dsvision-sd-cards" => PlatformFamily.NintendoDS,
+                "nintendo---nintendo-ds--dsvision-sd-cards" => PlatformFamily.NintendoDS,
                 _ => PlatformFamily.Nintendo
             };
         }
