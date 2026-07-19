@@ -87,7 +87,7 @@ namespace Gamarr.Api.V3.GameComponents
 
             var sourceById = context.Sources.ToDictionary(x => x.Id);
             var exactMatches = GetExactHashMatches(files, context);
-            var entries = exactMatches.Count > 0 ? exactMatches.Select(x => x.Entry) : context.Entries.Where(entry => IsComponentCatalogMatch(component.Title, entry));
+            var entries = exactMatches.Count > 0 ? exactMatches.Select(x => x.Entry) : context.Entries.Where(entry => IsComponentCatalogMatch(component, entry));
 
             return entries
                 .OrderBy(entry => entry.SystemKey)
@@ -129,19 +129,33 @@ namespace Gamarr.Api.V3.GameComponents
                 .ToList();
         }
 
-        private static bool IsComponentCatalogMatch(string componentTitle, NoIntroCatalogEntry entry)
+        private static bool IsComponentCatalogMatch(GameComponent component, NoIntroCatalogEntry entry)
         {
             if (entry == null || string.IsNullOrWhiteSpace(entry.CanonicalName))
             {
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(entry.ParentCanonicalName) && entry.ParentCanonicalName == componentTitle)
+            if (IsNoIntroComponent(component))
+            {
+                return component.Key?.EndsWith($":{NzbDrone.Core.Parser.Parser.ToUrlSlug(entry.CanonicalName, true)}", global::System.StringComparison.Ordinal) == true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.ParentCanonicalName) && entry.ParentCanonicalName == component.Title)
             {
                 return true;
             }
 
-            return entry.CanonicalName == componentTitle || entry.CanonicalName.StartsWith($"{componentTitle} (", global::System.StringComparison.Ordinal);
+            return entry.CanonicalName == component.Title || entry.CanonicalName.StartsWith($"{component.Title} (", global::System.StringComparison.Ordinal);
+        }
+
+        private static bool IsNoIntroComponent(GameComponent component)
+        {
+            return component.ComponentType is GameComponentType.NoIntroRetailRom or
+                GameComponentType.NoIntroMultiboot or
+                GameComponentType.NoIntroVideo or
+                GameComponentType.NoIntroBios or
+                GameComponentType.NoIntroRomhackOrUnverified;
         }
     }
 }
