@@ -19,7 +19,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
         {
-            var wantedLanguage = subject.Game.QualityProfile.Language;
+            var wantedLanguage = subject.EffectiveQualityProfile.Language;
 
             if (wantedLanguage == Language.Any)
             {

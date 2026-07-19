@@ -210,6 +210,43 @@ function MediaManagement() {
                     {...settings.deleteEmptyFolders}
                   />
                 </FormGroup>
+
+                <FormGroup
+                  advancedSettings={showAdvancedSettings}
+                  isAdvanced={true}
+                  size={sizes.MEDIUM}
+                >
+                  <FormLabel>{translate('UpdateRetentionCount')}</FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.NUMBER}
+                    name="updateRetentionCount"
+                    min={0}
+                    helpText={translate('UpdateRetentionCountHelpText')}
+                    onChange={handleInputChange}
+                    {...settings.updateRetentionCount}
+                  />
+                </FormGroup>
+
+                <FormGroup
+                  advancedSettings={showAdvancedSettings}
+                  isAdvanced={true}
+                  size={sizes.MEDIUM}
+                >
+                  <FormLabel>
+                    {translate('UpdateRetentionKeepOnePerMajor')}
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.CHECK}
+                    name="updateRetentionKeepOnePerMajor"
+                    helpText={translate(
+                      'UpdateRetentionKeepOnePerMajorHelpText'
+                    )}
+                    onChange={handleInputChange}
+                    {...settings.updateRetentionKeepOnePerMajor}
+                  />
+                </FormGroup>
               </FieldSet>
             ) : null}
 

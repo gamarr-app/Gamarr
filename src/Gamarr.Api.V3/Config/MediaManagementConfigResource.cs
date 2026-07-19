@@ -14,6 +14,8 @@ namespace Gamarr.Api.V3.Config
         public ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
         public bool CreateEmptyGameFolders { get; set; }
         public bool DeleteEmptyFolders { get; set; }
+        public int UpdateRetentionCount { get; set; }
+        public bool UpdateRetentionKeepOnePerMajor { get; set; }
         public FileDateType FileDate { get; set; }
         public RescanAfterRefreshType RescanAfterRefresh { get; set; }
         public bool AutoRenameFolders { get; set; }
@@ -53,6 +55,8 @@ namespace Gamarr.Api.V3.Config
                 DownloadPropersAndRepacks = model.DownloadPropersAndRepacks,
                 CreateEmptyGameFolders = model.CreateEmptyGameFolders,
                 DeleteEmptyFolders = model.DeleteEmptyFolders,
+                UpdateRetentionCount = model.UpdateRetentionCount,
+                UpdateRetentionKeepOnePerMajor = model.UpdateRetentionKeepOnePerMajor,
                 FileDate = model.FileDate,
                 RescanAfterRefresh = model.RescanAfterRefresh,
                 AutoRenameFolders = model.AutoRenameFolders,

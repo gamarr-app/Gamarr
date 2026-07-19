@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import AppState from 'App/State/AppState';
 import { GAME_COMPONENT_SEARCH } from 'Commands/commandNames';
+import EnhancedSelectInput from 'Components/Form/Select/EnhancedSelectInput';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
@@ -25,6 +27,7 @@ interface GameComponent {
   title: string;
   monitored: boolean;
   externalId: number;
+  qualityProfileId: number;
   hasFile: boolean;
   sizeOnDisk: number;
 }
@@ -34,6 +37,11 @@ const columns = [
   { name: 'title', label: () => translate('Title'), isVisible: true },
   { name: 'size', label: () => translate('Size'), isVisible: true },
   { name: 'status', label: () => translate('Status'), isVisible: true },
+  {
+    name: 'qualityProfileId',
+    label: () => translate('QualityProfile'),
+    isVisible: true,
+  },
   { name: 'monitored', label: '', isVisible: true },
   { name: 'actions', label: '', isVisible: true },
 ];
@@ -84,13 +92,17 @@ function getStatusIcon(component: GameComponent) {
 interface GameComponentRowProps {
   component: GameComponent;
   isSaving: boolean;
+  profileValues: { key: number; value: string }[];
   onMonitorPress: (componentId: number, monitored: boolean) => void;
+  onProfileChange: (componentId: number, qualityProfileId: number) => void;
 }
 
 function GameComponentRow({
   component,
   isSaving,
+  profileValues,
   onMonitorPress,
+  onProfileChange,
 }: GameComponentRowProps) {
   const dispatch = useDispatch();
 
@@ -121,6 +133,13 @@ function GameComponentRow({
     );
   }, [dispatch, component.gameId, component.id]);
 
+  const handleProfileChange = useCallback(
+    ({ value }: { value: number }) => {
+      onProfileChange(component.id, value);
+    },
+    [component.id, onProfileChange]
+  );
+
   return (
     <TableRow>
       <TableRowCell>
@@ -136,6 +155,19 @@ function GameComponentRow({
       </TableRowCell>
 
       <TableRowCell>{getStatusIcon(component)}</TableRowCell>
+
+      <TableRowCell>
+        {component.componentType === 'dlc' ? (
+          <EnhancedSelectInput
+            name={`componentProfile-${component.id}`}
+            value={component.qualityProfileId}
+            values={profileValues}
+            onChange={handleProfileChange}
+          />
+        ) : (
+          '-'
+        )}
+      </TableRowCell>
 
       <TableRowCell>
         <MonitorToggleButton
@@ -161,6 +193,16 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
   const [components, setComponents] = useState<GameComponent[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
+
+  const qualityProfiles = useSelector(
+    (state: AppState) => state.settings.qualityProfiles.items
+  );
+
+  const profileValues = useMemo(() => {
+    return [{ key: 0, value: translate('InheritFromGame') }].concat(
+      qualityProfiles.map((p) => ({ key: p.id, value: p.name }))
+    );
+  }, [qualityProfiles]);
 
   useEffect(() => {
     let aborted = false;
@@ -188,21 +230,36 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
     };
   }, [gameId]);
 
-  const handleMonitorPress = useCallback(
-    (componentId: number, monitored: boolean) => {
+  const componentsRef = useRef(components);
+  componentsRef.current = components;
+
+  // The PUT replaces both fields, so always send the component's full
+  // current state — a partial body would reset the omitted field.
+  const saveComponent = useCallback(
+    (componentId: number, changes: Partial<GameComponent>) => {
+      const current = componentsRef.current.find((c) => c.id === componentId);
+
+      if (!current) {
+        return;
+      }
+
       setSavingIds((ids) => new Set(ids).add(componentId));
 
       const { request } = createAjaxRequest({
         url: `/gamecomponent/${componentId}`,
         method: 'PUT',
         contentType: 'application/json',
-        data: JSON.stringify({ monitored }),
+        data: JSON.stringify({
+          monitored: current.monitored,
+          qualityProfileId: current.qualityProfileId,
+          ...changes,
+        }),
       });
 
       request
         .then((updated: GameComponent) => {
-          setComponents((all) =>
-            all.map((c) => (c.id === updated.id ? updated : c))
+          setComponents((latest) =>
+            latest.map((c) => (c.id === updated.id ? updated : c))
           );
           return updated;
         })
@@ -215,6 +272,20 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
         });
     },
     []
+  );
+
+  const handleMonitorPress = useCallback(
+    (componentId: number, monitored: boolean) => {
+      saveComponent(componentId, { monitored });
+    },
+    [saveComponent]
+  );
+
+  const handleProfileChange = useCallback(
+    (componentId: number, qualityProfileId: number) => {
+      saveComponent(componentId, { qualityProfileId });
+    },
+    [saveComponent]
   );
 
   if (isFetching) {
@@ -233,7 +304,9 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
             key={component.id}
             component={component}
             isSaving={savingIds.has(component.id)}
+            profileValues={profileValues}
             onMonitorPress={handleMonitorPress}
+            onProfileChange={handleProfileChange}
           />
         ))}
       </TableBody>
