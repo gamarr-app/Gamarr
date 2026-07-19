@@ -3,7 +3,7 @@ using NzbDrone.Core.Datastore.Migration.Framework;
 
 namespace NzbDrone.Core.Datastore.Migration
 {
-    [Migration(9)]
+    [Migration(10)]
     public class add_parent_canonical_name_to_nointro_catalog_entry : NzbDroneMigrationBase
     {
         protected override void MainDbUpgrade()

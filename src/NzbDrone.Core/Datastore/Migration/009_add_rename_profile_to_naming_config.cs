@@ -4,7 +4,7 @@ using NzbDrone.Core.Organizer;
 
 namespace NzbDrone.Core.Datastore.Migration
 {
-    [Migration(8)]
+    [Migration(9)]
     public class add_rename_profile_to_naming_config : NzbDroneMigrationBase
     {
         protected override void MainDbUpgrade()
