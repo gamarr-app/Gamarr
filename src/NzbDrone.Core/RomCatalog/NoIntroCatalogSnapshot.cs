@@ -12,7 +12,10 @@ namespace NzbDrone.Core.RomCatalog
     public class NoIntroCatalogSnapshotEntry
     {
         public string CanonicalName { get; set; }
+        public string ParentCanonicalName { get; set; }
         public string CanonicalFileName { get; set; }
+        public string ReleaseNumber { get; set; }
+        public string NumberedCanonicalFileName { get; set; }
         public List<NoIntroCatalogSnapshotHash> Hashes { get; set; } = new List<NoIntroCatalogSnapshotHash>();
     }
 

@@ -25,7 +25,24 @@ namespace Gamarr.Api.V3.RomCatalog
         public string CanonicalName { get; set; }
         public string ParentCanonicalName { get; set; }
         public string CanonicalFileName { get; set; }
+        public string ReleaseNumber { get; set; }
+        public string NumberedCanonicalFileName { get; set; }
         public PlatformFamily PlatformFamily { get; set; }
+    }
+
+    public class NoIntroCatalogStatusResource
+    {
+        public List<NoIntroCatalogSourceStatusResource> Sources { get; set; } = new List<NoIntroCatalogSourceStatusResource>();
+    }
+
+    public class NoIntroCatalogSourceStatusResource : RestResource
+    {
+        public string Name { get; set; }
+        public string CatalogVersion { get; set; }
+        public DateTime? LastSuccessfulSync { get; set; }
+        public DateTime? LastAttemptedSync { get; set; }
+        public string LastSyncError { get; set; }
+        public int EntryCount { get; set; }
     }
 
     public class NoIntroCatalogPlanResource
@@ -110,6 +127,8 @@ namespace Gamarr.Api.V3.RomCatalog
                 CanonicalName = model.CanonicalName,
                 ParentCanonicalName = model.ParentCanonicalName,
                 CanonicalFileName = model.CanonicalFileName,
+                ReleaseNumber = model.ReleaseNumber,
+                NumberedCanonicalFileName = model.NumberedCanonicalFileName,
                 PlatformFamily = model.PlatformFamily
             };
         }
