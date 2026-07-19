@@ -1014,7 +1014,7 @@
   "InstanceNameHelpText": "Instance name in tab and for Syslog app name",
   "InteractiveImport": "Interactive Import",
   "InteractiveImportLoadError": "Unable to load manual import items",
-  "InteractiveImportNoFilesFound": "No video files were found in the selected folder",
+  "InteractiveImportNoFilesFound": "No game files found",
   "InteractiveImportNoGame": "Game must be chosen for each selected file",
   "InteractiveImportNoImportMode": "An import mode must be selected",
   "InteractiveImportNoLanguage": "Language must be chosen for each selected file",
