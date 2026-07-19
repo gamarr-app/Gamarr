@@ -86,5 +86,40 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.WantedPlatform);
         }
+
+        [Test]
+        public void should_accept_broad_nintendo_release_for_specific_nintendo_entry()
+        {
+            _remoteGame.Game.Platform = PlatformFamily.NintendoDS;
+            _remoteGame.ParsedGameInfo.Platform = PlatformFamily.Nintendo;
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_accept_specific_nintendo_release_for_broad_nintendo_preference()
+        {
+            _remoteGame.Game.Platform = PlatformFamily.Unknown;
+            _remoteGame.ParsedGameInfo.Platform = PlatformFamily.NintendoGBA;
+            _remoteGame.Game.QualityProfile.PreferredPlatforms = new List<PlatformFamily>
+            {
+                PlatformFamily.Nintendo
+            };
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_accept_game_boy_color_release_for_broad_nintendo_preference()
+        {
+            _remoteGame.Game.Platform = PlatformFamily.Unknown;
+            _remoteGame.ParsedGameInfo.Platform = PlatformFamily.NintendoGBC;
+            _remoteGame.Game.QualityProfile.PreferredPlatforms = new List<PlatformFamily>
+            {
+                PlatformFamily.Nintendo
+            };
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
     }
 }
