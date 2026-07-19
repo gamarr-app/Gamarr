@@ -7,6 +7,11 @@ namespace NzbDrone.Core.RomCatalog
     {
         public static string GetExpectedFileName(NoIntroCatalogEntry catalogEntry, string actualFileName, RenameProfile renameProfile)
         {
+            if (renameProfile == RenameProfile.NoIntroPreserveById && !string.IsNullOrWhiteSpace(catalogEntry.NumberedCanonicalFileName))
+            {
+                return catalogEntry.NumberedCanonicalFileName;
+            }
+
             if (renameProfile == RenameProfile.NoIntroPreserveById && IsByIdFileName(actualFileName, catalogEntry.CanonicalFileName))
             {
                 return actualFileName;
@@ -22,8 +27,14 @@ namespace NzbDrone.Core.RomCatalog
                 return true;
             }
 
-            return renameProfile == RenameProfile.NoIntroPreserveById &&
-                   IsByIdFileName(actualFileName, catalogEntry.CanonicalFileName);
+            if (renameProfile != RenameProfile.NoIntroPreserveById)
+            {
+                return false;
+            }
+
+            return !string.IsNullOrWhiteSpace(catalogEntry.NumberedCanonicalFileName)
+                ? actualFileName.Equals(catalogEntry.NumberedCanonicalFileName, StringComparison.Ordinal)
+                : IsByIdFileName(actualFileName, catalogEntry.CanonicalFileName);
         }
 
         private static bool IsByIdFileName(string actualFileName, string canonicalFileName)
