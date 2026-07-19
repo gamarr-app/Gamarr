@@ -67,6 +67,12 @@ namespace NzbDrone.Core.RomCatalog
         {
             var canonicalName = entry.CanonicalName ?? string.Empty;
 
+            if (IsDownloadPlaySource(entry.SystemKey))
+            {
+                AddDownloadPlaySourceEntry(plan, entry, canonicalName);
+                return;
+            }
+
             if (IsDownloadPlay(canonicalName))
             {
                 AddDownloadPlay(plan, entry, canonicalName);
@@ -84,7 +90,7 @@ namespace NzbDrone.Core.RomCatalog
                 return;
             }
 
-            var region = TryParseRegion(canonicalName);
+            var region = TryParseRegionRelease(canonicalName);
 
             if (region == null)
             {
@@ -147,29 +153,83 @@ namespace NzbDrone.Core.RomCatalog
             return game;
         }
 
-        private static RegionRelease TryParseRegion(string canonicalName)
+        private static RegionRelease TryParseRegionRelease(string canonicalName)
         {
-            var closeIndex = canonicalName.LastIndexOf(')');
-            var openIndex = canonicalName.LastIndexOf('(');
+            var tags = ParseTrailingTags(canonicalName);
 
-            if (openIndex < 1 || closeIndex != canonicalName.Length - 1 || openIndex >= closeIndex)
+            if (tags.Count == 0)
             {
                 return null;
             }
 
-            var label = canonicalName.Substring(openIndex + 1, closeIndex - openIndex - 1);
-            var title = canonicalName.Substring(0, openIndex).TrimEnd();
+            var title = canonicalName.Substring(0, tags[0].OpenIndex).TrimEnd();
 
-            if (string.IsNullOrWhiteSpace(label) || string.IsNullOrWhiteSpace(title))
+            if (string.IsNullOrWhiteSpace(title))
             {
                 return null;
             }
 
             return new RegionRelease
             {
-                GameTitle = title,
-                SlotLabel = label
+                GameTitle = NormalizeGameTitle(title, tags),
+                SlotLabel = BuildSlotLabel(tags)
             };
+        }
+
+        private static string NormalizeGameTitle(string title, List<ReleaseTag> tags)
+        {
+            if (tags.Any(tag => Contains(tag.Label, "Kiosk")) && title.EndsWith(" Demo", StringComparison.Ordinal))
+            {
+                return title.Substring(0, title.Length - " Demo".Length);
+            }
+
+            return title;
+        }
+
+        private static List<ReleaseTag> ParseTrailingTags(string canonicalName)
+        {
+            var tags = new List<ReleaseTag>();
+            var cursor = canonicalName.Length;
+
+            while (cursor > 0 && canonicalName[cursor - 1] == ')')
+            {
+                var openIndex = canonicalName.LastIndexOf('(', cursor - 1);
+
+                if (openIndex < 1 || openIndex >= cursor - 1)
+                {
+                    break;
+                }
+
+                var label = canonicalName.Substring(openIndex + 1, cursor - openIndex - 2);
+
+                if (string.IsNullOrWhiteSpace(label))
+                {
+                    break;
+                }
+
+                tags.Insert(0, new ReleaseTag
+                {
+                    OpenIndex = openIndex,
+                    Label = label
+                });
+
+                cursor = openIndex;
+
+                while (cursor > 0 && canonicalName[cursor - 1] == ' ')
+                {
+                    cursor--;
+                }
+            }
+
+            return tags;
+        }
+
+        private static string BuildSlotLabel(List<ReleaseTag> tags)
+        {
+            var first = tags[0].Label;
+            var rest = tags.Skip(1).Select(tag => $"({tag.Label})");
+
+            return string.Join(" ", new[] { first }.Concat(rest));
         }
 
         private static bool IsDownloadPlay(string canonicalName)
@@ -177,8 +237,41 @@ namespace NzbDrone.Core.RomCatalog
             return Contains(canonicalName, "Download Play");
         }
 
+        private static bool IsDownloadPlaySource(string systemKey)
+        {
+            return Contains(systemKey ?? string.Empty, "download-play");
+        }
+
+        private static void AddDownloadPlaySourceEntry(NoIntroCatalogPlan plan, NoIntroCatalogEntry entry, string canonicalName)
+        {
+            var region = TryParseRegionRelease(canonicalName);
+
+            if (region == null)
+            {
+                plan.StandaloneGames.Add(new NoIntroCatalogStandalonePlan
+                {
+                    Title = canonicalName,
+                    ComponentType = NoIntroRomComponentType.Multiboot
+                });
+
+                return;
+            }
+
+            GetOrAddGame(plan, entry.SystemKey, region.GameTitle).RegionLanguageComponents.Add(new NoIntroCatalogComponentSlot
+            {
+                SlotLabel = region.SlotLabel,
+                CanonicalName = canonicalName,
+                ComponentType = NoIntroRomComponentType.Multiboot
+            });
+        }
+
         private static bool IsStandaloneProduct(string canonicalName)
         {
+            if (Contains(canonicalName, "(Kiosk)"))
+            {
+                return false;
+            }
+
             return Contains(canonicalName, "Game Boy Advance Video") ||
                    Contains(canonicalName, "Play-Yan") ||
                    Contains(canonicalName, "DSvision") ||
@@ -186,7 +279,6 @@ namespace NzbDrone.Core.RomCatalog
                    Contains(canonicalName, "(BIOS)") ||
                    Contains(canonicalName, " Demo") ||
                    Contains(canonicalName, " Prototype") ||
-                   Contains(canonicalName, "(Kiosk)") ||
                    Contains(canonicalName, "Not for Resale");
         }
 
@@ -239,6 +331,12 @@ namespace NzbDrone.Core.RomCatalog
         {
             public string GameTitle { get; set; }
             public string SlotLabel { get; set; }
+        }
+
+        private class ReleaseTag
+        {
+            public int OpenIndex { get; set; }
+            public string Label { get; set; }
         }
     }
 }
