@@ -3,6 +3,7 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.RomCatalog;
 using NzbDrone.Core.Test.Framework;
 
@@ -157,12 +158,37 @@ namespace NzbDrone.Core.Test.RomCatalog
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Color");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo DS Download Play");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo 3DS");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo 3DS Digital");
+            sources.Should().Contain(x => x.Name == "No-Intro New Nintendo 3DS");
+            sources.Should().Contain(x => x.Name == "No-Intro New Nintendo 3DS Digital");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo DS DSvision SD Cards" && x.SourceUrl == "datomatic://system/319");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Multiboot" && x.SourceUrl == "datomatic://system/137");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance e-Reader" && x.SourceUrl == "datomatic://system/41");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Play-Yan" && x.SourceUrl == "datomatic://system/148");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Video" && x.SourceUrl == "datomatic://system/297");
             sources.Should().ContainSingle(x => x.SourceUrl == existingSource.SourceUrl);
+        }
+
+        [Test]
+        public void sync_should_map_3ds_sources_to_nintendo_3ds_platform()
+        {
+            var source = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro Nintendo 3DS",
+                SourceUrl = "https://example.invalid/3ds.dat"
+            });
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.Fetch(source.SourceUrl))
+                .Returns("<datafile><header><name>Nintendo - Nintendo 3DS</name><version>2026.07</version></header><game name='Mario Kart 7 (USA) (En,Fr,Es)'><rom name='Mario Kart 7 (USA) (En,Fr,Es).3ds' crc='ED9D4190' sha1='858F85EF67DD996A9F8F56B84D1C2CC4EE369DDE' status='verified' /></game></datafile>");
+
+            _subject.Sync(source.Id);
+
+            var entry = _entryRepository.All().Should().ContainSingle().Subject;
+            entry.SystemKey.Should().Be("nintendo---nintendo-3ds");
+            entry.PlatformFamily.Should().Be(PlatformFamily.Nintendo3DS);
+            entry.CanonicalFileName.Should().Be("Mario Kart 7 (USA) (En,Fr,Es).3ds");
         }
 
         [Test]

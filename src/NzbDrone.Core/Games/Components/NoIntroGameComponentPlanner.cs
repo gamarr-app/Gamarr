@@ -127,6 +127,10 @@ namespace NzbDrone.Core.Games.Components
                 $"{canonicalName}.gbc",
                 $"{canonicalName}.gba",
                 $"{canonicalName}.nds",
+                $"{canonicalName}.3ds",
+                $"{canonicalName}.cia",
+                $"{canonicalName}.cci",
+                $"{canonicalName}.cxi",
                 $"{canonicalName}.zip"
             };
 
