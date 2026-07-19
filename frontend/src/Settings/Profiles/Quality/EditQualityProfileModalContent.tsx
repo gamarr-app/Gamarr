@@ -31,6 +31,14 @@ const platformOptions = [
   { key: 2, value: 'PlayStation', order: 4 },
   { key: 3, value: 'Xbox', order: 5 },
   { key: 4, value: 'Nintendo', order: 6 },
+  { key: 10, value: 'Nintendo Switch', order: 7 },
+  { key: 11, value: 'Nintendo Wii U', order: 8 },
+  { key: 12, value: 'Nintendo Wii', order: 9 },
+  { key: 13, value: 'Nintendo 3DS', order: 10 },
+  { key: 14, value: 'Nintendo DS', order: 11 },
+  { key: 15, value: 'Nintendo Game Boy Advance', order: 12 },
+  { key: 17, value: 'Nintendo Game Boy Color', order: 13 },
+  { key: 16, value: 'Nintendo Game Boy', order: 14 },
 ];
 
 interface PendingValue<T> {

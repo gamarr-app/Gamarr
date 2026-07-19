@@ -57,6 +57,14 @@ const platformOptions = [
   { key: 'playStation', value: 'PlayStation' },
   { key: 'xbox', value: 'Xbox' },
   { key: 'nintendo', value: 'Nintendo' },
+  { key: 'nintendoSwitch', value: 'Nintendo Switch' },
+  { key: 'nintendoWiiU', value: 'Nintendo Wii U' },
+  { key: 'nintendoWii', value: 'Nintendo Wii' },
+  { key: 'nintendo3DS', value: 'Nintendo 3DS' },
+  { key: 'nintendoDS', value: 'Nintendo DS' },
+  { key: 'nintendoGBA', value: 'Nintendo Game Boy Advance' },
+  { key: 'nintendoGBC', value: 'Nintendo Game Boy Color' },
+  { key: 'nintendoGB', value: 'Nintendo Game Boy' },
 ];
 
 function AddNewGameModalContent(props: AddNewGameModalContentProps) {
