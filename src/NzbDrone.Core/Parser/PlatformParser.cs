@@ -117,19 +117,19 @@ namespace NzbDrone.Core.Parser
             if (PlayStation3Regex.IsMatch(title))
             {
                 Logger.Trace("Detected PS3 platform in title");
-                return PlatformFamily.PlayStation;
+                return PlatformFamily.SonyPS3;
             }
 
             if (PSVitaRegex.IsMatch(title))
             {
                 Logger.Trace("Detected PS Vita platform in title");
-                return PlatformFamily.PlayStation;
+                return PlatformFamily.SonyPSVita;
             }
 
             if (PSPRegex.IsMatch(title))
             {
                 Logger.Trace("Detected PSP platform in title");
-                return PlatformFamily.PlayStation;
+                return PlatformFamily.SonyPSP;
             }
 
             // Check Xbox platforms (most specific first)

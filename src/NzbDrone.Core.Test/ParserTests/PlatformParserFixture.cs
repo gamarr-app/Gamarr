@@ -9,13 +9,13 @@ namespace NzbDrone.Core.Test.ParserTests
     [TestFixture]
     public class PlatformParserFixture : CoreTest
     {
-        [TestCase("Portal 2 (2011) [Ps3][EUR FREE][MULTi5]", PlatformFamily.PlayStation, "PS3")]
-        [TestCase("Game Title 2023 PS3 EUR ISO", PlatformFamily.PlayStation, "PS3")]
-        [TestCase("Game.Title.2023.PlayStation3.EUR.ISO", PlatformFamily.PlayStation, "PS3")]
+        [TestCase("Portal 2 (2011) [Ps3][EUR FREE][MULTi5]", PlatformFamily.SonyPS3, "PS3")]
+        [TestCase("Game Title 2023 PS3 EUR ISO", PlatformFamily.SonyPS3, "PS3")]
+        [TestCase("Game.Title.2023.PlayStation3.EUR.ISO", PlatformFamily.SonyPS3, "PS3")]
         [TestCase("Game Title (2023) [PS4] [USA]", PlatformFamily.PlayStation, "PS4")]
         [TestCase("Game.Title.2023.PS5.EUR.PKG", PlatformFamily.PlayStation, "PS5")]
-        [TestCase("Game Title 2023 PSVita USA VPK", PlatformFamily.PlayStation, "PS Vita")]
-        [TestCase("Game.Title.2023.PSP.EUR.ISO", PlatformFamily.PlayStation, "PSP")]
+        [TestCase("Game Title 2023 PSVita USA VPK", PlatformFamily.SonyPSVita, "PS Vita")]
+        [TestCase("Game.Title.2023.PSP.EUR.ISO", PlatformFamily.SonyPSP, "PSP")]
         public void should_parse_playstation_platform(string postTitle, PlatformFamily expectedFamily, string expectedString)
         {
             var result = PlatformParser.ParsePlatform(postTitle);
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Test.ParserTests
             var result = Parser.Parser.ParseGameTitle(postTitle, true);
 
             result.Should().NotBeNull();
-            result.Platform.Should().Be(PlatformFamily.PlayStation);
+            result.Platform.Should().Be(PlatformFamily.SonyPS3);
             result.PlatformString.Should().Be("PS3");
         }
     }
