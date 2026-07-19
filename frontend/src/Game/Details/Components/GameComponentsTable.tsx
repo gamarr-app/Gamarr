@@ -24,7 +24,15 @@ import GameInteractiveSearchModal from '../../Search/GameInteractiveSearchModal'
 interface GameComponent {
   id: number;
   gameId: number;
-  componentType: 'base' | 'update' | 'dlc';
+  componentType:
+    | 'base'
+    | 'update'
+    | 'dlc'
+    | 'noIntroRetailRom'
+    | 'noIntroMultiboot'
+    | 'noIntroVideo'
+    | 'noIntroBios'
+    | 'noIntroRomhackOrUnverified';
   key: string;
   title: string;
   monitored: boolean;
@@ -65,18 +73,46 @@ const columns = [
 
 const typeKinds: Record<
   GameComponent['componentType'],
-  'info' | 'success' | 'primary'
+  'info' | 'success' | 'primary' | 'warning' | 'danger'
 > = {
   base: 'info',
   update: 'success',
   dlc: 'primary',
+  noIntroRetailRom: 'info',
+  noIntroMultiboot: 'success',
+  noIntroVideo: 'primary',
+  noIntroBios: 'warning',
+  noIntroRomhackOrUnverified: 'danger',
+};
+
+const typeLabels: Record<GameComponent['componentType'], string> = {
+  base: 'BASE',
+  update: 'UPDATE',
+  dlc: 'DLC',
+  noIntroRetailRom: 'ROM',
+  noIntroMultiboot: 'MULTIBOOT',
+  noIntroVideo: 'VIDEO',
+  noIntroBios: 'BIOS',
+  noIntroRomhackOrUnverified: 'UNVERIFIED',
 };
 
 const noIntroSystemNames: Record<string, string> = {
   'nintendo---game-boy': 'Nintendo Game Boy',
   'nintendo---game-boy-color': 'Nintendo Game Boy Color',
   'nintendo---game-boy-advance': 'Nintendo Game Boy Advance',
+  'nintendo---game-boy-advance-multiboot': 'Nintendo GBA Multiboot',
+  'nintendo---game-boy-advance--multiboot': 'Nintendo GBA Multiboot',
+  'nintendo---game-boy-advance-e-reader': 'Nintendo GBA e-Reader',
+  'nintendo---game-boy-advance--e-reader': 'Nintendo GBA e-Reader',
+  'nintendo---game-boy-advance-play-yan': 'Nintendo GBA Play-Yan',
+  'nintendo---game-boy-advance--play-yan': 'Nintendo GBA Play-Yan',
+  'nintendo---game-boy-advance-video': 'Nintendo GBA Video',
+  'nintendo---game-boy-advance--video': 'Nintendo GBA Video',
   'nintendo---nintendo-ds': 'Nintendo DS',
+  'nintendo---nintendo-ds-download-play': 'Nintendo DS Download Play',
+  'nintendo---nintendo-ds--download-play': 'Nintendo DS Download Play',
+  'nintendo---nintendo-ds-dsvision-sd-cards': 'Nintendo DS DSvision',
+  'nintendo---nintendo-ds--dsvision-sd-cards': 'Nintendo DS DSvision',
 };
 
 interface GameComponentsTableProps {
@@ -219,7 +255,7 @@ function GameComponentRow({
     <TableRow>
       <TableRowCell>
         <Label kind={typeKinds[component.componentType]}>
-          {component.componentType.toUpperCase()}
+          {typeLabels[component.componentType]}
         </Label>
       </TableRowCell>
 
@@ -294,6 +330,18 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
       qualityProfiles.map((p) => ({ key: p.id, value: p.name }))
     );
   }, [qualityProfiles]);
+
+  const visibleComponents = useMemo(() => {
+    const hasNoIntroVariants = components.some((component) =>
+      component.componentType.startsWith('noIntro')
+    );
+
+    if (!hasNoIntroVariants) {
+      return components;
+    }
+
+    return components.filter((component) => component.componentType !== 'base');
+  }, [components]);
 
   useEffect(() => {
     let aborted = false;
@@ -383,14 +431,14 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
     return <LoadingIndicator />;
   }
 
-  if (!components.length) {
+  if (!visibleComponents.length) {
     return null;
   }
 
   return (
     <Table columns={columns}>
       <TableBody>
-        {components.map((component) => (
+        {visibleComponents.map((component) => (
           <GameComponentRow
             key={component.id}
             component={component}
