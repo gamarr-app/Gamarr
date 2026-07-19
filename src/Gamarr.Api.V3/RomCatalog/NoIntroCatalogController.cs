@@ -33,6 +33,32 @@ namespace Gamarr.Api.V3.RomCatalog
             return _sourceRepository.All().Select(x => x.ToResource()).ToList();
         }
 
+        [HttpGet("status")]
+        [Produces("application/json")]
+        public NoIntroCatalogStatusResource GetStatus()
+        {
+            var entryCounts = _entryRepository.All()
+                .GroupBy(x => x.CatalogSourceId)
+                .ToDictionary(x => x.Key, x => x.Count());
+
+            return new NoIntroCatalogStatusResource
+            {
+                Sources = _sourceRepository.All()
+                    .OrderBy(x => x.Name)
+                    .Select(source => new NoIntroCatalogSourceStatusResource
+                    {
+                        Id = source.Id,
+                        Name = source.Name,
+                        CatalogVersion = source.CatalogVersion,
+                        LastSuccessfulSync = source.LastSuccessfulSync,
+                        LastAttemptedSync = source.LastAttemptedSync,
+                        LastSyncError = source.LastSyncError,
+                        EntryCount = entryCounts.GetValueOrDefault(source.Id)
+                    })
+                    .ToList()
+            };
+        }
+
         [HttpGet("entry")]
         [Produces("application/json")]
         public List<NoIntroCatalogEntryResource> GetEntries([FromQuery] int catalogSourceId)
