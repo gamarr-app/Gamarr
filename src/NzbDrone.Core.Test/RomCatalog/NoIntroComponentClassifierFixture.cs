@@ -54,6 +54,44 @@ namespace NzbDrone.Core.Test.RomCatalog
         }
 
         [Test]
+        public void should_group_multi_parenthetical_region_language_releases_under_one_game()
+        {
+            var plan = _subject.BuildCatalogPlan(new[]
+            {
+                Entry("nintendo-ds", "Mario Kart DS (Europe) (En,Fr,De,Es,It)"),
+                Entry("nintendo-ds", "Mario Kart DS (USA, Australia) (En,Fr,De,Es,It)"),
+                Entry("nintendo-ds", "Mario Kart DS (Japan)"),
+                Entry("nintendo-ds", "Mario Kart DS (Korea)")
+            });
+
+            var game = plan.Games.Should().ContainSingle(x => x.SystemKey == "nintendo-ds" && x.GameTitle == "Mario Kart DS").Subject;
+
+            game.RegionLanguageComponents.Select(x => x.SlotLabel).Should().BeEquivalentTo(
+                "Europe (En,Fr,De,Es,It)",
+                "USA, Australia (En,Fr,De,Es,It)",
+                "Japan",
+                "Korea");
+        }
+
+        [Test]
+        public void should_keep_revision_tags_on_the_region_component_label()
+        {
+            var plan = _subject.BuildCatalogPlan(new[]
+            {
+                Entry("nintendo-gba", "Example Game (USA)"),
+                Entry("nintendo-gba", "Example Game (USA) (Rev 1)"),
+                Entry("nintendo-gba", "Example Game (USA) (Rev 2)")
+            });
+
+            var game = plan.Games.Should().ContainSingle(x => x.SystemKey == "nintendo-gba" && x.GameTitle == "Example Game").Subject;
+
+            game.RegionLanguageComponents.Select(x => x.SlotLabel).Should().BeEquivalentTo(
+                "USA",
+                "USA (Rev 1)",
+                "USA (Rev 2)");
+        }
+
+        [Test]
         public void should_build_DownloadPlayComponents_only_when_parent_mapping_is_explicit()
         {
             var plan = _subject.BuildCatalogPlan(new[]
@@ -66,6 +104,40 @@ namespace NzbDrone.Core.Test.RomCatalog
 
             game.RegionLanguageComponents.Should().ContainSingle(x => x.SlotLabel == "USA");
             game.DownloadPlayComponents.Should().ContainSingle(x => x.SlotLabel == "Download Play");
+            plan.StandaloneGames.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_build_download_play_source_entries_as_multiboot_game_components()
+        {
+            var plan = _subject.BuildCatalogPlan(new[]
+            {
+                Entry("nintendo---nintendo-ds--download-play", "Mario Kart DS (Europe) (Demo) (Download Station Vol. 1)"),
+                Entry("nintendo---nintendo-ds--download-play", "Mario Kart DS (USA) (Demo) (Nintendo Channel)")
+            });
+
+            var game = plan.Games.Should().ContainSingle(x => x.SystemKey == "nintendo---nintendo-ds--download-play" && x.GameTitle == "Mario Kart DS").Subject;
+
+            game.RegionLanguageComponents.Select(x => x.SlotLabel).Should().BeEquivalentTo(
+                "Europe (Demo) (Download Station Vol. 1)",
+                "USA (Demo) (Nintendo Channel)");
+            game.RegionLanguageComponents.Should().OnlyContain(x => x.ComponentType == NoIntroRomComponentType.Multiboot);
+            plan.StandaloneGames.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_build_kiosk_releases_as_game_variants()
+        {
+            var plan = _subject.BuildCatalogPlan(new[]
+            {
+                Entry("nintendo-ds", "New Super Mario Bros. Demo (Kiosk)"),
+                Entry("nintendo-ds", "Pokemon Distribution 2011 (USA) (Wi-Fi Kiosk) (Save Data)")
+            });
+
+            plan.Games.Should().ContainSingle(x => x.GameTitle == "New Super Mario Bros.")
+                .Subject.RegionLanguageComponents.Should().ContainSingle(x => x.SlotLabel == "Kiosk");
+            plan.Games.Should().ContainSingle(x => x.GameTitle == "Pokemon Distribution 2011")
+                .Subject.RegionLanguageComponents.Should().ContainSingle(x => x.SlotLabel == "USA (Wi-Fi Kiosk) (Save Data)");
             plan.StandaloneGames.Should().BeEmpty();
         }
 
@@ -132,7 +204,6 @@ namespace NzbDrone.Core.Test.RomCatalog
 
             plan.StandaloneGames.Select(x => x.Title).Should().BeEquivalentTo(
                 "Nintendo - Game Boy Advance (BIOS) (World)",
-                "New Super Mario Bros. Demo (Kiosk)",
                 "DSvision SD cards - Aquarium Tour (Japan)");
         }
 
