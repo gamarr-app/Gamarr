@@ -7,6 +7,7 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
+using NzbDrone.Core.RomCatalog;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.GameTests
@@ -55,6 +56,18 @@ namespace NzbDrone.Core.Test.GameTests
             return captured ?? new List<GameComponent>();
         }
 
+        private static NoIntroCatalogEntry Entry(string canonicalName, PlatformFamily platform, string numberedCanonicalFileName = null)
+        {
+            return new NoIntroCatalogEntry
+            {
+                SystemKey = platform == PlatformFamily.NintendoDS ? "nintendo---nintendo-ds" : "nintendo---game-boy-advance",
+                CanonicalName = canonicalName,
+                CanonicalFileName = $"{canonicalName}.nds",
+                NumberedCanonicalFileName = numberedCanonicalFileName,
+                PlatformFamily = platform
+            };
+        }
+
         [Test]
         public void should_create_base_and_metadata_dlc_components()
         {
@@ -84,6 +97,136 @@ namespace NzbDrone.Core.Test.GameTests
 
             inserted.Should().Contain(c => c.ComponentType == GameComponentType.Update && c.Key == "v1.5" && c.Monitored);
             inserted.Should().Contain(c => c.ComponentType == GameComponentType.Dlc && c.Key == "import:Some.Release.DLC-GRP" && c.Monitored);
+        }
+
+        [Test]
+        public void should_create_nointro_catalog_components_for_matching_game_title_and_platform()
+        {
+            _game.Platform = PlatformFamily.NintendoDS;
+            _game.GameMetadata.Value.Title = "Mario Kart DS";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.All())
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
+                      Entry("Mario Kart DS (USA, Australia) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
+                      Entry("Mario Kart DS (Japan)", PlatformFamily.NintendoDS),
+                      Entry("Pokemon Dash (USA)", PlatformFamily.NintendoDS),
+                      Entry("Mario Kart DS (USA)", PlatformFamily.NintendoGBA)
+                  });
+
+            var inserted = CapturedInserts();
+
+            inserted.Should().Contain(c => c.ComponentType == GameComponentType.Base && c.Key == "base");
+            inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Select(c => c.Title).Should().BeEquivalentTo(
+                "Europe (En,Fr,De,Es,It)",
+                "USA, Australia (En,Fr,De,Es,It)",
+                "Japan");
+            inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Should().OnlyContain(c => c.Monitored && c.Key.StartsWith("nointro:retail:"));
+        }
+
+        [Test]
+        public void should_create_download_play_components_for_matching_game_title_and_platform()
+        {
+            _game.Platform = PlatformFamily.NintendoDS;
+            _game.GameMetadata.Value.Title = "Mario Kart DS";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.All())
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
+                      new NoIntroCatalogEntry
+                      {
+                          SystemKey = "nintendo---nintendo-ds--download-play",
+                          CanonicalName = "Mario Kart DS (Europe) (Demo) (Download Station Vol. 1)",
+                          CanonicalFileName = "Mario Kart DS (Europe) (Demo) (Download Station Vol. 1).nds",
+                          PlatformFamily = PlatformFamily.NintendoDS
+                      }
+                  });
+
+            var inserted = CapturedInserts();
+
+            inserted.Should().Contain(c => c.ComponentType == GameComponentType.NoIntroRetailRom && c.Title == "Europe (En,Fr,De,Es,It)");
+            inserted.Should().Contain(c => c.ComponentType == GameComponentType.NoIntroMultiboot && c.Title == "Europe (Demo) (Download Station Vol. 1)");
+        }
+
+        [Test]
+        public void should_link_nointro_file_to_matching_catalog_component()
+        {
+            _game.Platform = PlatformFamily.NintendoDS;
+            _game.GameMetadata.Value.Title = "Mario Kart DS";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            var baseSlot = new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" };
+            var europeSlot = new GameComponent { Id = 11, GameId = _game.Id, ComponentType = GameComponentType.NoIntroRetailRom, Key = "nointro:retail:mario-kart-ds-europe-en-fr-de-es-it" };
+            var file = new GameFile { Id = 1, GameId = _game.Id, RelativePath = "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds" };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent> { baseSlot, europeSlot });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { file });
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.All())
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS, "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds")
+                  });
+
+            Subject.EnsureComponents(_game);
+
+            file.ComponentId.Should().Be(11);
+            Mocker.GetMock<IMediaFileService>()
+                   .Verify(m => m.Update(It.Is<List<GameFile>>(l => l.Count == 1 && l[0].ComponentId == 11)), Times.Once());
+        }
+
+        [Test]
+        public void should_link_folder_backed_nointro_file_to_matching_catalog_component()
+        {
+            _game.Platform = PlatformFamily.NintendoDS;
+            _game.Path = "/games/Mario Kart DS";
+            _game.GameMetadata.Value.Title = "Mario Kart DS";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            var baseSlot = new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" };
+            var europeSlot = new GameComponent { Id = 11, GameId = _game.Id, ComponentType = GameComponentType.NoIntroRetailRom, Key = "nointro:retail:mario-kart-ds-europe-en-fr-de-es-it", Title = "Europe (En,Fr,De,Es,It)" };
+            var file = new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent> { baseSlot, europeSlot });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { file });
+
+            Mocker.GetMock<NzbDrone.Common.Disk.IDiskProvider>()
+                  .Setup(d => d.FolderExists(_game.Path))
+                  .Returns(true);
+
+            Mocker.GetMock<NzbDrone.Common.Disk.IDiskProvider>()
+                  .Setup(d => d.GetFiles(_game.Path, true))
+                  .Returns(new List<string> { "/games/Mario Kart DS/0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds" });
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.All())
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS, "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds")
+                  });
+
+            Subject.EnsureComponents(_game);
+
+            file.ComponentId.Should().Be(11);
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(m => m.Update(It.Is<List<GameFile>>(l => l.Count == 1 && l[0].ComponentId == 11)), Times.Once());
         }
 
         [Test]
