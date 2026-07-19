@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using FluentAssertions;
+using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.RomCatalog;
 using NzbDrone.Core.Test.Framework;
@@ -49,6 +51,112 @@ namespace NzbDrone.Core.Test.RomCatalog
             entry.SystemKey.Should().Be("nintendo---game-boy-advance");
 
             _hashRepository.All().Should().Contain(x => x.CatalogEntryId == entry.Id && x.HashType == "crc32" && x.HashValue == "ABCDEF12");
+        }
+
+        [Test]
+        public void sync_should_preserve_quoted_clrmamepro_rom_filenames()
+        {
+            var source = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro",
+                SourceUrl = "https://example.invalid/gba.dat"
+            });
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.Fetch(source.SourceUrl))
+                .Returns("clrmamepro (\n" +
+                         "\tname \"Nintendo - Game Boy Advance\"\n" +
+                         "\tversion \"2026.07\"\n" +
+                         ")\n" +
+                         "game (\n" +
+                         "\tname \"007 - Everything or Nothing (USA, Europe) (En,Fr,De)\"\n" +
+                         "\trom ( name \"007 - Everything or Nothing (USA, Europe) (En,Fr,De).gba\" size 16777216 crc 1234ABCD md5 0123456789ABCDEF0123456789ABCDEF sha1 0123456789ABCDEF0123456789ABCDEF01234567 )\n" +
+                         ")\n");
+
+            _subject.Sync(source.Id);
+
+            var entry = _entryRepository.All().Should().ContainSingle().Subject;
+            entry.CanonicalName.Should().Be("007 - Everything or Nothing (USA, Europe) (En,Fr,De)");
+            entry.CanonicalFileName.Should().Be("007 - Everything or Nothing (USA, Europe) (En,Fr,De).gba");
+            _hashRepository.All().Should().Contain(x => x.CatalogEntryId == entry.Id && x.HashType == "crc32" && x.HashValue == "1234ABCD");
+        }
+
+        [Test]
+        public void sync_should_enrich_entries_with_datomatic_numbered_filename_by_hash()
+        {
+            var source = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro Nintendo DS",
+                SourceUrl = "https://example.invalid/nds.dat"
+            });
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.Fetch(source.SourceUrl))
+                .Returns("<datafile><header><name>Nintendo - Nintendo DS</name><version>2026.05.02</version></header><game name='Mario Kart DS (Europe) (En,Fr,De,Es,It)'><rom name='Mario Kart DS (Europe) (En,Fr,De,Es,It).nds' crc='94E8127E' sha1='CE97D9B43F0D3CA0D48B781983E8A16F6393378F' status='verified' /></game></datafile>");
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.FetchDatOMaticNumbered(28))
+                .Returns("<datafile><header><name>Nintendo - Nintendo DS</name></header><game name='0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It)' id='0201'><rom name='0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds' crc='94E8127E' sha1='CE97D9B43F0D3CA0D48B781983E8A16F6393378F' status='verified' /></game></datafile>");
+
+            _subject.Sync(source.Id);
+
+            var entry = _entryRepository.All().Should().ContainSingle().Subject;
+            entry.CanonicalName.Should().Be("Mario Kart DS (Europe) (En,Fr,De,Es,It)");
+            entry.CanonicalFileName.Should().Be("Mario Kart DS (Europe) (En,Fr,De,Es,It).nds");
+            entry.ReleaseNumber.Should().Be("0201");
+            entry.NumberedCanonicalFileName.Should().Be("0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds");
+        }
+
+        [Test]
+        public void sync_should_fallback_to_advanscene_release_number_when_datomatic_fails()
+        {
+            var source = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro Nintendo DS",
+                SourceUrl = "https://example.invalid/nds.dat"
+            });
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.Fetch(source.SourceUrl))
+                .Returns("<datafile><header><name>Nintendo - Nintendo DS</name><version>2026.05.02</version></header><game name='Mario Kart DS (Europe) (En,Fr,De,Es,It)'><rom name='Mario Kart DS (Europe) (En,Fr,De,Es,It).nds' crc='94E8127E' sha1='CE97D9B43F0D3CA0D48B781983E8A16F6393378F' status='verified' /></game></datafile>");
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.FetchDatOMaticNumbered(28))
+                .Throws(new InvalidOperationException("DAT-o-MATIC did not return a numbered DAT download token"));
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.FetchAdvanscene("https://advanscene.com/offline/datas/ADVANsCEne_NDS_S.zip"))
+                .Returns("<releases><game><releaseNumber>201</releaseNumber><files><romCRC extension='.nds'>94E8127E</romCRC></files></game></releases>");
+
+            _subject.Sync(source.Id);
+
+            var entry = _entryRepository.All().Should().ContainSingle().Subject;
+            entry.ReleaseNumber.Should().Be("0201");
+            entry.NumberedCanonicalFileName.Should().Be("0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds");
+        }
+
+        [Test]
+        public void sync_should_seed_missing_default_game_boy_sources()
+        {
+            _sourceRepository.Purge();
+
+            var existingSource = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro Nintendo DS",
+                SourceUrl = "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS.dat"
+            });
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.Fetch(It.IsAny<string>()))
+                .Returns("<datafile><header><name>Nintendo - Nintendo DS</name></header></datafile>");
+
+            _subject.Sync();
+
+            var sources = _sourceRepository.All().ToList();
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Color");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance");
+            sources.Should().ContainSingle(x => x.SourceUrl == existingSource.SourceUrl);
         }
 
         [Test]
