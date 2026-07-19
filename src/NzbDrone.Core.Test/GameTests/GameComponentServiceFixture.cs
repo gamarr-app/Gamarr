@@ -63,6 +63,7 @@ namespace NzbDrone.Core.Test.GameTests
             {
                 SystemKey = platform switch
                 {
+                    PlatformFamily.SonyPSP => "sony---playstation-portable",
                     PlatformFamily.Nintendo3DS => "nintendo---nintendo-3ds",
                     PlatformFamily.NintendoDS => "nintendo---nintendo-ds",
                     _ => "nintendo---game-boy-advance"
@@ -119,6 +120,8 @@ namespace NzbDrone.Core.Test.GameTests
                       Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
                       Entry("Mario Kart DS (USA, Australia) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
                       Entry("Mario Kart DS (Japan)", PlatformFamily.NintendoDS),
+                      Entry("Mario Kart DS (USA)", PlatformFamily.Nintendo3DS, extension: "3ds"),
+                      Entry("Mario Kart DS (USA)", PlatformFamily.SonyPSP, extension: "iso"),
                       Entry("Pokemon Dash (USA)", PlatformFamily.NintendoDS),
                       Entry("Mario Kart DS (USA)", PlatformFamily.NintendoGBA)
                   });
