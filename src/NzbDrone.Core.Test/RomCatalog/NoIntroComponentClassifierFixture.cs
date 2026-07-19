@@ -18,6 +18,7 @@ namespace NzbDrone.Core.Test.RomCatalog
 
         [TestCase("GBA (by-id)/0001 - F-Zero for Game Boy Advance (Japan).zip", "0001 - F-Zero for Game Boy Advance (Japan).zip", NoIntroRomComponentType.RetailRom, false)]
         [TestCase("Nintendo 3DS/3ds/Mario Kart 7 (USA) (En,Fr,Es).3ds", "Mario Kart 7 (USA) (En,Fr,Es).3ds", NoIntroRomComponentType.RetailRom, false)]
+        [TestCase("Sony PlayStation Portable/iso/Grand Theft Auto - Liberty City Stories (USA).iso", "Grand Theft Auto - Liberty City Stories (USA).iso", NoIntroRomComponentType.RetailRom, false)]
         [TestCase("GBA (e-Reader)/Animal Crossing-e - Series 1 - A-001 - K.K. Slider (USA).zip", "Animal Crossing-e - Series 1 - A-001 - K.K. Slider (USA).zip", NoIntroRomComponentType.EReaderCards, false)]
         [TestCase("GBA (Multiboot)/Animal Crossing - Balloon Fight (USA, Europe).gba", "Animal Crossing - Balloon Fight (USA, Europe).gba", NoIntroRomComponentType.Multiboot, false)]
         [TestCase("GBA (Play-Yan)/Nintendo - Game Boy Advance (Play-Yan).zip", "Nintendo - Game Boy Advance (Play-Yan).zip", NoIntroRomComponentType.Video, false)]

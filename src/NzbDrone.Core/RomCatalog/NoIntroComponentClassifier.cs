@@ -46,14 +46,24 @@ namespace NzbDrone.Core.RomCatalog
             if (Contains(path, "GBA") ||
                 Contains(path, "GBA (by-id)") ||
                 Contains(path, "3DS") ||
+                Contains(path, "PSP") ||
+                Contains(path, "PlayStation Portable") ||
+                Contains(path, "PlayStation Vita") ||
+                Contains(path, "PlayStation 3") ||
                 Contains(path, "/zip/") ||
                 Contains(path, "/nds/") ||
                 Contains(path, "/3ds/") ||
                 Contains(path, "/cia/") ||
+                Contains(path, "/iso/") ||
+                Contains(path, "/pkg/") ||
+                Contains(path, "/vpk/") ||
                 EndsWithFolder(path, "zip") ||
                 EndsWithFolder(path, "nds") ||
                 EndsWithFolder(path, "3ds") ||
-                EndsWithFolder(path, "cia"))
+                EndsWithFolder(path, "cia") ||
+                EndsWithFolder(path, "iso") ||
+                EndsWithFolder(path, "pkg") ||
+                EndsWithFolder(path, "vpk"))
             {
                 return Exact(NoIntroRomComponentType.RetailRom);
             }
