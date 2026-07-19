@@ -7,7 +7,12 @@ namespace NzbDrone.Core.Games.Components
     {
         Base = 1,
         Update = 2,
-        Dlc = 3
+        Dlc = 3,
+        NoIntroRetailRom = 4,
+        NoIntroMultiboot = 5,
+        NoIntroVideo = 6,
+        NoIntroBios = 7,
+        NoIntroRomhackOrUnverified = 8
     }
 
     /// <summary>
