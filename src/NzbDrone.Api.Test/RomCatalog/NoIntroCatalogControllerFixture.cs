@@ -51,6 +51,35 @@ namespace NzbDrone.Api.Test.RomCatalog
         }
 
         [Test]
+        public void NoIntroApi_should_surface_catalog_status_counts()
+        {
+            Mocker.GetMock<INoIntroCatalogSourceRepository>()
+                .Setup(x => x.All())
+                .Returns(new List<NoIntroCatalogSource>
+                {
+                    new NoIntroCatalogSource
+                    {
+                        Id = 7,
+                        Name = "No-Intro Nintendo DS",
+                        CatalogVersion = "2026.05.02",
+                        LastSuccessfulSync = new DateTime(2026, 7, 19, 0, 0, 0, DateTimeKind.Utc)
+                    }
+                });
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                .Setup(x => x.All())
+                .Returns(new List<NoIntroCatalogEntry>
+                {
+                    Entry(7, "nintendo---nintendo-ds", "Mario Kart DS (Europe) (En,Fr,De,Es,It)"),
+                    Entry(7, "nintendo---nintendo-ds", "Mario Kart DS (Japan)")
+                });
+
+            var status = Subject.GetStatus();
+
+            status.Sources.Should().ContainSingle(x => x.Name == "No-Intro Nintendo DS" && x.CatalogVersion == "2026.05.02" && x.EntryCount == 2);
+        }
+
+        [Test]
         public void NoIntroApi_should_surface_region_download_play_and_standalone_component_plan()
         {
             var entries = new List<NoIntroCatalogEntry>
