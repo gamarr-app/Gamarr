@@ -331,7 +331,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 return new List<ImportResult>
                        {
-                           new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName }, new ImportRejection(ImportRejectionReason.InvalidFilePath, "Invalid video file, filename starts with '._'")), "Invalid video file, filename starts with '._'")
+                           new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName }, new ImportRejection(ImportRejectionReason.InvalidFilePath, "Invalid game file, filename starts with '._'")), "Invalid game file, filename starts with '._'")
                        };
             }
 
@@ -364,8 +364,8 @@ namespace NzbDrone.Core.MediaFiles
                 return new List<ImportResult>
                        {
                            new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
-                               new ImportRejection(ImportRejectionReason.UnsupportedExtension, $"Invalid video file, unsupported extension: '{extension}'")),
-                               $"Invalid video file, unsupported extension: '{extension}'")
+                               new ImportRejection(ImportRejectionReason.UnsupportedExtension, $"Invalid game file, unsupported extension: '{extension}'")),
+                               $"Invalid game file, unsupported extension: '{extension}'")
                        };
             }
 
