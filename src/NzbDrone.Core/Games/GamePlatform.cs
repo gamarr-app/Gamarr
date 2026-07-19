@@ -35,7 +35,17 @@ namespace NzbDrone.Core.Games
         NintendoDS = 14,
         NintendoGBA = 15,
         NintendoGB = 16,
-        NintendoGBC = 17
+        NintendoGBC = 17,
+        NintendoNES = 18,
+        NintendoSNES = 19,
+        NintendoN64 = 20,
+        NintendoFDS = 21,
+        NintendoVirtualBoy = 22,
+        NintendoPokemonMini = 23,
+        NintendoDSi = 24,
+        SonyPS3 = 25,
+        SonyPSP = 26,
+        SonyPSVita = 27
     }
 
     /// <summary>
@@ -75,10 +85,25 @@ namespace NzbDrone.Core.Games
                 PlatformFamily.NintendoWiiU or
                 PlatformFamily.NintendoWii or
                 PlatformFamily.Nintendo3DS or
+                PlatformFamily.NintendoDSi or
                 PlatformFamily.NintendoDS or
                 PlatformFamily.NintendoGBA or
                 PlatformFamily.NintendoGB or
-                PlatformFamily.NintendoGBC;
+                PlatformFamily.NintendoGBC or
+                PlatformFamily.NintendoNES or
+                PlatformFamily.NintendoSNES or
+                PlatformFamily.NintendoN64 or
+                PlatformFamily.NintendoFDS or
+                PlatformFamily.NintendoVirtualBoy or
+                PlatformFamily.NintendoPokemonMini;
+        }
+
+        public static bool IsPlayStationFamily(PlatformFamily platform)
+        {
+            return platform is PlatformFamily.PlayStation or
+                PlatformFamily.SonyPS3 or
+                PlatformFamily.SonyPSP or
+                PlatformFamily.SonyPSVita;
         }
 
         public static bool PlatformMatches(PlatformFamily wanted, PlatformFamily actual)
@@ -89,7 +114,9 @@ namespace NzbDrone.Core.Games
             }
 
             return (IsNintendoFamily(wanted) && actual == PlatformFamily.Nintendo) ||
-                (wanted == PlatformFamily.Nintendo && IsNintendoFamily(actual));
+                (wanted == PlatformFamily.Nintendo && IsNintendoFamily(actual)) ||
+                (IsPlayStationFamily(wanted) && actual == PlatformFamily.PlayStation) ||
+                (wanted == PlatformFamily.PlayStation && IsPlayStationFamily(actual));
         }
 
         /// <summary>
@@ -103,6 +130,7 @@ namespace NzbDrone.Core.Games
             public const int PS5 = 167;
             public const int PS4 = 48;
             public const int PS3 = 9;
+            public const int PSP = 38;
             public const int PSVita = 46;
             public const int XboxSeriesX = 169;
             public const int XboxOne = 49;

@@ -121,5 +121,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
         }
+
+        [Test]
+        public void should_accept_specific_playstation_release_for_broad_playstation_preference()
+        {
+            _remoteGame.Game.Platform = PlatformFamily.Unknown;
+            _remoteGame.ParsedGameInfo.Platform = PlatformFamily.SonyPSP;
+            _remoteGame.Game.QualityProfile.PreferredPlatforms = new List<PlatformFamily>
+            {
+                PlatformFamily.PlayStation
+            };
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
     }
 }
