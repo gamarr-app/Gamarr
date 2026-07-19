@@ -162,6 +162,15 @@ namespace NzbDrone.Core.Test.RomCatalog
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo 3DS Digital");
             sources.Should().Contain(x => x.Name == "No-Intro New Nintendo 3DS");
             sources.Should().Contain(x => x.Name == "No-Intro New Nintendo 3DS Digital");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Entertainment System");
+            sources.Should().Contain(x => x.Name == "No-Intro Super Nintendo Entertainment System");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo 64");
+            sources.Should().Contain(x => x.Name == "No-Intro Nintendo DSi");
+            sources.Should().Contain(x => x.Name == "No-Intro Wii Digital");
+            sources.Should().Contain(x => x.Name == "No-Intro Wii U Digital");
+            sources.Should().Contain(x => x.Name == "No-Intro Sony PlayStation Portable");
+            sources.Should().Contain(x => x.Name == "No-Intro Sony PlayStation Vita");
+            sources.Should().Contain(x => x.Name == "No-Intro Sony PlayStation 3 PSN");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo DS DSvision SD Cards" && x.SourceUrl == "datomatic://system/319");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Multiboot" && x.SourceUrl == "datomatic://system/137");
             sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance e-Reader" && x.SourceUrl == "datomatic://system/41");
@@ -189,6 +198,26 @@ namespace NzbDrone.Core.Test.RomCatalog
             entry.SystemKey.Should().Be("nintendo---nintendo-3ds");
             entry.PlatformFamily.Should().Be(PlatformFamily.Nintendo3DS);
             entry.CanonicalFileName.Should().Be("Mario Kart 7 (USA) (En,Fr,Es).3ds");
+        }
+
+        [Test]
+        public void sync_should_map_sony_sources_to_specific_playstation_platforms()
+        {
+            var source = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro Sony PlayStation Portable",
+                SourceUrl = "https://example.invalid/psp.dat"
+            });
+
+            Mocker.GetMock<INoIntroCatalogDocumentClient>()
+                .Setup(x => x.Fetch(source.SourceUrl))
+                .Returns("<datafile><header><name>Sony - PlayStation Portable</name><version>2026.07</version></header><game name='Example Game (USA)'><rom name='Example Game (USA).iso' crc='ED9D4190' sha1='858F85EF67DD996A9F8F56B84D1C2CC4EE369DDE' status='verified' /></game></datafile>");
+
+            _subject.Sync(source.Id);
+
+            var entry = _entryRepository.All().Should().ContainSingle().Subject;
+            entry.SystemKey.Should().Be("sony---playstation-portable");
+            entry.PlatformFamily.Should().Be(PlatformFamily.SonyPSP);
         }
 
         [Test]
