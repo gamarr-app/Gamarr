@@ -27,7 +27,15 @@ namespace NzbDrone.Core.Games
         Atari = 6,
         Mobile = 7,
         Linux = 8,
-        Mac = 9
+        Mac = 9,
+        NintendoSwitch = 10,
+        NintendoWiiU = 11,
+        NintendoWii = 12,
+        Nintendo3DS = 13,
+        NintendoDS = 14,
+        NintendoGBA = 15,
+        NintendoGB = 16,
+        NintendoGBC = 17
     }
 
     /// <summary>
@@ -58,6 +66,30 @@ namespace NzbDrone.Core.Games
                 5 => PlatformFamily.Atari,
                 _ => PlatformFamily.Unknown
             };
+        }
+
+        public static bool IsNintendoFamily(PlatformFamily platform)
+        {
+            return platform is PlatformFamily.Nintendo or
+                PlatformFamily.NintendoSwitch or
+                PlatformFamily.NintendoWiiU or
+                PlatformFamily.NintendoWii or
+                PlatformFamily.Nintendo3DS or
+                PlatformFamily.NintendoDS or
+                PlatformFamily.NintendoGBA or
+                PlatformFamily.NintendoGB or
+                PlatformFamily.NintendoGBC;
+        }
+
+        public static bool PlatformMatches(PlatformFamily wanted, PlatformFamily actual)
+        {
+            if (wanted == actual)
+            {
+                return true;
+            }
+
+            return (IsNintendoFamily(wanted) && actual == PlatformFamily.Nintendo) ||
+                (wanted == PlatformFamily.Nintendo && IsNintendoFamily(actual));
         }
 
         /// <summary>
