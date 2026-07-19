@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Games.Components
         public List<NoIntroGameComponentSlot> GetSlots(Game game, List<NoIntroCatalogEntry> entries)
         {
             var platformEntries = entries
-                .Where(entry => entry.PlatformFamily == game.Platform)
+                .Where(entry => NoIntroCatalogDefaults.MatchesGamePlatform(game.Platform, entry.PlatformFamily))
                 .ToList();
             var plan = _componentClassifier.BuildCatalogPlan(platformEntries);
             var titleKeys = BuildTitleKeys(game);
@@ -131,6 +131,19 @@ namespace NzbDrone.Core.Games.Components
                 $"{canonicalName}.cia",
                 $"{canonicalName}.cci",
                 $"{canonicalName}.cxi",
+                $"{canonicalName}.n64",
+                $"{canonicalName}.z64",
+                $"{canonicalName}.v64",
+                $"{canonicalName}.nes",
+                $"{canonicalName}.sfc",
+                $"{canonicalName}.smc",
+                $"{canonicalName}.fds",
+                $"{canonicalName}.vb",
+                $"{canonicalName}.min",
+                $"{canonicalName}.iso",
+                $"{canonicalName}.cso",
+                $"{canonicalName}.pkg",
+                $"{canonicalName}.vpk",
                 $"{canonicalName}.zip"
             };
 
