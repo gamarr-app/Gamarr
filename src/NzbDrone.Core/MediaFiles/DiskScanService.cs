@@ -328,7 +328,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public string[] GetVideoFiles(string path, bool allDirectories = true)
         {
-            _logger.Debug("Scanning '{0}' for video files", path);
+            _logger.Debug("Scanning '{0}' for game files", path);
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
@@ -336,14 +336,14 @@ namespace NzbDrone.Core.MediaFiles
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
-            _logger.Debug("{0} video files were found in {1}", mediaFileList.Count, path);
+            _logger.Debug("{0} game files were found in {1}", mediaFileList.Count, path);
 
             return mediaFileList.ToArray();
         }
 
         public string[] GetNonVideoFiles(string path, bool allDirectories = true)
         {
-            _logger.Debug("Scanning '{0}' for non-video files", path);
+            _logger.Debug("Scanning '{0}' for non-game files", path);
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
@@ -351,7 +351,7 @@ namespace NzbDrone.Core.MediaFiles
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
-            _logger.Debug("{0} non-video files were found in {1}", mediaFileList.Count, path);
+            _logger.Debug("{0} non-game files were found in {1}", mediaFileList.Count, path);
 
             return mediaFileList.ToArray();
         }

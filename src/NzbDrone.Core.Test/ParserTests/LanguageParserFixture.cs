@@ -77,6 +77,18 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Languages.Should().Contain(Language.English);
         }
 
+        [Test]
+        public void should_parse_nointro_language_code_list()
+        {
+            var result = LanguageParser.ParseLanguages("0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds");
+
+            result.Should().Contain(Language.English);
+            result.Should().Contain(Language.French);
+            result.Should().Contain(Language.German);
+            result.Should().Contain(Language.Spanish);
+            result.Should().Contain(Language.Italian);
+        }
+
         [TestCase("Game.Title.1994.Spanish.1080p.XviD-LOL")]
         [TestCase("Game Title (2020)[BDRemux AVC 1080p][E-AC3 DD Plus 5.1 Castellano-Inglés Subs]")]
         [TestCase("Game Title (2020) [UHDRemux2160p HDR][DTS-HD MA 5.1 AC3 5.1 Castellano - True-HD 7.1 Atmos Inglés Subs]")]

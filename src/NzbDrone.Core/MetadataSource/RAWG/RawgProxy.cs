@@ -538,7 +538,47 @@ namespace NzbDrone.Core.MetadataSource.RAWG
                 return PlatformFamily.Xbox;
             }
 
-            if (slug.Contains("nintendo") || slug.Contains("switch") || slug.Contains("wii") || slug.Contains("3ds"))
+            if (slug.Contains("switch"))
+            {
+                return PlatformFamily.NintendoSwitch;
+            }
+
+            if (slug.Contains("wii-u") || slug.Contains("wiiu"))
+            {
+                return PlatformFamily.NintendoWiiU;
+            }
+
+            if (slug.Contains("wii"))
+            {
+                return PlatformFamily.NintendoWii;
+            }
+
+            if (slug.Contains("3ds"))
+            {
+                return PlatformFamily.Nintendo3DS;
+            }
+
+            if (slug.Contains("nintendo-ds") || slug.Contains("nds"))
+            {
+                return PlatformFamily.NintendoDS;
+            }
+
+            if (slug.Contains("game-boy-advance") || slug.Contains("gba"))
+            {
+                return PlatformFamily.NintendoGBA;
+            }
+
+            if (slug.Contains("game-boy-color") || slug.Contains("gbc"))
+            {
+                return PlatformFamily.NintendoGBC;
+            }
+
+            if (slug.Contains("game-boy") || slug.Contains("gb"))
+            {
+                return PlatformFamily.NintendoGB;
+            }
+
+            if (slug.Contains("nintendo"))
             {
                 return PlatformFamily.Nintendo;
             }

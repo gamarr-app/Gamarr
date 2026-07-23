@@ -66,11 +66,11 @@ namespace NzbDrone.Core.Test.Datastore.Converters
         [Test]
         public void should_deserialize_all_platform_families()
         {
-            var json = "[\"pc\",\"playStation\",\"xbox\",\"nintendo\",\"linux\",\"mac\",\"mobile\"]";
+            var json = "[\"pc\",\"playStation\",\"xbox\",\"nintendo\",\"linux\",\"mac\",\"mobile\",\"nintendoDS\",\"nintendoGBA\",\"nintendoGB\",\"nintendoGBC\"]";
 
             var result = Subject.Parse(json);
 
-            result.Should().HaveCount(7);
+            result.Should().HaveCount(11);
             result.Should().Contain(PlatformFamily.PC);
             result.Should().Contain(PlatformFamily.PlayStation);
             result.Should().Contain(PlatformFamily.Xbox);
@@ -78,6 +78,10 @@ namespace NzbDrone.Core.Test.Datastore.Converters
             result.Should().Contain(PlatformFamily.Linux);
             result.Should().Contain(PlatformFamily.Mac);
             result.Should().Contain(PlatformFamily.Mobile);
+            result.Should().Contain(PlatformFamily.NintendoDS);
+            result.Should().Contain(PlatformFamily.NintendoGBA);
+            result.Should().Contain(PlatformFamily.NintendoGB);
+            result.Should().Contain(PlatformFamily.NintendoGBC);
         }
 
         [Test]

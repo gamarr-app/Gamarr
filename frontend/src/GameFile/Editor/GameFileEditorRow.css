@@ -4,6 +4,23 @@
   word-break: break-all;
 }
 
+.component,
+.componentContent,
+.componentTitle {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+}
+
+.componentContent {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.componentTitle {
+  word-break: break-word;
+}
+
 .quality,
 .formats,
 .language {

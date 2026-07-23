@@ -68,6 +68,18 @@ namespace NzbDrone.Core.Parser
             @"\b(?:NDS|Nintendo\s*DS)\b|\[(?:NDS|Nintendo\s*DS)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        private static readonly Regex NintendoGBARegex = new Regex(
+            @"\b(?:GBA|Game\s*Boy\s*Advance|Nintendo\s*Game\s*Boy\s*Advance)\b|\[(?:GBA|Game\s*Boy\s*Advance|Nintendo\s*Game\s*Boy\s*Advance)\]",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex NintendoGBCRegex = new Regex(
+            @"\b(?:GBC|Game\s*Boy\s*Color|Nintendo\s*Game\s*Boy\s*Color)\b|\[(?:GBC|Game\s*Boy\s*Color|Nintendo\s*Game\s*Boy\s*Color)\]",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex NintendoGBRegex = new Regex(
+            @"\b(?:GB|Game\s*Boy|Nintendo\s*Game\s*Boy)\b|\[(?:GB|Game\s*Boy|Nintendo\s*Game\s*Boy)\]",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         // PC/Mac/Linux platforms
         private static readonly Regex MacRegex = new Regex(
             @"\b(?:MAC|macOS|OSX|Mac\s*OS)\b|\[(?:MAC|macOS|OSX|Mac\s*OS)\]",
@@ -105,19 +117,19 @@ namespace NzbDrone.Core.Parser
             if (PlayStation3Regex.IsMatch(title))
             {
                 Logger.Trace("Detected PS3 platform in title");
-                return PlatformFamily.PlayStation;
+                return PlatformFamily.SonyPS3;
             }
 
             if (PSVitaRegex.IsMatch(title))
             {
                 Logger.Trace("Detected PS Vita platform in title");
-                return PlatformFamily.PlayStation;
+                return PlatformFamily.SonyPSVita;
             }
 
             if (PSPRegex.IsMatch(title))
             {
                 Logger.Trace("Detected PSP platform in title");
-                return PlatformFamily.PlayStation;
+                return PlatformFamily.SonyPSP;
             }
 
             // Check Xbox platforms (most specific first)
@@ -149,31 +161,49 @@ namespace NzbDrone.Core.Parser
             if (SwitchRegex.IsMatch(title))
             {
                 Logger.Trace("Detected Nintendo Switch platform in title");
-                return PlatformFamily.Nintendo;
+                return PlatformFamily.NintendoSwitch;
             }
 
             if (WiiURegex.IsMatch(title))
             {
                 Logger.Trace("Detected Wii U platform in title");
-                return PlatformFamily.Nintendo;
+                return PlatformFamily.NintendoWiiU;
             }
 
             if (WiiRegex.IsMatch(title))
             {
                 Logger.Trace("Detected Wii platform in title");
-                return PlatformFamily.Nintendo;
+                return PlatformFamily.NintendoWii;
             }
 
             if (Nintendo3DSRegex.IsMatch(title))
             {
                 Logger.Trace("Detected Nintendo 3DS platform in title");
-                return PlatformFamily.Nintendo;
+                return PlatformFamily.Nintendo3DS;
             }
 
             if (NintendoDSRegex.IsMatch(title))
             {
                 Logger.Trace("Detected Nintendo DS platform in title");
-                return PlatformFamily.Nintendo;
+                return PlatformFamily.NintendoDS;
+            }
+
+            if (NintendoGBARegex.IsMatch(title))
+            {
+                Logger.Trace("Detected Game Boy Advance platform in title");
+                return PlatformFamily.NintendoGBA;
+            }
+
+            if (NintendoGBCRegex.IsMatch(title))
+            {
+                Logger.Trace("Detected Game Boy Color platform in title");
+                return PlatformFamily.NintendoGBC;
+            }
+
+            if (NintendoGBRegex.IsMatch(title))
+            {
+                Logger.Trace("Detected Game Boy platform in title");
+                return PlatformFamily.NintendoGB;
             }
 
             // Check Mac/Linux
@@ -276,6 +306,21 @@ namespace NzbDrone.Core.Parser
             if (NintendoDSRegex.IsMatch(title))
             {
                 return "NDS";
+            }
+
+            if (NintendoGBARegex.IsMatch(title))
+            {
+                return "GBA";
+            }
+
+            if (NintendoGBCRegex.IsMatch(title))
+            {
+                return "GBC";
+            }
+
+            if (NintendoGBRegex.IsMatch(title))
+            {
+                return "GB";
             }
 
             // Mac/Linux

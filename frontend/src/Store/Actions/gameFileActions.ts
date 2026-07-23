@@ -83,6 +83,12 @@ export const defaultState = {
       isSortable: true,
     },
     {
+      name: 'componentTitle',
+      label: () => 'Component',
+      isVisible: true,
+      isSortable: true,
+    },
+    {
       name: 'size',
       label: () => translate('Size'),
       isVisible: true,

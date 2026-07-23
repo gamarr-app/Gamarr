@@ -11,6 +11,7 @@ using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -30,20 +31,23 @@ namespace Gamarr.Api.V3.GameFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IDeleteMediaFiles _mediaFileDeletionService;
         private readonly IGameService _gameService;
+        private readonly IGameComponentService _gameComponentService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IUpgradableSpecification _upgradableSpecification;
 
         public GameFileController(IBroadcastSignalRMessage signalRBroadcaster,
-                               IMediaFileService mediaFileService,
-                               IDeleteMediaFiles mediaFileDeletionService,
-                               IGameService gameService,
-                               ICustomFormatCalculationService formatCalculator,
-                               IUpgradableSpecification upgradableSpecification)
+                                IMediaFileService mediaFileService,
+                                IDeleteMediaFiles mediaFileDeletionService,
+                                IGameService gameService,
+                                IGameComponentService gameComponentService,
+                                ICustomFormatCalculationService formatCalculator,
+                                IUpgradableSpecification upgradableSpecification)
             : base(signalRBroadcaster)
         {
             _mediaFileService = mediaFileService;
             _mediaFileDeletionService = mediaFileDeletionService;
             _gameService = gameService;
+            _gameComponentService = gameComponentService;
             _formatCalculator = formatCalculator;
             _upgradableSpecification = upgradableSpecification;
         }
@@ -52,8 +56,10 @@ namespace Gamarr.Api.V3.GameFiles
         {
             var gameFile = _mediaFileService.GetGame(id);
             var game = _gameService.GetGame(gameFile.GameId);
+            var componentsById = _gameComponentService.GetByGame(game.Id).ToDictionary(x => x.Id);
+            componentsById.TryGetValue(gameFile.ComponentId, out var component);
 
-            var resource = gameFile.ToResource(game, _upgradableSpecification, _formatCalculator);
+            var resource = gameFile.ToResource(game, _upgradableSpecification, _formatCalculator, component);
 
             return resource;
         }
@@ -77,8 +83,17 @@ namespace Gamarr.Api.V3.GameFiles
             }
 
             return gameFiles.GroupBy(e => e.GameId)
-                .SelectMany(f => f.ToList()
-                    .ConvertAll(e => e.ToResource(_gameService.GetGame(f.Key), _upgradableSpecification, _formatCalculator)))
+                .SelectMany(group =>
+                {
+                    var game = _gameService.GetGame(group.Key);
+                    var componentsById = _gameComponentService.GetByGame(group.Key).ToDictionary(x => x.Id);
+
+                    return group.Select(file =>
+                    {
+                        componentsById.TryGetValue(file.ComponentId, out var component);
+                        return file.ToResource(game, _upgradableSpecification, _formatCalculator, component);
+                    });
+                })
                 .ToList();
         }
 
@@ -206,7 +221,13 @@ namespace Gamarr.Api.V3.GameFiles
 
             var game = _gameService.GetGame(gameFiles.First().GameId);
 
-            return Accepted(gameFiles.ConvertAll(f => f.ToResource(game, _upgradableSpecification, _formatCalculator)));
+            var componentsById = _gameComponentService.GetByGame(game.Id).ToDictionary(x => x.Id);
+
+            return Accepted(gameFiles.ConvertAll(f =>
+            {
+                componentsById.TryGetValue(f.ComponentId, out var component);
+                return f.ToResource(game, _upgradableSpecification, _formatCalculator, component);
+            }));
         }
 
         [NonAction]

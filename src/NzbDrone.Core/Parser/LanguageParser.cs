@@ -58,6 +58,7 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex GermanDualLanguageRegex = new (@"(?<!WEB[-_. ]?)\bDL\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex GermanMultiLanguageRegex = new (@"\bML\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex NoIntroLanguageListRegex = new (@"[\(\[](?<codes>[a-z]{2,3}(?:,[a-z]{2,3})+)[\)\]]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex SubtitleLanguageRegex = new Regex(".+?([-_. ](?<tags>forced|foreign|default|cc|psdh|sdh))*[-_. ](?<iso_code>[a-z]{2,3})([-_. ](?<tags>forced|foreign|default|cc|psdh|sdh))*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -453,6 +454,19 @@ namespace NzbDrone.Core.Parser
             {
                 Logger.Trace("Detected Cyrillic characters in title, assuming Russian language");
                 languages.Add(Language.Russian);
+            }
+
+            foreach (Match match in NoIntroLanguageListRegex.Matches(title))
+            {
+                foreach (var code in match.Groups["codes"].Value.Split(','))
+                {
+                    var language = IsoLanguages.Find(code)?.Language;
+
+                    if (language != null)
+                    {
+                        languages.Add(language);
+                    }
+                }
             }
 
             if (!languages.Any())

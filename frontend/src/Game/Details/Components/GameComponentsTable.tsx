@@ -5,6 +5,7 @@ import { GAME_COMPONENT_SEARCH } from 'Commands/commandNames';
 import EnhancedSelectInput from 'Components/Form/Select/EnhancedSelectInput';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
+import IconButton from 'Components/Link/IconButton';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
@@ -18,11 +19,12 @@ import createCommandExecutingSelector from 'Store/Selectors/createCommandExecuti
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import formatBytes from 'Utilities/Number/formatBytes';
 import translate from 'Utilities/String/translate';
+import GameInteractiveSearchModal from '../../Search/GameInteractiveSearchModal';
 
 interface GameComponent {
   id: number;
   gameId: number;
-  componentType: 'base' | 'update' | 'dlc';
+  componentType: string;
   key: string;
   title: string;
   monitored: boolean;
@@ -30,6 +32,20 @@ interface GameComponent {
   qualityProfileId: number;
   hasFile: boolean;
   sizeOnDisk: number;
+  noIntroCatalogMatches: NoIntroCatalogMatch[];
+}
+
+interface NoIntroCatalogMatch {
+  id: number;
+  catalogSourceId: number;
+  sourceName?: string;
+  systemKey: string;
+  canonicalName: string;
+  canonicalFileName: string;
+  catalogVersion?: string;
+  lastSyncError?: string;
+  hashType?: string;
+  hashValue?: string;
 }
 
 const columns = [
@@ -37,6 +53,7 @@ const columns = [
   { name: 'title', label: () => translate('Title'), isVisible: true },
   { name: 'size', label: () => translate('Size'), isVisible: true },
   { name: 'status', label: () => translate('Status'), isVisible: true },
+  { name: 'noIntro', label: () => 'No-Intro', isVisible: true },
   {
     name: 'qualityProfileId',
     label: () => translate('QualityProfile'),
@@ -47,12 +64,63 @@ const columns = [
 ];
 
 const typeKinds: Record<
-  GameComponent['componentType'],
-  'info' | 'success' | 'primary'
+  string,
+  'info' | 'success' | 'primary' | 'warning' | 'danger'
 > = {
   base: 'info',
   update: 'success',
   dlc: 'primary',
+  noIntroRetailRom: 'info',
+  noIntroMultiboot: 'success',
+  noIntroVideo: 'primary',
+  noIntroBios: 'warning',
+  noIntroRomhackOrUnverified: 'danger',
+};
+
+const typeLabels: Record<string, string> = {
+  base: 'BASE',
+  update: 'UPDATE',
+  dlc: 'DLC',
+  noIntroRetailRom: 'REGIONAL VARIANT',
+  noIntroMultiboot: 'RELEASE VARIANT',
+  noIntroVideo: 'VIDEO',
+  noIntroBios: 'BIOS',
+  noIntroRomhackOrUnverified: 'UNVERIFIED',
+};
+
+const fallbackTypeLabels: Record<string, string> = {
+  nointroretailrom: 'REGIONAL VARIANT',
+  nointromultiboot: 'RELEASE VARIANT',
+  nointrovideo: 'VIDEO',
+  nointrobios: 'BIOS',
+  nointroromhackorunverified: 'UNVERIFIED',
+};
+
+function getTypeLabel(componentType: string) {
+  return (
+    typeLabels[componentType] ??
+    fallbackTypeLabels[componentType.toLowerCase()] ??
+    componentType
+  );
+}
+
+const noIntroSystemNames: Record<string, string> = {
+  'nintendo---game-boy': 'Nintendo Game Boy',
+  'nintendo---game-boy-color': 'Nintendo Game Boy Color',
+  'nintendo---game-boy-advance': 'Nintendo Game Boy Advance',
+  'nintendo---game-boy-advance-multiboot': 'Nintendo GBA Multiboot',
+  'nintendo---game-boy-advance--multiboot': 'Nintendo GBA Multiboot',
+  'nintendo---game-boy-advance-e-reader': 'Nintendo GBA e-Reader',
+  'nintendo---game-boy-advance--e-reader': 'Nintendo GBA e-Reader',
+  'nintendo---game-boy-advance-play-yan': 'Nintendo GBA Play-Yan',
+  'nintendo---game-boy-advance--play-yan': 'Nintendo GBA Play-Yan',
+  'nintendo---game-boy-advance-video': 'Nintendo GBA Video',
+  'nintendo---game-boy-advance--video': 'Nintendo GBA Video',
+  'nintendo---nintendo-ds': 'Nintendo DS',
+  'nintendo---nintendo-ds-download-play': 'Nintendo DS Download Play',
+  'nintendo---nintendo-ds--download-play': 'Nintendo DS Download Play',
+  'nintendo---nintendo-ds-dsvision-sd-cards': 'Nintendo DS DSvision',
+  'nintendo---nintendo-ds--dsvision-sd-cards': 'Nintendo DS DSvision',
 };
 
 interface GameComponentsTableProps {
@@ -89,6 +157,47 @@ function getStatusIcon(component: GameComponent) {
   );
 }
 
+function getNoIntroStatus(component: GameComponent) {
+  const matches = component.noIntroCatalogMatches ?? [];
+
+  if (matches.length === 0) {
+    return '-';
+  }
+
+  const match = matches[0];
+
+  if (match == null) {
+    return '-';
+  }
+
+  const suffix = matches.length > 1 ? ` +${matches.length - 1}` : '';
+  const version = match.catalogVersion ? ` (${match.catalogVersion})` : '';
+  const systemName = noIntroSystemNames[match.systemKey] ?? match.systemKey;
+  const title = [
+    `${match.sourceName ?? 'No-Intro'}${version}`,
+    ...matches.flatMap((catalogMatch) => {
+      const lines = [catalogMatch.canonicalFileName];
+
+      if (catalogMatch.hashType && catalogMatch.hashValue) {
+        lines.push(
+          `${catalogMatch.hashType.toUpperCase()} ${catalogMatch.hashValue}`
+        );
+      }
+
+      return lines;
+    }),
+  ].join('\n');
+
+  return (
+    <Label
+      kind={match.lastSyncError ? kinds.WARNING : kinds.SUCCESS}
+      title={title}
+    >
+      {`${systemName}${suffix}`}
+    </Label>
+  );
+}
+
 interface GameComponentRowProps {
   component: GameComponent;
   isSaving: boolean;
@@ -105,6 +214,8 @@ function GameComponentRow({
   onProfileChange,
 }: GameComponentRowProps) {
   const dispatch = useDispatch();
+  const [isInteractiveSearchModalOpen, setIsInteractiveSearchModalOpen] =
+    useState(false);
 
   const isSearching = useSelector(
     useMemo(
@@ -133,6 +244,14 @@ function GameComponentRow({
     );
   }, [dispatch, component.gameId, component.id]);
 
+  const handleInteractiveSearchPress = useCallback(() => {
+    setIsInteractiveSearchModalOpen(true);
+  }, []);
+
+  const handleInteractiveSearchModalClose = useCallback(() => {
+    setIsInteractiveSearchModalOpen(false);
+  }, []);
+
   const handleProfileChange = useCallback(
     ({ value }: { value: number }) => {
       onProfileChange(component.id, value);
@@ -143,8 +262,8 @@ function GameComponentRow({
   return (
     <TableRow>
       <TableRowCell>
-        <Label kind={typeKinds[component.componentType]}>
-          {component.componentType.toUpperCase()}
+        <Label kind={typeKinds[component.componentType] ?? 'info'}>
+          {getTypeLabel(component.componentType)}
         </Label>
       </TableRowCell>
 
@@ -155,6 +274,8 @@ function GameComponentRow({
       </TableRowCell>
 
       <TableRowCell>{getStatusIcon(component)}</TableRowCell>
+
+      <TableRowCell>{getNoIntroStatus(component)}</TableRowCell>
 
       <TableRowCell>
         {component.componentType === 'dlc' ? (
@@ -180,9 +301,23 @@ function GameComponentRow({
       <TableRowCell>
         <SpinnerIconButton
           name={icons.SEARCH}
-          title={translate('Search')}
+          title={translate('AutomaticSearch')}
           isSpinning={isSearching}
           onPress={handleSearchPress}
+        />
+
+        <IconButton
+          name={icons.INTERACTIVE}
+          title={translate('InteractiveSearch')}
+          onPress={handleInteractiveSearchPress}
+        />
+
+        <GameInteractiveSearchModal
+          isOpen={isInteractiveSearchModalOpen}
+          gameId={component.gameId}
+          componentId={component.id}
+          componentTitle={component.title}
+          onModalClose={handleInteractiveSearchModalClose}
         />
       </TableRowCell>
     </TableRow>
@@ -203,6 +338,18 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
       qualityProfiles.map((p) => ({ key: p.id, value: p.name }))
     );
   }, [qualityProfiles]);
+
+  const visibleComponents = useMemo(() => {
+    const hasNoIntroVariants = components.some((component) =>
+      component.componentType.startsWith('noIntro')
+    );
+
+    if (!hasNoIntroVariants) {
+      return components;
+    }
+
+    return components.filter((component) => component.componentType !== 'base');
+  }, [components]);
 
   useEffect(() => {
     let aborted = false;
@@ -292,14 +439,14 @@ function GameComponentsTable({ gameId }: GameComponentsTableProps) {
     return <LoadingIndicator />;
   }
 
-  if (!components.length) {
+  if (!visibleComponents.length) {
     return null;
   }
 
   return (
     <Table columns={columns}>
       <TableBody>
-        {components.map((component) => (
+        {visibleComponents.map((component) => (
           <GameComponentRow
             key={component.id}
             component={component}

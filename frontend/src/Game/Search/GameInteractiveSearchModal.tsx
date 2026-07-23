@@ -19,6 +19,8 @@ interface GameInteractiveSearchModalProps extends GameInteractiveSearchModalCont
 function GameInteractiveSearchModal({
   isOpen,
   gameId,
+  componentId,
+  componentTitle,
   onModalClose,
 }: GameInteractiveSearchModalProps) {
   const dispatch = useDispatch();
@@ -42,6 +44,8 @@ function GameInteractiveSearchModal({
     >
       <GameInteractiveSearchModalContent
         gameId={gameId}
+        componentId={componentId}
+        componentTitle={componentTitle}
         onModalClose={handleModalClose}
       />
     </Modal>
