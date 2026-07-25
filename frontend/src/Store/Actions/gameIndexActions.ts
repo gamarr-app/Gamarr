@@ -75,6 +75,7 @@ export const defaultState = {
   posterOptions: {
     detailedProgressBar: false,
     size: 'large',
+    groupPlatforms: true,
     showTitle: false,
     showMonitored: true,
     showQualityProfile: true,

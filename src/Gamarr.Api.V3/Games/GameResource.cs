@@ -262,10 +262,16 @@ namespace Gamarr.Api.V3.Games
 
                 Runtime = model.GameMetadata.Value.Runtime,
                 CleanTitle = model.GameMetadata.Value.CleanTitle,
-                TitleSlug = model.SteamAppId > 0 ? model.SteamAppId.ToString() :
-                            model.IgdbId > 0 ? model.IgdbId.ToString() :
-                            model.RawgId > 0 ? $"rawg-{model.RawgId}" :
-                            model.Id.ToString(),
+
+                // Platformed entries share their source ids with their
+                // siblings (#150), so the slug carries the platform — details
+                // routing is slug-based and a duplicate slug would make every
+                // sibling but the first unreachable.
+                TitleSlug = (model.SteamAppId > 0 ? model.SteamAppId.ToString() :
+                             model.IgdbId > 0 ? model.IgdbId.ToString() :
+                             model.RawgId > 0 ? $"rawg-{model.RawgId}" :
+                             model.Id.ToString()) +
+                            (model.Platform != PlatformFamily.Unknown ? $"-{model.Platform.ToString().ToLowerInvariant()}" : string.Empty),
                 RootFolderPath = model.RootFolderPath,
                 Certification = model.GameMetadata.Value.Certification,
                 Website = model.GameMetadata.Value.Website,

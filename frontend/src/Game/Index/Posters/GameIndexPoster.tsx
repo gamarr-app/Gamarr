@@ -25,6 +25,7 @@ import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import translate from 'Utilities/String/translate';
 import createGameIndexItemSelector from '../createGameIndexItemSelector';
 import GameIndexPosterInfo from './GameIndexPosterInfo';
+import GameIndexPosterPlatformStrip from './GameIndexPosterPlatformStrip';
 import selectPosterOptions from './selectPosterOptions';
 import styles from './GameIndexPoster.css';
 
@@ -34,10 +35,18 @@ interface GameIndexPosterProps {
   isSelectMode: boolean;
   posterWidth: number;
   posterHeight: number;
+  platformSiblingIds?: number[];
 }
 
 function GameIndexPoster(props: GameIndexPosterProps) {
-  const { gameId, sortKey, isSelectMode, posterWidth, posterHeight } = props;
+  const {
+    gameId,
+    sortKey,
+    isSelectMode,
+    posterWidth,
+    posterHeight,
+    platformSiblingIds,
+  } = props;
 
   const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
     useSelector(
@@ -217,6 +226,10 @@ function GameIndexPoster(props: GameIndexPosterProps) {
             <div className={styles.overlayTitle}>{title}</div>
           ) : null}
         </Link>
+
+        {platformSiblingIds && platformSiblingIds.length > 1 ? (
+          <GameIndexPosterPlatformStrip gameIds={platformSiblingIds} />
+        ) : null}
       </div>
 
       <GameIndexProgressBar
