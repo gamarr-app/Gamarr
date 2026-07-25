@@ -8,6 +8,13 @@ namespace NzbDrone.Core.Test.ParserTests
     [TestFixture]
     public class GameVersionParserFixture : CoreTest
     {
+        // Single-number update/hotfix versions from real scene names (srrdb corpus)
+        [TestCase("DELTARUNE.Update.v22-TENOKE", 22, 0, 0, 0)]
+        [TestCase("The.Last.Starship.Update.v24-TENOKE", 24, 0, 0, 0)]
+        [TestCase("Homura.Hime.Hotfix.10-RUNE", 10, 0, 0, 0)]
+        [TestCase("Escape.Simulator.2.Update.v20448r-RUNE", 20448, 0, 0, 0)]
+        [TestCase("Absolum.Update.Build.r35080-RUNE", 0, 0, 0, 35080)]
+
         // Basic dotted version parsing
         [TestCase("Cyberpunk.2077.v1.5-CODEX", 1, 5, 0, 0)]
         [TestCase("Cyberpunk.2077.v2.1-CODEX", 2, 1, 0, 0)]

@@ -94,6 +94,12 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex UpdatePatchOnlyRegex = new (@"\b(?<updateonly>UPDATE[\s._-]?ONLY|PATCH[\s._-]?ONLY|(?:UPDATE|PATCH)[\s._-]?\d+[\s._-]?ONLY|HOTFIX[\s._-]?ONLY)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Real scene updates are "Game.Update.v1.2-GRP" with no "only" marker.
+        // The version requirement keeps games whose titles contain the word
+        // (e.g. "Patch Quest") from classifying as updates.
+        private static readonly Regex VersionedUpdateRegex = new (@"\b(?:UPDATE|PATCH|HOTFIX)[\s._-]?(?:v?\d|BUILD\b)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static readonly Regex MultiLangRegex = new (@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -134,8 +140,8 @@ namespace NzbDrone.Core.Parser
             @"\((?<parenversion>\d+(?:\.\d+)+)\)|" +
             @"[\s\?\!](?<spacenov>\d+(?:\s+\d+){2,3})(?=\s|$)|" +
             @"\s(?<buildonly>\d{6,})(?=\s+MULTi)|" +
-            @"[._\-\s\[\(](?:BUILD|B)[._\-\s]?(?<build>\d+)|" +
-            @"[._\-\s\[\(](?:Update|Patch)[._\-\s\]\)]?(?<update>\d+(?:\.\d+)*)",
+            @"[._\-\s\[\(](?:BUILD|B)[._\-\s]?r?(?<build>\d+)|" +
+            @"[._\-\s\[\(](?:Update|Patch|Hotfix)[._\-\s\]\)]?v?(?<update>\d+(?:\.\d+)*)(?!\s+\d)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -310,6 +316,15 @@ namespace NzbDrone.Core.Parser
             if (UpdatePatchOnlyRegex.IsMatch(normalizedName))
             {
                 Logger.Trace("Detected update-only release: {0}", CleanseLogMessage.SanitizeLogParam(name));
+                return ReleaseContentType.UpdateOnly;
+            }
+
+            // Versioned update without an "only" marker: "Game.Update.v1.7-RUNE".
+            // Checked before the DLC patterns so "Update.v2.5.incl.DLC" stays an
+            // update (it patches the base; the bundled DLC comes along).
+            if (VersionedUpdateRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected versioned update release: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.UpdateOnly;
             }
 

@@ -26,6 +26,26 @@ namespace NzbDrone.Core.Test.ParserTests
             QualityParser.ParseContentType(title).Should().Be(expected);
         }
 
+        // Real scene update names (srrdb corpus) carry a version, not "only"
+        [TestCase("Wreckreation.Update.v1.7.0.153795-RUNE", ReleaseContentType.UpdateOnly)]
+        [TestCase("The.Hundred.Line.Last.Defense.Academy.Update.v1.2.2-RUNE", ReleaseContentType.UpdateOnly)]
+        [TestCase("Solo.Leveling.ARISE.OVERDRIVE.Update.v1.1.93-RUNE", ReleaseContentType.UpdateOnly)]
+        [TestCase("7.Days.To.Die.Update.v2.5.b23.incl.DLC-RUNE", ReleaseContentType.UpdateOnly)]
+        [TestCase("Game.Name.Patch.1.05-CODEX", ReleaseContentType.UpdateOnly)]
+        [TestCase("Game.Name.Update.Build.14332-TENOKE", ReleaseContentType.UpdateOnly)]
+        public void should_detect_versioned_update_releases(string title, ReleaseContentType expected)
+        {
+            QualityParser.ParseContentType(title).Should().Be(expected);
+        }
+
+        // Games whose titles contain update-ish words must not classify as updates
+        [TestCase("Patch.Quest-TENOKE")]
+        [TestCase("Update.Eight.Deluxe.Edition-RUNE")]
+        public void should_not_classify_titles_containing_update_words_without_version(string title)
+        {
+            QualityParser.ParseContentType(title).Should().Be(ReleaseContentType.Unknown);
+        }
+
         [TestCase("Game.Name.Season.Pass-CODEX", ReleaseContentType.SeasonPass)]
         [TestCase("Game.Name.DLC.Bundle-PLAZA", ReleaseContentType.SeasonPass)]
         [TestCase("Game.Name.Expansion.Pass-SKIDROW", ReleaseContentType.SeasonPass)]
