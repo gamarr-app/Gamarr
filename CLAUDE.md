@@ -107,15 +107,12 @@ REST/curl call.
   `Reference`, and `AddSecurityRequirement` takes a
   `Func<OpenApiDocument, OpenApiSecurityRequirement>` whose entries key off
   `OpenApiSecuritySchemeReference(id, document)`. The Debug-only OpenAPI doc at
-  `/docs/v3/openapi.json` is the runtime smoke test. History: pinned to 8.x in
-  `713c9329e3`, migrated to 10.x afterward.
+  `/docs/v3/openapi.json` is the runtime smoke test.
 - **react-router is v8; `react-router-dom` is gone.** v8 removed the
   `react-router-dom` package — import everything from `react-router`, and the
-  DOM `RouterProvider` from `react-router/dom`. This required
-  `moduleResolution: bundler` in `frontend/tsconfig.json` (was `node`) so tsc
-  can read react-router v8's package `exports` map. History: migrated off
-  react-router-dom 7 for GHSA-qwww-vcr4-c8h2 (RSC-mode CSRF, N/A to our SPA but
-  only patched in 8.3.0).
+  DOM `RouterProvider` from `react-router/dom`. This requires
+  `moduleResolution: bundler` in `frontend/tsconfig.json` so tsc can read
+  react-router v8's package `exports` map.
 - **`*.css.d.ts` files are generated** by `css-modules-typescript-loader`.
   Don't run Prettier on them (it strips the quoted property names the loader
   emits). They're listed in `.prettierignore` / `frontend/.prettierignore`.
@@ -125,12 +122,10 @@ REST/curl call.
   (`frontend/build/webpack.config.js`).
 - **Steam Store API throttling.** `appdetails` bursts trigger undocumented 403s.
   `SteamStoreProxy` throttles to 1 req/sec. Never put per-item Steam fetches
-  inside loops driven by user search/typeahead — see commit `550b659407` for
-  the kind of N+1 we already had to fix.
+  inside loops driven by user search/typeahead (N+1 request storms).
 - **ClamAV daemon disabled by default** to save ~1 GB RAM. We invoke
   `clamscan` standalone. Daemon mode is gated behind the `CLAMAV_DAEMON` env
-  var. See `src/NzbDrone.Core/MediaFiles/VirusScanning/ClamAvScannerService.cs`
-  and commits `036f7fae09` / `0d0b56b178`.
+  var. See `src/NzbDrone.Core/MediaFiles/VirusScanning/ClamAvScannerService.cs`.
 - **`Environment.UserInteractive` returns true on headless Linux.** The
   browser-launch path in `src/NzbDrone.Host/BrowserService.cs` additionally
   checks `DISPLAY` / `WAYLAND_DISPLAY` before opening a browser.
@@ -152,9 +147,9 @@ REST/curl call.
 ## CI quirks
 
 - `actions/download-artifact` is pinned to **v4**. v8 has a Linux
-  digest-mismatch regression (commit `29a9f4d160`).
+  digest-mismatch regression.
 - Integration / automation tests reference `_tests/net10.0/*.dll`. If you
-  retarget the runtime, update the workflow paths too (commit `1648d343d1`).
+  retarget the runtime, update the workflow paths too.
 - Dependabot minor/patch PRs are auto-merged; majors are split into individual
   PRs by severity (`.github/workflows/dependabot-automerge.yml`).
 
