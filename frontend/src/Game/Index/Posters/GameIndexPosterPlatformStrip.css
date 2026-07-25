@@ -6,6 +6,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
+
   padding: 2px;
   width: 100%;
   background-color: rgb(0 0 0 / 70%);
@@ -15,6 +16,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
+
   padding: 1px 5px;
   border-radius: 3px;
   background-color: rgb(255 255 255 / 15%);
