@@ -17,6 +17,7 @@ interface DiscoverGameDefaults {
   qualityProfileId: number;
   minimumAvailability: string;
   searchForGame: boolean;
+  platform: string;
   tags: number[];
 }
 
@@ -87,6 +88,7 @@ function AddNewDiscoverGameModalContentConnector({
     qualityProfileId,
     minimumAvailability,
     searchForGame,
+    platform,
     tags,
   } = settings;
 
@@ -107,6 +109,7 @@ function AddNewDiscoverGameModalContentConnector({
         qualityProfileId: qualityProfileId.value,
         minimumAvailability: minimumAvailability.value,
         searchForGame: searchForGame.value,
+        platform: platform.value,
         tags: tags.value,
       })
     );
@@ -121,6 +124,7 @@ function AddNewDiscoverGameModalContentConnector({
     qualityProfileId,
     minimumAvailability,
     searchForGame,
+    platform,
     tags,
     onModalClose,
   ]);
@@ -140,6 +144,7 @@ function AddNewDiscoverGameModalContentConnector({
       qualityProfileId={qualityProfileId}
       minimumAvailability={minimumAvailability}
       searchForGame={searchForGame}
+      platform={platform}
       tags={tags}
       folder={folder}
       onModalClose={onModalClose}

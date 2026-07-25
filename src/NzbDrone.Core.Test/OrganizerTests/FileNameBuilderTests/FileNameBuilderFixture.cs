@@ -12,9 +12,11 @@ using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
+using NzbDrone.Core.RomCatalog;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
@@ -171,6 +173,39 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
             Subject.BuildFileName(_game, _gameFile)
                    .Should().Be("South Park");
+        }
+
+        [Test]
+        public void should_use_nointro_catalog_filename_when_nointro_profile_is_selected()
+        {
+            _namingConfig.RenameProfile = RenameProfile.NoIntroPreserveById;
+            _gameFile.ComponentId = 50;
+            _gameFile.RelativePath = "Mario Kart DS (2005) Unknown - Gamarr.nds";
+
+            Mocker.GetMock<IGameComponentRepository>()
+                .Setup(x => x.Get(50))
+                .Returns(new GameComponent
+                {
+                    Id = 50,
+                    Title = "Mario Kart DS (Europe) (En,Fr,De,Es,It)"
+                });
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                .Setup(x => x.All())
+                .Returns(new[]
+                {
+                    new NoIntroCatalogEntry
+                    {
+                        SystemKey = "nintendo---nintendo-ds",
+                        CanonicalName = "Mario Kart DS (Europe) (En,Fr,De,Es,It)",
+                        CanonicalFileName = "Mario Kart DS (Europe) (En,Fr,De,Es,It).nds",
+                        ReleaseNumber = "0201",
+                        NumberedCanonicalFileName = "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds"
+                    }
+                });
+
+            Subject.BuildFileName(_game, _gameFile)
+                .Should().Be("0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It)");
         }
 
         [Test]

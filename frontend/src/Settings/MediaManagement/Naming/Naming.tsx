@@ -126,6 +126,18 @@ function Naming() {
     },
   ];
 
+  const renameProfileOptions = [
+    { key: 'gamarr', value: translate('RenameProfileGamarr') },
+    {
+      key: 'noIntroPreserveById',
+      value: translate('RenameProfileNoIntroNumbered'),
+    },
+    {
+      key: 'noIntroCanonical',
+      value: translate('RenameProfileNoIntroCanonical'),
+    },
+  ];
+
   const standardGameFormatHelpTexts = [];
   const standardGameFormatErrors = [];
   const gameFolderFormatHelpTexts = [];
@@ -172,6 +184,19 @@ function Naming() {
               helpText={translate('RenameGamesHelpText')}
               onChange={handleInputChange}
               {...settings.renameGames}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('RenameProfile')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.SELECT}
+              name="renameProfile"
+              values={renameProfileOptions}
+              helpText={translate('RenameProfileHelpText')}
+              onChange={handleInputChange}
+              {...settings.renameProfile}
             />
           </FormGroup>
 
