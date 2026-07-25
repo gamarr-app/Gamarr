@@ -185,6 +185,45 @@ namespace NzbDrone.Core.MetadataSource.Steam
             return game;
         }
 
+        // dlcforapp returns every visible DLC's id + name in a single call,
+        // unlike appdetails which lists bare ids (and would need one request
+        // per DLC to resolve names — the N+1 the 1 req/sec throttle forbids).
+        private List<DlcReference> FetchDlcReferences(int steamAppId)
+        {
+            var request = new HttpRequestBuilder($"{StoreApiBaseUrl}dlcforapp/")
+                .AddQueryParam("appid", steamAppId)
+                .Accept(HttpAccept.Json)
+                .Build();
+
+            try
+            {
+                EnforceRateLimit();
+                var response = _httpClient.Get(request);
+
+                return ParseDlcForApp(response.Content);
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Failed to fetch DLC names for Steam App ID {0}", steamAppId);
+                return new List<DlcReference>();
+            }
+        }
+
+        internal static List<DlcReference> ParseDlcForApp(string json)
+        {
+            var parsed = JObject.Parse(json);
+
+            if (parsed["status"]?.Value<int>() != 1 || parsed["dlc"] is not JArray dlcArray)
+            {
+                return new List<DlcReference>();
+            }
+
+            return dlcArray
+                .Select(d => new DlcReference(d["id"]?.Value<int>() ?? 0, d["name"]?.Value<string>(), DlcReference.SteamSource))
+                .Where(d => d.Id > 0 && !string.IsNullOrWhiteSpace(d.Name))
+                .ToList();
+        }
+
         private GameMetadata MapSteamGame(SteamGameData data)
         {
             var game = new GameMetadata
@@ -230,12 +269,13 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 }
             }
 
-            // Set DLC IDs if this is a base game. Steam returns IDs only;
-            // names + type filtering happen when DLC metadata is enriched from IGDB.
+            // Set DLC IDs if this is a base game. appdetails returns IDs only;
+            // names come from the dlcforapp endpoint (one extra throttled call
+            // per base game) so Steam-only games get DLC component slots too.
             if (data.Dlc != null && data.Dlc.Any())
             {
                 game.SteamDlcIds = data.Dlc.ToList();
-                game.DlcReferences = new List<DlcReference>();
+                game.DlcReferences = FetchDlcReferences(data.Steam_Appid);
             }
 
             // Set ratings - only Metacritic since Steam doesn't have IGDB ratings

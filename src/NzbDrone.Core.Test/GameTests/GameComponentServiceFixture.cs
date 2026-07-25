@@ -241,5 +241,78 @@ namespace NzbDrone.Core.Test.GameTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(m => m.Update(It.Is<List<GameFile>>(l => l.Count == 2)), Times.Once());
         }
+
+        [Test]
+        public void should_create_steam_keyed_slots_for_steam_sourced_dlc_references()
+        {
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>
+            {
+                new DlcReference(2950840, "Hades II Original Soundtrack", DlcReference.SteamSource)
+            };
+
+            var inserted = CapturedInserts();
+
+            inserted.Should().Contain(c => c.ComponentType == GameComponentType.Dlc &&
+                                           c.Key == "steam:2950840" &&
+                                           c.Title == "Hades II Original Soundtrack" &&
+                                           !c.Monitored);
+        }
+
+        [Test]
+        public void should_not_duplicate_slot_when_steam_reference_matches_existing_igdb_slot_by_title()
+        {
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>
+            {
+                new DlcReference(555, "The Blood Price", DlcReference.SteamSource)
+            };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent>
+                  {
+                      new GameComponent { Id = 1, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" },
+                      new GameComponent { Id = 12, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "igdb:111", Title = "The Blood Price" }
+                  });
+
+            Subject.EnsureComponents(_game);
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Verify(r => r.InsertMany(It.IsAny<IList<GameComponent>>()), Times.Never());
+        }
+
+        [Test]
+        public void should_merge_import_slot_into_steam_keyed_metadata_slot()
+        {
+            var steamSlot = new GameComponent { Id = 12, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "steam:2950840", Title = "The Blood Price", Monitored = false };
+            var importSlot = new GameComponent { Id = 20, GameId = _game.Id, ComponentType = GameComponentType.Dlc, Key = "import:Hades.The.Blood.Price.DLC-GRP", Title = "Hades.The.Blood.Price.DLC-GRP", Monitored = true };
+
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>
+            {
+                new DlcReference(2950840, "The Blood Price", DlcReference.SteamSource)
+            };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent>
+                  {
+                      new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" },
+                      steamSlot,
+                      importSlot
+                  });
+
+            var dlcFile = new GameFile { Id = 3, GameId = _game.Id, RelativePath = "DLC/Hades.The.Blood.Price.DLC-GRP", ComponentId = 20 };
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { dlcFile });
+
+            Subject.EnsureComponents(_game);
+
+            dlcFile.ComponentId.Should().Be(12);
+            steamSlot.Monitored.Should().BeTrue();
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Verify(r => r.Delete(importSlot), Times.Once());
+        }
     }
 }

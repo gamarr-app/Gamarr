@@ -315,5 +315,99 @@ namespace NzbDrone.Core.Test.Games
 
             callOrder.Should().ContainInOrder("upsert", "add");
         }
+
+        [Test]
+        public void should_reject_steam_dlc_as_standalone_entry()
+        {
+            _steamMetadata.GameType = GameType.DlcAddon;
+
+            Mocker.GetMock<IProvideGameInfo>()
+                  .Setup(s => s.GetGameBySteamAppId(570))
+                  .Returns(_steamMetadata);
+
+            var ex = Assert.Throws<ValidationException>(() => Subject.AddGame(_newGame));
+            ex.Message.Should().Contain("DLC");
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(v => v.AddGame(It.IsAny<Game>()), Times.Never());
+        }
+
+        [Test]
+        public void should_reject_igdb_dlc_as_standalone_entry()
+        {
+            var dlcGame = new Game
+            {
+                GameMetadata = new GameMetadata
+                {
+                    SteamAppId = 0,
+                    IgdbId = 5000,
+                    Title = "Some DLC",
+                    CleanTitle = "somedlc",
+                    SortTitle = "some dlc"
+                },
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
+                QualityProfileId = 1,
+                Monitored = true,
+                Tags = new HashSet<int>()
+            };
+
+            _steamMetadata.GameType = GameType.DlcAddon;
+
+            Mocker.GetMock<IProvideGameInfo>()
+                  .Setup(s => s.GetGameInfoByIgdbId(5000))
+                  .Returns(_steamMetadata);
+
+            Assert.Throws<ValidationException>(() => Subject.AddGame(dlcGame));
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(v => v.AddGame(It.IsAny<Game>()), Times.Never());
+        }
+
+        [Test]
+        public void should_skip_dlc_entries_in_batch_add_when_ignoring_errors()
+        {
+            var dlcMetadata = new GameMetadata
+            {
+                SteamAppId = 571,
+                IgdbId = 5001,
+                Title = "Dota 2 Soundtrack",
+                CleanTitle = "dota2soundtrack",
+                SortTitle = "dota 2 soundtrack",
+                GameType = GameType.DlcAddon
+            };
+
+            var dlcGame = new Game
+            {
+                GameMetadata = new GameMetadata { SteamAppId = 571, IgdbId = 5001, Title = "Dota 2 Soundtrack" },
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
+                QualityProfileId = 1,
+                Tags = new HashSet<int>()
+            };
+
+            Mocker.GetMock<IProvideGameInfo>()
+                  .Setup(s => s.GetGameInfoByIgdbId(5000))
+                  .Returns(_steamMetadata);
+
+            Mocker.GetMock<IProvideGameInfo>()
+                  .Setup(s => s.GetGameInfoByIgdbId(5001))
+                  .Returns(dlcMetadata);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.AddGames(It.IsAny<List<Game>>()))
+                  .Returns<List<Game>>(g => g);
+
+            var baseGame = new Game
+            {
+                GameMetadata = new GameMetadata { SteamAppId = 570, IgdbId = 5000, Title = "Dota 2" },
+                RootFolderPath = @"C:\games".AsOsAgnostic(),
+                QualityProfileId = 1,
+                Tags = new HashSet<int>()
+            };
+
+            var result = Subject.AddGames(new List<Game> { baseGame, dlcGame }, true);
+
+            result.Should().HaveCount(1);
+            result[0].GameMetadata.Value.Title.Should().Be("Dota 2");
+        }
     }
 }
