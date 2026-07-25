@@ -19,6 +19,14 @@ namespace NzbDrone.Core.Test.MediaFiles
         [TestCase(@"setup.exe")]
         [TestCase(@"game.iso")]
         [TestCase(@"data1.bin")]
+        [TestCase(@"0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds")]
+        [TestCase(@"Pokemon Emerald Version (Germany).gba")]
+        [TestCase(@"Super Mario Bros.nes")]
+        [TestCase(@"Super Mario World.sfc")]
+        [TestCase(@"Mario Kart 64.z64")]
+        [TestCase(@"The Legend of Zelda Breath of the Wild.xci")]
+        [TestCase(@"Metroid Prime.rvz")]
+        [TestCase(@"No-Intro archive.zip")]
         public void should_recognize_game_file(string fileName)
         {
             MediaFileExtensions.IsGameFileExtension(Path.GetExtension(fileName)).Should().BeTrue();

@@ -16,6 +16,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             PlatformFamily.PlayStation,
             PlatformFamily.Xbox,
             PlatformFamily.Nintendo,
+            PlatformFamily.NintendoSwitch,
+            PlatformFamily.NintendoWiiU,
+            PlatformFamily.NintendoWii,
+            PlatformFamily.Nintendo3DS,
+            PlatformFamily.NintendoDS,
+            PlatformFamily.NintendoGBA,
+            PlatformFamily.NintendoGB,
+            PlatformFamily.NintendoGBC,
             PlatformFamily.Sega,
             PlatformFamily.Atari,
             PlatformFamily.Mobile
@@ -43,7 +51,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             if (gamePlatform != PlatformFamily.Unknown)
             {
-                if (releasePlatform == gamePlatform)
+                if (GamePlatform.PlatformMatches(gamePlatform, releasePlatform))
                 {
                     return DownloadSpecDecision.Accept();
                 }
@@ -73,7 +81,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     return DownloadSpecDecision.Accept();
                 }
 
-                if (preferredPlatforms.Contains(releasePlatform))
+                if (preferredPlatforms.Any(platform => GamePlatform.PlatformMatches(platform, releasePlatform)))
                 {
                     _logger.Debug("Release platform {0} matches preferred platforms, accepting.", releasePlatform);
                     return DownloadSpecDecision.Accept();

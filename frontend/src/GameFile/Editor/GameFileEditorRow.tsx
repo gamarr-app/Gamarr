@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
@@ -14,9 +15,22 @@ import translate from 'Utilities/String/translate';
 import FileDetailsModal from '../FileDetailsModal';
 import styles from './GameFileEditorRow.css';
 
+type ComponentLabelKind =
+  | 'warning'
+  | 'danger'
+  | 'default'
+  | 'disabled'
+  | 'info'
+  | 'inverse'
+  | 'primary'
+  | 'success'
+  | 'queue';
+
 interface GameFileEditorRowProps {
   id: number;
   path?: string;
+  componentType: string;
+  componentTitle?: string;
   size: number;
   relativePath: string;
   sceneName?: string;
@@ -32,6 +46,8 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
   const {
     id,
     path,
+    componentType,
+    componentTitle,
     relativePath,
     size,
     sceneName,
@@ -82,6 +98,38 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
     path?.split(/[/\\]/).filter(Boolean).pop() ||
     translate('GameFolder');
 
+  const componentKinds: Record<string, ComponentLabelKind> = {
+    base: kinds.INFO,
+    update: kinds.SUCCESS,
+    dlc: kinds.PRIMARY,
+    noIntroRetailRom: kinds.INFO,
+    noIntroMultiboot: kinds.SUCCESS,
+    noIntroVideo: kinds.PRIMARY,
+    noIntroBios: kinds.WARNING,
+    noIntroRomhackOrUnverified: kinds.DANGER,
+    file: kinds.DEFAULT,
+  };
+
+  const componentLabels: Record<string, string> = {
+    base: 'BASE',
+    update: 'UPDATE',
+    dlc: 'DLC',
+    noIntroRetailRom: 'REGIONAL VARIANT',
+    noIntroMultiboot: 'RELEASE VARIANT',
+    noIntroVideo: 'VIDEO',
+    noIntroBios: 'BIOS',
+    noIntroRomhackOrUnverified: 'UNVERIFIED',
+    file: 'FILE',
+  };
+
+  const fallbackComponentLabels: Record<string, string> = {
+    nointroretailrom: 'REGIONAL VARIANT',
+    nointromultiboot: 'RELEASE VARIANT',
+    nointrovideo: 'VIDEO',
+    nointrobios: 'BIOS',
+    nointroromhackorunverified: 'UNVERIFIED',
+  };
+
   return (
     <TableRow>
       {columns.map((column) => {
@@ -119,6 +167,26 @@ function GameFileEditorRow(props: GameFileEditorRowProps) {
               title={String(size)}
             >
               {formatBytes(size)}
+            </TableRowCell>
+          );
+        }
+
+        if (name === 'componentTitle') {
+          if (!componentTitle) {
+            return <TableRowCell key={name}>-</TableRowCell>;
+          }
+
+          return (
+            <TableRowCell key={name} className={styles.component}>
+              <div className={styles.componentContent}>
+                <Label kind={componentKinds[componentType] ?? kinds.DEFAULT}>
+                  {componentLabels[componentType] ??
+                    fallbackComponentLabels[componentType.toLowerCase()] ??
+                    componentType}
+                </Label>
+
+                <span className={styles.componentTitle}>{componentTitle}</span>
+              </div>
             </TableRowCell>
           );
         }

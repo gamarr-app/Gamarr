@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
@@ -20,6 +20,7 @@ import {
   OnChildStateChange,
   SetChildSave,
 } from 'typings/Settings/SettingsState';
+import createAjaxRequest from 'Utilities/createAjaxRequest';
 import translate from 'Utilities/String/translate';
 
 const SECTION = 'metadataOptions';
@@ -45,11 +46,37 @@ interface MetadataOptionsProps {
   onChildStateChange: OnChildStateChange;
 }
 
+interface NoIntroCatalogSourceStatus {
+  id: number;
+  name: string;
+  catalogVersion?: string;
+  lastSuccessfulSync?: string;
+  lastAttemptedSync?: string;
+  lastSyncError?: string;
+  entryCount: number;
+}
+
+interface NoIntroCatalogStatus {
+  sources: NoIntroCatalogSourceStatus[];
+}
+
+function fetchNoIntroCatalogStatus() {
+  return createAjaxRequest({
+    url: '/romcatalog/status',
+    dataType: 'json',
+  }).request;
+}
+
 function MetadataOptions({
   setChildSave,
   onChildStateChange,
 }: MetadataOptionsProps) {
   const dispatch = useDispatch();
+  const [noIntroStatus, setNoIntroStatus] =
+    useState<NoIntroCatalogStatus | null>(null);
+  const [noIntroStatusError, setNoIntroStatusError] = useState<string | null>(
+    null
+  );
   const {
     isFetching,
     isPopulated,
@@ -71,6 +98,19 @@ function MetadataOptions({
     dispatch(fetchMetadataOptions());
     setChildSave(() => dispatch(saveMetadataOptions()));
   }, [dispatch, setChildSave]);
+
+  useEffect(() => {
+    fetchNoIntroCatalogStatus()
+      .done(setNoIntroStatus)
+      .fail((error: unknown) => {
+        if (error instanceof Error) {
+          setNoIntroStatusError(error.message);
+          return;
+        }
+
+        setNoIntroStatusError('Unable to load No-Intro catalog status');
+      });
+  }, []);
 
   useEffect(() => {
     onChildStateChange({
@@ -147,6 +187,38 @@ function MetadataOptions({
               {...settings.rawgApiKey}
             />
           </FormGroup>
+
+          {noIntroStatusError ? (
+            <FormGroup>
+              <FormLabel>No-Intro DB</FormLabel>
+
+              <div>{noIntroStatusError}</div>
+            </FormGroup>
+          ) : null}
+
+          {noIntroStatus ? (
+            <FormGroup>
+              <FormLabel>No-Intro DB</FormLabel>
+
+              <div>
+                {noIntroStatus.sources.map((source) => {
+                  const version = source.catalogVersion ?? 'unknown version';
+                  const synced = source.lastSuccessfulSync
+                    ? new Date(source.lastSuccessfulSync).toLocaleString()
+                    : 'never synced';
+                  const status = `${source.name}: ${version}, ${source.entryCount} entries, synced ${synced}`;
+
+                  return (
+                    <div key={source.id}>
+                      {source.lastSyncError
+                        ? `${status} (${source.lastSyncError})`
+                        : status}
+                    </div>
+                  );
+                })}
+              </div>
+            </FormGroup>
+          ) : null}
         </Form>
       ) : null}
     </FieldSet>

@@ -19,11 +19,15 @@ import translate from 'Utilities/String/translate';
 
 export interface GameInteractiveSearchModalContentProps {
   gameId: number;
+  componentId?: number;
+  componentTitle?: string;
   onModalClose(): void;
 }
 
 function GameInteractiveSearchModalContent({
   gameId,
+  componentId,
+  componentTitle,
   onModalClose,
 }: GameInteractiveSearchModalContentProps) {
   const dispatch = useDispatch();
@@ -41,19 +45,22 @@ function GameInteractiveSearchModalContent({
   }, [dispatch]);
 
   const gameTitle = `${title}${year > 0 ? ` (${year})` : ''}`;
+  const modalTitle = componentTitle
+    ? `${gameTitle} - ${componentTitle}`
+    : gameTitle;
 
   return (
     <ModalContent onModalClose={onModalClose}>
       <ModalHeader>
-        {gameTitle
+        {modalTitle
           ? translate('InteractiveSearchModalHeaderTitle', {
-              title: gameTitle,
+              title: modalTitle,
             })
           : translate('InteractiveSearchModalHeader')}
       </ModalHeader>
 
       <ModalBody scrollDirection={scrollDirections.BOTH}>
-        <InteractiveSearch searchPayload={{ gameId }} />
+        <InteractiveSearch searchPayload={{ gameId, componentId }} />
       </ModalBody>
 
       <ModalFooter>

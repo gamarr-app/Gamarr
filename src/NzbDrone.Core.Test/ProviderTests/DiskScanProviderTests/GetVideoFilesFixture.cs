@@ -23,6 +23,8 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
                             @"Game2.exe",
                             @"Game3.rar",
                             @"Game4.zip",
+                            @"Mario Kart DS.nds",
+                            @"Pokemon Emerald.gba",
                             @"readme.txt",
                             @"game"
                         };
@@ -80,7 +82,7 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
             var path = @"C:\Test\";
             GivenFiles(GetFiles(path));
 
-            Subject.GetVideoFiles(path).Should().HaveCount(4);
+            Subject.GetVideoFiles(path).Should().HaveCount(6);
         }
 
         [TestCase("Extras")]
