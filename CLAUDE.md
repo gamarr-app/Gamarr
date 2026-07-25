@@ -41,7 +41,7 @@ false verification more than once):
 make backend      # dotnet build src/Gamarr.sln (prints the output dll mtime)
 make frontend     # yarn build (production UI into _output/UI)
 make build        # both
-make check        # yarn lint + tsc + jest
+make check        # yarn lint + tsc + stylelint + jest (matches CI's frontend jobs)
 make test         # backend unit tests — MUST run with the sandbox disabled:
                   # the Claude Code sandbox SIGKILLs dotnet testhost children
 make smoke        # throwaway instance on :6968, auth disabled, prints API key
