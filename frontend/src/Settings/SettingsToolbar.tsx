@@ -1,5 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
-import { useBeforeUnload, useNavigate } from 'react-router-dom';
+import { useBeforeUnload, useNavigate } from 'react-router';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
 import PageToolbarButton, {
   PageToolbarButtonProps,

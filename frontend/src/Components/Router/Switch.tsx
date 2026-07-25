@@ -1,5 +1,5 @@
 import React, { Children, ReactElement, ReactNode } from 'react';
-import { Routes } from 'react-router-dom';
+import { Routes } from 'react-router';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 
 interface ExtendedRoute {

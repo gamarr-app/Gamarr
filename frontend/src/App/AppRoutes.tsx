@@ -1,4 +1,4 @@
-import { Route } from 'react-router-dom';
+import { Route } from 'react-router';
 import Blocklist from 'Activity/Blocklist/Blocklist';
 import History from 'Activity/History/History';
 import Queue from 'Activity/Queue/Queue';

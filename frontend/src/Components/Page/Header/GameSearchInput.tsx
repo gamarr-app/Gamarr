@@ -11,7 +11,7 @@ import {
 } from 'react';
 import Autosuggest from 'react-autosuggest';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { createSelector } from 'reselect';
 import { useDebouncedCallback } from 'use-debounce';
 import { Tag } from 'App/State/TagsAppState';

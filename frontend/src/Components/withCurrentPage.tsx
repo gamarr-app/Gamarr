@@ -1,5 +1,5 @@
 import { ComponentType } from 'react';
-import { useNavigationType } from 'react-router-dom';
+import { useNavigationType } from 'react-router';
 
 interface InjectedProps {
   useCurrentPage: boolean;

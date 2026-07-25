@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { createSelector } from 'reselect';
 import {
   addRootFolder,
