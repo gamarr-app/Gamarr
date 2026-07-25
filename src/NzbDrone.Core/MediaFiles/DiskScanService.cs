@@ -291,7 +291,14 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     var relativePath = Path.Combine(container, Path.GetFileName(dir));
 
-                    if (existingGameFiles.Any(f => f.RelativePath.IsNotNullOrWhiteSpace() && f.RelativePath.PathEquals(relativePath)))
+                    // PathEquals rejects non-rooted paths, so relative paths
+                    // must be compared as normalized strings (Sentry 7620897427:
+                    // the throw aborted every rescan of a game with tracked
+                    // DLC/ files).
+                    var normalized = relativePath.Replace('\\', '/');
+
+                    if (existingGameFiles.Any(f => f.RelativePath.IsNotNullOrWhiteSpace() &&
+                                                   f.RelativePath.Replace('\\', '/').Equals(normalized, StringComparison.OrdinalIgnoreCase)))
                     {
                         continue;
                     }
