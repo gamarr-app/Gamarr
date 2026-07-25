@@ -438,12 +438,13 @@ namespace NzbDrone.Core.Test.ParserTests
             QualityParser.ParseQuality(title).Quality.Should().Be(Quality.Unknown);
         }
 
-        // Lies of P releases - Hotfix in title triggers UpdateOnly
+        // A repacker bundle that mentions a hotfix is still a full repack:
+        // classifying it UpdateOnly got these releases rejected as
+        // "Update Only is not wanted in profile" despite being complete games.
         [TestCase("Lies of P [v 1.5.0.0 Hotfix + DLCs] (2023) PC | RePack от Decepticon | Deluxe Edition")]
-        public void should_parse_lies_of_p_with_hotfix_as_update_only(string title)
+        public void should_parse_lies_of_p_repack_with_hotfix_as_full_repack(string title)
         {
-            // "Hotfix" keyword triggers UpdateOnly quality
-            QualityParser.ParseQuality(title).Quality.Should().Be(Quality.UpdateOnly);
+            QualityParser.ParseQuality(title).Quality.Should().Be(Quality.RepackAllDLC);
         }
 
         // Lies of P without Hotfix
