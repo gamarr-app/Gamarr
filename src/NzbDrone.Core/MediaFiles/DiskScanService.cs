@@ -332,9 +332,18 @@ namespace NzbDrone.Core.MediaFiles
                     continue;
                 }
 
-                _diskProvider.CreateFolder(Path.Combine(game.Path, "DLC"));
-                _diskProvider.MoveFolder(dir, destination);
-                _logger.Info("Split bundled DLC '{0}' (matches '{1}') into '{2}'", name, slot.Title, destination);
+                try
+                {
+                    _diskProvider.CreateFolder(Path.Combine(game.Path, "DLC"));
+                    _diskProvider.MoveFolder(dir, destination);
+                    _logger.Info("Split bundled DLC '{0}' (matches '{1}') into '{2}'", name, slot.Title, destination);
+                }
+                catch (Exception ex)
+                {
+                    // A locked or partially-written folder must not abort the whole scan;
+                    // leave it in place and carry on with the remaining folders.
+                    _logger.Warn(ex, "Failed to split bundled DLC '{0}' into '{1}' — leaving in place", name, destination);
+                }
             }
         }
 
