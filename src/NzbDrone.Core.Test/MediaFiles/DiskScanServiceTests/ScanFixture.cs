@@ -51,6 +51,10 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Setup(s => s.GetFilesByGame(It.IsAny<int>()))
                   .Returns(new List<GameFile>());
+
+            Mocker.GetMock<NzbDrone.Core.Games.Components.IGameComponentRepository>()
+                  .Setup(s => s.GetByGame(It.IsAny<int>()))
+                  .Returns(new List<NzbDrone.Core.Games.Components.GameComponent>());
         }
 
         private void GivenRootFolder(params string[] subfolders)
@@ -484,6 +488,106 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == Path.Combine("Updates", "v1.7.1"))), Times.Once());
+        }
+
+        private void GivenDlcSlot(string title)
+        {
+            Mocker.GetMock<NzbDrone.Core.Games.Components.IGameComponentRepository>()
+                  .Setup(s => s.GetByGame(_game.Id))
+                  .Returns(new List<NzbDrone.Core.Games.Components.GameComponent>
+                  {
+                      new NzbDrone.Core.Games.Components.GameComponent
+                      {
+                          Id = 12,
+                          GameId = _game.Id,
+                          ComponentType = NzbDrone.Core.Games.Components.GameComponentType.Dlc,
+                          Key = "igdb:111",
+                          Title = title
+                      }
+                  });
+        }
+
+        [Test]
+        public void should_split_bundled_dlc_folder_matching_metadata_slot_with_packaged_payload()
+        {
+            GivenGameFolder();
+            GivenDlcSlot("The Blood Price");
+
+            var dlcDir = Path.Combine(_game.Path, "The.Blood.Price.DLC").AsOsAgnostic();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(dlcDir, "dlc.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(_game.Path))
+                  .Returns(new[] { dlcDir });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(dlcDir, false))
+                  .Returns(new[] { Path.Combine(dlcDir, "dlc.iso").AsOsAgnostic() });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.MoveFolder(
+                      dlcDir,
+                      Path.Combine(_game.Path, "DLC", "The.Blood.Price.DLC").AsOsAgnostic(),
+                      false), Times.Once());
+        }
+
+        [Test]
+        public void should_not_split_matching_folder_without_packaged_payload()
+        {
+            GivenGameFolder();
+            GivenDlcSlot("The Blood Price");
+
+            var dlcDir = Path.Combine(_game.Path, "The.Blood.Price.DLC").AsOsAgnostic();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(dlcDir, "content.pak").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(_game.Path))
+                  .Returns(new[] { dlcDir });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(dlcDir, false))
+                  .Returns(new[] { Path.Combine(dlcDir, "content.pak").AsOsAgnostic() });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.MoveFolder(It.IsAny<string>(), It.IsAny<string>(), false), Times.Never());
+        }
+
+        [Test]
+        public void should_not_split_folder_that_matches_no_dlc_slot()
+        {
+            GivenGameFolder();
+            GivenDlcSlot("The Blood Price");
+
+            var otherDir = Path.Combine(_game.Path, "soundtrack").AsOsAgnostic();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(otherDir, "music.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(_game.Path))
+                  .Returns(new[] { otherDir });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.MoveFolder(It.IsAny<string>(), It.IsAny<string>(), false), Times.Never());
         }
     }
 }
