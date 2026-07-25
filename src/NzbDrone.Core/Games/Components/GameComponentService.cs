@@ -104,7 +104,25 @@ namespace NzbDrone.Core.Games.Components
             {
                 foreach (var dlc in metadata.DlcReferences.Where(d => d.Id > 0 && d.Name.IsNotNullOrWhiteSpace()))
                 {
-                    var component = FindOrStage(existing, toInsert, game, GameComponentType.Dlc, $"igdb:{dlc.Id}", dlc.Name, monitored: false);
+                    var source = dlc.Source.IsNotNullOrWhiteSpace() ? dlc.Source : DlcReference.IgdbSource;
+                    var key = $"{source}:{dlc.Id}";
+
+                    // The same DLC can arrive from both id spaces across
+                    // refreshes (IGDB one time, Steam the next). If no slot
+                    // has this exact key but one from the other source
+                    // matches by title, keep that one instead of creating a
+                    // same-DLC sibling.
+                    var exact = existing.Concat(toInsert).Any(c => c.ComponentType == GameComponentType.Dlc && c.Key == key);
+
+                    if (!exact && existing.Concat(toInsert).Any(c => c.ComponentType == GameComponentType.Dlc &&
+                                                                     IsMetadataDlcKey(c.Key) &&
+                                                                     (GameComponentMatcher.ReleaseMatchesDlcTitle(dlc.Name, c.Title) ||
+                                                                      GameComponentMatcher.ReleaseMatchesDlcTitle(c.Title, dlc.Name))))
+                    {
+                        continue;
+                    }
+
+                    var component = FindOrStage(existing, toInsert, game, GameComponentType.Dlc, key, dlc.Name, monitored: false);
                     component.ExternalId = dlc.Id;
                 }
             }
@@ -162,7 +180,7 @@ namespace NzbDrone.Core.Games.Components
         // missing.
         private void MergeDuplicateDlcSlots(List<GameComponent> existing, List<GameFile> files)
         {
-            var metadataSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("igdb:")).ToList();
+            var metadataSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && IsMetadataDlcKey(c.Key)).ToList();
             var importSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("import:")).ToList();
 
             foreach (var importSlot in importSlots)
@@ -218,7 +236,7 @@ namespace NzbDrone.Core.Games.Components
                 // creating an import-keyed duplicate. Having the file on disk
                 // implies the user wants this DLC, so the slot turns monitored.
                 var metadataSlot = existing.Concat(toInsert)
-                    .Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("igdb:"))
+                    .Where(c => c.ComponentType == GameComponentType.Dlc && IsMetadataDlcKey(c.Key))
                     .FirstOrDefault(c => GameComponentMatcher.ReleaseMatchesDlcTitle(name, c.Title));
 
                 if (metadataSlot != null)
@@ -241,6 +259,13 @@ namespace NzbDrone.Core.Games.Components
 
             // Legacy file-based records belong to the base slot.
             return baseComponent;
+        }
+
+        // Metadata-sourced DLC slots are keyed by their provider's id space;
+        // import-keyed slots ("import:<folder>") are provisional until merged.
+        private static bool IsMetadataDlcKey(string key)
+        {
+            return key.StartsWith("igdb:") || key.StartsWith("steam:");
         }
 
         private static GameComponent FindOrStage(List<GameComponent> existing, List<GameComponent> toInsert, Game game, GameComponentType type, string key, string title, bool monitored)

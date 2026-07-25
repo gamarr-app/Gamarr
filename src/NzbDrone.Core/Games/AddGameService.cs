@@ -139,6 +139,8 @@ namespace NzbDrone.Core.Games
                     });
                 }
 
+                EnsureNotDlc(metadata);
+
                 game.GameMetadata = metadata;
                 game.ApplyChanges(newGame);
                 return game;
@@ -169,10 +171,29 @@ namespace NzbDrone.Core.Games
                                               });
             }
 
+            EnsureNotDlc(igdbMetadata);
+
             game.GameMetadata = igdbMetadata;
             game.ApplyChanges(newGame);
 
             return game;
+        }
+
+        // DLC belongs under its base game as a component slot, not as a
+        // standalone library entry (#149). Blocking here covers interactive
+        // adds, Discover, and import-list syncs (which skip failures), so a
+        // Steam library list no longer floods the library with DLC entries.
+        private static void EnsureNotDlc(GameMetadata metadata)
+        {
+            if (metadata.GameType != GameType.DlcAddon)
+            {
+                return;
+            }
+
+            throw new ValidationException(new List<ValidationFailure>
+            {
+                new ValidationFailure("GameType", $"'{metadata.Title}' is DLC, not a standalone game. Add the base game instead and monitor this DLC in its Components panel.", metadata.Title)
+            });
         }
 
         private Game SetPropertiesAndValidate(Game newGame)
