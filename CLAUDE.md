@@ -109,6 +109,13 @@ REST/curl call.
   `OpenApiSecuritySchemeReference(id, document)`. The Debug-only OpenAPI doc at
   `/docs/v3/openapi.json` is the runtime smoke test. History: pinned to 8.x in
   `713c9329e3`, migrated to 10.x afterward.
+- **react-router is v8; `react-router-dom` is gone.** v8 removed the
+  `react-router-dom` package — import everything from `react-router`, and the
+  DOM `RouterProvider` from `react-router/dom`. This required
+  `moduleResolution: bundler` in `frontend/tsconfig.json` (was `node`) so tsc
+  can read react-router v8's package `exports` map. History: migrated off
+  react-router-dom 7 for GHSA-qwww-vcr4-c8h2 (RSC-mode CSRF, N/A to our SPA but
+  only patched in 8.3.0).
 - **`*.css.d.ts` files are generated** by `css-modules-typescript-loader`.
   Don't run Prettier on them (it strips the quoted property names the loader
   emits). They're listed in `.prettierignore` / `frontend/.prettierignore`.
