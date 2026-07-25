@@ -44,6 +44,15 @@ RELEASES = [
     ("Hades.Update.v1.38290-FAKE", 500_000_000, 25, 30),
     ("Hades.MULTi10.Repack.All.DLC-FAKE", 5_900_000_000, 12, 20),
     ("Hades.The.Blood.Price.DLC-FAKE", 200_000_000, 18, 22),
+
+    # Real-corpus name shapes (srrdb) so smokes exercise the same parser
+    # paths as production: single-number update, hotfix, build revision,
+    # update-with-bundled-DLC, and a platform-suffixed base release.
+    ("Hades.Update.v22-TENOKE", 450_000_000, 21, 26),
+    ("Hades.Hotfix.4-RUNE", 120_000_000, 9, 12),
+    ("Hades.Update.Build.r35080-RUNE", 480_000_000, 14, 17),
+    ("Hades.Update.v1.38400.incl.DLC-RUNE", 700_000_000, 11, 15),
+    ("Hades.MacOS-BiGMAC", 5_200_000_000, 7, 9),
 ]
 
 
