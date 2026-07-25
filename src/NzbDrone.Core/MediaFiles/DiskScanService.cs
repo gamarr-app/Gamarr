@@ -42,6 +42,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileTableCleanupService _mediaFileTableCleanupService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly Games.Components.IGameComponentRepository _componentRepository;
         private readonly Logger _logger;
 
         public DiskScanService(IDiskProvider diskProvider,
@@ -53,6 +54,7 @@ namespace NzbDrone.Core.MediaFiles
                                IMediaFileTableCleanupService mediaFileTableCleanupService,
                                IRootFolderService rootFolderService,
                                IEventAggregator eventAggregator,
+                               Games.Components.IGameComponentRepository componentRepository,
                                Logger logger)
         {
             _diskProvider = diskProvider;
@@ -64,6 +66,7 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileTableCleanupService = mediaFileTableCleanupService;
             _rootFolderService = rootFolderService;
             _eventAggregator = eventAggregator;
+            _componentRepository = componentRepository;
             _logger = logger;
         }
 
@@ -138,6 +141,7 @@ namespace NzbDrone.Core.MediaFiles
             if (folderHasContent)
             {
                 NormalizeNestedUpdateFolders(game);
+                SplitBundledDlcFolders(game);
                 AdoptUntrackedComponentFolders(game, existingGameFiles);
 
                 // Folder has content - treat the entire folder as a single GameFile
@@ -270,6 +274,67 @@ namespace NzbDrone.Core.MediaFiles
                 _diskProvider.CreateFolder(Path.Combine(game.Path, "Updates"));
                 _diskProvider.MoveFolder(dir, destination);
                 _logger.Info("Moved nested update package '{0}' to '{1}'", name, destination);
+            }
+        }
+
+        // Bundled DLC splitting (#149): a release can ship the base plus
+        // separately-packaged DLC ("game.iso" + "Beach.Pack.DLC/dlc.iso").
+        // Splitting is only safe when BOTH hold:
+        //  - the folder name matches a metadata-confirmed DLC slot (IGDB or
+        //    Steam), so we know it IS that DLC and not game content, and
+        //  - the folder contains a packaged payload (disc image / archive)
+        //    rather than loose files — GOG-style installers lay integral DLC
+        //    data into the game tree, and those folders must stay put.
+        private static readonly string[] DlcPayloadExtensions = { ".iso", ".rar", ".zip", ".7z", ".bin", ".nrg", ".mds" };
+
+        private void SplitBundledDlcFolders(Game game)
+        {
+            var dlcSlots = _componentRepository.GetByGame(game.Id)
+                .Where(c => c.ComponentType == Games.Components.GameComponentType.Dlc &&
+                            (c.Key.StartsWith("igdb:") || c.Key.StartsWith("steam:")))
+                .ToList();
+
+            if (!dlcSlots.Any())
+            {
+                return;
+            }
+
+            foreach (var dir in _diskProvider.GetDirectories(game.Path))
+            {
+                var name = Path.GetFileName(dir);
+
+                if (name.Equals("Updates", StringComparison.OrdinalIgnoreCase) ||
+                    name.Equals("DLC", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var slot = dlcSlots.FirstOrDefault(s => Games.Components.GameComponentMatcher.ReleaseMatchesDlcTitle(name, s.Title));
+
+                if (slot == null)
+                {
+                    continue;
+                }
+
+                var hasPackagedPayload = _diskProvider.GetFiles(dir, false)
+                    .Any(f => DlcPayloadExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase));
+
+                if (!hasPackagedPayload)
+                {
+                    _logger.Debug("Folder '{0}' matches DLC '{1}' but has no packaged payload — leaving in place as game content", name, slot.Title);
+                    continue;
+                }
+
+                var destination = Path.Combine(game.Path, "DLC", name);
+
+                if (_diskProvider.FolderExists(destination))
+                {
+                    continue;
+                }
+
+                _diskProvider.CreateFolder(Path.Combine(game.Path, "DLC"));
+                _diskProvider.MoveFolder(dir, destination);
+                _logger.Info("Split bundled DLC '{0}' (matches '{1}') into '{2}'", name, slot.Title, destination);
             }
         }
 
