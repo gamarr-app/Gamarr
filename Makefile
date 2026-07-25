@@ -43,6 +43,9 @@ check: | $(LOG_DIR)
 	@yarn --silent tsc --noEmit -p frontend > $(LOG_DIR)/tsc.log 2>&1 \
 		&& echo "tsc: OK" \
 		|| { tail -30 $(LOG_DIR)/tsc.log; echo "tsc: FAILED"; exit 1; }
+	@yarn --silent stylelint-linux > $(LOG_DIR)/stylelint.log 2>&1 \
+		&& echo "stylelint: OK" \
+		|| { tail -30 $(LOG_DIR)/stylelint.log; echo "stylelint: FAILED"; exit 1; }
 	@yarn --silent test > $(LOG_DIR)/jest.log 2>&1 \
 		&& { grep -E "^Tests:" $(LOG_DIR)/jest.log; echo "jest: OK"; } \
 		|| { tail -30 $(LOG_DIR)/jest.log; echo "jest: FAILED"; exit 1; }
