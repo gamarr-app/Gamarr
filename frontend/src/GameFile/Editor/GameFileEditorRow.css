@@ -11,8 +11,8 @@
 }
 
 .componentContent {
-  align-items: flex-start;
   display: flex;
+  align-items: flex-start;
   flex-direction: column;
   gap: 4px;
 }
