@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using NLog;
-using NzbDrone.Common;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
@@ -19,9 +17,7 @@ namespace NzbDrone.Core.MediaCover
 {
     public interface IMapCoversToLocal
     {
-        Dictionary<string, FileInfo> GetCoverFileInfos();
-        void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers, Dictionary<string, FileInfo> fileInfos = null);
-        void ConvertToLocalUrls(IEnumerable<Tuple<int, IEnumerable<MediaCover>>> items, Dictionary<string, FileInfo> coverFileInfos);
+        void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers);
         string GetCoverPath(int gameId, MediaCoverTypes coverType, int? height = null, int index = 0);
     }
 
@@ -80,23 +76,11 @@ namespace NzbDrone.Core.MediaCover
             return Path.Combine(GetGameCoverPath(gameId), coverType.ToString().ToLower() + indexSuffix + heightSuffix + GetExtension(coverType));
         }
 
-        public Dictionary<string, FileInfo> GetCoverFileInfos()
-        {
-            if (!_diskProvider.FolderExists(_coverRootFolder))
-            {
-                return new Dictionary<string, FileInfo>();
-            }
-
-            return _diskProvider
-                .GetFileInfos(_coverRootFolder, true)
-                .ToDictionary(x => x.FullName, PathEqualityComparer.Instance);
-        }
-
-        public void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers, Dictionary<string, FileInfo> fileInfos = null)
+        public void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers)
         {
             if (gameId == 0)
             {
-                // Game isn't in Gamarr yet, map via a proxy to circument referrer issues
+                // Game isn't in Gamarr yet, map via a proxy to circumvent referrer issues
                 foreach (var mediaCover in covers)
                 {
                     mediaCover.Url = _mediaCoverProxy.RegisterUrl(mediaCover.RemoteUrl);
@@ -118,34 +102,16 @@ namespace NzbDrone.Core.MediaCover
                     var index = mediaCover.CoverType == MediaCoverTypes.Screenshot ? ++screenshotCount : 0;
                     var indexSuffix = index >= 2 ? index.ToString() : "";
 
-                    var filePath = GetCoverPath(gameId, mediaCover.CoverType, null, index);
-
                     mediaCover.Url = _configFileProvider.UrlBase + @"/MediaCover/" + gameId + "/" + mediaCover.CoverType.ToString().ToLower() + indexSuffix + GetExtension(mediaCover.CoverType);
 
-                    DateTime? lastWrite = null;
-
-                    if (fileInfos != null && fileInfos.TryGetValue(filePath, out var file))
+                    // Hash of the source url busts browser caches when the
+                    // remote image changes — no per-cover disk stat needed
+                    // (upstream Radarr 69f8cea).
+                    if (mediaCover.RemoteUrl.IsNotNullOrWhiteSpace())
                     {
-                        lastWrite = file.LastWriteTimeUtc;
-                    }
-                    else if (_diskProvider.FileExists(filePath))
-                    {
-                        lastWrite = _diskProvider.FileGetLastWrite(filePath);
-                    }
-
-                    if (lastWrite.HasValue)
-                    {
-                        mediaCover.Url += "?lastWrite=" + lastWrite.Value.Ticks;
+                        mediaCover.Url += "?h=" + mediaCover.RemoteUrl.SHA256Hash()[..20];
                     }
                 }
-            }
-        }
-
-        public void ConvertToLocalUrls(IEnumerable<Tuple<int, IEnumerable<MediaCover>>> items, Dictionary<string, FileInfo> coverFileInfos)
-        {
-            foreach (var game in items)
-            {
-                ConvertToLocalUrls(game.Item1, game.Item2, coverFileInfos);
             }
         }
 

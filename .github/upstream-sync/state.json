@@ -2,13 +2,13 @@
   "radarr": {
     "remote": "https://github.com/Radarr/Radarr.git",
     "branch": "develop",
-    "last_sha": "5e8e532cd3cecdd3645a4c44148a88a3c26713b1",
-    "last_sha_note": "As of 2026-07-18 (second check): no new commits since 5e8e532c."
+    "last_sha": "0c78421d553f8395fee14171892da60650123c97",
+    "last_sha_note": "As of 2026-07-25: ported HttpRequestMessage dispose fix, Lazy HttpResponse<T> deserialize, UpgradableSpecification log indices, cover cache-busting by RemoteUrl hash (69f8cea). Already present: BasicRepository bulk transactions. N/A: SkyHook rating enum case + search-error suppression (custom proxies; aggregate must tolerate per-source failures)."
   },
   "sonarr": {
     "remote": "https://github.com/Sonarr/Sonarr.git",
     "branch": "develop",
-    "last_sha": "4ff1b780010d3d9ec76a4864dce96b6494e9caea",
-    "last_sha_note": "As of 2026-07-18: no new commits since 4ff1b780 (the 4.0.19 bump)."
+    "last_sha": "709c9f6483b6d37d6d4f29f60212cb339afddff1",
+    "last_sha_note": "As of 2026-07-25: LanguageIntConverter null-guard already present; streaming-extension media-info probing N/A (no ffprobe); cookie test already diverged with a still-future 2-digit year."
   }
 }

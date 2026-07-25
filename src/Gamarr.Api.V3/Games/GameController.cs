@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -176,9 +174,7 @@ namespace Gamarr.Api.V3.Games
 
                 if (!excludeLocalCovers)
                 {
-                    var coverFileInfos = _coverMapper.GetCoverFileInfos();
-
-                    MapCoversToLocal(gamesResources, coverFileInfos);
+                    MapCoversToLocal(gamesResources.ToArray());
                 }
 
                 LinkGameStatistics(gamesResources, sdict);
@@ -354,7 +350,7 @@ namespace Gamarr.Api.V3.Games
             var dlcs = _gamesService.GetAllDlcs();
 
             var resources = dlcs.Select(d => d.ToResource(availDelay, null, _qualityUpgradableSpecification)).ToList();
-            MapCoversToLocal(resources, _coverMapper.GetCoverFileInfos());
+            MapCoversToLocal(resources.ToArray());
 
             return resources;
         }
@@ -369,19 +365,17 @@ namespace Gamarr.Api.V3.Games
             var games = _gamesService.GetMainGamesOnly();
 
             var resources = games.Select(g => g.ToResource(availDelay, null, _qualityUpgradableSpecification)).ToList();
-            MapCoversToLocal(resources, _coverMapper.GetCoverFileInfos());
+            MapCoversToLocal(resources.ToArray());
 
             return resources;
         }
 
-        private void MapCoversToLocal(GameResource game)
+        private void MapCoversToLocal(params GameResource[] games)
         {
-            _coverMapper.ConvertToLocalUrls(game.Id, game.Images);
-        }
-
-        private void MapCoversToLocal(IEnumerable<GameResource> games, Dictionary<string, FileInfo> coverFileInfos)
-        {
-            _coverMapper.ConvertToLocalUrls(games.Select(x => Tuple.Create(x.Id, x.Images.AsEnumerable())), coverFileInfos);
+            foreach (var gameResource in games)
+            {
+                _coverMapper.ConvertToLocalUrls(gameResource.Id, gameResource.Images);
+            }
         }
 
         private void FetchAndLinkGameStatistics(GameResource resource)

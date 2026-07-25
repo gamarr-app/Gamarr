@@ -33,26 +33,21 @@ namespace NzbDrone.Core.Test.MediaCoverTests
         }
 
         [Test]
-        public void should_convert_cover_urls_to_local()
+        public void should_convert_cover_urls_to_local_with_remote_url_hash()
         {
             var covers = new List<MediaCover.MediaCover>
                 {
-                    new MediaCover.MediaCover { CoverType = MediaCoverTypes.Banner }
+                    new MediaCover.MediaCover { CoverType = MediaCoverTypes.Banner, RemoteUrl = "https://example.com/banner.jpg" }
                 };
-
-            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileGetLastWrite(It.IsAny<string>()))
-                .Returns(new DateTime(1234));
-
-            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(It.IsAny<string>()))
-                .Returns(true);
 
             Subject.ConvertToLocalUrls(12, covers);
 
-            covers.Single().Url.Should().Be("/MediaCover/12/banner.jpg?lastWrite=1234");
+            covers.Single().Url.Should().StartWith("/MediaCover/12/banner.jpg?h=");
+            covers.Single().Url.Split("?h=")[1].Should().HaveLength(20);
         }
 
         [Test]
-        public void should_convert_media_urls_to_local_without_time_if_file_doesnt_exist()
+        public void should_convert_media_urls_to_local_without_hash_when_no_remote_url()
         {
             var covers = new List<MediaCover.MediaCover>
                 {
