@@ -444,5 +444,46 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath.Contains("Updates"))), Times.Never());
         }
+
+        [Test]
+        public void should_adopt_folder_when_other_component_files_are_tracked()
+        {
+            // Regression (Sentry 7620897427): comparing the candidate against a
+            // tracked file with a *different* relative path used to hit
+            // PathEquals, which throws on non-rooted paths and aborted the
+            // whole rescan.
+            GivenGameFolder();
+
+            var updatesContainer = Path.Combine(_game.Path, "Updates").AsOsAgnostic();
+            var updateDir = Path.Combine(_game.Path, "Updates", "v1.7.1").AsOsAgnostic();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "game.iso").AsOsAgnostic(),
+                           Path.Combine(updateDir, "update.iso").AsOsAgnostic(),
+                       });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(updatesContainer))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(updatesContainer))
+                  .Returns(new[] { updateDir });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(It.IsAny<int>()))
+                  .Returns(new List<GameFile>
+                  {
+                      new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty },
+                      new GameFile { Id = 2, GameId = _game.Id, RelativePath = Path.Combine("DLC", "Playable Character Pack - Aaravi and Milo") }
+                  });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == Path.Combine("Updates", "v1.7.1"))), Times.Once());
+        }
     }
 }
