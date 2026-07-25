@@ -90,8 +90,10 @@ namespace NzbDrone.Core.ImportLists
                 return;
             }
 
-            // Check to see if game excluded (by Steam App ID or IGDB ID)
-            var excludedGame = listExclusions.SingleOrDefault(s =>
+            // Check to see if game excluded (by Steam App ID or IGDB ID).
+            // FirstOrDefault: a report can match one exclusion by Steam id
+            // and a different one by IGDB id — Single would throw.
+            var excludedGame = listExclusions.FirstOrDefault(s =>
                 (report.SteamAppId > 0 && s.SteamAppId == report.SteamAppId) ||
                 (report.IgdbId > 0 && s.IgdbId == report.IgdbId));
 

@@ -33,7 +33,10 @@ namespace NzbDrone.Core.Test.Framework
 
         protected override void SetupLogging()
         {
-            Mocker.SetConstant<ILoggerProvider>(Mocker.Resolve<NLogLoggerProvider>());
+            // Constructed directly: auto-resolving NLogLoggerProvider makes
+            // AutoMoqer proxy NLog-internal interfaces, which strong-named
+            // NLog 6 forbids.
+            Mocker.SetConstant<ILoggerProvider>(new NLogLoggerProvider());
         }
 
         private ITestDatabase WithMigrationAction(Action<TMigration> beforeMigration = null)

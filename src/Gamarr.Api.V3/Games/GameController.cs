@@ -448,7 +448,15 @@ namespace Gamarr.Api.V3.Games
         {
             if (message.Updated)
             {
-                BroadcastResourceChange(ModelAction.Updated, message.Game.Id);
+                // The game can be deleted between the cover update and this
+                // event; broadcasting by id re-fetches it and would throw.
+                try
+                {
+                    BroadcastResourceChange(ModelAction.Updated, message.Game.Id);
+                }
+                catch (NzbDrone.Core.Datastore.ModelNotFoundException)
+                {
+                }
             }
         }
     }
