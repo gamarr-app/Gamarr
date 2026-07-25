@@ -1,0 +1,49 @@
+.strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  width: 100%;
+  background-color: rgb(0 0 0 / 70%);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background-color: rgb(255 255 255 / 15%);
+  color: var(--white);
+  font-size: 10px;
+  line-height: 14px;
+
+  &:hover {
+    background-color: rgb(255 255 255 / 35%);
+    color: var(--white);
+    text-decoration: none;
+  }
+}
+
+.status {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.downloaded {
+  background-color: var(--successColor);
+}
+
+.missing {
+  background-color: var(--dangerColor);
+}
+
+.unmonitored {
+  background-color: var(--gray);
+}

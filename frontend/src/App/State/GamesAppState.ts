@@ -17,6 +17,7 @@ export interface GameIndexAppState {
   posterOptions: {
     detailedProgressBar: boolean;
     size: string;
+    groupPlatforms: boolean;
     showTitle: boolean;
     showMonitored: boolean;
     showQualityProfile: boolean;

@@ -16,6 +16,13 @@ export interface GameIndexItem {
   id: number;
   sortTitle: string;
   collectionId?: number;
+  // Stable identity fields for platform-entry grouping (#150). Volatile
+  // fields (hasFile, monitored) must NOT be added here: the collection
+  // memo compares by id and order only, so changes would serve stale data.
+  steamAppId?: number;
+  igdbId?: number;
+  year?: number;
+  platform?: string;
 }
 
 export interface GameClientSideCollectionItemsState {
@@ -38,12 +45,24 @@ function createUnoptimizedSelector(uiSection: string) {
     createClientSideCollectionSelector<Game>('games', uiSection),
     (games): GameClientSideCollectionItemsState => {
       const items = games.items.map((s) => {
-        const { id, sortTitle, collection } = s;
+        const {
+          id,
+          sortTitle,
+          collection,
+          steamAppId,
+          igdbId,
+          year,
+          platform,
+        } = s;
 
         return {
           id,
           sortTitle,
           collectionId: collection?.igdbId,
+          steamAppId,
+          igdbId,
+          year,
+          platform,
         };
       });
 

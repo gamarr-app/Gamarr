@@ -10,6 +10,9 @@ import { SortDirection } from 'Helpers/Props/sortDirections';
 import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
+import groupGameIndexItems, {
+  GroupedGameIndexItem,
+} from './groupGameIndexItems';
 
 const bodyPadding = parseInt(dimensions.pageContentBodyPadding);
 const bodyPaddingSmallScreen = parseInt(
@@ -35,7 +38,7 @@ interface CellItemData {
     posterWidth: number;
     posterHeight: number;
   };
-  items: GameIndexItem[];
+  items: GroupedGameIndexItem[];
   sortKey: string;
   isSelectMode: boolean;
 }
@@ -96,6 +99,7 @@ function Cell({
         isSelectMode={isSelectMode}
         posterWidth={posterWidth}
         posterHeight={posterHeight}
+        platformSiblingIds={game.platformSiblingIds}
       />
     </div>
   );
@@ -119,6 +123,10 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
   const ref = useRef<GridImperativeAPI>(null);
   const [measureRef, bounds] = useMeasure();
   const [size, setSize] = useState({ width: 0, height: 0 });
+
+  const groupedItems: GroupedGameIndexItem[] = useMemo(() => {
+    return posterOptions.groupPlatforms ? groupGameIndexItems(items) : items;
+  }, [items, posterOptions.groupPlatforms]);
 
   const columnWidth = useMemo(() => {
     const { width } = size;
@@ -311,7 +319,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
 
   useEffect(() => {
     if (jumpToCharacter) {
-      const index = getIndexOfFirstCharacter(items, jumpToCharacter);
+      const index = getIndexOfFirstCharacter(groupedItems, jumpToCharacter);
 
       if (index !== -1) {
         const rowIndex = Math.floor(index / columnCount);
@@ -327,7 +335,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
     rowHeight,
     columnCount,
     padding,
-    items,
+    groupedItems,
     scrollerRef,
     ref,
   ]);
@@ -343,7 +351,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
         }}
         columnCount={columnCount}
         columnWidth={columnWidth}
-        rowCount={Math.ceil(items.length / columnCount)}
+        rowCount={Math.ceil(groupedItems.length / columnCount)}
         rowHeight={rowHeight}
         cellProps={{
           layout: {
@@ -352,7 +360,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
             posterWidth,
             posterHeight,
           },
-          items,
+          items: groupedItems,
           sortKey,
           isSelectMode,
         }}
