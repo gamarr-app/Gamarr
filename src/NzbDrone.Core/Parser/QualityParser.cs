@@ -100,6 +100,14 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex VersionedUpdateRegex = new (@"\b(?:UPDATE|PATCH|HOTFIX)[\s._-]?(?:v?\d|BUILD\b)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Repacker bundles are full games even when the name carries an
+        // update number ("FIFA 15 Update 8 RePack от R.G. Механики",
+        // "FitGirl Repack ... Day 1 Patch Build 8008283") — they must not
+        // classify as update-only. The scene REPACK tag alone doesn't match:
+        // "Game.Update.v1.7.REPACK-GRP" is still an update.
+        private static readonly Regex FullRepackerRegex = new (@"\b(?:FitGirl|DODI|ElAmigos|CorePack|KaOs|xatab)\b|Re?Pack\s+(?:от|by|from)|Steam[-\s]?Rip",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static readonly Regex MultiLangRegex = new (@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -322,7 +330,7 @@ namespace NzbDrone.Core.Parser
             // Versioned update without an "only" marker: "Game.Update.v1.7-RUNE".
             // Checked before the DLC patterns so "Update.v2.5.incl.DLC" stays an
             // update (it patches the base; the bundled DLC comes along).
-            if (VersionedUpdateRegex.IsMatch(normalizedName))
+            if (VersionedUpdateRegex.IsMatch(normalizedName) && !FullRepackerRegex.IsMatch(normalizedName))
             {
                 Logger.Trace("Detected versioned update release: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.UpdateOnly;
@@ -403,23 +411,18 @@ namespace NzbDrone.Core.Parser
                 return result;
             }
 
-            // Check for update/patch only releases BEFORE scene groups
-            // Update releases should be marked as UpdateOnly even if they have a scene group
-            if (UpdateOnlyRegex.IsMatch(normalizedName))
+            // Check for update/patch only releases BEFORE scene groups.
+            // Same patterns as ParseContentType, so the Quality and
+            // ContentType channels agree on what counts as an update
+            // ("Update.Build.r35080" and "Update.22" included) — and on what
+            // does not (repacker bundles that merely mention an update).
+            if (UpdatePatchOnlyRegex.IsMatch(normalizedName) ||
+                ((VersionedUpdateRegex.IsMatch(normalizedName) || normalizedName.ContainsIgnoreCase("hotfix")) &&
+                 !FullRepackerRegex.IsMatch(normalizedName)))
             {
-                // Check for indicators that this is an update-only release
-                var isUpdateRelease = normalizedName.ContainsIgnoreCase("update only") ||
-                    normalizedName.ContainsIgnoreCase("patch only") ||
-                    normalizedName.ContainsIgnoreCase("hotfix") ||
-                    Regex.IsMatch(normalizedName, @"\bupdate\s+v[\d\s._]+", RegexOptions.IgnoreCase) ||
-                    Regex.IsMatch(normalizedName, @"\bpatch\s+v[\d\s._]+", RegexOptions.IgnoreCase);
-
-                if (isUpdateRelease)
-                {
-                    result.SourceDetectionSource = QualityDetectionSource.Name;
-                    result.Quality = Quality.UpdateOnly;
-                    return result;
-                }
+                result.SourceDetectionSource = QualityDetectionSource.Name;
+                result.Quality = Quality.UpdateOnly;
+                return result;
             }
 
             // Check for repack releases BEFORE scene groups
