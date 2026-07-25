@@ -4,8 +4,8 @@ import GameIndex from './GameIndex';
 
 import '@testing-library/jest-dom';
 
-// Mock react-router-dom
-jest.mock('react-router-dom', () => ({
+// Mock react-router
+jest.mock('react-router', () => ({
   useNavigationType: jest.fn(() => 'PUSH'),
 }));
 

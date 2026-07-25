@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import FieldSet from 'Components/FieldSet';

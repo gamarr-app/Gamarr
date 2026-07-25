@@ -5,7 +5,7 @@ import {
   SyntheticEvent,
   useCallback,
 } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router';
 import styles from './Link.css';
 
 export type LinkProps<C extends ElementType = 'button'> =

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useNavigationType } from 'react-router-dom';
+import { useNavigationType } from 'react-router';
 import scrollPositions from 'Store/scrollPositions';
 
 interface WrappedComponentProps {

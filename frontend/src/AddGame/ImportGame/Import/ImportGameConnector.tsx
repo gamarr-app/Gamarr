@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import { ImportGameItem } from 'App/State/ImportGameAppState';

@@ -1,4 +1,4 @@
-import { Route } from 'react-router-dom';
+import { Route } from 'react-router';
 import Switch from 'Components/Router/Switch';
 import AppLogFiles from './App/AppLogFiles';
 import UpdateLogFiles from './Update/UpdateLogFiles';
