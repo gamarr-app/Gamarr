@@ -45,10 +45,12 @@ namespace NzbDrone.Core.Messaging.Commands
                     }
                     catch (Exception ex)
                     {
-                        if (_cancellationTokenSource.IsCancellationRequested)
+                        // Container disposal can precede the cancellation token
+                        // flipping (teardown ordering isn't guaranteed), so a
+                        // disposed-container failure is shutdown noise even
+                        // when cancellation hasn't been requested yet.
+                        if (_cancellationTokenSource.IsCancellationRequested || IsContainerDisposed(ex))
                         {
-                            // Shutdown was requested mid-command; the container may already be
-                            // disposed, so resolution/execution failures here aren't app bugs.
                             _logger.Debug(ex, "Error occurred while executing task {0} during shutdown", command.Name);
                         }
                         else
@@ -119,6 +121,19 @@ namespace NzbDrone.Core.Messaging.Commands
                     _logger.Trace("{0} <- {1} [{2}]", command.GetType().Name, handler.GetType().Name, commandModel.Duration.ToString());
                 }
             }
+        }
+
+        private static bool IsContainerDisposed(Exception ex)
+        {
+            for (var e = ex; e != null; e = e.InnerException)
+            {
+                if (e is DryIoc.ContainerException ce && ce.Error == DryIoc.Error.ContainerIsDisposed)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void BroadcastCommandUpdate(CommandModel command)
