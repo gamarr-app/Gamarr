@@ -16,11 +16,11 @@ namespace NzbDrone.Core.RomCatalog
             new NoIntroCatalogSourceSeed("No-Intro New Nintendo 3DS", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20New%20Nintendo%203DS.dat"),
             new NoIntroCatalogSourceSeed("No-Intro New Nintendo 3DS Digital", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20New%20Nintendo%203DS%20%28Digital%29.dat"),
             new NoIntroCatalogSourceSeed("No-Intro Nintendo DS Download Play", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS%20%28Download%20Play%29.dat"),
-            new NoIntroCatalogSourceSeed("No-Intro Nintendo DS DSvision SD Cards", "datomatic://system/319"),
-            new NoIntroCatalogSourceSeed("No-Intro Nintendo Game Boy Advance Multiboot", "datomatic://system/137"),
-            new NoIntroCatalogSourceSeed("No-Intro Nintendo Game Boy Advance e-Reader", "datomatic://system/41"),
-            new NoIntroCatalogSourceSeed("No-Intro Nintendo Game Boy Advance Play-Yan", "datomatic://system/148"),
-            new NoIntroCatalogSourceSeed("No-Intro Nintendo Game Boy Advance Video", "datomatic://system/297"),
+
+            // DAT-o-MATIC-only niche systems (GBA Multiboot/e-Reader/Play-Yan/Video,
+            // DSvision) are intentionally not seeded while the datomatic:// scrape
+            // path is broken — see FetchDatOMaticNumbered. Restore once it works.
+
             new NoIntroCatalogSourceSeed("No-Intro Nintendo Entertainment System", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20Entertainment%20System.dat"),
             new NoIntroCatalogSourceSeed("No-Intro Super Nintendo Entertainment System", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Super%20Nintendo%20Entertainment%20System.dat"),
             new NoIntroCatalogSourceSeed("No-Intro Nintendo 64", "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%2064.dat"),
