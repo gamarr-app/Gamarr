@@ -14,35 +14,11 @@ namespace NzbDrone.Core.Datastore.Migration
                 SourceUrl = "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/no-intro/Nintendo%20-%20Nintendo%20DS%20%28Download%20Play%29.dat"
             });
 
-            Insert.IntoTable("NoIntroCatalogSources").Row(new
-            {
-                Name = "No-Intro Nintendo DS DSvision SD Cards",
-                SourceUrl = "datomatic://system/319"
-            });
-
-            Insert.IntoTable("NoIntroCatalogSources").Row(new
-            {
-                Name = "No-Intro Nintendo Game Boy Advance Multiboot",
-                SourceUrl = "datomatic://system/137"
-            });
-
-            Insert.IntoTable("NoIntroCatalogSources").Row(new
-            {
-                Name = "No-Intro Nintendo Game Boy Advance e-Reader",
-                SourceUrl = "datomatic://system/41"
-            });
-
-            Insert.IntoTable("NoIntroCatalogSources").Row(new
-            {
-                Name = "No-Intro Nintendo Game Boy Advance Play-Yan",
-                SourceUrl = "datomatic://system/148"
-            });
-
-            Insert.IntoTable("NoIntroCatalogSources").Row(new
-            {
-                Name = "No-Intro Nintendo Game Boy Advance Video",
-                SourceUrl = "datomatic://system/297"
-            });
+            // Note: the DAT-o-MATIC-only niche systems (GBA Multiboot/e-Reader/
+            // Play-Yan/Video, DSvision) are intentionally NOT seeded — the
+            // datomatic:// scrape path is currently non-functional, so seeding
+            // them would surface permanently-failing sources. The support code
+            // remains; re-seed once FetchDatOMaticNumbered is hardened.
         }
     }
 }

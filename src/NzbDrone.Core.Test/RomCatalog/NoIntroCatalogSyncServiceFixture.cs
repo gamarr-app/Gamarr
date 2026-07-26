@@ -171,11 +171,11 @@ namespace NzbDrone.Core.Test.RomCatalog
             sources.Should().Contain(x => x.Name == "No-Intro Sony PlayStation Portable");
             sources.Should().Contain(x => x.Name == "No-Intro Sony PlayStation Vita");
             sources.Should().Contain(x => x.Name == "No-Intro Sony PlayStation 3 PSN");
-            sources.Should().Contain(x => x.Name == "No-Intro Nintendo DS DSvision SD Cards" && x.SourceUrl == "datomatic://system/319");
-            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Multiboot" && x.SourceUrl == "datomatic://system/137");
-            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance e-Reader" && x.SourceUrl == "datomatic://system/41");
-            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Play-Yan" && x.SourceUrl == "datomatic://system/148");
-            sources.Should().Contain(x => x.Name == "No-Intro Nintendo Game Boy Advance Video" && x.SourceUrl == "datomatic://system/297");
+
+            // The DAT-o-MATIC-only niche systems are intentionally NOT seeded while
+            // the datomatic:// scrape path is non-functional (would surface
+            // permanently-failing sources). Restore once the scrape is hardened.
+            sources.Should().NotContain(x => x.SourceUrl.StartsWith("datomatic://"));
             sources.Should().ContainSingle(x => x.SourceUrl == existingSource.SourceUrl);
         }
 
