@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using NLog;
+using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.RomCatalog;
 
 namespace NzbDrone.Core.Games.Components
 {
@@ -28,16 +31,24 @@ namespace NzbDrone.Core.Games.Components
         private readonly IGameComponentRepository _componentRepository;
         private readonly IMediaFileService _mediaFileService;
         private readonly IGameService _gameService;
+        private readonly INoIntroCatalogEntryRepository _noIntroCatalogEntryRepository;
+        private readonly IDiskProvider _diskProvider;
+        private readonly NoIntroGameComponentPlanner _noIntroComponentPlanner;
         private readonly Logger _logger;
 
         public GameComponentService(IGameComponentRepository componentRepository,
-                                    IMediaFileService mediaFileService,
-                                    IGameService gameService,
-                                    Logger logger)
+                                     IMediaFileService mediaFileService,
+                                     IGameService gameService,
+                                     INoIntroCatalogEntryRepository noIntroCatalogEntryRepository,
+                                     IDiskProvider diskProvider,
+                                     Logger logger)
         {
             _componentRepository = componentRepository;
             _mediaFileService = mediaFileService;
             _gameService = gameService;
+            _noIntroCatalogEntryRepository = noIntroCatalogEntryRepository;
+            _diskProvider = diskProvider;
+            _noIntroComponentPlanner = new NoIntroGameComponentPlanner(new NoIntroComponentClassifier());
             _logger = logger;
         }
 
@@ -90,6 +101,8 @@ namespace NzbDrone.Core.Games.Components
         {
             var existing = _componentRepository.GetByGame(game.Id);
             var files = _mediaFileService.GetFilesByGame(game.Id);
+            var noIntroEntries = (_noIntroCatalogEntryRepository.GetByPlatformFamily(game.Platform) ?? Enumerable.Empty<NoIntroCatalogEntry>()).ToList();
+            var noIntroSlots = _noIntroComponentPlanner.GetSlots(game, noIntroEntries);
 
             MergeDuplicateDlcSlots(existing, files);
 
@@ -127,9 +140,16 @@ namespace NzbDrone.Core.Games.Components
                 }
             }
 
+            foreach (var slot in noIntroSlots)
+            {
+                FindOrStage(existing, toInsert, game, slot.ComponentType, slot.Key, slot.Title, monitored: false);
+            }
+
+            var folderBackedFileSlot = ResolveFolderBackedFileSlot(game, files, noIntroSlots);
+
             foreach (var file in files)
             {
-                var component = GetComponentForFile(existing, toInsert, game, file, baseComponent);
+                var component = GetComponentForFile(existing, toInsert, game, file, baseComponent, noIntroSlots, folderBackedFileSlot);
 
                 if (component != null && file.ComponentId != component.Id)
                 {
@@ -153,7 +173,7 @@ namespace NzbDrone.Core.Games.Components
 
                 foreach (var file in files)
                 {
-                    var component = GetComponentForFile(all, new List<GameComponent>(), game, file, all.FirstOrDefault(c => c.ComponentType == GameComponentType.Base));
+                    var component = GetComponentForFile(all, new List<GameComponent>(), game, file, all.FirstOrDefault(c => c.ComponentType == GameComponentType.Base), noIntroSlots, folderBackedFileSlot);
 
                     if (component is { Id: > 0 } && file.ComponentId != component.Id)
                     {
@@ -212,8 +232,15 @@ namespace NzbDrone.Core.Games.Components
             }
         }
 
-        private GameComponent GetComponentForFile(List<GameComponent> existing, List<GameComponent> toInsert, Game game, GameFile file, GameComponent baseComponent)
+        private GameComponent GetComponentForFile(List<GameComponent> existing, List<GameComponent> toInsert, Game game, GameFile file, GameComponent baseComponent, List<NoIntroGameComponentSlot> noIntroSlots, NoIntroGameComponentSlot folderBackedFileSlot)
         {
+            var noIntroSlot = _noIntroComponentPlanner.FindSlotForFile(noIntroSlots, file) ?? folderBackedFileSlot;
+
+            if (noIntroSlot != null)
+            {
+                return FindOrStage(existing, toInsert, game, noIntroSlot.ComponentType, noIntroSlot.Key, noIntroSlot.Title, monitored: false);
+            }
+
             if (file.RelativePath.IsNullOrWhiteSpace())
             {
                 return baseComponent;
@@ -266,6 +293,25 @@ namespace NzbDrone.Core.Games.Components
         private static bool IsMetadataDlcKey(string key)
         {
             return key.StartsWith("igdb:") || key.StartsWith("steam:");
+        }
+
+        private NoIntroGameComponentSlot ResolveFolderBackedFileSlot(Game game, List<GameFile> files, List<NoIntroGameComponentSlot> noIntroSlots)
+        {
+            if (!_diskProvider.FolderExists(game.Path) || !files.Any(file => file.RelativePath.IsNullOrWhiteSpace()))
+            {
+                return null;
+            }
+
+            var matchingSlots = _diskProvider.GetFiles(game.Path, true)
+                .Select(Path.GetFileName)
+                .Where(name => name.IsNotNullOrWhiteSpace())
+                .Select(name => _noIntroComponentPlanner.FindSlotForFileName(noIntroSlots, name))
+                .Where(slot => slot != null)
+                .GroupBy(slot => slot.Key)
+                .Select(group => group.First())
+                .ToList();
+
+            return matchingSlots.Count == 1 ? matchingSlots[0] : null;
         }
 
         private static GameComponent FindOrStage(List<GameComponent> existing, List<GameComponent> toInsert, Game game, GameComponentType type, string key, string title, bool monitored)

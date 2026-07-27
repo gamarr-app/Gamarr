@@ -12,9 +12,11 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Qualities;
+using NzbDrone.Core.RomCatalog;
 
 namespace NzbDrone.Core.Organizer
 {
@@ -31,6 +33,8 @@ namespace NzbDrone.Core.Organizer
         private readonly IQualityDefinitionService _qualityDefinitionService;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly ICustomFormatCalculationService _formatCalculator;
+        private readonly IGameComponentRepository _componentRepository;
+        private readonly INoIntroCatalogEntryRepository _noIntroEntryRepository;
         private readonly Logger _logger;
 
         private static readonly Regex TitleRegex = new Regex(@"(?<tag>\{(?<prefix>[-{ ._\[(]*)(?:edition-))?\{(?<prefix>[-{ ._\[(]*)(?<token>(?:[a-z0-9]+)(?:(?<separator>[- ._]+)(?:[a-z0-9]+))?)(?::(?<customFormat>[ ,a-z0-9|+-]+(?<![- ])))?(?<suffix>[-} ._)\]]*)\}",
@@ -86,12 +90,16 @@ namespace NzbDrone.Core.Organizer
                                IQualityDefinitionService qualityDefinitionService,
                                IGameTranslationService gameTranslationService,
                                ICustomFormatCalculationService formatCalculator,
+                               IGameComponentRepository componentRepository,
+                               INoIntroCatalogEntryRepository noIntroEntryRepository,
                                Logger logger)
         {
             _namingConfigService = namingConfigService;
             _qualityDefinitionService = qualityDefinitionService;
             _gameTranslationService = gameTranslationService;
             _formatCalculator = formatCalculator;
+            _componentRepository = componentRepository;
+            _noIntroEntryRepository = noIntroEntryRepository;
             _logger = logger;
         }
 
@@ -105,6 +113,13 @@ namespace NzbDrone.Core.Organizer
             if (!namingConfig.RenameGames)
             {
                 return GetOriginalTitle(gameFile, false);
+            }
+
+            var noIntroFileName = GetNoIntroFileName(gameFile, namingConfig.RenameProfile);
+
+            if (noIntroFileName.IsNotNullOrWhiteSpace())
+            {
+                return noIntroFileName;
             }
 
             if (namingConfig.StandardGameFormat.IsNullOrWhiteSpace())
@@ -146,6 +161,140 @@ namespace NzbDrone.Core.Organizer
             }
 
             return Path.Combine(components.ToArray());
+        }
+
+        private string GetNoIntroFileName(GameFile gameFile, RenameProfile renameProfile)
+        {
+            if (gameFile == null)
+            {
+                return null;
+            }
+
+            var actualFileName = GetActualFileName(gameFile);
+            var catalogEntry = ResolveNoIntroCatalogEntry(gameFile, actualFileName);
+
+            if (catalogEntry == null)
+            {
+                return null;
+            }
+
+            if (renameProfile == RenameProfile.Gamarr)
+            {
+                return Path.GetFileNameWithoutExtension(actualFileName);
+            }
+
+            var expectedFileName = NoIntroRenameProfileEvaluator.GetExpectedFileName(catalogEntry, actualFileName, renameProfile);
+            return Path.GetFileNameWithoutExtension(expectedFileName);
+        }
+
+        private NoIntroCatalogEntry ResolveNoIntroCatalogEntry(GameFile gameFile, string actualFileName)
+        {
+            if (actualFileName.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
+
+            if (gameFile.ComponentId > 0)
+            {
+                var component = _componentRepository.Get(gameFile.ComponentId);
+
+                if (component != null)
+                {
+                    return FindMatchingCatalogEntry(component, actualFileName);
+                }
+            }
+
+            if (gameFile.GameId <= 0)
+            {
+                return null;
+            }
+
+            return _componentRepository.GetByGame(gameFile.GameId)
+                .Where(IsNoIntroComponent)
+                .Select(component => FindMatchingCatalogEntry(component, actualFileName))
+                .FirstOrDefault(entry => entry != null);
+        }
+
+        private NoIntroCatalogEntry FindMatchingCatalogEntry(GameComponent component, string actualFileName)
+        {
+            if (component == null)
+            {
+                return null;
+            }
+
+            return _noIntroEntryRepository.All()
+                .Where(entry => IsComponentCatalogMatch(component, entry) && EntryMatchesActualFileName(entry, actualFileName))
+                .OrderBy(entry => entry.SystemKey)
+                .ThenBy(entry => entry.CanonicalName)
+                .FirstOrDefault();
+        }
+
+        private static bool EntryMatchesActualFileName(NoIntroCatalogEntry entry, string actualFileName)
+        {
+            if (entry == null || actualFileName.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            return string.Equals(entry.CanonicalFileName, actualFileName, StringComparison.Ordinal) ||
+                string.Equals(entry.NumberedCanonicalFileName, actualFileName, StringComparison.Ordinal);
+        }
+
+        private static bool IsNoIntroComponent(GameComponent component)
+        {
+            return component.ComponentType is GameComponentType.NoIntroRetailRom or
+                GameComponentType.NoIntroMultiboot or
+                GameComponentType.NoIntroVideo or
+                GameComponentType.NoIntroBios or
+                GameComponentType.NoIntroRomhackOrUnverified;
+        }
+
+        private static bool IsComponentCatalogMatch(string componentTitle, NoIntroCatalogEntry entry)
+        {
+            if (entry == null || entry.CanonicalName.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            if (!entry.ParentCanonicalName.IsNullOrWhiteSpace() && entry.ParentCanonicalName == componentTitle)
+            {
+                return true;
+            }
+
+            return entry.CanonicalName == componentTitle || entry.CanonicalName.StartsWith($"{componentTitle} (", StringComparison.Ordinal);
+        }
+
+        private static bool IsComponentCatalogMatch(GameComponent component, NoIntroCatalogEntry entry)
+        {
+            if (component == null || entry == null || entry.CanonicalName.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            if (IsNoIntroComponent(component))
+            {
+                if (component.Key?.EndsWith($":{Parser.Parser.ToUrlSlug(entry.CanonicalName, true)}", StringComparison.Ordinal) == true)
+                {
+                    return true;
+                }
+            }
+
+            return IsComponentCatalogMatch(component.Title, entry);
+        }
+
+        private static string GetActualFileName(GameFile gameFile)
+        {
+            if (gameFile.OriginalFilePath.IsNotNullOrWhiteSpace())
+            {
+                return Path.GetFileName(gameFile.OriginalFilePath);
+            }
+
+            if (gameFile.RelativePath.IsNotNullOrWhiteSpace())
+            {
+                return Path.GetFileName(gameFile.RelativePath);
+            }
+
+            return Path.GetFileName(gameFile.Path);
         }
 
         public string BuildFilePath(Game game, string fileName, string extension)
