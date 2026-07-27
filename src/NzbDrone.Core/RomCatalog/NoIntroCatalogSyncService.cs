@@ -201,8 +201,9 @@ namespace NzbDrone.Core.RomCatalog
                     entry.NumberedCanonicalFileName = numberedEntry.NumberedCanonicalFileName;
                 }
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
+                _logger.Debug(ex, "DAT-o-MATIC numbered DAT unavailable for {0}; falling back to ADVANsCEne", snapshot.SystemKey);
                 EnrichWithAdvansceneCatalog(snapshot);
                 return;
             }
@@ -223,6 +224,15 @@ namespace NzbDrone.Core.RomCatalog
                 return;
             }
 
+            var unnumbered = snapshot.Entries.Where(x => x.NumberedCanonicalFileName == null).ToList();
+
+            // Nothing left to number (DAT-o-MATIC covered everything) — skip
+            // the download entirely.
+            if (unnumbered.Count == 0)
+            {
+                return;
+            }
+
             try
             {
                 var advansceneContent = _documentClient.FetchAdvanscene(sourceUrl);
@@ -234,7 +244,7 @@ namespace NzbDrone.Core.RomCatalog
 
                 var releaseNumbersByCrc = ParseAdvansceneReleaseNumbers(advansceneContent);
 
-                foreach (var entry in snapshot.Entries.Where(x => x.NumberedCanonicalFileName == null))
+                foreach (var entry in unnumbered)
                 {
                     var crc = entry.Hashes.FirstOrDefault(x => x.HashType.Equals("crc32", StringComparison.OrdinalIgnoreCase));
 
