@@ -281,14 +281,14 @@ namespace NzbDrone.Core.Organizer
 
         private static string GetActualFileName(GameFile gameFile)
         {
-            if (gameFile.RelativePath.IsNotNullOrWhiteSpace())
-            {
-                return Path.GetFileName(gameFile.RelativePath);
-            }
-
             if (gameFile.OriginalFilePath.IsNotNullOrWhiteSpace())
             {
                 return Path.GetFileName(gameFile.OriginalFilePath);
+            }
+
+            if (gameFile.RelativePath.IsNotNullOrWhiteSpace())
+            {
+                return Path.GetFileName(gameFile.RelativePath);
             }
 
             return Path.GetFileName(gameFile.Path);
