@@ -23,6 +23,8 @@ namespace Gamarr.Api.V3.GameComponents
         // component without a file is "missing".
         public bool HasFile { get; set; }
         public long SizeOnDisk { get; set; }
+        public string ReleaseGroup { get; set; }
+        public string Version { get; set; }
         public List<GameComponentNoIntroCatalogResource> NoIntroCatalogMatches { get; set; } = new List<GameComponentNoIntroCatalogResource>();
     }
 
@@ -74,8 +76,20 @@ namespace Gamarr.Api.V3.GameComponents
                 QualityProfileId = model.QualityProfileId,
                 HasFile = files.Any(),
                 SizeOnDisk = files.Sum(f => f.Size),
+                ReleaseGroup = JoinDistinct(files.Select(f => f.ReleaseGroup)),
+                Version = JoinDistinct(files.Select(f => f.GameVersion?.ToString())),
                 NoIntroCatalogMatches = GetNoIntroCatalogMatches(model, files, context)
             };
+        }
+
+        private static string JoinDistinct(IEnumerable<string> values)
+        {
+            var distinct = values
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct()
+                .ToList();
+
+            return distinct.Count == 0 ? null : string.Join(", ", distinct);
         }
 
         private static List<GameComponentNoIntroCatalogResource> GetNoIntroCatalogMatches(GameComponent component, List<GameFile> files, GameComponentNoIntroCatalogContext context)

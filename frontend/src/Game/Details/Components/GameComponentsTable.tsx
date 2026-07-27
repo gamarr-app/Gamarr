@@ -32,6 +32,8 @@ interface GameComponent {
   qualityProfileId: number;
   hasFile: boolean;
   sizeOnDisk: number;
+  releaseGroup?: string;
+  version?: string;
   noIntroCatalogMatches: NoIntroCatalogMatch[];
 }
 
@@ -53,7 +55,7 @@ const columns = [
   { name: 'title', label: () => translate('Title'), isVisible: true },
   { name: 'size', label: () => translate('Size'), isVisible: true },
   { name: 'status', label: () => translate('Status'), isVisible: true },
-  { name: 'noIntro', label: () => 'No-Intro', isVisible: true },
+  { name: 'noIntro', label: () => 'Catalog', isVisible: true },
   {
     name: 'qualityProfileId',
     label: () => translate('QualityProfile'),
@@ -102,6 +104,14 @@ function getTypeLabel(componentType: string) {
     fallbackTypeLabels[componentType.toLowerCase()] ??
     componentType
   );
+}
+
+function getComponentMeta(component: GameComponent) {
+  const parts = [component.version, component.releaseGroup].filter(
+    (value): value is string => value != null && value.trim().length > 0
+  );
+
+  return parts.join(' · ');
 }
 
 const noIntroSystemNames: Record<string, string> = {
@@ -174,7 +184,7 @@ function getNoIntroStatus(component: GameComponent) {
   const version = match.catalogVersion ? ` (${match.catalogVersion})` : '';
   const systemName = noIntroSystemNames[match.systemKey] ?? match.systemKey;
   const title = [
-    `${match.sourceName ?? 'No-Intro'}${version}`,
+    `${match.sourceName ?? 'Catalog'}${version}`,
     ...matches.flatMap((catalogMatch) => {
       const lines = [catalogMatch.canonicalFileName];
 
@@ -267,7 +277,14 @@ function GameComponentRow({
         </Label>
       </TableRowCell>
 
-      <TableRowCell>{component.title}</TableRowCell>
+      <TableRowCell>
+        <div>{component.title}</div>
+        {getComponentMeta(component) ? (
+          <div style={{ fontSize: '12px', opacity: 0.75 }}>
+            {getComponentMeta(component)}
+          </div>
+        ) : null}
+      </TableRowCell>
 
       <TableRowCell>
         {component.hasFile ? formatBytes(component.sizeOnDisk) : '-'}
