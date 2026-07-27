@@ -273,7 +273,10 @@ namespace NzbDrone.Core.Organizer
 
             if (IsNoIntroComponent(component))
             {
-                return component.Key?.EndsWith($":{Parser.Parser.ToUrlSlug(entry.CanonicalName, true)}", StringComparison.Ordinal) == true;
+                if (component.Key?.EndsWith($":{Parser.Parser.ToUrlSlug(entry.CanonicalName, true)}", StringComparison.Ordinal) == true)
+                {
+                    return true;
+                }
             }
 
             return IsComponentCatalogMatch(component.Title, entry);

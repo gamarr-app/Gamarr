@@ -181,12 +181,14 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.RenameProfile = RenameProfile.NoIntroPreserveById;
             _gameFile.ComponentId = 50;
             _gameFile.RelativePath = "Mario Kart DS (2005) Unknown - Gamarr.nds";
+            _gameFile.OriginalFilePath = "Nintendo - Nintendo DS/Mario Kart DS (Europe) (En,Fr,De,Es,It).nds";
 
             Mocker.GetMock<IGameComponentRepository>()
                 .Setup(x => x.Get(50))
                 .Returns(new GameComponent
                 {
                     Id = 50,
+                    Key = "nointro:retail:mario-kart-ds-europe-en-fr-de-es-it",
                     Title = "Mario Kart DS (Europe) (En,Fr,De,Es,It)"
                 });
 

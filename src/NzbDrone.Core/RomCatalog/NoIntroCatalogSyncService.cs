@@ -172,7 +172,15 @@ namespace NzbDrone.Core.RomCatalog
 
             try
             {
-                var numberedSnapshot = _snapshotParser.Parse(_documentClient.FetchDatOMaticNumbered(systemId.Value));
+                var numberedContent = _documentClient.FetchDatOMaticNumbered(systemId.Value);
+
+                if (string.IsNullOrWhiteSpace(numberedContent))
+                {
+                    EnrichWithAdvansceneCatalog(snapshot);
+                    return;
+                }
+
+                var numberedSnapshot = _snapshotParser.Parse(numberedContent);
                 var numberedByHash = numberedSnapshot.Entries
                     .SelectMany(entry => entry.Hashes.Select(hash => new { Key = HashKey(hash), Entry = entry }))
                     .GroupBy(x => x.Key)
@@ -193,6 +201,11 @@ namespace NzbDrone.Core.RomCatalog
                     entry.NumberedCanonicalFileName = numberedEntry.NumberedCanonicalFileName;
                 }
             }
+            catch (InvalidOperationException)
+            {
+                EnrichWithAdvansceneCatalog(snapshot);
+                return;
+            }
             catch (Exception ex)
             {
                 _logger.Warn(ex, "Failed enriching No-Intro catalog {0} with DAT-o-MATIC numbered filenames", snapshot.SystemKey);
@@ -212,7 +225,14 @@ namespace NzbDrone.Core.RomCatalog
 
             try
             {
-                var releaseNumbersByCrc = ParseAdvansceneReleaseNumbers(_documentClient.FetchAdvanscene(sourceUrl));
+                var advansceneContent = _documentClient.FetchAdvanscene(sourceUrl);
+
+                if (string.IsNullOrWhiteSpace(advansceneContent))
+                {
+                    return;
+                }
+
+                var releaseNumbersByCrc = ParseAdvansceneReleaseNumbers(advansceneContent);
 
                 foreach (var entry in snapshot.Entries.Where(x => x.NumberedCanonicalFileName == null))
                 {

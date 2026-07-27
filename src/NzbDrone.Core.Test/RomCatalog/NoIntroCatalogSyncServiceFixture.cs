@@ -6,6 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.RomCatalog;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.RomCatalog
 {
@@ -254,6 +255,7 @@ namespace NzbDrone.Core.Test.RomCatalog
             Action act = () => _subject.Sync(source.Id);
 
             act.Should().Throw<InvalidOperationException>();
+            ExceptionVerification.ExpectedWarns(1);
 
             _entryRepository.All().Should().ContainSingle(x => x.Id == existingEntry.Id);
             _hashRepository.All().Should().ContainSingle(x => x.HashValue == "oldhash");
