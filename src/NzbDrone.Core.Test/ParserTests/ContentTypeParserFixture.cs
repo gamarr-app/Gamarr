@@ -46,6 +46,23 @@ namespace NzbDrone.Core.Test.ParserTests
             QualityParser.ParseContentType(title).Should().Be(ReleaseContentType.Unknown);
         }
 
+        // Repacker bundles are full games even when the name carries an
+        // update number — they must not classify as update-only
+        [TestCase("FIFA 15 Ultimate Team Edition Update 8 2014 PC RePack от R.G. Механики")]
+        [TestCase("God of War v1 0 1 Day 1 Patch Build 8008283 Bonus OST MULTi18 FitGirl Repack")]
+        [TestCase("Final Fantasy XIII Update 3 2014 PC Steam-Rip от Let'sРlay")]
+        public void should_not_classify_repacker_bundles_as_update_only(string title)
+        {
+            QualityParser.ParseContentType(title).Should().NotBe(ReleaseContentType.UpdateOnly);
+        }
+
+        // But a scene REPACK tag on an update release is still an update
+        [TestCase("Game.Name.Update.v1.7.REPACK-RUNE", ReleaseContentType.UpdateOnly)]
+        public void should_keep_scene_repack_updates_as_update_only(string title, ReleaseContentType expected)
+        {
+            QualityParser.ParseContentType(title).Should().Be(expected);
+        }
+
         [TestCase("Game.Name.Season.Pass-CODEX", ReleaseContentType.SeasonPass)]
         [TestCase("Game.Name.DLC.Bundle-PLAZA", ReleaseContentType.SeasonPass)]
         [TestCase("Game.Name.Expansion.Pass-SKIDROW", ReleaseContentType.SeasonPass)]

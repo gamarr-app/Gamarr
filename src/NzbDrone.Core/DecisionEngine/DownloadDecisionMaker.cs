@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Configuration;
@@ -216,7 +217,7 @@ namespace NzbDrone.Core.DecisionEngine
 
             if (profile != null)
             {
-                _logger.Debug("Using quality profile '{0}' from DLC slot '{1}' for {2}", profile.Name, slot.Title, remoteGame.Release.Title);
+                _logger.Debug("Using quality profile '{0}' from DLC slot '{1}' for {2}", profile.Name, slot.Title, CleanseLogMessage.SanitizeLogParam(remoteGame.Release.Title));
                 remoteGame.ComponentQualityProfile = profile;
             }
         }

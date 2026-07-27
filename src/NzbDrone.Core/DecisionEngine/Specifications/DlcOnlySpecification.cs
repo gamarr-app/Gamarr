@@ -1,4 +1,5 @@
 using NLog;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser.Model;
 
@@ -36,7 +37,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             // has no base on disk to apply them to.
             if (subject.Game?.HasFile == true)
             {
-                _logger.Debug("Release requires the base game and one is on disk, accepting: {0}", subject.Release.Title);
+                _logger.Debug("Release requires the base game and one is on disk, accepting: {0}", CleanseLogMessage.SanitizeLogParam(subject.Release.Title));
                 return DownloadSpecDecision.Accept();
             }
 

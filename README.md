@@ -54,6 +54,16 @@ or Jackett using a Torznab feed with game categories (1000 = Console,
 
 * Game-native quality model: Scene, GOG (DRM-free), Repack, ISO, Retail, Portable — not video resolutions
 * Recognizes game versions, updates, and DLC in release names; can upgrade when a newer version releases
+* **Game components**: base game, updates, and DLC tracked as separate slots under one entry — updates
+  import into `Updates/<version>/` alongside the base instead of replacing it, DLC into `DLC/<name>/`.
+  Each slot is individually monitorable and searchable from the Components panel; DLC slots come from
+  Steam/IGDB metadata, can carry their own quality profile, and bundled releases (`game.iso` +
+  `update_1.7/` + a known DLC folder) are split into their components at import
+* **Update retention**: keep the newest N updates plus the newest of each major version; older ones go
+  to the recycle bin (configurable, or keep everything)
+* **Multi-platform titles**: one library entry per platform with its own folder, profile, and
+  platform-filtered searches; the poster index groups platform siblings into one card with per-platform
+  status chips
 * Steam library and Steam wishlist import lists — point Gamarr at your account and it monitors your backlog
 * Game discovery: popular, trending, and recommendations based on your library
 * Metadata from three sources — Steam (no key needed), IGDB, and RAWG — merged into one record
