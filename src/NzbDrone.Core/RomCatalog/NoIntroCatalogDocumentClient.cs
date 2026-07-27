@@ -17,6 +17,7 @@ namespace NzbDrone.Core.RomCatalog
     public class NoIntroCatalogDocumentClient : INoIntroCatalogDocumentClient
     {
         private const string DatOMaticSourceUrlPrefix = "datomatic://system/";
+        private static readonly Regex PrepareFieldRegex = new Regex(@"name=""(?<field>dat_dl_[^""]+)""\s+value=""Prepare""", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex DownloadTokenRegex = new Regex("<input type=\"submit\" name=\"(?<token>[0-9a-f]{32})\" value=\"Download!!\"", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private readonly IHttpClient _httpClient;
 
@@ -29,7 +30,11 @@ namespace NzbDrone.Core.RomCatalog
         {
             if (sourceUrl.StartsWith(DatOMaticSourceUrlPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                var systemId = int.Parse(sourceUrl.Substring(DatOMaticSourceUrlPrefix.Length));
+                if (!int.TryParse(sourceUrl.AsSpan(DatOMaticSourceUrlPrefix.Length), out var systemId))
+                {
+                    throw new InvalidOperationException($"Invalid DAT-o-MATIC source url: {sourceUrl}");
+                }
+
                 return FetchDatOMaticNumbered(systemId);
             }
 
@@ -39,7 +44,13 @@ namespace NzbDrone.Core.RomCatalog
         public string FetchDatOMaticNumbered(int systemId)
         {
             var prepareUrl = $"https://datomatic.no-intro.org/index.php?page=download&op=dat&s={systemId}";
-            _httpClient.Get(new HttpRequest(prepareUrl));
+            var preparePage = _httpClient.Get(new HttpRequest(prepareUrl));
+            var prepareField = PrepareFieldRegex.Match(preparePage.Content).Groups["field"].Value;
+
+            if (string.IsNullOrWhiteSpace(prepareField))
+            {
+                throw new InvalidOperationException("DAT-o-MATIC did not expose a numbered DAT prepare field");
+            }
 
             var prepareRequest = new HttpRequestBuilder(prepareUrl)
                 .Post()
@@ -61,7 +72,7 @@ namespace NzbDrone.Core.RomCatalog
                 .AddFormParameter("storage_2", 1)
                 .AddFormParameter("inc_nodump", 0)
                 .AddFormParameter("inc_mia", 1)
-                .AddFormParameter("dat_dl_2026-05-30", "Prepare")
+                .AddFormParameter(prepareField, "Prepare")
                 .Build();
 
             var prepareResponse = _httpClient.Post(prepareRequest);
@@ -95,7 +106,13 @@ namespace NzbDrone.Core.RomCatalog
             {
                 using var stream = new MemoryStream(data);
                 using var archive = new ZipArchive(stream, ZipArchiveMode.Read);
-                var entry = archive.Entries.FirstOrDefault(x => x.Name.EndsWith(".dat", StringComparison.OrdinalIgnoreCase)) ?? archive.Entries.First();
+                var entry = archive.Entries.FirstOrDefault(x => x.Name.EndsWith(".dat", StringComparison.OrdinalIgnoreCase)) ?? archive.Entries.FirstOrDefault();
+
+                if (entry == null)
+                {
+                    throw new InvalidOperationException("Catalog archive was empty");
+                }
+
                 using var entryStream = entry.Open();
                 using var reader = new StreamReader(entryStream);
                 return reader.ReadToEnd();
