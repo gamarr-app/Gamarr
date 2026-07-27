@@ -110,6 +110,59 @@ namespace NzbDrone.Core.Test.RomCatalog
             results.Should().Contain(x => x.CatalogEntryId == missingEntry.Id && x.IsMissing);
         }
 
+        [Test]
+        public void should_continue_when_one_file_cannot_be_read()
+        {
+            var source = _sourceRepository.Insert(new NoIntroCatalogSource
+            {
+                Name = "No-Intro",
+                SourceUrl = "https://example.invalid/gba.dat"
+            });
+
+            var goodBytes = new byte[] { 1, 2, 3, 4 };
+
+            var verifiedEntry = _entryRepository.Insert(new NoIntroCatalogEntry
+            {
+                CatalogSourceId = source.Id,
+                SystemKey = "nintendo-gba",
+                CanonicalName = "Verified Game",
+                CanonicalFileName = "Verified Game.gba",
+                PlatformFamily = PlatformFamily.Nintendo
+            });
+
+            InsertSha1Hash(verifiedEntry.Id, goodBytes, false);
+
+            var missingEntry = _entryRepository.Insert(new NoIntroCatalogEntry
+            {
+                CatalogSourceId = source.Id,
+                SystemKey = "nintendo-gba",
+                CanonicalName = "Missing Game",
+                CanonicalFileName = "Missing Game.gba",
+                PlatformFamily = PlatformFamily.Nintendo
+            });
+
+            InsertSha1Hash(missingEntry.Id, new byte[] { 7, 7, 7, 7 }, false);
+
+            var verificationSet = _verificationSetRepository.Insert(new NoIntroVerificationSet
+            {
+                CatalogSourceId = source.Id,
+                SystemKey = "nintendo-gba",
+                RootPath = _tempRoot,
+                Enabled = true
+            });
+
+            var rawPath = WriteBytes("Verified Game.gba", goodBytes);
+            var unreadablePath = Path.Combine(_tempRoot, "Unreadable Game.gba");
+
+            _subject.Verify(verificationSet.Id, new[] { rawPath, unreadablePath });
+
+            var results = _resultRepository.All().ToList();
+
+            results.Should().Contain(x => x.ActualFileName == "Verified Game.gba" && x.VerificationStatus == NoIntroVerificationStatus.Verified);
+            results.Should().Contain(x => x.ActualFileName == "Unreadable Game.gba" && x.VerificationStatus == NoIntroVerificationStatus.Unknown && !x.IsMissing);
+            results.Should().Contain(x => x.CatalogEntryId == missingEntry.Id && x.IsMissing);
+        }
+
         private void InsertSha1Hash(int entryId, byte[] content, bool isBadDump)
         {
             using var sha1 = System.Security.Cryptography.SHA1.Create();

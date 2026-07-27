@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Disk;
+using NLog;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
@@ -23,6 +24,7 @@ namespace Gamarr.Api.V3.GameComponents
         private readonly INoIntroCatalogSourceRepository _noIntroCatalogSourceRepository;
         private readonly INoIntroCatalogHashRepository _noIntroCatalogHashRepository;
         private readonly IDiskProvider _diskProvider;
+        private readonly Logger _logger;
 
         public GameComponentController(IGameComponentService componentService,
                                         IMediaFileService mediaFileService,
@@ -31,7 +33,8 @@ namespace Gamarr.Api.V3.GameComponents
                                         INoIntroCatalogEntryRepository noIntroCatalogEntryRepository,
                                         INoIntroCatalogSourceRepository noIntroCatalogSourceRepository,
                                         INoIntroCatalogHashRepository noIntroCatalogHashRepository,
-                                        IDiskProvider diskProvider)
+                                        IDiskProvider diskProvider,
+                                        Logger logger)
         {
             _componentService = componentService;
             _mediaFileService = mediaFileService;
@@ -41,6 +44,7 @@ namespace Gamarr.Api.V3.GameComponents
             _noIntroCatalogSourceRepository = noIntroCatalogSourceRepository;
             _noIntroCatalogHashRepository = noIntroCatalogHashRepository;
             _diskProvider = diskProvider;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -104,8 +108,19 @@ namespace Gamarr.Api.V3.GameComponents
                     continue;
                 }
 
-                using var stream = _diskProvider.OpenReadStream(path);
-                var hashes = NoIntroRomHasher.Compute(stream);
+                NoIntroHashTriplet hashes;
+
+                try
+                {
+                    using var stream = _diskProvider.OpenReadStream(path);
+                    hashes = NoIntroRomHasher.Compute(stream);
+                }
+                catch (global::System.Exception ex)
+                {
+                    _logger.Warn(ex, "Failed hashing game file {0} for component inspection", path);
+                    continue;
+                }
+
                 var matchedHash = FindMatch(hashes, hashByKey);
 
                 if (matchedHash == null)

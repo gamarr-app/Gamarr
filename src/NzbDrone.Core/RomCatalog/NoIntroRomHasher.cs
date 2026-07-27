@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using ICSharpCode.SharpZipLib.Checksum;
 
@@ -21,7 +20,7 @@ namespace NzbDrone.Core.RomCatalog
             {
                 md5.TransformBlock(buffer, 0, bytesRead, null, 0);
                 sha1.TransformBlock(buffer, 0, bytesRead, null, 0);
-                crc.Update(buffer.Take(bytesRead).ToArray());
+                crc.Update(new ArraySegment<byte>(buffer, 0, bytesRead));
             }
 
             md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);

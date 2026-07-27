@@ -74,9 +74,16 @@ namespace NzbDrone.Core.RomCatalog
             Dictionary<int, NoIntroCatalogEntry> entryMap,
             RenameProfile renameProfile)
         {
-            return Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase)
-                ? VerifyArchive(snapshot, verificationSet, path, hashMap, entryMap, renameProfile)
-                : VerifyFile(snapshot, verificationSet, path, hashMap, entryMap, renameProfile);
+            try
+            {
+                return Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase)
+                    ? VerifyArchive(snapshot, verificationSet, path, hashMap, entryMap, renameProfile)
+                    : VerifyFile(snapshot, verificationSet, path, hashMap, entryMap, renameProfile);
+            }
+            catch (Exception)
+            {
+                return BuildUnknownResult(snapshot, verificationSet, path, Path.GetFileName(path), null, null, null);
+            }
         }
 
         private static NoIntroVerificationResult VerifyFile(
@@ -148,22 +155,7 @@ namespace NzbDrone.Core.RomCatalog
 
             if (matchedHash == null)
             {
-                return new NoIntroVerificationResult
-                {
-                    SnapshotId = snapshot.Id,
-                    VerificationSetId = verificationSet.Id,
-                    RelativePath = GetRelativePath(verificationSet.RootPath, fullPath),
-                    ArchivePath = archivePath,
-                    MemberPath = memberPath,
-                    ActualFileName = actualFileName,
-                    ExpectedFileName = null,
-                    HashType = hashes.PreferredHashType,
-                    HashValue = hashes.PreferredHashValue,
-                    VerificationStatus = NoIntroVerificationStatus.Unknown,
-                    IsDuplicate = false,
-                    IsMissing = false,
-                    VerifiedAt = DateTime.UtcNow
-                };
+                return BuildUnknownResult(snapshot, verificationSet, fullPath, actualFileName, archivePath, memberPath, hashes);
             }
 
             var catalogEntry = entryMap[matchedHash.CatalogEntryId];
@@ -256,6 +248,33 @@ namespace NzbDrone.Core.RomCatalog
             return fullPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase)
                 ? fullPath.Substring(rootPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                 : fullPath;
+        }
+
+        private static NoIntroVerificationResult BuildUnknownResult(
+            NoIntroVerificationSnapshot snapshot,
+            NoIntroVerificationSet verificationSet,
+            string fullPath,
+            string actualFileName,
+            string archivePath,
+            string memberPath,
+            NoIntroHashTriplet hashes)
+        {
+            return new NoIntroVerificationResult
+            {
+                SnapshotId = snapshot.Id,
+                VerificationSetId = verificationSet.Id,
+                RelativePath = GetRelativePath(verificationSet.RootPath, fullPath),
+                ArchivePath = archivePath,
+                MemberPath = memberPath,
+                ActualFileName = actualFileName,
+                ExpectedFileName = null,
+                HashType = hashes?.PreferredHashType,
+                HashValue = hashes?.PreferredHashValue,
+                VerificationStatus = NoIntroVerificationStatus.Unknown,
+                IsDuplicate = false,
+                IsMissing = false,
+                VerifiedAt = DateTime.UtcNow
+            };
         }
 
         private static NoIntroHashTriplet ComputeHashes(Stream stream)
