@@ -40,6 +40,7 @@ using NzbDrone.Core.Profiles.Releases;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.RemotePathMappings;
 using NzbDrone.Core.RootFolders;
+using NzbDrone.Core.RomCatalog;
 using NzbDrone.Core.Tags;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Update.History;
@@ -153,6 +154,13 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(e => e.RemoteGame);
 
             Mapper.Entity<RemotePathMapping>("RemotePathMappings").RegisterModel();
+            Mapper.Entity<NoIntroCatalogSource>("NoIntroCatalogSources").RegisterModel();
+            Mapper.Entity<NoIntroCatalogEntry>("NoIntroCatalogEntries").RegisterModel();
+            Mapper.Entity<NoIntroCatalogHash>("NoIntroCatalogHashes").RegisterModel();
+            Mapper.Entity<NoIntroSystemMapping>("NoIntroSystemMappings").RegisterModel();
+            Mapper.Entity<NoIntroVerificationSet>("NoIntroVerificationSets").RegisterModel();
+            Mapper.Entity<NoIntroVerificationSnapshot>("NoIntroVerificationSnapshots").RegisterModel();
+            Mapper.Entity<NoIntroVerificationResult>("NoIntroVerificationResults").RegisterModel();
             Mapper.Entity<Tag>("Tags").RegisterModel();
             Mapper.Entity<ReleaseProfile>("ReleaseProfiles").RegisterModel();
 

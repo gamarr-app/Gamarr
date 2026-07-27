@@ -3,6 +3,9 @@
 interface CssExports {
   'actions': string;
   'age': string;
+  'component': string;
+  'componentContent': string;
+  'componentTitle': string;
   'customFormatScore': string;
   'dateAdded': string;
   'download': string;
