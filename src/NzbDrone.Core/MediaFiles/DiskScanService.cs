@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Languages;
@@ -409,30 +410,30 @@ namespace NzbDrone.Core.MediaFiles
 
         public string[] GetVideoFiles(string path, bool allDirectories = true)
         {
-            _logger.Debug("Scanning '{0}' for game files", path);
+            _logger.Debug("Scanning '{0}' for game files", CleanseLogMessage.SanitizeLogParam(path));
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
             var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)))
                                            .ToList();
 
-            _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
-            _logger.Debug("{0} game files were found in {1}", mediaFileList.Count, path);
+            _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, CleanseLogMessage.SanitizeLogParam(path));
+            _logger.Debug("{0} game files were found in {1}", mediaFileList.Count, CleanseLogMessage.SanitizeLogParam(path));
 
             return mediaFileList.ToArray();
         }
 
         public string[] GetNonVideoFiles(string path, bool allDirectories = true)
         {
-            _logger.Debug("Scanning '{0}' for non-game files", path);
+            _logger.Debug("Scanning '{0}' for non-game files", CleanseLogMessage.SanitizeLogParam(path));
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
             var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)))
                                            .ToList();
 
-            _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
-            _logger.Debug("{0} non-game files were found in {1}", mediaFileList.Count, path);
+            _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, CleanseLogMessage.SanitizeLogParam(path));
+            _logger.Debug("{0} non-game files were found in {1}", mediaFileList.Count, CleanseLogMessage.SanitizeLogParam(path));
 
             return mediaFileList.ToArray();
         }
