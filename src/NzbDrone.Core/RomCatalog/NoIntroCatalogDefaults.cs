@@ -99,6 +99,45 @@ namespace NzbDrone.Core.RomCatalog
             return (gamePlatform == PlatformFamily.Nintendo && GamePlatform.IsNintendoFamily(catalogPlatform)) ||
                 (gamePlatform == PlatformFamily.PlayStation && GamePlatform.IsPlayStationFamily(catalogPlatform));
         }
+
+        public static IReadOnlyList<PlatformFamily> GetRelevantPlatformFamilies(PlatformFamily gamePlatform)
+        {
+            if (gamePlatform == PlatformFamily.Nintendo)
+            {
+                return new[]
+                {
+                    PlatformFamily.Nintendo,
+                    PlatformFamily.NintendoSwitch,
+                    PlatformFamily.NintendoWiiU,
+                    PlatformFamily.NintendoWii,
+                    PlatformFamily.Nintendo3DS,
+                    PlatformFamily.NintendoDSi,
+                    PlatformFamily.NintendoDS,
+                    PlatformFamily.NintendoGBA,
+                    PlatformFamily.NintendoGB,
+                    PlatformFamily.NintendoGBC,
+                    PlatformFamily.NintendoNES,
+                    PlatformFamily.NintendoSNES,
+                    PlatformFamily.NintendoN64,
+                    PlatformFamily.NintendoFDS,
+                    PlatformFamily.NintendoVirtualBoy,
+                    PlatformFamily.NintendoPokemonMini
+                };
+            }
+
+            if (gamePlatform == PlatformFamily.PlayStation)
+            {
+                return new[]
+                {
+                    PlatformFamily.PlayStation,
+                    PlatformFamily.SonyPS3,
+                    PlatformFamily.SonyPSP,
+                    PlatformFamily.SonyPSVita
+                };
+            }
+
+            return new[] { gamePlatform };
+        }
     }
 
     public class NoIntroCatalogSourceSeed

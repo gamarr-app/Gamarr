@@ -85,24 +85,38 @@ namespace NzbDrone.Core.Games.Components
 
         public NoIntroGameComponentSlot FindSlotForFile(Game game, List<NoIntroCatalogEntry> entries, GameFile file)
         {
-            if (string.IsNullOrWhiteSpace(file.RelativePath))
-            {
-                return null;
-            }
-
-            var fileName = Path.GetFileName(file.RelativePath.Replace('\\', '/'));
-
-            return FindSlotForFileName(game, entries, fileName);
+            return FindSlotForFile(GetSlots(game, entries), file);
         }
 
         public NoIntroGameComponentSlot FindSlotForFileName(Game game, List<NoIntroCatalogEntry> entries, string fileName)
+        {
+            return FindSlotForFileName(GetSlots(game, entries), fileName);
+        }
+
+        public NoIntroGameComponentSlot FindSlotForFile(List<NoIntroGameComponentSlot> slots, GameFile file)
+        {
+            return FindSlotForFileName(slots, GetFileName(file.RelativePath)) ??
+                FindSlotForFileName(slots, GetFileName(file.OriginalFilePath));
+        }
+
+        public NoIntroGameComponentSlot FindSlotForFileName(List<NoIntroGameComponentSlot> slots, string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 return null;
             }
 
-            return GetSlots(game, entries).FirstOrDefault(slot => slot.FileNames.Contains(fileName));
+            return slots.FirstOrDefault(slot => slot.FileNames.Contains(fileName));
+        }
+
+        private static string GetFileName(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return null;
+            }
+
+            return Path.GetFileName(path.Replace('\\', '/'));
         }
 
         private static NoIntroGameComponentSlot ToSlot(NoIntroCatalogComponentSlot slot, Dictionary<string, List<NoIntroCatalogEntry>> entriesByCanonicalName)

@@ -42,6 +42,10 @@ namespace NzbDrone.Core.Test.GameTests
             Mocker.GetMock<IMediaFileService>()
                   .Setup(m => m.GetFilesByGame(_game.Id))
                   .Returns(new List<GameFile>());
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.GetByPlatformFamily(It.IsAny<PlatformFamily>()))
+                  .Returns(new List<NoIntroCatalogEntry>());
         }
 
         private List<GameComponent> CapturedInserts()
@@ -114,7 +118,7 @@ namespace NzbDrone.Core.Test.GameTests
             _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
-                  .Setup(r => r.All())
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))
                   .Returns(new List<NoIntroCatalogEntry>
                   {
                       Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
@@ -133,7 +137,7 @@ namespace NzbDrone.Core.Test.GameTests
                 "Europe (En,Fr,De,Es,It)",
                 "USA, Australia (En,Fr,De,Es,It)",
                 "Japan");
-            inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Should().OnlyContain(c => c.Monitored && c.Key.StartsWith("nointro:retail:"));
+            inserted.Where(c => c.ComponentType == GameComponentType.NoIntroRetailRom).Should().OnlyContain(c => !c.Monitored && c.Key.StartsWith("nointro:retail:"));
         }
 
         [Test]
@@ -144,7 +148,7 @@ namespace NzbDrone.Core.Test.GameTests
             _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
-                  .Setup(r => r.All())
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))
                   .Returns(new List<NoIntroCatalogEntry>
                   {
                       Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS),
@@ -177,7 +181,7 @@ namespace NzbDrone.Core.Test.GameTests
             };
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
-                  .Setup(r => r.All())
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))
                   .Returns(new List<NoIntroCatalogEntry>
                   {
                       Entry("Pokemon - White Version (USA, Europe) (NDSi Enhanced)", PlatformFamily.NintendoDS),
@@ -198,7 +202,7 @@ namespace NzbDrone.Core.Test.GameTests
             _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
-                  .Setup(r => r.All())
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.Nintendo3DS))
                   .Returns(new List<NoIntroCatalogEntry>
                   {
                       Entry("Mario Kart 7 (Europe) (En,Fr,De,Es,It,Nl,Pt,Ru)", PlatformFamily.Nintendo3DS, extension: "3ds"),
@@ -233,10 +237,49 @@ namespace NzbDrone.Core.Test.GameTests
                   .Returns(new List<GameFile> { file });
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
-                  .Setup(r => r.All())
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))
                   .Returns(new List<NoIntroCatalogEntry>
                   {
                       Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS, "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds")
+                  });
+
+            Subject.EnsureComponents(_game);
+
+            file.ComponentId.Should().Be(11);
+            Mocker.GetMock<IMediaFileService>()
+                   .Verify(m => m.Update(It.Is<List<GameFile>>(l => l.Count == 1 && l[0].ComponentId == 11)), Times.Once());
+        }
+
+        [Test]
+        public void should_link_renamed_nointro_file_using_original_file_path()
+        {
+            _game.Platform = PlatformFamily.NintendoGB;
+            _game.GameMetadata.Value.Title = "Mega Man IV";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            var baseSlot = new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" };
+            var usaSlot = new GameComponent { Id = 11, GameId = _game.Id, ComponentType = GameComponentType.NoIntroRetailRom, Key = "nointro:retail:mega-man-iv-usa" };
+            var file = new GameFile
+            {
+                Id = 1,
+                GameId = _game.Id,
+                RelativePath = "Mega Man IV (1993) Retail - Gamarr.zip",
+                OriginalFilePath = "Nintendo - Game Boy/Mega Man IV (USA).zip"
+            };
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent> { baseSlot, usaSlot });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { file });
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoGB))
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mega Man IV (USA)", PlatformFamily.NintendoGB, extension: "zip")
                   });
 
             Subject.EnsureComponents(_game);
@@ -275,7 +318,7 @@ namespace NzbDrone.Core.Test.GameTests
                   .Returns(new List<string> { "/games/Mario Kart DS/0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds" });
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
-                  .Setup(r => r.All())
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))
                   .Returns(new List<NoIntroCatalogEntry>
                   {
                       Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS, "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds")
