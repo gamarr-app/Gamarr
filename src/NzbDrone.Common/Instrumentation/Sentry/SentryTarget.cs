@@ -59,7 +59,11 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "DirectoryNotFoundException",
 
             // A remote server (indexer, Prowlarr, etc.) told us to back off
-            "TooManyRequestsException"
+            "TooManyRequestsException",
+
+            // The user's download client refused a grab (bad NZB/torrent,
+            // client-side limits) — surfaced in the UI, not an app bug
+            "DownloadClientRejectedReleaseException"
         };
 
         public static readonly List<string> FilteredExceptionMessages = new List<string>
