@@ -47,14 +47,13 @@ namespace NzbDrone.Core.Messaging.Commands
 
         public List<CommandModel> All()
         {
-            List<CommandModel> rval = null;
-
+            // Copy under the lock: returning the live list handed callers a
+            // reference that worker threads mutate mid-enumeration (Sentry
+            // 7647825140: IndexOutOfRange in the command API's ToList).
             lock (_mutex)
             {
-                rval = _items;
+                return _items.ToList();
             }
-
-            return rval;
         }
 
         public CommandModel Find(int id)
