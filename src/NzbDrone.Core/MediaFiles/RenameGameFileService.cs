@@ -74,6 +74,14 @@ namespace NzbDrone.Core.MediaFiles
 
                 var gameFilePath = file.GetPath(game);
 
+                // Component subfolder units (Updates/<version>, DLC/<name>)
+                // are directories too; an extension-less folder name crashed
+                // BuildFilePath's extension check (Sentry 7649288954).
+                if (_diskProvider.FolderExists(gameFilePath))
+                {
+                    continue;
+                }
+
                 var newName = _filenameBuilder.BuildFileName(game, file);
                 var newPath = _filenameBuilder.BuildFilePath(game, newName, System.IO.Path.GetExtension(gameFilePath));
 
@@ -105,6 +113,13 @@ namespace NzbDrone.Core.MediaFiles
 
                 var previousRelativePath = gameFile.RelativePath;
                 var previousPath = gameFile.GetPath(game);
+
+                // Component subfolder units are directories — not renameable
+                // as files (see GetPreviews).
+                if (_diskProvider.FolderExists(previousPath))
+                {
+                    continue;
+                }
 
                 try
                 {
