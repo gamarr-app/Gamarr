@@ -63,7 +63,7 @@ namespace NzbDrone.Core.MediaFiles
                 return;
             }
 
-            var game = message.GameFile.Game ?? _gameService.GetGame(message.GameFile.GameId);
+            var game = message.GameFile.Game ?? _gameService.FindGame(message.GameFile.GameId);
 
             if (game == null)
             {

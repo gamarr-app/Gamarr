@@ -18,6 +18,7 @@ namespace NzbDrone.Core.Games
     public interface IGameService
     {
         Game GetGame(int gameId);
+        Game FindGame(int gameId);
         List<Game> GetGames(IEnumerable<int> gameIds);
         PagingSpec<Game> Paged(PagingSpec<Game> pagingSpec);
         Game AddGame(Game newGame);
@@ -93,6 +94,13 @@ namespace NzbDrone.Core.Games
         public Game GetGame(int gameId)
         {
             return _gameRepository.Get(gameId);
+        }
+
+        // Null when the game doesn't exist — for callers racing deletion
+        // (event handlers, mid-command lookups) where missing isn't an error.
+        public Game FindGame(int gameId)
+        {
+            return _gameRepository.Find(gameId);
         }
 
         public List<Game> GetGames(IEnumerable<int> gameIds)

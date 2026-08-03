@@ -353,7 +353,7 @@ namespace NzbDrone.Core.Games.Components
         // raising a scan/update event, so reconcile here too.
         public void Handle(GameFileAddedEvent message)
         {
-            var game = message.GameFile.Game ?? _gameService.GetGame(message.GameFile.GameId);
+            var game = message.GameFile.Game ?? _gameService.FindGame(message.GameFile.GameId);
 
             if (game == null)
             {
