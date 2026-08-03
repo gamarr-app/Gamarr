@@ -348,14 +348,21 @@ namespace NzbDrone.Core.Extras.Metadata
                 return null;
             }
 
-            // Remove duplicate metadata files from DB and disk
+            // Remove duplicate metadata files from DB and disk. A record whose
+            // file is already gone must still be deleted — recycling used to
+            // throw on the missing file BEFORE the record delete, so the stale
+            // row crashed every cover update forever (Sentry 7649201333).
             foreach (var file in matchingMetadataFiles.Skip(1))
             {
                 var path = Path.Combine(game.Path, file.RelativePath);
 
                 _logger.Debug("Removing duplicate Metadata file: {0}", path);
 
-                _recycleBinProvider.DeleteFile(path);
+                if (_diskProvider.FileExists(path))
+                {
+                    _recycleBinProvider.DeleteFile(path);
+                }
+
                 _metadataFileService.Delete(file.Id);
             }
 
