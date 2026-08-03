@@ -353,7 +353,7 @@ namespace NzbDrone.Core.Test.GameTests
         public void should_reconcile_components_when_a_file_is_added_by_import()
         {
             Mocker.GetMock<IGameService>()
-                  .Setup(s => s.GetGame(_game.Id))
+                  .Setup(s => s.FindGame(_game.Id))
                   .Returns(_game);
 
             Mocker.GetMock<IMediaFileService>()

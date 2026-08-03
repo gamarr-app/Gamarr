@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             _game = new Game { Id = 3, Title = "Hades", Path = @"C:\Games\Hades".AsOsAgnostic() };
 
             Mocker.GetMock<IGameService>()
-                  .Setup(s => s.GetGame(_game.Id))
+                  .Setup(s => s.FindGame(_game.Id))
                   .Returns(_game);
 
             Mocker.GetMock<IConfigService>().SetupGet(s => s.UpdateRetentionCount).Returns(3);

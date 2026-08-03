@@ -43,7 +43,10 @@ namespace NzbDrone.Core.MediaFiles
             var addedFile = _mediaFileRepository.Insert(gameFile);
             if (addedFile.Game == null)
             {
-                addedFile.Game = _gameRepository.Get(gameFile.GameId);
+                // Find, not Get: the game can be deleted mid-scan; the
+                // orphaned record is cleaned up by housekeeping, and event
+                // handlers already null-check the game.
+                addedFile.Game = _gameRepository.Find(gameFile.GameId);
             }
 
             _eventAggregator.PublishEvent(new GameFileAddedEvent(addedFile));

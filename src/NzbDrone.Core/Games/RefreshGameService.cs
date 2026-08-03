@@ -5,6 +5,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
@@ -318,6 +319,14 @@ namespace NzbDrone.Core.Games
                         catch (GameNotFoundException)
                         {
                             _logger.Error("Game '{0}' (IGDB {1}) was not found, it may have been removed from The Game Database.", gameLocal.Title, gameLocal.IgdbId);
+                            continue;
+                        }
+                        catch (ModelNotFoundException)
+                        {
+                            // Deleted from the library while the refresh-all
+                            // command was running — nothing left to refresh or
+                            // rescan.
+                            _logger.Debug("Game '{0}' was deleted during refresh, skipping", gameLocal.Title);
                             continue;
                         }
                         catch (Exception e)
