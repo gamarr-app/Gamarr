@@ -1,10 +1,12 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using FluentAssertions;
 using NLog;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation.Sentry;
 using NzbDrone.Test.Common;
 
@@ -112,6 +114,44 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         {
             var log = GivenLogEvent(LogLevel.Error, new Exception(message), "test");
             _subject.IsSentryMessage(log).Should().BeTrue();
+        }
+
+        [TestCaseSource(typeof(SentryTarget), "FilteredExceptionMessages")]
+        public void should_filter_event_for_filtered_exception_messages_on_inner_exception(string message)
+        {
+            var log = GivenLogEvent(LogLevel.Error, new Exception("outer", new Exception("aaaaaaa" + message + "bbbbbbb")), "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        private static HttpException GivenHttpException(HttpStatusCode statusCode)
+        {
+            var request = new HttpRequest("https://indexer.example.com/api");
+
+            return new HttpException(request, new HttpResponse(request, new HttpHeader(), string.Empty, statusCode));
+        }
+
+        [TestCase(HttpStatusCode.Unauthorized)]
+        [TestCase(HttpStatusCode.Forbidden)]
+        [TestCase(HttpStatusCode.PaymentRequired)]
+        public void should_filter_event_for_http_exceptions_caused_by_user_configuration(HttpStatusCode statusCode)
+        {
+            var log = GivenLogEvent(LogLevel.Error, GivenHttpException(statusCode), "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [TestCase(HttpStatusCode.InternalServerError)]
+        [TestCase(HttpStatusCode.BadRequest)]
+        public void should_not_filter_event_for_other_http_exceptions(HttpStatusCode statusCode)
+        {
+            var log = GivenLogEvent(LogLevel.Error, GivenHttpException(statusCode), "test");
+            _subject.IsSentryMessage(log).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_filter_event_for_wrapped_http_exception_caused_by_user_configuration()
+        {
+            var log = GivenLogEvent(LogLevel.Error, new Exception("Failed to fetch releases", GivenHttpException(HttpStatusCode.Forbidden)), "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
         }
     }
 }

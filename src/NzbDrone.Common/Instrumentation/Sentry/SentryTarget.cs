@@ -11,6 +11,7 @@ using NLog.Targets;
 using Npgsql;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Http;
 using Sentry;
 
 namespace NzbDrone.Common.Instrumentation.Sentry
@@ -63,7 +64,24 @@ namespace NzbDrone.Common.Instrumentation.Sentry
 
             // The user's download client refused a grab (bad NZB/torrent,
             // client-side limits) — surfaced in the UI, not an app bug
-            "DownloadClientRejectedReleaseException"
+            "DownloadClientRejectedReleaseException",
+
+            // The download client is switched off, unreachable or behind a
+            // broken reverse proxy — environmental, and already surfaced as a
+            // health check
+            "DownloadClientUnavailableException",
+
+            // Wrong username/password/API key for the download client
+            "DownloadClientAuthenticationException"
+        };
+
+        // Remote services reject us for reasons that are always the user's configuration
+        // (bad/expired API key, IP not whitelisted, account not on the required tier).
+        private static readonly HashSet<HttpStatusCode> FilteredHttpStatusCodes = new HashSet<HttpStatusCode>
+        {
+            HttpStatusCode.Unauthorized,
+            HttpStatusCode.Forbidden,
+            HttpStatusCode.PaymentRequired
         };
 
         public static readonly List<string> FilteredExceptionMessages = new List<string>
@@ -325,11 +343,20 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                                 isSentry = false;
                                 break;
                             }
-                        }
 
-                        if (FilteredExceptionMessages.Any(x => ex.Message.Contains(x)))
-                        {
-                            isSentry = false;
+                            if (FilteredExceptionMessages.Any(x => inner.Message.Contains(x)))
+                            {
+                                isSentry = false;
+                                break;
+                            }
+
+                            if (inner is HttpException httpEx &&
+                                httpEx.Response != null &&
+                                FilteredHttpStatusCodes.Contains(httpEx.Response.StatusCode))
+                            {
+                                isSentry = false;
+                                break;
+                            }
                         }
 
                         if (isSentry)
