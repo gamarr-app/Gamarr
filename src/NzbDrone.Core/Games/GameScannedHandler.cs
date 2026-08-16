@@ -47,9 +47,17 @@ namespace NzbDrone.Core.Games
             if (addOptions.Monitor == MonitorTypes.GameAndCollection && game.GameMetadata.Value.CollectionIgdbId > 0)
             {
                 var collection = _collectionService.FindByIgdbId(game.GameMetadata.Value.CollectionIgdbId);
-                collection.Monitored = true;
 
-                _collectionService.UpdateCollection(collection);
+                if (collection == null)
+                {
+                    _logger.Debug("[{0}] Collection {1} is not in the database, skipping collection monitoring", game.Title, game.GameMetadata.Value.CollectionIgdbId);
+                }
+                else
+                {
+                    collection.Monitored = true;
+
+                    _collectionService.UpdateCollection(collection);
+                }
             }
 
             game.AddOptions = null;

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 using NLog;
 using NzbDrone.Common.Http;
@@ -9,6 +11,8 @@ namespace NzbDrone.Core.ImportLists.SteamWishlist
 {
     public class SteamWishlistRequestGenerator : IImportListRequestGenerator
     {
+        private static readonly Regex SteamId64Regex = new (@"<steamID64>\s*(?<id>\d+)\s*</steamID64>", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public SteamWishlistSettings Settings { get; set; }
         public IHttpClient HttpClient { get; set; }
         public Logger Logger { get; set; }
@@ -40,8 +44,7 @@ namespace NzbDrone.Core.ImportLists.SteamWishlist
             request.AllowAutoRedirect = true;
             var response = HttpClient.Get(request);
 
-            var doc = XDocument.Load(new StringReader(response.Content));
-            var steamId64 = doc.Root?.Element("steamID64")?.Value;
+            var steamId64 = ParseSteamId64(response.Content);
 
             if (string.IsNullOrWhiteSpace(steamId64))
             {
@@ -51,6 +54,25 @@ namespace NzbDrone.Core.ImportLists.SteamWishlist
             Logger.Debug("Resolved Steam vanity URL '{0}' to Steam64 ID '{1}'", input, steamId64);
 
             return steamId64;
+        }
+
+        // Steam serves the profile XML with unescaped entities in user-supplied fields (summary, group
+        // names, ...), which makes it invalid XML. We only ever want steamID64, so fall back to a plain
+        // text match rather than failing the whole import list on someone else's malformed profile blurb.
+        private string ParseSteamId64(string content)
+        {
+            try
+            {
+                return XDocument.Load(new StringReader(content)).Root?.Element("steamID64")?.Value;
+            }
+            catch (XmlException ex)
+            {
+                Logger.Debug(ex, "Steam profile XML is malformed, falling back to extracting steamID64 directly");
+
+                var match = SteamId64Regex.Match(content);
+
+                return match.Success ? match.Groups["id"].Value : null;
+            }
         }
     }
 }
