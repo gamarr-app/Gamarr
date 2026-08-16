@@ -79,6 +79,13 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      # Without this, production JS stack traces in Sentry are unreadable
+      # minified frames. The step used to skip in silence when the secret was
+      # missing, which is exactly how it went unnoticed — warn instead.
+      - name: Warn if Sentry sourcemap upload is skipped
+        if: env.SENTRY_AUTH_TOKEN == ''
+        run: echo "::warning title=Sentry sourcemaps not uploaded::SENTRY_AUTH_TOKEN is not set, so production JS stack traces will stay minified. Add the secret with project:releases and org:read scopes."
+
       - name: Upload sourcemaps to Sentry
         if: env.SENTRY_AUTH_TOKEN != ''
         run: |
