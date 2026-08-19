@@ -72,7 +72,12 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "DownloadClientUnavailableException",
 
             // Wrong username/password/API key for the download client
-            "DownloadClientAuthenticationException"
+            "DownloadClientAuthenticationException",
+
+            // Cancellation is cooperative and expected: shutting the host down,
+            // a browser hanging up mid-request, a resilience pipeline timing out.
+            // Nothing here is ever actionable.
+            "OperationCanceledException"
         };
 
         // Remote services reject us for reasons that are always the user's configuration
@@ -108,7 +113,16 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "Network is unreachable",
             "Name or service not known",
             "No such host is known",
-            "Resource temporarily unavailable"
+            "Resource temporarily unavailable",
+
+            // The logging pipeline itself failing, not the thing being logged.
+            // On Windows service installs Kestrel's EventLog sink throws all
+            // through shutdown once the event log handle is torn down.
+            "An error occurred while writing to logger(s)",
+
+            // A request that arrived after the DI container was disposed, i.e.
+            // in the window between shutdown starting and Kestrel stopping.
+            "Container is disposed"
         };
 
         // exception types in this list will additionally have the exception message added to the
