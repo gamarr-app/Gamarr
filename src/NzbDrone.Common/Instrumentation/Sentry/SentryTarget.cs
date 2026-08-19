@@ -84,6 +84,14 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             HttpStatusCode.PaymentRequired
         };
 
+        // HttpException is only ever thrown for calls Gamarr made *out* to someone else
+        // (indexer, Prowlarr, download client, metadata server). A 5xx means that remote
+        // service faulted, which we can't fix and which drowns out real bugs.
+        private static bool IsFilteredHttpStatusCode(HttpStatusCode statusCode)
+        {
+            return FilteredHttpStatusCodes.Contains(statusCode) || (int)statusCode >= 500;
+        }
+
         public static readonly List<string> FilteredExceptionMessages = new List<string>
         {
             // Swallow the many, many exceptions flowing through from Jackett
@@ -96,6 +104,8 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // (service down, host renamed, DNS broken) — user setup, not code.
             "Connection refused",
             "No route to host",
+            "Host is unreachable",
+            "Network is unreachable",
             "Name or service not known",
             "No such host is known",
             "Resource temporarily unavailable"
@@ -352,7 +362,7 @@ namespace NzbDrone.Common.Instrumentation.Sentry
 
                             if (inner is HttpException httpEx &&
                                 httpEx.Response != null &&
-                                FilteredHttpStatusCodes.Contains(httpEx.Response.StatusCode))
+                                IsFilteredHttpStatusCode(httpEx.Response.StatusCode))
                             {
                                 isSentry = false;
                                 break;
