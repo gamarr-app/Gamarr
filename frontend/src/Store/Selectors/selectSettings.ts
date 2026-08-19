@@ -17,7 +17,14 @@ interface ValidationFailures {
 }
 
 function getValidationFailures(saveError?: Error): ValidationFailures {
-  if (!saveError || saveError.status !== 400) {
+  // A 400 does not guarantee a validation-failure body: a reverse proxy or a
+  // request rejected before it reached our controllers answers with an HTML
+  // page or nothing at all, leaving responseJSON undefined.
+  if (
+    !saveError ||
+    saveError.status !== 400 ||
+    !Array.isArray(saveError.responseJSON)
+  ) {
     return {
       errors: [],
       warnings: [],

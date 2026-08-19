@@ -140,7 +140,17 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         }
 
         [TestCase(HttpStatusCode.InternalServerError)]
+        [TestCase(HttpStatusCode.BadGateway)]
+        [TestCase(HttpStatusCode.ServiceUnavailable)]
+        [TestCase(HttpStatusCode.GatewayTimeout)]
+        public void should_filter_event_for_http_exceptions_where_the_remote_server_faulted(HttpStatusCode statusCode)
+        {
+            var log = GivenLogEvent(LogLevel.Error, GivenHttpException(statusCode), "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
         [TestCase(HttpStatusCode.BadRequest)]
+        [TestCase(HttpStatusCode.NotFound)]
         public void should_not_filter_event_for_other_http_exceptions(HttpStatusCode statusCode)
         {
             var log = GivenLogEvent(LogLevel.Error, GivenHttpException(statusCode), "test");
