@@ -53,6 +53,12 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // Filter out people stuck in boot loops
             "CorruptDatabaseException",
 
+            // The configured port is already taken — a second instance, an
+            // unrelated app on 6767, or a container restarting faster than the
+            // old one releases the socket. ConsoleApp already explains this at
+            // the console; Kestrel logging it too just crash-loops into Sentry.
+            "AddressInUseException",
+
             // Filter SingleInstance Termination Exceptions
             "TerminateApplicationException",
 

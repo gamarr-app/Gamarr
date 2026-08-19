@@ -1,7 +1,9 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using FluentAssertions;
 using NLog;
 using NUnit.Framework;
@@ -162,6 +164,27 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         {
             var log = GivenLogEvent(LogLevel.Error, new Exception("Failed to fetch releases", GivenHttpException(HttpStatusCode.Forbidden)), "test");
             _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_filter_event_when_the_port_is_already_in_use()
+        {
+            // Kestrel reports this as IOException -> AddressInUseException -> SocketException.
+            // The stand-in stands in because the filter matches on type name, so the test
+            // needs no reference to Microsoft.AspNetCore.Connections.
+            var ex = new IOException(
+                "Failed to bind to address http://[::]:6767: address already in use.",
+                new AddressInUseException("Address in use", new SocketException(48)));
+
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "Hosting failed to start")).Should().BeFalse();
+        }
+
+        private class AddressInUseException : Exception
+        {
+            public AddressInUseException(string message, Exception innerException)
+                : base(message, innerException)
+            {
+            }
         }
     }
 }
