@@ -79,6 +79,17 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+          # BuildInfo.Version reads Assembly.GetName().Version, which .NET always
+          # normalises to four components. Nightlies are already 1.1.0.<run> so
+          # they match, but a stable tag like v1.0.2 sets <AssemblyVersion>1.0.2
+          # and reports 1.0.2.0 at runtime — uploading maps under "1.0.2" would
+          # leave stable stack traces minified. Pad to four before naming them.
+          SENTRY_VERSION="$VERSION"
+          while [[ "$(tr -cd . <<< "$SENTRY_VERSION" | wc -c)" -lt 3 ]]; do
+            SENTRY_VERSION="$SENTRY_VERSION.0"
+          done
+          echo "sentry_version=$SENTRY_VERSION" >> $GITHUB_OUTPUT
+
       # Without this, production JS stack traces in Sentry are unreadable
       # minified frames. The step used to skip in silence when the secret was
       # missing, which is exactly how it went unnoticed — warn instead.
@@ -93,7 +104,7 @@ jobs:
           npx --yes @sentry/cli@2 sourcemaps upload \
             --org gamarr \
             --project javascript \
-            --release "${{ steps.version.outputs.version }}-Release-dev" \
+            --release "${{ steps.version.outputs.sentry_version }}-Release-dev" \
             _output/UI
 
       # Sourcemaps only need to reach Sentry; keep them out of the shipped
