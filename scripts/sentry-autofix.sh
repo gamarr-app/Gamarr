@@ -5,12 +5,23 @@
 
 set -uo pipefail
 
+# cron runs with a bare PATH (/usr/bin:/bin), which has neither the claude CLI nor
+# the .NET SDK on it. Without this the script gets all the way to the fix step and
+# dies with "claude: command not found", once a day, silently.
+export DOTNET_ROOT="${DOTNET_ROOT:-$HOME/.dotnet}"
+export PATH="$HOME/.local/bin:$DOTNET_ROOT:$PATH"
+
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_FILE="${REPO_DIR}/.sentry-autofix.log"
 SEEN_FILE="${REPO_DIR}/.sentry-seen-issues.json"
 SENTRY_ORG="gamarr"
 
 log() { echo "$(date): $1" >> "$LOG_FILE"; }
+
+CLAUDE_BIN="$(command -v claude)" || {
+    log "ERROR: claude CLI not found on PATH ($PATH)"
+    exit 1
+}
 
 cd "$REPO_DIR" || { log "ERROR: Cannot cd to $REPO_DIR"; exit 1; }
 
@@ -107,7 +118,7 @@ fi
 
 log "Invoking Claude to analyze and fix..."
 
-CLAUDE_OUTPUT=$(claude -p --model opus "New Sentry issues found. Here are the details:
+CLAUDE_OUTPUT=$("$CLAUDE_BIN" -p --model opus "New Sentry issues found. Here are the details:
 
 $DETAILS
 
