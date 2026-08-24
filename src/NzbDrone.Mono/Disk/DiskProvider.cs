@@ -51,7 +51,17 @@ namespace NzbDrone.Mono.Disk
                 return null;
             }
 
-            return mount.AvailableFreeSpace;
+            try
+            {
+                return mount.AvailableFreeSpace;
+            }
+            catch (Exception ex)
+            {
+                // A mount can be listed but not answer statfs, e.g. a network share whose
+                // server went away (ENOTCONN). Treat it as unknown rather than throwing.
+                _logger.Debug(ex, "Unable to get free space for '{0}', drive '{1}' is not responding", CleanseLogMessage.SanitizeLogParam(path), CleanseLogMessage.SanitizeLogParam(mount.RootDirectory));
+                return null;
+            }
         }
 
         public override void InheritFolderPermissions(string filename)
@@ -232,7 +242,20 @@ namespace NzbDrone.Mono.Disk
 
             var mount = GetMount(path);
 
-            return mount?.TotalSize;
+            if (mount == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return mount.TotalSize;
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Unable to get total size for '{0}', drive '{1}' is not responding", CleanseLogMessage.SanitizeLogParam(path), CleanseLogMessage.SanitizeLogParam(mount.RootDirectory));
+                return null;
+            }
         }
 
         protected override void CloneFileInternal(string source, string destination, bool overwrite)
