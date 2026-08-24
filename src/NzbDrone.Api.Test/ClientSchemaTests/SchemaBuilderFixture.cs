@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -6,6 +7,7 @@ using NzbDrone.Core.Annotations;
 using NzbDrone.Core.Localization;
 using NzbDrone.Test.Common;
 using Gamarr.Http.ClientSchema;
+using Gamarr.Http.REST;
 
 namespace NzbDrone.Api.Test.ClientSchemaTests
 {
@@ -61,6 +63,23 @@ namespace NzbDrone.Api.Test.ClientSchemaTests
             schema.Should().Contain(c => c.Order == 0 && c.Name == "name.firstName" && c.Label == "First Name" && c.HelpText == "Your First Name" && c.HelpTextWarning == "Mandatory First Name" && (string)c.Value == "Bob");
             schema.Should().Contain(c => c.Order == 1 && c.Name == "name.lastName" && c.Label == "Last Name" && c.HelpText == "Your Last Name" && c.HelpTextWarning == "Mandatory Last Name" && (string)c.Value == "Poop");
             schema.Should().Contain(c => c.Order == 2 && c.Name == "quote" && c.Label == "Quote" && c.HelpText == "Your Favorite Quote");
+        }
+
+        [Test]
+        public void should_reject_field_value_of_the_wrong_json_shape()
+        {
+            var fields = new List<Field>
+            {
+                new Field
+                {
+                    Name = "firstName",
+                    Value = JsonDocument.Parse("[\"Bob\"]").RootElement
+                }
+            };
+
+            var exception = Assert.Throws<BadRequestException>(() => SchemaBuilder.ReadFromSchema(fields, typeof(TestModel), new TestModel()));
+
+            exception.Content.ToString().Should().Contain("firstName");
         }
     }
 

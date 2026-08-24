@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using DryIoc;
+using Gamarr.Http.REST;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Reflection;
@@ -168,13 +169,14 @@ namespace Gamarr.Http.ClientSchema
                     }
 
                     var valueConverter = GetValueConverter(propertyInfo.PropertyType);
+                    var fieldName = field.Name;
 
                     result.Add(new FieldMapping
                     {
                         Field = field,
                         PropertyType = propertyInfo.PropertyType,
                         GetterFunc = t => propertyInfo.GetValue(targetSelector(t), null),
-                        SetterFunc = (t, v) => propertyInfo.SetValue(targetSelector(t), v?.GetType() == propertyInfo.PropertyType ? v : valueConverter(v), null)
+                        SetterFunc = (t, v) => propertyInfo.SetValue(targetSelector(t), v?.GetType() == propertyInfo.PropertyType ? v : ConvertValue(valueConverter, v, fieldName), null)
                     });
                 }
                 else
@@ -260,6 +262,21 @@ namespace Gamarr.Http.ClientSchema
             }
 
             throw new NotSupportedException();
+        }
+
+        // A client can send a value whose JSON shape doesn't match the field, e.g. an array
+        // for a string setting. That's a bad request, not a server fault, so report it as one
+        // instead of letting the conversion error escape as a 500.
+        private static object ConvertValue(Func<object, object> valueConverter, object fieldValue, string fieldName)
+        {
+            try
+            {
+                return valueConverter(fieldValue);
+            }
+            catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException or OverflowException)
+            {
+                throw new BadRequestException($"Invalid value for field '{fieldName}': {ex.Message}");
+            }
         }
 
         private static Func<object, object> GetValueConverter(Type propertyType)
