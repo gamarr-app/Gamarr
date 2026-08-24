@@ -80,7 +80,7 @@ the smoke instance uses 6968.
 - `distribution/` — Platform-specific packaging: `distribution/osx/Gamarr.app`
   bundle template, `distribution/windows/setup` Inno Setup scripts.
 - `schemas/`, `scripts/`, `tools/` — codegen, helper scripts (incl.
-  `scripts/sentry-autofix.sh`), and vendored build tools.
+  `scripts/sentry-watch.sh`), and vendored build tools.
 
 ## How to run locally
 
@@ -130,7 +130,7 @@ REST/curl call.
   browser-launch path in `src/NzbDrone.Host/BrowserService.cs` additionally
   checks `DISPLAY` / `WAYLAND_DISPLAY` before opening a browser.
 - **Sentry token lives in `.env`** (gitignored). GitHub push protection blocks
-  any commit with the literal token. Scripts (e.g. `scripts/sentry-autofix.sh`)
+  any commit with the literal token. Scripts (e.g. `scripts/sentry-watch.sh`)
   should `source .env` rather than hardcode the value.
 - **Namespace mismatch is intentional.** `Directory.Build.props` rewrites
   `Gamarr*` project root namespaces to `NzbDrone*`. Don't "fix" it.
