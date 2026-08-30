@@ -11,6 +11,20 @@ const IgnoreErrors: RegExp[] = [
   // Innocuous browser errors
   /ResizeObserver loop limit exceeded/,
   /ResizeObserver loop completed with undelivered notifications/,
+
+  // SignalR connection churn. Losing the hub is a state this app models and
+  // shows the user (automatic reconnect, then ConnectionLostModal), not a
+  // crash — it usually means a restarted server or a reverse proxy that won't
+  // carry WebSockets/SSE. These only reach Sentry because @microsoft/signalr
+  // rejects internal promises nobody is awaiting, so they arrive as
+  // unhandledrejection and look like faults in our code.
+  /Server returned handshake error/,
+  /Failed to start the transport/,
+  /(WebSocket|EventSource) failed to connect/,
+  /before the hub handshake could complete/,
+  /The connection was stopped during negotiation/,
+  /Unable to connect to the server with any of the available transports/,
+  /Server timeout elapsed without receiving a message from the server/,
 ];
 
 function cleanseUrl(url: string): string {
@@ -23,7 +37,7 @@ function shouldIgnoreException(s: string): RegExp | undefined {
   return s ? IgnoreErrors.find((pattern) => pattern.test(s)) : undefined;
 }
 
-function cleanseData(
+export function cleanseData(
   event: sentry.ErrorEvent,
   hint: sentry.EventHint
 ): sentry.ErrorEvent | null {
