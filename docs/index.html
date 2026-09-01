@@ -4,9 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- If the site is published somewhere other than gamarr.app, this is the
-         only value that needs changing: every absolute URL below uses it. -->
-    <link rel="canonical" href="https://gamarr.app/" />
+    <!-- Published as a GitHub Pages project site, so it lives on a subpath. If
+         it ever moves to its own domain, the absolute URLs in this head block
+         are the only thing that needs rewriting. Note that robots.txt is only
+         honoured at a domain root, so ours does nothing until then. -->
+    <link rel="canonical" href="https://gamarr-app.github.io/Gamarr/" />
 
     <title>Gamarr — a self-hosted PVR for your game library</title>
     <meta
@@ -16,13 +18,13 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Gamarr" />
-    <meta property="og:url" content="https://gamarr.app/" />
+    <meta property="og:url" content="https://gamarr-app.github.io/Gamarr/" />
     <meta property="og:title" content="Gamarr — a self-hosted PVR for your game library" />
     <meta
       property="og:description"
       content="Radarr, but for games. Monitors Usenet and BitTorrent indexers, grabs releases, then imports, renames and upgrades your PC and console game library — versions, updates and DLC included."
     />
-    <meta property="og:image" content="https://gamarr.app/screenshots/library.png" />
+    <meta property="og:image" content="https://gamarr-app.github.io/Gamarr/screenshots/library.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Gamarr — a self-hosted PVR for your game library" />
@@ -30,7 +32,7 @@
       name="twitter:description"
       content="Radarr, but for games. Monitors Usenet and BitTorrent indexers, grabs releases, then imports, renames and upgrades your PC and console game library."
     />
-    <meta name="twitter:image" content="https://gamarr.app/screenshots/library.png" />
+    <meta name="twitter:image" content="https://gamarr-app.github.io/Gamarr/screenshots/library.png" />
 
     <link rel="icon" href="logo.svg" type="image/svg+xml" />
 
@@ -45,7 +47,7 @@
         "applicationCategory": "MultimediaApplication",
         "applicationSubCategory": "Game collection manager",
         "operatingSystem": "Linux, Windows, macOS, Docker",
-        "url": "https://gamarr.app/",
+        "url": "https://gamarr-app.github.io/Gamarr/",
         "downloadUrl": "https://github.com/gamarr-app/Gamarr/releases",
         "codeRepository": "https://github.com/gamarr-app/Gamarr",
         "programmingLanguage": ["C#", "TypeScript"],
