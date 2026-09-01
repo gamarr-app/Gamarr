@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- If the site is published somewhere other than gamarr.app, this is the
+         only value that needs changing: every absolute URL below uses it. -->
+    <link rel="canonical" href="https://gamarr.app/" />
+
+    <title>Gamarr — a self-hosted PVR for your game library</title>
+    <meta
+      name="description"
+      content="Gamarr is a self-hosted game collection manager for Usenet and BitTorrent users — Radarr, but for games. It monitors indexers for the PC and console games you want, hands grabs to your download client, and imports, renames and upgrades the results, including versions, updates and DLC."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Gamarr" />
+    <meta property="og:url" content="https://gamarr.app/" />
+    <meta property="og:title" content="Gamarr — a self-hosted PVR for your game library" />
+    <meta
+      property="og:description"
+      content="Radarr, but for games. Monitors Usenet and BitTorrent indexers, grabs releases, then imports, renames and upgrades your PC and console game library — versions, updates and DLC included."
+    />
+    <meta property="og:image" content="https://gamarr.app/screenshots/library.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Gamarr — a self-hosted PVR for your game library" />
+    <meta
+      name="twitter:description"
+      content="Radarr, but for games. Monitors Usenet and BitTorrent indexers, grabs releases, then imports, renames and upgrades your PC and console game library."
+    />
+    <meta name="twitter:image" content="https://gamarr.app/screenshots/library.png" />
+
+    <link rel="icon" href="logo.svg" type="image/svg+xml" />
+
+    <!-- None of Radarr, Sonarr, Prowlarr or Immich ship this. It is what makes
+         search engines render the stars/price/platform rich result. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Gamarr",
+        "alternateName": "Radarr for games",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Game collection manager",
+        "operatingSystem": "Linux, Windows, macOS, Docker",
+        "url": "https://gamarr.app/",
+        "downloadUrl": "https://github.com/gamarr-app/Gamarr/releases",
+        "codeRepository": "https://github.com/gamarr-app/Gamarr",
+        "programmingLanguage": ["C#", "TypeScript"],
+        "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+        "description": "Gamarr is a self-hosted game collection manager and PVR for Usenet and BitTorrent users. It monitors RSS feeds and indexers for the PC and console games you want, hands grabs to your download client, and imports, renames and organizes the results — including game versions, updates and DLC.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --panel: #161b22;
+        --line: #30363d;
+        --text: #e6edf3;
+        --muted: #9198a1;
+        --accent: #f5a623;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      header {
+        text-align: center;
+        padding: 72px 0 48px;
+      }
+      header img {
+        width: 96px;
+        height: 96px;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin: 24px 0 8px;
+      }
+      .tagline {
+        font-size: 1.25rem;
+        color: var(--muted);
+        margin: 0 auto 32px;
+        max-width: 42rem;
+      }
+      .cta a {
+        display: inline-block;
+        margin: 6px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .cta a.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #1a1200;
+      }
+      h2 {
+        font-size: 1.5rem;
+        margin: 56px 0 16px;
+      }
+      ul {
+        padding-left: 1.2em;
+      }
+      li {
+        margin: 8px 0;
+      }
+      pre {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+      }
+      .shots {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      .shots img {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      footer {
+        margin: 72px 0 48px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+      footer a {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <img src="logo.svg" alt="Gamarr logo" width="96" height="96" />
+        <h1>Gamarr</h1>
+        <p class="tagline">
+          A self-hosted PVR for your game library. Radarr, but for games — it monitors
+          Usenet and BitTorrent indexers for the PC and console games you want, hands
+          grabs to your download client, and imports, renames and upgrades the results.
+        </p>
+        <p class="cta">
+          <a class="primary" href="https://github.com/gamarr-app/Gamarr/releases">Download</a>
+          <a href="https://github.com/gamarr-app/Gamarr">Source on GitHub</a>
+        </p>
+      </header>
+
+      <main>
+        <h2>What makes it different from the other *arrs</h2>
+        <p>
+          Games are not movies, so Gamarr models the things only games have. It reads
+          versions, updates and DLC out of release names and tracks them as separate
+          slots under one library entry — updates land in
+          <code>Updates/&lt;version&gt;/</code> next to the base game instead of
+          replacing it, DLC in <code>DLC/&lt;name&gt;/</code>. Each slot is individually
+          monitored and searchable, and the library upgrades itself when a newer version
+          or a more complete repack shows up.
+        </p>
+        <ul>
+          <li>
+            A game-native quality model — Scene, GOG (DRM-free), Repack, ISO, Retail,
+            Portable — rather than video resolutions.
+          </li>
+          <li>
+            Metadata merged from Steam (no API key needed), IGDB and RAWG into one
+            record.
+          </li>
+          <li>
+            Steam library and wishlist import lists, so Gamarr monitors your backlog for
+            you.
+          </li>
+          <li>
+            One library entry per platform for multi-platform titles, each with its own
+            folder, quality profile and platform-filtered searches.
+          </li>
+          <li>
+            The usual *arr machinery: manual and automatic search, RSS sync, failed
+            download handling, renaming with game-aware tokens, and around twenty
+            notification providers.
+          </li>
+          <li>
+            Works with SABnzbd, NZBGet, qBittorrent, Deluge, rTorrent, Transmission and
+            more, and takes indexers from Prowlarr or Jackett over Torznab.
+          </li>
+        </ul>
+
+        <h2>Install with Docker</h2>
+        <pre><code>services:
+  gamarr:
+    image: ghcr.io/gamarr-app/gamarr:latest
+    container_name: gamarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./gamarr-config:/config
+      - /path/to/games:/games
+      - /path/to/downloads:/downloads
+    ports:
+      - "6767:6767"
+    restart: unless-stopped</code></pre>
+        <p>
+          Then open <code>http://localhost:6767</code>. Standalone builds for Windows,
+          Linux, macOS and ARM (including Raspberry Pi) are on the
+          <a href="https://github.com/gamarr-app/Gamarr/releases">releases page</a>.
+        </p>
+
+        <h2>Screenshots</h2>
+        <div class="shots">
+          <img
+            src="screenshots/library.png"
+            alt="The Gamarr library view, showing game posters with monitoring status"
+            loading="lazy"
+          />
+          <img
+            src="screenshots/game-details.png"
+            alt="A Gamarr game details page, showing components for the base game, updates and DLC"
+            loading="lazy"
+          />
+          <img
+            src="screenshots/add-game.png"
+            alt="Adding a new game to Gamarr, with metadata pulled from Steam"
+            loading="lazy"
+          />
+          <img
+            src="screenshots/quality-settings.png"
+            alt="Gamarr quality profile settings, showing game-native qualities"
+            loading="lazy"
+          />
+        </div>
+      </main>
+
+      <footer>
+        <p>
+          Gamarr is free software under the
+          <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL v3</a>, built on
+          <a href="https://github.com/Radarr/Radarr">Radarr</a>.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
