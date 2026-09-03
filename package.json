@@ -52,7 +52,7 @@
     "moment": "2.30.1",
     "mousetrap": "1.6.5",
     "normalize.css": "8.0.1",
-    "qs": "6.15.3",
+    "qs": "6.16.0",
     "rdndmb-html5-to-touch": "9.0.0",
     "react": "^19",
     "react-autosuggest": "10.1.0",
