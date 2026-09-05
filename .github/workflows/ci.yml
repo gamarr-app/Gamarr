@@ -36,6 +36,19 @@ env:
   DOTNET_MULTILEVEL_LOOKUP: 0
 
 jobs:
+  personal-data:
+    name: Personal Data Scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Scan tracked files for personal addresses
+        run: ./scripts/check-personal-email.sh
+
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-24.04

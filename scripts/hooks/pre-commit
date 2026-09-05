@@ -1,0 +1,6 @@
+#!/bin/bash
+# Local fast-feedback copy of the CI check. Install with:
+#   git config core.hooksPath scripts/hooks
+# A hook alone is not the guard — it lives outside the repo's history on most
+# clones and anyone can pass --no-verify — so the same script also runs in CI.
+exec "$(git rev-parse --show-toplevel)/scripts/check-personal-email.sh" --staged
