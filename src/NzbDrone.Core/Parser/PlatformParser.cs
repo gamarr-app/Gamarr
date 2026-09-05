@@ -60,6 +60,38 @@ namespace NzbDrone.Core.Parser
             @"\b(?:NSP|NSZ|XCI)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Verified Nintendo Switch release-group names. Group names are a
+        // weaker signal than a container token (a group could theoretically
+        // reuse a name across scenes), so this list only exists to cover
+        // group names that glue directly onto a container token with no
+        // separator, defeating SwitchContainerRegex's own \b boundary.
+        // "SuperXCi" is the observed case: "SuperXCi" has no word break
+        // between "Super" and "XCi", so \bXCI\b never matches, e.g.
+        // "Pokemon Lets Go Pikachu v1 0 1 SuperXCi CLC".
+        //
+        // In a live corpus check, the two SuperXCi titles turned out to be
+        // redundant (the same game was already reachable via other releases
+        // that clear SwitchRegex/SwitchContainerRegex, e.g. "...NSW-VENOM"
+        // and "...NSW LiGHTFORCE" rows), and other real Switch groups seen in
+        // that corpus (VENOM, LiGHTFORCE, SUXXORS) already pass through NSW
+        // adjacency without needing to be listed here. So this entry is a
+        // small correctness fix for a future title released Switch-exclusive
+        // by this group, not a fix for a current acquisition gap.
+        //
+        // Add a name here only when BOTH hold: (1) concrete evidence (a real
+        // corpus title or an existing test) that it is a Switch-exclusive
+        // release group, and (2) it is not already reachable via
+        // SwitchRegex/SwitchContainerRegex adjacency in the same title — if
+        // it's already reachable, adding it here only grows the maintenance
+        // surface for no gain. Do not add bare/short tokens (e.g. a 3-letter
+        // tag that could be a group, a region code, or noise — that is the
+        // same collision class as the NSW/"New South Wales" false-positive
+        // already parked on SwitchRegex) or common words, even if they
+        // co-occur with a verified group in a blocked title.
+        private static readonly Regex SwitchReleaseGroupRegex = new Regex(
+            @"\bSuperXCi\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static readonly Regex WiiURegex = new Regex(
             @"\b(?:Wii\s*U|WiiU)\b|\[(?:Wii\s*U|WiiU)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -183,7 +215,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check Nintendo platforms (most specific first)
-            if (SwitchRegex.IsMatch(title) || SwitchContainerRegex.IsMatch(title))
+            if (SwitchRegex.IsMatch(title) || SwitchContainerRegex.IsMatch(title) || SwitchReleaseGroupRegex.IsMatch(title))
             {
                 Logger.Trace("Detected Nintendo Switch platform in title");
                 return PlatformFamily.NintendoSwitch;
@@ -319,7 +351,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Nintendo
-            if (SwitchRegex.IsMatch(title) || SwitchContainerRegex.IsMatch(title))
+            if (SwitchRegex.IsMatch(title) || SwitchContainerRegex.IsMatch(title) || SwitchReleaseGroupRegex.IsMatch(title))
             {
                 return "Switch";
             }
