@@ -95,8 +95,15 @@ namespace NzbDrone.Core.Parser
         // after every title regex above, so an explicit tag always wins.
         // .iso is deliberately absent: PS2/PSP/Wii/GameCube and plain PC discs
         // all use it, so it says nothing about the platform.
+        //
+        // The separator is [.\s] rather than a literal dot because indexers do
+        // not preserve it. Prowlarr hands real releases over with the dot
+        // normalised to whitespace — the live title is
+        // "Kirby and the Forgotten Land [01004D300C5AE000][v0] nsp" — so a
+        // dot-only pattern matched none of them and this fallback never fired
+        // on anything but hand-written fixtures.
         private static readonly Regex ConsoleExtensionRegex = new Regex(
-            @"\.(?<extension>nsp|nsz|xci|wux|wud|3ds|cia)\s*$",
+            @"[.\s](?<extension>nsp|nsz|xci|wux|wud|3ds|cia)\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -238,7 +245,9 @@ namespace NzbDrone.Core.Parser
                 return extensionPlatform;
             }
 
-            // Default to PC (most game releases are for PC)
+            // Nothing said what this is for. Unknown means "any" downstream;
+            // never guess PC here, which would let PC repacks satisfy a console
+            // entry.
             return PlatformFamily.Unknown;
         }
 

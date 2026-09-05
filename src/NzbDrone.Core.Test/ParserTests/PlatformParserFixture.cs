@@ -114,6 +114,46 @@ namespace NzbDrone.Core.Test.ParserTests
             resultString.Should().Be(expectedString);
         }
 
+        // Prowlarr normalises the extension separator to whitespace before
+        // gamarr ever sees the release, so the dotted form above never occurs on
+        // a real grab. This is the live title, verbatim from the API.
+        [TestCase("Kirby and the Forgotten Land [01004D300C5AE000][v0] nsp", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Kirby and the Forgotten Land [01004D300C5AE000][v0] NSP", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Kirby and the Forgotten Land [01004D300C5AE000][v0] nsz", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Game Title (2022) xci", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Game Title (2015) [EUR] wud", PlatformFamily.NintendoWiiU, "Wii U")]
+        [TestCase("Game Title (2015) [EUR] WUX", PlatformFamily.NintendoWiiU, "Wii U")]
+        [TestCase("Game Title (2013) [USA] cia", PlatformFamily.Nintendo3DS, "3DS")]
+        public void should_parse_platform_from_whitespace_separated_console_extension(string postTitle, PlatformFamily expectedFamily, string expectedString)
+        {
+            var result = PlatformParser.ParsePlatform(postTitle);
+            var resultString = PlatformParser.ParsePlatformString(postTitle);
+
+            result.Should().Be(expectedFamily);
+            resultString.Should().Be(expectedString);
+        }
+
+        [TestCase("Kirby and the Forgotten Land [01004D300C5AE000][v0] iso")]
+        [TestCase("Game Title (2011) [EUR][MULTi5] iso")]
+        [TestCase("Game Title (2023) [sakura] rar")]
+        [TestCase("Game Title (2023) (Base Game) rar")]
+        public void should_not_infer_platform_from_whitespace_separated_ambiguous_extension(string postTitle)
+        {
+            PlatformParser.ParsePlatform(postTitle).Should().Be(PlatformFamily.Unknown);
+            PlatformParser.ParsePlatformString(postTitle).Should().BeNull();
+        }
+
+        [Test]
+        public void should_parse_whitespace_separated_console_extension_from_full_parser()
+        {
+            var result = Parser.Parser.ParseGameTitle("Kirby and the Forgotten Land [01004D300C5AE000][v0] nsp", false);
+
+            result.Should().NotBeNull();
+            result.Platform.Should().Be(PlatformFamily.NintendoSwitch);
+            result.PlatformString.Should().Be("Switch");
+        }
+
+        [TestCase("Game Title (2011) [PS3][EUR] nsp", PlatformFamily.SonyPS3, "PS3")]
         [TestCase("Game Title (2011) [PS3][EUR].iso", PlatformFamily.SonyPS3, "PS3")]
         [TestCase("Game Title (2023) [Nintendo Switch].xci", PlatformFamily.NintendoSwitch, "Switch")]
         [TestCase("Game Title (2015) Wii U EUR.wud", PlatformFamily.NintendoWiiU, "Wii U")]

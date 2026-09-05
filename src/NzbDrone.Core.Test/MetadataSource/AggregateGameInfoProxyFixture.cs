@@ -102,6 +102,117 @@ namespace NzbDrone.Core.Test.MetadataSource
             method.Invoke(_subject, new object[] { existing, secondary });
         }
 
+        private List<Game> InvokeCollapseSameTitleHits(List<Game> hits)
+        {
+            var method = typeof(AggregateGameInfoProxy).GetMethod(
+                "CollapseSameTitleHits",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+
+            return (List<Game>)method.Invoke(_subject, new object[] { hits });
+        }
+
+        private static Game BuildSearchHit(string title, int igdbId, int year, PlatformFamily platform, int id = 0)
+        {
+            return new Game
+            {
+                Id = id,
+                GameMetadata = new GameMetadata
+                {
+                    Title = title,
+                    IgdbId = igdbId,
+                    Year = year,
+                    Images = new List<NzbDrone.Core.MediaCover.MediaCover>(),
+                    Genres = new List<string>(),
+                    Ratings = new Ratings(),
+                    Platforms = new List<GamePlatform>
+                    {
+                        new GamePlatform { Family = platform }
+                    }
+                }
+            };
+        }
+
+        // IGDB returns three rows named "Metroid Dread": 323061 (PC, no release
+        // date, a stub) first, then 233651 (a Nintendo DS one), then 15698 - the
+        // real Switch game. They all collapse onto one normalized title, and
+        // taking the first meant the add path derived platform 'pc' for a Switch
+        // exclusive.
+        [Test]
+        public void collapse_should_keep_the_released_row_when_a_title_has_several_igdb_rows()
+        {
+            var hits = new List<Game>
+            {
+                BuildSearchHit("Metroid Dread", 323061, 0, PlatformFamily.PC),
+                BuildSearchHit("Metroid Dread", 233651, 0, PlatformFamily.NintendoDS),
+                BuildSearchHit("Metroid Dread", 15698, 2021, PlatformFamily.NintendoSwitch)
+            };
+
+            var result = InvokeCollapseSameTitleHits(hits);
+
+            result.Should().HaveCount(1);
+            result[0].GameMetadata.Value.IgdbId.Should().Be(15698);
+
+            GamePlatform.UnambiguousFamily(result[0].GameMetadata.Value.Platforms)
+                        .Should().Be(PlatformFamily.NintendoSwitch);
+        }
+
+        [Test]
+        public void collapse_should_keep_a_library_row_over_an_unreleased_duplicate()
+        {
+            var hits = new List<Game>
+            {
+                BuildSearchHit("Kirby and the Forgotten Land", 999999, 0, PlatformFamily.PC),
+                BuildSearchHit("Kirby and the Forgotten Land", 172427, 2022, PlatformFamily.NintendoSwitch, id: 60)
+            };
+
+            var result = InvokeCollapseSameTitleHits(hits);
+
+            result.Should().HaveCount(1);
+            result[0].Id.Should().Be(60);
+            result[0].GameMetadata.Value.IgdbId.Should().Be(172427);
+        }
+
+        [Test]
+        public void collapse_should_leave_distinct_titles_alone_and_keep_their_order()
+        {
+            var hits = new List<Game>
+            {
+                BuildSearchHit("Metroid Dread", 15698, 2021, PlatformFamily.NintendoSwitch),
+                BuildSearchHit("Metroid Dread Demake", 195336, 2021, PlatformFamily.NintendoGBC),
+                BuildSearchHit("Metroid Dread: Special Edition", 153646, 2021, PlatformFamily.NintendoSwitch)
+            };
+
+            var result = InvokeCollapseSameTitleHits(hits);
+
+            result.Should().HaveCount(3);
+            result.Select(g => g.GameMetadata.Value.IgdbId).Should().ContainInOrder(15698, 195336, 153646);
+        }
+
+        [Test]
+        public void collapse_should_keep_source_order_when_rows_are_equally_complete()
+        {
+            var hits = new List<Game>
+            {
+                BuildSearchHit("Doom", 1, 1993, PlatformFamily.PC),
+                BuildSearchHit("Doom", 2, 1993, PlatformFamily.PC)
+            };
+
+            var result = InvokeCollapseSameTitleHits(hits);
+
+            result.Should().HaveCount(1);
+            result[0].GameMetadata.Value.IgdbId.Should().Be(1);
+        }
+
+        [Test]
+        public void collapse_should_handle_null_and_single_element_input()
+        {
+            InvokeCollapseSameTitleHits(null).Should().BeEmpty();
+            InvokeCollapseSameTitleHits(new List<Game>()).Should().BeEmpty();
+
+            var single = new List<Game> { BuildSearchHit("Halo", 1, 2001, PlatformFamily.Xbox) };
+            InvokeCollapseSameTitleHits(single).Should().HaveCount(1);
+        }
+
         private GameMetadata BuildGameMetadata(
             string title = "Test Game",
             int steamAppId = 0,

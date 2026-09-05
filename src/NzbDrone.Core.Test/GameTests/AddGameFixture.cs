@@ -170,6 +170,89 @@ namespace NzbDrone.Core.Test.GameTests
             Subject.AddGame(newGame).Platform.Should().Be(PlatformFamily.Unknown);
         }
 
+        // The three tests above assert the value AddGame returns. These assert
+        // what is actually handed to IGameService.AddGame, i.e. what gets
+        // stored: a live add of a Switch title came back as 'pc', so "derived
+        // correctly" and "stored correctly" have to be checked separately.
+        [Test]
+        public void should_store_nintendo_switch_for_a_switch_exclusive_title()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.NintendoSwitch);
+
+            Subject.AddGame(newGame);
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(s => s.AddGame(It.Is<Game>(g => g.Platform == PlatformFamily.NintendoSwitch)), Times.Once());
+        }
+
+        [Test]
+        public void should_not_clobber_a_platform_of_nintendo_switch_on_the_way_to_storage()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games",
+                Platform = PlatformFamily.NintendoSwitch
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.PC, PlatformFamily.NintendoSwitch);
+
+            Subject.AddGame(newGame).Platform.Should().Be(PlatformFamily.NintendoSwitch);
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(s => s.AddGame(It.Is<Game>(g => g.Platform == PlatformFamily.NintendoSwitch)), Times.Once());
+        }
+
+        [Test]
+        public void should_store_unknown_rather_than_pc_for_a_multiplatform_title()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.PC, PlatformFamily.NintendoSwitch, PlatformFamily.Xbox);
+
+            Subject.AddGame(newGame);
+
+            // Unknown means "any" to PlatformSpecification; PC would let PC
+            // repacks satisfy a console entry.
+            Mocker.GetMock<IGameService>()
+                  .Verify(s => s.AddGame(It.Is<Game>(g => g.Platform == PlatformFamily.Unknown)), Times.Once());
+        }
+
+        [Test]
+        public void should_store_unknown_rather_than_pc_when_metadata_has_no_platforms()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms();
+
+            Subject.AddGame(newGame);
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(s => s.AddGame(It.Is<Game>(g => g.Platform == PlatformFamily.Unknown)), Times.Once());
+        }
+
         [Test]
         public void should_not_override_a_platform_chosen_by_the_caller()
         {
