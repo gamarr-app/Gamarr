@@ -52,6 +52,14 @@ namespace NzbDrone.Core.Parser
             @"\b(?:Switch|NSW|NSwitch|Nintendo\s*Switch)\b|\[(?:Switch|NSW|NSwitch|Nintendo\s*Switch)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // The dump container names double as platform tags in the wild:
+        // "Kirby and the Forgotten Land [NSP]" carries no other Switch marker,
+        // and bracketed like that it is not a file extension either, so the
+        // extension fallback below never sees it.
+        private static readonly Regex SwitchContainerRegex = new Regex(
+            @"\b(?:NSP|NSZ|XCI)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static readonly Regex WiiURegex = new Regex(
             @"\b(?:Wii\s*U|WiiU)\b|\[(?:Wii\s*U|WiiU)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -175,7 +183,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Check Nintendo platforms (most specific first)
-            if (SwitchRegex.IsMatch(title))
+            if (SwitchRegex.IsMatch(title) || SwitchContainerRegex.IsMatch(title))
             {
                 Logger.Trace("Detected Nintendo Switch platform in title");
                 return PlatformFamily.NintendoSwitch;
@@ -311,7 +319,7 @@ namespace NzbDrone.Core.Parser
             }
 
             // Nintendo
-            if (SwitchRegex.IsMatch(title))
+            if (SwitchRegex.IsMatch(title) || SwitchContainerRegex.IsMatch(title))
             {
                 return "Switch";
             }
