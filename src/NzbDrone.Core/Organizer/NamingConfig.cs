@@ -6,7 +6,8 @@ namespace NzbDrone.Core.Organizer
     {
         Gamarr = 0,
         NoIntroPreserveById = 1,
-        NoIntroCanonical = 2
+        NoIntroCanonical = 2,
+        SwitchOwnfoil = 3
     }
 
     public class NamingConfig : ModelBase

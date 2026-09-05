@@ -1,7 +1,8 @@
 type ColonReplacementFormat =
   'delete' | 'dash' | 'spaceDash' | 'spaceDashSpace' | 'smart';
 
-type RenameProfile = 'gamarr' | 'noIntroPreserveById' | 'noIntroCanonical';
+type RenameProfile =
+  'gamarr' | 'noIntroPreserveById' | 'noIntroCanonical' | 'switchOwnfoil';
 
 export default interface NamingConfig {
   renameGames: boolean;
