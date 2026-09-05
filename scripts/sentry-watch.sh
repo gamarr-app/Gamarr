@@ -8,7 +8,7 @@
 # in main that nobody watched happen.
 #
 # Reads SENTRY_AUTH_TOKEN from .env in the repo root.
-# Run via cron: 0 9 * * * /path/to/repo/scripts/sentry-watch.sh
+# Run via cron: */15 * * * * /path/to/repo/scripts/sentry-watch.sh
 
 set -uo pipefail
 
@@ -42,12 +42,46 @@ notify() {
     fi
 }
 
+# Waking the channel is the one expensive thing this script does — an agent
+# reads it, and that is inference. The new-issue path pays for itself, because
+# the seen-issue state means it only ever fires on something genuinely new.
+# The failure paths had no such dedup: they fire on every run, which was one
+# message a day at the old daily cadence and is 96 a day at */15. So a missing
+# token or a Sentry outage now says so once, goes quiet for FAIL_QUIET_HOURS,
+# and speaks up again only if it is still broken after that.
+FAIL_QUIET_HOURS="${SENTRY_FAIL_QUIET_HOURS:-6}"
+
+notify_failure() {
+    local key="$1" msg="$2"
+    local stamp
+    stamp="$(dirname "$STATE_FILE")/gamarr-sentry-fail-${key}.stamp"
+    mkdir -p "$(dirname "$stamp")"
+
+    if [ -f "$stamp" ]; then
+        local age=$(( $(date +%s) - $(stat -f %m "$stamp" 2>/dev/null || echo 0) ))
+        if [ "$age" -lt $(( FAIL_QUIET_HOURS * 3600 )) ]; then
+            log "Still failing ($key), but notified ${age}s ago — staying quiet."
+            return
+        fi
+    fi
+
+    date +%s > "$stamp"
+    notify "$msg"
+}
+
+# Once a run gets through cleanly, forget the failures so the next outage is
+# announced immediately rather than swallowed by a stale stamp.
+clear_failure_stamps() {
+    rm -f "$(dirname "$STATE_FILE")"/gamarr-sentry-fail-*.stamp
+}
+
 cd "$REPO_DIR" || { log "ERROR: Cannot cd to $REPO_DIR"; exit 1; }
 
 log "=== Starting Sentry check ==="
 
 if [ ! -f "$REPO_DIR/.env" ]; then
     log "ERROR: .env file not found at $REPO_DIR/.env"
+    notify_failure env "Sentry watch is broken: there is no .env at $REPO_DIR, so it has no token and is checking nothing."
     exit 1
 fi
 set -a
@@ -56,7 +90,7 @@ set +a
 
 if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
     log "ERROR: SENTRY_AUTH_TOKEN not set in .env"
-    notify "Sentry watch is broken: SENTRY_AUTH_TOKEN is missing from $REPO_DIR/.env, so nothing is being checked."
+    notify_failure token "Sentry watch is broken: SENTRY_AUTH_TOKEN is missing from $REPO_DIR/.env, so nothing is being checked."
     exit 1
 fi
 
@@ -69,9 +103,11 @@ HTTP_CODE=$(curl -s -o /tmp/sentry-issues.json -w "%{http_code}" \
 if [ "$HTTP_CODE" != "200" ]; then
     log "ERROR: Sentry API returned HTTP $HTTP_CODE"
     [ -f /tmp/sentry-issues.json ] && cat /tmp/sentry-issues.json >> "$LOG_FILE"
-    notify "Sentry watch could not reach Sentry: HTTP $HTTP_CODE. Tail $LOG_FILE on gamarr for the body."
+    notify_failure "http" "Sentry watch could not reach Sentry: HTTP $HTTP_CODE. Tail $LOG_FILE on gamarr for the body."
     exit 1
 fi
+
+clear_failure_stamps
 
 mkdir -p "$(dirname "$STATE_FILE")"
 if [ ! -f "$STATE_FILE" ] && [ -f "$SEED_FILE" ]; then
