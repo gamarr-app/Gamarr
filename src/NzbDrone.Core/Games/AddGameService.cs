@@ -143,7 +143,7 @@ namespace NzbDrone.Core.Games
 
                 game.GameMetadata = metadata;
                 game.ApplyChanges(newGame);
-                return game;
+                return ApplyMetadataPlatform(game);
             }
 
             GameMetadata igdbMetadata;
@@ -175,6 +175,29 @@ namespace NzbDrone.Core.Games
 
             game.GameMetadata = igdbMetadata;
             game.ApplyChanges(newGame);
+
+            return ApplyMetadataPlatform(game);
+        }
+
+        // A library entry's Platform decides which releases it accepts
+        // (PlatformSpecification tier 1), but nothing ever derived it from the
+        // metadata we just fetched, so every add landed on Unknown even for a
+        // console exclusive. Only fill it in when the metadata is unambiguous;
+        // an explicit choice from the caller always wins.
+        private Game ApplyMetadataPlatform(Game game)
+        {
+            if (game.Platform != PlatformFamily.Unknown)
+            {
+                return game;
+            }
+
+            var family = GamePlatform.UnambiguousFamily(game.GameMetadata?.Value?.Platforms);
+
+            if (family != PlatformFamily.Unknown)
+            {
+                _logger.Debug("Platform for '{0}' resolved to {1} from metadata", game.GameMetadata.Value.Title, family);
+                game.Platform = family;
+            }
 
             return game;
         }

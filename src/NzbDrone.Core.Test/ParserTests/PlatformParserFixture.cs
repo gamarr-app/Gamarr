@@ -99,6 +99,57 @@ namespace NzbDrone.Core.Test.ParserTests
             resultString.Should().BeNull();
         }
 
+        [TestCase("Kirby and the Forgotten Land [01004D300C5AE000][v0].nsp", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Kirby and the Forgotten Land [01004D300C5AE000][v0].nsz", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Game Title (2022).xci", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Game.Title.2015.wux", PlatformFamily.NintendoWiiU, "Wii U")]
+        [TestCase("Game Title (2015) [EUR].wud", PlatformFamily.NintendoWiiU, "Wii U")]
+        [TestCase("Game Title (2013) [USA].cia", PlatformFamily.Nintendo3DS, "3DS")]
+        public void should_parse_platform_from_console_file_extension(string postTitle, PlatformFamily expectedFamily, string expectedString)
+        {
+            var result = PlatformParser.ParsePlatform(postTitle);
+            var resultString = PlatformParser.ParsePlatformString(postTitle);
+
+            result.Should().Be(expectedFamily);
+            resultString.Should().Be(expectedString);
+        }
+
+        [TestCase("Game Title (2011) [PS3][EUR].iso", PlatformFamily.SonyPS3, "PS3")]
+        [TestCase("Game Title (2023) [Nintendo Switch].xci", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Game Title (2015) Wii U EUR.wud", PlatformFamily.NintendoWiiU, "Wii U")]
+        public void should_prefer_platform_token_in_title_over_file_extension(string postTitle, PlatformFamily expectedFamily, string expectedString)
+        {
+            var result = PlatformParser.ParsePlatform(postTitle);
+            var resultString = PlatformParser.ParsePlatformString(postTitle);
+
+            result.Should().Be(expectedFamily);
+            resultString.Should().Be(expectedString);
+        }
+
+        [TestCase("Game Title (2011) [EUR][MULTi5].iso")]
+        [TestCase("Game.Title.2023.FitGirl.Repack.rar")]
+        [TestCase("Game Title (2023) CODEX.bin")]
+        public void should_not_infer_platform_from_ambiguous_extension(string postTitle)
+        {
+            var result = PlatformParser.ParsePlatform(postTitle);
+            var resultString = PlatformParser.ParsePlatformString(postTitle);
+
+            result.Should().Be(PlatformFamily.Unknown);
+            resultString.Should().BeNull();
+        }
+
+        [TestCase("Kirby and the Forgotten Land (2022).nsp")]
+        [TestCase("Kirby and the Forgotten Land (2022) [v0].nsp")]
+        [TestCase("Kirby.and.the.Forgotten.Land.2022.nsp")]
+        public void should_parse_console_extension_platform_from_full_parser(string postTitle)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle, false);
+
+            result.Should().NotBeNull();
+            result.Platform.Should().Be(PlatformFamily.NintendoSwitch);
+            result.PlatformString.Should().Be("Switch");
+        }
+
         [TestCase("Portal 2 (2011) [Ps3][EUR FREE][MULTi5]")]
         public void should_parse_platform_from_full_parser(string postTitle)
         {

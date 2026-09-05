@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NzbDrone.Core.Games
 {
     /// <summary>
@@ -78,6 +81,63 @@ namespace NzbDrone.Core.Games
             };
         }
 
+        /// <summary>
+        /// Maps a specific IGDB platform to its family. IGDB's own
+        /// platform_family is far too coarse on its own — every Nintendo
+        /// console shares family id 4 — so the platform id is checked first and
+        /// the family is only a fallback for platforms we don't list.
+        /// </summary>
+        public static PlatformFamily MapPlatformFamily(int igdbPlatformId, int? igdbFamilyId)
+        {
+            var family = igdbPlatformId switch
+            {
+                CommonPlatforms.Windows => PlatformFamily.PC,
+                CommonPlatforms.Linux => PlatformFamily.Linux,
+                CommonPlatforms.Mac => PlatformFamily.Mac,
+                CommonPlatforms.PS5 or CommonPlatforms.PS4 => PlatformFamily.PlayStation,
+                CommonPlatforms.PS3 => PlatformFamily.SonyPS3,
+                CommonPlatforms.PSP => PlatformFamily.SonyPSP,
+                CommonPlatforms.PSVita => PlatformFamily.SonyPSVita,
+                CommonPlatforms.XboxSeriesX or CommonPlatforms.XboxOne or CommonPlatforms.Xbox360 or CommonPlatforms.Xbox => PlatformFamily.Xbox,
+                CommonPlatforms.Switch => PlatformFamily.NintendoSwitch,
+                CommonPlatforms.WiiU => PlatformFamily.NintendoWiiU,
+                CommonPlatforms.Wii => PlatformFamily.NintendoWii,
+                CommonPlatforms.Nintendo3DS => PlatformFamily.Nintendo3DS,
+                CommonPlatforms.NintendoDS => PlatformFamily.NintendoDS,
+                CommonPlatforms.GameBoyAdvance => PlatformFamily.NintendoGBA,
+                CommonPlatforms.GameBoyColor => PlatformFamily.NintendoGBC,
+                CommonPlatforms.GameBoy => PlatformFamily.NintendoGB,
+                CommonPlatforms.NES => PlatformFamily.NintendoNES,
+                CommonPlatforms.SNES => PlatformFamily.NintendoSNES,
+                CommonPlatforms.N64 => PlatformFamily.NintendoN64,
+                CommonPlatforms.Android or CommonPlatforms.IOS => PlatformFamily.Mobile,
+                _ => PlatformFamily.Unknown
+            };
+
+            return family != PlatformFamily.Unknown ? family : MapPlatformFamily(igdbFamilyId);
+        }
+
+        /// <summary>
+        /// The single family a set of platforms unambiguously belongs to, or
+        /// Unknown when it spans more than one. Multiplatform titles stay
+        /// Unknown on purpose: Unknown means "any" to PlatformSpecification,
+        /// and pinning one arbitrarily would filter out valid releases.
+        /// </summary>
+        public static PlatformFamily UnambiguousFamily(IEnumerable<GamePlatform> platforms)
+        {
+            if (platforms == null)
+            {
+                return PlatformFamily.Unknown;
+            }
+
+            var families = platforms.Select(p => p.Family)
+                                    .Where(f => f != PlatformFamily.Unknown)
+                                    .Distinct()
+                                    .ToList();
+
+            return families.Count == 1 ? families[0] : PlatformFamily.Unknown;
+        }
+
         public static bool IsNintendoFamily(PlatformFamily platform)
         {
             return platform is PlatformFamily.Nintendo or
@@ -135,9 +195,20 @@ namespace NzbDrone.Core.Games
             public const int XboxSeriesX = 169;
             public const int XboxOne = 49;
             public const int Xbox360 = 12;
+            public const int Xbox = 11;
             public const int Switch = 130;
             public const int WiiU = 41;
+            public const int Wii = 5;
             public const int Nintendo3DS = 37;
+            public const int NintendoDS = 20;
+            public const int GameBoyAdvance = 24;
+            public const int GameBoyColor = 22;
+            public const int GameBoy = 33;
+            public const int NES = 18;
+            public const int SNES = 19;
+            public const int N64 = 4;
+            public const int Android = 34;
+            public const int IOS = 39;
         }
     }
 }

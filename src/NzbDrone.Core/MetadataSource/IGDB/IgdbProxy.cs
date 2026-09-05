@@ -806,7 +806,7 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 Slug = p.Slug,
                 Category = p.Category.HasValue ? (GamePlatformCategory)p.Category.Value : GamePlatformCategory.Console,
                 Generation = p.Generation,
-                Family = GamePlatform.MapPlatformFamily(p.PlatformFamily?.Id)
+                Family = GamePlatform.MapPlatformFamily(p.Id, p.PlatformFamily?.Id)
             }).ToList() ?? new List<GamePlatform>();
 
             // Companies (Developer/Publisher)
