@@ -71,7 +71,7 @@ namespace Gamarr.Api.V3.Games
                 return null;
             }
 
-            var result = new Game { GameMetadata = metadata };
+            var result = DerivePlatformForLookup(new Game { GameMetadata = metadata });
             var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
             return result.ToResource(availDelay, translation);
         }
@@ -91,7 +91,7 @@ namespace Gamarr.Api.V3.Games
                 return null;
             }
 
-            var result = new Game { GameMetadata = metadata };
+            var result = DerivePlatformForLookup(new Game { GameMetadata = metadata });
             var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
             return result.ToResource(availDelay, translation);
         }
@@ -111,7 +111,7 @@ namespace Gamarr.Api.V3.Games
                 return null;
             }
 
-            var result = new Game { GameMetadata = metadata };
+            var result = DerivePlatformForLookup(new Game { GameMetadata = metadata });
             var translation = metadata.Translations?.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
             return result.ToResource(availDelay, translation);
         }
@@ -125,6 +125,30 @@ namespace Gamarr.Api.V3.Games
             return MapToResource(searchResults);
         }
 
+        /// <summary>
+        /// Show the platform the add path would derive for a game that isn't in
+        /// the library yet, so a lookup reports what adding it will store
+        /// instead of a flat 'unknown'. Applies to every lookup form (term,
+        /// igdb:, steam:, /igdb, /steam, /rawg) — the two forms only ever
+        /// differed because an already-added game came back as its library row,
+        /// carrying the platform stored on it.
+        ///
+        /// Library rows (Id > 0) are left alone: their Platform is user state,
+        /// and the UI round-trips this resource back on edit, so overwriting a
+        /// deliberate "any" (Unknown) here would silently pin the entry.
+        /// </summary>
+        private static Game DerivePlatformForLookup(Game game)
+        {
+            if (game == null || game.Id > 0 || game.Platform != PlatformFamily.Unknown)
+            {
+                return game;
+            }
+
+            game.Platform = GamePlatform.UnambiguousFamily(game.GameMetadata?.Value?.Platforms);
+
+            return game;
+        }
+
         private IEnumerable<GameResource> MapToResource(IEnumerable<Game> games)
         {
             var gameInfoLanguage = (Language)_configService.GameInfoLanguage;
@@ -136,6 +160,9 @@ namespace Gamarr.Api.V3.Games
             foreach (var currentGame in games)
             {
                 var translation = currentGame.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == gameInfoLanguage);
+
+                DerivePlatformForLookup(currentGame);
+
                 var resource = currentGame.ToResource(availDelay, translation);
 
                 _coverMapper.ConvertToLocalUrls(resource.Id, resource.Images);

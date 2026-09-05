@@ -682,9 +682,13 @@ namespace NzbDrone.Core.MetadataSource
 
             Task.WaitAll(steamTask, igdbTask, rawgTask);
 
-            var steamHits = steamTask.Result;
-            var igdbHits = igdbTask.Result;
-            var rawgHits = rawgTask.Result;
+            // Collapse same-title rows within each source before merging across
+            // sources, keeping the most complete row of each set (see
+            // CollapseSameTitleHits). Cross-source precedence below is
+            // unchanged: Steam still seeds, IGDB then RAWG merge into it.
+            var steamHits = CollapseSameTitleHits(steamTask.Result);
+            var igdbHits = CollapseSameTitleHits(igdbTask.Result);
+            var rawgHits = CollapseSameTitleHits(rawgTask.Result);
 
             // Steam seeds the dictionary first; IGDB then RAWG merge into existing
             // entries to preserve the pre-parallel merge precedence.
@@ -1071,6 +1075,101 @@ namespace NzbDrone.Core.MetadataSource
             {
                 existingMeta.Genres = secondaryMeta.Genres;
             }
+        }
+
+        /// <summary>
+        /// Collapses rows that share a normalized title down to one, keeping the
+        /// most complete row rather than whichever the source happened to return
+        /// first.
+        ///
+        /// IGDB carries several rows for a popular title: the released original
+        /// plus unreleased fan ports and stubs. Searching "Metroid Dread"
+        /// returns id 323061 (PC, no release date, a stub) BEFORE id 15698 (the
+        /// real Nintendo Switch game). The dictionary below is keyed on the
+        /// normalized title, so the stub won the key and the Switch row was
+        /// merged into it — and MergeGameMetadata never overwrites a populated
+        /// field, so the surviving row kept the stub's IgdbId and its PC-only
+        /// platform list. Adding that row then legitimately derived platform
+        /// 'pc' for what the user searched for as a Switch exclusive.
+        /// </summary>
+        private List<Game> CollapseSameTitleHits(List<Game> hits)
+        {
+            if (hits == null || hits.Count < 2)
+            {
+                return hits ?? new List<Game>();
+            }
+
+            var collapsed = new List<Game>();
+
+            foreach (var group in hits.GroupBy(g => NormalizeTitleForComparison(g.Title)))
+            {
+                // OrderByDescending is stable, so an all-equal group keeps the
+                // source's own ordering.
+                var ordered = group.OrderByDescending(CompletenessScore).ToList();
+                var best = ordered[0];
+
+                foreach (var other in ordered.Skip(1))
+                {
+                    MergeGameMetadata(best, other);
+                }
+
+                if (ordered.Count > 1)
+                {
+                    _logger.Debug("Collapsed {0} same-title rows for '{1}' onto IgdbId {2}",
+                        ordered.Count,
+                        CleanseLogMessage.SanitizeLogParam(best.Title),
+                        best.GameMetadata?.Value?.IgdbId ?? 0);
+                }
+
+                collapsed.Add(best);
+            }
+
+            return collapsed;
+        }
+
+        /// <summary>
+        /// How much a search hit actually tells us, used only to pick between
+        /// rows that share a title. A released row beats an unreleased stub;
+        /// a library entry always wins so an existing entry never disappears
+        /// from search results.
+        /// </summary>
+        private static int CompletenessScore(Game game)
+        {
+            var meta = game?.GameMetadata?.Value;
+
+            if (meta == null)
+            {
+                return -1;
+            }
+
+            var score = 0;
+
+            if (game.Id > 0)
+            {
+                score += 100;
+            }
+
+            if (meta.PhysicalRelease.HasValue || meta.DigitalRelease.HasValue || meta.Year > 0)
+            {
+                score += 8;
+            }
+
+            if (meta.Platforms != null)
+            {
+                score += Math.Min(meta.Platforms.Count, 4);
+            }
+
+            if (!string.IsNullOrWhiteSpace(meta.Overview))
+            {
+                score += 2;
+            }
+
+            if (meta.Images != null && meta.Images.Any())
+            {
+                score += 1;
+            }
+
+            return score;
         }
 
         private static bool IsMockMode()

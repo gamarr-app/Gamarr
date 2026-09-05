@@ -9,11 +9,21 @@ namespace NzbDrone.Core.Test.GameTests
     [TestFixture]
     public class GamePlatformFixture : CoreTest
     {
-        // IGDB's platform_family is 4 for every Nintendo console, so the
-        // platform id has to drive the mapping.
-        [TestCase(GamePlatform.CommonPlatforms.Switch, 4, PlatformFamily.NintendoSwitch)]
-        [TestCase(GamePlatform.CommonPlatforms.WiiU, 4, PlatformFamily.NintendoWiiU)]
-        [TestCase(GamePlatform.CommonPlatforms.Nintendo3DS, 4, PlatformFamily.Nintendo3DS)]
+        // IGDB's platform_family is 5 for every Nintendo console, so the
+        // platform id has to drive the mapping. (Verified against
+        // /v4/platform_families: 1 PlayStation, 2 Xbox, 3 Sega, 4 Linux,
+        // 5 Nintendo — and PC/Mac/iOS carry no family at all.)
+        [TestCase(GamePlatform.CommonPlatforms.Switch, 5, PlatformFamily.NintendoSwitch)]
+        [TestCase(GamePlatform.CommonPlatforms.WiiU, 5, PlatformFamily.NintendoWiiU)]
+        [TestCase(GamePlatform.CommonPlatforms.Nintendo3DS, 5, PlatformFamily.Nintendo3DS)]
+        [TestCase(GamePlatform.CommonPlatforms.New3DS, 5, PlatformFamily.Nintendo3DS)]
+        [TestCase(GamePlatform.CommonPlatforms.NintendoDSi, 5, PlatformFamily.NintendoDSi)]
+        [TestCase(GamePlatform.CommonPlatforms.Famicom, 5, PlatformFamily.NintendoNES)]
+        [TestCase(GamePlatform.CommonPlatforms.SuperFamicom, 5, PlatformFamily.NintendoSNES)]
+        [TestCase(GamePlatform.CommonPlatforms.FamicomDiskSystem, 5, PlatformFamily.NintendoFDS)]
+        [TestCase(GamePlatform.CommonPlatforms.VirtualBoy, 5, PlatformFamily.NintendoVirtualBoy)]
+        [TestCase(GamePlatform.CommonPlatforms.PokemonMini, 5, PlatformFamily.NintendoPokemonMini)]
+        [TestCase(GamePlatform.CommonPlatforms.Android, 4, PlatformFamily.Mobile)]
         [TestCase(GamePlatform.CommonPlatforms.Windows, null, PlatformFamily.PC)]
         [TestCase(GamePlatform.CommonPlatforms.Linux, null, PlatformFamily.Linux)]
         [TestCase(GamePlatform.CommonPlatforms.Mac, null, PlatformFamily.Mac)]
@@ -29,8 +39,35 @@ namespace NzbDrone.Core.Test.GameTests
         [Test]
         public void should_fall_back_to_igdb_platform_family_for_unlisted_platform()
         {
-            // 87 is Virtual Boy - not in CommonPlatforms, but IGDB says Nintendo
-            GamePlatform.MapPlatformFamily(87, 4).Should().Be(PlatformFamily.Nintendo);
+            // GameCube has no PlatformFamily value of its own, but IGDB puts it
+            // in family 5 (Nintendo), and PlatformMatches treats the generic
+            // Nintendo family as compatible with any Nintendo console.
+            GamePlatform.MapPlatformFamily(GamePlatform.CommonPlatforms.GameCube, 5).Should().Be(PlatformFamily.Nintendo);
+        }
+
+        // Family 4 is Linux and family 5 is Nintendo. Reading them the other way
+        // round (as this code once did) sent every unlisted Nintendo console to
+        // Atari and every unlisted Linux-family one to Nintendo.
+        [TestCase(5, PlatformFamily.Nintendo)]
+        [TestCase(4, PlatformFamily.Linux)]
+        [TestCase(3, PlatformFamily.Sega)]
+        [TestCase(2, PlatformFamily.Xbox)]
+        [TestCase(1, PlatformFamily.PlayStation)]
+        [TestCase(null, PlatformFamily.Unknown)]
+        [TestCase(6, PlatformFamily.Unknown)]
+        public void should_map_igdb_platform_family_ids(int? familyId, PlatformFamily expected)
+        {
+            GamePlatform.MapPlatformFamily(familyId).Should().Be(expected);
+        }
+
+        [Test]
+        public void should_not_resolve_an_unlisted_nintendo_console_to_pc_or_atari()
+        {
+            // Nintendo Switch 2 (508) has no PlatformFamily value of its own.
+            var family = GamePlatform.MapPlatformFamily(GamePlatform.CommonPlatforms.Switch2, 5);
+
+            family.Should().Be(PlatformFamily.Nintendo);
+            GamePlatform.PlatformMatches(PlatformFamily.NintendoSwitch, family).Should().BeTrue();
         }
 
         [Test]

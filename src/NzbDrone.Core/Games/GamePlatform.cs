@@ -66,7 +66,13 @@ namespace NzbDrone.Core.Games
         public int? Generation { get; set; }
 
         /// <summary>
-        /// Maps IGDB platform family ID to our PlatformFamily enum
+        /// Maps IGDB platform family ID to our PlatformFamily enum.
+        /// These are the five families IGDB actually defines (verified against
+        /// /v4/platform_families): 1 PlayStation, 2 Xbox, 3 Sega, 4 Linux,
+        /// 5 Nintendo. There is no Atari family, and 4 is Linux rather than
+        /// Nintendo — the previous guesses sent every Nintendo platform that
+        /// isn't listed by id below (GameCube, Switch 2, Virtual Boy, ...) to
+        /// Atari, and every unlisted Linux-family one to Nintendo.
         /// </summary>
         public static PlatformFamily MapPlatformFamily(int? igdbFamilyId)
         {
@@ -75,8 +81,8 @@ namespace NzbDrone.Core.Games
                 1 => PlatformFamily.PlayStation,
                 2 => PlatformFamily.Xbox,
                 3 => PlatformFamily.Sega,
-                4 => PlatformFamily.Nintendo,
-                5 => PlatformFamily.Atari,
+                4 => PlatformFamily.Linux,
+                5 => PlatformFamily.Nintendo,
                 _ => PlatformFamily.Unknown
             };
         }
@@ -102,14 +108,18 @@ namespace NzbDrone.Core.Games
                 CommonPlatforms.Switch => PlatformFamily.NintendoSwitch,
                 CommonPlatforms.WiiU => PlatformFamily.NintendoWiiU,
                 CommonPlatforms.Wii => PlatformFamily.NintendoWii,
-                CommonPlatforms.Nintendo3DS => PlatformFamily.Nintendo3DS,
+                CommonPlatforms.Nintendo3DS or CommonPlatforms.New3DS => PlatformFamily.Nintendo3DS,
                 CommonPlatforms.NintendoDS => PlatformFamily.NintendoDS,
+                CommonPlatforms.NintendoDSi => PlatformFamily.NintendoDSi,
                 CommonPlatforms.GameBoyAdvance => PlatformFamily.NintendoGBA,
                 CommonPlatforms.GameBoyColor => PlatformFamily.NintendoGBC,
                 CommonPlatforms.GameBoy => PlatformFamily.NintendoGB,
-                CommonPlatforms.NES => PlatformFamily.NintendoNES,
-                CommonPlatforms.SNES => PlatformFamily.NintendoSNES,
+                CommonPlatforms.NES or CommonPlatforms.Famicom => PlatformFamily.NintendoNES,
+                CommonPlatforms.SNES or CommonPlatforms.SuperFamicom => PlatformFamily.NintendoSNES,
                 CommonPlatforms.N64 => PlatformFamily.NintendoN64,
+                CommonPlatforms.FamicomDiskSystem => PlatformFamily.NintendoFDS,
+                CommonPlatforms.VirtualBoy => PlatformFamily.NintendoVirtualBoy,
+                CommonPlatforms.PokemonMini => PlatformFamily.NintendoPokemonMini,
                 CommonPlatforms.Android or CommonPlatforms.IOS => PlatformFamily.Mobile,
                 _ => PlatformFamily.Unknown
             };
@@ -209,6 +219,22 @@ namespace NzbDrone.Core.Games
             public const int N64 = 4;
             public const int Android = 34;
             public const int IOS = 39;
+
+            // Nintendo hardware that has its own PlatformFamily value but was
+            // previously only reachable through the (wrong) family fallback.
+            public const int New3DS = 137;
+            public const int NintendoDSi = 159;
+            public const int Famicom = 99;
+            public const int SuperFamicom = 58;
+            public const int FamicomDiskSystem = 51;
+            public const int VirtualBoy = 87;
+            public const int PokemonMini = 166;
+
+            // No dedicated PlatformFamily value; these resolve to the generic
+            // Nintendo family via platform_family id 5, which PlatformMatches
+            // already treats as compatible with any Nintendo console.
+            public const int GameCube = 21;
+            public const int Switch2 = 508;
         }
     }
 }
