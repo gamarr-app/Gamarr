@@ -173,12 +173,23 @@ bypass it):
 Both survive in `refs/pull/*`, which is GitHub-managed and cannot be rewritten —
 so catch them before merge, not after.
 
-Worktree/agent branches: open a PR rather than pushing to `main`. Direct push
-shortcut (for non-PR work) is:
+**Push straight to `main`. Do not open a PR unless Paul asks for one.** This is
+a solo repo with no reviewer, so a PR adds a review round-trip nobody performs
+and permanently creates a `refs/pull/*` ref — which is GitHub-managed,
+unrewritable, and is exactly why 64 refs still carry leaked addresses. From a
+worktree or agent branch, push with an explicit refspec:
 
 ```bash
-git push origin gamarr3-work:main
+git push origin <branch>:main
 ```
+
+Note `push.default=upstream` plus a worktree branch tracking `origin/main` makes
+a bare `git push` target `main` unintentionally — always name the refspec.
+
+If a PR does exist, merge it by rebasing locally and pushing to `main`, not with
+the merge button: a GitHub-side merge or squash stamps the account's primary
+email onto the commit author (cause 1 above). GitHub then closes the PR without
+labelling it merged, which is expected for a fast-forward.
 
 ## Common Commands
 
