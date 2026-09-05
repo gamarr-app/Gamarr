@@ -28,6 +28,7 @@ import { InputChanged } from 'typings/inputs';
 import isEmpty from 'Utilities/Object/isEmpty';
 import translate from 'Utilities/String/translate';
 import Naming from './Naming/Naming';
+import PlatformRootFolders from './PlatformRootFolders/PlatformRootFolders';
 import AddRootFolder from './RootFolder/AddRootFolder';
 import styles from './MediaManagement.css';
 
@@ -648,6 +649,8 @@ function MediaManagement() {
           <RootFolders />
           <AddRootFolder />
         </FieldSet>
+
+        <PlatformRootFolders />
       </PageContentBody>
     </PageContent>
   );

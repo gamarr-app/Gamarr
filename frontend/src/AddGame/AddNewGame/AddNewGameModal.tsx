@@ -1,5 +1,5 @@
 import Modal from 'Components/Modal/Modal';
-import { Image } from 'Game/Game';
+import { GamePlatform, Image } from 'Game/Game';
 import AddNewGameModalContentConnector from './AddNewGameModalContentConnector';
 
 interface AddNewGameModalProps {
@@ -11,6 +11,7 @@ interface AddNewGameModalProps {
   overview?: string;
   folder: string;
   images: Image[];
+  platforms?: GamePlatform[];
   onModalClose: () => void;
 }
 

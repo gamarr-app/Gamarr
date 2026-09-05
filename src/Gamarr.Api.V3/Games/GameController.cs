@@ -56,6 +56,7 @@ namespace Gamarr.Api.V3.Games
                            IMapCoversToLocal coverMapper,
                            IManageCommandQueue commandQueueManager,
                            IRootFolderService rootFolderService,
+                           IPlatformRootFolderService platformRootFolderService,
                            IUpgradableSpecification qualityUpgradableSpecification,
                            IConfigService configService,
                            RootFolderValidator rootFolderValidator,
@@ -91,17 +92,26 @@ namespace Gamarr.Api.V3.Games
                 .SetPathValidator(systemFolderValidator)
                 .When(s => s.Path.IsNotNullOrWhiteSpace());
 
+            // An add that supplies neither path is still an error unless a
+            // per-platform (or global) default root folder is configured for
+            // it — AddGameService fills that in. A path that *was* supplied is
+            // always validated.
+            bool HasDefaultRootFolder(GameResource s) =>
+                platformRootFolderService.GetDefaultRootFolderPath(s.Platform).IsNotNullOrWhiteSpace();
+
             PostValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .IsValidPath()
-                .When(s => s.RootFolderPath.IsNullOrWhiteSpace());
+                .When(s => s.RootFolderPath.IsNullOrWhiteSpace() &&
+                           (s.Path.IsNotNullOrWhiteSpace() || !HasDefaultRootFolder(s)));
             PostValidator.RuleFor(s => s.RootFolderPath).Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .IsValidPath()
                 .SetPathValidator(rootFolderExistsValidator)
                 .Must((resource, path) => gameFolderAsRootFolderValidator.IsValid(new ValidationContext<object>(resource), path))
                 .WithMessage("Root folder path contains game folder")
-                .When(s => s.Path.IsNullOrWhiteSpace());
+                .When(s => s.Path.IsNullOrWhiteSpace() &&
+                           (s.RootFolderPath.IsNotNullOrWhiteSpace() || !HasDefaultRootFolder(s)));
 
             PutValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
                 .NotEmpty()

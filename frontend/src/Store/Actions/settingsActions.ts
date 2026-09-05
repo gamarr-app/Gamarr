@@ -22,6 +22,7 @@ import metadataOptions from './Settings/metadataOptions';
 import naming from './Settings/naming';
 import namingExamples from './Settings/namingExamples';
 import notifications from './Settings/notifications';
+import platformRootFolders from './Settings/platformRootFolders';
 import qualityDefinitions from './Settings/qualityDefinitions';
 import qualityProfiles from './Settings/qualityProfiles';
 import releaseProfiles from './Settings/releaseProfiles';
@@ -49,6 +50,7 @@ export * from './Settings/metadataOptions';
 export * from './Settings/naming';
 export * from './Settings/namingExamples';
 export * from './Settings/notifications';
+export * from './Settings/platformRootFolders';
 export * from './Settings/qualityDefinitions';
 export * from './Settings/qualityProfiles';
 export * from './Settings/releaseProfiles';
@@ -80,6 +82,7 @@ export interface SettingsState {
   naming: typeof naming.defaultState;
   namingExamples: typeof namingExamples.defaultState;
   notifications: typeof notifications.defaultState;
+  platformRootFolders: typeof platformRootFolders.defaultState;
   qualityDefinitions: typeof qualityDefinitions.defaultState;
   qualityProfiles: typeof qualityProfiles.defaultState;
   releaseProfiles: typeof releaseProfiles.defaultState;
@@ -110,6 +113,7 @@ export const defaultState: SettingsState = {
   naming: naming.defaultState,
   namingExamples: namingExamples.defaultState,
   notifications: notifications.defaultState,
+  platformRootFolders: platformRootFolders.defaultState,
   qualityDefinitions: qualityDefinitions.defaultState,
   qualityProfiles: qualityProfiles.defaultState,
   releaseProfiles: releaseProfiles.defaultState,
@@ -148,6 +152,7 @@ export const actionHandlers = handleThunks({
   ...naming.actionHandlers,
   ...namingExamples.actionHandlers,
   ...notifications.actionHandlers,
+  ...platformRootFolders.actionHandlers,
   ...qualityDefinitions.actionHandlers,
   ...qualityProfiles.actionHandlers,
   ...releaseProfiles.actionHandlers,
@@ -184,6 +189,7 @@ export const reducers = createHandleActions(
     ...naming.reducers,
     ...namingExamples.reducers,
     ...notifications.reducers,
+    ...platformRootFolders.reducers,
     ...qualityDefinitions.reducers,
     ...qualityProfiles.reducers,
     ...releaseProfiles.reducers,

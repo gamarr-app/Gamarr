@@ -16,6 +16,7 @@ import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Popover from 'Components/Tooltip/Popover';
 import MoveGameModal from 'Game/MoveGame/MoveGameModal';
+import platformOptions from 'Game/platformOptions';
 import useGame from 'Game/useGame';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
@@ -38,34 +39,6 @@ export interface EditGameModalContentProps {
   onModalClose: () => void;
   onDeleteGamePress: () => void;
 }
-
-const platformOptions = [
-  { key: 'unknown', value: 'Any' },
-  { key: 'pc', value: 'PC (Windows)' },
-  { key: 'linux', value: 'Linux' },
-  { key: 'mac', value: 'macOS' },
-  { key: 'playStation', value: 'PlayStation' },
-  { key: 'sonyPS3', value: 'Sony PlayStation 3' },
-  { key: 'sonyPSP', value: 'Sony PSP' },
-  { key: 'sonyPSVita', value: 'Sony PlayStation Vita' },
-  { key: 'xbox', value: 'Xbox' },
-  { key: 'nintendo', value: 'Nintendo' },
-  { key: 'nintendoSwitch', value: 'Nintendo Switch' },
-  { key: 'nintendoWiiU', value: 'Nintendo Wii U' },
-  { key: 'nintendoWii', value: 'Nintendo Wii' },
-  { key: 'nintendo3DS', value: 'Nintendo 3DS' },
-  { key: 'nintendoDSi', value: 'Nintendo DSi' },
-  { key: 'nintendoDS', value: 'Nintendo DS' },
-  { key: 'nintendoGBA', value: 'Nintendo Game Boy Advance' },
-  { key: 'nintendoGBC', value: 'Nintendo Game Boy Color' },
-  { key: 'nintendoGB', value: 'Nintendo Game Boy' },
-  { key: 'nintendoNES', value: 'Nintendo Entertainment System' },
-  { key: 'nintendoSNES', value: 'Super Nintendo Entertainment System' },
-  { key: 'nintendoN64', value: 'Nintendo 64' },
-  { key: 'nintendoFDS', value: 'Family Computer Disk System' },
-  { key: 'nintendoVirtualBoy', value: 'Virtual Boy' },
-  { key: 'nintendoPokemonMini', value: 'Pokemon Mini' },
-];
 
 function EditGameModalContent({
   gameId,
