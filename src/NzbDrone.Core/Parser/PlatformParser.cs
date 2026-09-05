@@ -89,6 +89,16 @@ namespace NzbDrone.Core.Parser
             @"\b(?:Linux|LNX)\b|\[(?:Linux|LNX)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Console dump/ROM container extensions. These belong to exactly one
+        // platform, so a bare "Game Title [0100ABC000][v0].nsp" can be placed
+        // even though the title carries no platform token at all. Only checked
+        // after every title regex above, so an explicit tag always wins.
+        // .iso is deliberately absent: PS2/PSP/Wii/GameCube and plain PC discs
+        // all use it, so it says nothing about the platform.
+        private static readonly Regex ConsoleExtensionRegex = new Regex(
+            @"\.(?<extension>nsp|nsz|xci|wux|wud|3ds|cia)\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         /// <summary>
         /// Parse platform from release title
         /// </summary>
@@ -219,6 +229,15 @@ namespace NzbDrone.Core.Parser
                 return PlatformFamily.Linux;
             }
 
+            // No platform token in the title - fall back to the file extension
+            var extensionPlatform = ParsePlatformFromExtension(title);
+
+            if (extensionPlatform != PlatformFamily.Unknown)
+            {
+                Logger.Trace("Detected {0} platform from file extension", extensionPlatform);
+                return extensionPlatform;
+            }
+
             // Default to PC (most game releases are for PC)
             return PlatformFamily.Unknown;
         }
@@ -334,7 +353,49 @@ namespace NzbDrone.Core.Parser
                 return "Linux";
             }
 
+            // Console dump extension, same fallback as ParsePlatform
+            switch (ParsePlatformFromExtension(title))
+            {
+                case PlatformFamily.NintendoSwitch:
+                    return "Switch";
+                case PlatformFamily.NintendoWiiU:
+                    return "Wii U";
+                case PlatformFamily.Nintendo3DS:
+                    return "3DS";
+            }
+
             return null;
+        }
+
+        /// <summary>
+        /// Map an unambiguous console dump extension to its platform
+        /// </summary>
+        /// <param name="title">Release title to inspect</param>
+        /// <returns>Detected platform family, or Unknown if the title does not end in one</returns>
+        private static PlatformFamily ParsePlatformFromExtension(string title)
+        {
+            var match = ConsoleExtensionRegex.Match(title);
+
+            if (!match.Success)
+            {
+                return PlatformFamily.Unknown;
+            }
+
+            switch (match.Groups["extension"].Value.ToLowerInvariant())
+            {
+                case "nsp":
+                case "nsz":
+                case "xci":
+                    return PlatformFamily.NintendoSwitch;
+                case "wux":
+                case "wud":
+                    return PlatformFamily.NintendoWiiU;
+                case "3ds":
+                case "cia":
+                    return PlatformFamily.Nintendo3DS;
+                default:
+                    return PlatformFamily.Unknown;
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using FluentValidation;
@@ -126,6 +127,64 @@ namespace NzbDrone.Core.Test.GameTests
             Assert.Throws<ValidationException>(() => Subject.AddGame(newGame));
 
             ExceptionVerification.ExpectedErrors(1);
+        }
+
+        private void GivenMetadataPlatforms(params PlatformFamily[] families)
+        {
+            _fakeGame.Platforms = families.Select(f => new GamePlatform { Family = f }).ToList();
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetAllGames())
+                  .Returns(new List<Game>());
+        }
+
+        [Test]
+        public void should_set_platform_from_unambiguous_metadata()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.NintendoSwitch);
+
+            Subject.AddGame(newGame).Platform.Should().Be(PlatformFamily.NintendoSwitch);
+        }
+
+        [Test]
+        public void should_leave_platform_unknown_for_a_multiplatform_game()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.PC, PlatformFamily.NintendoSwitch);
+
+            Subject.AddGame(newGame).Platform.Should().Be(PlatformFamily.Unknown);
+        }
+
+        [Test]
+        public void should_not_override_a_platform_chosen_by_the_caller()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games",
+                Platform = PlatformFamily.PC
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.NintendoSwitch);
+
+            Subject.AddGame(newGame).Platform.Should().Be(PlatformFamily.PC);
         }
     }
 }
