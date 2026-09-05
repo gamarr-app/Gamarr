@@ -160,7 +160,7 @@ namespace NzbDrone.Core.Parser
 
             // Switch emulator format: "Nintendo Switch Game Name NSP/NSZ RUS Multi10" or "Game Name Switch Emulators"
             // Stop title at version number (v1 or similar) or at Switch marker if no version
-            new Regex(@"^(?:Nintendo\s+Switch\s+)?(?<title>(?![(\[]).+?)(?=\s+v\d|\s+(?:NSP|NSZ|Switch\s+Emulators?|Ryujinx|Suyu)\b).*?(?:NSP|NSZ|Switch\s+Emulators?|Ryujinx|Suyu)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"^(?:Nintendo\s+Switch\s+)?(?<title>(?![(\[]).+?)(?=\s+v\d|\s+(?:NSP|NSZ|XCI|Switch\s+Emulators?|Ryujinx|Suyu)\b).*?(?:NSP|NSZ|XCI|Switch\s+Emulators?|Ryujinx|Suyu)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // DL prefix format with GOG ending: "DL Hollow Knight L RUS ENG 8 2017 Arcade ... GOG"
             // Title stops at "L" followed by language markers - must come before general GOG pattern
@@ -365,6 +365,14 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex CleanQualityBracketsRegex = new Regex(@"\[[a-z0-9 ._-]+\]$",
                                                                    RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // A bracketed run of exactly 16 hex digits is a Nintendo Switch title id
+        // and nothing else - "Kirby and the Forgotten Land [01004D300C5AE000][v0] nsp".
+        // Without this the id and version are left glued onto the parsed game
+        // title, which then matches no game. Any version group directly after
+        // the id belongs to it, so it goes too.
+        private static readonly Regex SwitchTitleIdRegex = new Regex(@"[\[(][0-9A-F]{16}[\])](?:\s*[\[(]v?[\d.]+[\])])*",
+                                                                   RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static readonly Regex YearInTitleRegex = new Regex(@"^(?<title>.+?)(?:\W|_.)?[\(\[]?(?<year>\d{4})[\]\)]?",
                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -409,6 +417,11 @@ namespace NzbDrone.Core.Parser
         }
 
         public static ParsedGameInfo ParseGameTitle(string title, bool isDir = false)
+        {
+            return ParseGameTitle(title, isDir, true);
+        }
+
+        private static ParsedGameInfo ParseGameTitle(string title, bool isDir, bool allowConsoleRetry)
         {
             var originalTitle = title;
             try
@@ -469,6 +482,8 @@ namespace NzbDrone.Core.Parser
 
                     return m.Value;
                 });
+
+                simpleTitle = SwitchTitleIdRegex.Replace(simpleTitle, " ");
 
                 var allRegexes = ReportGameTitleRegex.ToList();
 
@@ -619,6 +634,39 @@ namespace NzbDrone.Core.Parser
                 if (!title.ToLower().Contains("password") && !title.ToLower().Contains("yenc"))
                 {
                     Logger.Error(e, "An error has occurred while trying to parse {0}", CleanseLogMessage.SanitizeLogParam(title));
+                }
+            }
+
+            // Console dumps are made almost entirely of tokens the regex array
+            // above does not recognise, so they match nothing and fail here.
+            // Strip the decorations and try once more. This runs only after a
+            // failure, so it cannot change any name that already parses.
+            if (allowConsoleRetry)
+            {
+                var consoleTitle = ConsoleTitleParser.Normalize(originalTitle);
+
+                if (consoleTitle != null)
+                {
+                    Logger.Debug("Retrying as a console release: '{0}'", consoleTitle);
+
+                    var consoleResult = ParseGameTitle(consoleTitle, isDir, false);
+
+                    if (consoleResult != null)
+                    {
+                        // The name was cleaned only so the title regexes could
+                        // read it. Everything else still comes off the full
+                        // release name, which is where the tokens carrying the
+                        // quality, version, content type and platform live.
+                        consoleResult.Quality = QualityParser.ParseQuality(originalTitle);
+                        consoleResult.GameVersion = QualityParser.ParseGameVersion(originalTitle);
+                        consoleResult.ContentType = QualityParser.ParseContentType(originalTitle);
+                        consoleResult.Platform = PlatformParser.ParsePlatform(originalTitle);
+                        consoleResult.PlatformString = PlatformParser.ParsePlatformString(originalTitle);
+                        consoleResult.OriginalTitle = originalTitle;
+                        consoleResult.ReleaseTitle = originalTitle;
+
+                        return consoleResult;
+                    }
                 }
             }
 
