@@ -145,9 +145,6 @@ namespace NzbDrone.Core.MediaFiles
                 SplitBundledDlcFolders(game);
                 AdoptUntrackedComponentFolders(game, existingGameFiles);
 
-                // Folder has content - treat the entire folder as a single GameFile
-                var folderSize = _diskProvider.GetFolderSize(game.Path);
-
                 // Subfolder units (update releases imported alongside the base,
                 // RelativePath like Updates/<version>) are reconciled by their
                 // own folder's existence and must not be absorbed or deleted by
@@ -174,49 +171,70 @@ namespace NzbDrone.Core.MediaFiles
                     .Except(vanishedSubfolderUnits)
                     .ToList();
 
-                // Check if we already have a folder-based GameFile (RelativePath is empty)
-                var existingFolderFile = existingGameFiles.FirstOrDefault(f => f.RelativePath.IsNullOrWhiteSpace());
+                // Console titles ship as one packaged file per unit, so the
+                // folder-level collapse below has to be skipped for them —
+                // see ShouldTrackPerFile. Fall back to the folder record when
+                // nothing on disk looks like a game file, so a console folder
+                // holding only unrecognised content keeps a record at all.
+                var perFileCandidates = ShouldTrackPerFile(game)
+                    ? FilterPaths(game.Path, GetVideoFiles(game.Path))
+                        .Where(file => !IsUnderSubfolderUnit(subfolderUnits, game.Path.GetRelativePath(file)))
+                        .ToList()
+                    : new List<string>();
 
-                if (existingFolderFile != null)
+                if (perFileCandidates.Any())
                 {
-                    // Update existing folder record if size changed
-                    if (existingFolderFile.Size != folderSize)
-                    {
-                        _logger.Debug("Updating folder size for {0}: {1} -> {2}", game.Title, existingFolderFile.Size, folderSize);
-                        existingFolderFile.Size = folderSize;
-                        _mediaFileService.Update(existingFolderFile);
-                    }
+                    ReconcilePerFileRecords(game, existingGameFiles, subfolderUnits, perFileCandidates);
                 }
                 else
                 {
-                    // No folder-based GameFile exists - migrate from file-based
-                    // Preserve metadata from the first existing file (if any)
-                    var sourceFile = existingGameFiles.FirstOrDefault();
+                    // Folder has content - treat the entire folder as a single GameFile
+                    var folderSize = _diskProvider.GetFolderSize(game.Path);
 
-                    // Delete old file-based GameFile records
-                    foreach (var oldFile in existingGameFiles)
+                    // Check if we already have a folder-based GameFile (RelativePath is empty)
+                    var existingFolderFile = existingGameFiles.FirstOrDefault(f => f.RelativePath.IsNullOrWhiteSpace());
+
+                    if (existingFolderFile != null)
                     {
-                        _logger.Debug("Removing old file-based GameFile record: {0}", oldFile.RelativePath);
-                        _mediaFileService.Delete(oldFile, DeleteMediaFileReason.ManualOverride);
+                        // Update existing folder record if size changed
+                        if (existingFolderFile.Size != folderSize)
+                        {
+                            _logger.Debug("Updating folder size for {0}: {1} -> {2}", game.Title, existingFolderFile.Size, folderSize);
+                            existingFolderFile.Size = folderSize;
+                            _mediaFileService.Update(existingFolderFile);
+                        }
                     }
-
-                    // Create new folder-based GameFile, preserving metadata from old record
-                    _logger.Debug("Creating folder-based GameFile for {0}", game.Title);
-                    var folderGameFile = new GameFile
+                    else
                     {
-                        GameId = game.Id,
-                        RelativePath = string.Empty, // Empty means the folder itself
-                        Size = folderSize,
-                        DateAdded = sourceFile?.DateAdded ?? DateTime.UtcNow,
-                        Quality = sourceFile?.Quality ?? new QualityModel { Quality = Quality.Unknown },
-                        Languages = sourceFile?.Languages ?? new List<Language> { Language.Unknown },
-                        IndexerFlags = sourceFile?.IndexerFlags ?? 0,
-                        ReleaseGroup = sourceFile?.ReleaseGroup,
-                        SceneName = sourceFile?.SceneName,
-                        GameVersion = sourceFile?.GameVersion
-                    };
+                        // No folder-based GameFile exists - migrate from file-based
+                        // Preserve metadata from the first existing file (if any)
+                        var sourceFile = existingGameFiles.FirstOrDefault();
 
-                    _mediaFileService.Add(folderGameFile);
+                        // Delete old file-based GameFile records
+                        foreach (var oldFile in existingGameFiles)
+                        {
+                            _logger.Debug("Removing old file-based GameFile record: {0}", oldFile.RelativePath);
+                            _mediaFileService.Delete(oldFile, DeleteMediaFileReason.ManualOverride);
+                        }
+
+                        // Create new folder-based GameFile, preserving metadata from old record
+                        _logger.Debug("Creating folder-based GameFile for {0}", game.Title);
+                        var folderGameFile = new GameFile
+                        {
+                            GameId = game.Id,
+                            RelativePath = string.Empty, // Empty means the folder itself
+                            Size = folderSize,
+                            DateAdded = sourceFile?.DateAdded ?? DateTime.UtcNow,
+                            Quality = sourceFile?.Quality ?? new QualityModel { Quality = Quality.Unknown },
+                            Languages = sourceFile?.Languages ?? new List<Language> { Language.Unknown },
+                            IndexerFlags = sourceFile?.IndexerFlags ?? 0,
+                            ReleaseGroup = sourceFile?.ReleaseGroup,
+                            SceneName = sourceFile?.SceneName,
+                            GameVersion = sourceFile?.GameVersion
+                        };
+
+                        _mediaFileService.Add(folderGameFile);
+                    }
                 }
             }
             else
@@ -234,6 +252,182 @@ namespace NzbDrone.Core.MediaFiles
 
             RemoveEmptyGameFolder(game.Path);
             CompletedScanning(game, possibleExtraFiles);
+        }
+
+        // Granularity switch: a PC release is an *installation* — a
+        // repack is dozens of .rar/.bin parts and an installed GOG game is
+        // thousands of .dll/.pak files, none of which is meaningful on its
+        // own — so the whole folder is tracked as one GameFile. A console
+        // release is the opposite: one packaged file (.nsp/.xci/.iso/.rom) IS
+        // one game, and a base sitting next to its update must stay two
+        // records with two sizes rather than collapse into one row whose size
+        // is the sum.
+        //
+        // This gates on the entry's platform rather than on sniffing
+        // extensions, matching how PlatformSpecification / NoIntroCatalogDefaults
+        // reason about consoles. It reuses the very same family primitives
+        // GamePlatform.PlatformMatches is built from, so an entry stored as
+        // plain Nintendo behaves like one stored as NintendoSwitch here
+        // exactly as it already does in release filtering — PlatformMatches
+        // itself is the wrong shape (it compares a wanted release platform
+        // against an actual one, not "is this a console").
+        // Note the codebase only ships IsNintendoFamily
+        // and IsPlayStationFamily helpers — Xbox, Sega and Atari each collapse
+        // to a single PlatformFamily value (MapPlatformFamily sends Xbox/360/
+        // One/Series X all to PlatformFamily.Xbox), so they are named directly.
+        // Unknown (the default for every pre-#150 entry) stays folder-based.
+        private static bool ShouldTrackPerFile(Game game)
+        {
+            var platform = game.Platform;
+
+            return GamePlatform.IsNintendoFamily(platform) ||
+                   GamePlatform.IsPlayStationFamily(platform) ||
+                   platform is PlatformFamily.Xbox or PlatformFamily.Sega or PlatformFamily.Atari;
+        }
+
+        // Files inside a tracked component folder (Updates/<version>,
+        // DLC/<name>) belong to that unit's record and must not get their own.
+        private static bool IsUnderSubfolderUnit(List<GameFile> subfolderUnits, string relativePath)
+        {
+            if (relativePath.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            var normalized = relativePath.Replace('\\', '/');
+
+            return subfolderUnits.Any(unit => normalized.StartsWith(
+                unit.RelativePath.Replace('\\', '/').TrimEnd('/') + "/",
+                StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool RelativePathMatches(string left, string right)
+        {
+            return left.Replace('\\', '/').Equals(right.Replace('\\', '/'), StringComparison.OrdinalIgnoreCase);
+        }
+
+        // One GameFile per packaged file, reconciled against disk. Records for
+        // files that have vanished were already removed by the shared
+        // missing-path sweep in Scan; there is deliberately no blanket delete
+        // of file-based records here — that is precisely what would destroy a
+        // correct per-file record produced by download import.
+        private void ReconcilePerFileRecords(Game game, List<GameFile> existingGameFiles, List<GameFile> subfolderUnits, List<string> filesOnDisk)
+        {
+            var records = existingGameFiles
+                .Where(f => !IsUnderSubfolderUnit(subfolderUnits, f.RelativePath))
+                .ToList();
+
+            var folderRecords = records.Where(f => f.RelativePath.IsNullOrWhiteSpace()).ToList();
+            var metadataSource = folderRecords.FirstOrDefault() ?? records.FirstOrDefault();
+
+            // Largest first: a console update/DLC package is always a fraction
+            // of the base's size, so this puts the base package first. That
+            // ordering is load-bearing — the folder record is recycled into the
+            // first file and GameService assigns Game.GameFileId to the first
+            // record added, so the game's primary file ends up being the base.
+            var onDisk = filesOnDisk
+                .Select(path => new
+                {
+                    RelativePath = game.Path.GetRelativePath(path),
+                    Size = _diskProvider.GetFileSize(path),
+                    Extension = Path.GetExtension(path)
+                })
+                .OrderByDescending(f => f.Size)
+                .ThenBy(f => f.RelativePath, StringComparer.Ordinal)
+                .ToList();
+
+            var reconciled = new List<GameFile>();
+
+            foreach (var file in onDisk)
+            {
+                var existing = records.FirstOrDefault(r => r.RelativePath.IsNotNullOrWhiteSpace() &&
+                                                           RelativePathMatches(r.RelativePath, file.RelativePath) &&
+                                                           !reconciled.Contains(r));
+
+                if (existing != null)
+                {
+                    if (existing.Size != file.Size)
+                    {
+                        _logger.Debug("Updating size for {0}: {1} -> {2}", existing.RelativePath, existing.Size, file.Size);
+                        existing.Size = file.Size;
+                        _mediaFileService.Update(existing);
+                    }
+
+                    reconciled.Add(existing);
+                    continue;
+                }
+
+                var recycled = folderRecords.FirstOrDefault();
+
+                if (recycled != null)
+                {
+                    // Explode a folder-level record into per-file records by
+                    // repurposing the row rather than delete-then-add: the row
+                    // id is what Game.GameFileId points at, and it carries the
+                    // metadata of the release that produced it.
+                    folderRecords.Remove(recycled);
+
+                    _logger.Debug("Exploding folder-level GameFile for {0} into per-file record: {1}", game.Title, file.RelativePath);
+                    recycled.RelativePath = file.RelativePath;
+                    recycled.Size = file.Size;
+                    _mediaFileService.Update(recycled);
+
+                    reconciled.Add(recycled);
+                    continue;
+                }
+
+                _logger.Debug("Adding per-file GameFile for {0}: {1}", game.Title, file.RelativePath);
+
+                var added = _mediaFileService.Add(new GameFile
+                {
+                    GameId = game.Id,
+                    RelativePath = file.RelativePath,
+                    Size = file.Size,
+                    DateAdded = metadataSource?.DateAdded ?? DateTime.UtcNow,
+                    Quality = new QualityModel { Quality = MediaFileExtensions.GetQualityForExtension(file.Extension) },
+                    Languages = metadataSource?.Languages ?? new List<Language> { Language.Unknown },
+                    IndexerFlags = metadataSource?.IndexerFlags ?? 0,
+                    ReleaseGroup = metadataSource?.ReleaseGroup
+                });
+
+                reconciled.Add(added ?? new GameFile { GameId = game.Id, RelativePath = file.RelativePath });
+            }
+
+            // A leftover folder record can only happen if a game somehow has
+            // more than one; it would otherwise sit there claiming the summed
+            // size of the whole folder.
+            foreach (var leftover in folderRecords)
+            {
+                _logger.Debug("Removing surplus folder-level GameFile record for {0}", game.Title);
+                _mediaFileService.Delete(leftover, DeleteMediaFileReason.ManualOverride);
+            }
+
+            EnsurePrimaryFile(game, reconciled, subfolderUnits);
+        }
+
+        // With N records per game, Game.GameFileId can be left dangling when
+        // the row it named is the one whose file vanished. Re-point it at the
+        // base record (first reconciled = largest package) instead of leaving
+        // the game looking file-less while its files are on disk. A pointer
+        // that still names a tracked record is left alone.
+        private void EnsurePrimaryFile(Game game, List<GameFile> reconciled, List<GameFile> subfolderUnits)
+        {
+            var baseFile = reconciled.FirstOrDefault();
+
+            if (baseFile == null || baseFile.Id == 0)
+            {
+                return;
+            }
+
+            if (game.GameFileId != 0 &&
+                (reconciled.Any(f => f.Id == game.GameFileId) || subfolderUnits.Any(f => f.Id == game.GameFileId)))
+            {
+                return;
+            }
+
+            _logger.Debug("Pointing {0} at base file record [{1}] {2}", game.Title, baseFile.Id, baseFile.RelativePath);
+            game.GameFileId = baseFile.Id;
+            _gameService.UpdateGame(game);
         }
 
         // Some releases ship the base game with separate update packages

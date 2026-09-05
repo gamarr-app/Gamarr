@@ -84,6 +84,41 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             GivenRootFolder(_game.Path);
         }
 
+        private void GivenPlatform(PlatformFamily platform)
+        {
+            _game.Platform = platform;
+        }
+
+        // Files plus their individual sizes, as a per-file platform sees them.
+        private void GivenFilesWithSizes(params (string Name, long Size)[] files)
+        {
+            GivenFiles(files.Select(f => Path.Combine(_game.Path, f.Name).AsOsAgnostic()));
+
+            foreach (var file in files)
+            {
+                var path = Path.Combine(_game.Path, file.Name).AsOsAgnostic();
+
+                Mocker.GetMock<IDiskProvider>()
+                      .Setup(s => s.GetFileSize(path))
+                      .Returns(file.Size);
+
+                Mocker.GetMock<IDiskProvider>()
+                      .Setup(s => s.FileExists(path))
+                      .Returns(true);
+            }
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(files.Sum(f => f.Size));
+        }
+
+        private void GivenExistingFiles(params GameFile[] files)
+        {
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(It.IsAny<int>()))
+                  .Returns(files.ToList());
+        }
+
         private void GivenFiles(IEnumerable<string> files)
         {
             Mocker.GetMock<IDiskProvider>()
@@ -588,6 +623,363 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IDiskProvider>()
                   .Verify(v => v.MoveFolder(It.IsAny<string>(), It.IsAny<string>(), false), Times.Never());
+        }
+
+        // ---------------------------------------------------------------
+        // Per-file granularity on console platforms (one packaged file IS
+        // one game) vs folder granularity on PC (a repack is dozens of parts
+        // of one install).
+        // ---------------------------------------------------------------
+
+        [Test]
+        public void should_track_single_console_file_as_its_own_record()
+        {
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(("Kirby and the Forgotten Land [v0].nsp", 6169789825L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == "Kirby and the Forgotten Land [v0].nsp" &&
+                      gf.Size == 6169789825L)), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Never());
+        }
+
+        [Test]
+        public void should_track_base_and_update_as_separate_records_with_individual_sizes()
+        {
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(
+                ("Pokemon Let's Go, Pikachu! [010003F003A34000][v0].nsp", 4465458938L),
+                ("Pokemon Let's Go, Pikachu! [010003F003A34800][v131072].nsp", 35598272L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.Size == 4465458938L)), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.Size == 35598272L)), Times.Once());
+
+            // The bug: 4465458938 + 35598272 collapsed into one folder row.
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.Size == 4501057210L)), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Never());
+        }
+
+        [Test]
+        public void should_treat_generic_nintendo_family_platform_as_per_file()
+        {
+            // Game 55 on the live instance is stored as plain `nintendo`, not
+            // `nintendoSwitch` — an equality check against Switch would leave
+            // it broken while appearing to work.
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.Nintendo);
+            GivenFilesWithSizes(("Pokemon Let's Go, Pikachu! [v0].nsp", 4465458938L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == "Pokemon Let's Go, Pikachu! [v0].nsp" &&
+                      gf.Size == 4465458938L)), Times.Once());
+        }
+
+        [TestCase(PlatformFamily.NintendoSwitch)]
+        [TestCase(PlatformFamily.Nintendo)]
+        [TestCase(PlatformFamily.NintendoGBA)]
+        [TestCase(PlatformFamily.PlayStation)]
+        [TestCase(PlatformFamily.SonyPSVita)]
+        [TestCase(PlatformFamily.Xbox)]
+        [TestCase(PlatformFamily.Sega)]
+        [TestCase(PlatformFamily.Atari)]
+        public void should_track_per_file_for_console_families(PlatformFamily platform)
+        {
+            GivenGameFolder();
+            GivenPlatform(platform);
+            GivenFilesWithSizes(("game.iso", 500L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "game.iso")), Times.Once());
+        }
+
+        [TestCase(PlatformFamily.PC)]
+        [TestCase(PlatformFamily.Linux)]
+        [TestCase(PlatformFamily.Mac)]
+        [TestCase(PlatformFamily.Unknown)]
+        public void should_keep_single_folder_record_for_non_console_platforms(PlatformFamily platform)
+        {
+            // The original motivation for folder records: a PC repack is
+            // dozens of parts of one installation, not dozens of games.
+            GivenGameFolder();
+            GivenPlatform(platform);
+            GivenFilesWithSizes(
+                ("setup.exe", 1000L),
+                ("data-1.bin", 2000L),
+                ("data-2.bin", 3000L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == string.Empty &&
+                      gf.Size == 6000L)), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath != string.Empty)), Times.Never());
+        }
+
+        [Test]
+        public void should_not_destroy_existing_file_record_on_console_rescan()
+        {
+            // Regression: game 60 (Kirby) came in file-granular via download
+            // import and every rescan used to delete that record and replace
+            // it with a folder record summing base + update.
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(
+                ("Kirby and the Forgotten Land [v0].nsp", 6169789825L),
+                ("Kirby and the Forgotten Land [v65536][1.1.0][UPD].nsp", 50953289L));
+
+            var existing = new GameFile
+            {
+                Id = 145,
+                GameId = _game.Id,
+                RelativePath = "Kirby and the Forgotten Land [v0].nsp",
+                Size = 6169789825L
+            };
+
+            _game.GameFileId = existing.Id;
+            GivenExistingFiles(existing);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Never());
+
+            // Untouched size means no needless write; the update gets its own row.
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.IsAny<GameFile>()), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == "Kirby and the Forgotten Land [v65536][1.1.0][UPD].nsp" &&
+                      gf.Size == 50953289L)), Times.Once());
+        }
+
+        [Test]
+        public void should_track_byte_identical_duplicate_files_as_separate_records()
+        {
+            // Two files, same size, different names: reconciliation keys on
+            // relative path, so neither is silently dropped.
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(
+                ("Kirby and the Forgotten Land [01004D300C5AE000][v0][Base].nsp", 6169789825L),
+                ("Kirby and the Forgotten Land [v0].nsp", 6169789825L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == "Kirby and the Forgotten Land [01004D300C5AE000][v0][Base].nsp")), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == "Kirby and the Forgotten Land [v0].nsp")), Times.Once());
+        }
+
+        [Test]
+        public void should_explode_folder_record_into_per_file_records_on_console_platform()
+        {
+            // Repair path for game 55 (Pokémon): one folder record whose size
+            // is base + update becomes two records with their real sizes. The
+            // folder row is repurposed for the base rather than deleted, so
+            // Game.GameFileId keeps pointing at the base.
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.Nintendo);
+            GivenFilesWithSizes(
+                ("Pokemon Let's Go, Pikachu! [010003F003A34000][v0].nsp", 4465458938L),
+                ("Pokemon Let's Go, Pikachu! [010003F003A34800][v131072].nsp", 35598272L));
+
+            var folderRecord = new GameFile
+            {
+                Id = 146,
+                GameId = _game.Id,
+                RelativePath = string.Empty,
+                Size = 4501057210L,
+                SceneName = "Pokemon.Lets.Go.Pikachu.NSW-GRP"
+            };
+
+            _game.GameFileId = folderRecord.Id;
+            GivenExistingFiles(folderRecord);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.Is<GameFile>(gf =>
+                      gf.Id == 146 &&
+                      gf.RelativePath == "Pokemon Let's Go, Pikachu! [010003F003A34000][v0].nsp" &&
+                      gf.Size == 4465458938L &&
+                      gf.SceneName == "Pokemon.Lets.Go.Pikachu.NSW-GRP")), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf =>
+                      gf.RelativePath == "Pokemon Let's Go, Pikachu! [010003F003A34800][v131072].nsp" &&
+                      gf.Size == 35598272L)), Times.Once());
+
+            // The folder row is recycled, never deleted — deleting it would
+            // null out Game.GameFileId.
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+        }
+
+        [Test]
+        public void should_delete_per_file_record_whose_file_vanished()
+        {
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(("kept.nsp", 100L));
+
+            var gone = new GameFile { Id = 7, GameId = _game.Id, RelativePath = "gone.nsp", Size = 200L };
+            var kept = new GameFile { Id = 8, GameId = _game.Id, RelativePath = "kept.nsp", Size = 100L };
+
+            GivenExistingFiles(gone, kept);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(gone, DeleteMediaFileReason.MissingFromDisk), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(kept, It.IsAny<DeleteMediaFileReason>()), Times.Never());
+        }
+
+        [Test]
+        public void should_update_size_of_existing_per_file_record_when_it_changed()
+        {
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(("game.nsp", 900L));
+
+            var existing = new GameFile { Id = 3, GameId = _game.Id, RelativePath = "game.nsp", Size = 100L };
+            GivenExistingFiles(existing);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.Is<GameFile>(gf => gf.Id == 3 && gf.Size == 900L)), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.IsAny<GameFile>()), Times.Never());
+        }
+
+        [Test]
+        public void should_leave_tracked_component_subfolder_alone_on_console_platform()
+        {
+            // Updates/<version> is its own unit; files inside it must not also
+            // get per-file records.
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+
+            var updateDir = Path.Combine(_game.Path, "Updates", "v1.1.0").AsOsAgnostic();
+
+            GivenFilesWithSizes(
+                ("game.nsp", 900L),
+                (Path.Combine("Updates", "v1.1.0", "update.nsp"), 50L));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(updateDir))
+                  .Returns(true);
+
+            GivenExistingFiles(new GameFile
+            {
+                Id = 4,
+                GameId = _game.Id,
+                RelativePath = Path.Combine("Updates", "v1.1.0"),
+                Size = 50L
+            });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "game.nsp")), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath.Contains("Updates"))), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+        }
+
+        [Test]
+        public void should_repoint_dangling_primary_file_at_base_record()
+        {
+            // With N records per game, Game.GameFileId can name a row that has
+            // since been deleted (its file vanished). Leaving it dangling makes
+            // the game look file-less while its files sit on disk.
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(
+                ("base.nsp", 900L),
+                ("update.nsp", 50L));
+
+            _game.GameFileId = 99;
+
+            GivenExistingFiles(
+                new GameFile { Id = 8, GameId = _game.Id, RelativePath = "base.nsp", Size = 900L },
+                new GameFile { Id = 9, GameId = _game.Id, RelativePath = "update.nsp", Size = 50L });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(v => v.UpdateGame(It.Is<Game>(g => g.GameFileId == 8)), Times.Once());
+        }
+
+        [Test]
+        public void should_not_touch_primary_file_that_still_names_a_tracked_record()
+        {
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(
+                ("base.nsp", 900L),
+                ("update.nsp", 50L));
+
+            _game.GameFileId = 9;
+
+            GivenExistingFiles(
+                new GameFile { Id = 8, GameId = _game.Id, RelativePath = "base.nsp", Size = 900L },
+                new GameFile { Id = 9, GameId = _game.Id, RelativePath = "update.nsp", Size = 50L });
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(v => v.UpdateGame(It.IsAny<Game>()), Times.Never());
+        }
+
+        [Test]
+        public void should_fall_back_to_folder_record_on_console_platform_without_recognisable_game_files()
+        {
+            GivenGameFolder();
+            GivenPlatform(PlatformFamily.NintendoSwitch);
+            GivenFilesWithSizes(("readme.txt", 10L));
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty && gf.Size == 10L)), Times.Once());
         }
     }
 }

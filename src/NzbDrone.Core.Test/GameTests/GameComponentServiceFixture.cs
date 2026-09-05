@@ -488,6 +488,36 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
+        public void should_link_sibling_per_file_records_on_a_console_platform()
+        {
+            // A console game scanned per-file has N root-level records where it
+            // used to have one folder record. With no No-Intro catalog for the
+            // platform they all belong to the base slot; nothing throws and no
+            // record is left unlinked.
+            _game.Platform = PlatformFamily.NintendoSwitch;
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            Mocker.GetMock<IGameComponentRepository>()
+                  .Setup(r => r.GetByGame(_game.Id))
+                  .Returns(new List<GameComponent>
+                  {
+                      new GameComponent { Id = 10, GameId = _game.Id, ComponentType = GameComponentType.Base, Key = "base" }
+                  });
+
+            var baseFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = "Pokemon Lets Go Pikachu [v0].nsp" };
+            var updateFile = new GameFile { Id = 2, GameId = _game.Id, RelativePath = "Pokemon Lets Go Pikachu [v131072].nsp" };
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { baseFile, updateFile });
+
+            Subject.EnsureComponents(_game);
+
+            baseFile.ComponentId.Should().Be(10);
+            updateFile.ComponentId.Should().Be(10);
+        }
+
+        [Test]
         public void should_create_steam_keyed_slots_for_steam_sourced_dlc_references()
         {
             _game.GameMetadata.Value.DlcReferences = new List<DlcReference>
