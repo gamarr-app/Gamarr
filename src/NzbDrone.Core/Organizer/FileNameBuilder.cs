@@ -115,6 +115,16 @@ namespace NzbDrone.Core.Organizer
                 return GetOriginalTitle(gameFile, false);
             }
 
+            if (namingConfig.RenameProfile == RenameProfile.SwitchOwnfoil)
+            {
+                var switchFileName = GetSwitchOwnfoilFileName(game, gameFile);
+
+                if (switchFileName.IsNotNullOrWhiteSpace())
+                {
+                    return switchFileName;
+                }
+            }
+
             var noIntroFileName = GetNoIntroFileName(gameFile, namingConfig.RenameProfile);
 
             if (noIntroFileName.IsNotNullOrWhiteSpace())
@@ -163,6 +173,44 @@ namespace NzbDrone.Core.Organizer
             return Path.Combine(components.ToArray());
         }
 
+        // The Switch layout is built from the name the dumper wrote, since the title
+        // id, the nsp version and the region only ever exist there - nothing in the
+        // metadata carries them. Names are tried in order of how close they are to
+        // the dump itself, and the first one carrying a title id wins.
+        private string GetSwitchOwnfoilFileName(Game game, GameFile gameFile)
+        {
+            if (gameFile == null)
+            {
+                return null;
+            }
+
+            var candidates = new[]
+            {
+                gameFile.OriginalFilePath,
+                gameFile.SceneName,
+                gameFile.RelativePath,
+                gameFile.Path
+            };
+
+            foreach (var candidate in candidates)
+            {
+                if (candidate.IsNullOrWhiteSpace())
+                {
+                    continue;
+                }
+
+                var sourceName = Path.GetFileName(candidate.Replace('\\', '/'));
+                var fileName = SwitchOwnfoilNameBuilder.BuildFileName(sourceName, game?.Title, gameFile.GameVersion);
+
+                if (fileName.IsNotNullOrWhiteSpace())
+                {
+                    return fileName;
+                }
+            }
+
+            return null;
+        }
+
         private string GetNoIntroFileName(GameFile gameFile, RenameProfile renameProfile)
         {
             if (gameFile == null)
@@ -178,7 +226,9 @@ namespace NzbDrone.Core.Organizer
                 return null;
             }
 
-            if (renameProfile == RenameProfile.Gamarr)
+            // Only the No-Intro profiles rename to a No-Intro catalog name. Under any
+            // other profile a catalogued file keeps the name it already has.
+            if (renameProfile is RenameProfile.Gamarr or RenameProfile.SwitchOwnfoil)
             {
                 return Path.GetFileNameWithoutExtension(actualFileName);
             }
@@ -319,7 +369,12 @@ namespace NzbDrone.Core.Organizer
             AddReleaseDateTokens(tokenHandlers, game.Year);
             AddIdTokens(tokenHandlers, game);
 
-            var pattern = namingConfig.GameFolderFormat;
+            // The Switch layout is one folder per game named for the game and nothing
+            // else - no year, no tags - so the folder format is fixed with the file
+            // name format rather than left to the user's pattern.
+            var pattern = namingConfig.RenameProfile == RenameProfile.SwitchOwnfoil
+                ? "{Game Title}"
+                : namingConfig.GameFolderFormat;
             var splitPatterns = pattern.Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
             var components = new List<string>();
 

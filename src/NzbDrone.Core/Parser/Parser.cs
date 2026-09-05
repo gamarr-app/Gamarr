@@ -370,7 +370,10 @@ namespace NzbDrone.Core.Parser
         // Without this the id and version are left glued onto the parsed game
         // title, which then matches no game. Any version group directly after
         // the id belongs to it, so it goes too.
-        private static readonly Regex SwitchTitleIdRegex = new Regex(@"[\[(][0-9A-F]{16}[\])](?:\s*[\[(]v?[\d.]+[\])])*",
+        // Public because the ownfoil rename profile has to read the id back out
+        // of the same names this strips it from - one definition of what counts
+        // as a title id, not two that can drift apart.
+        public static readonly Regex SwitchTitleIdRegex = new Regex(@"[\[(](?<titleid>[0-9A-F]{16})[\])](?:\s*[\[(]v?[\d.]+[\])])*",
                                                                    RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly Regex YearInTitleRegex = new Regex(@"^(?<title>.+?)(?:\W|_.)?[\(\[]?(?<year>\d{4})[\]\)]?",

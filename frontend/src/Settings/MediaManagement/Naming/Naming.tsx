@@ -136,6 +136,10 @@ function Naming() {
       key: 'noIntroCanonical',
       value: translate('RenameProfileNoIntroCanonical'),
     },
+    {
+      key: 'switchOwnfoil',
+      value: translate('RenameProfileSwitchOwnfoil'),
+    },
   ];
 
   const standardGameFormatHelpTexts = [];

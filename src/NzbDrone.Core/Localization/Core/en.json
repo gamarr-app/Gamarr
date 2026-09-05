@@ -1705,6 +1705,7 @@
   "RenameProfileHelpText": "Choose how verified ROM filenames are evaluated. Normal Gamarr naming remains the default.",
   "RenameProfileNoIntroCanonical": "No-Intro Canonical",
   "RenameProfileNoIntroPreserveById": "No-Intro Preserve By-ID",
+  "RenameProfileSwitchOwnfoil": "Nintendo Switch (ownfoil)",
   "Renamed": "Renamed",
   "Reorder": "Reorder",
   "Repack": "Repack",
