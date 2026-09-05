@@ -199,5 +199,36 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Platform.Should().Be(PlatformFamily.SonyPS3);
             result.PlatformString.Should().Be("PS3");
         }
+
+        // SuperXCi glues its container token onto the group name with no
+        // separator ("...SuperXCi CLC"), so \bXCI\b in SwitchContainerRegex
+        // never fires: there is no word boundary between "Super" and "XCi".
+        // These are live titles for a real game (Pokemon Let's Go Pikachu)
+        // that were staying Unknown before SwitchReleaseGroupRegex was added.
+        [TestCase("Pokemon Lets Go Pikachu v1 0 1 SuperXCi CLC", PlatformFamily.NintendoSwitch, "Switch")]
+        [TestCase("Pokemon Lets Go Pikachu v1 0 2 EUR SuperXCi CLC", PlatformFamily.NintendoSwitch, "Switch")]
+        public void should_parse_switch_platform_from_known_release_group(string postTitle, PlatformFamily expectedFamily, string expectedString)
+        {
+            var result = PlatformParser.ParsePlatform(postTitle);
+            var resultString = PlatformParser.ParsePlatformString(postTitle);
+
+            result.Should().Be(expectedFamily);
+            resultString.Should().Be(expectedString);
+        }
+
+        // The release-group allowlist is a literal match, not a substring
+        // scan: "SuperXCi" glued into a longer word (no word boundary after
+        // "XCi") must not trip it, the same way "NSW" deliberately does not
+        // match inside "New South Wales" elsewhere in this parser.
+        [TestCase("Game Title 2023 SuperXCity Repack")]
+        [TestCase("Game Title 2023 MegaSuperXCiWorks")]
+        public void should_not_match_release_group_allowlist_inside_another_word(string postTitle)
+        {
+            var result = PlatformParser.ParsePlatform(postTitle);
+            var resultString = PlatformParser.ParsePlatformString(postTitle);
+
+            result.Should().Be(PlatformFamily.Unknown);
+            resultString.Should().BeNull();
+        }
     }
 }
