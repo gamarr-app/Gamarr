@@ -1,0 +1,55 @@
+# Allowlist of email addresses that may appear in this repo's file contents.
+#
+# SHA-256 of the lowercased address, never the address itself — writing them in
+# clear would make this file the largest collection of personal data in the repo,
+# which is the opposite of the point. The comment after each hash says where the
+# address was found, so this stays reviewable.
+#
+# Everything here is inherited from upstream (Radarr/Sonarr contributors, NLog and
+# Sentry config, test fixtures) or is the project's own noreply address. Anything
+# NOT on this list fails scripts/check-personal-email.sh.
+#
+# Add an entry only for an address that genuinely belongs in the tree:
+#   printf '%s' 'someone@example.com' | shasum -a 256
+# Baseline generated 2026-09-05 from the tree at d30a1c6b.
+#
+0d76fdc1fd8da46a09b5565560b02b9459801bad868f8835e3fdfd3c7caf677e  # src/NzbDrone.Core/Datastore/Migration/Framework/TableDefinition.cs
+106f574adeb2029b4b9115a2ac03af8b042e414f76156f716c88056569c0321d  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+2663242ab049c53990b69176179a98d72a625e2500c43e2953782f9930f32252  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+3662e199e7d9e106c1359c1a1af988adf171c6bec8d8f50272062f2e402af1d3  # src/NzbDrone.Common.Test/InstrumentationTests/SentryTargetFixture.cs
+36e96648c5410d00a7da7206c01237139f950bed21d8c729aae019dbe07964e7  # src/NzbDrone.Core/Notifications/Email/EmailSettings.cs (+2 more)
+38cc3c377380eafc2240311e0cfab8a900d52b2fa16ef2f8436edfc8adef1732  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+404f6d616507dbc220fb6395a617d4552cb6ea5a1c3561137a7583e52a17caca  # src/NzbDrone.Core.Test/Files/Indexers/TorrentRss/ImmortalSeed.xml (+2 more)
+4a3bcb3c7db7bb87dad4e2d52db1c90ed701ba946d0daa0609a9e90e1c47951a  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+4aecf0ab25c72ffb2b5981925fe4780e622af30d11397864cfe70023139a5130  # src/NzbDrone.Core.Test/NotificationTests/EmailTests/EmailSettingsValidatorFixture.cs
+5d17434b4a240ff0edcca350028d3fe798d56e125aa7bd91eeccaa81326d7aed  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+5d8ca12a739ded372f3b92efdc897d851273d9a75fb4a6a11b472e5036ec72ea  # azure-pipelines.yml
+5ec7cc152717dcc6a929df2997c203e14ca87ee7652709e6fad1c0a910882ea2  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+6546f2c5d73dbed7e83d83af081393b45e5eacfe312af053fbdcaf5c7f7bec47  # frontend/src/Store/Middleware/createSentryMiddleware.ts
+67abd505704d2f0037325a451390aefb5b3bc4132fef5949fa9d2e22c74cd19e  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+72497f475e4f76d0b28f57c73a084ece576d170874eba3ee2609d9afe4b71aab  # scripts/check-personal-email.sh
+7de4a33dc84b7492e1401287e550a931a50ef3d5e84a33a07bad45904dacdcb1  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+8e8156c07287ee8cd30c18014f88d5da09d1af800306511c3e0f9ac1f632deed  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+9481c1ff1086bfa1a5f84da1c4d51d84ba805e992168293c70d011be49decee9  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+97ef4f3fcaee0ef7935d71d5aa0d65f9fa798d8d9e7bd390a6e7e4948b7267de  # src/NzbDrone.Core.Test/Files/Indexers/TorrentRss/ExtraTorrents.xml
+9a5febf18fdf329c1e6f414b7413d90442962572100193f29315bcee2a167889  # src/NzbDrone.Core.Test/Files/Indexers/Newznab/newznab_language.xml (+1 more)
+9ae0c7d16dbe857f80d6325cacdd002423f8ffca1d31dcf3815136a267949d6d  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+a0a21c6f0ef8971b6500dd1631f73fc6f7af76cddd229a129d66bdb5afc6c66b  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+a1183adc7458c3ea0c84c0755024cac1423a189e99d2073e38fe105969162745  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+a62bee42abc7dd4260808338ae68eed2144332fa48ee54994bba3869edb84ead  # src/NzbDrone.Core/Notifications/Email/EmailSettings.cs (+2 more)
+a8e0064b05d6144511bfa39e146520493ff4813dc3078920676412af5af67e96  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+a917264f7e3f07a7ce52c80090f0732f6c1e540c21b64a993d5d4da85b1d1e5f  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+ab2c85155b1e5c3bda738108d871c67eeb054f181e32cfb18eabfec71b0936c0  # SECURITY.md
+bdeba50933d383679f18a9dca70cac874341caf34cfc66f2152493e004fa9072  # CODE_OF_CONDUCT.md
+be8b7d297ad6ad26ed54e1ad18db8474113ff957d91bd4d7e93b8b45217637b8  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+c55448ccd3fe06a863817be08e8f0ce04f0a6236dbcb7ca70f672ca603f19034  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+cc88545a49284a0891034a81b147d11b051b704bdc168099e8c03494e8a476a7  # src/NzbDrone.Core.Test/Files/Indexers/TorrentRss/BitHdtv.xml
+cd29c5ac348a026a3ec5286890908fffb5bf6ab77f20672171be323a70c95026  # contrib/prowlarr/0001-New-Gamarr-application-support.patch (+1 more)
+e5d779b7f1e02ae910dd3696ce60fa19678543a0774f56a3fab92229c17806ca  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+e6f84b2fe49a99574f3f535f8d31a1d6aeeb5d14068553d88e7d10048498d0e6  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+e97a9871805dcce61836188432a3f1413ae2c82aa6c2f272da5bad9ac6900875  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+f0f6e78f72b4b4fc291a27cb2b650773aa586ee637df0f0394d3c7e2bcbcdb69  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+f3fe06f62eeff6d9ee56ba0b021905f9282af056da4328fa7d3d496ccc9b0072  # src/NzbDrone.Common/Instrumentation/NzbDroneLogger.cs
+f42c499eaa0b260d5f534be06ca73014d18f908eecd312beeec4d8bb4d581f9b  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)
+fad393f1f293334be969951075d17530d0d1655a0b942ef9683909dd9167168a  # src/NzbDrone.Core.Test/Files/Indexers/Newznab/newznab_indexerflags.xml
+fbd5e990b83e6658db4370648802d61ead7984f5389b89dfdee3c5ea84e3a2c6  # src/NzbDrone.Core.Test/Files/Nzbs/NotNzb.nzb (+1 more)

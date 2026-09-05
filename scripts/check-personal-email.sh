@@ -10,19 +10,24 @@
 # step was looking at contents. Purging it afterwards meant rewriting 185 commits and
 # force-pushing 99 tags.
 #
-# The denylist is SHA-256 of the lowercased address, never the address itself.
-# Writing it in clear here would re-commit the very string this is meant to keep
-# out — the first version of this script did exactly that and tripped its own check.
-# Add an entry with:
-#   printf '%s' 'someone@example.com' | shasum -a 256
+# This is an ALLOWLIST, not a denylist. A denylist only blocks addresses someone
+# already thought to name — it has to store the very string it is protecting, and
+# it lets the next unrelated address straight through. The allowlist inverts that:
+# every address in the tree is known-good and anything new fails, so no personal
+# address needs to be recorded here at all.
 #
-# Two rules, deliberately narrow so this stays quiet:
-#   1. No address whose hash is on the denylist, anywhere.
-#   2. Identity headers inside vendored *.patch/*.diff must use the project
-#      address. That is the exact shape of the leak, and scoping it to patches
-#      avoids tripping over the real contributor addresses that legitimately live
-#      in test fixtures (ExtraTorrents.xml) and in
-#      Datastore/Migration/Framework/TableDefinition.cs.
+# Entries live in scripts/allowed-emails.sha256 as SHA-256 of the lowercased
+# address. Writing addresses in clear would make that file the largest collection
+# of personal data in the repo — and the first version of this script did exactly
+# that with a denylist, re-committing the address it was meant to keep out and
+# tripping its own check.
+#
+# Two rules:
+#   1. Every address in file contents must be on the allowlist.
+#   2. Identity headers inside vendored *.patch/*.diff must additionally use the
+#      project address. That is the exact shape of the leak: a patch body is file
+#      content, so a wrongly-authored commit exported by `git format-patch` walks
+#      straight past every author-identity check.
 #
 # Address extraction is one `git grep` over the index and one hash per distinct
 # address; a per-file loop over this tree takes minutes and was too slow for CI.
@@ -32,9 +37,7 @@
 
 set -uo pipefail
 
-DENY_SHA256=(
-    "2abaad518817b90fc477134079b9ce0c6292e0993d7a0284a09ffc1cef0b1df6"
-)
+ALLOWLIST_FILE="scripts/allowed-emails.sha256"
 ALLOWED_PATCH_ADDRESS="noreply@anthropic.com"
 EMAIL_RE='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 IDENTITY_HEADER='^\+?(From|Author|Signed-off-by|Co-authored-by):.*<[^>]+@[^>]+>'
@@ -65,19 +68,29 @@ else
     addresses=$(git grep -hoIE "$EMAIL_RE" -- . 2>/dev/null | tr 'A-Z' 'a-z' | sort -u)
 fi
 
+if [ ! -f "$ALLOWLIST_FILE" ]; then
+    echo "ERROR: $ALLOWLIST_FILE is missing; cannot verify addresses." >&2
+    exit 1
+fi
+allowed=$(grep -oE '^[0-9a-f]{64}' "$ALLOWLIST_FILE")
+
 while IFS= read -r addr; do
     [ -z "$addr" ] && continue
     hash=$(sha256 "$addr")
-    for deny in "${DENY_SHA256[@]}"; do
-        if [ "$hash" = "$deny" ]; then
-            fail "a denylisted personal address appears in:"
-            # File and line number only. CI logs for this repo are public, so
-            # echoing the matched line back would publish the address a second
-            # time on the very run that is complaining about it.
+    if ! grep -qxF "$hash" <<< "$allowed"; then
+        fail "an address that is not on the allowlist appears in:"
+        # Filenames and the hash only, never the address. CI logs for this repo
+        # are public, so echoing the matched line would publish the address on
+        # the very run that is complaining about it.
+        if [ "$staged_mode" -eq 1 ]; then
+            git diff --cached --name-only -G"$(sed 's/[.[\*^$]/\\&/g' <<< "$addr")" \
+                | head -20 | sed 's/^/    /' >&2
+        else
             git grep -lIF "$addr" -- . 2>/dev/null | head -20 | sed 's/^/    /' >&2
-            echo "    (address withheld; sha256 $deny)" >&2
         fi
-    done
+        echo "    (address withheld; sha256 $hash)" >&2
+        echo "    If it belongs here, add that hash to $ALLOWLIST_FILE." >&2
+    fi
 done <<< "$addresses"
 
 if [ "$staged_mode" -eq 1 ]; then
