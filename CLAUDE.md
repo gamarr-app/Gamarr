@@ -155,6 +155,24 @@ REST/curl call.
 
 ## Git Workflow
 
+**Two ways a personal email reaches this repo, neither via local git config**
+(local + global identity is `Claude <noreply@anthropic.com>`; both of these
+bypass it):
+
+1. **GitHub's own squash/merge button.** The merge commit's author comes from
+   the merging *account's* primary email, with GitHub itself as committer. That
+   put the bot account's `paulisageek.com` address on 8 commits (#105–#113,
+   2026-05-16) and from there into every PR branch cut afterwards. Only fixable
+   by enabling "Keep my email addresses private" on the `gamarr-bot2` account —
+   check it before merging from the web UI.
+2. **`git format-patch` output committed as a file.** It writes a literal
+   `From: Name <email>` header. `contrib/prowlarr/0001-New-Gamarr-application-support.patch`
+   carried a personal gmail that way from 2026-07-04. Scrub the `From:` line of
+   any patch file before committing it.
+
+Both survive in `refs/pull/*`, which is GitHub-managed and cannot be rewritten —
+so catch them before merge, not after.
+
 Worktree/agent branches: open a PR rather than pushing to `main`. Direct push
 shortcut (for non-PR work) is:
 
