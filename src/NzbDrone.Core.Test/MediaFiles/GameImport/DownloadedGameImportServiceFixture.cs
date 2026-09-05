@@ -314,8 +314,10 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
 
             Subject.ProcessPath(_folderPath, ImportMode.Auto, _game, _downloadClientItem);
 
-            Mocker.GetMock<IDiskProvider>()
-                  .Verify(v => v.MoveFolder(It.IsAny<string>(), It.Is<string>(s => s.StartsWith(quarantineFolder)), It.IsAny<bool>()), Times.Once());
+            // TransferFolder, not MoveFolder: quarantine routinely crosses mounts,
+            // where a rename fails with "Cross-device link".
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(v => v.TransferFolder(It.IsAny<string>(), It.Is<string>(s => s.StartsWith(quarantineFolder)), TransferMode.Move), Times.Once());
 
             ExceptionVerification.ExpectedErrors(1);
         }
