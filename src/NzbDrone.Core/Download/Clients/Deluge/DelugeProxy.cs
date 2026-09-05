@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NzbDrone.Common.Cache;
@@ -292,6 +293,16 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
                 throw new DownloadClientUnavailableException("Unable to connect to Deluge, please check your settings", ex);
             }
+            catch (HttpRequestException ex)
+            {
+                // SocketsHttpHandler reports a dropped or refused connection as
+                // HttpRequestException; the WebException above is the legacy type
+                // and never fires for it. Without this the raw exception escapes
+                // the download client abstraction, and callers that only expect
+                // DownloadClientException — the health checks especially — treat a
+                // Deluge restart as an unknown fault and report it as an error.
+                throw new DownloadClientUnavailableException("Unable to connect to Deluge, please check your settings", ex);
+            }
         }
 
         private void VerifyResponse<TResult>(JsonRpcResponse<TResult> response)
@@ -314,7 +325,21 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 _authCookieCache.Remove(authKey);
 
                 var authLoginRequest = requestBuilder.Call("auth.login", settings.Password).Build();
-                var response = _httpClient.Execute(authLoginRequest);
+
+                HttpResponse response;
+                try
+                {
+                    response = _httpClient.Execute(authLoginRequest);
+                }
+                catch (Exception ex) when (ex is HttpException or WebException or HttpRequestException)
+                {
+                    // Every other call goes through ExecuteRequest, which turns a
+                    // dead connection into a DownloadClientException. This one did
+                    // not, so a Deluge that was merely restarting surfaced as a raw
+                    // transport exception from whatever happened to be calling.
+                    throw new DownloadClientUnavailableException("Unable to connect to Deluge, please check your settings", ex);
+                }
+
                 var result = Json.Deserialize<JsonRpcResponse<bool>>(response.Content);
                 if (!result.Result)
                 {

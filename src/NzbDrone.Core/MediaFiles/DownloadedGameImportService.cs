@@ -27,6 +27,7 @@ namespace NzbDrone.Core.MediaFiles
     public class DownloadedGameImportService : IDownloadedGameImportService
     {
         private readonly IDiskProvider _diskProvider;
+        private readonly IDiskTransferService _diskTransferService;
         private readonly IDiskScanService _diskScanService;
         private readonly IGameService _gameService;
         private readonly IParsingService _parsingService;
@@ -40,6 +41,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly Logger _logger;
 
         public DownloadedGameImportService(IDiskProvider diskProvider,
+                                               IDiskTransferService diskTransferService,
                                                IDiskScanService diskScanService,
                                                IGameService gameService,
                                                IParsingService parsingService,
@@ -53,6 +55,7 @@ namespace NzbDrone.Core.MediaFiles
                                                Logger logger)
         {
             _diskProvider = diskProvider;
+            _diskTransferService = diskTransferService;
             _diskScanService = diskScanService;
             _gameService = gameService;
             _parsingService = parsingService;
@@ -478,7 +481,13 @@ namespace NzbDrone.Core.MediaFiles
                     _diskProvider.CreateFolder(quarantineFolder);
                 }
 
-                _diskProvider.MoveFolder(sourcePath, quarantinePath);
+                // The download folder and the quarantine folder are routinely on
+                // different mounts — in the Docker image they are two separate
+                // volumes — and a plain MoveFolder is a rename, which fails there
+                // with "Cross-device link" and leaves the infected release sitting
+                // in the download folder. TransferFolder compares the mounts and
+                // falls back to copy-then-delete when they differ.
+                _diskTransferService.TransferFolder(sourcePath, quarantinePath, TransferMode.Move);
                 _logger.Info("Successfully quarantined infected folder to {0}", quarantinePath);
             }
             catch (Exception ex)
