@@ -1,13 +1,18 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { Error } from 'App/State/AppSectionState';
-import { Image } from 'Game/Game';
+import { GamePlatform, Image } from 'Game/Game';
+import { getUnambiguousPlatform } from 'Game/platformOptions';
 import {
   addGame,
   AddGameState,
   setAddGameDefault,
 } from 'Store/Actions/addGameActions';
+import {
+  fetchPlatformRootFolders,
+  PlatformRootFolderItem,
+} from 'Store/Actions/settingsActions';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
@@ -56,6 +61,7 @@ interface AddNewGameModalContentConnectorProps {
   overview?: string;
   folder: string;
   images: Image[];
+  platforms?: GamePlatform[];
   onModalClose: () => void;
 }
 
@@ -70,6 +76,7 @@ function AddNewGameModalContentConnector(
     overview,
     folder,
     images,
+    platforms,
     onModalClose,
   } = props;
 
@@ -102,6 +109,55 @@ function AddNewGameModalContentConnector(
     tags: FormValue<number[]>;
     platform?: FormValue<string>;
   };
+
+  const platformRootFolders = useSelector(
+    (state: {
+      settings: {
+        platformRootFolders: {
+          isPopulated: boolean;
+          items: PlatformRootFolderItem[];
+        };
+      };
+    }) => state.settings.platformRootFolders
+  );
+
+  useEffect(() => {
+    dispatch(fetchPlatformRootFolders());
+  }, [dispatch]);
+
+  // The root folder stays a per-add choice, this only pre-fills it: a Switch
+  // exclusive lands on the Switch default instead of whatever was used last.
+  // The platform the user picked wins over the one derived from metadata,
+  // which is the same precedence AddGameService applies server side.
+  const effectivePlatform =
+    platform?.value && platform.value !== 'unknown'
+      ? platform.value
+      : getUnambiguousPlatform(platforms);
+
+  // Applied once per platform so that changing the root folder by hand
+  // afterwards sticks (and so a default pointing at a removed root folder
+  // can't ping-pong with RootFolderSelectInput's own fallback).
+  const appliedPlatformRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!platformRootFolders.isPopulated) {
+      return;
+    }
+
+    if (appliedPlatformRef.current === effectivePlatform) {
+      return;
+    }
+
+    appliedPlatformRef.current = effectivePlatform;
+
+    const defaultRootFolder =
+      platformRootFolders.items.find((i) => i.platform === effectivePlatform) ??
+      platformRootFolders.items.find((i) => i.platform === 'unknown');
+
+    if (defaultRootFolder) {
+      dispatch(setAddGameDefault({ rootFolderPath: defaultRootFolder.path }));
+    }
+  }, [dispatch, effectivePlatform, platformRootFolders]);
 
   const onInputChange = useCallback(
     ({ name, value }: InputChanged) => {

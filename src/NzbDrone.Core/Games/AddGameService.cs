@@ -11,6 +11,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser;
+using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.Games
 {
@@ -27,6 +28,7 @@ namespace NzbDrone.Core.Games
         private readonly IProvideGameInfo _gameInfo;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IAddGameValidator _addGameValidator;
+        private readonly IPlatformRootFolderService _platformRootFolderService;
         private readonly Logger _logger;
 
         public AddGameService(IGameService gameService,
@@ -34,6 +36,7 @@ namespace NzbDrone.Core.Games
                                 IProvideGameInfo gameInfo,
                                 IBuildFileNames fileNameBuilder,
                                 IAddGameValidator addGameValidator,
+                                IPlatformRootFolderService platformRootFolderService,
                                 Logger logger)
         {
             _gameService = gameService;
@@ -41,6 +44,7 @@ namespace NzbDrone.Core.Games
             _gameInfo = gameInfo;
             _fileNameBuilder = fileNameBuilder;
             _addGameValidator = addGameValidator;
+            _platformRootFolderService = platformRootFolderService;
             _logger = logger;
         }
 
@@ -219,10 +223,36 @@ namespace NzbDrone.Core.Games
             });
         }
 
+        // The root folder stays a per-entry choice made at add time; this only
+        // supplies the default when the caller didn't pick one (API clients and
+        // import-list syncs; the UI pre-fills the same value in the add dialog).
+        // Platform has already been resolved from metadata by this point, so a
+        // Switch exclusive lands in the Switch folder rather than the global one.
+        private void ApplyDefaultRootFolder(Game newGame)
+        {
+            if (newGame.RootFolderPath.IsNotNullOrWhiteSpace())
+            {
+                return;
+            }
+
+            var defaultRootFolderPath = _platformRootFolderService.GetDefaultRootFolderPath(newGame.Platform);
+
+            if (defaultRootFolderPath.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+
+            _logger.Debug("Using default root folder [{0}] for platform {1}", defaultRootFolderPath, newGame.Platform);
+
+            newGame.RootFolderPath = defaultRootFolderPath;
+        }
+
         private Game SetPropertiesAndValidate(Game newGame)
         {
             if (string.IsNullOrWhiteSpace(newGame.Path))
             {
+                ApplyDefaultRootFolder(newGame);
+
                 var folderName = _fileNameBuilder.GetGameFolder(newGame);
                 newGame.Path = Path.Combine(newGame.RootFolderPath, folderName);
             }

@@ -11,6 +11,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
@@ -268,6 +269,74 @@ namespace NzbDrone.Core.Test.GameTests
             GivenMetadataPlatforms(PlatformFamily.NintendoSwitch);
 
             Subject.AddGame(newGame).Platform.Should().Be(PlatformFamily.PC);
+        }
+
+        private void GivenPlatformDefaultRootFolder(PlatformFamily platform, string path)
+        {
+            Mocker.GetMock<IPlatformRootFolderService>()
+                  .Setup(s => s.GetDefaultRootFolderPath(platform))
+                  .Returns(path);
+        }
+
+        [Test]
+        public void should_use_the_platform_default_root_folder_when_none_was_supplied()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                Platform = PlatformFamily.NintendoSwitch
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms();
+            GivenPlatformDefaultRootFolder(PlatformFamily.NintendoSwitch, @"C:\Test\Switch");
+
+            var game = Subject.AddGame(newGame);
+
+            game.RootFolderPath.Should().Be(@"C:\Test\Switch");
+            game.Path.Should().Be(Path.Combine(@"C:\Test\Switch", _fakeGame.Title));
+        }
+
+        // The platform is derived from metadata before the root folder is
+        // resolved, so a console exclusive added by IGDB id alone (import
+        // lists, API clients) still lands in the console's folder.
+        [Test]
+        public void should_use_the_default_for_the_platform_derived_from_metadata()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms(PlatformFamily.NintendoSwitch);
+            GivenPlatformDefaultRootFolder(PlatformFamily.NintendoSwitch, @"C:\Test\Switch");
+            GivenPlatformDefaultRootFolder(PlatformFamily.Unknown, @"C:\Test\Games");
+
+            Subject.AddGame(newGame).RootFolderPath.Should().Be(@"C:\Test\Switch");
+        }
+
+        [Test]
+        public void should_not_override_a_root_folder_chosen_by_the_caller()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games",
+                Platform = PlatformFamily.NintendoSwitch
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms();
+            GivenPlatformDefaultRootFolder(PlatformFamily.NintendoSwitch, @"C:\Test\Switch");
+
+            Subject.AddGame(newGame).RootFolderPath.Should().Be(@"C:\Test\Games");
+
+            Mocker.GetMock<IPlatformRootFolderService>()
+                  .Verify(s => s.GetDefaultRootFolderPath(It.IsAny<PlatformFamily>()), Times.Never());
         }
     }
 }

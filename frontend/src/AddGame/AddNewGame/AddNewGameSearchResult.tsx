@@ -7,7 +7,7 @@ import MetacriticRating from 'Components/MetacriticRating';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GameStatusLabel from 'Game/Details/GameStatusLabel';
-import { GameStatus, Image, Ratings } from 'Game/Game';
+import { GamePlatform, GameStatus, Image, Ratings } from 'Game/Game';
 import GameGenres from 'Game/GameGenres';
 import GamePoster from 'Game/GamePoster';
 import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
@@ -35,6 +35,7 @@ export interface AddNewGameSearchResultProps {
   ratings: Ratings;
   folder: string;
   images: Image[];
+  platforms?: GamePlatform[];
   existingGameId?: number;
   isExistingGame: boolean;
   isExcluded?: boolean;
@@ -64,6 +65,7 @@ function AddNewGameSearchResult(props: AddNewGameSearchResultProps) {
     ratings,
     folder,
     images,
+    platforms,
     existingGameId,
     isExistingGame,
     isExcluded = false,
@@ -267,6 +269,7 @@ function AddNewGameSearchResult(props: AddNewGameSearchResultProps) {
         overview={overview}
         folder={folder}
         images={images}
+        platforms={platforms}
         onModalClose={onAddGameModalClose}
       />
     </div>
