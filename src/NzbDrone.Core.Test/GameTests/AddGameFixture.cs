@@ -338,5 +338,49 @@ namespace NzbDrone.Core.Test.GameTests
             Mocker.GetMock<IPlatformRootFolderService>()
                   .Verify(s => s.GetDefaultRootFolderPath(It.IsAny<PlatformFamily>()), Times.Never());
         }
+
+        // GetDefaultRootFolderPath only returns null when the instance has no
+        // root folders at all. The failure has to name the missing mapping:
+        // "'Root Folder Path' must not be empty" sends the caller looking for a
+        // bug in a request body that was fine.
+        [Test]
+        public void should_fail_naming_the_missing_mapping_when_nothing_can_be_resolved()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                Platform = PlatformFamily.NintendoSwitch
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms();
+
+            var exception = Assert.Throws<ValidationException>(() => Subject.AddGame(newGame));
+
+            exception.Message.Should().Contain("No root folder was supplied and no default is configured for platform NintendoSwitch");
+            exception.Message.Should().Contain("platform root folder mapping");
+            exception.Message.Should().NotContain("must not be empty");
+        }
+
+        // ...and it fails before Path.Combine gets a null root folder, which
+        // used to surface as an ArgumentNullException from deep inside the add.
+        [Test]
+        public void should_not_throw_argument_null_when_nothing_can_be_resolved()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+            GivenMetadataPlatforms();
+
+            Assert.Throws<ValidationException>(() => Subject.AddGame(newGame));
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(s => s.AddGame(It.IsAny<Game>()), Times.Never());
+        }
     }
 }

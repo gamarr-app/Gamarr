@@ -253,6 +253,17 @@ namespace NzbDrone.Core.Games
             {
                 ApplyDefaultRootFolder(newGame);
 
+                // Nothing left to build a path from. Report the missing
+                // configuration rather than letting Path.Combine throw an
+                // ArgumentNullException at a caller that never touched a path.
+                if (newGame.RootFolderPath.IsNullOrWhiteSpace())
+                {
+                    throw new ValidationException(new List<ValidationFailure>
+                                                  {
+                                                      new ValidationFailure(nameof(newGame.RootFolderPath), PlatformRootFolderService.NoDefaultRootFolderError(newGame.Platform))
+                                                  });
+                }
+
                 var folderName = _fileNameBuilder.GetGameFolder(newGame);
                 newGame.Path = Path.Combine(newGame.RootFolderPath, folderName);
             }
