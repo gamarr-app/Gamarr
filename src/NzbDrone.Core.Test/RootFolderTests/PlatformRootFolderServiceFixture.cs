@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Moq;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
+using NzbDrone.Common.Disk;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
@@ -17,6 +22,11 @@ namespace NzbDrone.Core.Test.RootFolderTests
         public void Setup()
         {
             GivenPlatformDefaults();
+            GivenRootFolders();
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(It.IsAny<string>()))
+                  .Returns(true);
 
             Mocker.GetMock<IPlatformRootFolderRepository>()
                   .Setup(s => s.Insert(It.IsAny<PlatformRootFolder>()))
@@ -34,9 +44,40 @@ namespace NzbDrone.Core.Test.RootFolderTests
                   .Returns(new List<PlatformRootFolder>(defaults));
         }
 
+        // Handed to the service in a deliberately unhelpful order so a test
+        // that expects the lowest id can't pass by accident on "first row".
+        private void GivenRootFolders(params RootFolder[] rootFolders)
+        {
+            Mocker.GetMock<IRootFolderService>()
+                  .Setup(s => s.All())
+                  .Returns(rootFolders.Reverse().ToList());
+        }
+
+        private static RootFolder Folder(int id, string path)
+        {
+            return new RootFolder { Id = id, Path = path };
+        }
+
         private static PlatformRootFolder Default(PlatformFamily platform, string path)
         {
             return new PlatformRootFolder { Platform = platform, Path = path };
+        }
+
+        // A LogFactory of its own, so this never touches the global NLog
+        // configuration that every other fixture is logging through in
+        // parallel. Must run before Subject is first touched.
+        private MemoryTarget GivenCapturedLogs()
+        {
+            var target = new MemoryTarget { Layout = "${level}|${message}" };
+
+            var config = new LoggingConfiguration();
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, target);
+
+            var factory = new LogFactory { Configuration = config };
+
+            Mocker.SetConstant(factory.GetLogger("PlatformRootFolderService"));
+
+            return target;
         }
 
         [Test]
@@ -78,21 +119,131 @@ namespace NzbDrone.Core.Test.RootFolderTests
             Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoWii).Should().Be("/media/Games");
         }
 
-        // Without a default configured the caller keeps whatever root folder it
-        // already had, so an add with none still fails validation as before
-        // rather than silently landing in an arbitrary root folder.
+        // Null is now reserved for "this instance has no root folders at all";
+        // anything else resolves, because failing the add outright is worse for
+        // the user than landing in a folder they can move the game out of.
         [Test]
-        public void should_return_null_when_nothing_is_configured()
+        public void should_return_null_when_nothing_is_configured_and_there_are_no_root_folders()
         {
             Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().BeNull();
         }
 
         [Test]
-        public void should_return_null_when_only_another_platform_has_a_default()
+        public void should_return_null_when_only_another_platform_has_a_default_and_there_are_no_root_folders()
         {
             GivenPlatformDefaults(Default(PlatformFamily.NintendoSwitch, "/media/Switch"));
 
             Subject.GetDefaultRootFolderPath(PlatformFamily.PC).Should().BeNull();
+        }
+
+        [Test]
+        public void should_fall_back_to_the_only_root_folder_when_no_default_is_configured()
+        {
+            GivenRootFolders(Folder(3, "/media/Games"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Games");
+        }
+
+        // Not silent: the log line is the whole reason redirecting an add that
+        // used to fail validation is acceptable, so assert it exists, is at
+        // Info (ExceptionVerification only captures Warn and above, hence the
+        // private LogFactory rather than a global NLog target — fixtures here
+        // run in parallel), and names both the platform and the chosen path.
+        [Test]
+        public void should_log_at_info_when_falling_back_to_a_root_folder()
+        {
+            var logs = GivenCapturedLogs();
+
+            GivenRootFolders(Folder(3, "/media/Games"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch);
+
+            logs.Logs.Should().ContainSingle(l => l.StartsWith("Info|") &&
+                                                  l.Contains("NintendoSwitch") &&
+                                                  l.Contains("/media/Games"));
+        }
+
+        [Test]
+        public void should_not_log_when_a_platform_default_resolved()
+        {
+            var logs = GivenCapturedLogs();
+
+            GivenPlatformDefaults(Default(PlatformFamily.NintendoSwitch, "/media/Switch"));
+            GivenRootFolders(Folder(3, "/media/Games"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch);
+
+            logs.Logs.Should().NotContain(l => l.StartsWith("Info|"));
+        }
+
+        [Test]
+        public void should_fall_back_to_the_oldest_root_folder_when_there_are_several()
+        {
+            GivenRootFolders(Folder(2, "/media/Games"),
+                             Folder(5, "/media/Switch"),
+                             Folder(9, "/media/Xbox"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Games");
+        }
+
+        [Test]
+        public void should_skip_an_inaccessible_root_folder_when_falling_back()
+        {
+            GivenRootFolders(Folder(2, "/media/Games"),
+                             Folder(5, "/media/Switch"));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists("/media/Games"))
+                  .Returns(false);
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Switch");
+        }
+
+        // An unmounted root folder shouldn't turn an add into a hard failure;
+        // the downstream path validators report a missing folder properly.
+        [Test]
+        public void should_still_fall_back_when_no_root_folder_is_accessible()
+        {
+            GivenRootFolders(Folder(2, "/media/Games"),
+                             Folder(5, "/media/Switch"));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(It.IsAny<string>()))
+                  .Returns(false);
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Games");
+        }
+
+        // A single root folder is unambiguous, so it is taken without a disk
+        // check at all — nothing to prefer it over.
+        [Test]
+        public void should_not_check_the_disk_when_there_is_only_one_root_folder()
+        {
+            GivenRootFolders(Folder(3, "/media/Games"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Games");
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(s => s.FolderExists(It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void should_prefer_the_unknown_default_over_falling_back_to_a_root_folder()
+        {
+            GivenPlatformDefaults(Default(PlatformFamily.Unknown, "/media/Games"));
+            GivenRootFolders(Folder(2, "/media/Downloads"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Games");
+        }
+
+        [Test]
+        public void should_prefer_the_platform_default_over_falling_back_to_a_root_folder()
+        {
+            GivenPlatformDefaults(Default(PlatformFamily.Unknown, "/media/Games"),
+                                  Default(PlatformFamily.NintendoSwitch, "/media/Switch"));
+            GivenRootFolders(Folder(2, "/media/Downloads"));
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.NintendoSwitch).Should().Be("/media/Switch");
         }
 
         [Test]

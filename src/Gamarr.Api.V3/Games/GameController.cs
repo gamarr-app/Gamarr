@@ -92,20 +92,25 @@ namespace Gamarr.Api.V3.Games
                 .SetPathValidator(systemFolderValidator)
                 .When(s => s.Path.IsNotNullOrWhiteSpace());
 
-            // An add that supplies neither path is still an error unless a
-            // per-platform (or global) default root folder is configured for
-            // it — AddGameService fills that in. A path that *was* supplied is
-            // always validated.
+            // An add that supplies neither path is only an error when nothing
+            // can be defaulted for it — a per-platform mapping, the 'unknown'
+            // catch-all, or, failing both, an existing root folder.
+            // AddGameService fills the resolved value in. A path that *was*
+            // supplied is always validated.
             bool HasDefaultRootFolder(GameResource s) =>
                 platformRootFolderService.GetDefaultRootFolderPath(s.Platform).IsNotNullOrWhiteSpace();
 
-            PostValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
-                .NotEmpty()
-                .IsValidPath()
-                .When(s => s.RootFolderPath.IsNullOrWhiteSpace() &&
-                           (s.Path.IsNotNullOrWhiteSpace() || !HasDefaultRootFolder(s)));
+            // "Neither was supplied and nothing could be defaulted" is now
+            // reported once, on RootFolderPath, and names the missing mapping.
+            // The old pair of "'Path' must not be empty" / "'Root Folder Path'
+            // must not be empty" sent the caller looking for a bug in a request
+            // body that was fine, when the fix is a configuration one. The
+            // PostValidator rule on Path is gone rather than reworded: all it
+            // added was that NotEmpty, since SharedValidator above already runs
+            // IsValidPath (and more) on any path that was actually supplied.
             PostValidator.RuleFor(s => s.RootFolderPath).Cascade(CascadeMode.Stop)
                 .NotEmpty()
+                .WithMessage(s => PlatformRootFolderService.NoDefaultRootFolderError(s.Platform))
                 .IsValidPath()
                 .SetPathValidator(rootFolderExistsValidator)
                 .Must((resource, path) => gameFolderAsRootFolderValidator.IsValid(new ValidationContext<object>(resource), path))
