@@ -9,10 +9,14 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <!-- Always use latest runtime patch for security fixes -->
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <!-- Pin runtime to >= 10.0.10: patches the Nov 2026 .NET security CVEs
-         (CVE-2026-47302/50524/50528/50650/50651/50659/57108, DoS + EoP + bypass +
-         spoofing) plus everything covered by <= 10.0.9. Bump as new patch releases land. -->
-    <RuntimeFrameworkVersion>10.0.10</RuntimeFrameworkVersion>
+    <!-- Pin runtime to >= 10.0.11: patches the Dec 2026 .NET security CVEs
+         (CVE-2026-62871/62886/62897/62898/62899/62901/62902/62909/70354, RCE + EoP +
+         DoS + info disclosure + feature bypass) plus everything covered by <= 10.0.10.
+         Requires SDK 10.0.400 / 10.0.303 / 10.0.111 or newer locally; CI's
+         dotnet-version '10.0.x' resolves to one of those. Bump as new patch releases
+         land — this single line drives every Microsoft.NETCore.App.Runtime.* and
+         Microsoft.WindowsDesktop.App.Runtime.* Dependabot alert in the repo. -->
+    <RuntimeFrameworkVersion>10.0.11</RuntimeFrameworkVersion>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <GamarrRootDir>$(MSBuildThisFileDirectory)..\</GamarrRootDir>
