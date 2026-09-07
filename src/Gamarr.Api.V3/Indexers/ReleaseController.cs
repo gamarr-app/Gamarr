@@ -66,9 +66,9 @@ namespace Gamarr.Api.V3.Indexers
 
             if (remoteGame == null)
             {
-                _logger.Debug("Couldn't find requested release in cache, cache timeout probably expired.");
+                _logger.Debug("Couldn't find requested release in cache, it either expired or was never cached because it did not come from a Gamarr search.");
 
-                throw new NzbDroneClientException(HttpStatusCode.NotFound, "Couldn't find requested release in cache, try searching again");
+                throw new NzbDroneClientException(HttpStatusCode.NotFound, "Couldn't find requested release in Gamarr's search cache, search again if it came from a Gamarr search, otherwise push it to /api/v3/release/push");
             }
 
             try
