@@ -44,6 +44,14 @@ namespace Gamarr.Api.V3.Indexers
             PostValidator.RuleFor(s => s.DownloadUrl).NotEmpty().When(s => s.MagnetUrl.IsNullOrWhiteSpace());
             PostValidator.RuleFor(s => s.MagnetUrl).NotEmpty().When(s => s.DownloadUrl.IsNullOrWhiteSpace());
             PostValidator.RuleFor(s => s.Protocol).NotEmpty();
+
+            // ToModel only builds a TorrentInfo (the only carrier of MagnetUrl) for the torrent
+            // protocol. A magnet-only release sent as usenet would validate here and then have its
+            // magnet silently dropped, leaving UsenetClientBase to grab an empty DownloadUrl.
+            PostValidator.RuleFor(s => s.Protocol)
+                .Equal(DownloadProtocol.Torrent)
+                .When(s => s.DownloadUrl.IsNullOrWhiteSpace() && s.MagnetUrl.IsNotNullOrWhiteSpace())
+                .WithMessage("Must be 'torrent' when only a magnet url is supplied");
             PostValidator.RuleFor(s => s.PublishDate).NotEmpty();
         }
 
@@ -57,7 +65,9 @@ namespace Gamarr.Api.V3.Indexers
 
             var info = release.ToModel();
 
-            info.Guid = "PUSH-" + info.DownloadUrl;
+            // A magnet-only release has no DownloadUrl, which would collapse every such push onto
+            // the single guid "PUSH-".
+            info.Guid = "PUSH-" + (info.DownloadUrl.IsNotNullOrWhiteSpace() ? info.DownloadUrl : release.MagnetUrl);
 
             ResolveIndexer(info);
 
