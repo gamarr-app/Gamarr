@@ -300,7 +300,19 @@ namespace NzbDrone.Core.Parser
             // the last), giving 2^(word count) backtracking on long capitalized
             // titles that end up not matching — this is the last regex in the
             // array, so every otherwise-unparseable title paid that cost.
-            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:(?:[:,]\s+|\s+-\s+|\s+)[A-Za-z][a-z]*(?:[A-Z][a-z]+)*(?:'[a-z]+)?)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
+            // NOTE: the possessive suffix (?:'[a-z]+)? must be allowed on the
+            // FIRST word as well as the later ones. It used to appear only in the
+            // subsequent-word branch, so "Assassin's Creed" and "Kirby's Return to
+            // Dream Land Deluxe" died on their first token while "Tom Clancy's
+            // Rainbow Six" was fine. That mattered far beyond bare titles: a
+            // console release like "[Nintendo Switch] Kirby's ... [NSP][ENG]"
+            // matches no shaped regex (they all start (?![(\[])), so it falls to
+            // the ConsoleTitleParser retry, which strips the decorations and hands
+            // exactly such a bare title back here - and this rejection then sank
+            // the whole parse. The apostrophe is kept, not stripped: CleanGameTitle
+            // drops it later for matching, and the search path handles it
+            // separately.
+            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+)[A-Za-z][a-z]*(?:[A-Z][a-z]+)*(?:'[a-z]+)?)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
