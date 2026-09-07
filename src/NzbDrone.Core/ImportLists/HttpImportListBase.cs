@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -154,6 +155,30 @@ namespace NzbDrone.Core.ImportLists
             {
                 _importListStatusService.RecordFailure(Definition.Id);
                 _logger.Warn(ex, "{0}", url);
+            }
+            catch (HttpRequestException ex)
+            {
+                // Connect and TLS handshake failures never become a WebException:
+                // ManagedHttpDispatcher only converts timeouts and truncated reads, so
+                // these reached the catch-all below and were logged at Error — a remote
+                // server resetting a connection on someone else's network, reported as
+                // if this application had crashed. It is the same class of failure the
+                // WebException branch above already treats as a connection failure.
+                if (ex.HttpRequestError is HttpRequestError.NameResolutionError or
+                    HttpRequestError.ConnectionError or
+                    HttpRequestError.SecureConnectionError or
+                    HttpRequestError.ProxyTunnelError)
+                {
+                    _importListStatusService.RecordConnectionFailure(Definition.Id);
+                }
+                else
+                {
+                    _importListStatusService.RecordFailure(Definition.Id);
+                }
+
+                // "The SSL connection could not be established, see inner exception."
+                // names no cause on its own, and the inner one is all the diagnosis there is.
+                _logger.Warn("{0} {1} {2}", this, url, ex.InnerException == null ? ex.Message : $"{ex.Message} {ex.GetBaseException().Message}");
             }
             catch (Exception ex)
             {
