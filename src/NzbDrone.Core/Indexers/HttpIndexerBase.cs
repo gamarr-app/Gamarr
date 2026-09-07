@@ -267,6 +267,26 @@ namespace NzbDrone.Core.Indexers
                 _indexerStatusService.RecordFailure(Definition.Id);
                 _logger.Warn(ex, "{0}", url);
             }
+            catch (HttpRequestException ex)
+            {
+                // Same gap as HttpImportListBase: a connect or TLS failure arrives as a
+                // raw HttpRequestException rather than a WebException, so it fell to the
+                // catch-all and was logged at Error. Test() below has always treated this
+                // as "unable to connect"; the RSS path did not.
+                if (ex.HttpRequestError is HttpRequestError.NameResolutionError or
+                    HttpRequestError.ConnectionError or
+                    HttpRequestError.SecureConnectionError or
+                    HttpRequestError.ProxyTunnelError)
+                {
+                    _indexerStatusService.RecordConnectionFailure(Definition.Id);
+                }
+                else
+                {
+                    _indexerStatusService.RecordFailure(Definition.Id);
+                }
+
+                _logger.Warn("{0} {1} {2}", this, url, ex.InnerException == null ? ex.Message : $"{ex.Message} {ex.GetBaseException().Message}");
+            }
             catch (Exception ex)
             {
                 _indexerStatusService.RecordFailure(Definition.Id);
