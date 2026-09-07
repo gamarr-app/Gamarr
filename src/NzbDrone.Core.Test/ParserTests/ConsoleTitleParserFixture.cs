@@ -33,6 +33,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Kirby and the Forgotten Land NSW VENOM")]
         [TestCase("Kirby and the Forgotten Land [v0]")]
         [TestCase("[Switch NSP] Kirby and the Forgotten Land")]
+
+        // The bracketed-WORD prefix, isolated from the apostrophe: this shape
+        // already worked, and pins that the leading group is not itself the bug.
+        [TestCase("[Nintendo Switch] Kirby and the Forgotten Land [NSP][ENG]")]
         public void should_parse_live_switch_release_to_the_bare_game_title(string postTitle)
         {
             var parsed = Parser.Parser.ParseGameTitle(postTitle);
@@ -108,6 +112,50 @@ namespace NzbDrone.Core.Test.ParserTests
 
             parsed.Should().NotBeNull();
             parsed.GameTitle.Should().Be("Game Title");
+        }
+
+        // A leading bracketed WORD group - "[Nintendo Switch] ..." - is the
+        // dominant Switch scene convention on the indexers in use. It is not the
+        // same shape as "[Switch NSP]" above: the parse only survives if the
+        // reduced title itself is parseable.
+        [TestCase("[Nintendo Switch] Kirby's Return to Dream Land Deluxe [NSP][ENG]")]
+        [TestCase("Kirby's Return to Dream Land Deluxe NSP")]
+        [TestCase("Kirby's Return to Dream Land Deluxe [01007E3006DDA000][v0] nsp")]
+        [TestCase("[Switch] Kirby's Return to Dream Land Deluxe [NSP]")]
+        [TestCase("[NSW] Kirby's Return to Dream Land Deluxe")]
+        public void should_parse_a_bracket_prefixed_switch_release(string postTitle)
+        {
+            var parsed = Parser.Parser.ParseGameTitle(postTitle);
+
+            parsed.Should().NotBeNull();
+            parsed.GameTitle.Should().Be("Kirby's Return to Dream Land Deluxe");
+            parsed.Platform.Should().Be(PlatformFamily.NintendoSwitch);
+        }
+
+        // A leading bracket that is not a platform tag must keep whatever it
+        // means today - the group tag stays a group tag, the title ID case
+        // still yields the bare title.
+        [Test]
+        public void should_keep_a_leading_bracket_that_is_not_a_platform_tag()
+        {
+            var parsed = Parser.Parser.ParseGameTitle("[DL] Hollow Knight (2017)");
+
+            parsed.Should().NotBeNull();
+            parsed.GameTitle.Should().Be("Hollow Knight");
+        }
+
+        // An apostrophe in the FIRST word is what the bare-title fallback used
+        // to reject; every later word already allowed one.
+        [TestCase("Kirby's Return to Dream Land Deluxe", "Kirby's Return to Dream Land Deluxe")]
+        [TestCase("Assassin's Creed", "Assassin's Creed")]
+        [TestCase("Baldur's Gate 3", "Baldur's Gate 3")]
+        [TestCase("Kirby and the Forgotten Land", "Kirby and the Forgotten Land")]
+        public void should_parse_a_bare_title_whose_first_word_has_an_apostrophe(string postTitle, string expected)
+        {
+            var parsed = Parser.Parser.ParseGameTitle(postTitle);
+
+            parsed.Should().NotBeNull();
+            parsed.GameTitle.Should().Be(expected);
         }
 
         // Normalising is only ever a retry, so anything that does not need it
