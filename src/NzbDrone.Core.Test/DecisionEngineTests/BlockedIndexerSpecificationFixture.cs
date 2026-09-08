@@ -50,5 +50,34 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
             Subject.Type.Should().Be(RejectionType.Temporary);
         }
+
+        // A pushed magnet is the recovery route for an indexer Gamarr cannot download from, so
+        // it has to survive that indexer being blocked — otherwise it fails only when needed.
+        [Test]
+        public void should_return_true_for_a_magnet_only_release_from_a_blocked_indexer()
+        {
+            WithBlockedIndexer();
+
+            _remoteGame.Release = new TorrentInfo { IndexerId = 1, MagnetUrl = "magnet:?xt=urn:btih:abc" };
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+        }
+
+        // With a download url present the grab does go back to the indexer, so being blocked
+        // still matters even though a magnet is also on offer.
+        [Test]
+        public void should_return_false_for_a_release_that_also_has_a_download_url()
+        {
+            WithBlockedIndexer();
+
+            _remoteGame.Release = new TorrentInfo
+            {
+                IndexerId = 1,
+                MagnetUrl = "magnet:?xt=urn:btih:abc",
+                DownloadUrl = "http://my.indexer/file.torrent"
+            };
+
+            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+        }
     }
 }
