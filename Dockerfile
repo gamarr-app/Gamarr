@@ -95,16 +95,19 @@ RUN \
   ln -sf "${DOTNET_ROOT}/dotnet" /usr/bin/dotnet && \
   mkdir -p /etc/dotnet && \
   echo "${DOTNET_ROOT}/" > /etc/dotnet/install_location && \
-  echo "**** verify installed runtime meets the pin (fail the build, not the user's compose pull) ****" && \
-  INSTALLED_VERSION=$("${DOTNET_ROOT}/dotnet" --list-runtimes | awk '$1 == "Microsoft.AspNetCore.App" {print $2}') && \
-  if [ -z "$INSTALLED_VERSION" ]; then \
-    echo "ERROR: dotnet --list-runtimes reports no Microsoft.AspNetCore.App runtime after install" && exit 1; \
-  fi && \
-  echo "Installed ASP.NET Core runtime version: ${INSTALLED_VERSION}" && \
-  LOWEST=$(printf '%s\n%s\n' "$ASPNETCORE_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1) && \
-  if [ "$LOWEST" != "$ASPNETCORE_VERSION" ]; then \
-    echo "ERROR: installed ASP.NET Core runtime ${INSTALLED_VERSION} is older than the pinned ${ASPNETCORE_VERSION}" && exit 1; \
-  fi && \
+  echo "**** verify installed runtimes meet the pin (fail the build, not the user's compose pull) ****" && \
+  "${DOTNET_ROOT}/dotnet" --list-runtimes && \
+  for FRAMEWORK in Microsoft.AspNetCore.App Microsoft.NETCore.App; do \
+    INSTALLED_VERSION=$("${DOTNET_ROOT}/dotnet" --list-runtimes | awk -v f="$FRAMEWORK" '$1 == f {print $2}' | sort -V | tail -n1); \
+    if [ -z "$INSTALLED_VERSION" ]; then \
+      echo "ERROR: dotnet --list-runtimes reports no ${FRAMEWORK} runtime after install" && exit 1; \
+    fi; \
+    echo "Installed ${FRAMEWORK} runtime version: ${INSTALLED_VERSION}"; \
+    LOWEST=$(printf '%s\n%s\n' "$ASPNETCORE_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1); \
+    if [ "$LOWEST" != "$ASPNETCORE_VERSION" ]; then \
+      echo "ERROR: installed ${FRAMEWORK} runtime ${INSTALLED_VERSION} is older than the pinned ${ASPNETCORE_VERSION}" && exit 1; \
+    fi; \
+  done && \
   echo "**** cleanup ****" && \
   rm -rf \
     /app/gamarr/bin/Gamarr.Update \
