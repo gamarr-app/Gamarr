@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FizzWare.NBuilder;
@@ -95,6 +96,40 @@ namespace NzbDrone.Core.Test.HistoryTests
 
             Mocker.GetMock<IHistoryRepository>()
                 .Verify(v => v.Insert(It.Is<GameHistory>(h => h.SourceTitle == Path.GetFileNameWithoutExtension(localGame.Path))));
+        }
+
+        [Test]
+        public void should_insert_grab_failed_history_row_with_reason()
+        {
+            var game = Builder<Game>.CreateNew().Build();
+            var remoteGame = new RemoteGame
+            {
+                Game = game,
+                ParsedGameInfo = new ParsedGameInfo
+                {
+                    Quality = new QualityModel(Quality.Uplay)
+                },
+                Release = new ReleaseInfo
+                {
+                    Title = "A.Game.1998",
+                    Indexer = "Some Indexer",
+                    IndexerId = 2,
+                    Guid = "abcd-guid",
+                    Size = 200,
+                    DownloadUrl = "http://example.com/download",
+                    DownloadProtocol = DownloadProtocol.Torrent,
+                    PublishDate = DateTime.UtcNow
+                }
+            };
+
+            Subject.Handle(new GameGrabFailedEvent(remoteGame, "Indexer returned a 500"));
+
+            // The reason is the whole point of the row: without it this history entry says no
+            // more than the log line it replaces.
+            Mocker.GetMock<IHistoryRepository>()
+                .Verify(v => v.Insert(It.Is<GameHistory>(h =>
+                    h.EventType == GameHistoryEventType.GrabFailed &&
+                    h.Data["Message"] == "Indexer returned a 500")));
         }
     }
 }

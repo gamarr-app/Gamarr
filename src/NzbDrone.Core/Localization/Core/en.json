@@ -812,6 +812,8 @@
   "Genres": "Genres",
   "Global": "Global",
   "Grab": "Grab",
+  "GrabFailed": "Grab Failed",
+  "GrabFailedGameTooltip": "Game Grab Failed",
   "GrabId": "Grab ID",
   "GrabRelease": "Grab Release",
   "GrabReleaseMessageText": "{appName} was unable to determine which game this release was for. {appName} may be unable to automatically import this release. Do you want to grab '{0}'?",

@@ -33,6 +33,7 @@ namespace NzbDrone.Core.History
 
     public class HistoryService : IHistoryService,
                                   IHandle<GameGrabbedEvent>,
+                                  IHandle<GameGrabFailedEvent>,
                                   IHandle<GameFileImportedEvent>,
                                   IHandle<DownloadFailedEvent>,
                                   IHandle<GameFileDeletedEvent>,
@@ -166,6 +167,44 @@ namespace NzbDrone.Core.History
             {
                 history.Data.Add("TorrentInfoHash", torrentRelease.InfoHash);
             }
+
+            _historyRepository.Insert(history);
+        }
+
+        public void Handle(GameGrabFailedEvent message)
+        {
+            // A release that never matched a game has nothing to hang a history row off, and the
+            // API keys history by game, so there is nowhere to put it. That case is already
+            // rejected before the grab, so this is a guard rather than a normal path.
+            if (message.Game?.Game == null)
+            {
+                _logger.Debug("Grab failed for a release with no matching game, not recording history: {0}", message.Reason);
+
+                return;
+            }
+
+            var history = new GameHistory
+            {
+                EventType = GameHistoryEventType.GrabFailed,
+                Date = DateTime.UtcNow,
+                Quality = message.Game.ParsedGameInfo?.Quality ?? new QualityModel(),
+                Languages = message.Game.Languages,
+                SourceTitle = message.Game.Release.Title,
+                GameId = message.Game.Game.Id
+            };
+
+            // The reason is the whole point of the row: without it this says no more than the
+            // log line it replaces. TorrentClientBase now folds the indexer's own response body
+            // into that message, so this carries the downstream cause rather than pointing at
+            // a log.
+            history.Data.Add("Message", message.Reason);
+            history.Data.Add("Indexer", message.Game.Release.Indexer);
+            history.Data.Add("IndexerId", message.Game.Release.IndexerId.ToString());
+            history.Data.Add("Guid", message.Game.Release.Guid);
+            history.Data.Add("Size", message.Game.Release.Size.ToString());
+            history.Data.Add("DownloadUrl", message.Game.Release.DownloadUrl);
+            history.Data.Add("Protocol", ((int)message.Game.Release.DownloadProtocol).ToString());
+            history.Data.Add("PublishedDate", message.Game.Release.PublishDate.ToUniversalTime().ToString("s") + "Z");
 
             _historyRepository.Insert(history);
         }

@@ -8,6 +8,7 @@ using NzbDrone.Core.Download.Clients;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Download
 {
@@ -22,16 +23,19 @@ namespace NzbDrone.Core.Download
         private readonly IDownloadService _downloadService;
         private readonly IPrioritizeDownloadDecision _prioritizeDownloadDecision;
         private readonly IPendingReleaseService _pendingReleaseService;
+        private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
         public ProcessDownloadDecisions(IDownloadService downloadService,
                                         IPrioritizeDownloadDecision prioritizeDownloadDecision,
                                         IPendingReleaseService pendingReleaseService,
+                                        IEventAggregator eventAggregator,
                                         Logger logger)
         {
             _downloadService = downloadService;
             _prioritizeDownloadDecision = prioritizeDownloadDecision;
             _pendingReleaseService = pendingReleaseService;
+            _eventAggregator = eventAggregator;
             _logger = logger;
         }
 
@@ -203,15 +207,19 @@ namespace NzbDrone.Core.Download
 
                 return ProcessedDecisionResult.Grabbed;
             }
-            catch (ReleaseUnavailableException)
+            catch (ReleaseUnavailableException ex)
             {
                 _logger.Warn("Failed to download release '{0}' from Indexer {1}. Release not available", remoteGame, remoteIndexer);
+                _eventAggregator.PublishEvent(new GameGrabFailedEvent(remoteGame, ex.Message));
+
                 return ProcessedDecisionResult.Rejected;
             }
             catch (Exception ex)
             {
                 if (ex is DownloadClientUnavailableException || ex is DownloadClientAuthenticationException)
                 {
+                    // Deliberately not a grab failure: this one is stored and retried, so a
+                    // history row saying the grab failed would be wrong as often as it is right.
                     _logger.Debug(ex, "Failed to send release '{0}' from Indexer {1} to download client, storing until later.", remoteGame, remoteIndexer);
 
                     return ProcessedDecisionResult.Failed;
@@ -219,6 +227,8 @@ namespace NzbDrone.Core.Download
                 else
                 {
                     _logger.Warn(ex, "Couldn't add release '{0}' from Indexer {1} to download queue.", remoteGame, remoteIndexer);
+                    _eventAggregator.PublishEvent(new GameGrabFailedEvent(remoteGame, ex.Message));
+
                     return ProcessedDecisionResult.Skipped;
                 }
             }

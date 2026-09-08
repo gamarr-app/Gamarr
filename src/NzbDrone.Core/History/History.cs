@@ -46,6 +46,10 @@ namespace NzbDrone.Core.History
         GameFileDeleted = 6,
         GameFolderImported = 7, // not used yet
         GameFileRenamed = 8,
-        DownloadIgnored = 9
+        DownloadIgnored = 9,
+
+        // Distinct from DownloadFailed, which means a download the client had already accepted
+        // went on to fail. This one never reached the client at all.
+        GrabFailed = 10
     }
 }

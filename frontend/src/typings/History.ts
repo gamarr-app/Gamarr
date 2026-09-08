@@ -9,7 +9,8 @@ export type HistoryEventType =
   | 'gameFileDeleted'
   | 'gameFolderImported'
   | 'gameFileRenamed'
-  | 'downloadIgnored';
+  | 'downloadIgnored'
+  | 'grabFailed';
 
 export interface GrabbedHistoryData {
   indexer: string;

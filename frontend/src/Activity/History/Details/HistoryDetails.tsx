@@ -198,6 +198,30 @@ function HistoryDetails(props: HistoryDetailsProps) {
     );
   }
 
+  // The message is the reason this row exists at all — it carries the indexer's own error text,
+  // which is otherwise only in the log.
+  if (eventType === 'grabFailed') {
+    const { message, indexer } = data as DownloadFailedHistory;
+
+    return (
+      <DescriptionList>
+        <DescriptionListItem
+          descriptionClassName={styles.description}
+          title={translate('Name')}
+          data={sourceTitle}
+        />
+
+        {indexer ? (
+          <DescriptionListItem title={translate('Indexer')} data={indexer} />
+        ) : null}
+
+        {message ? (
+          <DescriptionListItem title={translate('Message')} data={message} />
+        ) : null}
+      </DescriptionList>
+    );
+  }
+
   if (eventType === 'downloadFolderImported') {
     const { customFormatScore, droppedPath, importedPath, size } =
       data as DownloadFolderImportedHistory;
