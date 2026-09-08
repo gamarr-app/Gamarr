@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MonoTorrent;
 using NLog;
@@ -22,6 +23,10 @@ namespace NzbDrone.Core.Download
     public abstract class TorrentClientBase<TSettings> : DownloadClientBase<TSettings>
         where TSettings : IProviderConfig, new()
     {
+        private const int MaxResponseDetailLength = 200;
+
+        private static readonly Regex CollapseWhitespace = new Regex(@"\s+", RegexOptions.Compiled);
+
         protected readonly IHttpClient _httpClient;
         private readonly IBlocklistService _blocklistService;
         protected readonly ITorrentFileInfoReader _torrentFileInfoReader;
@@ -187,7 +192,7 @@ namespace NzbDrone.Core.Download
                     _logger.Error(ex, "Downloading torrent file for game '{0}' failed ({1})", remoteGame.Release.Title, torrentUrl);
                 }
 
-                throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed", ex);
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed" + DescribeResponse(ex), ex);
             }
             catch (WebException ex)
             {
@@ -212,6 +217,40 @@ namespace NzbDrone.Core.Download
             }
 
             return actualHash;
+        }
+
+        // "Downloading torrent failed" on its own sends the user to the log for the one detail
+        // that explains it. The indexer proxy puts its real reason in the response body — a
+        // Prowlarr 500 says which part of its definition stopped matching, for instance — so
+        // carry a trimmed copy of that into the message the UI and API actually show.
+        private static string DescribeResponse(HttpException ex)
+        {
+            var status = ex.Response != null ? $": {(int)ex.Response.StatusCode} {ex.Response.StatusCode}" : string.Empty;
+
+            string content = null;
+
+            try
+            {
+                content = ex.Response?.Content;
+            }
+            catch
+            {
+                // A non-text body is no reason to lose the status code below.
+            }
+
+            if (content.IsNullOrWhiteSpace())
+            {
+                return status;
+            }
+
+            content = CollapseWhitespace.Replace(content.Trim(), " ");
+
+            if (content.Length > MaxResponseDetailLength)
+            {
+                content = string.Concat(content.AsSpan(0, MaxResponseDetailLength), "...");
+            }
+
+            return $"{status} - {content}";
         }
 
         private string DownloadFromMagnetUrl(RemoteGame remoteGame, IIndexer indexer, string magnetUrl)
