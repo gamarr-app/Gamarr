@@ -465,6 +465,18 @@ jobs:
               echo "::error::gamarr-boot-test container exited before answering /ping"
               exit 1
             fi
+            # The check above only catches a container that actually dies. s6
+            # restarts the app in place when it exits, so a fatal startup failure
+            # (e.g. no runtime matching <RuntimeFrameworkVersion>) leaves the
+            # container "running" forever while nothing ever listens — that is how
+            # 1.1.0.420/.421 shipped broken while reporting Up. Bail on the shape
+            # that failure actually has instead: the hostfxr banner repeating,
+            # which means we are in a restart loop rather than merely slow to boot.
+            if [ "$(docker logs gamarr-boot-test 2>&1 | grep -c 'The framework .* was not found')" -ge 2 ]; then
+              echo "::error::gamarr-boot-test is in a restart loop: no .NET runtime in the image satisfies the pinned version"
+              docker logs gamarr-boot-test 2>&1 | grep -A4 'The framework .* was not found' | head -20
+              exit 1
+            fi
             sleep 2
           done
           echo "::error::gamarr-boot-test never answered http://localhost:6767/ping within 90s"
