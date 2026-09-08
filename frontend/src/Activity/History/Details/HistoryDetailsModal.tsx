@@ -25,6 +25,8 @@ function getHeaderTitle(eventType: HistoryEventType) {
       return translate('GameFileRenamed');
     case 'downloadIgnored':
       return translate('DownloadIgnored');
+    case 'grabFailed':
+      return translate('GrabFailed');
     default:
       return translate('Unknown');
   }

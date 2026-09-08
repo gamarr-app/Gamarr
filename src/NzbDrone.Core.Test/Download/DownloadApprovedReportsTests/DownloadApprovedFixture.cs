@@ -12,6 +12,7 @@ using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -285,6 +286,47 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
             result.Rejected.Should().NotBeEmpty();
 
             ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public async Task should_publish_grab_failed_event_when_download_throws()
+        {
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
+
+            var decisions = new List<DownloadDecision>();
+            decisions.Add(new DownloadDecision(remoteGame));
+
+            Mocker.GetMock<IDownloadService>()
+                  .Setup(s => s.DownloadReport(It.IsAny<RemoteGame>(), null))
+                  .Throws(new Exception("Boom, indexer said no"));
+
+            await Subject.ProcessDecisions(decisions);
+
+            // The push endpoint's grab-outcome response and the history "grab failed" row both
+            // hang off this event, so it has to carry the actual failure reason, not just fire.
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.Is<GameGrabFailedEvent>(e => e.Reason == "Boom, indexer said no")), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public async Task should_not_publish_grab_failed_event_when_download_client_unavailable()
+        {
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
+
+            var decisions = new List<DownloadDecision>();
+            decisions.Add(new DownloadDecision(remoteGame));
+
+            Mocker.GetMock<IDownloadService>().Setup(s => s.DownloadReport(It.IsAny<RemoteGame>(), null))
+                  .Throws(new DownloadClientUnavailableException("Download client failed"));
+
+            await Subject.ProcessDecisions(decisions);
+
+            // Deliberate pin: this failure is stashed as pending and retried later, so a history
+            // row saying the grab failed would be wrong as often as it would be right.
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.IsAny<GameGrabFailedEvent>()), Times.Never());
         }
     }
 }

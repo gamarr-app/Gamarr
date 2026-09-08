@@ -28,6 +28,8 @@ function getIconName(eventType: HistoryEventType, data: HistoryData) {
       return icons.ORGANIZE;
     case 'downloadIgnored':
       return icons.IGNORE;
+    case 'grabFailed':
+      return icons.DOWNLOADING;
     default:
       return icons.UNKNOWN;
   }
@@ -36,6 +38,7 @@ function getIconName(eventType: HistoryEventType, data: HistoryData) {
 function getIconKind(eventType: HistoryEventType) {
   switch (eventType) {
     case 'downloadFailed':
+    case 'grabFailed':
       return kinds.DANGER;
     default:
       return kinds.DEFAULT;
@@ -63,6 +66,8 @@ function getTooltip(eventType: HistoryEventType, data: HistoryData) {
       return translate('GameFileRenamedTooltip');
     case 'downloadIgnored':
       return translate('DownloadIgnoredGameTooltip');
+    case 'grabFailed':
+      return translate('GrabFailedGameTooltip');
     default:
       return translate('UnknownEventTooltip');
   }
