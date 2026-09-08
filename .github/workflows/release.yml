@@ -426,6 +426,60 @@ jobs:
             type=raw,value=develop,enable=${{ steps.version.outputs.channel == 'develop' }}
             type=raw,value=nightly,enable=${{ steps.version.outputs.channel == 'nightly' }}
 
+      # Nothing before this point ever actually started the image. A
+      # framework-dependent app that rolls forward but never backward across
+      # .NET patch versions (see Dockerfile: the ASP.NET Core runtime pin in
+      # src/Directory.Build.props) can build a perfectly valid-looking image
+      # that exits immediately on boot with "You must install .NET to run
+      # this application." Build a single-arch image locally (no push yet),
+      # run it, and require /ping to answer before anything reaches the
+      # registry.
+      - name: Build amd64 image for boot test (no push)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: gamarr-boot-test:${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            VERSION=${{ steps.version.outputs.version }}
+            GAMARR_RELEASE=${{ steps.version.outputs.version }}
+
+      - name: Start boot-test container
+        run: |
+          docker run -d --name gamarr-boot-test -p 6767:6767 gamarr-boot-test:${{ steps.version.outputs.version }}
+
+      - name: Wait for /ping to answer
+        run: |
+          echo "Polling http://localhost:6767/ping for up to 90s..."
+          for i in $(seq 1 45); do
+            if curl -fsS http://localhost:6767/ping 2>/dev/null | grep -q '"status"[[:space:]]*:[[:space:]]*"OK"'; then
+              echo "gamarr answered healthy after ~$((i * 2))s"
+              exit 0
+            fi
+            if ! docker ps --filter name=gamarr-boot-test --filter status=running -q | grep -q .; then
+              echo "::error::gamarr-boot-test container exited before answering /ping"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "::error::gamarr-boot-test never answered http://localhost:6767/ping within 90s"
+          exit 1
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker logs gamarr-boot-test || true
+
+      - name: Stop boot-test container
+        if: always()
+        run: docker rm -f gamarr-boot-test || true
+
+      # Only reached if the boot test above passed. Same tags/labels/build-args
+      # as before; now also multi-arch and actually pushed.
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
