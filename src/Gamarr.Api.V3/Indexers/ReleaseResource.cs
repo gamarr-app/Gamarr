@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NzbDrone.Core.DecisionEngine;
+using NzbDrone.Core.Download;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Parser.Model;
@@ -78,6 +79,13 @@ namespace Gamarr.Api.V3.Indexers
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool? ShouldOverride { get; set; }
+
+        // What happened when the release was actually handed to a download client, which is a
+        // different question from Approved — that only reports whether it passed the decision
+        // specs. Only the push endpoint grabs as part of the request, so it is the only one
+        // that can answer this; everywhere else it stays null and is not serialised.
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public ProcessedDecisionResult? GrabResult { get; set; }
     }
 
     public static class ReleaseResourceMapper
