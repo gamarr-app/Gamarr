@@ -74,6 +74,7 @@ namespace Gamarr.Api.V3.Indexers
             var downloadClientId = ResolveDownloadClientId(release);
 
             DownloadDecision decision;
+            ProcessedDecisionResult grabResult;
 
             lock (PushLock)
             {
@@ -81,7 +82,7 @@ namespace Gamarr.Api.V3.Indexers
 
                 decision = decisions.FirstOrDefault();
 
-                _downloadDecisionProcessor.ProcessDecision(decision, downloadClientId).GetAwaiter().GetResult();
+                grabResult = _downloadDecisionProcessor.ProcessDecision(decision, downloadClientId).GetAwaiter().GetResult();
             }
 
             if (decision?.RemoteGame.ParsedGameInfo == null)
@@ -89,7 +90,24 @@ namespace Gamarr.Api.V3.Indexers
                 throw new ValidationException(new List<ValidationFailure> { new ("Title", "Unable to parse", release.Title) });
             }
 
-            return MapDecisions(new[] { decision });
+            if (grabResult != ProcessedDecisionResult.Grabbed)
+            {
+                _logger.Warn("Pushed release '{0}' was not grabbed: {1}", release.Title, grabResult);
+            }
+
+            var resources = MapDecisions(new[] { decision });
+
+            // Unlike every other endpoint that returns a ReleaseResource, this one performs the
+            // grab inside the request, so it knows whether the grab worked. Reporting only
+            // Approved would answer a question the caller did not ask: a release can pass every
+            // specification and then fail to reach the download client, and until this was
+            // returned the only trace of that was a log line.
+            foreach (var resource in resources)
+            {
+                resource.GrabResult = grabResult;
+            }
+
+            return resources;
         }
 
         private void ResolveIndexer(ReleaseInfo release)
