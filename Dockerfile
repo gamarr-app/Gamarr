@@ -13,6 +13,12 @@ LABEL org.opencontainers.image.url="https://github.com/gamarr-app/Gamarr"
 LABEL org.opencontainers.image.description="A game collection manager for Usenet and BitTorrent users."
 
 # environment settings
+#
+# TMPDIR points at a runtime directory that the s6 init creates at *container
+# start*, so it does not exist while this image is being built. Anything in the
+# build below that shells out to `mktemp` (notably dotnet-install.sh) must
+# override TMPDIR for its own invocation, or it fails with
+# "failed to create file via template".
 ARG GAMARR_BRANCH="main"
 ENV XDG_CONFIG_HOME="/config/xdg" \
   COMPlus_EnableDiagnostics=0 \
@@ -78,7 +84,7 @@ RUN \
   echo "Pinned ASP.NET Core runtime version: ${ASPNETCORE_VERSION}" && \
   curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh && \
   chmod +x /tmp/dotnet-install.sh && \
-  /tmp/dotnet-install.sh \
+  TMPDIR=/tmp /tmp/dotnet-install.sh \
     --runtime aspnetcore \
     --version "${ASPNETCORE_VERSION}" \
     --os linux-musl \
