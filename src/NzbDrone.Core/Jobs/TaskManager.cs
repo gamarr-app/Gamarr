@@ -228,8 +228,17 @@ namespace NzbDrone.Core.Jobs
                 var lastExecution = DateTime.UtcNow;
 
                 _scheduledTaskRepository.SetLastExecutionTime(scheduledTask.Id, lastExecution, message.Command.StartedAt.Value);
-                _cache.Find(scheduledTask.TypeName).LastExecution = lastExecution;
-                _cache.Find(scheduledTask.TypeName).LastStartTime = message.Command.StartedAt.Value;
+
+                // The cache is only populated by Handle(ApplicationStartedEvent). A command
+                // that finishes before that handler has run finds its row in the database
+                // but not yet in the cache, so Find returns null.
+                var cached = _cache.Find(scheduledTask.TypeName);
+
+                if (cached != null)
+                {
+                    cached.LastExecution = lastExecution;
+                    cached.LastStartTime = message.Command.StartedAt.Value;
+                }
             }
         }
 
