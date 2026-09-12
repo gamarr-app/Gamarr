@@ -16,6 +16,7 @@ namespace Gamarr.Api.V3.Config
         public bool LaunchBrowser { get; set; }
         public AuthenticationType AuthenticationMethod { get; set; }
         public AuthenticationRequiredType AuthenticationRequired { get; set; }
+        public string AllowedHosts { get; set; }
         public bool AnalyticsEnabled { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
@@ -28,6 +29,7 @@ namespace Gamarr.Api.V3.Config
         public string SslCertPath { get; set; }
         public string SslCertPassword { get; set; }
         public string UrlBase { get; set; }
+        public string TrustedNetworks { get; set; }
         public string InstanceName { get; set; }
         public string ApplicationUrl { get; set; }
         public bool UpdateAutomatically { get; set; }
@@ -69,6 +71,7 @@ namespace Gamarr.Api.V3.Config
             resource.LaunchBrowser = configFile.LaunchBrowser;
             resource.AuthenticationMethod = configFile.AuthenticationMethod;
             resource.AuthenticationRequired = configFile.AuthenticationRequired;
+            resource.AllowedHosts = configFile.AllowedHosts;
             resource.AnalyticsEnabled = configFile.AnalyticsEnabled;
             resource.LogLevel = configFile.LogLevel;
             resource.LogSizeLimit = configFile.LogSizeLimit;
@@ -78,6 +81,7 @@ namespace Gamarr.Api.V3.Config
             resource.SslCertPath = configFile.SslCertPath;
             resource.SslCertPassword = configFile.SslCertPassword;
             resource.UrlBase = configFile.UrlBase;
+            resource.TrustedNetworks = configFile.TrustedNetworks;
             resource.InstanceName = configFile.InstanceName;
             resource.UpdateAutomatically = configFile.UpdateAutomatically;
             resource.UpdateMechanism = configFile.UpdateMechanism;
