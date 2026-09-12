@@ -273,7 +273,10 @@ namespace NzbDrone.Common.Http
 
         public async Task DownloadFileAsync(string url, string fileName)
         {
-            var fileNamePart = fileName + ".part";
+            // Unique per call: a shared "<file>.part" collides when two downloads of the same
+            // target overlap — one moves or cleans up the partial file the other is still
+            // writing, and the loser throws FileNotFoundException on the move below.
+            var fileNamePart = $"{fileName}.{Path.GetRandomFileName()}.part";
 
             try
             {
@@ -302,12 +305,7 @@ namespace NzbDrone.Common.Http
 
                 stopWatch.Stop();
 
-                if (File.Exists(fileName))
-                {
-                    File.Delete(fileName);
-                }
-
-                File.Move(fileNamePart, fileName);
+                File.Move(fileNamePart, fileName, true);
                 _logger.Debug("Downloading Completed. took {0:0}s", stopWatch.Elapsed.Seconds);
             }
             finally
