@@ -491,6 +491,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 {
                     throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, please check your settings.", ex);
                 }
+                catch (HttpRequestException ex)
+                {
+                    // See the matching catch in IsApiSupported.
+                    throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, please check your settings.", ex);
+                }
 
                 if (response.Content.IsNotNullOrWhiteSpace() && response.Content != "Ok.")
                 {

@@ -351,7 +351,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error testing Torrent Download Station");
+                _logger.Debug(ex, "Error testing Torrent Download Station");
                 return new NzbDroneValidationFailure(string.Empty, _localizationService.GetLocalizedString("DownloadClientValidationUnknownException", new Dictionary<string, object> { { "exception", ex.Message } }));
             }
         }
@@ -386,7 +386,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error testing Torrent Download Station");
+                _logger.Debug(ex, "Error testing Torrent Download Station");
 
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                        {

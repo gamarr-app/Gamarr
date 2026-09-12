@@ -329,6 +329,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             {
                 throw new DownloadClientException("Failed to connect to qBittorrent, please check your settings.", ex);
             }
+            catch (HttpRequestException ex)
+            {
+                // See the matching catch in IsApiSupported.
+                throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, please check your settings.", ex);
+            }
 
             return response.Content;
         }
@@ -371,6 +376,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 }
                 catch (WebException ex)
                 {
+                    throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, please check your settings.", ex);
+                }
+                catch (HttpRequestException ex)
+                {
+                    // See the matching catch in IsApiSupported.
                     throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, please check your settings.", ex);
                 }
 
