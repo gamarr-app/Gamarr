@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NzbDrone.Common.Cache;
@@ -369,6 +370,15 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                     throw new DownloadClientUnavailableException("Unable to connect to Transmission, certificate validation failed.", ex);
                 }
 
+                throw new DownloadClientUnavailableException("Unable to connect to Transmission, please check your settings", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                // SocketsHttpHandler surfaces an unresolvable host or a refused connection as
+                // HttpRequestException; the WebException above is the legacy type and never fires
+                // for it. Without this the raw exception escapes the download client abstraction,
+                // and callers that only expect DownloadClientException — the health checks
+                // especially — report a client that is merely down as an unknown fault.
                 throw new DownloadClientUnavailableException("Unable to connect to Transmission, please check your settings", ex);
             }
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
@@ -238,6 +239,15 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
 
                 throw new DownloadClientException("Unable to connect to uTorrent, please check your settings", ex);
             }
+            catch (HttpRequestException ex)
+            {
+                // SocketsHttpHandler surfaces an unresolvable host or a refused connection as
+                // HttpRequestException; the WebException above is the legacy type and never fires
+                // for it. Without this the raw exception escapes the download client abstraction,
+                // and callers that only expect DownloadClientException — the health checks
+                // especially — report a client that is merely down as an unknown fault.
+                throw new DownloadClientUnavailableException("Unable to connect to uTorrent, please check your settings", ex);
+            }
 
             return Json.Deserialize<UTorrentResponse>(response.Content);
         }
@@ -279,6 +289,11 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
                 }
                 catch (WebException ex)
                 {
+                    throw new DownloadClientUnavailableException("Unable to connect to uTorrent, please check your settings", ex);
+                }
+                catch (HttpRequestException ex)
+                {
+                    // See the matching catch in ProcessRequest.
                     throw new DownloadClientUnavailableException("Unable to connect to uTorrent, please check your settings", ex);
                 }
 
