@@ -20,7 +20,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
 
         public override HealthCheck Check()
         {
-            // Not best for optimization but due to possible symlinks and junctions, we get mounts based on series path so internals can handle mount resolution.
+            // Not best for optimization but due to possible symlinks and junctions, we get mounts based on game path so internals can handle mount resolution.
             var mounts = _gameService.AllGamePaths()
                 .Select(p => new Tuple<IMount, string>(_diskProvider.GetMount(p.Value), p.Value))
                 .Where(m => m.Item1 is { MountOptions.IsReadOnly: true })
@@ -31,6 +31,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
             {
                 return new HealthCheck(GetType(),
                     HealthCheckResult.Error,
+                    HealthCheckReason.MountGames,
                     $"{_localizationService.GetLocalizedString("MountGameHealthCheckMessage")}{string.Join(", ", mounts.Select(m => $"{m.Item1.Name} ({m.Item2})"))}",
                     "#game-mount-ro");
             }

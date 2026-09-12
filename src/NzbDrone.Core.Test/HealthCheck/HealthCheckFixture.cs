@@ -15,9 +15,19 @@ namespace NzbDrone.Core.Test.HealthCheck
         [TestCase("I blew up because of some weird user mistake", "custom-page#my-health-check", WikiRoot + "custom-page#my-health-check")]
         public void should_format_wiki_url(string message, string wikiFragment, string expectedUrl)
         {
-            var subject = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(HealthCheckBase), HealthCheckResult.Warning, message, wikiFragment);
+            var subject = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(HealthCheckBase), HealthCheckResult.Warning, HealthCheckReason.ServerNotification, message, wikiFragment);
 
             subject.WikiUrl.Should().Be(expectedUrl);
+        }
+
+        [TestCase(HealthCheckReason.RootFolderMissing)]
+        [TestCase(HealthCheckReason.IndexerStatusUnavailable)]
+        [TestCase(HealthCheckReason.GamesWithoutMetadata)]
+        public void should_set_reason(HealthCheckReason reason)
+        {
+            var subject = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(HealthCheckBase), HealthCheckResult.Error, reason, "I blew up because of some weird user mistake");
+
+            subject.Reason.Should().Be(reason);
         }
     }
 }
