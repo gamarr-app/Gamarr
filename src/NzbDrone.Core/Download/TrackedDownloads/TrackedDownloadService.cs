@@ -202,7 +202,8 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             catch (Exception e)
             {
                 _logger.Debug(e, "Failed to find game for " + downloadItem.Title);
-                return null;
+
+                trackedDownload.Warn("Unable to parse game from title");
             }
 
             LogItemChange(trackedDownload, existingItem?.DownloadItem, trackedDownload.DownloadItem);
