@@ -31,7 +31,7 @@ export default function Icon({
   size = 14,
   title,
   isSpinning = false,
-  fixedWidth = false,
+  widthAuto = true,
   ...otherProps
 }: IconProps) {
   const icon = (
@@ -39,7 +39,7 @@ export default function Icon({
       className={classNames(className, styles[kind])}
       icon={name}
       spin={isSpinning}
-      fixedWidth={fixedWidth}
+      widthAuto={widthAuto}
       style={{
         fontSize: `${size}px`,
       }}
