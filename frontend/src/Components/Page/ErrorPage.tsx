@@ -65,7 +65,7 @@ function ErrorPage(props: ErrorPageProps) {
     );
   } else if (systemStatusError) {
     errorMessage = getErrorMessage(
-      uiSettingsError,
+      systemStatusError,
       'Failed to load system status from API'
     );
   }
