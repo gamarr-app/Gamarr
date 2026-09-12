@@ -1,6 +1,7 @@
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
@@ -51,7 +52,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality.Quality = qualityType;
             _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Scene, Quality.Uplay, Quality.GOG);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -61,7 +62,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality.Quality = qualityType;
             _remoteGame.Game.QualityProfile.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Scene, Quality.Uplay, Quality.GOG);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

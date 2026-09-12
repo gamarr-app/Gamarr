@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Languages;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Languages;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -59,7 +60,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             WithEnglishRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -67,7 +68,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             WithGermanRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -77,7 +78,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             WithGermanRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -87,7 +88,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             WithFrenchRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -100,11 +101,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             WithGermanRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
 
             WithEnglishRelease();
 
-            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Mocker.Resolve<LanguageSpecification>().IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

@@ -1,7 +1,6 @@
 using System.Linq;
 using NLog;
 using NzbDrone.Core.Games.Components;
-using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
@@ -24,9 +23,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
-            if (searchCriteria != null && searchCriteria.UserInvokedSearch)
+            if (information.SearchCriteria is { UserInvokedSearch: true })
             {
                 _logger.Debug("Skipping DLC monitored check during search");
                 return DownloadSpecDecision.Accept();

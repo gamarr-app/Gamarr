@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_release_is_not_blocklisted()
         {
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenBlocklistedRelease();
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_check_blocklist_with_correct_game_id()
         {
-            Subject.IsSatisfiedBy(_remoteGame, null);
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             Mocker.GetMock<IBlocklistService>()
                   .Verify(s => s.Blocklisted(_remoteGame.Game.Id, _remoteGame.Release), Times.Once());
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenBlocklistedRelease();
 
-            var result = Subject.IsSatisfiedBy(_remoteGame, null);
+            var result = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.Blocklisted);
         }

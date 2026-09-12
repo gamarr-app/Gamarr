@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo = null;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.DlcOnly;
 
-            var result = Subject.IsSatisfiedBy(_remoteGame, null);
+            var result = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.DlcOnly);
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game = new NzbDrone.Core.Games.Game { GameFileId = 1 };
             _remoteGame.ParsedGameInfo.ContentType = contentType;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [TestCase(ReleaseContentType.DlcOnly)]
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game = new NzbDrone.Core.Games.Game { GameFileId = 0 };
             _remoteGame.ParsedGameInfo.ContentType = contentType;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.UpdateOnly;
 
-            var result = Subject.IsSatisfiedBy(_remoteGame, null);
+            var result = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.UpdateOnly);
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.SeasonPass;
 
-            var result = Subject.IsSatisfiedBy(_remoteGame, null);
+            var result = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.SeasonPassOnly);
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.Expansion;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.BaseGame;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -114,7 +114,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.Unknown;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Test.Framework;
@@ -42,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Usenet);
             _delayProfile.EnableUsenet = true;
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().Be(true);
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().Be(true);
         }
 
         [Test]
@@ -51,7 +52,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Torrent);
             _delayProfile.EnableTorrent = true;
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().Be(true);
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().Be(true);
         }
 
         [Test]
@@ -60,7 +61,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Usenet);
             _delayProfile.EnableUsenet = false;
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().Be(false);
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().Be(false);
         }
 
         [Test]
@@ -69,7 +70,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Torrent);
             _delayProfile.EnableTorrent = false;
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().Be(false);
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().Be(false);
         }
     }
 }

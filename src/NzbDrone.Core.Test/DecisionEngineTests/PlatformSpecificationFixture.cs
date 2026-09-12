@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.Game.QualityProfile.PreferredPlatforms = null;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.Game.QualityProfile.PreferredPlatforms = new List<PlatformFamily>();
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.Platform = PlatformFamily.Unknown;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 PlatformFamily.PlayStation
             };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 PlatformFamily.PlayStation
             };
 
-            var result = Subject.IsSatisfiedBy(_remoteGame, null);
+            var result = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             result.Accepted.Should().BeFalse();
             result.Reason.Should().Be(DownloadRejectionReason.WantedPlatform);
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game.Platform = PlatformFamily.NintendoDS;
             _remoteGame.ParsedGameInfo.Platform = PlatformFamily.Nintendo;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 PlatformFamily.Nintendo
             };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 PlatformFamily.Nintendo
             };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 PlatformFamily.PlayStation
             };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

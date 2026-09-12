@@ -3,6 +3,7 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
@@ -55,7 +56,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.EnabledForTags(It.IsAny<HashSet<int>>(), It.IsAny<int>()))
                   .Returns(new List<ReleaseProfile>());
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -63,7 +64,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string> { "WEBRip" }, new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -71,7 +72,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string> { "doesnt", "exist" }, new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -79,7 +80,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string>(), new List<string> { "ignored" });
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -87,7 +88,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string>(), new List<string> { "edited" });
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [TestCase("EdiTED")]
@@ -98,7 +99,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(required.Split(',').ToList(), new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [TestCase("EdiTED")]
@@ -109,7 +110,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(new List<string>(), ignored.Split(',').ToList());
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -128,7 +129,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                }
                            });
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [TestCase("/WEB/", true)]
@@ -139,7 +140,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenRestictions(pattern.Split(',').ToList(), new List<string>());
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().Be(expected);
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().Be(expected);
         }
     }
 }
