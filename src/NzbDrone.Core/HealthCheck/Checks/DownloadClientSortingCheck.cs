@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Datastore.Events;
@@ -55,6 +56,10 @@ namespace NzbDrone.Core.HealthCheck.Checks
                     }
                 }
                 catch (DownloadClientException ex)
+                {
+                    _logger.Debug(ex, "Unable to communicate with {0}", client.Definition.Name);
+                }
+                catch (HttpRequestException ex)
                 {
                     _logger.Debug(ex, "Unable to communicate with {0}", client.Definition.Name);
                 }

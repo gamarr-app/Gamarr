@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
@@ -54,6 +55,12 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             catch (WebException ex)
             {
                 throw new DownloadClientException("Failed to connect to qBittorrent, check your settings.", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                // See the matching catch in QBittorrentProxyV2.IsApiSupported — the V1 probe
+                // runs whenever the V2 one returns 404, so it needs the same translation.
+                throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, check your settings.", ex);
             }
         }
 

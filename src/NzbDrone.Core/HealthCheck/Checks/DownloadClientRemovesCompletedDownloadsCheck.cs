@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using NLog;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.Download;
@@ -56,9 +57,13 @@ namespace NzbDrone.Core.HealthCheck.Checks
                 {
                     _logger.Debug(ex, "Unable to communicate with {0}", client.Definition.Name);
                 }
+                catch (HttpRequestException ex)
+                {
+                    _logger.Debug(ex, "Unable to communicate with {0}", client.Definition.Name);
+                }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "Unknown error occurred in DownloadClientHistoryRetentionCheck HealthCheck");
+                    _logger.Error(ex, "Unknown error occurred in DownloadClientRemovesCompletedDownloadsCheck HealthCheck");
                 }
             }
 
