@@ -94,6 +94,7 @@ interface SecuritySettingsRequiredKeys {
   passwordConfirmation: SettingValue<string>;
   apiKey: SettingValue<string>;
   certificateValidation: SettingValue<string>;
+  trustedNetworks: SettingValue<string>;
 }
 
 interface SecuritySettingsProps {
@@ -120,6 +121,7 @@ function SecuritySettings({
     passwordConfirmation,
     apiKey,
     certificateValidation,
+    trustedNetworks,
   } = settings;
 
   const authenticationEnabled =
@@ -254,6 +256,20 @@ function SecuritySettings({
           helpText={translate('CertificateValidationHelpText')}
           onChange={onInputChange}
           {...certificateValidation}
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel>{translate('TrustedNetworks')}</FormLabel>
+
+        <FormInputGroup
+          type={inputTypes.TEXT}
+          name="trustedNetworks"
+          helpText={translate('TrustedNetworksHelpText')}
+          helpTextWarning={translate('RestartRequiredHelpTextWarning')}
+          helpLink="https://github.com/gamarr-app/Gamarr/wiki/settings#security"
+          onChange={onInputChange}
+          {...trustedNetworks}
         />
       </FormGroup>
 

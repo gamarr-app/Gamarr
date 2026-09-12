@@ -25,6 +25,7 @@ function HostSettings(props: HostSettingsProps) {
     urlBase,
     instanceName,
     applicationUrl,
+    allowedHosts,
     enableSsl,
     sslPort,
     sslCertPath,
@@ -72,6 +73,20 @@ function HostSettings(props: HostSettingsProps) {
           helpTextWarning={translate('RestartRequiredHelpTextWarning')}
           onChange={onInputChange}
           {...urlBase}
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel>{translate('AllowedHosts')}</FormLabel>
+
+        <FormInputGroup
+          type={inputTypes.TEXT}
+          name="allowedHosts"
+          helpText={translate('AllowedHostsHelpText')}
+          helpTextWarning={translate('RestartRequiredHelpTextWarning')}
+          helpLink="https://github.com/gamarr-app/Gamarr/wiki/settings#host"
+          onChange={onInputChange}
+          {...allowedHosts}
         />
       </FormGroup>
 
