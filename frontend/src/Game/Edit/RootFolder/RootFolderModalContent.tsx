@@ -39,7 +39,7 @@ function RootFolderModalContent(props: RootFolderModalContentProps) {
   const [rootFolderPath, setRootFolderPath] = useState(props.rootFolderPath);
 
   const { isLoading, data } = useApiQuery<GameFolder>({
-    url: `/game/${gameId}/folder`,
+    path: `/game/${gameId}/folder`,
   });
 
   const onInputChange = useCallback(({ value }: InputChanged<string>) => {
