@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_no_blocked_indexer()
         {
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             WithBlockedIndexer();
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
             Subject.Type.Should().Be(RejectionType.Temporary);
         }
 
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _remoteGame.Release = new TorrentInfo { IndexerId = 1, MagnetUrl = "magnet:?xt=urn:btih:abc" };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         // With a download url present the grab does go back to the indexer, so being blocked
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 DownloadUrl = "http://my.indexer/file.torrent"
             };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

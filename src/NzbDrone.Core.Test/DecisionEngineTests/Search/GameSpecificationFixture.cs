@@ -1,9 +1,10 @@
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications.Search;
-using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Test.Common;
 
@@ -31,7 +32,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             _searchCriteria.Game = _game2;
 
-            Subject.IsSatisfiedBy(_remoteEpisode, _searchCriteria).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation(false, _searchCriteria)).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -39,7 +40,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             _searchCriteria.Game = _game1;
 
-            Subject.IsSatisfiedBy(_remoteEpisode, _searchCriteria).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation(false, _searchCriteria)).Accepted.Should().BeTrue();
         }
     }
 }

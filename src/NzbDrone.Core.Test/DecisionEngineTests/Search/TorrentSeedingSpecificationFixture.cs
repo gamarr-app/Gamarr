@@ -3,10 +3,11 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.TorrentRss;
-using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Test.Common;
 
@@ -61,7 +62,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
                 Title = "Series.Title.S01.720p.BluRay.X264-RlsGrp"
             };
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         // These tests are not needed anymore, since indexer settings are saved on the release itself!
@@ -70,7 +71,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             _remoteGame.Release.IndexerId = 0;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -80,7 +81,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
                   .Setup(v => v.Get(It.IsAny<int>()))
                   .Callback<int>(i => { throw new ModelNotFoundException(typeof(IndexerDefinition), i); });
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -88,7 +89,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             GivenReleaseSeeders(null);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [TestCase(5)]
@@ -97,7 +98,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             GivenReleaseSeeders(seeders);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [TestCase(0)]
@@ -106,7 +107,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             GivenReleaseSeeders(seeders);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

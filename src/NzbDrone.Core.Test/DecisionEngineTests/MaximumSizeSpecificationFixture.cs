@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -33,7 +34,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMaximumSize(0);
             WithSize(1000);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -42,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMaximumSize(2000);
             WithSize(1999);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -51,7 +52,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMaximumSize(2000);
             WithSize(2000);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -60,7 +61,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMaximumSize(2000);
             WithSize(2001);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -69,7 +70,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMaximumSize(2000);
             WithSize(0);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenTitle(title);
 
-            var decision = Subject.IsSatisfiedBy(_remoteGame, null);
+            var decision = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             decision.Accepted.Should().BeFalse();
             decision.Reason.Should().Be(DownloadRejectionReason.ExecutableFile);
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenTitle(title);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [TestCase("Game.Title.2023.REPACK-FitGirl")]
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenTitle(title);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [TestCase("Game.Title.2023.REPACK-FitGirl www.example.com")]
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenTitle(title);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [TestCase(null)]
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenTitle(title);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

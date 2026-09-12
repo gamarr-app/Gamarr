@@ -2,7 +2,6 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
-using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -54,7 +53,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             return new string(value.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
         }
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, SearchCriteriaBase searchCriteria)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             var qualityProfile = subject.EffectiveQualityProfile;
 

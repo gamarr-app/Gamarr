@@ -5,6 +5,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles;
@@ -82,7 +83,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(2, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -95,7 +96,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(2, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -108,7 +109,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Scene, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(2, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -117,7 +118,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             // No existing game file, should always accept
             _remoteGame.Game.GameFile = null;
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -130,7 +131,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.Scene, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -143,7 +144,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -156,7 +157,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = null;
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -169,7 +170,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 1));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(2, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -182,7 +183,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 1, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -198,7 +199,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(2, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -214,7 +215,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -227,7 +228,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.Quality = new QualityModel(Quality.GOG, new Revision(version: 2));
             _remoteGame.ParsedGameInfo.GameVersion = new GameVersion(1, 0, 0);
 
-            _upgradeDisk.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

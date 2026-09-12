@@ -6,11 +6,12 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.History;
 using NzbDrone.Core.IndexerSearch.Definitions;
-using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -87,41 +88,41 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_it_is_a_search()
         {
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new GameSearchCriteria()).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation(false, new GameSearchCriteria())).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_if_latest_history_item_is_null()
         {
             Mocker.GetMock<IHistoryService>().Setup(s => s.MostRecentForGame(It.IsAny<int>())).Returns((GameHistory)null);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_if_latest_history_item_is_not_grabbed()
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow, GameHistoryEventType.DownloadFailed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         // [Test]
         //        public void should_return_true_if_latest_history_has_a_download_id_and_cdh_is_enabled()
         //        {
         //            GivenMostRecentForEpisode(FIRST_EPISODE_ID, "test", _notupgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
-        //            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeTrue();
+        //            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         //        }
         [Test]
         public void should_return_true_if_latest_history_item_is_older_than_twelve_hours()
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow.AddHours(-13), GameHistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_upgradable_if_only_episode_is_upgradable()
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, GameHistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         /*
@@ -130,7 +131,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
             GivenMostRecentForEpisode(SECOND_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -138,7 +139,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
             GivenMostRecentForEpisode(SECOND_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -146,7 +147,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -154,7 +155,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
             GivenMostRecentForEpisode(SECOND_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, HistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }*/
 
         [Test]
@@ -177,7 +178,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, GameHistoryEventType.Grabbed);
 
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -196,14 +197,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, GameHistoryEventType.Grabbed);
 
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_if_latest_history_item_is_only_one_hour_old()
         {
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, string.Empty, _notupgradableQuality, DateTime.UtcNow.AddHours(-1), GameHistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -211,7 +212,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenCdhDisabled();
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, "test", _upgradableQuality, DateTime.UtcNow.AddDays(-100), GameHistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -231,7 +232,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, "test", _upgradableQuality, DateTime.UtcNow.AddDays(-100), GameHistoryEventType.Grabbed);
 
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -239,7 +240,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenCdhDisabled();
             GivenMostRecentForEpisode(FIRST_EPISODE_ID, "test", _notupgradableQuality, DateTime.UtcNow.AddDays(-100), GameHistoryEventType.Grabbed);
-            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeHistory.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

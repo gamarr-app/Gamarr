@@ -5,6 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
@@ -45,7 +46,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -55,7 +56,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -65,7 +66,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(1000);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -75,7 +76,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -89,7 +90,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithAvailableSpace(200);
             WithSize(100);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -100,7 +101,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Mocker.GetMock<IDiskProvider>().Setup(s => s.GetAvailableSpace(It.IsAny<string>())).Throws<DirectoryNotFoundException>();
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

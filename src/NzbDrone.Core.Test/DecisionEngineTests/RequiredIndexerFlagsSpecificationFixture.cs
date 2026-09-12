@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenNoIndexer();
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenIndexerWithRequiredFlags();
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenIndexerWithRequiredFlags((int)IndexerFlags.G_Freeleech);
             _remoteGame.Release.IndexerFlags = IndexerFlags.G_Freeleech;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenIndexerWithRequiredFlags((int)IndexerFlags.G_Freeleech);
             _remoteGame.Release.IndexerFlags = (IndexerFlags)0;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenIndexerWithRequiredFlags((int)IndexerFlags.G_Freeleech, (int)IndexerFlags.G_Halfleech);
             _remoteGame.Release.IndexerFlags = IndexerFlags.G_Halfleech;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenIndexerWithRequiredFlags((int)IndexerFlags.G_Freeleech, (int)IndexerFlags.G_Halfleech);
             _remoteGame.Release.IndexerFlags = IndexerFlags.G_Internal;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]

@@ -2,6 +2,7 @@ using System;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Parser.Model;
@@ -40,7 +41,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(0);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -49,7 +50,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(30);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -58,7 +59,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(30);
             WithAge(10);
 
-            Subject.IsSatisfiedBy(_remoteEpisode, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteEpisode, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

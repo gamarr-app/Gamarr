@@ -7,9 +7,10 @@ using NUnit.Framework;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles;
 using NzbDrone.Core.Profiles.Qualities;
@@ -104,7 +105,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_true_if_game_has_no_existing_file()
         {
             _parseResultSingle.Game.GameFile = null;
-            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -115,7 +116,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultSingle.ParsedGameInfo.ContentType = ReleaseContentType.DlcOnly;
             _parseResultSingle.ParsedGameInfo.GameTitles = new List<string> { "Hades The Blood Price" };
 
-            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -131,14 +132,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                       new GameFile { RelativePath = "DLC/Hades.The.Blood.Price.DLC-GRP" }
                   });
 
-            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_be_upgradable_if_only_game_is_upgradable()
         {
             WithFirstFileUpgradable();
-            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -150,7 +151,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _firstFile.Quality = new QualityModel(Quality.Steam);
             _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Steam);
-            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -158,7 +159,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _firstFile.Quality = new QualityModel(Quality.Steam, new Revision(2));
             _parseResultSingle.ParsedGameInfo.Quality = new QualityModel(Quality.Steam);
-            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            _upgradeDisk.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -172,7 +173,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             });
 
             GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -186,7 +187,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             });
 
             GivenFileQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -201,7 +202,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 1)));
             GivenNewQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -216,7 +217,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
             GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -231,7 +232,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
             GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -246,7 +247,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenFileQuality(new QualityModel(Quality.Uplay, new Revision(version: 2)));
             GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -261,7 +262,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             GivenFileQuality(new QualityModel(Quality.Scene, new Revision(version: 2)));
             GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 2)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -277,7 +278,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             // File has lower quality, release has higher quality
             GivenFileQuality(new QualityModel(Quality.Scene, new Revision(version: 1)));
             GivenNewQuality(new QualityModel(Quality.GOG, new Revision(version: 1)));
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -300,7 +301,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenOldCustomFormats(new List<CustomFormat>());
             GivenNewCustomFormats(new List<CustomFormat> { customFormat });
 
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -316,7 +317,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenFileQuality(new QualityModel(Quality.Steam, new Revision(version: 1)));
             GivenNewQuality(new QualityModel(Quality.Steam, new Revision(version: 2)));
 
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -332,7 +333,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenFileQuality(new QualityModel(Quality.Steam));
             GivenNewQuality(new QualityModel(Quality.GOG));
 
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -365,7 +366,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenOldCustomFormats(new List<CustomFormat>());
             GivenNewCustomFormats(new List<CustomFormat> { customFormat });
 
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -402,7 +403,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenOldCustomFormats(new List<CustomFormat>());
             GivenNewCustomFormats(new List<CustomFormat> { customFormat });
 
-            Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
     }
 }

@@ -2,9 +2,10 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -41,7 +42,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -57,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -78,7 +79,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -99,7 +100,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -120,7 +121,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -141,7 +142,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -164,7 +165,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -189,7 +190,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeFalse();
@@ -214,7 +215,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeTrue();
@@ -239,7 +240,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(e => e.Game = _game)
                                                       .Build();
 
-            Subject.IsSatisfiedBy(remoteGame, null)
+            Subject.IsSatisfiedBy(remoteGame, new ReleaseDecisionInformation())
                    .Accepted
                    .Should()
                    .BeTrue();

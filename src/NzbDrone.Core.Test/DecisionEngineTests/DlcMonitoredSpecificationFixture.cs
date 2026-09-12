@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
@@ -50,7 +51,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_reject_dlc_release_for_unmonitored_slot()
         {
-            var decision = Subject.IsSatisfiedBy(_remoteGame, null);
+            var decision = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation());
 
             decision.Accepted.Should().BeFalse();
         }
@@ -65,7 +66,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Monitored = true
             });
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -78,7 +79,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Monitored = true
             });
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -86,7 +87,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var criteria = new GameSearchCriteria { UserInvokedSearch = true };
 
-            Subject.IsSatisfiedBy(_remoteGame, criteria).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation(false, criteria)).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -94,11 +95,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.UpdateOnly;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
 
             _remoteGame.ParsedGameInfo.ContentType = ReleaseContentType.BaseGame;
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }

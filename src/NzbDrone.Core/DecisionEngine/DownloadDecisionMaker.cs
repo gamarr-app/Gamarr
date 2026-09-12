@@ -6,7 +6,6 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download.Aggregation;
@@ -28,7 +27,6 @@ namespace NzbDrone.Core.DecisionEngine
     {
         private readonly IEnumerable<IDownloadDecisionEngineSpecification> _specifications;
         private readonly IParsingService _parsingService;
-        private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IRemoteGameAggregationService _aggregationService;
         private readonly IGameComponentService _componentService;
@@ -37,7 +35,6 @@ namespace NzbDrone.Core.DecisionEngine
 
         public DownloadDecisionMaker(IEnumerable<IDownloadDecisionEngineSpecification> specifications,
                                      IParsingService parsingService,
-                                     IConfigService configService,
                                      ICustomFormatCalculationService formatCalculator,
                                      IRemoteGameAggregationService aggregationService,
                                      IGameComponentService componentService,
@@ -46,7 +43,6 @@ namespace NzbDrone.Core.DecisionEngine
         {
             _specifications = specifications;
             _parsingService = parsingService;
-            _configService = configService;
             _formatCalculator = formatCalculator;
             _aggregationService = aggregationService;
             _componentService = componentService;
@@ -93,6 +89,7 @@ namespace NzbDrone.Core.DecisionEngine
                         // Pass Steam App ID as primary, IGDB ID as secondary
                         var remoteGame = _parsingService.Map(parsedGameInfo, report.SteamAppId, report.IgdbId, searchCriteria);
                         remoteGame.Release = report;
+                        remoteGame.ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria);
 
                         if (remoteGame.Game == null)
                         {
@@ -110,7 +107,7 @@ namespace NzbDrone.Core.DecisionEngine
                             _logger.Trace("Custom Format Score of '{0}' [{1}] calculated for '{2}'", remoteGame.CustomFormatScore, remoteGame.CustomFormats?.ConcatToString(), report.Title);
 
                             remoteGame.DownloadAllowed = remoteGame.Game != null;
-                            decision = GetDecisionForReport(remoteGame, searchCriteria);
+                            decision = GetDecisionForReport(remoteGame, new ReleaseDecisionInformation(pushedRelease, searchCriteria));
                         }
                     }
 
@@ -130,8 +127,9 @@ namespace NzbDrone.Core.DecisionEngine
                             var remoteGame = new RemoteGame
                             {
                                 Release = report,
+                                ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria),
                                 ParsedGameInfo = parsedGameInfo,
-                                Languages = parsedGameInfo.Languages
+                                Languages = parsedGameInfo.Languages,
                             };
 
                             decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.UnableToParse, "Unable to parse release"));
@@ -142,7 +140,7 @@ namespace NzbDrone.Core.DecisionEngine
                 {
                     _logger.Error(e, "Couldn't process release.");
 
-                    var remoteGame = new RemoteGame { Release = report };
+                    var remoteGame = new RemoteGame { Release = report, ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria) };
                     decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Error, "Unexpected error processing release"));
                 }
 
@@ -150,26 +148,6 @@ namespace NzbDrone.Core.DecisionEngine
 
                 if (decision != null)
                 {
-                    var source = pushedRelease ? ReleaseSourceType.ReleasePush : ReleaseSourceType.Rss;
-
-                    if (searchCriteria != null)
-                    {
-                        if (searchCriteria.InteractiveSearch)
-                        {
-                            source = ReleaseSourceType.InteractiveSearch;
-                        }
-                        else if (searchCriteria.UserInvokedSearch)
-                        {
-                            source = ReleaseSourceType.UserInvokedSearch;
-                        }
-                        else
-                        {
-                            source = ReleaseSourceType.Search;
-                        }
-                    }
-
-                    decision.RemoteGame.ReleaseSource = source;
-
                     if (decision.Rejections.Any())
                     {
                         _logger.Debug("Release '{0}' from '{1}' rejected for the following reasons: {2}", report.Title, report.Indexer, string.Join(", ", decision.Rejections));
@@ -222,13 +200,13 @@ namespace NzbDrone.Core.DecisionEngine
             }
         }
 
-        private DownloadDecision GetDecisionForReport(RemoteGame remoteGame, SearchCriteriaBase searchCriteria = null)
+        private DownloadDecision GetDecisionForReport(RemoteGame remoteGame, ReleaseDecisionInformation information)
         {
             var reasons = Array.Empty<DownloadRejection>();
 
             foreach (var specifications in _specifications.GroupBy(v => v.Priority).OrderBy(v => v.Key))
             {
-                reasons = specifications.Select(c => EvaluateSpec(c, remoteGame, searchCriteria))
+                reasons = specifications.Select(c => EvaluateSpec(c, remoteGame, information))
                                         .Where(c => c != null)
                                         .ToArray();
 
@@ -241,11 +219,11 @@ namespace NzbDrone.Core.DecisionEngine
             return new DownloadDecision(remoteGame, reasons.ToArray());
         }
 
-        private DownloadRejection EvaluateSpec(IDownloadDecisionEngineSpecification spec, RemoteGame remoteGame, SearchCriteriaBase searchCriteriaBase = null)
+        private DownloadRejection EvaluateSpec(IDownloadDecisionEngineSpecification spec, RemoteGame remoteGame, ReleaseDecisionInformation information)
         {
             try
             {
-                var result = spec.IsSatisfiedBy(remoteGame, searchCriteriaBase);
+                var result = spec.IsSatisfiedBy(remoteGame, information);
 
                 if (!result.Accepted)
                 {
@@ -265,6 +243,27 @@ namespace NzbDrone.Core.DecisionEngine
             }
 
             return null;
+        }
+
+        private ReleaseSourceType GetReleaseSource(bool pushedRelease, SearchCriteriaBase searchCriteria = null)
+        {
+            if (searchCriteria == null)
+            {
+                return pushedRelease ? ReleaseSourceType.ReleasePush : ReleaseSourceType.Rss;
+            }
+
+            if (searchCriteria.InteractiveSearch)
+            {
+                return ReleaseSourceType.InteractiveSearch;
+            }
+            else if (searchCriteria.UserInvokedSearch)
+            {
+                return ReleaseSourceType.UserInvokedSearch;
+            }
+            else
+            {
+                return ReleaseSourceType.Search;
+            }
         }
     }
 }

@@ -39,13 +39,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _fail2 = new Mock<IDownloadDecisionEngineSpecification>();
             _fail3 = new Mock<IDownloadDecisionEngineSpecification>();
 
-            _pass1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Accept);
-            _pass2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Accept);
-            _pass3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Accept);
+            _pass1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>())).Returns(DownloadSpecDecision.Accept);
+            _pass2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>())).Returns(DownloadSpecDecision.Accept);
+            _pass3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>())).Returns(DownloadSpecDecision.Accept);
 
-            _fail1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail1"));
-            _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail2"));
-            _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null)).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail3"));
+            _fail1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>())).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail1"));
+            _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>())).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail2"));
+            _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>())).Returns(DownloadSpecDecision.Reject(DownloadRejectionReason.Unknown, "fail3"));
 
             _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" } };
             _remoteEpisode = new RemoteGame
@@ -127,12 +127,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports).ToList();
 
-            _fail1.Verify(c => c.IsSatisfiedBy(_remoteEpisode, null), Times.Once());
-            _fail2.Verify(c => c.IsSatisfiedBy(_remoteEpisode, null), Times.Once());
-            _fail3.Verify(c => c.IsSatisfiedBy(_remoteEpisode, null), Times.Once());
-            _pass1.Verify(c => c.IsSatisfiedBy(_remoteEpisode, null), Times.Once());
-            _pass2.Verify(c => c.IsSatisfiedBy(_remoteEpisode, null), Times.Once());
-            _pass3.Verify(c => c.IsSatisfiedBy(_remoteEpisode, null), Times.Once());
+            _fail1.Verify(c => c.IsSatisfiedBy(_remoteEpisode, It.IsAny<ReleaseDecisionInformation>()), Times.Once());
+            _fail2.Verify(c => c.IsSatisfiedBy(_remoteEpisode, It.IsAny<ReleaseDecisionInformation>()), Times.Once());
+            _fail3.Verify(c => c.IsSatisfiedBy(_remoteEpisode, It.IsAny<ReleaseDecisionInformation>()), Times.Once());
+            _pass1.Verify(c => c.IsSatisfiedBy(_remoteEpisode, It.IsAny<ReleaseDecisionInformation>()), Times.Once());
+            _pass2.Verify(c => c.IsSatisfiedBy(_remoteEpisode, It.IsAny<ReleaseDecisionInformation>()), Times.Once());
+            _pass3.Verify(c => c.IsSatisfiedBy(_remoteEpisode, It.IsAny<ReleaseDecisionInformation>()), Times.Once());
         }
 
         [Test]
@@ -184,9 +184,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
         }
 
         [Test]
@@ -199,9 +199,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
         }
 
         [Test]
@@ -213,9 +213,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports);
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
         }
 
         [Test]

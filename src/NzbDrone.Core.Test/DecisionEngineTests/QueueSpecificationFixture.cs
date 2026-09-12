@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_accept_when_queue_is_empty()
         {
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.GetQueue())
                   .Returns(queue);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.GetQueue())
                   .Returns(queue);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]

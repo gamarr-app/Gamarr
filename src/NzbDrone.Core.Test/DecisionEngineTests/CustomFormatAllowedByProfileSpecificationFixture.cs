@@ -4,6 +4,7 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
@@ -57,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
             _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -70,7 +71,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Console.WriteLine(_remoteGame.CustomFormatScore);
             Console.WriteLine(_remoteGame.Game.QualityProfile.MinFormatScore);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -80,7 +81,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name);
             _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -90,7 +91,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
             _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -100,7 +101,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game.QualityProfile.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems(_format1.Name, _format2.Name);
             _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -111,7 +112,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.Game.QualityProfile.MinFormatScore = 0;
             _remoteGame.CustomFormatScore = _remoteGame.Game.QualityProfile.CalculateCustomFormatScore(_remoteGame.CustomFormats);
 
-            Subject.IsSatisfiedBy(_remoteGame, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
         }
     }
 }
