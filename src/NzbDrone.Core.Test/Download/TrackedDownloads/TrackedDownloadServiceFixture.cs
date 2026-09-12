@@ -273,6 +273,70 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
+        public void should_retrack_as_downloading_when_grabbed_again_after_being_imported()
+        {
+            Mocker.GetMock<IHistoryService>()
+                .Setup(s => s.FindByDownloadId(It.Is<string>(sr => sr == "35238")))
+                .Returns(new List<GameHistory>());
+
+            Mocker.GetMock<IDownloadHistoryService>()
+                .Setup(s => s.GetLatestDownloadHistoryItem(It.Is<string>(sr => sr == "35238")))
+                .Returns(new DownloadHistory
+                {
+                    GameId = 5,
+                    EventType = DownloadHistoryEventType.DownloadImported,
+                });
+
+            var remoteGame = new RemoteGame
+            {
+                Game = new Game { Id = 5 },
+                ParsedGameInfo = new ParsedGameInfo
+                {
+                    GameTitles = { "A Game" },
+                    Year = 1998
+                },
+            };
+
+            Mocker.GetMock<IParsingService>()
+                .Setup(s => s.Map(It.Is<ParsedGameInfo>(i => i.Year == 1998 && i.PrimaryGameTitle == "A Game"), It.IsAny<int>()))
+                .Returns(remoteGame);
+
+            var client = new DownloadClientDefinition
+            {
+                Id = 1,
+                Protocol = DownloadProtocol.Torrent
+            };
+
+            var item = new DownloadClientItem
+            {
+                Title = "A Game 1998",
+                DownloadId = "35238",
+                DownloadClientInfo = new DownloadClientItemClientInfo
+                {
+                    Protocol = client.Protocol,
+                    Id = client.Id,
+                    Name = client.Name
+                }
+            };
+
+            var imported = Subject.TrackDownload(client, item);
+            imported.State.Should().Be(TrackedDownloadState.Imported);
+
+            Subject.Handle(new GameGrabbedEvent(remoteGame) { DownloadId = "35238" });
+
+            Mocker.GetMock<IDownloadHistoryService>()
+                .Setup(s => s.GetLatestDownloadHistoryItem(It.Is<string>(sr => sr == "35238")))
+                .Returns(new DownloadHistory
+                {
+                    GameId = 5,
+                    EventType = DownloadHistoryEventType.DownloadGrabbed,
+                });
+
+            var regrabbed = Subject.TrackDownload(client, item);
+            regrabbed.State.Should().Be(TrackedDownloadState.Downloading);
+        }
+
+        [Test]
         public void should_track_downloads_using_the_game_id_for_already_imported_downloads()
         {
             Mocker.GetMock<IHistoryService>()

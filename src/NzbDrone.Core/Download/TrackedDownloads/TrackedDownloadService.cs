@@ -27,6 +27,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
     }
 
     public class TrackedDownloadService : ITrackedDownloadService,
+                                          IHandle<GameGrabbedEvent>,
                                           IHandle<GameAddedEvent>,
                                           IHandle<GameEditedEvent>,
                                           IHandle<GamesBulkEditedEvent>,
@@ -227,6 +228,24 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
+        private void LogItemChange(TrackedDownload trackedDownload, DownloadClientItem existingItem, DownloadClientItem downloadItem)
+        {
+            if (existingItem == null ||
+                existingItem.Status != downloadItem.Status ||
+                existingItem.CanBeRemoved != downloadItem.CanBeRemoved ||
+                existingItem.CanMoveFiles != downloadItem.CanMoveFiles)
+            {
+                _logger.Debug("Tracking '{0}:{1}': ClientState={2}{3} GamarrStage={4} Game='{5}' OutputPath={6}.",
+                    downloadItem.DownloadClientInfo.Name,
+                    downloadItem.Title,
+                    downloadItem.Status,
+                    downloadItem.CanBeRemoved ? "" : downloadItem.CanMoveFiles ? " (busy)" : " (readonly)",
+                    trackedDownload.State,
+                    trackedDownload.RemoteGame?.ParsedGameInfo,
+                    downloadItem.OutputPath);
+            }
+        }
+
         private void UpdateCachedItem(TrackedDownload trackedDownload)
         {
             var parsedGameInfo = Parser.Parser.ParseGameTitle(trackedDownload.DownloadItem.Title);
@@ -264,21 +283,20 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
-        private void LogItemChange(TrackedDownload trackedDownload, DownloadClientItem existingItem, DownloadClientItem downloadItem)
+        public void Handle(GameGrabbedEvent message)
         {
-            if (existingItem == null ||
-                existingItem.Status != downloadItem.Status ||
-                existingItem.CanBeRemoved != downloadItem.CanBeRemoved ||
-                 existingItem.CanMoveFiles != downloadItem.CanMoveFiles)
+            if (message.DownloadId.IsNullOrWhiteSpace())
             {
-                _logger.Debug("Tracking '{0}:{1}': ClientState={2}{3} GamarrStage={4} Game='{5}' OutputPath={6}.",
-                    downloadItem.DownloadClientInfo.Name,
-                    downloadItem.Title,
-                    downloadItem.Status,
-                    downloadItem.CanBeRemoved ? "" : downloadItem.CanMoveFiles ? " (busy)" : " (readonly)",
-                    trackedDownload.State,
-                    trackedDownload.RemoteGame?.ParsedGameInfo,
-                    downloadItem.OutputPath);
+                return;
+            }
+
+            var trackedDownload = _cache.Find(message.DownloadId);
+
+            if (trackedDownload is { State: TrackedDownloadState.Imported or
+                                            TrackedDownloadState.Failed or
+                                            TrackedDownloadState.Ignored })
+            {
+                _cache.Remove(message.DownloadId);
             }
         }
 
