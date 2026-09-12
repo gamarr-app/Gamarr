@@ -12,13 +12,15 @@ namespace NzbDrone.Common.EnvironmentInfo
     public class RuntimeInfo : IRuntimeInfo
     {
         private readonly Logger _logger;
+        private readonly IOsInfo _osInfo;
         private readonly DateTime _startTime = DateTime.UtcNow;
 
-        public RuntimeInfo(Logger logger, IHostLifetime hostLifetime = null)
+        public RuntimeInfo(Logger logger, IOsInfo osInfo, IHostLifetime hostLifetime = null)
         {
             _logger = logger;
+            _osInfo = osInfo;
 
-            IsWindowsService = hostLifetime is WindowsServiceLifetime;
+            IsWindowsService = hostLifetime is WindowsServiceLifetime || IsRunningAsWindowsService(logger);
             IsStarting = true;
 
             // net6.0 will return Gamarr.dll for entry assembly, we need the actual
@@ -82,6 +84,30 @@ namespace NzbDrone.Common.EnvironmentInfo
         }
 
         public bool IsWindowsService { get; private set; }
+
+        public bool IsContainerized => _osInfo.IsContainerized;
+
+        public bool IsSystemdService
+        {
+            get
+            {
+                if (!OsInfo.IsLinux)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    var invocationId = Environment.GetEnvironmentVariable("INVOCATION_ID");
+                    return !string.IsNullOrEmpty(invocationId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Error checking if system is running under systemd");
+                    return false;
+                }
+            }
+        }
 
         public bool IsStarting { get; set; }
         public bool IsExiting { get; set; }
@@ -213,6 +239,28 @@ namespace NzbDrone.Common.EnvironmentInfo
             }
 
             return true;
+        }
+
+        // The host lifetime is no longer WindowsServiceLifetime once
+        // RestartableServiceLifetime is registered (it has to own ServiceBase so the
+        // in-process restart loop can reuse it), so ask the SCM directly instead of
+        // inferring service mode from the lifetime type.
+        private static bool IsRunningAsWindowsService(Logger logger)
+        {
+            if (!OsInfo.IsWindows)
+            {
+                return false;
+            }
+
+            try
+            {
+                return WindowsServiceHelpers.IsWindowsService();
+            }
+            catch (Exception ex)
+            {
+                logger.Warn(ex, "Error checking if the application is running as a Windows service");
+                return false;
+            }
         }
 
         public bool IsWindowsTray { get; private set; }

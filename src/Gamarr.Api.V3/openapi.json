@@ -12424,6 +12424,9 @@
           "isDocker": {
             "type": "boolean"
           },
+          "isContainerized": {
+            "type": "boolean"
+          },
           "mode": {
             "$ref": "#/components/schemas/RuntimeMode"
           },

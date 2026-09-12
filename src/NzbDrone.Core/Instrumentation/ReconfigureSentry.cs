@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Instrumentation
                     { "os_name", _osInfo.FullName },
                     { "arch", RuntimeInformation.OSArchitecture.ToString() },
                     { "runtime", $"{PlatformInfo.PlatformName} {_platformInfo.Version}" },
-                    { "is_docker", _osInfo.IsDocker.ToString() },
+                    { "is_containerized", _osInfo.IsContainerized.ToString() },
                     { "is_production", RuntimeInfo.IsProduction.ToString() },
                 });
         }
