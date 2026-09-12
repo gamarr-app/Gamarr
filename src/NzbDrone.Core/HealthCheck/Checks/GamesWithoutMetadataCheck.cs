@@ -39,6 +39,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
                 return new HealthCheck(
                     GetType(),
                     HealthCheckResult.Warning,
+                    HealthCheckReason.GamesWithoutMetadata,
                     _localizationService.GetLocalizedString("GamesWithoutMetadataHealthCheckMessage",
                         new Dictionary<string, object>
                         {

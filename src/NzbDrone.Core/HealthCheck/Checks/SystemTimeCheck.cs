@@ -32,7 +32,11 @@ namespace NzbDrone.Core.HealthCheck.Checks
                 if (Math.Abs((result.Datetime - systemTime).TotalDays) >= 1)
                 {
                     _logger.Error("System time mismatch. SystemTime: {0} ApiTime: {1}", systemTime, result.Datetime);
-                    return new HealthCheck(GetType(), HealthCheckResult.Error, _localizationService.GetLocalizedString("SystemTimeCheckMessage"), "#system-time-off");
+                    return new HealthCheck(GetType(),
+                        HealthCheckResult.Error,
+                        HealthCheckReason.SystemTime,
+                        _localizationService.GetLocalizedString("SystemTimeCheckMessage"),
+                        "#system-time-off");
                 }
             }
             catch (Exception ex)

@@ -233,7 +233,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 .Setup(f => f.OnHealthIssueEnabled(It.IsAny<bool>()))
                 .Returns(new List<INotification> { _notification.Object });
 
-            var healthCheck = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(NotificationServiceFixture), NzbDrone.Core.HealthCheck.HealthCheckResult.Error, "Test error");
+            var healthCheck = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(NotificationServiceFixture), NzbDrone.Core.HealthCheck.HealthCheckResult.Error, NzbDrone.Core.HealthCheck.HealthCheckReason.ServerNotification, "Test error");
 
             Subject.Handle(new NzbDrone.Core.HealthCheck.HealthCheckFailedEvent(healthCheck, false));
 
@@ -257,7 +257,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 .Setup(f => f.OnHealthIssueEnabled(It.IsAny<bool>()))
                 .Returns(new List<INotification> { _notification.Object });
 
-            var healthCheck = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(NotificationServiceFixture), NzbDrone.Core.HealthCheck.HealthCheckResult.Warning, "Test warning");
+            var healthCheck = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(NotificationServiceFixture), NzbDrone.Core.HealthCheck.HealthCheckResult.Warning, NzbDrone.Core.HealthCheck.HealthCheckReason.ServerNotification, "Test warning");
 
             Subject.Handle(new NzbDrone.Core.HealthCheck.HealthCheckFailedEvent(healthCheck, false));
 
@@ -271,7 +271,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 .Setup(f => f.OnHealthIssueEnabled(It.IsAny<bool>()))
                 .Returns(new List<INotification> { _notification.Object });
 
-            var healthCheck = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(NotificationServiceFixture), NzbDrone.Core.HealthCheck.HealthCheckResult.Error, "Test error");
+            var healthCheck = new NzbDrone.Core.HealthCheck.HealthCheck(typeof(NotificationServiceFixture), NzbDrone.Core.HealthCheck.HealthCheckResult.Error, NzbDrone.Core.HealthCheck.HealthCheckReason.ServerNotification, "Test error");
 
             Subject.Handle(new NzbDrone.Core.HealthCheck.HealthCheckFailedEvent(healthCheck, true));
 
