@@ -14,7 +14,15 @@ function createThemeSelector() {
 
 const useTheme = () => {
   const selectedTheme = useSelector(useMemo(() => createThemeSelector(), []));
-  const [resolvedTheme, setResolvedTheme] = useState(selectedTheme);
+  const [resolvedTheme, setResolvedTheme] = useState(() => {
+    if (selectedTheme === 'auto') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+    }
+
+    return selectedTheme;
+  });
 
   useEffect(() => {
     if (selectedTheme !== 'auto') {
