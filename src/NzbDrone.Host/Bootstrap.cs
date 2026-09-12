@@ -232,7 +232,6 @@ namespace NzbDrone.Host
                     services.AddSingleton<IHostLifetime, RestartableServiceLifetime>();
 
                     services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
-                    services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
                     services.Configure<AppOptions>(config.GetSection("Gamarr:App"));
                     services.Configure<AuthOptions>(config.GetSection("Gamarr:Auth"));
                     services.Configure<ServerOptions>(config.GetSection("Gamarr:Server"));
