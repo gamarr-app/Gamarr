@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common;
+using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Messaging;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Test.Common;
@@ -18,6 +19,8 @@ namespace NzbDrone.Core.Test.Messaging.Events
         private Mock<IHandle<EventB>> _handlerB1;
         private Mock<IHandle<EventB>> _handlerB2;
 
+        private Mock<IHandle<LifecycleEventA>> _lifecycleHandler;
+
         [SetUp]
         public void Setup()
         {
@@ -25,6 +28,7 @@ namespace NzbDrone.Core.Test.Messaging.Events
             _handlerA2 = new Mock<IHandle<EventA>>();
             _handlerB1 = new Mock<IHandle<EventB>>();
             _handlerB2 = new Mock<IHandle<EventB>>();
+            _lifecycleHandler = new Mock<IHandle<LifecycleEventA>>();
 
             Mocker.GetMock<IServiceFactory>()
                   .Setup(c => c.BuildAll<IHandle<EventA>>())
@@ -33,6 +37,17 @@ namespace NzbDrone.Core.Test.Messaging.Events
             Mocker.GetMock<IServiceFactory>()
                   .Setup(c => c.BuildAll<IHandle<EventB>>())
                   .Returns(new List<IHandle<EventB>> { _handlerB1.Object, _handlerB2.Object });
+
+            Mocker.GetMock<IServiceFactory>()
+                  .Setup(c => c.BuildAll<IHandle<LifecycleEventA>>())
+                  .Returns(new List<IHandle<LifecycleEventA>> { _lifecycleHandler.Object });
+        }
+
+        private void GivenExiting(bool exiting)
+        {
+            Mocker.GetMock<IRuntimeInfo>()
+                  .SetupGet(c => c.IsExiting)
+                  .Returns(exiting);
         }
 
         [Test]
@@ -75,6 +90,59 @@ namespace NzbDrone.Core.Test.Messaging.Events
 
             ExceptionVerification.ExpectedErrors(1);
         }
+
+        [Test]
+        public void should_publish_lifecycle_event_when_not_exiting()
+        {
+            GivenExiting(false);
+
+            var lifecycleEvent = new LifecycleEventA();
+
+            Subject.PublishEvent(lifecycleEvent);
+
+            _lifecycleHandler.Verify(c => c.Handle(lifecycleEvent), Times.Once());
+        }
+
+        [Test]
+        public void should_block_lifecycle_event_when_exiting()
+        {
+            GivenExiting(true);
+
+            var lifecycleEvent = new LifecycleEventA();
+
+            Subject.PublishEvent(lifecycleEvent);
+
+            _lifecycleHandler.Verify(c => c.Handle(It.IsAny<LifecycleEventA>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_still_publish_non_lifecycle_event_when_exiting()
+        {
+            GivenExiting(true);
+
+            var eventA = new EventA();
+
+            Subject.PublishEvent(eventA);
+
+            _handlerA1.Verify(c => c.Handle(eventA), Times.Once());
+            _handlerA2.Verify(c => c.Handle(eventA), Times.Once());
+        }
+
+        [Test]
+        public void should_not_throw_when_subscribers_cannot_be_resolved()
+        {
+            Mocker.GetMock<IServiceFactory>()
+                  .Setup(c => c.BuildAll<IHandle<EventB>>())
+                  .Throws(new ObjectDisposedException("container"));
+
+            Assert.DoesNotThrow(() => Subject.PublishEvent(new EventB()));
+
+            _handlerB1.Verify(c => c.Handle(It.IsAny<EventB>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
     }
 
     public class EventA : IEvent
@@ -82,6 +150,11 @@ namespace NzbDrone.Core.Test.Messaging.Events
     }
 
     public class EventB : IEvent
+    {
+    }
+
+    [LifecycleEvent]
+    public class LifecycleEventA : IEvent
     {
     }
 }

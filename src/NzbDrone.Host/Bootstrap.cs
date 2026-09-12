@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
@@ -66,73 +67,18 @@ namespace NzbDrone.Host
                 var appMode = GetApplicationMode(startupContext);
                 var config = GetConfiguration(startupContext);
 
-                switch (appMode)
+                // Deliberately not an early `return` (upstream uses one): falling through
+                // keeps the SQLite/Npgsql pool cleanup below running for utility mode,
+                // exactly as it did before this was split into helpers.
+                if (appMode != ApplicationModes.Interactive && appMode != ApplicationModes.Service)
                 {
-                    case ApplicationModes.Service:
-                    {
-                        Logger.Debug("Service selected");
+                    RunUtilityMode(appMode, startupContext, config);
+                }
+                else
+                {
+                    RunHostUntilShutdown(args, startupContext, appMode, trayCallback);
 
-                        CreateConsoleHostBuilder(args, startupContext).UseWindowsService().Build().Run();
-                        break;
-                    }
-
-                    case ApplicationModes.Interactive:
-                    {
-                        Logger.Debug(trayCallback != null ? "Tray selected" : "Console selected");
-                        var builder = CreateConsoleHostBuilder(args, startupContext);
-
-                        if (trayCallback != null)
-                        {
-                            trayCallback(builder);
-                        }
-
-                        builder.Build().Run();
-                        break;
-                    }
-
-                    // Utility mode
-                    default:
-                    {
-                        new HostBuilder()
-                            .UseServiceProviderFactory(new DryIocServiceProviderFactory(new Container(rules => rules.WithNzbDroneRules())))
-                            .ConfigureContainer<IContainer>(c =>
-                            {
-                                c.AutoAddServices(Bootstrap.ASSEMBLIES)
-                                    .AddNzbDroneLogger()
-                                    .AddDatabase()
-                                    .AddStartupContext(startupContext);
-
-                                // Register MockHttpDispatcher to wrap ManagedHttpDispatcher for mock metadata support
-                                c.Register<IHttpDispatcher, MockHttpDispatcher>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
-
-                                // Register AggregateGameInfoProxy to use both RAWG and IGDB
-                                c.Register<ISearchForNewGame, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
-                                c.Register<IProvideGameInfo, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
-
-                                c.Resolve<UtilityModeRouter>()
-                                    .Route(appMode);
-
-                                if (config.GetValue(nameof(ConfigFileProvider.LogDbEnabled), true))
-                                {
-                                    c.AddLogDatabase();
-                                }
-                                else
-                                {
-                                    c.AddDummyLogDatabase();
-                                }
-                            })
-                            .ConfigureServices(services =>
-                            {
-                                services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
-                                services.Configure<AppOptions>(config.GetSection("Gamarr:App"));
-                                services.Configure<AuthOptions>(config.GetSection("Gamarr:Auth"));
-                                services.Configure<ServerOptions>(config.GetSection("Gamarr:Server"));
-                                services.Configure<LogOptions>(config.GetSection("Gamarr:Log"));
-                                services.Configure<UpdateOptions>(config.GetSection("Gamarr:Update"));
-                            }).Build();
-
-                        break;
-                    }
+                    Logger.Info("Gamarr has shut down completely");
                 }
             }
             catch (InvalidConfigFileException ex)
@@ -150,6 +96,87 @@ namespace NzbDrone.Host
             GC.WaitForPendingFinalizers();
             SQLiteConnection.ClearAllPools();
             NpgsqlConnection.ClearAllPools();
+        }
+
+        private static void RunUtilityMode(ApplicationModes appMode, StartupContext startupContext, IConfiguration config)
+        {
+            Logger.Debug("Utility mode: {0}", appMode);
+
+            new HostBuilder()
+                .UseServiceProviderFactory(new DryIocServiceProviderFactory(new Container(rules => rules.WithNzbDroneRules())))
+                .ConfigureContainer<IContainer>(c =>
+                {
+                    c.AutoAddServices(ASSEMBLIES)
+                        .AddNzbDroneLogger()
+                        .AddDatabase()
+                        .AddStartupContext(startupContext);
+
+                    // Register MockHttpDispatcher to wrap ManagedHttpDispatcher for mock metadata support
+                    c.Register<IHttpDispatcher, MockHttpDispatcher>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+
+                    // Register AggregateGameInfoProxy to use both RAWG and IGDB
+                    c.Register<ISearchForNewGame, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                    c.Register<IProvideGameInfo, AggregateGameInfoProxy>(ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+
+                    c.Resolve<UtilityModeRouter>()
+                        .Route(appMode);
+
+                    if (config.GetValue(nameof(ConfigFileProvider.LogDbEnabled), true))
+                    {
+                        c.AddLogDatabase();
+                    }
+                    else
+                    {
+                        c.AddDummyLogDatabase();
+                    }
+                })
+                .ConfigureServices(services =>
+                {
+                    services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
+                    services.Configure<AppOptions>(config.GetSection("Gamarr:App"));
+                    services.Configure<AuthOptions>(config.GetSection("Gamarr:Auth"));
+                    services.Configure<ServerOptions>(config.GetSection("Gamarr:Server"));
+                    services.Configure<LogOptions>(config.GetSection("Gamarr:Log"));
+                    services.Configure<UpdateOptions>(config.GetSection("Gamarr:Update"));
+                })
+                .Build();
+        }
+
+        private static void RunHostUntilShutdown(string[] args, StartupContext startupContext, ApplicationModes appMode, Action<IHostBuilder> trayCallback)
+        {
+            Logger.Debug("Starting in {0} mode", trayCallback != null ? "Tray" : appMode.ToString());
+
+            bool shouldRestart;
+            do
+            {
+                var builder = CreateConsoleHostBuilder(args, startupContext);
+                trayCallback?.Invoke(builder);
+
+                shouldRestart = RunWithRestartCheck(builder.Build());
+
+                if (shouldRestart)
+                {
+                    Logger.Info("Application restart requested, reinitializing host");
+                    NzbDroneLogger.ResetAllTargets(startupContext, false, true);
+                    Thread.Sleep(1000);
+                }
+            }
+            while (shouldRestart);
+        }
+
+        private static bool RunWithRestartCheck(IHost host)
+        {
+            var shouldRestart = false;
+
+            var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+            lifetime.ApplicationStopped.Register(() =>
+            {
+                var runtimeInfo = host.Services.GetRequiredService<IRuntimeInfo>();
+                shouldRestart = runtimeInfo.RestartPending;
+            });
+
+            host.Run();
+            return shouldRestart;
         }
 
         public static IHostBuilder CreateConsoleHostBuilder(string[] args, StartupContext context)
@@ -199,6 +226,11 @@ namespace NzbDrone.Host
                 })
                 .ConfigureServices(services =>
                 {
+                    // Replaces the default ConsoleLifetime (and the old UseWindowsService()
+                    // call): ServiceBase.Run can only happen once per process, so the
+                    // in-process restart loop needs a lifetime that reuses it.
+                    services.AddSingleton<IHostLifetime, RestartableServiceLifetime>();
+
                     services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
                     services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
                     services.Configure<AppOptions>(config.GetSection("Gamarr:App"));
