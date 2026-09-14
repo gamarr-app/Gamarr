@@ -327,7 +327,19 @@ namespace NzbDrone.Core.Parser
             // ordinary word by the rule above, and leaving it in both places would
             // make the separator ambiguous again - which is the exponential
             // backtracking described above, not a new risk.
-            new Regex(@"^(?<title>(?:[A-Z][a-z]+(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*)(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4})(?:'[a-z]+)?)*(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
+            // NOTE: a hyphen with no surrounding spaces joins one word, it does not
+            // separate two ("Half-Life", "Spider-Man", "X-Men", "Re-Volt"). That is
+            // why the head of a hyphenated word is [A-Z][a-z]* with a * rather than
+            // the + used everywhere else - "X" has no lowercase to give. The * is
+            // only safe because at least one -segment is then REQUIRED: without that
+            // the alternative would match a lone capital and swallow every token.
+            // Each segment stays narrow ([A-Z][a-z]*, [a-z]+ or digits) so
+            // "SOME-RELEASE-GROUP" keeps failing - "RELEASE" gets one capital and
+            // then has letters left over, which is the whole point.
+            // This cannot be confused with the " - " separator above, since that one
+            // demands whitespace on both sides and this one forbids it, so the two
+            // never compete and no new backtracking is introduced.
+            new Regex(@"^(?<title>(?:[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Z][a-z]+(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*)(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4})(?:'[a-z]+)?)*(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
