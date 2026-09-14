@@ -878,6 +878,24 @@ namespace NzbDrone.Core.Test.ParserTests
             result.PrimaryGameTitle.Should().Be(title);
         }
 
+        // Bare titles that only the catch-all pattern can match. These came in via
+        // release/push, which 400s with "Unable to parse" when ParseGameTitle returns
+        // null - there is no friendlier rejection for a pushed release.
+        [TestCase("Super Mario 3D World + Bowser's Fury", "Super Mario 3D World + Bowser's Fury")]
+        [TestCase("Super Mario 3D World", "Super Mario 3D World")]
+        [TestCase("Portal 2 + Portal Stories", "Portal 2 + Portal Stories")]
+        [TestCase("Mario Kart 8 Deluxe", "Mario Kart 8 Deluxe")]
+        [TestCase("Final Fantasy VII", "Final Fantasy VII")]
+        [TestCase("3D Pinball Space Cadet", "3D Pinball Space Cadet")]
+        [TestCase("Assassin's Creed", "Assassin's Creed")]
+        [TestCase("StarRupture", "StarRupture")]
+        public void should_parse_bare_titles_with_plus_and_digit_led_words(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
         // Real 1337x top 100 releases - Scene group releases
         [TestCase("Quarantine Zone The Last Check-RUNE", "Quarantine Zone The Last Check")]
         [TestCase("Terra Invicta-RUNE", "Terra Invicta")]

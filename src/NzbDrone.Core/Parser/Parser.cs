@@ -312,7 +312,22 @@ namespace NzbDrone.Core.Parser
             // the whole parse. The apostrophe is kept, not stripped: CleanGameTitle
             // drops it later for matching, and the search path handles it
             // separately.
-            new Regex(@"^(?<title>[A-Z][a-z]+(?:[A-Z][a-z]+)*(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+)[A-Za-z][a-z]*(?:[A-Z][a-z]+)*(?:'[a-z]+)?)*(?:\s+(?:\d{1,4}|[IVXLCDM]+))?)$", RegexOptions.Compiled)
+            // NOTE: " + " is a word separator too. Compilation titles join their
+            // halves with it ("Super Mario 3D World + Bowser's Fury"), and without
+            // the alternative the whole title was unparseable - which on the
+            // release/push endpoint surfaces as a 400 "Unable to parse", because
+            // DownloadDecisionMaker emits no decision at all for a pushed release
+            // whose title returns null.
+            // NOTE: a word may lead with digits (3D, 2D, 4X) as long as a capital
+            // follows, so "Super Mario 3D World" survives, and a word may be a bare
+            // number, so "Portal 2 + Portal Stories" and "Mario Kart 8 Deluxe" do
+            // too. The number was previously only reachable from the trailing
+            // sequel group, i.e. only as the very last token. Note that group has
+            // now GIVEN UP \d{1,4} in exchange: a trailing number is just an
+            // ordinary word by the rule above, and leaving it in both places would
+            // make the separator ambiguous again - which is the exponential
+            // backtracking described above, not a new risk.
+            new Regex(@"^(?<title>(?:[A-Z][a-z]+(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*)(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4})(?:'[a-z]+)?)*(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
