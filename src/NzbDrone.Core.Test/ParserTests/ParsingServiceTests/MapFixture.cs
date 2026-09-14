@@ -313,12 +313,28 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         public void should_map_by_game_id()
         {
             Mocker.GetMock<IGameService>()
-                  .Setup(s => s.GetGame(42))
+                  .Setup(s => s.FindGame(42))
                   .Returns(_game);
 
             var result = Subject.Map(_parsedGameInfo, 42);
 
             result.Game.Should().Be(_game);
+            result.ParsedGameInfo.Should().Be(_parsedGameInfo);
+        }
+
+        [Test]
+        public void should_map_to_an_unresolved_game_when_the_id_no_longer_exists()
+        {
+            // The id comes from grab history, so the game may since have been deleted.
+            // That is an unresolved download, not an exception.
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(42))
+                  .Returns(default(Game));
+
+            var result = Subject.Map(_parsedGameInfo, 42);
+
+            result.Should().NotBeNull();
+            result.Game.Should().BeNull();
             result.ParsedGameInfo.Should().Be(_parsedGameInfo);
         }
 

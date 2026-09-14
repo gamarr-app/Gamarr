@@ -119,93 +119,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
             UpdateStallTracking(trackedDownload, downloadItem);
 
-            try
-            {
-                var downloadHistory = _downloadHistoryService.GetLatestDownloadHistoryItem(downloadItem.DownloadId);
-
-                if (downloadHistory != null)
-                {
-                    var state = GetStateFromHistory(downloadHistory.EventType);
-                    trackedDownload.State = state;
-                }
-
-                var parsedGameInfo = Parser.Parser.ParseGameTitle(trackedDownload.DownloadItem.Title);
-
-                if (parsedGameInfo != null)
-                {
-                    trackedDownload.RemoteGame = downloadHistory is { EventType: DownloadHistoryEventType.DownloadImported }
-                        ? _parsingService.Map(parsedGameInfo, downloadHistory.GameId)
-                        : _parsingService.Map(parsedGameInfo, 0, 0, null);
-                }
-
-                var historyItems = _historyService.FindByDownloadId(downloadItem.DownloadId)
-                    .OrderByDescending(h => h.Date)
-                    .ToList();
-
-                if (historyItems.Any())
-                {
-                    var firstHistoryItem = historyItems.First();
-                    var grabbedEvent = historyItems.FirstOrDefault(v => v.EventType == GameHistoryEventType.Grabbed);
-
-                    trackedDownload.Indexer = grabbedEvent?.Data?.GetValueOrDefault("indexer");
-                    trackedDownload.Added = grabbedEvent?.Date;
-
-                    if (parsedGameInfo == null ||
-                        trackedDownload.RemoteGame?.Game == null)
-                    {
-                        parsedGameInfo = Parser.Parser.ParseGameTitle(firstHistoryItem.SourceTitle);
-
-                        if (parsedGameInfo != null)
-                        {
-                            trackedDownload.RemoteGame = _parsingService.Map(parsedGameInfo,
-                                firstHistoryItem.GameId);
-                        }
-                    }
-
-                    if (trackedDownload.RemoteGame != null)
-                    {
-                        trackedDownload.RemoteGame.Release ??= new ReleaseInfo();
-                        trackedDownload.RemoteGame.Release.Indexer = trackedDownload.Indexer;
-                        trackedDownload.RemoteGame.Release.Title = trackedDownload.RemoteGame.ParsedGameInfo?.ReleaseTitle;
-
-                        if (Enum.TryParse(grabbedEvent?.Data?.GetValueOrDefault("indexerFlags"), true, out IndexerFlags flags))
-                        {
-                            trackedDownload.RemoteGame.Release.IndexerFlags = flags;
-                        }
-
-                        if (downloadHistory != null)
-                        {
-                            trackedDownload.RemoteGame.Release.IndexerId = downloadHistory.IndexerId;
-                        }
-                    }
-                }
-
-                if (trackedDownload.RemoteGame != null)
-                {
-                    _aggregationService.Augment(trackedDownload.RemoteGame);
-
-                    // Calculate custom formats
-                    trackedDownload.RemoteGame.CustomFormats = _formatCalculator.ParseCustomFormat(trackedDownload.RemoteGame, downloadItem.TotalSize);
-                }
-
-                // Track it so it can be displayed in the queue even though we can't determine which game it is for
-                if (trackedDownload.RemoteGame == null)
-                {
-                    _logger.Trace("No Game found for download '{0}'", trackedDownload.DownloadItem.Title);
-                }
-            }
-            catch (MultipleGamesFoundException e)
-            {
-                _logger.Debug(e, "Found multiple games for " + downloadItem.Title);
-
-                trackedDownload.Warn("Unable to import automatically, found multiple games: {0}", string.Join(", ", e.Games));
-            }
-            catch (Exception e)
-            {
-                _logger.Debug(e, "Failed to find game for " + downloadItem.Title);
-
-                trackedDownload.Warn("Unable to parse game from title");
-            }
+            ResolveRemoteGame(trackedDownload, updateState: true);
 
             LogItemChange(trackedDownload, existingItem?.DownloadItem, trackedDownload.DownloadItem);
 
@@ -246,13 +160,117 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
+        // The in-place re-resolve, run when the library changes under a download that is
+        // already being tracked. It deliberately does NOT re-derive State: the download's
+        // lifecycle stage is not a function of the library, and rewinding an Imported item
+        // to Downloading because someone edited a game would re-run the import pipeline.
         private void UpdateCachedItem(TrackedDownload trackedDownload)
         {
-            var parsedGameInfo = Parser.Parser.ParseGameTitle(trackedDownload.DownloadItem.Title);
+            ResolveRemoteGame(trackedDownload, updateState: false);
+        }
 
-            trackedDownload.RemoteGame = parsedGameInfo == null ? null : _parsingService.Map(parsedGameInfo, 0, 0, null);
+        /// <summary>
+        /// The single place a tracked download's game is resolved.
+        ///
+        /// There used to be two: this one, and a title-only copy in <see cref="UpdateCachedItem"/>
+        /// with no grab-history fallback. Every game add/edit/bulk-edit/delete runs that path, so
+        /// editing a game re-parsed every tracked download title-only and **nulled out any
+        /// resolution that only history had established** — the download client reports a
+        /// URL-encoded name (`Lords+of+Thunder+(E)[SEGA+CD]`) that the parser rejects, while the
+        /// grab history stores the decoded one that parses. The next download-client refresh
+        /// repaired it, so the damage was a ~1 minute window of a game vanishing from the queue,
+        /// with no error anywhere. Two implementations of "resolve a tracked download" is how one
+        /// of them ended up with a safety net and one without; hence one method.
+        /// </summary>
+        private void ResolveRemoteGame(TrackedDownload trackedDownload, bool updateState)
+        {
+            var downloadItem = trackedDownload.DownloadItem;
 
-            _aggregationService.Augment(trackedDownload.RemoteGame);
+            try
+            {
+                var downloadHistory = _downloadHistoryService.GetLatestDownloadHistoryItem(downloadItem.DownloadId);
+
+                if (updateState && downloadHistory != null)
+                {
+                    trackedDownload.State = GetStateFromHistory(downloadHistory.EventType);
+                }
+
+                var parsedGameInfo = Parser.Parser.ParseGameTitle(downloadItem.Title);
+
+                trackedDownload.RemoteGame = parsedGameInfo == null
+                    ? null
+                    : downloadHistory is { EventType: DownloadHistoryEventType.DownloadImported }
+                        ? _parsingService.Map(parsedGameInfo, downloadHistory.GameId)
+                        : _parsingService.Map(parsedGameInfo, 0, 0, null);
+
+                var historyItems = _historyService.FindByDownloadId(downloadItem.DownloadId)
+                    .OrderByDescending(h => h.Date)
+                    .ToList();
+
+                if (historyItems.Any())
+                {
+                    var firstHistoryItem = historyItems.First();
+                    var grabbedEvent = historyItems.FirstOrDefault(v => v.EventType == GameHistoryEventType.Grabbed);
+
+                    trackedDownload.Indexer = grabbedEvent?.Data?.GetValueOrDefault("indexer");
+                    trackedDownload.Added = grabbedEvent?.Date;
+
+                    // The fallback that the edit path used to be missing. The client's title and
+                    // history's SourceTitle are not the same string, and either one can be the
+                    // only one that parses.
+                    if (trackedDownload.RemoteGame?.Game == null)
+                    {
+                        var historyGameInfo = Parser.Parser.ParseGameTitle(firstHistoryItem.SourceTitle);
+
+                        if (historyGameInfo != null)
+                        {
+                            trackedDownload.RemoteGame = _parsingService.Map(historyGameInfo, firstHistoryItem.GameId);
+                        }
+                    }
+
+                    if (trackedDownload.RemoteGame != null)
+                    {
+                        trackedDownload.RemoteGame.Release ??= new ReleaseInfo();
+                        trackedDownload.RemoteGame.Release.Indexer = trackedDownload.Indexer;
+                        trackedDownload.RemoteGame.Release.Title = trackedDownload.RemoteGame.ParsedGameInfo?.ReleaseTitle;
+
+                        if (Enum.TryParse(grabbedEvent?.Data?.GetValueOrDefault("indexerFlags"), true, out IndexerFlags flags))
+                        {
+                            trackedDownload.RemoteGame.Release.IndexerFlags = flags;
+                        }
+
+                        if (downloadHistory != null)
+                        {
+                            trackedDownload.RemoteGame.Release.IndexerId = downloadHistory.IndexerId;
+                        }
+                    }
+                }
+
+                if (trackedDownload.RemoteGame != null)
+                {
+                    _aggregationService.Augment(trackedDownload.RemoteGame);
+
+                    // Calculate custom formats
+                    trackedDownload.RemoteGame.CustomFormats = _formatCalculator.ParseCustomFormat(trackedDownload.RemoteGame, downloadItem.TotalSize);
+                }
+                else
+                {
+                    // Track it so it can be displayed in the queue even though we can't determine which game it is for
+                    _logger.Trace("No Game found for download '{0}'", downloadItem.Title);
+                }
+            }
+            catch (MultipleGamesFoundException e)
+            {
+                _logger.Debug(e, "Found multiple games for " + downloadItem.Title);
+
+                trackedDownload.Warn("Unable to import automatically, found multiple games: {0}", string.Join(", ", e.Games));
+            }
+            catch (Exception e)
+            {
+                _logger.Debug(e, "Failed to find game for " + downloadItem.Title);
+
+                trackedDownload.Warn("Unable to parse game from title");
+            }
         }
 
         private static void UpdateStallTracking(TrackedDownload trackedDownload, DownloadClientItem downloadItem)
