@@ -207,5 +207,63 @@ namespace NzbDrone.Core.Test.Datastore
 
             _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" = ANY (@Clause1_P1))");
         }
+
+        [Test]
+        public void where_in_int_array()
+        {
+            var list = new int[] { 1, 2, 3 };
+            _subject = Where(x => list.Contains(x.Id));
+
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = ANY (('{{1, 2, 3}}')))");
+
+            _subject.Parameters.ParameterNames.Should().BeEmpty();
+        }
+
+        [Test]
+        public void where_in_int_array_with_cast_member()
+        {
+            var eventTypes = new int[] { 1, 4 };
+            _subject = WhereMeta(x => eventTypes.Contains((int)x.Status));
+
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" = ANY (('{{1, 4}}')))");
+
+            _subject.Parameters.ParameterNames.Should().BeEmpty();
+        }
+
+        [Test]
+        public void where_in_empty_int_array()
+        {
+            var list = Array.Empty<int>();
+            _subject = Where(x => list.Contains(x.Id));
+
+            _subject.ToString().Should().Be($"(1 = 0)");
+        }
+
+        [Test]
+        public void where_in_empty_int_list()
+        {
+            var list = new List<int>();
+            _subject = Where(x => list.Contains(x.Id));
+
+            _subject.ToString().Should().Be($"(1 = 0)");
+        }
+
+        [Test]
+        public void where_in_long_array()
+        {
+            var list = new long[] { 1, 2, 3 };
+            _subject = Where(x => list.Contains((long)x.Id));
+
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" = ANY (@Clause1_P1))");
+        }
+
+        [Test]
+        public void where_in_nullable_int_array()
+        {
+            var list = new int?[] { 1, 2 };
+            _subject = WhereMeta(x => list.Contains(x.SecondaryYear));
+
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"SecondaryYear\" = ANY (@Clause1_P1))");
+        }
     }
 }

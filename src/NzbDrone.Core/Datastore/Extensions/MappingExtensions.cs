@@ -10,12 +10,29 @@ namespace NzbDrone.Core.Datastore
     {
         public static PropertyInfo GetMemberName<T, TChild>(this Expression<Func<T, TChild>> member)
         {
-            if (!(member.Body is MemberExpression memberExpression))
+            var body = member.Body;
+
+            // Value-typed properties arrive wrapped in a conversion node. The old code
+            // assumed anything that wasn't a MemberExpression was a UnaryExpression over
+            // one, and dereferenced the result of two unchecked "as" casts -- the same
+            // unguarded-cast pattern that made the where-clause builder throw a
+            // NullReferenceException on a filtered history/blocklist query.
+            while (body is UnaryExpression unary)
             {
-                memberExpression = (member.Body as UnaryExpression).Operand as MemberExpression;
+                body = unary.Operand;
             }
 
-            return (PropertyInfo)memberExpression.Member;
+            if (body is not MemberExpression memberExpression)
+            {
+                throw new ArgumentException($"Expression '{member}' does not refer to a property.", nameof(member));
+            }
+
+            if (memberExpression.Member is not PropertyInfo propertyInfo)
+            {
+                throw new ArgumentException($"Expression '{member}' refers to a field, not a property.", nameof(member));
+            }
+
+            return propertyInfo;
         }
 
         public static bool IsMappableProperty(this MemberInfo memberInfo)

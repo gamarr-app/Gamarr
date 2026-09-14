@@ -5,6 +5,7 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Blocklisting;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
@@ -87,6 +88,29 @@ namespace NzbDrone.Core.Test.Blocklisting
 
             removedGameBlocklists.Should().HaveCount(0);
             nonRemovedGameBlocklists.Should().HaveCount(1);
+        }
+
+        [Test]
+        public void should_page_with_game_id_filter()
+        {
+            // Regression for GET /api/v3/blocklist?gameIds=N, which returned a 500 for
+            // the same reason as the history eventType filter: an int[] Contains filter
+            // reaches the where-clause builder wrapped in a conversion node.
+            var gameIds = new[] { _game1.Id };
+
+            var pagingSpec = new PagingSpec<Blocklist>
+            {
+                Page = 1,
+                PageSize = 10,
+                SortKey = "date",
+                SortDirection = SortDirection.Descending
+            };
+
+            pagingSpec.FilterExpressions.Add(b => gameIds.Contains(b.GameId));
+
+            var result = Subject.GetPaged(pagingSpec);
+
+            result.Records.Should().NotBeNull();
         }
     }
 }
