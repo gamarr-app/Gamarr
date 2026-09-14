@@ -23,7 +23,11 @@ namespace NzbDrone.Core.HealthCheck.Checks
 
         public override HealthCheck Check()
         {
-            if (AllowedHostsParser.Parse(_configFileProvider.AllowedHosts).Count > 0)
+            var allowedHosts = AllowedHostsParser.Parse(_configFileProvider.AllowedHosts);
+
+            // A configured "*" is not a configuration: it accepts every hostname, which is
+            // exactly the state this check exists to warn about.
+            if (allowedHosts.Count > 0 && !allowedHosts.Contains("*"))
             {
                 return new HealthCheck(GetType());
             }
