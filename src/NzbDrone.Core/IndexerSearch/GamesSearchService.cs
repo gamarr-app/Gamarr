@@ -23,6 +23,7 @@ namespace NzbDrone.Core.IndexerSearch
         private readonly ISearchForReleases _releaseSearchService;
         private readonly IProcessDownloadDecisions _processDownloadDecisions;
         private readonly IQueueService _queueService;
+        private readonly IGameSearchBackoff _searchBackoff;
         private readonly Logger _logger;
 
         public GameSearchService(IGameService gameService,
@@ -31,6 +32,7 @@ namespace NzbDrone.Core.IndexerSearch
                                    ISearchForReleases releaseSearchService,
                                    IProcessDownloadDecisions processDownloadDecisions,
                                    IQueueService queueService,
+                                   IGameSearchBackoff searchBackoff,
                                    Logger logger)
         {
             _gameService = gameService;
@@ -39,6 +41,7 @@ namespace NzbDrone.Core.IndexerSearch
             _releaseSearchService = releaseSearchService;
             _processDownloadDecisions = processDownloadDecisions;
             _queueService = queueService;
+            _searchBackoff = searchBackoff;
             _logger = logger;
         }
 
@@ -184,10 +187,22 @@ namespace NzbDrone.Core.IndexerSearch
 
         private async Task SearchForBulkGames(List<Game> games, bool userInvokedSearch)
         {
-            _logger.ProgressInfo("Performing search for {0} games", games.Count);
+            // A user who pressed Search means now, not "unless we looked recently".
+            var searchable = userInvokedSearch ? games : games.Where(g => !_searchBackoff.ShouldSkip(g)).ToList();
+            var skipped = games.Count - searchable.Count;
+
+            if (skipped > 0)
+            {
+                _logger.ProgressInfo("Performing search for {0} games ({1} skipped, still backed off after finding nothing)", searchable.Count, skipped);
+            }
+            else
+            {
+                _logger.ProgressInfo("Performing search for {0} games", searchable.Count);
+            }
+
             var downloadedCount = 0;
 
-            foreach (var gameId in games.GroupBy(e => e.Id).OrderBy(g => g.Min(m => m.LastSearchTime ?? DateTime.MinValue)))
+            foreach (var gameId in searchable.GroupBy(e => e.Id).OrderBy(g => g.Min(m => m.LastSearchTime ?? DateTime.MinValue)))
             {
                 List<DownloadDecision> decisions;
 
@@ -201,12 +216,20 @@ namespace NzbDrone.Core.IndexerSearch
                     continue;
                 }
 
+                // Only automatic passes escalate. A manual search that finds
+                // nothing still clears an existing backoff if it finds something,
+                // but must not deepen one the user is trying to search past.
+                if (!userInvokedSearch || decisions.Count > 0)
+                {
+                    _searchBackoff.Record(gameId.Key, decisions.Count);
+                }
+
                 var processDecisions = await _processDownloadDecisions.ProcessDecisions(decisions);
 
                 downloadedCount += processDecisions.Grabbed.Count;
             }
 
-            _logger.ProgressInfo("Completed search for {0} games. {1} reports downloaded.", games.Count, downloadedCount);
+            _logger.ProgressInfo("Completed search for {0} games. {1} reports downloaded.", searchable.Count, downloadedCount);
         }
     }
 }
