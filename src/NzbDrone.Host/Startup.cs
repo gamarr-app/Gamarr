@@ -31,6 +31,7 @@ using Gamarr.Http.ClientSchema;
 using Gamarr.Http.ErrorManagement;
 using Gamarr.Http.Frontend;
 using Gamarr.Http.Middleware;
+using Gamarr.Http.ModelBinding;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace NzbDrone.Host
@@ -95,6 +96,7 @@ namespace NzbDrone.Host
             .AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
+                options.ValueProviderFactories.Add(new RadarrCompatibilityValueProviderFactory());
             })
             .AddApplicationPart(typeof(SystemController).Assembly)
             .AddApplicationPart(typeof(StaticResourceController).Assembly)
