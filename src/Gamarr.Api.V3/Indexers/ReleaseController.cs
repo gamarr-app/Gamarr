@@ -12,6 +12,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Validation;
@@ -29,6 +30,7 @@ namespace Gamarr.Api.V3.Indexers
         private readonly IPrioritizeDownloadDecision _prioritizeDownloadDecision;
         private readonly IDownloadService _downloadService;
         private readonly IGameService _gameService;
+        private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
         private readonly ICached<RemoteGame> _remoteGameCache;
@@ -41,6 +43,7 @@ namespace Gamarr.Api.V3.Indexers
                              IGameService gameService,
                              ICacheManager cacheManager,
                              IQualityProfileService qualityProfileService,
+                             IEventAggregator eventAggregator,
                              Logger logger)
             : base(qualityProfileService)
         {
@@ -50,6 +53,7 @@ namespace Gamarr.Api.V3.Indexers
             _prioritizeDownloadDecision = prioritizeDownloadDecision;
             _downloadService = downloadService;
             _gameService = gameService;
+            _eventAggregator = eventAggregator;
             _logger = logger;
 
             PostValidator.RuleFor(s => s.IndexerId).ValidId();
@@ -125,10 +129,25 @@ namespace Gamarr.Api.V3.Indexers
 
                 await _downloadService.DownloadReport(remoteGame, release.DownloadClientId);
             }
+            catch (IndexerBlockedException ex)
+            {
+                // Specific arm first: this one derives from ReleaseDownloadException but nothing
+                // was sent, so it must not be recorded as a failed grab. The message names the
+                // indexer and when it frees up, which is the only useful thing to say here.
+                _logger.Warn(ex.Message);
+
+                throw new NzbDroneClientException(HttpStatusCode.Conflict, ex.Message);
+            }
             catch (ReleaseDownloadException ex)
             {
                 _logger.Error(ex, ex.Message);
-                throw new NzbDroneClientException(HttpStatusCode.Conflict, "Getting release from indexer failed");
+
+                // An interactive grab that failed used to leave no trace anywhere but the log:
+                // no history row, and nothing counting towards the repeated-failure cap. Every
+                // other grab entry point records one, so this one does too.
+                _eventAggregator.PublishEvent(new GameGrabFailedEvent(remoteGame, ex.Message));
+
+                throw new NzbDroneClientException(HttpStatusCode.Conflict, ex.Message);
             }
 
             return release;

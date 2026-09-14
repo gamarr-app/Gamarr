@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.EnsureThat;
@@ -22,6 +23,11 @@ namespace NzbDrone.Core.Download
 
     public class DownloadService : IDownloadService
     {
+        // What a 429 with no Retry-After header is worth. HttpIndexerBase has always used an
+        // hour for exactly this case on the search side; the grab side passing TimeSpan.Zero
+        // through instead is why a grab-side rate limit never accumulated any back-off.
+        private static readonly TimeSpan MinimumIndexerBackOff = TimeSpan.FromHours(1);
+
         private readonly IProvideDownloadClient _downloadClientProvider;
         private readonly IDownloadClientStatusService _downloadClientStatusService;
         private readonly IIndexerFactory _indexerFactory;
@@ -74,6 +80,8 @@ namespace NzbDrone.Core.Download
                 throw new DownloadClientUnavailableException($"{remoteGame.Release.DownloadProtocol} Download client isn't configured yet");
             }
 
+            EnsureIndexerIsNotBlocked(remoteGame);
+
             // Get the seed configuration for this release.
             remoteGame.SeedConfiguration = _seedConfigProvider.GetSeedConfiguration(remoteGame);
 
@@ -117,7 +125,16 @@ namespace NzbDrone.Core.Download
             {
                 if (ex.InnerException is TooManyRequestsException http429)
                 {
-                    _indexerStatusService.RecordFailure(remoteGame.Release.IndexerId, http429.RetryAfter);
+                    // A 429 is the indexer saying "stop asking", whether or not it bothered to
+                    // attach a Retry-After. Prowlarr's grab-limit 429 carries none, so this used
+                    // to record a plain escalating failure - and the very next successful search
+                    // against the same indexer cleared it again through RecordSuccess. The
+                    // back-off could therefore never survive a single RSS cycle.
+                    var retryAfter = http429.RetryAfter != TimeSpan.Zero ? http429.RetryAfter : MinimumIndexerBackOff;
+
+                    _logger.Warn("Grab limit reached for indexer {0}, backing off for {1}.", remoteGame.Release.Indexer, retryAfter);
+
+                    _indexerStatusService.RecordFailure(remoteGame.Release.IndexerId, retryAfter);
                 }
                 else
                 {
@@ -139,6 +156,38 @@ namespace NzbDrone.Core.Download
 
             _logger.ProgressInfo("Report for {0} ({1}) sent to {2} from indexer {3}. {4}", remoteGame.Game.Title, remoteGame.Game.Year, downloadClient.Definition.Name, remoteGame.Release.Indexer, downloadTitle);
             _eventAggregator.PublishEvent(gameGrabbedEvent);
+        }
+
+        // Grabbing normally means fetching the .torrent/.nzb back from the indexer, so an indexer
+        // that is already backed off after recent failures cannot serve one. Attempting it anyway
+        // does not merely fail: the indexer re-arms its own rate limit from the attempt, so the
+        // block never expires and every search in the instance keeps losing that indexer -
+        // including searches for unrelated games. The search side has always filtered these out
+        // (IndexerFactory.FilterBlockedIndexers); every grab entry point funnels through here, so
+        // this is the one place that gives all of them the same treatment. In particular it also
+        // covers the second and later releases of a single batch, whose decisions were made
+        // before the first grab in that batch armed the block.
+        private void EnsureIndexerIsNotBlocked(RemoteGame remoteGame)
+        {
+            var indexerId = remoteGame.Release.IndexerId;
+
+            if (indexerId <= 0 || remoteGame.Release.IsMagnetOnly)
+            {
+                return;
+            }
+
+            var blockedIndexer = _indexerStatusService.GetBlockedProviders().FirstOrDefault(v => v.ProviderId == indexerId);
+
+            if (blockedIndexer == null)
+            {
+                return;
+            }
+
+            var disabledTill = blockedIndexer.DisabledTill.Value.ToLocalTime();
+
+            _logger.Warn("Not grabbing '{0}': indexer {1} is blocked till {2} due to recent failures.", remoteGame.Release.Title, remoteGame.Release.Indexer, disabledTill);
+
+            throw new IndexerBlockedException(remoteGame.Release, $"Indexer {remoteGame.Release.Indexer} is blocked till {disabledTill} due to recent failures, not grabbing release");
         }
     }
 }
