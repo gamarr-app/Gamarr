@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Games;
@@ -67,6 +69,52 @@ namespace NzbDrone.Core.Test.HistoryTests
             var downloadHistory = Subject.FindDownloadHistory(12, new QualityModel(Quality.GOG));
 
             downloadHistory.Should().HaveCount(1);
+        }
+
+        [Test]
+        public void should_page_with_event_type_filter()
+        {
+            // Regression for GET /api/v3/history?eventType=N, which returned a 500.
+            // The controller builds an int[] Contains filter, and int[] binds to the
+            // static Enumerable.Contains overload, so the list argument arrives wrapped
+            // in a conversion node. The where-clause builder assumed a bare
+            // MemberExpression and threw a NullReferenceException while building the
+            // WHERE clause, before any SQL was executed.
+            var eventTypes = new[] { (int)GameHistoryEventType.GrabFailed };
+
+            var pagingSpec = new PagingSpec<GameHistory>
+            {
+                Page = 1,
+                PageSize = 10,
+                SortKey = "date",
+                SortDirection = SortDirection.Descending
+            };
+
+            pagingSpec.FilterExpressions.Add(h => eventTypes.Contains((int)h.EventType));
+
+            var result = Subject.GetPaged(pagingSpec, null, null);
+
+            result.Records.Should().NotBeNull();
+        }
+
+        [Test]
+        public void should_page_with_game_id_filter()
+        {
+            var gameIds = new[] { _game1.Id, _game2.Id };
+
+            var pagingSpec = new PagingSpec<GameHistory>
+            {
+                Page = 1,
+                PageSize = 10,
+                SortKey = "date",
+                SortDirection = SortDirection.Descending
+            };
+
+            pagingSpec.FilterExpressions.Add(h => gameIds.Contains(h.GameId));
+
+            var result = Subject.GetPaged(pagingSpec, null, null);
+
+            result.Records.Should().NotBeNull();
         }
     }
 }

@@ -209,5 +209,73 @@ namespace NzbDrone.Core.Test.Datastore
 
             _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" IN @Clause1_P1)");
         }
+
+        [Test]
+        public void where_in_int_array()
+        {
+            // int[] binds to the static Enumerable.Contains overload, so the list
+            // argument arrives wrapped in an array -> IEnumerable<int> conversion node
+            // rather than as a bare MemberExpression.
+            var list = new int[] { 1, 2, 3 };
+            _subject = Where(x => list.Contains(x.Id));
+
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" IN (1, 2, 3))");
+
+            _subject.Parameters.ParameterNames.Should().BeEmpty();
+        }
+
+        [Test]
+        public void where_in_int_array_with_cast_member()
+        {
+            // Mirrors GET /api/v3/history?eventType=N, which filters with
+            // eventTypes.Contains((int)v.EventType) over an int[].
+            var eventTypes = new int[] { 1, 4 };
+            _subject = WhereMeta(x => eventTypes.Contains((int)x.Status));
+
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"Status\" IN (1, 4))");
+
+            _subject.Parameters.ParameterNames.Should().BeEmpty();
+        }
+
+        [Test]
+        public void where_in_empty_int_array()
+        {
+            // Contains over an empty set matches nothing. "IN ()" is a syntax error
+            // in SQLite, so it must degrade to a constant-false clause, not to
+            // "no filter" (which would silently return every row).
+            var list = Array.Empty<int>();
+            _subject = Where(x => list.Contains(x.Id));
+
+            _subject.ToString().Should().Be($"(1 = 0)");
+        }
+
+        [Test]
+        public void where_in_empty_int_list()
+        {
+            var list = new List<int>();
+            _subject = Where(x => list.Contains(x.Id));
+
+            _subject.ToString().Should().Be($"(1 = 0)");
+        }
+
+        [Test]
+        public void where_in_long_array()
+        {
+            // Same static-overload conversion node as int[], but the item type is not
+            // int so it takes the parameterised path instead of the hardcoded one.
+            var list = new long[] { 1, 2, 3 };
+            _subject = Where(x => list.Contains((long)x.Id));
+
+            _subject.ToString().Should().Be($"(\"Games\".\"Id\" IN @Clause1_P1)");
+        }
+
+        [Test]
+        public void where_in_nullable_int_array()
+        {
+            var list = new int?[] { 1, 2 };
+            _subject = WhereMeta(x => list.Contains(x.SecondaryYear));
+
+            _subject.ToString().Should().Be($"(\"GameMetadata\".\"SecondaryYear\" IN @Clause1_P1)");
+        }
     }
 }

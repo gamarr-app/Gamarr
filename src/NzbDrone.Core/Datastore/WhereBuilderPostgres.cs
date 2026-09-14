@@ -156,6 +156,11 @@ namespace NzbDrone.Core.Datastore
         {
             result = null;
 
+            if (expression == null)
+            {
+                return false;
+            }
+
             if (expression.Expression is MemberExpression nested)
             {
                 // Value is passed in as a property on a parent entity
@@ -178,6 +183,11 @@ namespace NzbDrone.Core.Datastore
         {
             result = null;
 
+            if (expression == null)
+            {
+                return false;
+            }
+
             // Value is passed in as a variable
             if (expression.Expression is ConstantExpression nested)
             {
@@ -192,12 +202,24 @@ namespace NzbDrone.Core.Datastore
         {
             value = null;
 
+            // Peel off any conversion nodes first, otherwise the "as MemberExpression"
+            // below silently yields null and we hand null to the resolvers.
+            expression = Unwrap(expression);
+
+            if (expression == null)
+            {
+                return false;
+            }
+
             if (TryGetConstantValue(expression, out value))
             {
                 return true;
             }
 
-            var memberExp = expression as MemberExpression;
+            if (expression is not MemberExpression memberExp)
+            {
+                return false;
+            }
 
             if (TryGetPropertyValue(memberExp, out value))
             {
@@ -310,26 +332,45 @@ namespace NzbDrone.Core.Datastore
                 throw new NotSupportedException("Unexpected form of Contains expression");
             }
 
+            // hardcode the integer list if it exists to bypass parameter limit
+            if (item.Type == typeof(int) && TryGetRightValue(list, out var value) && value is IEnumerable<int> ints)
+            {
+                var items = ints.ToList();
+
+                if (items.Count == 0)
+                {
+                    // Contains over an empty set is false for every row. Degrade to a
+                    // constant-false clause rather than emitting no clause at all, which
+                    // would silently widen the query to every row.
+                    _sb.Append("(1 = 0)");
+                    _gotConcreteValue = true;
+                    return;
+                }
+
+                _sb.Append('(');
+
+                Visit(item);
+
+                _sb.Append(" = ANY (");
+
+                _sb.Append("('{");
+                _sb.Append(string.Join(", ", items));
+                _sb.Append("}')");
+
+                _gotConcreteValue = true;
+
+                _sb.Append("))");
+
+                return;
+            }
+
             _sb.Append('(');
 
             Visit(item);
 
             _sb.Append(" = ANY (");
 
-            // hardcode the integer list if it exists to bypass parameter limit
-            if (item.Type == typeof(int) && TryGetRightValue(list, out var value))
-            {
-                var items = (IEnumerable<int>)value;
-                _sb.Append("('{");
-                _sb.Append(string.Join(", ", items));
-                _sb.Append("}')");
-
-                _gotConcreteValue = true;
-            }
-            else
-            {
-                Visit(list);
-            }
+            Visit(list);
 
             _sb.Append("))");
         }
