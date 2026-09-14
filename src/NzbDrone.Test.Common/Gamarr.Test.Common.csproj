@@ -11,7 +11,7 @@
     <PackageReference Include="RestSharp" Version="114.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.79" />
+    <PackageReference Include="Dapper" Version="2.1.86" />
     <ProjectReference Include="..\NzbDrone.Common\Gamarr.Common.csproj" />
     <ProjectReference Include="..\NzbDrone.Core\Gamarr.Core.csproj" />
   </ItemGroup>
