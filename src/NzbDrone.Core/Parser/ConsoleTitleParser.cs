@@ -23,19 +23,30 @@ namespace NzbDrone.Core.Parser
     /// </remarks>
     public static class ConsoleTitleParser
     {
+        private const string ConsoleToken = @"\b(?:NSP|NSZ|XCI|NSW|N?Switch|WiiU|Wii|3DS|CIA|WUX|WUD)\b";
+
         // Leading platform prefix: "[Switch NSP] Game Name", "[NSW] Game Name".
         // A prefix moves the start of the title, which no existing regex allows
         // for - they all pin the title to the start of the string.
+        // Same nesting rule as TrailingGroupRegex below: the bracket form stops
+        // only at "]" and the paren form only at ")", so "[Switch (NSP)]" is one
+        // prefix rather than a group that ends early and leaves a stray "]".
         private static readonly Regex LeadingConsolePrefixRegex = new Regex(
-            @"^\s*[\[(][^\])]*\b(?:NSP|NSZ|XCI|NSW|N?Switch|WiiU|Wii|3DS|CIA|WUX|WUD)\b[^\])]*[\])]\s*",
+            @"^\s*(?:\[[^\]]*" + ConsoleToken + @"[^\]]*\]|\([^)]*" + ConsoleToken + @"[^)]*\))\s*",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // One trailing bracketed or parenthesised group: "[NSP]", "(Base Game)",
         // "[01004D300C5AE000]", "[v0]", "[1.1.0]", "[US]", "[sakura]".
         // Content is deliberately not enumerated: at this point the name has
         // already failed to parse, so an unrecognised trailing group is a tag.
+        // NOTE: each alternative excludes only its OWN delimiters, so a bracket
+        // group may carry parens inside it and vice versa: "[RUS (Mod.)/ENG]" is
+        // one tag, not three tokens. The previous single form excluded all four
+        // characters from the content, which meant one nested "(" made the group
+        // unmatchable - nothing was stripped, the retry gave up, and the release
+        // parsed to nothing at all.
         private static readonly Regex TrailingGroupRegex = new Regex(
-            @"[\[(][^\[\]()]*[\])]\s*$",
+            @"(?:\[[^\[\]]*\]|\([^()]*\))\s*$",
             RegexOptions.Compiled);
 
         // A trailing bare container or dump token. Prowlarr/TorrentDownload

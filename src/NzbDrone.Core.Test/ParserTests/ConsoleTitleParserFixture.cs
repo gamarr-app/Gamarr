@@ -168,6 +168,33 @@ namespace NzbDrone.Core.Test.ParserTests
             ConsoleTitleParser.Normalize(postTitle).Should().BeNull();
         }
 
+        // A "(" nested inside a "[...]" group used to make the whole group
+        // unmatchable, so nothing was stripped and the release parsed to null.
+        [TestCase("[Nintendo Switch] Kirby and the Forgotten Land [NSP][RUS (Mod.)/ENG]")]
+        [TestCase("[Nintendo Switch] Kirby and the Forgotten Land [NSP][RUS (Mod)/ENG]")]
+        [TestCase("[Nintendo Switch] Kirby and the Forgotten Land [NSP][RUS(Mod.)/ENG]")]
+        [TestCase("[Nintendo Switch] Kirby and the Forgotten Land [NSP][(Mod.)]")]
+        [TestCase("[Nintendo Switch] Kirby and the Forgotten Land [NSP][RUS (Mod.) (Fix)/ENG]")]
+        public void should_parse_a_console_release_with_parens_nested_in_a_bracket_group(string postTitle)
+        {
+            var parsed = Parser.Parser.ParseGameTitle(postTitle);
+
+            parsed.Should().NotBeNull();
+            parsed.GameTitle.Should().Be("Kirby and the Forgotten Land");
+        }
+
+        // The quieter half of the same bug: this one did not refuse, it swallowed
+        // the bracket junk into GameTitle and failed later as an unknown game.
+        [TestCase("Kirby and the Forgotten Land [RUS (Mod.) ENG]")]
+        [TestCase("Kirby and the Forgotten Land [RUS (Mod.)/ENG]")]
+        public void should_not_swallow_a_language_tag_into_the_game_title(string postTitle)
+        {
+            var parsed = Parser.Parser.ParseGameTitle(postTitle);
+
+            parsed.Should().NotBeNull();
+            parsed.GameTitle.Should().Be("Kirby and the Forgotten Land");
+        }
+
         // A name that is nothing but tags must not collapse to an empty string.
         [TestCase("[NSP]")]
         [TestCase("[v0]")]

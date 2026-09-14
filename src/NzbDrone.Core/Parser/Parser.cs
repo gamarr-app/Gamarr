@@ -175,7 +175,14 @@ namespace NzbDrone.Core.Parser
 
             // DL prefix format without brackets: "DL Game Name P RUS ENG 8 2017 Arcade..." (for stripped brackets)
             // P = Portable marker, L = some other marker - strip both from title
-            new Regex(@"^(?:DL\s+)?(?<title>(?![(\[]).+?)\s+(?:P\s+)?(?:L\s+)?(?:RUS|ENG|MULTi)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // NOTE: the title may not contain "[" at all, not merely start with it.
+            // RUS/ENG/MULTi are exactly what lives inside a "[...]" language tag,
+            // so a lazy ".+?" stops at the SECOND marker in "[RUS (Mod.) ENG]" and
+            // hands back "Game Name [RUS (Mod.)" as the title. That fails silently
+            // as an unknown game rather than as a parse error, which is the harder
+            // one to see in the logs. A name whose markers are bracketed belongs to
+            // the bracketed shapes above, or to the console retry.
+            new Regex(@"^(?:DL\s+)?(?<title>(?![(\[])[^\[]+?)\s+(?:P\s+)?(?:L\s+)?(?:RUS|ENG|MULTi)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // DODI/FitGirl repack with YEAR PC before version: "Title 2024 PC v1... DODI-Repack"
             // Title stops at year when followed by "PC" - must be before flexible version pattern
