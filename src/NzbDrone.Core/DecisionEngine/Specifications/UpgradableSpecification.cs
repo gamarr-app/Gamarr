@@ -126,6 +126,16 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public bool QualityCutoffNotMet(QualityProfile profile, QualityModel currentQuality, QualityModel newQuality = null)
         {
+            // An Unknown-quality file is a placeholder we failed to identify, never a satisfied
+            // cutoff. Unknown is id 0 and sits at Items[0], and QualityProfile.GetIndex returns a
+            // default QualityIndex (also 0) for any id it cannot find - so as soon as the profile's
+            // own cutoff resolves to index 0 the comparison comes out equal, the cutoff reads as
+            // met, and the file can never be replaced by anything.
+            if (currentQuality.Quality == Quality.Unknown)
+            {
+                return true;
+            }
+
             var cutoff = profile.UpgradeAllowed ? profile.Cutoff : profile.FirststAllowedQuality().Id;
             var cutoffCompare = new QualityModelComparer(profile).Compare(currentQuality.Quality.Id, cutoff);
 
