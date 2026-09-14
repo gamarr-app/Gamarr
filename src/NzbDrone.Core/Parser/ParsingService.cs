@@ -111,12 +111,16 @@ namespace NzbDrone.Core.Parser
             return Map(parsedGameInfo, steamAppId, igdbId, null, searchCriteria);
         }
 
+        // FindGame, not GetGame: the only callers are the tracked-download resolver's
+        // grab-history fallbacks, where the id comes from history and the game may since
+        // have been deleted. That is an unresolved download, not an exception — GetGame
+        // would throw and surface as the misleading "Unable to parse game from title".
         public RemoteGame Map(ParsedGameInfo parsedGameInfo, int gameId)
         {
             return new RemoteGame
             {
                 ParsedGameInfo = parsedGameInfo,
-                Game = _gameService.GetGame(gameId)
+                Game = _gameService.FindGame(gameId)
             };
         }
 

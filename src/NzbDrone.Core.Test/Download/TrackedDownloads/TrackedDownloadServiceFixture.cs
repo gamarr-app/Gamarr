@@ -391,5 +391,111 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             trackedDownload.RemoteGame.Game.Id.Should().Be(5);
             trackedDownload.RemoteGame.ParsedGameInfo.Year.Should().Be(1998);
         }
+
+        [Test]
+        public void should_keep_a_history_only_resolution_when_a_game_is_edited()
+        {
+            // The download client reports the URL-encoded name; the grab history stores the
+            // decoded one. Only the history title resolves, so the edit path must consult it.
+            // It used to re-parse title-only and null the game out until the next refresh.
+            Mocker.GetMock<IHistoryService>()
+                  .Setup(s => s.FindByDownloadId(It.Is<string>(sr => sr == "35238")))
+                  .Returns(new List<GameHistory>
+                  {
+                      new GameHistory
+                      {
+                          DownloadId = "35238",
+                          SourceTitle = "Lords of Thunder (E)[SEGA CD]",
+                          GameId = 3,
+                      }
+                  });
+
+            var remoteGame = new RemoteGame
+            {
+                Game = new Game { Id = 3 },
+                ParsedGameInfo = new ParsedGameInfo
+                {
+                    GameTitles = new List<string> { "Lords of Thunder" }
+                }
+            };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), null))
+                  .Returns(default(RemoteGame));
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.Is<int>(i => i == 3)))
+                  .Returns(remoteGame);
+
+            var client = new DownloadClientDefinition
+            {
+                Id = 1,
+                Protocol = DownloadProtocol.Torrent
+            };
+
+            var item = new DownloadClientItem
+            {
+                Title = "Lords+of+Thunder+(E)[SEGA+CD]",
+                DownloadId = "35238",
+                DownloadClientInfo = new DownloadClientItemClientInfo
+                {
+                    Protocol = client.Protocol,
+                    Id = client.Id,
+                    Name = client.Name
+                }
+            };
+
+            Subject.TrackDownload(client, item);
+            Subject.GetTrackedDownloads().First().RemoteGame.Game.Id.Should().Be(3);
+
+            Subject.Handle(new GameEditedEvent(remoteGame.Game, remoteGame.Game));
+
+            var trackedDownload = Subject.GetTrackedDownloads().First();
+
+            trackedDownload.RemoteGame.Should().NotBeNull();
+            trackedDownload.RemoteGame.Game.Should().NotBeNull();
+            trackedDownload.RemoteGame.Game.Id.Should().Be(3);
+        }
+
+        [Test]
+        public void should_not_rewind_download_state_when_a_game_is_edited()
+        {
+            GivenDownloadHistory();
+
+            Mocker.GetMock<IDownloadHistoryService>()
+                  .Setup(s => s.GetLatestDownloadHistoryItem(It.IsAny<string>()))
+                  .Returns(new DownloadHistory { EventType = DownloadHistoryEventType.DownloadImported, GameId = 3 });
+
+            var remoteGame = new RemoteGame
+            {
+                Game = new Game { Id = 3 },
+                ParsedGameInfo = new ParsedGameInfo { GameTitles = new List<string> { "A Game" } }
+            };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>()))
+                  .Returns(remoteGame);
+
+            var client = new DownloadClientDefinition { Id = 1, Protocol = DownloadProtocol.Torrent };
+
+            var item = new DownloadClientItem
+            {
+                Title = "A Game 1998",
+                DownloadId = "35238",
+                DownloadClientInfo = new DownloadClientItemClientInfo
+                {
+                    Protocol = client.Protocol,
+                    Id = client.Id,
+                    Name = client.Name
+                }
+            };
+
+            var tracked = Subject.TrackDownload(client, item);
+            tracked.State.Should().Be(TrackedDownloadState.Imported);
+
+            Subject.Handle(new GameEditedEvent(remoteGame.Game, remoteGame.Game));
+
+            Subject.GetTrackedDownloads().First().State.Should().Be(TrackedDownloadState.Imported);
+        }
     }
 }
