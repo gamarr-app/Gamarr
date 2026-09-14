@@ -191,6 +191,62 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
+        public void should_return_true_if_existing_file_is_unknown_quality_and_cutoff_is_also_unknown()
+        {
+            // Unknown is id 0 and sits at Items[0], so a profile whose cutoff also resolves to
+            // index 0 used to compare equal and report the cutoff as met - leaving an
+            // unidentified file that nothing could ever replace.
+            GivenProfile(new QualityProfile
+            {
+                Cutoff = Quality.Unknown.Id,
+                Items = Qualities.QualityFixture.GetDefaultQualities(),
+                UpgradeAllowed = true
+            });
+
+            GivenFileQuality(new QualityModel(Quality.Unknown));
+            GivenNewQuality(new QualityModel(Quality.Scene));
+
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_true_if_existing_file_is_unknown_quality_and_cutoff_is_not_in_profile()
+        {
+            // The other way into the same index-0 collision: GetIndex returns a default
+            // QualityIndex for a cutoff id it cannot find in Items at all, which is index 0 -
+            // the same index Unknown legitimately occupies.
+            GivenProfile(new QualityProfile
+            {
+                Cutoff = 9999,
+                Items = Qualities.QualityFixture.GetDefaultQualities(),
+                UpgradeAllowed = true
+            });
+
+            GivenFileQuality(new QualityModel(Quality.Unknown));
+            GivenNewQuality(new QualityModel(Quality.Scene));
+
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_if_existing_file_is_unknown_quality_and_new_release_is_also_unknown()
+        {
+            // The guard must not turn every Unknown file into a perpetual re-grab: an equal
+            // quality is still not an upgrade.
+            GivenProfile(new QualityProfile
+            {
+                Cutoff = Quality.Unknown.Id,
+                Items = Qualities.QualityFixture.GetDefaultQualities(),
+                UpgradeAllowed = true
+            });
+
+            GivenFileQuality(new QualityModel(Quality.Unknown));
+            GivenNewQuality(new QualityModel(Quality.Unknown));
+
+            Subject.IsSatisfiedBy(_parseResultSingle, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
+        }
+
+        [Test]
         public void should_return_true_when_new_game_is_proper_but_existing_is_not()
         {
             GivenProfile(new QualityProfile
