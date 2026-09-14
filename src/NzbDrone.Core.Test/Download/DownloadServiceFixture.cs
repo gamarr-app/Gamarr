@@ -14,6 +14,7 @@ using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.Download
 {
@@ -44,6 +45,24 @@ namespace NzbDrone.Core.Test.Download
                    .With(c => c.Game = Builder<Game>.CreateNew().Build())
                    .With(c => c.Release = releaseInfo)
                    .Build();
+
+            Mocker.GetMock<IIndexerStatusService>()
+                  .Setup(v => v.GetBlockedProviders())
+                  .Returns(new List<IndexerStatus>());
+        }
+
+        private void WithBlockedIndexer(int indexerId)
+        {
+            Mocker.GetMock<IIndexerStatusService>()
+                  .Setup(v => v.GetBlockedProviders())
+                  .Returns(new List<IndexerStatus>
+                  {
+                      new IndexerStatus
+                      {
+                          ProviderId = indexerId,
+                          DisabledTill = DateTime.UtcNow.AddHours(1)
+                      }
+                  });
         }
 
         private Mock<IDownloadClient> WithUsenetClient()
@@ -138,6 +157,8 @@ namespace NzbDrone.Core.Test.Download
 
             Mocker.GetMock<IIndexerStatusService>()
                 .Verify(v => v.RecordFailure(It.IsAny<int>(), TimeSpan.FromMinutes(5.0)), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
@@ -159,6 +180,8 @@ namespace NzbDrone.Core.Test.Download
             Mocker.GetMock<IIndexerStatusService>()
                 .Verify(v => v.RecordFailure(It.IsAny<int>(),
                     It.IsInRange<TimeSpan>(TimeSpan.FromMinutes(4.9), TimeSpan.FromMinutes(5.1), Moq.Range.Inclusive)), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
@@ -188,6 +211,98 @@ namespace NzbDrone.Core.Test.Download
 
             Mocker.GetMock<IIndexerStatusService>()
                 .Verify(v => v.RecordFailure(It.IsAny<int>(), It.IsAny<TimeSpan>()), Times.Never());
+        }
+
+        [Test]
+        public void Download_report_should_use_minimum_backoff_on_http429_without_retry_after()
+        {
+            var request = new HttpRequest("http://my.indexer.com");
+            var response = new HttpResponse(request, new HttpHeader(), Array.Empty<byte>(), (HttpStatusCode)429);
+
+            var mock = WithUsenetClient();
+            mock.Setup(s => s.Download(It.IsAny<RemoteGame>(), It.IsAny<IIndexer>()))
+                .Callback<RemoteGame, IIndexer>((v, indexer) =>
+                {
+                    throw new ReleaseDownloadException(v.Release, "Error", new TooManyRequestsException(request, response));
+                });
+
+            Assert.ThrowsAsync<ReleaseDownloadException>(async () => await Subject.DownloadReport(_parseResult, null));
+
+            // Prowlarr's grab-limit 429 carries no Retry-After. Passing the resulting TimeSpan.Zero
+            // through made this an ordinary escalating failure that the next successful search
+            // wiped out via RecordSuccess, so the back-off never survived one RSS cycle.
+            Mocker.GetMock<IIndexerStatusService>()
+                .Verify(v => v.RecordFailure(It.IsAny<int>(), TimeSpan.FromHours(1)), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_grab_from_a_blocked_indexer()
+        {
+            var mock = WithUsenetClient();
+
+            WithBlockedIndexer(_parseResult.Release.IndexerId);
+
+            Assert.ThrowsAsync<IndexerBlockedException>(async () => await Subject.DownloadReport(_parseResult, null));
+
+            mock.Verify(c => c.Download(It.IsAny<RemoteGame>(), It.IsAny<IIndexer>()), Times.Never());
+            VerifyEventNotPublished<GameGrabbedEvent>();
+
+            // A skipped grab has to be findable without turning on trace logging.
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_record_another_indexer_failure_when_the_grab_was_skipped()
+        {
+            WithUsenetClient();
+            WithBlockedIndexer(_parseResult.Release.IndexerId);
+
+            Assert.ThrowsAsync<IndexerBlockedException>(async () => await Subject.DownloadReport(_parseResult, null));
+
+            // Nothing was sent, so there is nothing new to hold against the indexer. Recording one
+            // here would push the expiry out every cycle and the block would never lift.
+            Mocker.GetMock<IIndexerStatusService>()
+                .Verify(v => v.RecordFailure(It.IsAny<int>(), It.IsAny<TimeSpan>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public async Task should_still_grab_a_magnet_only_release_from_a_blocked_indexer()
+        {
+            var mock = WithTorrentClient();
+
+            _parseResult.Release = Builder<TorrentInfo>.CreateNew()
+                .With(v => v.DownloadProtocol = DownloadProtocol.Torrent)
+                .With(v => v.DownloadUrl = null)
+                .With(v => v.MagnetUrl = "magnet:?xt=urn:btih:1234")
+                .With(v => v.IndexerId = 1)
+                .Build();
+
+            WithBlockedIndexer(_parseResult.Release.IndexerId);
+
+            await Subject.DownloadReport(_parseResult, null);
+
+            // A magnet never touches the indexer, so its failure state cannot stop the grab. This
+            // is the manual-push recovery route and it is reached for precisely when an indexer is
+            // failing; BlockedIndexerSpecification makes the same exception on the decision side.
+            mock.Verify(c => c.Download(It.IsAny<RemoteGame>(), It.IsAny<IIndexer>()), Times.Once());
+            VerifyEventPublished<GameGrabbedEvent>();
+        }
+
+        [Test]
+        public async Task should_grab_when_a_different_indexer_is_blocked()
+        {
+            var mock = WithUsenetClient();
+
+            WithBlockedIndexer(_parseResult.Release.IndexerId + 1);
+
+            await Subject.DownloadReport(_parseResult, null);
+
+            mock.Verify(c => c.Download(It.IsAny<RemoteGame>(), It.IsAny<IIndexer>()), Times.Once());
+            VerifyEventPublished<GameGrabbedEvent>();
         }
 
         [Test]

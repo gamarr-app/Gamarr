@@ -53,6 +53,13 @@ namespace NzbDrone.Core.Parser.Model
         [JsonIgnore]
         public PendingReleaseReason? PendingReleaseReason { get; set; }
 
+        // A release that carries only a magnet is handed straight to the download client and
+        // never touches the indexer, so the indexer's failure state says nothing about whether
+        // the grab can succeed. Both the decision engine and the grab itself have to agree on
+        // that or one of them will block a grab the other lets through, so the test lives here.
+        [JsonIgnore]
+        public virtual bool IsMagnetOnly => false;
+
         [JsonIgnore]
         public int Age => DateTime.UtcNow.Subtract(PublishDate).Days;
 

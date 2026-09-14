@@ -311,6 +311,27 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         }
 
         [Test]
+        public async Task should_not_publish_grab_failed_event_when_the_indexer_is_blocked()
+        {
+            var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));
+
+            var decisions = new List<DownloadDecision>();
+            decisions.Add(new DownloadDecision(remoteGame));
+
+            Mocker.GetMock<IDownloadService>()
+                  .Setup(s => s.DownloadReport(It.IsAny<RemoteGame>(), null))
+                  .Throws(new IndexerBlockedException(remoteGame.Release, "Indexer is blocked till later"));
+
+            await Subject.ProcessDecisions(decisions);
+
+            // Nothing was sent. A history row per release per cycle while an indexer is down is
+            // the noise this whole change exists to remove, and it would also count towards the
+            // repeated-failure cap, blocklisting releases for their indexer's outage.
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.IsAny<GameGrabFailedEvent>()), Times.Never());
+        }
+
+        [Test]
         public async Task should_not_publish_grab_failed_event_when_download_client_unavailable()
         {
             var remoteGame = GetRemoteGame(new QualityModel(Quality.Uplay));

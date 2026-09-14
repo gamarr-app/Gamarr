@@ -207,6 +207,15 @@ namespace NzbDrone.Core.Download
 
                 return ProcessedDecisionResult.Grabbed;
             }
+            catch (IndexerBlockedException)
+            {
+                // Nothing was sent, so this is not a grab failure: recording one would spam
+                // history with a row per release per cycle for as long as the indexer is down,
+                // and would count towards the repeated-failure cap in FailedGrabService, which
+                // would blocklist releases for their indexer's outage. DownloadService already
+                // logged the skip at Warn with the indexer and the expiry.
+                return ProcessedDecisionResult.Skipped;
+            }
             catch (ReleaseUnavailableException ex)
             {
                 _logger.Warn("Failed to download release '{0}' from Indexer {1}. Release not available", remoteGame, remoteIndexer);
