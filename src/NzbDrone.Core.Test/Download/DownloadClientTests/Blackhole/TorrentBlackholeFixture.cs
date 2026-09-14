@@ -246,6 +246,47 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
             Assert.ThrowsAsync<ReleaseDownloadException>(async () => await Subject.Download(remoteGame, CreateIndexer()));
         }
 
+        // Regression test for the Knaben incident (2026-09-13): a 429 on the .torrent download
+        // path is exactly the "torrent download failed" case this fallback exists for. Blackhole
+        // sets PreferTorrentFile, so it always attempts the .torrent URL first - the fallback to
+        // an available magnet only matters, and only fires, on that path.
+        [Test]
+        public async Task Download_should_fall_back_to_magnet_if_torrent_download_fails()
+        {
+            Subject.Definition.Settings.As<TorrentBlackholeSettings>().SaveMagnetFiles = true;
+            GivenMagnetFilePath();
+            GivenFailedDownload();
+
+            var remoteGame = CreateRemoteGame();
+
+            await Subject.Download(remoteGame, CreateIndexer());
+
+            Mocker.GetMock<IHttpClient>().Verify(c => c.GetAsync(It.Is<HttpRequest>(v => v.Url.FullUri == _downloadUrl)), Times.Once());
+            Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_filePath), Times.Never());
+            Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(_magnetFilePath), Times.Once());
+
+            // The failed .torrent fetch logs an Error before the fallback runs. It is written from
+            // inside Polly's pipeline, so whether it lands in this test's AsyncLocal log context is
+            // platform-dependent (it does on Linux, not on macOS). Discard it without asserting a
+            // count - ExpectedErrors(1) would pass on one runner and fail on the other.
+            ExceptionVerification.IgnoreErrors();
+        }
+
+        [Test]
+        public void Download_should_rethrow_if_torrent_download_fails_and_no_magnet_available()
+        {
+            GivenFailedDownload();
+
+            var remoteGame = CreateRemoteGame();
+            remoteGame.Release.As<TorrentInfo>().MagnetUrl = null;
+
+            Assert.ThrowsAsync<ReleaseDownloadException>(async () => await Subject.Download(remoteGame, CreateIndexer()));
+
+            Mocker.GetMock<IDiskProvider>().Verify(c => c.OpenWriteStream(It.IsAny<string>()), Times.Never());
+
+            ExceptionVerification.IgnoreErrors();
+        }
+
         [Test]
         public void RemoveItem_should_delete_file()
         {
