@@ -878,6 +878,42 @@ namespace NzbDrone.Core.Test.ParserTests
             result.PrimaryGameTitle.Should().Be(title);
         }
 
+        // A hyphen with no spaces around it joins a word rather than separating two.
+        // Same failure mode and same endpoint as the "+" cases below. The last two are
+        // controls: they pass before and after, and pin the " - " separator (which does
+        // take spaces) and the reject path against this looser head pattern.
+        [TestCase("Half-Life", "Half-Life")]
+        [TestCase("Half-Life 2", "Half-Life 2")]
+        [TestCase("Spider-Man", "Spider-Man")]
+        [TestCase("Spider-Man: Miles Morales", "Spider-Man: Miles Morales")]
+        [TestCase("Marvel's Spider-Man 2", "Marvel's Spider-Man 2")]
+        [TestCase("X-Men", "X-Men")]
+        [TestCase("Re-Volt", "Re-Volt")]
+        [TestCase("Portal 2 - Portal Stories", "Portal 2 - Portal Stories")]
+        [TestCase("Ace Combat 7: Skies Unknown", "Ace Combat 7: Skies Unknown")]
+        public void should_parse_bare_titles_with_hyphen_joined_words(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // The looser hyphenated-word head ([A-Z][a-z]* rather than +) must not start
+        // accepting shouty scene junk. These stay unparseable.
+        // Deliberately NOT listed: "SOME-RELEASE-GROUP". It does parse - as title
+        // "SOME-RELEASE" with release group "GROUP" - but that is a shaped
+        // scene-release regex doing its job, not the catch-all, and it behaves
+        // identically with this change reverted. Asserting it here would pin
+        // unrelated behaviour to this test.
+        [TestCase("SOME.RELEASE.GROUP")]
+        [TestCase("some-lowercase-title")]
+        [TestCase("d41d8cd98f00b204e9800998ecf8427e")]
+        [TestCase("8F3kd9xQ2p")]
+        public void should_not_parse_junk_as_a_hyphenated_bare_title(string postTitle)
+        {
+            Parser.Parser.ParseGameTitle(postTitle).Should().BeNull($"Should not have parsed: {postTitle}");
+        }
+
         // Bare titles that only the catch-all pattern can match. These came in via
         // release/push, which 400s with "Unable to parse" when ParseGameTitle returns
         // null - there is no friendlier rejection for a pushed release.
