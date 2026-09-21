@@ -95,6 +95,11 @@ function GameImage({
         setImageIndex(0);
         setUrl(getUrl(firstMatchingImage, coverType, pixelRatio * size));
         setHasError(false);
+
+        // A previous total failure left isLoaded false, and the render below
+        // shows the placeholder while it is - so without this a game that once
+        // had no usable cover keeps the placeholder after a good URL arrives.
+        setIsLoaded(true);
       }
     } else if (availableImages.current.length > 0) {
       availableImages.current = [];
