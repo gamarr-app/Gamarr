@@ -518,12 +518,18 @@ namespace NzbDrone.Core.Notifications.Discord
                         break;
                     case DiscordManualInteractionFieldType.Size:
                         discordField.Name = "Size";
-                        discordField.Value = BytesToString(message.TrackedDownload.DownloadItem.TotalSize);
+
+                        // Same nullable DownloadItem as CustomScript: an empty
+                        // value drops the field below rather than reporting 0 B.
+                        discordField.Value = message.TrackedDownload.DownloadItem != null
+                            ? BytesToString(message.TrackedDownload.DownloadItem.TotalSize)
+                            : string.Empty;
                         discordField.Inline = true;
                         break;
                     case DiscordManualInteractionFieldType.DownloadTitle:
                         discordField.Name = "Download";
-                        discordField.Value = $"```{message.TrackedDownload.DownloadItem.Title}```";
+                        var downloadTitle = message.TrackedDownload.DownloadItem?.Title;
+                        discordField.Value = downloadTitle.IsNotNullOrWhiteSpace() ? $"```{downloadTitle}```" : string.Empty;
                         break;
                     case DiscordManualInteractionFieldType.Links:
                         discordField.Name = "Links";

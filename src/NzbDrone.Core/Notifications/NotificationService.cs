@@ -77,6 +77,15 @@ namespace NzbDrone.Core.Notifications
                 return true;
             }
 
+            // A tagged notification cannot be matched against a game we never
+            // identified, so it is not sent. Untagged ones above still are:
+            // "no tags" means every game, including an unknown one.
+            if (game == null)
+            {
+                _logger.Debug("{0} has tags but the game is unknown. Notification will not be sent", definition.Name);
+                return false;
+            }
+
             if (definition.Tags.Intersect(game.Tags).Any())
             {
                 _logger.Debug("Notification and game have one or more intersecting tags.");
@@ -268,11 +277,15 @@ namespace NzbDrone.Core.Notifications
         public void Handle(ManualInteractionRequiredEvent message)
         {
             var game = message.RemoteGame?.Game;
+            var quality = message.RemoteGame?.ParsedGameInfo?.Quality;
             var mess = "";
 
-            if (game != null)
+            // GetMessage dereferences both, and manual interaction is the one
+            // notification raised for a download we could NOT identify: the
+            // release may have no parse at all, and so no game and no quality.
+            if (game != null && quality != null)
             {
-                mess = GetMessage(game, message.RemoteGame.ParsedGameInfo.Quality);
+                mess = GetMessage(game, quality);
             }
 
             if (mess.IsNullOrWhiteSpace() && message.TrackedDownload.DownloadItem != null)
@@ -289,7 +302,7 @@ namespace NzbDrone.Core.Notifications
             {
                 Message = mess,
                 Game = game,
-                Quality = message.RemoteGame?.ParsedGameInfo.Quality,
+                Quality = quality,
                 RemoteGame = message.RemoteGame,
                 TrackedDownload = message.TrackedDownload,
                 DownloadClientInfo = message.TrackedDownload.DownloadItem?.DownloadClientInfo,
@@ -301,7 +314,7 @@ namespace NzbDrone.Core.Notifications
             {
                 try
                 {
-                    if (!ShouldHandleGame(notification.Definition, message.RemoteGame.Game))
+                    if (!ShouldHandleGame(notification.Definition, game))
                     {
                         continue;
                     }

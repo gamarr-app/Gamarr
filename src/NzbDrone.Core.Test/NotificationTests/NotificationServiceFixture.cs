@@ -4,6 +4,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.MediaFiles;
@@ -360,6 +361,79 @@ namespace NzbDrone.Core.Test.NotificationTests
 
             _notification.Verify(n => n.OnGrab(It.IsAny<GrabMessage>()), Times.Once());
             notification2.Verify(n => n.OnGrab(It.IsAny<GrabMessage>()), Times.Once());
+        }
+
+        // Manual interaction is raised for a download we could NOT identify, so
+        // the unknown game is its normal case, not an edge one: RemoteGame is
+        // whatever the tracked download carries, and that is null when nothing
+        // matched. Every dereference of it here used to throw.
+        [Test]
+        public void should_send_manual_interaction_notification_for_an_unknown_game()
+        {
+            Mocker.GetMock<INotificationFactory>()
+                .Setup(f => f.OnManualInteractionEnabled())
+                .Returns(new List<INotification> { _notification.Object });
+
+            var trackedDownload = new TrackedDownload
+            {
+                DownloadItem = new DownloadClientItem { Title = "Some.Unmatched.Release" }
+            };
+
+            Subject.Handle(new ManualInteractionRequiredEvent(trackedDownload, null));
+
+            _notification.Verify(n => n.OnManualInteractionRequired(It.IsAny<ManualInteractionRequiredMessage>()), Times.Once());
+        }
+
+        // A tagged notification has nothing to match an unidentified game
+        // against, so it is skipped - but skipped deliberately, not by throwing.
+        [Test]
+        public void should_not_send_manual_interaction_notification_for_an_unknown_game_when_tagged()
+        {
+            _notification.Setup(n => n.Definition)
+                .Returns(new NotificationDefinition
+                {
+                    Id = 1,
+                    Name = "TestNotification",
+                    OnManualInteractionRequired = true,
+                    Tags = new HashSet<int> { 99 }
+                });
+
+            Mocker.GetMock<INotificationFactory>()
+                .Setup(f => f.OnManualInteractionEnabled())
+                .Returns(new List<INotification> { _notification.Object });
+
+            var trackedDownload = new TrackedDownload
+            {
+                DownloadItem = new DownloadClientItem { Title = "Some.Unmatched.Release" }
+            };
+
+            Subject.Handle(new ManualInteractionRequiredEvent(trackedDownload, null));
+
+            _notification.Verify(n => n.OnManualInteractionRequired(It.IsAny<ManualInteractionRequiredMessage>()), Times.Never());
+        }
+
+        // A known game with no parsed quality: GetMessage dereferences the
+        // quality, so this is the same fault one field along.
+        [Test]
+        public void should_send_manual_interaction_notification_when_the_quality_is_unparsed()
+        {
+            Mocker.GetMock<INotificationFactory>()
+                .Setup(f => f.OnManualInteractionEnabled())
+                .Returns(new List<INotification> { _notification.Object });
+
+            var trackedDownload = new TrackedDownload
+            {
+                DownloadItem = new DownloadClientItem { Title = "Some.Unmatched.Release" },
+                RemoteGame = new RemoteGame
+                {
+                    Game = GetGame(),
+                    ParsedGameInfo = null
+                }
+            };
+
+            Subject.Handle(new ManualInteractionRequiredEvent(trackedDownload, null));
+
+            _notification.Verify(n => n.OnManualInteractionRequired(It.IsAny<ManualInteractionRequiredMessage>()), Times.Once());
         }
     }
 }
