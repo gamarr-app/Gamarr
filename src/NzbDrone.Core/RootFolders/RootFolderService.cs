@@ -215,7 +215,7 @@ namespace NzbDrone.Core.RootFolders
 
         private void GetDetails(RootFolder rootFolder, Dictionary<int, string> gamePaths, bool timeout)
         {
-            Task.Run(() =>
+            var task = Task.Run(() =>
             {
                 if (_diskProvider.FolderExists(rootFolder.Path))
                 {
@@ -224,7 +224,22 @@ namespace NzbDrone.Core.RootFolders
                     rootFolder.TotalSpace = _diskProvider.GetTotalSize(rootFolder.Path);
                     rootFolder.UnmappedFolders = GetUnmappedFolders(rootFolder.Path, gamePaths);
                 }
-            }).Wait(timeout ? 5000 : -1);
+            });
+
+            if (!task.Wait(timeout ? 5000 : -1))
+            {
+                // Wait timed out, so the task keeps running unattended and nothing
+                // will ever look at its result. If it then throws, the exception is
+                // unobserved and the finalizer thread rethrows it process-wide, which
+                // is how a transient SQLite lock in here surfaced as a top-level
+                // AggregateException with a useless stack. Observe it and move on:
+                // we already gave up on this folder's details, so the caller is not
+                // waiting on anything this failure could still affect.
+                var path = rootFolder.Path;
+
+                task.ContinueWith(t => _logger.Warn(t.Exception, "Timed out reading details for root folder {0}, and the abandoned read then failed", path),
+                    TaskContinuationOptions.OnlyOnFaulted);
+            }
         }
 
         private string GetBestRootFolderPathInternal(string path, List<RootFolder> rootFolders = null)
