@@ -165,7 +165,7 @@ namespace Gamarr.Api.V3.Games
 
                 var resource = currentGame.ToResource(availDelay, translation);
 
-                _coverMapper.ConvertToLocalUrls(resource.Id, resource.Images);
+                _coverMapper.ConvertToLocalUrls(resource.Id, resource.Images, resource.Added);
 
                 var poster = currentGame.GameMetadata.Value.Images.FirstOrDefault(c => c.CoverType == MediaCoverTypes.Poster);
                 if (poster != null)

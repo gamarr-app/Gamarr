@@ -389,7 +389,7 @@ namespace Gamarr.Api.V3.Games
         {
             foreach (var gameResource in games)
             {
-                _coverMapper.ConvertToLocalUrls(gameResource.Id, gameResource.Images);
+                _coverMapper.ConvertToLocalUrls(gameResource.Id, gameResource.Images, gameResource.Added);
             }
         }
 

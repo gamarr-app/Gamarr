@@ -244,7 +244,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 return null;
             }
 
-            _mediaCoverService.ConvertToLocalUrls(game.Id, game.GameMetadata.Value.Images);
+            _mediaCoverService.ConvertToLocalUrls(game.Id, game.GameMetadata.Value.Images, game.Added);
 
             return new WebhookGame(game, GetTagLabels(game));
         }

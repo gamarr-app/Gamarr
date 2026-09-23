@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using NLog;
+using NzbDrone.Common.Cache;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
@@ -17,7 +18,7 @@ namespace NzbDrone.Core.MediaCover
 {
     public interface IMapCoversToLocal
     {
-        void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers);
+        void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers, DateTime? added = null);
         string GetCoverPath(int gameId, MediaCoverTypes coverType, int? height = null, int index = 0);
     }
 
@@ -35,7 +36,13 @@ namespace NzbDrone.Core.MediaCover
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
+        private readonly ICached<bool> _coverExistsCache;
         private readonly string _coverRootFolder;
+
+        // Only games added inside this window get their covers stat'ed on disk.
+        // The window is load-bearing, not an optimisation: without it every
+        // game list request would cost one FileExists per cover per row.
+        private static readonly TimeSpan CoverExistsCheckWindow = TimeSpan.FromDays(1);
 
         // ImageSharp is slow on ARM (no hardware acceleration on mono yet)
         // So limit the number of concurrent resizing tasks
@@ -49,6 +56,7 @@ namespace NzbDrone.Core.MediaCover
                                  ICoverExistsSpecification coverExistsSpecification,
                                  IConfigFileProvider configFileProvider,
                                  IEventAggregator eventAggregator,
+                                 ICacheManager cacheManager,
                                  Logger logger)
         {
             _mediaCoverProxy = mediaCoverProxy;
@@ -60,6 +68,7 @@ namespace NzbDrone.Core.MediaCover
             _eventAggregator = eventAggregator;
             _logger = logger;
 
+            _coverExistsCache = cacheManager.GetCache<bool>(GetType(), "coverExists");
             _coverRootFolder = appFolderInfo.GetMediaCoverPath();
         }
 
@@ -76,7 +85,7 @@ namespace NzbDrone.Core.MediaCover
             return Path.Combine(GetGameCoverPath(gameId), coverType.ToString().ToLower() + indexSuffix + heightSuffix + GetExtension(coverType));
         }
 
-        public void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers)
+        public void ConvertToLocalUrls(int gameId, IEnumerable<MediaCover> covers, DateTime? added = null)
         {
             if (gameId == 0)
             {
@@ -105,13 +114,48 @@ namespace NzbDrone.Core.MediaCover
                     mediaCover.Url = _configFileProvider.UrlBase + @"/MediaCover/" + gameId + "/" + mediaCover.CoverType.ToString().ToLower() + indexSuffix + GetExtension(mediaCover.CoverType);
 
                     // Hash of the source url busts browser caches when the
-                    // remote image changes — no per-cover disk stat needed
-                    // (upstream Radarr 69f8cea).
-                    if (mediaCover.RemoteUrl.IsNotNullOrWhiteSpace())
+                    // remote image changes (upstream Radarr 69f8cea). Only
+                    // append it once the file is actually on disk: the hash
+                    // never changes again, so tagging a not-yet-downloaded
+                    // cover makes the browser cache the 404 forever.
+                    if (mediaCover.RemoteUrl.IsNotNullOrWhiteSpace() && CoverExists(gameId, mediaCover.CoverType, index, added))
                     {
                         mediaCover.Url += "?h=" + mediaCover.RemoteUrl.SHA256Hash()[..20];
                     }
                 }
+            }
+        }
+
+        private bool CoverExists(int gameId, MediaCoverTypes coverType, int index, DateTime? added)
+        {
+            // Covers for anything older than the window are assumed downloaded,
+            // so the common case stays free of disk access entirely.
+            if (!IsRecentlyAdded(added))
+            {
+                return true;
+            }
+
+            var filePath = GetCoverPath(gameId, coverType, null, index);
+
+            return _coverExistsCache.Get(filePath, () => _diskProvider.FileExists(filePath));
+        }
+
+        private static bool IsRecentlyAdded(DateTime? added)
+        {
+            return added > DateTime.UtcNow - CoverExistsCheckWindow;
+        }
+
+        private void RemoveCoverExistsCache(Game game)
+        {
+            var screenshotCount = 0;
+
+            foreach (var cover in game.GameMetadata.Value.Images)
+            {
+                // Same per-screenshot index as ConvertToLocalUrls/EnsureCovers,
+                // since the cache is keyed by the resulting file path.
+                var index = cover.CoverType == MediaCoverTypes.Screenshot ? ++screenshotCount : 0;
+
+                _coverExistsCache.Remove(GetCoverPath(game.Id, cover.CoverType, null, index));
             }
         }
 
@@ -158,6 +202,13 @@ namespace NzbDrone.Core.MediaCover
 
                     // Mark this type as successfully handled (either existed or downloaded)
                     downloadedTypes.Add(cover.CoverType);
+
+                    // The file is on disk now, so let ConvertToLocalUrls start
+                    // hashing it without waiting for the cache entry to expire.
+                    if (IsRecentlyAdded(game.Added))
+                    {
+                        _coverExistsCache.Set(fileName, true);
+                    }
                 }
                 catch (HttpException e)
                 {
@@ -263,6 +314,8 @@ namespace NzbDrone.Core.MediaCover
         {
             foreach (var game in message.Games)
             {
+                RemoveCoverExistsCache(game);
+
                 var path = GetGameCoverPath(game.Id);
                 if (_diskProvider.FolderExists(path))
                 {
