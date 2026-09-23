@@ -82,7 +82,11 @@
     <Company>gamarr.video</Company>
     <Copyright>Copyright 2014-$([System.DateTime]::Now.ToString('yyyy')) gamarr.video (GNU General Public v3)</Copyright>
     
-    <!-- Should be replaced by CI. Use fixed version for local dev builds -->
+    <!-- Both are replaced by CI (see .github/workflows/release.yml); these are
+         the local dev-build values. AssemblyConfiguration is what BuildInfo.Branch
+         reads, which is Sentry's environment tag and the suffix of its release
+         name — CI rewrites it to the channel (nightly/develop/stable), so a
+         "-dev" suffix in Sentry means someone's local build, not a shipped one. -->
     <AssemblyVersion>0.0.1.0</AssemblyVersion>
     <AssemblyConfiguration>$(Configuration)-dev</AssemblyConfiguration>
     <NeutralLanguage>en</NeutralLanguage>
