@@ -173,7 +173,7 @@ namespace Gamarr.Api.V3.Games
 
         private void MapCoversToLocal(GameResource game)
         {
-            _coverMapper.ConvertToLocalUrls(game.Id, game.Images);
+            _coverMapper.ConvertToLocalUrls(game.Id, game.Images, game.Added);
         }
     }
 }

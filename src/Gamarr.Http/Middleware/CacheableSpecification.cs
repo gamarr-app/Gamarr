@@ -1,7 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Http;
 using NzbDrone.Common.EnvironmentInfo;
-using NzbDrone.Common.Extensions;
 
 namespace Gamarr.Http.Middleware
 {
@@ -26,15 +25,18 @@ namespace Gamarr.Http.Middleware
 
             if (request.Path.StartsWithSegments("/api", StringComparison.CurrentCultureIgnoreCase))
             {
-                if (request.Path.ToString().ContainsIgnoreCase("/MediaCover"))
-                {
-                    return true;
-                }
-
                 return false;
             }
 
             if (request.Path.StartsWithSegments("/signalr", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return false;
+            }
+
+            // Cover requests are only cacheable via the `h` query key checked
+            // above; without it the file may not be downloaded yet, so caching
+            // here would pin a 404 in the browser for good.
+            if (request.Path.StartsWithSegments("/MediaCover", StringComparison.CurrentCultureIgnoreCase))
             {
                 return false;
             }

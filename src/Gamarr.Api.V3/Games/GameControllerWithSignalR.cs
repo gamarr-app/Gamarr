@@ -85,7 +85,7 @@ namespace Gamarr.Api.V3.Games
             var resource = game.ToResource(availDelay, translation, _upgradableSpecification, _formatCalculator);
             FetchAndLinkGameStatistics(resource);
 
-            _coverMapper.ConvertToLocalUrls(resource.Id, resource.Images);
+            _coverMapper.ConvertToLocalUrls(resource.Id, resource.Images, resource.Added);
 
             return resource;
         }
