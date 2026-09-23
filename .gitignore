@@ -190,3 +190,4 @@ UI
 .eslintcache
 .env
 .sentry-autofix.log
+.release-watch.log
