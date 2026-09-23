@@ -78,6 +78,34 @@ jobs:
           path: _output/UI
           retention-days: 1
 
+  # `yarn build` above is a development build; the release ships
+  # `yarn build --env production`, which additionally minifies. Breakage that
+  # only exists under minification therefore passed CI and failed Release (see
+  # minimizer-webpack-plugin 5.8.0, 2026-09-21). This job runs the production
+  # build nothing else depends on, so it fails here instead of at release time
+  # without lengthening CI's critical path.
+  frontend-prod-build:
+    name: Frontend Production Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build --env production
+
   backend-build:
     name: Backend Build
     runs-on: ubuntu-24.04
@@ -427,13 +455,13 @@ jobs:
   build-complete:
     name: Build Complete
     runs-on: ubuntu-24.04
-    needs: [frontend-build, backend-build, frontend-test, unit-test-linux, unit-test-other, integration-test, automation-test]
+    needs: [frontend-build, frontend-prod-build, backend-build, frontend-test, unit-test-linux, unit-test-other, integration-test, automation-test]
     if: always()
     steps:
       - name: Check build status
         run: |
           failed=false
-          for result in "${{ needs.frontend-build.result }}" "${{ needs.backend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.unit-test-other.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
+          for result in "${{ needs.frontend-build.result }}" "${{ needs.frontend-prod-build.result }}" "${{ needs.backend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.unit-test-other.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
             if [[ "$result" == "failure" ]]; then
               failed=true
             fi
