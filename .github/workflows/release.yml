@@ -65,19 +65,34 @@ jobs:
       - name: Build frontend
         run: yarn build --env production
 
-      # Matches the backend's version calculation (same run_number) so the
-      # Sentry release name equals BuildInfo.Release: "<version>-Release-dev".
+      # Matches the backend's version and channel calculation (same run_number,
+      # same branch rules) so the Sentry release name equals BuildInfo.Release:
+      # "<version>-<channel>". Sourcemaps upload under that name, so if the two
+      # jobs ever disagree, production JS frames stay minified.
       - name: Calculate version
         id: version
         shell: bash
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION="${{ github.ref_name }}"
+          # Handle both direct push and workflow_run triggers
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+          else
+            BRANCH="${{ github.ref }}"
+          fi
+
+          if [[ "$BRANCH" == refs/tags/v* || "$BRANCH" == v* ]]; then
+            VERSION="${BRANCH#refs/tags/}"
             VERSION="${VERSION#v}"
+            CHANNEL="stable"
+          elif [[ "$BRANCH" == *"develop"* ]]; then
+            VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            CHANNEL="develop"
           else
             VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            CHANNEL="nightly"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
 
           # BuildInfo.Version reads Assembly.GetName().Version, which .NET always
           # normalises to four components. Nightlies are already 1.1.0.<run> so
@@ -104,7 +119,7 @@ jobs:
           npx --yes @sentry/cli@2 sourcemaps upload \
             --org gamarr \
             --project javascript \
-            --release "${{ steps.version.outputs.sentry_version }}-Release-dev" \
+            --release "${{ steps.version.outputs.sentry_version }}-${{ steps.version.outputs.channel }}" \
             _output/UI
 
       # Sourcemaps only need to reach Sentry; keep them out of the shipped
@@ -175,19 +190,49 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION="${{ github.ref_name }}"
+          # Handle both direct push and workflow_run triggers
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+          else
+            BRANCH="${{ github.ref }}"
+          fi
+
+          if [[ "$BRANCH" == refs/tags/v* || "$BRANCH" == v* ]]; then
+            VERSION="${BRANCH#refs/tags/}"
             VERSION="${VERSION#v}"
+            CHANNEL="stable"
+          elif [[ "$BRANCH" == *"develop"* ]]; then
+            VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            CHANNEL="develop"
           else
             VERSION="${{ env.MAJOR_VERSION }}.${{ github.run_number }}"
+            CHANNEL="nightly"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION, Channel: $CHANNEL"
 
       - name: Update version in project
         shell: bash
         run: |
-          sed -i.bak "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>${{ steps.version.outputs.version }}<\/AssemblyVersion>/g" src/Directory.Build.props
+          # Patterns must stay POSIX: half this matrix runs on macOS, whose BSD
+          # sed reads "\+" as a literal plus and substitutes nothing at all —
+          # silently, so the osx artifacts shipped as AssemblyVersion 0.0.1.0
+          # and reported that to Sentry. "[^<]*" works on both seds.
+          sed -i.bak "s|<AssemblyVersion>[^<]*</AssemblyVersion>|<AssemblyVersion>${{ steps.version.outputs.version }}</AssemblyVersion>|g" src/Directory.Build.props
+
+          # BuildInfo.Branch reads this attribute, and it is the only thing
+          # feeding Sentry's environment tag and the suffix of the release
+          # name. Left at the dev default every shipped build reports
+          # environment "Release-dev", so Sentry cannot tell nightly from
+          # stable and its production view is empty.
+          sed -i.bak "s|<AssemblyConfiguration>[^<]*</AssemblyConfiguration>|<AssemblyConfiguration>${{ steps.version.outputs.channel }}</AssemblyConfiguration>|g" src/Directory.Build.props
+
+          grep -E '<Assembly(Version|Configuration)>' src/Directory.Build.props
+          grep -q "<AssemblyVersion>${{ steps.version.outputs.version }}</AssemblyVersion>" src/Directory.Build.props || {
+            echo "::error::AssemblyVersion was not stamped; the build would ship as 0.0.1.0"; exit 1; }
+          grep -q "<AssemblyConfiguration>${{ steps.version.outputs.channel }}</AssemblyConfiguration>" src/Directory.Build.props || {
+            echo "::error::AssemblyConfiguration was not stamped; Sentry would report the dev environment"; exit 1; }
 
       - name: Build backend
         shell: bash

@@ -19,8 +19,15 @@ UpdateVersionNumber()
 {
     if [ "$GAMARRVERSION" != "" ]; then
         echo "Updating Version Info"
-        sed -i'' -e "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>$GAMARRVERSION<\/AssemblyVersion>/g" src/Directory.Build.props
-        sed -i'' -e "s/<AssemblyConfiguration>[\$()A-Za-z-]\+<\/AssemblyConfiguration>/<AssemblyConfiguration>${BUILD_SOURCEBRANCHNAME}<\/AssemblyConfiguration>/g" src/Directory.Build.props
+        # "[^<]*" not "[0-9.*]\+": BSD sed (this script runs on macOS too) reads
+        # "\+" as a literal plus and then substitutes nothing, silently.
+        sed -i'' -e "s|<AssemblyVersion>[^<]*</AssemblyVersion>|<AssemblyVersion>$GAMARRVERSION</AssemblyVersion>|g" src/Directory.Build.props
+        # BuildInfo.Branch reads this attribute and nothing else does, so an
+        # empty value here (BUILD_SOURCEBRANCHNAME is an Azure variable that
+        # GitHub Actions never sets) ships a build whose Sentry environment tag
+        # is blank. Fall back to the channel, then to "dev".
+        GAMARRCONFIGURATION="${BUILD_SOURCEBRANCHNAME:-${GAMARRCHANNEL:-dev}}"
+        sed -i'' -e "s|<AssemblyConfiguration>[^<]*</AssemblyConfiguration>|<AssemblyConfiguration>${GAMARRCONFIGURATION}</AssemblyConfiguration>|g" src/Directory.Build.props
         sed -i'' -e "s/<string>10.0.0.0<\/string>/<string>$GAMARRVERSION<\/string>/g" distribution/osx/Gamarr.app/Contents/Info.plist
     fi
 }
