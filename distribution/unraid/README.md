@@ -1,10 +1,12 @@
 # Unraid Community Applications template
 
 `gamarr.xml` is the Community Applications (CA) container template for Gamarr.
+It defines the image, the web UI port, and the `/config`, `/games` and
+`/downloads` paths CA prompts for on install.
 
 ## Getting it listed in CA
 
-Two routes (either works; the first is faster to get accepted):
+Two routes; either works, and the first is faster to get accepted.
 
 1. **PR to the selfhosters community template repo** — fork
    [selfhosters/unRAID-CA-templates](https://github.com/selfhosters/unRAID-CA-templates),
@@ -18,9 +20,12 @@ Two routes (either works; the first is faster to get accepted):
 
 ## Testing locally
 
-On an unraid box: Docker tab → Add Container → Template dropdown → paste the
-raw URL of `gamarr.xml` (the `TemplateURL` value below), or drop the file into
-`/boot/config/plugins/dockerMan/templates-user/`.
+On an unraid box, either:
+
+- Docker tab → Add Container → Template dropdown, and paste the raw URL of
+  `gamarr.xml` (the `TemplateURL` value inside the file:
+  `https://raw.githubusercontent.com/gamarr-app/Gamarr/main/distribution/unraid/gamarr.xml`).
+- Or drop the file into `/boot/config/plugins/dockerMan/templates-user/`.
 
 Keep `TemplateURL` pointing at this file's raw `main` URL so CA can pick up
 template updates.

@@ -8,7 +8,11 @@
 Gamarr is a self-hosted game collection manager and PVR for Usenet and BitTorrent
 users — Radarr, but for your game library. It monitors RSS feeds and indexers for
 the PC and console games you want, hands grabs to your download client, and
-imports, renames, and organizes the results. Because games aren't movies, Gamarr also understands the things only games do: **it recognizes versions, updates, and DLC, and can automatically upgrade your library when a newer version or a more complete repack shows up.**
+imports, renames, and organizes the results.
+
+Because games aren't movies, Gamarr also understands the things only games do: it
+recognizes versions, updates, and DLC, and can automatically upgrade your library
+when a newer version or a more complete repack shows up.
 
 ## Screenshots
 
@@ -42,40 +46,55 @@ services:
     restart: unless-stopped
 ```
 
-Then open `http://localhost:6767`. A copy of this file ships as
-[`docker-compose.example.yml`](docker-compose.example.yml). The image is also
-mirrored to Docker Hub as [`gamarr/gamarr`](https://hub.docker.com/r/gamarr/gamarr)
-(GHCR is the canonical source; it has no pull rate limits). Standalone builds
-for Windows, Linux, macOS, and ARM (including Raspberry Pi) are on the
-[releases page](https://github.com/gamarr-app/Gamarr/releases).
+Open `http://localhost:6767`, then:
 
-Point your indexers at Gamarr via [Prowlarr](https://github.com/Prowlarr/Prowlarr)
-or Jackett using a Torznab feed with game categories (1000 = Console,
-4000 = PC), add a download client, and add your first game.
+1. Add your indexers through [Prowlarr](https://github.com/Prowlarr/Prowlarr) or
+   Jackett, as a Torznab feed with game categories (1000 = Console, 4000 = PC).
+2. Add a download client.
+3. Add your first game.
+
+A copy of the compose file above ships as
+[`docker-compose.example.yml`](docker-compose.example.yml). The image is also
+mirrored to Docker Hub as [`gamarr/gamarr`](https://hub.docker.com/r/gamarr/gamarr),
+though GHCR is the canonical source and has no pull rate limits. Standalone
+builds for Windows, Linux, macOS, and ARM (including Raspberry Pi) are on the
+[releases page](https://github.com/gamarr-app/Gamarr/releases).
 
 ## Major Features
 
-* Game-native quality model: Scene, GOG (DRM-free), Repack, ISO, Retail, Portable — not video resolutions
-* Recognizes game versions, updates, and DLC in release names; can upgrade when a newer version releases
-* **Game components**: base game, updates, and DLC tracked as separate slots under one entry — updates
-  import into `Updates/<version>/` alongside the base instead of replacing it, DLC into `DLC/<name>/`.
-  Each slot is individually monitorable and searchable from the Components panel; DLC slots come from
-  Steam/IGDB metadata, can carry their own quality profile, and bundled releases (`game.iso` +
-  `update_1.7/` + a known DLC folder) are split into their components at import
-* **Update retention**: keep the newest N updates plus the newest of each major version; older ones go
-  to the recycle bin (configurable, or keep everything)
-* **Multi-platform titles**: one library entry per platform with its own folder, profile, and
-  platform-filtered searches; the poster index groups platform siblings into one card with per-platform
-  status chips
-* Steam library and Steam wishlist import lists — point Gamarr at your account and it monitors your backlog
-* Game discovery: popular, trending, and recommendations based on your library
-* Metadata from three sources — Steam (no key needed), IGDB, and RAWG — merged into one record
-* Manual and automatic search, failed-download handling, and RSS sync, same as the rest of the *arr family
-* Works with SABnzbd, NZBGet, qBittorrent, Deluge, rTorrent, Transmission, uTorrent, and more
-* Optional virus scanning of imports via ClamAV, with quarantine
-* Notifications: Discord, Telegram, Slack, Webhook, Apprise, Notifiarr, and ~20 others
-* Renaming with game-aware tokens ({Game Title}, {Edition Tags}, {SteamAppId}, …)
-* SQLite by default, PostgreSQL optional
+* **Game-native quality model** — Scene, GOG (DRM-free), Repack, ISO, Retail, and
+  Portable, instead of video resolutions
+* **Version awareness** — recognizes game versions, updates, and DLC in release
+  names, and can upgrade when a newer version releases
+* **Game components** — base game, updates, and DLC are tracked as separate slots
+  under one library entry. Updates import into `Updates/<version>/` alongside the
+  base game instead of replacing it, DLC into `DLC/<name>/`. Every slot is
+  individually monitorable and searchable from the Components panel, DLC slots
+  come from Steam/IGDB metadata and can carry their own quality profile, and
+  bundled releases (`game.iso` + `update_1.7/` + a known DLC folder) are split
+  into their components at import
+* **Update retention** — keep the newest N updates plus the newest of each major
+  version, and send older ones to the recycle bin. Configurable, or keep
+  everything
+* **Multi-platform titles** — one library entry per platform, each with its own
+  folder, profile, and platform-filtered searches. The poster index groups
+  platform siblings into one card with per-platform status chips
+* **Steam import lists** — point Gamarr at your account and it monitors your Steam
+  library and wishlist
+* **Discovery** — popular and trending games, plus recommendations based on your
+  library
+* **Three metadata sources** — Steam (no key needed), IGDB, and RAWG, merged into
+  one record
+* **The usual \*arr plumbing** — manual and automatic search, failed-download
+  handling, and RSS sync
+* **Download clients** — SABnzbd, NZBGet, qBittorrent, Deluge, rTorrent,
+  Transmission, uTorrent, and more
+* **Virus scanning** — optional ClamAV scan of imports, with quarantine
+* **Notifications** — Discord, Telegram, Slack, Webhook, Apprise, Notifiarr, and
+  ~20 others
+* **Game-aware renaming** — tokens such as {Game Title}, {Edition Tags},
+  {SteamAppId}
+* **SQLite by default**, PostgreSQL optional
 
 ## Metadata Sources
 
@@ -85,7 +104,7 @@ or Jackett using a Torznab feed with game categories (1000 = Console,
 
 ## Support
 
-Note: GitHub Issues are for Bugs and Feature Requests Only
+GitHub Issues are for bugs and feature requests only.
 
 [![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/gamarr-app/Gamarr/issues)
 

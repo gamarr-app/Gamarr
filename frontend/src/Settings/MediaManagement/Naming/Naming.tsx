@@ -130,7 +130,7 @@ function Naming() {
     { key: 'gamarr', value: translate('RenameProfileGamarr') },
     {
       key: 'noIntroPreserveById',
-      value: translate('RenameProfileNoIntroNumbered'),
+      value: translate('RenameProfileNoIntroPreserveById'),
     },
     {
       key: 'noIntroCanonical',

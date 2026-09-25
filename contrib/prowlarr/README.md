@@ -4,11 +4,11 @@
 to Prowlarr, so Prowlarr can push its indexers to Gamarr the same way it does
 for Radarr/Sonarr/Whisparr (Settings → Apps → + → Gamarr).
 
-It is six self-contained files under
+The patch adds six self-contained files under
 `src/NzbDrone.Core/Applications/Gamarr/`, modeled on the Whisparr
 implementation, with game-appropriate default sync categories
-(Console 1000–1180, PC 4000–4050). No Prowlarr frontend changes are needed —
-the application settings UI is schema-driven.
+(Console 1000–1180, PC 4000–4050). Prowlarr needs no frontend changes — the
+application settings UI is schema-driven.
 
 ## Verified
 
@@ -23,7 +23,8 @@ and a local Gamarr build:
 ## Status
 
 Submitted upstream as [Prowlarr/Prowlarr#2725](https://github.com/Prowlarr/Prowlarr/pull/2725)
-(2026-07-05, from the gamarr-bot2 fork). This directory stays until it merges.
+(2026-07-05, from the gamarr-bot2 fork). This directory stays until it merges,
+and can be deleted once (if) the PR lands.
 
 ## Submitting upstream (for reference)
 
@@ -35,8 +36,6 @@ git am /path/to/0001-New-Gamarr-application-support.patch
 # push to your fork and open a PR against Prowlarr's develop branch
 ```
 
-PR title suggestion: `New: Gamarr application support`. Servarr projects use
-the `New:` prefix for features. Expect maintainers to ask what Gamarr is —
-link the repo and note the indexer API is contract-compatible with Radarr v3.
-
-Once (if) the PR merges, this directory can be deleted.
+Title the PR `New: Gamarr application support` — Servarr projects use the `New:`
+prefix for features. Expect maintainers to ask what Gamarr is: link the repo and
+note that the indexer API is contract-compatible with Radarr v3.

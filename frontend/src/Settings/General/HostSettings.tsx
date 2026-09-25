@@ -184,7 +184,7 @@ function HostSettings(props: HostSettingsProps) {
           <FormInputGroup
             type={inputTypes.CHECK}
             name="launchBrowser"
-            helpText={translate('OpenBrowserOnStartHelpText')}
+            helpText={translate('LaunchBrowserHelpText')}
             onChange={onInputChange}
             {...launchBrowser}
           />

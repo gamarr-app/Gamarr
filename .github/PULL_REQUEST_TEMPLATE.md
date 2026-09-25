@@ -2,7 +2,7 @@
 YES - XXXX | NO
 
 #### Description
-A few sentences describing the overall goals of the pull request's commits.
+A few sentences on what this pull request changes and why.
 
 #### Screenshot (if UI related)
 

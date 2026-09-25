@@ -131,7 +131,7 @@ function MetadataOptions({
 
       {!isFetching && error ? (
         <Alert kind={kinds.DANGER}>
-          {translate('UnableToLoadIndexerOptions')}
+          {translate('UnableToLoadMetadataOptions')}
         </Alert>
       ) : null}
 
