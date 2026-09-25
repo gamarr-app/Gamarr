@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -79,6 +80,15 @@ namespace NzbDrone.Core.Download
             }
             catch (WebException ex)
             {
+                _logger.Error(ex, "Downloading nzb for game '{0}' failed ({1})", remoteGame.Release.Title, url);
+
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading nzb failed", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                // HttpClient reports a connect, DNS or TLS failure as HttpRequestException, never as
+                // the WebException above, so this escaped the method and the grab surfaced as a
+                // Fatal 500 instead of a release failure.
                 _logger.Error(ex, "Downloading nzb for game '{0}' failed ({1})", remoteGame.Release.Title, url);
 
                 throw new ReleaseDownloadException(remoteGame.Release, "Downloading nzb failed", ex);

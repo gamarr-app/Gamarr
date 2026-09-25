@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using NLog;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Http;
@@ -122,6 +123,13 @@ namespace NzbDrone.Core.Notifications.Plex.PlexTv
             }
             catch (WebException)
             {
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Unable to connect to plex.tv");
+            }
+            catch (HttpRequestException)
+            {
+                // HttpClient never raises the WebException above. Ping and GetResources swallow this
+                // either way, but GetAuthToken has no catch, so an unreachable plex.tv surfaced as a
+                // Fatal 500 from the OAuth callback instead of a 400.
                 throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Unable to connect to plex.tv");
             }
 

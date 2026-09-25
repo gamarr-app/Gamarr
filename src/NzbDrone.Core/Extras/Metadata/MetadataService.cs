@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
@@ -325,6 +326,12 @@ namespace NzbDrone.Core.Extras.Metadata
             }
             catch (WebException ex)
             {
+                _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                // A connect or TLS failure never reaches the WebException arm above, so an
+                // unreachable image host was logged at Error and shipped to Sentry.
                 _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
             catch (Exception ex)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using NLog;
 using NzbDrone.Common.Cache;
@@ -216,6 +217,12 @@ namespace NzbDrone.Core.MediaCover
                 }
                 catch (WebException e)
                 {
+                    _logger.Warn("Couldn't download media cover for {0}. {1}", game, e.Message);
+                }
+                catch (HttpRequestException e)
+                {
+                    // A connect or TLS failure never reaches the WebException arm above, so an
+                    // unreachable cover host was logged at Error and shipped to Sentry.
                     _logger.Warn("Couldn't download media cover for {0}. {1}", game, e.Message);
                 }
                 catch (Exception e)
