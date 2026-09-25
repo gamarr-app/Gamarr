@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MonoTorrent;
@@ -196,6 +197,15 @@ namespace NzbDrone.Core.Download
             }
             catch (WebException ex)
             {
+                _logger.Error(ex, "Downloading torrent file for game '{0}' failed ({1})", remoteGame.Release.Title, torrentUrl);
+
+                throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                // The WebException arm only covers the redirect guard thrown above; a connect, DNS
+                // or TLS failure comes out of HttpClient as HttpRequestException and escaped this
+                // method entirely, so the grab surfaced as a Fatal 500 instead of a release failure.
                 _logger.Error(ex, "Downloading torrent file for game '{0}' failed ({1})", remoteGame.Release.Title, torrentUrl);
 
                 throw new ReleaseDownloadException(remoteGame.Release, "Downloading torrent failed", ex);

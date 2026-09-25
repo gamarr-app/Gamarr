@@ -144,6 +144,18 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 throw new PlexException($"Unable to connect to Plex Media Server, {ex.Message}", ex);
             }
+            catch (HttpRequestException ex)
+            {
+                // HttpClient never raises the WebException above, so an offline server escaped as a
+                // raw HttpRequestException: Test() logged it at Error while the PlexException arm it
+                // should have hit is silent.
+                if (ex.HttpRequestError == HttpRequestError.SecureConnectionError)
+                {
+                    throw new PlexException("Unable to connect to Plex Media Server, certificate validation failed.", ex);
+                }
+
+                throw new PlexException($"Unable to connect to Plex Media Server, {ex.Message}", ex);
+            }
 
             return response.Content;
         }
