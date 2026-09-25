@@ -1,19 +1,50 @@
 # Claude Code Notes
 
+## Hard rules
+
+Every one of these exists because it broke something. The section named after each
+rule has the full reasoning — read it before you decide a case is an exception.
+
+- **Run `make test` with the Claude Code sandbox disabled.** The sandbox SIGKILLs
+  dotnet testhost children. (Build Commands)
+- **If you pipe a build or test command, check `$pipestatus` or the log file.** A
+  pipeline's exit code is the LAST command's, so `| grep` / `| tail` masks
+  failures — that trap has produced stale-binary false verification more than
+  once. The Makefile targets need no piping. (Build Commands)
+- **Never put per-item Steam fetches inside loops driven by user search or
+  typeahead.** N+1 request storms trigger undocumented 403s. (Known Gotchas)
+- **Don't run Prettier on `*.css.d.ts` files.** It strips the quoted property
+  names the loader emits. (Known Gotchas)
+- **Don't "fix" the `Gamarr*` → `NzbDrone*` namespace mismatch.** It's
+  intentional. (Known Gotchas)
+- **Don't `--amend` failed-hook commits.** Create a new commit instead. (Known
+  Gotchas)
+- **Push straight to `main`. Do not open a PR unless Paul asks for one.** (Git
+  Workflow)
+- **Always name the refspec when you push**: `git push origin <branch>:main`. A
+  bare `git push` can target `main` unintentionally. (Git Workflow)
+- **Never merge a PR with GitHub's merge or squash button.** It stamps the
+  merging account's primary email onto the commit author. Rebase locally and
+  push. (Git Workflow)
+- **Scrub the `From:` line out of any patch file before committing it.** (Git
+  Workflow)
+- **Never inline the Sentry token in a command you commit.** `source .env`
+  instead. (Known Gotchas, Common Commands)
+
 ## What Gamarr is
 
 Fork of Radarr (which shares roots with Sonarr/Lidarr/Readarr), repurposed as a
 "PVR for games." Same architecture as Radarr — monitors RSS feeds and indexers,
 hands grabs to download clients, imports/renames finished files — but the
 managed entity is games (Steam/IGDB/RAWG metadata) instead of movies. Backend
-namespace is still `NzbDrone.*` per `Directory.Build.props`; assemblies and
+namespace is still `NzbDrone.*` per `src/Directory.Build.props`; assemblies and
 binaries are renamed to `Gamarr.*`.
 
 ## Stack
 
 - Backend: .NET 10 (LTS), ASP.NET Core, SignalR, DryIoc, FluentMigrator, Dapper,
-  SQLite (default) / Postgres (optional), NLog 6, Sentry 6, Swashbuckle 8.x.
-- Frontend: React 19, TypeScript 6, Redux 5 + redux-actions 3, react-router 7,
+  SQLite (default) / Postgres (optional), NLog 6, Sentry 6, Swashbuckle 10.x.
+- Frontend: React 19, TypeScript 6, Redux 5 + redux-actions 3, react-router 8,
   @tanstack/react-query 5, webpack 5, ESLint 10 (flat config), Prettier 3,
   stylelint 17, css-modules + PostCSS, @sentry/browser 10.
 - Tooling: Node 22 (Volta-pinned), Yarn 1.22, Jest 30, NUnit 4.
@@ -32,10 +63,9 @@ installed .NET 10 satisfies it.
 
 ## Build Commands
 
-Prefer the Makefile targets — each one prints a single `OK`/`FAILED` line and
+Prefer the Makefile targets. Each one prints a single `OK`/`FAILED` line and
 exits non-zero on real failure, so there is no need to pipe through
-`grep`/`tail` (which masks exit codes; that trap has produced stale-binary
-false verification more than once):
+`grep`/`tail`.
 
 ```bash
 make backend      # dotnet build src/Gamarr.sln (prints the output dll mtime)
@@ -49,24 +79,43 @@ make seed         # seed it: 10 Steam games, 1 imported file, fake Torznab
 make smoke-stop   # stop + clean the smoke instance
 ```
 
-Raw commands (when you need a custom filter): `dotnet build src/Gamarr.sln`,
-`dotnet test src/Gamarr.sln --filter "Category!=AutomationTest"`, `yarn build`,
-`yarn lint`, `yarn format:check`, `yarn test`. If you pipe them, remember the
-pipeline exit code is the LAST command's — check `$pipestatus`/log files, or
-just use make.
+**`make test` MUST run with the Claude Code sandbox disabled** — the sandbox
+SIGKILLs dotnet testhost children.
 
-The smoke tooling lives in `scripts/dev/`: `smoke.sh` (start/stop/status),
-`seed.sh`, and `fake-torznab.py` (canned Torznab indexer on :9899 so
-interactive search returns rows without a real tracker). Ports 6767 (live
-docker Gamarr) and 9696 (live Prowlarr) are usually taken on this machine —
-the smoke instance uses 6968.
+Raw commands, when you need a custom filter:
+
+```bash
+dotnet build src/Gamarr.sln
+dotnet test src/Gamarr.sln --filter "Category!=AutomationTest"
+yarn build
+yarn lint
+yarn format:check
+yarn test
+```
+
+**If you pipe any of these, the pipeline exit code is the LAST command's** —
+check `$pipestatus` or the log files, or just use make. Masking exit codes
+through `grep`/`tail` has produced stale-binary false verification more than
+once.
+
+### Smoke tooling
+
+Lives in `scripts/dev/`:
+
+- `smoke.sh` — start/stop/status.
+- `seed.sh` — seed data.
+- `fake-torznab.py` — canned Torznab indexer on :9899, so interactive search
+  returns rows without a real tracker.
+
+Ports 6767 (live docker Gamarr) and 9696 (live Prowlarr) are usually taken on
+this machine — the smoke instance uses 6968.
 
 ## Folder Layout
 
 - `src/` — .NET backend. Project dirs still named `NzbDrone.*` (fork legacy);
-  assemblies build as `Gamarr.*` via `Directory.Build.props`. Entry point is
+  assemblies build as `Gamarr.*` via `src/Directory.Build.props`. Entry point is
   `src/NzbDrone/` (assembly `Gamarr`).
-- `frontend/` — React/TypeScript UI. Entry: `frontend/src/index.tsx`. Webpack
+- `frontend/` — React/TypeScript UI. Entry: `frontend/src/index.ts`. Webpack
   config at `frontend/build/webpack.config.js`. ESLint flat config at
   `frontend/eslint.config.mjs`.
 - `_output/` — Backend build artifacts. `_output/net10.0/Gamarr` is the
@@ -74,7 +123,7 @@ the smoke instance uses 6968.
   `_output/UI/` is the built frontend; the backend serves it from there.
 - `_tests/` — Test assemblies. CI references `_tests/net10.0/*.dll`.
 - `_temp/` — MSBuild `obj/` and intermediate Release `bin/` outputs (per
-  `Directory.Build.props`). Safe to nuke.
+  `src/Directory.Build.props`). Safe to nuke.
 - `docker/` — Linuxserver-style s6 service scripts (`docker/root/etc/...`).
   `Dockerfile` at repo root builds on `baseimage-alpine:3.23`.
 - `distribution/` — Platform-specific packaging: `distribution/osx/Gamarr.app`
@@ -94,10 +143,11 @@ _output/net10.0/Gamarr -nobrowser -data=/tmp/gamarr-test-data
 ```
 
 On first launch Gamarr writes `config.xml` + `gamarr.db` to the `-data` dir.
-Default HTTP port is `6767` (`<Port>` in `config.xml`); change it there before
-the second start if `6767` is busy. The API key is auto-generated and lives in
-the `<ApiKey>` element of the same `config.xml` — read it from there for any
-REST/curl call.
+
+- **Port.** Default HTTP port is `6767` (`<Port>` in `config.xml`). If `6767` is
+  busy, change it there before the second start.
+- **API key.** Auto-generated into the `<ApiKey>` element of the same
+  `config.xml` — read it from there for any REST/curl call.
 
 ## Known Gotchas
 
@@ -114,8 +164,8 @@ REST/curl call.
   `moduleResolution: bundler` in `frontend/tsconfig.json` so tsc can read
   react-router v8's package `exports` map.
 - **`*.css.d.ts` files are generated** by `css-modules-typescript-loader`.
-  Don't run Prettier on them (it strips the quoted property names the loader
-  emits). They're listed in `.prettierignore` / `frontend/.prettierignore`.
+  Don't run Prettier on them — it strips the quoted property names the loader
+  emits. They're listed in `.prettierignore` / `frontend/.prettierignore`.
 - **css-loader 7 changed `namedExport` defaults.** Webpack config requires
   `modules: { namedExport: false, exportLocalsConvention: 'asIs' }` to keep
   css-modules-typescript-loader output stable
@@ -125,14 +175,15 @@ REST/curl call.
   inside loops driven by user search/typeahead (N+1 request storms).
 - **ClamAV daemon disabled by default** to save ~1 GB RAM. We invoke
   `clamscan` standalone. Daemon mode is gated behind the `CLAMAV_DAEMON` env
-  var. See `src/NzbDrone.Core/MediaFiles/VirusScanning/ClamAvScannerService.cs`.
+  var, read in `docker/root/etc/s6-overlay/s6-rc.d/svc-clamd/run`; the scanner
+  itself is `src/NzbDrone.Core/MediaFiles/VirusScanning/ClamAvScannerService.cs`.
 - **`Environment.UserInteractive` returns true on headless Linux.** The
   browser-launch path in `src/NzbDrone.Host/BrowserService.cs` additionally
   checks `DISPLAY` / `WAYLAND_DISPLAY` before opening a browser.
 - **Sentry token lives in `.env`** (gitignored). GitHub push protection blocks
   any commit with the literal token. Scripts (e.g. `scripts/sentry-watch.sh`)
   should `source .env` rather than hardcode the value.
-- **Namespace mismatch is intentional.** `Directory.Build.props` rewrites
+- **Namespace mismatch is intentional.** `src/Directory.Build.props` rewrites
   `Gamarr*` project root namespaces to `NzbDrone*`. Don't "fix" it.
 - **Don't `--amend`** failed-hook commits — see the harness rules; create a
   new commit instead.
@@ -155,9 +206,33 @@ REST/curl call.
 
 ## Git Workflow
 
-**Two ways a personal email reaches this repo, neither via local git config**
-(local + global identity is `Claude <noreply@anthropic.com>`; both of these
-bypass it):
+### Pushing
+
+**Push straight to `main`. Do not open a PR unless Paul asks for one.** This is
+a solo repo with no reviewer, so a PR adds a review round-trip nobody performs
+and permanently creates a `refs/pull/*` ref — which is GitHub-managed,
+unrewritable, and is exactly why 64 refs still carry leaked addresses.
+
+From a worktree or agent branch, push with an explicit refspec:
+
+```bash
+git push origin <branch>:main
+```
+
+**Always name the refspec.** `push.default=upstream` plus a worktree branch
+tracking `origin/main` makes a bare `git push` target `main` unintentionally.
+
+### Merging a PR that already exists
+
+Merge it by rebasing locally and pushing to `main`, **not** with the merge
+button: a GitHub-side merge or squash stamps the account's primary email onto
+the commit author (cause 1 below). GitHub then closes the PR without labelling
+it merged, which is expected for a fast-forward.
+
+### How a personal email reaches this repo
+
+**Two ways, neither via local git config** (local + global identity is
+`Claude <noreply@anthropic.com>`; both of these bypass it):
 
 1. **GitHub's own squash/merge button.** The merge commit's author comes from
    the merging *account's* primary email, with GitHub itself as committer. That
@@ -172,24 +247,6 @@ bypass it):
 
 Both survive in `refs/pull/*`, which is GitHub-managed and cannot be rewritten —
 so catch them before merge, not after.
-
-**Push straight to `main`. Do not open a PR unless Paul asks for one.** This is
-a solo repo with no reviewer, so a PR adds a review round-trip nobody performs
-and permanently creates a `refs/pull/*` ref — which is GitHub-managed,
-unrewritable, and is exactly why 64 refs still carry leaked addresses. From a
-worktree or agent branch, push with an explicit refspec:
-
-```bash
-git push origin <branch>:main
-```
-
-Note `push.default=upstream` plus a worktree branch tracking `origin/main` makes
-a bare `git push` target `main` unintentionally — always name the refspec.
-
-If a PR does exist, merge it by rebasing locally and pushing to `main`, not with
-the merge button: a GitHub-side merge or squash stamps the account's primary
-email onto the commit author (cause 1 above). GitHub then closes the PR without
-labelling it merged, which is expected for a fast-forward.
 
 ## Common Commands
 

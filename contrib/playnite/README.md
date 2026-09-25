@@ -2,23 +2,22 @@
 
 A [Playnite](https://playnite.link) library plugin that imports your
 [Gamarr](https://github.com/gamarr-app/Gamarr) game library into Playnite.
-Every game that Gamarr has downloaded shows up in Playnite with its title,
-release date, install directory, platforms, genres, developer/publisher,
-description, poster cover, and links to Steam/IGDB/RAWG and back to Gamarr.
+Every game Gamarr has downloaded shows up in Playnite with its title, release
+date, install directory, platforms, genres, developer/publisher, description,
+poster cover, and links to Steam/IGDB/RAWG and back to Gamarr.
 
 ## What gets imported
 
-- By default only games Gamarr has an imported file for
-  (`hasFile == true` or `sizeOnDisk > 0`). A settings toggle also imports
-  monitored-but-not-downloaded games as "not installed".
-- Downloaded games are marked *installed* in Playnite with
-  `InstallDirectory` set to Gamarr's game path, so Playnite's
-  "is installed" filter works. No play action is created — Gamarr manages
-  files, not launchers; point Playnite at the executable yourself or let
-  other extensions handle launching.
+- By default, only games Gamarr has an imported file for (`hasFile == true` or
+  `sizeOnDisk > 0`). A settings toggle also imports monitored-but-not-downloaded
+  games as "not installed".
+- Downloaded games are marked *installed* in Playnite with `InstallDirectory`
+  set to Gamarr's game path, so Playnite's "is installed" filter works. No play
+  action is created — Gamarr manages files, not launchers. Point Playnite at the
+  executable yourself, or let other extensions handle launching.
 - Covers are served straight from your Gamarr server
-  (`/api/v3/mediacover/{id}/poster.jpg`), so the server must be reachable
-  from the Playnite machine during import.
+  (`/api/v3/mediacover/{id}/poster.jpg`), so the server must be reachable from
+  the Playnite machine during import.
 
 ## Requirements
 
@@ -28,30 +27,30 @@ description, poster cover, and links to Steam/IGDB/RAWG and back to Gamarr.
 
 ## Build
 
-The plugin targets `net462` (Playnite's plugin runtime) but builds on any
-OS with the .NET SDK, via reference assemblies:
+The plugin targets `net462` (Playnite's plugin runtime) but builds on any OS
+with the .NET SDK, via reference assemblies:
 
 ```bash
 cd contrib/playnite
 ./build-pext.sh          # produces dist/GamarrLibrary_<version>.pext
 ```
 
-Or manually: `dotnet build GamarrLibrary/GamarrLibrary.csproj -c Release`
-and zip `GamarrLibrary.dll`, `Newtonsoft.Json.dll` and `extension.yaml`
-into a file with a `.pext` extension (do **not** include
-`Playnite.SDK.dll`).
+To do it by hand, run `dotnet build GamarrLibrary/GamarrLibrary.csproj -c Release`
+and zip `GamarrLibrary.dll`, `Newtonsoft.Json.dll` and `extension.yaml` into a
+file with a `.pext` extension. Do **not** include `Playnite.SDK.dll` — Playnite
+supplies it at runtime.
 
 This project is intentionally **not** part of `src/Gamarr.sln`.
 
 ## Install
 
 1. Build or download `GamarrLibrary_<version>.pext`.
-2. Drag & drop the `.pext` onto the Playnite window (or double-click it)
-   and confirm the install prompt; Playnite restarts.
-3. In Playnite: *Add-ons… (F9) → Extensions settings → Libraries → Gamarr
-   Library*, enter your Gamarr URL (e.g. `http://localhost:6767`) and API
-   key, save.
-4. Update the library: *Menu → Update Game Library → Gamarr*.
+2. Drag & drop the `.pext` onto the Playnite window (or double-click it) and
+   confirm the install prompt. Playnite restarts.
+3. In Playnite, go to *Add-ons… (F9) → Extensions settings → Libraries → Gamarr
+   Library*, enter your Gamarr URL (e.g. `http://localhost:6767`) and API key,
+   and save.
+4. Import: *Menu → Update Game Library → Gamarr*.
 
 ## Settings
 
@@ -62,14 +61,14 @@ This project is intentionally **not** part of `src/Gamarr.sln`.
 | Also import not-downloaded games | Import monitored games without files as "not installed" |
 
 The settings view is a minimal code-built WPF panel (two text boxes and a
-checkbox) rather than a styled XAML view — kept XAML-free so the project
-compiles with plain reference assemblies on macOS/Linux.
+checkbox) rather than a styled XAML view. Keeping it XAML-free is what lets the
+project compile with plain reference assemblies on macOS/Linux.
 
 ## Tests
 
-The Gamarr→Playnite mapping logic lives in `GamarrLibrary/Mapping/` with
-no PlayniteSDK dependency and is covered by NUnit tests that run on
-modern .NET on any OS:
+The Gamarr→Playnite mapping logic lives in `GamarrLibrary/Mapping/` with no
+PlayniteSDK dependency, and is covered by NUnit tests that run on modern .NET on
+any OS:
 
 ```bash
 cd contrib/playnite/GamarrLibrary.Tests
