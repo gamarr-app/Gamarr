@@ -60,7 +60,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 var response = _httpClient.Get(request);
                 var json = JObject.Parse(response.Content);
 
-                var appData = json[steamAppId.ToString()];
+                var appData = json[steamAppId.ToString()] ?? FindAppDataByInnerId(json, steamAppId);
                 if (appData?["success"]?.Value<bool>() != true)
                 {
                     _logger.Warn("Steam returned no data for App ID {0}", steamAppId);
@@ -81,6 +81,16 @@ namespace NzbDrone.Core.MetadataSource.Steam
                 _logger.Warn(ex, "Failed to fetch Steam game info for App ID {0}", steamAppId);
                 return null;
             }
+        }
+
+        // Steam does not always key the appdetails response by the id that was
+        // requested; it sometimes uses a related id, such as one of the app's DLC.
+        // The requested id is still carried inside the payload, so match on that.
+        private static JToken FindAppDataByInnerId(JObject json, int steamAppId)
+        {
+            return json.Properties()
+                .Select(property => property.Value)
+                .FirstOrDefault(value => value?["data"]?["steam_appid"]?.Value<int>() == steamAppId);
         }
 
         public List<Game> SearchForNewGame(string title)

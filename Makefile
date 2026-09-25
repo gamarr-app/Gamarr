@@ -54,7 +54,7 @@ check: | $(LOG_DIR)
 # Run `make test` with the sandbox disabled.
 test: | $(LOG_DIR)
 	@$(DOTNET) test src/NzbDrone.Core.Test/Gamarr.Core.Test.csproj \
-		--filter "Category!=AutomationTest&Category!=IntegrationTest" \
+		--filter "Category!=AutomationTest&Category!=IntegrationTest&Category!=ExternalIntegrationTest" \
 		> $(LOG_DIR)/test.log 2>&1 \
 		&& { grep -E "Passed!|Failed!" $(LOG_DIR)/test.log; echo "test: OK"; } \
 		|| { grep -E "Failed |Passed!|Failed!|error" $(LOG_DIR)/test.log | head -30; echo "test: FAILED (full log: $(LOG_DIR)/test.log)"; exit 1; }

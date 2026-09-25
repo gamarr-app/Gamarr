@@ -49,7 +49,7 @@ else
 fi
 
 if [ "$TYPE" = "Unit" ]; then
-  WHERE="$WHERE&Category!=IntegrationTest&Category!=AutomationTest"
+  WHERE="$WHERE&Category!=IntegrationTest&Category!=ExternalIntegrationTest&Category!=AutomationTest"
 elif [ "$TYPE" = "Integration" ] || [ "$TYPE" = "int" ] ; then
   WHERE="$WHERE&Category=IntegrationTest"
 elif [ "$TYPE" = "Automation" ] ; then
@@ -76,9 +76,8 @@ else
   exit 3
 fi
 
-if [ "$EXIT_CODE" -ge 0 ]; then
+if [ "$EXIT_CODE" -ne 0 ]; then
   echo "Failed tests: $EXIT_CODE"
-  exit 0
-else
-  exit $EXIT_CODE
 fi
+
+exit $EXIT_CODE

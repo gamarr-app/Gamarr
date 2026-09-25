@@ -268,7 +268,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                 }
                 else if (config.Misc.enable_game_sorting && ContainsCategory(config.Misc.game_categories, Settings.GameCategory))
                 {
-                    status.SortingMode = "Game";
+                    // Named for the setting the user has to find in SABnzbd, which
+                    // still calls it Movie sorting.
+                    status.SortingMode = "Movie";
                 }
                 else if (config.Misc.enable_date_sorting && ContainsCategory(config.Misc.date_categories, Settings.GameCategory))
                 {
