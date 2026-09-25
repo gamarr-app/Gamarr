@@ -60,7 +60,13 @@ staged_mode=0
 [ "${1:-}" = "--staged" ] && staged_mode=1
 
 if [ "$staged_mode" -eq 1 ]; then
-    added=$(git diff --cached -U0 --diff-filter=ACMR | grep '^+' | grep -v '^+++')
+    # Strip the diff's leading "+" before extracting. A "+" is a legal local-part
+    # character, so an address that happens to start an added line is read as
+    # "+name@host" — a different string, which hashes differently, fails the
+    # allowlist, and then breaks the -G reporting below because a leading "+" in a
+    # basic regex is a repetition operator with nothing to repeat. Reflowing a
+    # paragraph so the address lands at the start of a line was enough to trip it.
+    added=$(git diff --cached -U0 --diff-filter=ACMR | grep '^+' | grep -v '^+++' | sed 's/^+//')
     addresses=$(grep -oE "$EMAIL_RE" <<< "$added" | tr 'A-Z' 'a-z' | sort -u)
     patch_lines=$(git diff --cached -U0 --diff-filter=ACMR -- '*.patch' '*.diff' \
                   | grep '^+' | grep -v '^+++')
@@ -83,7 +89,7 @@ while IFS= read -r addr; do
         # are public, so echoing the matched line would publish the address on
         # the very run that is complaining about it.
         if [ "$staged_mode" -eq 1 ]; then
-            git diff --cached --name-only -G"$(sed 's/[.[\*^$]/\\&/g' <<< "$addr")" \
+            git diff --cached --name-only -G"$(sed 's/[].[\*^$+?(){}|]/\\&/g' <<< "$addr")" \
                 | head -20 | sed 's/^/    /' >&2
         else
             git grep -lIF "$addr" -- . 2>/dev/null | head -20 | sed 's/^/    /' >&2
