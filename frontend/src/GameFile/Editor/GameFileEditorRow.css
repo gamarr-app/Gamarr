@@ -4,9 +4,10 @@
   word-break: break-all;
 }
 
-.component,
-.componentContent,
-.componentTitle {
+/* Only the cell itself composes `cell` — it carries a border-top and 8px of
+   padding, so putting it on the wrapper and the title too drew two stray rules
+   inside the cell and indented the contents three times over. */
+.component {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 }
 

@@ -55,7 +55,7 @@ const columns = [
   { name: 'title', label: () => translate('Title'), isVisible: true },
   { name: 'size', label: () => translate('Size'), isVisible: true },
   { name: 'status', label: () => translate('Status'), isVisible: true },
-  { name: 'noIntro', label: () => 'Catalog', isVisible: true },
+  { name: 'noIntro', label: () => translate('Catalog'), isVisible: true },
   {
     name: 'qualityProfileId',
     label: () => translate('QualityProfile'),

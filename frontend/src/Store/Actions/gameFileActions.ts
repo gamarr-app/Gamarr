@@ -84,7 +84,7 @@ export const defaultState = {
     },
     {
       name: 'componentTitle',
-      label: () => 'Component',
+      label: () => translate('Component'),
       isVisible: true,
       isSortable: true,
     },
