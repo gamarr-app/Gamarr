@@ -19,7 +19,8 @@ rule has the full reasoning — read it before you decide a case is an exception
   intentional. (Known Gotchas)
 - **Don't `--amend` failed-hook commits.** Create a new commit instead. (Known
   Gotchas)
-- **Push straight to `main`. Do not open a PR unless the maintainer asks for one.** (Git
+- **Push straight to `main`. Do not open a PR unless the maintainer asks for
+  one.** (Git
   Workflow)
 - **Always name the refspec when you push**: `git push origin <branch>:main`. A
   bare `git push` can target `main` unintentionally. (Git Workflow)
@@ -208,7 +209,8 @@ On first launch Gamarr writes `config.xml` + `gamarr.db` to the `-data` dir.
 
 ### Pushing
 
-**Push straight to `main`. Do not open a PR unless the maintainer asks for one.** This is
+**Push straight to `main`. Do not open a PR unless the maintainer asks for
+one.** This is
 a solo repo with no reviewer, so a PR adds a review round-trip nobody performs
 and permanently creates a `refs/pull/*` ref — which is GitHub-managed,
 unrewritable, and is exactly why 64 refs still carry leaked addresses.
@@ -236,7 +238,7 @@ it merged, which is expected for a fast-forward.
 
 1. **GitHub's own squash/merge button.** The merge commit's author comes from
    the merging *account's* primary email, with GitHub itself as committer. That
-   put the bot account's `redacted.invalid` address on 8 commits (#105–#113,
+   put the bot account's own personal address on 8 commits (#105–#113,
    2026-05-16) and from there into every PR branch cut afterwards. Only fixable
    by enabling "Keep my email addresses private" on the `gamarr-bot2` account —
    check it before merging from the web UI.
