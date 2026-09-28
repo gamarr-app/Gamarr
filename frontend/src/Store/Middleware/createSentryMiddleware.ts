@@ -136,7 +136,8 @@ export default function createSentryMiddleware(): Middleware | undefined {
     dsn,
     environment: branch,
     release,
-    sendDefaultPii: true,
+    // `sendDefaultPii` was removed in @sentry/browser 11 — every `dataCollection`
+    // category it used to cover is now collected by default.
     beforeSend: cleanseData,
     integrations: [
       sentry.rewriteFramesIntegration({ iteratee: stripUrlBase }),
