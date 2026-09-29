@@ -112,7 +112,10 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                     return new List<ManualImportItem>();
                 }
 
-                path = trackedDownload.ImportItem.OutputPath.FullPath;
+                // ImportItem is only populated once CompletedDownloadService has tried to import
+                // this download. A manual import can run before that ever happens, so fall back to
+                // the download client's own item, which ImportItem is derived from anyway.
+                path = (trackedDownload.ImportItem ?? trackedDownload.DownloadItem).OutputPath.FullPath;
             }
 
             if (!_diskProvider.FolderExists(path))
@@ -539,7 +542,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                 var trackedDownload = groupedTrackedDownload.First().TrackedDownload;
 
                 var importGame = groupedTrackedDownload.First().ImportResult.ImportDecision.LocalGame.Game;
-                var outputPath = trackedDownload.ImportItem.OutputPath.FullPath;
+                var outputPath = (trackedDownload.ImportItem ?? trackedDownload.DownloadItem).OutputPath.FullPath;
 
                 if (_diskProvider.FolderExists(outputPath))
                 {
