@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Xml;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -180,6 +181,17 @@ namespace NzbDrone.Core.ImportLists
                 // names no cause on its own, and the inner one is all the diagnosis there is.
                 _logger.Warn("{0} {1} {2}", this, url, ex.InnerException == null ? ex.Message : $"{ex.Message} {ex.GetBaseException().Message}");
             }
+            catch (XmlException ex)
+            {
+                // RssImportBaseParser/RSSImportParser's LoadXmlDocument rethrows this
+                // when the feed body isn't valid XML at all - typically an HTML error
+                // or maintenance page served in place of the feed. That's the remote
+                // list misbehaving, not this app, so it belongs at Warn rather than
+                // falling to the catch-all below and logging as Error.
+                _importListStatusService.RecordFailure(Definition.Id);
+                ex.WithData("FeedUrl", url);
+                _logger.Warn(ex, "{0} responded with content that could not be parsed as XML. {1}", this, url);
+            }
             catch (Exception ex)
             {
                 _importListStatusService.RecordFailure(Definition.Id);
@@ -283,6 +295,10 @@ namespace NzbDrone.Core.ImportLists
             }
             catch (Exception ex)
             {
+                // Note: this catch-all is also reached by XmlException (an HTML error
+                // page instead of a feed), but it already logs at Warn like every arm
+                // above it, so unlike FetchGames' catch-all this one needs no separate
+                // XmlException arm.
                 _logger.Warn(ex, "Unable to connect to import list");
 
                 return new ValidationFailure(string.Empty, $"Unable to connect to import list: {ex.Message}. Check the log surrounding this error for details.");

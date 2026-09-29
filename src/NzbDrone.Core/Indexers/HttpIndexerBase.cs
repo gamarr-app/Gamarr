@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -286,6 +287,17 @@ namespace NzbDrone.Core.Indexers
                 }
 
                 _logger.Warn("{0} {1} {2}", this, url, ex.InnerException == null ? ex.Message : $"{ex.Message} {ex.GetBaseException().Message}");
+            }
+            catch (XmlException ex)
+            {
+                // RssParser.LoadXmlDocument rethrows this when the feed body isn't valid
+                // XML at all - typically an HTML error/maintenance page served in place
+                // of the feed. That's the remote indexer misbehaving, not this app, so
+                // it belongs at Warn like the other "the other end sent us garbage" cases
+                // above, rather than falling to the catch-all below and logging as Error.
+                _indexerStatusService.RecordFailure(Definition.Id);
+                ex.WithData("FeedUrl", url);
+                _logger.Warn(ex, "{0} responded with content that could not be parsed as XML. {1}", this, url);
             }
             catch (Exception ex)
             {
