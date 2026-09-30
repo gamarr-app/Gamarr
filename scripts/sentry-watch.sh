@@ -96,9 +96,26 @@ fi
 
 log "Fetching unresolved issues from Sentry..."
 
-HTTP_CODE=$(curl -s -o /tmp/sentry-issues.json -w "%{http_code}" \
-    -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
-    "https://sentry.io/api/0/organizations/${SENTRY_ORG}/issues/?query=is:unresolved&sort=date&limit=25")
+# Sentry's org-wide rate limit and its 5xx blips are both transient, and a
+# single one of them used to wake the channel — inference spent on something
+# that fixes itself by the next run. Retry a few times first; only a failure
+# that survives the backoff is worth anyone reading. Worst case this adds ~45s
+# to a job that runs every 15 minutes.
+for attempt in 1 2 3; do
+    HTTP_CODE=$(curl -s -o /tmp/sentry-issues.json -w "%{http_code}" \
+        -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
+        "https://sentry.io/api/0/organizations/${SENTRY_ORG}/issues/?query=is:unresolved&sort=date&limit=25")
+
+    case "$HTTP_CODE" in
+        429|5??|000) ;;   # transient: rate limited, Sentry-side error, or no connection
+        *) break ;;
+    esac
+
+    if [ "$attempt" -lt 3 ]; then
+        log "Sentry API returned HTTP $HTTP_CODE (attempt $attempt/3), retrying..."
+        sleep $(( attempt * 15 ))
+    fi
+done
 
 if [ "$HTTP_CODE" != "200" ]; then
     log "ERROR: Sentry API returned HTTP $HTTP_CODE"
