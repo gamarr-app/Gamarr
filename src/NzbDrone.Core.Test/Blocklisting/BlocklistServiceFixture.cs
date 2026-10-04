@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Indexers;
@@ -129,6 +131,143 @@ namespace NzbDrone.Core.Test.Blocklisting
                   .Returns(new List<Blocklist> { _blocklist });
 
             Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_true_when_same_infohash_is_offered_by_a_different_indexer()
+        {
+            // The same torrent re-offered under a second indexer label. The stored row's
+            // indexer differs, so before the hash hit short-circuited this it fell through
+            // to title+indexer matching and the re-push was grabbed again.
+            _blocklist.Indexer = "BigFANGroup (Prowlarr)";
+            _torrentInfo.Indexer = "1337x (Prowlarr)";
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTorrentInfoHash(1, _torrentInfo.InfoHash))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_return_false_when_title_matches_but_infohash_differs()
+        {
+            // Over-block: a blocklisted release must not block a genuinely different
+            // torrent that happens to share the title and indexer.
+            _blocklist.TorrentInfoHash = "0000000000000000000000000000000000000000";
+            _torrentInfo.InfoHash = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_still_block_legacy_row_with_no_stored_infohash()
+        {
+            // Every row written before the hash was recorded has a null TorrentInfoHash.
+            // Those must keep blocking on title+indexer even when the incoming release
+            // does carry a hash, or an upgrade silently empties the blocklist.
+            _blocklist.TorrentInfoHash = null;
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_block_hashless_release_from_another_indexer_when_size_matches()
+        {
+            // The decision-engine moment for a pushed release: the infohash isn't known
+            // until the .torrent is fetched, so the only evidence is the exact title, the
+            // game and the size.
+            _torrentInfo.InfoHash = null;
+            _blocklist.Indexer = "BigFANGroup (Prowlarr)";
+            _torrentInfo.Indexer = "1337x (Prowlarr)";
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_not_block_hashless_release_from_another_indexer_when_size_differs()
+        {
+            _torrentInfo.InfoHash = null;
+            _torrentInfo.Size = _blocklist.Size.Value + 500.Megabytes();
+            _blocklist.Indexer = "BigFANGroup (Prowlarr)";
+            _torrentInfo.Indexer = "1337x (Prowlarr)";
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_persist_torrent_info_hash_from_tracked_download()
+        {
+            _event.Data["protocol"] = ((int)DownloadProtocol.Torrent).ToString();
+            _event.DownloadId = "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92";
+            _event.TrackedDownload = new TrackedDownload
+            {
+                Protocol = DownloadProtocol.Torrent,
+                DownloadItem = new DownloadClientItem { DownloadId = _event.DownloadId }
+            };
+
+            Subject.Handle(_event);
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Verify(v => v.Insert(It.Is<Blocklist>(b =>
+                      b.TorrentInfoHash == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")), Times.Once());
+        }
+
+        [Test]
+        public void should_persist_download_id_as_torrent_info_hash_when_there_is_no_tracked_download()
+        {
+            // Manual "mark as failed" publishes no TrackedDownload, and the grab only
+            // recorded a torrentInfoHash when the indexer supplied one up front. Without
+            // this fallback the row is written with a null hash and can never be matched
+            // by hash afterwards.
+            _event.Data["protocol"] = ((int)DownloadProtocol.Torrent).ToString();
+            _event.DownloadId = "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92";
+
+            Subject.Handle(_event);
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Verify(v => v.Insert(It.Is<Blocklist>(b =>
+                      b.TorrentInfoHash == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")), Times.Once());
+        }
+
+        [Test]
+        public void should_prefer_recorded_torrent_info_hash_over_download_id()
+        {
+            _event.Data["protocol"] = ((int)DownloadProtocol.Torrent).ToString();
+            _event.Data["torrentInfoHash"] = "AAAABBBBCCCCDDDDEEEEFFFF00001111222233334";
+            _event.DownloadId = "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92";
+
+            Subject.Handle(_event);
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Verify(v => v.Insert(It.Is<Blocklist>(b =>
+                      b.TorrentInfoHash == "AAAABBBBCCCCDDDDEEEEFFFF00001111222233334")), Times.Once());
+        }
+
+        [Test]
+        public void should_not_persist_download_id_as_torrent_info_hash_for_usenet()
+        {
+            // _event is usenet (protocol 1); a Sabnzbd id is not an infohash.
+            Subject.Handle(_event);
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Verify(v => v.Insert(It.Is<Blocklist>(b => b.TorrentInfoHash == null)), Times.Once());
         }
 
         [Test]

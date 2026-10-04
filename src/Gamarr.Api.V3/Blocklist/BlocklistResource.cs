@@ -22,6 +22,10 @@ namespace Gamarr.Api.V3.Blocklist
         public string Indexer { get; set; }
         public string Message { get; set; }
 
+        // The column has always been stored and matched on, but was never mapped out to
+        // the API, so every blocklist row read over HTTP looked like it had no infohash.
+        public string TorrentInfoHash { get; set; }
+
         public GameResource Game { get; set; }
     }
 
@@ -47,6 +51,7 @@ namespace Gamarr.Api.V3.Blocklist
                 Protocol = model.Protocol,
                 Indexer = model.Indexer,
                 Message = model.Message,
+                TorrentInfoHash = model.TorrentInfoHash,
 
                 Game = model.Game.ToResource(0)
             };

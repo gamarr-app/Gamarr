@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Core.Datastore;
@@ -23,12 +24,25 @@ namespace NzbDrone.Core.Blocklisting
 
         public List<Blocklist> BlocklistedByTitle(int gameId, string sourceTitle)
         {
-            return Query(x => x.GameId == gameId && x.SourceTitle.Contains(sourceTitle));
+            // The SQL side stays a LIKE '%...%' because that is what gives us a
+            // case-insensitive comparison in both SQLite and Postgres without a
+            // collation cast. It is only a prefilter: every exact match is also a
+            // substring match, so narrowing it in memory loses nothing. Without the
+            // second pass a blocklisted "Some Game NSP" also blocks the unrelated
+            // shorter title "Some Game", which is the over-block we were seeing.
+            return Query(x => x.GameId == gameId && x.SourceTitle.Contains(sourceTitle))
+                .Where(x => x.SourceTitle.Equals(sourceTitle, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
         }
 
         public List<Blocklist> BlocklistedByTorrentInfoHash(int gameId, string torrentInfoHash)
         {
-            return Query(x => x.GameId == gameId && x.TorrentInfoHash.Contains(torrentInfoHash));
+            // Same shape as above: LIKE for the case-insensitive prefilter, exact
+            // equality in memory so one hash can't match another that merely
+            // contains it.
+            return Query(x => x.GameId == gameId && x.TorrentInfoHash.Contains(torrentInfoHash))
+                .Where(x => x.TorrentInfoHash.Equals(torrentInfoHash, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
         }
 
         public List<Blocklist> BlocklistedByGame(int gameId)

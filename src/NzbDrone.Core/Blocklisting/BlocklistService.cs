@@ -45,13 +45,22 @@ namespace NzbDrone.Core.Blocklisting
                     return false;
                 }
 
-                if (torrentInfo.InfoHash.IsNotNullOrWhiteSpace())
+                // A hash hit is authoritative and deliberately ignores the title and the
+                // indexer: the same torrent re-offered under a second indexer label (the
+                // same infohash arriving as "1337x" after it was blocklisted as
+                // "BigFANGroup") is the same bad download and must stay blocked.
+                if (torrentInfo.InfoHash.IsNotNullOrWhiteSpace() &&
+                    _blocklistRepository.BlocklistedByTorrentInfoHash(gameId, torrentInfo.InfoHash)
+                                        .Any(b => SameTorrent(b, torrentInfo)))
                 {
-                    var blocklistedByTorrentInfohash = _blocklistRepository.BlocklistedByTorrentInfoHash(gameId, torrentInfo.InfoHash);
-
-                    return blocklistedByTorrentInfohash.Any(b => SameTorrent(b, torrentInfo));
+                    return true;
                 }
 
+                // Fall through on a miss rather than returning false. Rows with no stored
+                // hash — pending releases blocklisted before a .torrent was ever fetched,
+                // and everything written before the hash was recorded — are invisible to
+                // the hash query, so returning early there would silently un-blocklist
+                // them the moment an incoming release happened to carry a hash.
                 return _blocklistRepository.BlocklistedByTitle(gameId, release.Title)
                     .Where(b => b.Protocol == DownloadProtocol.Torrent)
                     .Any(b => SameTorrent(b, torrentInfo));
@@ -131,16 +140,38 @@ namespace NzbDrone.Core.Blocklisting
 
         private bool SameTorrent(Blocklist item, TorrentInfo release)
         {
-            if (release.InfoHash.IsNotNullOrWhiteSpace())
+            // Two known, different hashes are two different torrents, whatever the title
+            // says. This is the half that stops a blocklisted release from blocking every
+            // later release of the same game from the same indexer.
+            if (release.InfoHash.IsNotNullOrWhiteSpace() && item.TorrentInfoHash.IsNotNullOrWhiteSpace())
             {
                 return release.InfoHash.Equals(item.TorrentInfoHash, StringComparison.InvariantCultureIgnoreCase);
             }
 
-            return HasSameIndexer(item, release.Indexer);
+            // Either side's hash is unknown, so title + indexer is all we have. Requiring
+            // a hash match here instead would un-blocklist every stored row that has no
+            // hash, which is the whole pre-existing blocklist on any upgraded instance.
+            if (HasSameIndexer(item, release.Indexer))
+            {
+                return true;
+            }
+
+            // No hash to compare and a different indexer label. The source title already
+            // matched exactly for this same game, so an equal size means this is the same
+            // release re-offered under a second indexer name -- which is how one bad
+            // torrent kept getting re-grabbed after being blocklisted. A genuinely
+            // different torrent of the same title differs in size, and a row with no
+            // recorded size stays indexer-scoped rather than becoming a wildcard.
+            return item.Size.HasValue && HasSameSize(item, release.Size);
         }
 
         private bool HasSameIndexer(Blocklist item, string indexer)
         {
+            // A blank stored indexer stays a wildcard. Rows reach that state legitimately
+            // (manual blocklists, and indexers that report no name), and treating blank as
+            // "matches nothing" would make those rows dead weight that never blocks
+            // anything. It is only reached when at least one side has no infohash, so the
+            // hash check above already keeps it away from the cases it used to over-block.
             if (item.Indexer.IsNullOrWhiteSpace())
             {
                 return true;
@@ -179,6 +210,8 @@ namespace NzbDrone.Core.Blocklisting
 
         public void Handle(DownloadFailedEvent message)
         {
+            var protocol = (DownloadProtocol)Convert.ToInt32(message.Data.GetValueOrDefault("protocol"));
+
             var blocklist = new Blocklist
             {
                 GameId = message.GameId,
@@ -188,12 +221,10 @@ namespace NzbDrone.Core.Blocklisting
                 PublishedDate = DateTime.Parse(message.Data.GetValueOrDefault("publishedDate")),
                 Size = long.Parse(message.Data.GetValueOrDefault("size", "0")),
                 Indexer = message.Data.GetValueOrDefault("indexer"),
-                Protocol = (DownloadProtocol)Convert.ToInt32(message.Data.GetValueOrDefault("protocol")),
+                Protocol = protocol,
                 Message = message.Message,
                 Languages = message.Languages,
-                TorrentInfoHash = message.TrackedDownload?.Protocol == DownloadProtocol.Torrent
-                    ? message.TrackedDownload.DownloadItem.DownloadId
-                    : message.Data.GetValueOrDefault("torrentInfoHash", null)
+                TorrentInfoHash = GetTorrentInfoHash(message, protocol)
             };
 
             if (Enum.TryParse(message.Data.GetValueOrDefault("indexerFlags"), true, out IndexerFlags flags))
@@ -202,6 +233,34 @@ namespace NzbDrone.Core.Blocklisting
             }
 
             _blocklistRepository.Insert(blocklist);
+        }
+
+        private static string GetTorrentInfoHash(DownloadFailedEvent message, DownloadProtocol protocol)
+        {
+            if (message.TrackedDownload?.Protocol == DownloadProtocol.Torrent)
+            {
+                return message.TrackedDownload.DownloadItem.DownloadId;
+            }
+
+            var hash = message.Data.GetValueOrDefault("torrentInfoHash", null);
+
+            if (hash.IsNotNullOrWhiteSpace())
+            {
+                return hash;
+            }
+
+            // Every other path that can reach here is a failure without a TrackedDownload
+            // (manual "mark as failed" on a history row, most notably), and the grab only
+            // recorded a torrentInfoHash when the indexer supplied one up front -- pushes
+            // and most Torznab results don't. For a torrent the download client's id is
+            // the infohash, which is exactly what the TrackedDownload branch above stores,
+            // so use it rather than writing a torrent row that can never be hash-matched.
+            if (protocol == DownloadProtocol.Torrent && message.DownloadId.IsNotNullOrWhiteSpace())
+            {
+                return message.DownloadId;
+            }
+
+            return null;
         }
 
         public void HandleAsync(GamesDeletedEvent message)

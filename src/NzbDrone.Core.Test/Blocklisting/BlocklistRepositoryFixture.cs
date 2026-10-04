@@ -65,6 +65,44 @@ namespace NzbDrone.Core.Test.Blocklisting
         }
 
         [Test]
+        public void should_not_match_blocklisted_title_by_substring()
+        {
+            // The query used to be a bare LIKE '%...%', so a blocklisted "game.title.1998"
+            // also blocked every shorter title it contained.
+            Subject.Insert(_blocklist);
+
+            Subject.BlocklistedByTitle(_blocklist.GameId, "game.title").Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_match_torrent_info_hash_exactly()
+        {
+            _blocklist.TorrentInfoHash = "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92";
+            Subject.Insert(_blocklist);
+
+            Subject.BlocklistedByTorrentInfoHash(_blocklist.GameId, "511567eacf51ee0b303d2a9b9edb4a9b214b3d92")
+                   .Should().HaveCount(1);
+        }
+
+        [Test]
+        public void should_not_match_torrent_info_hash_by_substring()
+        {
+            _blocklist.TorrentInfoHash = "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92";
+            Subject.Insert(_blocklist);
+
+            Subject.BlocklistedByTorrentInfoHash(_blocklist.GameId, "511567EA").Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_not_match_torrent_info_hash_on_rows_without_one()
+        {
+            Subject.Insert(_blocklist);
+
+            Subject.BlocklistedByTorrentInfoHash(_blocklist.GameId, "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")
+                   .Should().BeEmpty();
+        }
+
+        [Test]
         public void should_delete_blocklists_by_gameId()
         {
             var blocklistItems = Builder<Blocklist>.CreateListOfSize(5)

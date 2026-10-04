@@ -81,6 +81,28 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
             AssertDownloadFailed();
         }
 
+        [Test]
+        public void should_include_download_id_when_manually_marked_as_failed_without_a_tracked_download()
+        {
+            // The manual path has no TrackedDownload, so the download id on the event is
+            // the only place a torrent's infohash can come from when the grab never
+            // recorded one. BlocklistService falls back to it.
+            var history = Builder<GameHistory>.CreateNew()
+                                              .With(h => h.DownloadId = "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")
+                                              .Build();
+
+            Mocker.GetMock<IHistoryService>()
+                  .Setup(s => s.Get(history.Id))
+                  .Returns(history);
+
+            Subject.MarkAsFailed(history.Id);
+
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.Is<DownloadFailedEvent>(c =>
+                      c.TrackedDownload == null &&
+                      c.DownloadId == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")), Times.Once());
+        }
+
         private void AssertDownloadNotFailed()
         {
             Mocker.GetMock<IEventAggregator>()
