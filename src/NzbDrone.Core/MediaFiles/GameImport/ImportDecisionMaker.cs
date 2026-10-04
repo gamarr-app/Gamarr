@@ -7,6 +7,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
+using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
@@ -20,6 +21,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         List<ImportDecision> GetImportDecisions(List<string> videoFiles, Game game, DownloadClientItem downloadClientItem, ParsedGameInfo folderInfo, bool sceneSource);
         List<ImportDecision> GetImportDecisions(List<string> videoFiles, Game game, DownloadClientItem downloadClientItem, ParsedGameInfo folderInfo, bool sceneSource, bool filterExistingFiles);
         ImportDecision GetDecision(LocalGame localGame, DownloadClientItem downloadClientItem);
+        void InspectArchive(LocalGame localGame);
     }
 
     public class ImportDecisionMaker : IMakeImportDecision
@@ -30,6 +32,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         private readonly IDiskProvider _diskProvider;
         private readonly ITrackedDownloadService _trackedDownloadService;
         private readonly ICustomFormatCalculationService _formatCalculator;
+        private readonly IGameArchiveService _archiveService;
         private readonly Logger _logger;
 
         public ImportDecisionMaker(IEnumerable<IImportDecisionEngineSpecification> specifications,
@@ -38,6 +41,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                                    IDiskProvider diskProvider,
                                    ITrackedDownloadService trackedDownloadService,
                                    ICustomFormatCalculationService formatCalculator,
+                                   IGameArchiveService archiveService,
                                    Logger logger)
         {
             _specifications = specifications;
@@ -46,6 +50,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             _diskProvider = diskProvider;
             _trackedDownloadService = trackedDownloadService;
             _formatCalculator = formatCalculator;
+            _archiveService = archiveService;
             _logger = logger;
         }
 
@@ -101,6 +106,37 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             return decisions;
         }
 
+        /// <summary>
+        /// Phase one of archive-wrapped import: a cheap header-only peek. When the
+        /// release is nothing but an archive around a single game file, Path is
+        /// pointed at the archive — which makes the import unit one file instead of
+        /// an opaque folder, so release junk (filler .pad dirs, html, metadata) is
+        /// left behind — and Size is replaced with the uncompressed entry size.
+        ///
+        /// It has to happen here rather than in a spec: specs can only accept or
+        /// reject, and FreeSpaceSpecification, the custom format calculator and the
+        /// file namer all need the corrected size and extension before they run.
+        /// Nothing is decompressed; extraction happens in the mover, on approval.
+        /// </summary>
+        public void InspectArchive(LocalGame localGame)
+        {
+            var inspection = _archiveService.InspectImportUnit(localGame.Path);
+
+            if (inspection == null)
+            {
+                return;
+            }
+
+            _logger.Debug("Import unit {0} is an archive-wrapped release; importing {1} ({2} bytes) instead",
+                localGame.Path,
+                inspection.EntryName,
+                inspection.EntrySize);
+
+            localGame.ArchiveInspection = inspection;
+            localGame.Path = inspection.ArchivePath;
+            localGame.Size = inspection.EntrySize;
+        }
+
         public ImportDecision GetDecision(LocalGame localGame, DownloadClientItem downloadClientItem)
         {
             var reasons = _specifications.Select(c => EvaluateSpec(c, localGame, downloadClientItem))
@@ -128,6 +164,10 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                 {
                     localGame.Size = _diskProvider.GetFileSize(localGame.Path);
                 }
+
+                // Must run after the path parse (the folder name carries the full
+                // release title) and before Augment/specs, which need the real size.
+                InspectArchive(localGame);
 
                 _aggregationService.Augment(localGame, downloadClientItem);
 

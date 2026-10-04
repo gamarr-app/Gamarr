@@ -171,6 +171,11 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             localGame.Quality = finalQuality;
             localGame.IndexerFlags = (IndexerFlags)indexerFlags;
 
+            // ReprocessItem calls the public 2-arg GetDecision, which skips the
+            // private decision path where the archive peek lives — so it has to be
+            // done here, before the custom formats and the size are consumed.
+            _importDecisionMaker.InspectArchive(localGame);
+
             localGame.CustomFormats = _formatCalculator.ParseCustomFormat(localGame);
             localGame.CustomFormatScore = localGame.Game?.QualityProfile?.CalculateCustomFormatScore(localGame.CustomFormats) ?? 0;
 

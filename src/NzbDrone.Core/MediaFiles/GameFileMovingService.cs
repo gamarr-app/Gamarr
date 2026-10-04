@@ -5,6 +5,7 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Events;
@@ -30,6 +31,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IDiskProvider _diskProvider;
         private readonly IMediaFileAttributeService _mediaFileAttributeService;
         private readonly IImportScript _scriptImportDecider;
+        private readonly IGameArchiveService _gameArchiveService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IConfigService _configService;
@@ -41,6 +43,7 @@ namespace NzbDrone.Core.MediaFiles
                                 IDiskProvider diskProvider,
                                 IMediaFileAttributeService mediaFileAttributeService,
                                 IImportScript scriptImportDecider,
+                                IGameArchiveService gameArchiveService,
                                 IRootFolderService rootFolderService,
                                 IEventAggregator eventAggregator,
                                 IConfigService configService,
@@ -52,6 +55,7 @@ namespace NzbDrone.Core.MediaFiles
             _diskProvider = diskProvider;
             _mediaFileAttributeService = mediaFileAttributeService;
             _scriptImportDecider = scriptImportDecider;
+            _gameArchiveService = gameArchiveService;
             _rootFolderService = rootFolderService;
             _eventAggregator = eventAggregator;
             _configService = configService;
@@ -93,7 +97,7 @@ namespace NzbDrone.Core.MediaFiles
             else
             {
                 var newFileName = _buildFileNames.BuildFileName(localGame.Game, gameFile, null, localGame.CustomFormats);
-                destinationPath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, Path.GetExtension(localGame.Path));
+                destinationPath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, GetDestinationExtension(localGame));
                 EnsureGameFolder(gameFile, localGame, destinationPath);
             }
 
@@ -121,14 +125,21 @@ namespace NzbDrone.Core.MediaFiles
             else
             {
                 var newFileName = _buildFileNames.BuildFileName(localGame.Game, gameFile, null, localGame.CustomFormats);
-                destinationPath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, Path.GetExtension(localGame.Path));
+                destinationPath = _buildFileNames.BuildFilePath(localGame.Game, newFileName, GetDestinationExtension(localGame));
                 EnsureGameFolder(gameFile, localGame, destinationPath);
             }
 
-            if (_configService.CopyUsingHardlinks && !isFolder)
+            if (_configService.CopyUsingHardlinks && !isFolder && localGame.ArchiveInspection == null)
             {
                 _logger.Debug("Attempting to hardlink game file: {0} to {1}", sourcePath, destinationPath);
                 return TransferGamePath(gameFile, localGame.Game, sourcePath, destinationPath, TransferMode.HardLinkOrCopy, isFolder, localGame);
+            }
+
+            if (_configService.CopyUsingHardlinks && localGame.ArchiveInspection != null)
+            {
+                // Say so explicitly: to a seedbox user who hardlinks everything,
+                // a silent copy here reads as a hardlinking regression.
+                _logger.Debug("Not hardlinking {0}: the game file has to be extracted from the archive", sourcePath);
             }
 
             _logger.Debug("Copying game {0}: {1} to {2}", isFolder ? "folder" : "file", sourcePath, destinationPath);
@@ -204,7 +215,15 @@ namespace NzbDrone.Core.MediaFiles
                 localGame.FileNameBeforeRename = gameFile.RelativePath;
             }
 
-            if (localGame is not null && _scriptImportDecider.TryImport(gameFilePath, destinationFilePath, localGame, gameFile, mode) is var scriptImportDecision && scriptImportDecision != ScriptImportDecision.DeferMove)
+            if (localGame?.ArchiveInspection != null)
+            {
+                // Phase two of archive-wrapped import. The custom script path is
+                // bypassed on purpose: a script handed the archive path cannot do
+                // the right thing with it, and the extracted file is what the
+                // library expects to find at the destination.
+                _gameArchiveService.ExtractEntry(localGame.ArchiveInspection, destinationFilePath);
+            }
+            else if (localGame is not null && _scriptImportDecider.TryImport(gameFilePath, destinationFilePath, localGame, gameFile, mode) is var scriptImportDecision && scriptImportDecision != ScriptImportDecision.DeferMove)
             {
                 if (scriptImportDecision == ScriptImportDecision.RenameRequested)
                 {
@@ -237,6 +256,22 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileAttributeService.SetFilePermissions(destinationFilePath);
 
             return gameFile;
+        }
+
+        /// <summary>
+        /// The extension the destination must carry. For an archive-wrapped
+        /// release that is the inner entry's — naming XCI bytes "...[Base].7z"
+        /// would leave the game just as invisible to a library scanner, in a new
+        /// and more confusing way.
+        /// </summary>
+        private string GetDestinationExtension(LocalGame localGame)
+        {
+            if (localGame.ArchiveInspection != null)
+            {
+                return Path.GetExtension(localGame.ArchiveInspection.EntryName);
+            }
+
+            return Path.GetExtension(localGame.Path);
         }
 
         private void EnsureGameFolder(GameFile gameFile, LocalGame localGame, string filePath)

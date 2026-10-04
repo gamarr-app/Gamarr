@@ -90,8 +90,15 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     gameFile.GameId = localGame.Game.Id;
                     gameFile.Path = localGame.Path.CleanFilePath();
 
-                    // For games, the path may be a folder - calculate size accordingly
-                    if (_diskProvider.FolderExists(localGame.Path))
+                    // For games, the path may be a folder - calculate size accordingly.
+                    // An archive-wrapped release is neither: Path is the archive, and
+                    // its compressed size would understate the file we actually import,
+                    // so take the uncompressed size the decision peek worked out.
+                    if (localGame.ArchiveInspection != null)
+                    {
+                        gameFile.Size = localGame.Size;
+                    }
+                    else if (_diskProvider.FolderExists(localGame.Path))
                     {
                         gameFile.Size = _diskProvider.GetFolderSize(localGame.Path);
                     }
@@ -220,6 +227,22 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         }
 
         private string GetOriginalFilePath(DownloadClientItem downloadClientItem, LocalGame localGame)
+        {
+            var path = GetOriginalFilePathForUnit(downloadClientItem, localGame);
+
+            // Provenance for an archive-wrapped import: which entry of which
+            // archive this game file came out of. It rides OriginalFilePath
+            // rather than a new GameFile property because GameFile is
+            // Dapper-mapped and a new column would need a migration.
+            if (localGame.ArchiveInspection != null)
+            {
+                return $"{path}!{localGame.ArchiveInspection.EntryName}";
+            }
+
+            return path;
+        }
+
+        private string GetOriginalFilePathForUnit(DownloadClientItem downloadClientItem, LocalGame localGame)
         {
             var path = localGame.Path;
 

@@ -3,6 +3,7 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Qualities;
@@ -46,6 +47,12 @@ namespace NzbDrone.Core.Parser.Model
         // subfolder of the game folder (update-alongside imports, #149 phase 0)
         // instead of the game folder root.
         public string ImportSubfolder { get; set; }
+
+        // Transient: set by the import decision peek when this release is just
+        // an archive wrapping a single game file. When it is set, Path points at
+        // the archive, Size is the UNCOMPRESSED entry size, and the mover
+        // extracts instead of transferring.
+        public GameArchiveInspection ArchiveInspection { get; set; }
 
         // Best parsed release content type across the available sources
         // (same precedence as GameVersion above).

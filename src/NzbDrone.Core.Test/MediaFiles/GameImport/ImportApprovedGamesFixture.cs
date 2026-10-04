@@ -10,6 +10,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Events;
@@ -81,6 +82,54 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             Mocker.GetMock<IMediaFileService>()
                   .Setup(s => s.GetFilesWithRelativePath(It.IsAny<int>(), It.IsAny<string>()))
                   .Returns(new List<GameFile>());
+        }
+
+        [Test]
+        public void should_record_the_uncompressed_size_for_an_archive_wrapped_import()
+        {
+            // Path points at the archive, so GetFileSize here would store the
+            // compressed size and every later upgrade comparison would be wrong.
+            GivenExistingFileOnDisk();
+
+            var localGame = _approvedDecisions.First().LocalGame;
+            localGame.Path = Path.Combine(localGame.Game.Path, "Kirby.7z");
+            localGame.Size = 7985954816;
+            localGame.ArchiveInspection = new GameArchiveInspection
+            {
+                ArchivePath = localGame.Path,
+                EntryName = "Kirby.xci",
+                EntrySize = 7985954816
+            };
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFileSize(It.IsAny<string>()))
+                  .Returns(5700000000);
+
+            Subject.Import(_approvedDecisions, false);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(f => f.Size == 7985954816)), Times.Once());
+        }
+
+        [Test]
+        public void should_record_the_archive_entry_on_the_original_file_path()
+        {
+            GivenExistingFileOnDisk();
+            GivenNewDownload();
+
+            var localGame = _approvedDecisions.First().LocalGame;
+            localGame.Path = Path.Combine(_downloadClientItem.OutputPath.ToString(), "Kirby.7z");
+            localGame.ArchiveInspection = new GameArchiveInspection
+            {
+                ArchivePath = localGame.Path,
+                EntryName = "Kirby.xci",
+                EntrySize = 7985954816
+            };
+
+            Subject.Import(_approvedDecisions, true, _downloadClientItem);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(f => f.OriginalFilePath.EndsWith("Kirby.7z!Kirby.xci"))), Times.Once());
         }
 
         [Test]

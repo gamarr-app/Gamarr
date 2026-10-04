@@ -4,8 +4,10 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Common.Disk;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation;
 using NzbDrone.Core.Games;
@@ -106,6 +108,91 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                   {
                       localGame.Game = _localGame.Game;
                   });
+        }
+
+        [Test]
+        public void should_point_a_folder_shaped_archive_release_at_the_archive_itself()
+        {
+            // The release that caused this was folder-shaped, so the folder was
+            // handed to the decision engine as one opaque unit and everything in
+            // it — the archive, a filler .pad dir, scene html, metadata, artwork
+            // — was transferred verbatim. Reducing the unit to the archive is
+            // what leaves the junk behind.
+            var folder = @"C:\Test\Unsorted\Kirby (BlueRoms)".AsOsAgnostic();
+            var archive = @"C:\Test\Unsorted\Kirby (BlueRoms)\Kirby.7z".AsOsAgnostic();
+
+            GivenAugmentationSuccess();
+            GivenSpecifications(_pass1);
+            GivenVideoFiles(new List<string> { folder });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(folder))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(folder))
+                  .Returns(5700000000);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Setup(s => s.InspectImportUnit(folder))
+                  .Returns(new GameArchiveInspection
+                  {
+                      ArchivePath = archive,
+                      EntryName = "Kirby.xci",
+                      EntrySize = 7985954816
+                  });
+
+            var decision = Subject.GetImportDecisions(_videoFiles, _game).Single();
+
+            decision.LocalGame.Path.Should().Be(archive);
+            decision.LocalGame.ArchiveInspection.Should().NotBeNull();
+            decision.LocalGame.ArchiveInspection.EntryName.Should().Be("Kirby.xci");
+        }
+
+        [Test]
+        public void should_use_the_uncompressed_size_for_an_archive_release()
+        {
+            // FreeSpaceSpecification, the quality comparison and the upgrade
+            // decision all read Size — 5.7 GB in, 7.99 GB out.
+            var archive = @"C:\Test\Unsorted\Kirby (BlueRoms)\Kirby.7z".AsOsAgnostic();
+
+            GivenAugmentationSuccess();
+            GivenSpecifications(_pass1);
+            GivenVideoFiles(new List<string> { archive });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFileSize(archive))
+                  .Returns(5700000000);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Setup(s => s.InspectImportUnit(archive))
+                  .Returns(new GameArchiveInspection
+                  {
+                      ArchivePath = archive,
+                      EntryName = "Kirby.xci",
+                      EntrySize = 7985954816
+                  });
+
+            var decision = Subject.GetImportDecisions(_videoFiles, _game).Single();
+
+            decision.LocalGame.Size.Should().Be(7985954816);
+        }
+
+        [Test]
+        public void should_leave_a_normal_release_untouched()
+        {
+            GivenAugmentationSuccess();
+            GivenSpecifications(_pass1);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFileSize(It.IsAny<string>()))
+                  .Returns(1000);
+
+            var decision = Subject.GetImportDecisions(_videoFiles, _game).Single();
+
+            decision.LocalGame.ArchiveInspection.Should().BeNull();
+            decision.LocalGame.Path.Should().Be(_videoFiles.Single());
+            decision.LocalGame.Size.Should().Be(1000);
         }
 
         [Test]
