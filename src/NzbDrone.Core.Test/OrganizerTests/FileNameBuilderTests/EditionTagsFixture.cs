@@ -102,6 +102,12 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("10th anniversary edition", "{Game Title} [{EDITION TAGS}]", "Game Title [10TH ANNIVERSARY EDITION]")]
         [TestCase("10TH anniversary edition", "{Game Title} [{EDITION TAGS}]", "Game Title [10TH ANNIVERSARY EDITION]")]
         [TestCase("10Th anniversary edition", "{Game Title} [{EDITION TAGS}]", "Game Title [10TH ANNIVERSARY EDITION]")]
+        [TestCase("35mm edition", "{Game Title} [{edition tags}]", "Game Title [35mm edition]")]
+        [TestCase("35MM EDITION", "{Game Title} [{edition tags}]", "Game Title [35mm edition]")]
+        [TestCase("35mm edition", "{Game Title} [{Edition Tags}]", "Game Title [35mm Edition]")]
+        [TestCase("35MM EDITION", "{Game Title} [{Edition Tags}]", "Game Title [35mm Edition]")]
+        [TestCase("35mm edition", "{Game Title} [{EDITION TAGS}]", "Game Title [35MM EDITION]")]
+        [TestCase("35MM EDITION", "{Game Title} [{EDITION TAGS}]", "Game Title [35MM EDITION]")]
         public void should_always_lowercase_ordinals(string edition, string gameFormat, string expected)
         {
             _gameFile.Edition = edition;

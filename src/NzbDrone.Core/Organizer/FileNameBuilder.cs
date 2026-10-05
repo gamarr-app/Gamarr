@@ -677,11 +677,11 @@ namespace NzbDrone.Core.Organizer
             }
         }
 
-        private string GetEditionToken(GameFile gameFile)
+        private static string GetEditionToken(GameFile gameFile)
         {
             var edition = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(gameFile.Edition.ToLowerInvariant());
 
-            edition = Regex.Replace(edition, @"((?:\b|_)\d{1,3}(?:st|th|rd|nd)(?:\b|_))", match => match.Groups[1].Value.ToLowerInvariant(), RegexOptions.IgnoreCase);
+            edition = Regex.Replace(edition, @"((?:\b|_)\d{1,3}(?:st|th|rd|nd|mm)(?:\b|_))", match => match.Groups[1].Value.ToLowerInvariant(), RegexOptions.IgnoreCase);
             edition = Regex.Replace(edition, @"((?:\b|_)(?:IMAX|3D|SDR|HDR|DV)(?:\b|_))", match => match.Groups[1].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
 
             return edition;
