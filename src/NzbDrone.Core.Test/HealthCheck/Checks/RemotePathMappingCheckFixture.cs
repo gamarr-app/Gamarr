@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.Clients;
@@ -34,6 +37,13 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             new DownloadClientUnavailableException("error"),
             new DownloadClientAuthenticationException("error"),
             new DownloadClientException("error")
+        };
+
+        private static Exception[] TransportExceptions =
+        {
+            new WebException("error", WebExceptionStatus.Timeout),
+            new HttpRequestException("error"),
+            BuildHttpException()
         };
 
         [SetUp]
@@ -256,6 +266,40 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         [TestCaseSource("DownloadClientExceptions")]
         public void should_return_ok_on_import_failed_event_if_client_throws_downloadclientexception(Exception ex)
+        {
+            _downloadClient.Setup(s => s.GetStatus())
+                .Throws(ex);
+
+            var importEvent = new GameImportFailedEvent(null, null, true, _downloadItem);
+
+            Subject.Check(importEvent).ShouldBeOk();
+
+            ExceptionVerification.ExpectedErrors(0);
+        }
+
+        private static HttpException BuildHttpException()
+        {
+            var request = new HttpRequest("https://localhost");
+            var response = new HttpResponse(request, new HttpHeader(), string.Empty, HttpStatusCode.InternalServerError);
+
+            return new HttpException(request, response);
+        }
+
+        [Test]
+        [TestCaseSource(nameof(TransportExceptions))]
+        public void should_return_ok_if_client_throws_transport_exception(Exception ex)
+        {
+            _downloadClient.Setup(s => s.GetStatus())
+                .Throws(ex);
+
+            Subject.Check().ShouldBeOk();
+
+            ExceptionVerification.ExpectedErrors(0);
+        }
+
+        [Test]
+        [TestCaseSource(nameof(TransportExceptions))]
+        public void should_return_ok_on_import_failed_event_if_client_throws_transport_exception(Exception ex)
         {
             _downloadClient.Setup(s => s.GetStatus())
                 .Throws(ex);

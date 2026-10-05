@@ -1,6 +1,9 @@
 using System;
+using System.Net;
+using System.Net.Http;
 using Moq;
 using NUnit.Framework;
+using NzbDrone.Common.Http;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.Clients;
 using NzbDrone.Core.HealthCheck.Checks;
@@ -21,6 +24,13 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             new DownloadClientUnavailableException("error"),
             new DownloadClientAuthenticationException("error"),
             new DownloadClientException("error")
+        };
+
+        private static Exception[] TransportExceptions =
+        {
+            new WebException("error", WebExceptionStatus.Timeout),
+            new HttpRequestException("error"),
+            BuildHttpException()
         };
 
         [SetUp]
@@ -65,6 +75,26 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         [TestCaseSource("DownloadClientExceptions")]
         public void should_return_ok_if_client_throws_downloadclientexception(Exception ex)
+        {
+            _downloadClient.Setup(s => s.GetStatus())
+                .Throws(ex);
+
+            Subject.Check().ShouldBeOk();
+
+            ExceptionVerification.ExpectedErrors(0);
+        }
+
+        private static HttpException BuildHttpException()
+        {
+            var request = new HttpRequest("https://localhost");
+            var response = new HttpResponse(request, new HttpHeader(), string.Empty, HttpStatusCode.InternalServerError);
+
+            return new HttpException(request, response);
+        }
+
+        [Test]
+        [TestCaseSource(nameof(TransportExceptions))]
+        public void should_return_ok_if_client_throws_transport_exception(Exception ex)
         {
             _downloadClient.Setup(s => s.GetStatus())
                 .Throws(ex);

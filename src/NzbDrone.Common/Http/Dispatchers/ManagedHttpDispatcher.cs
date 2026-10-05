@@ -140,6 +140,17 @@ namespace NzbDrone.Common.Http.Dispatchers
             {
                 throw new WebException("Http request timed out", ex, WebExceptionStatus.Timeout, null);
             }
+            catch (SocketException ex)
+            {
+                // SocketsHttpHandler normally wraps socket failures in HttpRequestException, but a few
+                // paths escape that wrapping - notably the RemoteEndPoint lookup the connection pool runs
+                // on the Stream returned by our ConnectCallback (onConnect), which throws a bare
+                // SocketException if the socket died between connect and inspection. Callers (download
+                // clients, indexers, metadata providers) only handle HttpRequestException/WebException, so
+                // an unnormalized SocketException escapes as an "Unknown error" instead of a connectivity
+                // failure. Normalize it to the exception the rest of the stack already expects.
+                throw new HttpRequestException(HttpRequestError.ConnectionError, "Http request failed to connect", ex);
+            }
         }
 
         protected virtual System.Net.Http.HttpClient GetClient(HttpUri uri)
