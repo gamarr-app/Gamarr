@@ -22,6 +22,13 @@ namespace Gamarr.Api.V3.Blocklist
         public string Indexer { get; set; }
         public string Message { get; set; }
 
+        // Stored and matched on since the table existed, but never mapped out, so the key
+        // was absent from the JSON entirely -- which reads as "this row has no size" and
+        // sends anyone debugging a bad block looking at the wrong field.
+        public long? Size { get; set; }
+        public DateTime? PublishedDate { get; set; }
+        public NzbDrone.Core.Parser.Model.IndexerFlags IndexerFlags { get; set; }
+
         // The column has always been stored and matched on, but was never mapped out to
         // the API, so every blocklist row read over HTTP looked like it had no infohash.
         public string TorrentInfoHash { get; set; }
@@ -51,6 +58,9 @@ namespace Gamarr.Api.V3.Blocklist
                 Protocol = model.Protocol,
                 Indexer = model.Indexer,
                 Message = model.Message,
+                Size = model.Size,
+                PublishedDate = model.PublishedDate,
+                IndexerFlags = model.IndexerFlags,
                 TorrentInfoHash = model.TorrentInfoHash,
 
                 Game = model.Game.ToResource(0)

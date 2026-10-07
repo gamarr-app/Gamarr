@@ -121,6 +121,12 @@ namespace NzbDrone.Core.Blocklisting
             _blocklistRepository.DeleteMany(ids);
         }
 
+        // Knowingly left as upstream has it, divergence considered and declined: the bare
+        // PublishedDate equality below returns true while ignoring indexer and size, and
+        // the indexer test in the second branch is negated, which makes a blank stored
+        // indexer an *under*-block here -- the mirror image of the torrent path. Both are
+        // inherited from upstream, usenet is not the path that over-blocks pushed
+        // releases, and changing them would silently un-blocklist existing usenet rows.
         private bool SameNzb(Blocklist item, ReleaseInfo release)
         {
             if (item.PublishedDate == release.PublishDate)
@@ -148,12 +154,19 @@ namespace NzbDrone.Core.Blocklisting
                 return release.InfoHash.Equals(item.TorrentInfoHash, StringComparison.InvariantCultureIgnoreCase);
             }
 
-            // Either side's hash is unknown, so title + indexer is all we have. Requiring
-            // a hash match here instead would un-blocklist every stored row that has no
-            // hash, which is the whole pre-existing blocklist on any upgraded instance.
+            // Either side's hash is unknown, so title, indexer and size are all we have.
+            // A pushed release essentially never has a hash at this point: nothing parses
+            // a magnet at push time and the infohash is only learned in TorrentClientBase
+            // at grab time, which is strictly after this spec runs. Title + indexer alone
+            // therefore used to reject every re-release of an already-blocklisted title
+            // from the same indexer, however different the actual torrent was.
+            //
+            // So when both sides report a usable size, the size must agree too. When
+            // either side's size is unknown the old indexer-only behaviour stands, which
+            // keeps legacy and sizeless rows blocking exactly what they block today.
             if (HasSameIndexer(item, release.Indexer))
             {
-                return true;
+                return !HasKnownSize(item) || !IsKnownSize(release.Size) || HasSameSize(item, release.Size);
             }
 
             // No hash to compare and a different indexer label. The source title already
@@ -162,16 +175,19 @@ namespace NzbDrone.Core.Blocklisting
             // torrent kept getting re-grabbed after being blocklisted. A genuinely
             // different torrent of the same title differs in size, and a row with no
             // recorded size stays indexer-scoped rather than becoming a wildcard.
-            return item.Size.HasValue && HasSameSize(item, release.Size);
+            return HasKnownSize(item) && HasSameSize(item, release.Size);
         }
 
         private bool HasSameIndexer(Blocklist item, string indexer)
         {
-            // A blank stored indexer stays a wildcard. Rows reach that state legitimately
-            // (manual blocklists, and indexers that report no name), and treating blank as
-            // "matches nothing" would make those rows dead weight that never blocks
-            // anything. It is only reached when at least one side has no infohash, so the
-            // hash check above already keeps it away from the cases it used to over-block.
+            // A blank stored indexer stays a wildcard, deliberately. Rows reach that state
+            // legitimately (manual blocklists, and indexers that report no name), and
+            // treating blank as "matches nothing" would make those rows dead weight that
+            // never blocks anything. It is only reached when at least one side has no
+            // infohash, and now that the caller also demands size agreement whenever both
+            // sizes are known, a blank-indexer row only blocks a release of the same title
+            // and the same size for the same game -- which is a sound identity, so the
+            // wildcard is no longer an over-block and does not need removing.
             if (item.Indexer.IsNullOrWhiteSpace())
             {
                 return true;
@@ -189,6 +205,20 @@ namespace NzbDrone.Core.Blocklisting
 
             return item.PublishedDate.Value.AddMinutes(-2) <= publishedDate &&
                    item.PublishedDate.Value.AddMinutes(2) >= publishedDate;
+        }
+
+        // A size is only evidence when it is actually populated. The column is nullable,
+        // and the realistic bad state is 0 rather than null: anything that writes a row
+        // from a history payload with no recorded size parses it as 0. Treating 0 as a
+        // real size would make every sizeless row match only other sizeless rows.
+        private static bool HasKnownSize(Blocklist item)
+        {
+            return IsKnownSize(item.Size);
+        }
+
+        private static bool IsKnownSize(long? size)
+        {
+            return size.HasValue && size.Value > 0;
         }
 
         private bool HasSameSize(Blocklist item, long size)

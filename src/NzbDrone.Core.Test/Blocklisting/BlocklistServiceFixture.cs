@@ -212,6 +212,91 @@ namespace NzbDrone.Core.Test.Blocklisting
         }
 
         [Test]
+        public void should_not_block_hashless_push_from_same_indexer_when_size_differs()
+        {
+            // The reported bug. A Prowlarr push carries no infohash -- nothing parses a
+            // magnet at push time and the hash is only learned in TorrentClientBase at
+            // grab time, strictly after this spec runs -- so an exact title match plus an
+            // equal indexer label was enough to reject a genuinely different torrent of
+            // the same game. The sizes differ by gigabytes; these are not one release.
+            _torrentInfo.InfoHash = null;
+            _blocklist.TorrentInfoHash = null;
+            _blocklist.Size = 3.Gigabytes();
+            _torrentInfo.Size = 7.Gigabytes();
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_block_hashless_push_from_same_indexer_when_size_matches()
+        {
+            _torrentInfo.InfoHash = null;
+            _blocklist.TorrentInfoHash = null;
+            _blocklist.Size = 7.Gigabytes();
+            _torrentInfo.Size = 7.Gigabytes();
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [TestCase(null)]
+        [TestCase(0L)]
+        public void should_still_block_row_with_no_usable_size_from_same_indexer(long? storedSize)
+        {
+            // Legacy rows, and rows written from a history payload that recorded no size
+            // (parsed as 0), must keep blocking on title + indexer exactly as before --
+            // adding the size requirement must not un-blocklist anything that works today.
+            _torrentInfo.InfoHash = null;
+            _blocklist.TorrentInfoHash = null;
+            _blocklist.Size = storedSize;
+            _torrentInfo.Size = 7.Gigabytes();
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_still_block_when_incoming_release_has_no_usable_size()
+        {
+            _torrentInfo.InfoHash = null;
+            _blocklist.TorrentInfoHash = null;
+            _blocklist.Size = 7.Gigabytes();
+            _torrentInfo.Size = 0;
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_still_block_blank_indexer_row_when_size_matches()
+        {
+            _torrentInfo.InfoHash = null;
+            _blocklist.TorrentInfoHash = null;
+            _blocklist.Indexer = null;
+            _blocklist.Size = 7.Gigabytes();
+            _torrentInfo.Size = 7.Gigabytes();
+
+            Mocker.GetMock<IBlocklistRepository>()
+                  .Setup(s => s.BlocklistedByTitle(1, _torrentInfo.Title))
+                  .Returns(new List<Blocklist> { _blocklist });
+
+            Subject.Blocklisted(1, _torrentInfo).Should().BeTrue();
+        }
+
+        [Test]
         public void should_persist_torrent_info_hash_from_tracked_download()
         {
             _event.Data["protocol"] = ((int)DownloadProtocol.Torrent).ToString();

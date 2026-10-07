@@ -15,6 +15,10 @@ interface Blocklist extends ModelBase {
   gameId?: number;
   indexer?: string;
   message?: string;
+  size?: number;
+  publishedDate?: string;
+  indexerFlags?: string;
+  torrentInfoHash?: string;
 }
 
 export default Blocklist;
