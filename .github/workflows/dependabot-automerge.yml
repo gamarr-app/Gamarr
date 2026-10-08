@@ -24,8 +24,14 @@ jobs:
       # which let a red-CI dependabot PR (#140, prettier 3.9.1 reformat) land on
       # main. Instead, wait for the aggregate "Build Complete" check on the PR
       # head SHA and merge only if it concludes successfully.
+      # The gate must be an allow-list, not a deny-list. fetch-metadata emitted
+      # `update-type: null` for the ImageSharp 4.1.2 PR (#195), so a
+      # `!= semver-major` test passed and auto-merged a major bump that broke
+      # the Release build. An unknown update type now merges nothing.
       - name: Wait for CI, then auto-merge minor and patch updates
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
