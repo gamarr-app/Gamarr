@@ -8,5 +8,13 @@ namespace NzbDrone.Core.IndexerSearch
         public List<int> GameIds { get; set; }
 
         public override bool SendUpdatesToClient => true;
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            if (GameIds == null)
+            {
+                yield return "GameIds must be provided";
+            }
+        }
     }
 }

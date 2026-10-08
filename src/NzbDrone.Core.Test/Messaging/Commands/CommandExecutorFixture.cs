@@ -3,6 +3,7 @@ using System.Threading;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
@@ -142,6 +143,50 @@ namespace NzbDrone.Core.Test.Messaging.Commands
             QueueAndWaitForExecution(commandModel, true);
 
             VerifyEventPublished<CommandExecutedEvent>();
+
+            ExceptionVerification.WaitForErrors(1, 500);
+        }
+
+        [Test]
+        public void manually_triggered_command_for_missing_model_should_warn_not_error()
+        {
+            GivenCommandQueue();
+            var commandA = new CommandA();
+            var commandModel = new CommandModel
+            {
+                Body = commandA,
+                Trigger = CommandTrigger.Manual
+            };
+
+            _executorA.Setup(s => s.Execute(It.IsAny<CommandA>()))
+                      .Throws(new ModelNotFoundException(typeof(CommandA), 0));
+
+            Subject.Handle(new ApplicationStartedEvent());
+
+            QueueAndWaitForExecution(commandModel, true);
+
+            // Bad client input, not a crash: an Error here reaches Sentry as a bug report.
+            // Teardown's AssertNoUnexpectedLogs is what fails if an Error was logged too.
+            ExceptionVerification.WaitForWarns(1, 500);
+        }
+
+        [Test]
+        public void scheduled_command_for_missing_model_should_still_error()
+        {
+            GivenCommandQueue();
+            var commandA = new CommandA();
+            var commandModel = new CommandModel
+            {
+                Body = commandA,
+                Trigger = CommandTrigger.Scheduled
+            };
+
+            _executorA.Setup(s => s.Execute(It.IsAny<CommandA>()))
+                      .Throws(new ModelNotFoundException(typeof(CommandA), 0));
+
+            Subject.Handle(new ApplicationStartedEvent());
+
+            QueueAndWaitForExecution(commandModel, true);
 
             ExceptionVerification.WaitForErrors(1, 500);
         }

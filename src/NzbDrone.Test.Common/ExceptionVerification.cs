@@ -65,13 +65,23 @@ namespace NzbDrone.Test.Common
 
         public static void WaitForErrors(int count, int msec)
         {
+            WaitForLevel(LogLevel.Error, count, msec);
+        }
+
+        public static void WaitForWarns(int count, int msec)
+        {
+            WaitForLevel(LogLevel.Warn, count, msec);
+        }
+
+        private static void WaitForLevel(LogLevel level, int count, int msec)
+        {
             var ctx = CurrentContext;
 
             while (true)
             {
                 lock (ctx.Logs)
                 {
-                    var levelLogs = ctx.Logs.Where(l => l.Level == LogLevel.Error).ToList();
+                    var levelLogs = ctx.Logs.Where(l => l.Level == level).ToList();
 
                     if (levelLogs.Count >= count)
                     {
@@ -87,7 +97,7 @@ namespace NzbDrone.Test.Common
                 }
             }
 
-            Expected(LogLevel.Error, count);
+            Expected(level, count);
         }
 
         public static void ExpectedErrors(int count)

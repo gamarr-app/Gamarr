@@ -20,5 +20,18 @@ namespace NzbDrone.Core.MediaFiles.Commands
             GameId = gameId;
             Files = files;
         }
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            if (GameId <= 0)
+            {
+                yield return "A gameId must be provided";
+            }
+
+            if (Files == null || Files.Count == 0)
+            {
+                yield return "Files must be provided";
+            }
+        }
     }
 }

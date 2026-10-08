@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.Games.Commands
@@ -11,6 +12,19 @@ namespace NzbDrone.Core.Games.Commands
 
         public override bool SendUpdatesToClient => true;
         public override bool RequiresDiskAccess => true;
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            if (Games == null)
+            {
+                yield return "Games must be provided";
+            }
+
+            if (DestinationRootFolder.IsNullOrWhiteSpace())
+            {
+                yield return "A destinationRootFolder must be provided";
+            }
+        }
     }
 
     public class BulkMoveGame : IEquatable<BulkMoveGame>

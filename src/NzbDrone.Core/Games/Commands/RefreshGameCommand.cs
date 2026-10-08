@@ -22,10 +22,20 @@ namespace NzbDrone.Core.Games.Commands
 
         public override bool SendUpdatesToClient => true;
 
-        public override bool UpdateScheduledTask => GameIds.Empty();
+        public override bool UpdateScheduledTask => GameIds == null || GameIds.Empty();
 
         public override bool IsLongRunning => true;
 
         public override string CompletionMessage => "Completed";
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            // The ctor defaults this to an empty list, but an explicit
+            // "gameIds": null in the request body overwrites it.
+            if (GameIds == null)
+            {
+                yield return "GameIds must not be null";
+            }
+        }
     }
 }

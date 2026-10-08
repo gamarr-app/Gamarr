@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using NzbDrone.Common.Serializer;
 
@@ -40,6 +42,19 @@ namespace NzbDrone.Core.Messaging.Commands
         public Command()
         {
             Name = GetType().Name.Replace("Command", "");
+        }
+
+        /// <summary>
+        /// Required-input checks for a command that arrived from an API client.
+        /// Anything reported here is rejected with a 400 before the command is
+        /// queued, so a missing field becomes a client error instead of an
+        /// exception on the executor thread. Shape only: this runs without
+        /// services, so it cannot check that an id exists.
+        /// </summary>
+        /// <remarks>A method, not a property, so it is never serialized into the command body.</remarks>
+        public virtual IEnumerable<string> GetValidationFailures()
+        {
+            return Enumerable.Empty<string>();
         }
     }
 }

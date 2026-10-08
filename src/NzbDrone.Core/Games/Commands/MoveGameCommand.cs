@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.Games.Commands
@@ -11,5 +12,13 @@ namespace NzbDrone.Core.Games.Commands
 
         public override bool SendUpdatesToClient => true;
         public override bool RequiresDiskAccess => true;
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            if (GameId <= 0)
+            {
+                yield return "A gameId must be provided";
+            }
+        }
     }
 }

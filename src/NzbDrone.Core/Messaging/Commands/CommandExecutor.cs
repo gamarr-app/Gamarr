@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using NLog;
 using NzbDrone.Common;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.ProgressMessaging;
@@ -52,6 +53,14 @@ namespace NzbDrone.Core.Messaging.Commands
                         if (_cancellationTokenSource.IsCancellationRequested || IsContainerDisposed(ex))
                         {
                             _logger.Debug(ex, "Error occurred while executing task {0} during shutdown", command.Name);
+                        }
+                        else if (command.Trigger == CommandTrigger.Manual && ex is ModelNotFoundException)
+                        {
+                            // A manually triggered command naming an id that doesn't exist
+                            // is bad client input, not a fault of ours. Shape problems are
+                            // rejected with a 400 by CommandController; existence can only
+                            // be checked here, so log it without crying crash.
+                            _logger.Warn(ex, "Task {0} was requested for something that doesn't exist", command.Name);
                         }
                         else
                         {

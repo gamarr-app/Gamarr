@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.RomCatalog
@@ -17,5 +18,14 @@ namespace NzbDrone.Core.RomCatalog
 
         public override bool SendUpdatesToClient => true;
         public override bool IsTypeExclusive => true;
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            // Omitting the id syncs every source, which is valid; supplying 0 is not.
+            if (CatalogSourceId is <= 0)
+            {
+                yield return "catalogSourceId must be greater than zero when provided";
+            }
+        }
     }
 }

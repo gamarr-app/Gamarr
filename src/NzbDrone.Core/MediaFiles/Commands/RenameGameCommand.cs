@@ -9,5 +9,13 @@ namespace NzbDrone.Core.MediaFiles.Commands
 
         public override bool SendUpdatesToClient => true;
         public override bool RequiresDiskAccess => true;
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            if (GameIds == null)
+            {
+                yield return "GameIds must be provided";
+            }
+        }
     }
 }

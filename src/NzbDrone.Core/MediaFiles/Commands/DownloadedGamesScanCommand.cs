@@ -1,4 +1,6 @@
-﻿using NzbDrone.Core.MediaFiles.GameImport;
+﻿using System.Collections.Generic;
+using NzbDrone.Common.Extensions;
+using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.MediaFiles.Commands
@@ -15,5 +17,13 @@ namespace NzbDrone.Core.MediaFiles.Commands
         public ImportMode ImportMode { get; set; }
         public override bool RequiresDiskAccess => true;
         public override bool IsLongRunning => true;
+
+        public override IEnumerable<string> GetValidationFailures()
+        {
+            if (Path.IsNullOrWhiteSpace())
+            {
+                yield return "A path must be provided";
+            }
+        }
     }
 }

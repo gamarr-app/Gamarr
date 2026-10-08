@@ -63,6 +63,13 @@ namespace Gamarr.Api.V3.Commands
                 throw new BadRequestException($"Unknown command '{commandResource.Name}'");
             }
 
+            // A command with no registered handler would be queued happily and then
+            // fail to resolve on the executor thread, logging an error nobody can act on.
+            if (!_knownTypes.GetImplementations(typeof(IExecute<>).MakeGenericType(commandType)).Any())
+            {
+                throw new BadRequestException($"Command '{commandResource.Name}' has no handler");
+            }
+
             Request.Body.Seek(0, SeekOrigin.Begin);
             using (var reader = new StreamReader(Request.Body))
             {
@@ -72,6 +79,21 @@ namespace Gamarr.Api.V3.Commands
                     : CommandPriority.Normal;
 
                 var command = STJson.Deserialize(body, commandType) as Command;
+
+                if (command == null)
+                {
+                    throw new BadRequestException($"Invalid body for command '{commandResource.Name}'");
+                }
+
+                // Required-input checks before the command is queued: without these a
+                // missing field surfaces as an exception on the executor thread, which
+                // the client never sees and which reaches Sentry as a crash.
+                var validationFailures = command.GetValidationFailures().ToList();
+
+                if (validationFailures.Any())
+                {
+                    throw new BadRequestException($"Invalid {commandResource.Name} command: {string.Join(", ", validationFailures)}");
+                }
 
                 command.SuppressMessages = !command.SendUpdatesToClient;
                 command.SendUpdatesToClient = true;
