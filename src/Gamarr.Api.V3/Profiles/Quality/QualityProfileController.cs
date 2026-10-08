@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Profiles.Qualities;
+using NzbDrone.Core.Validation;
 using Gamarr.Http;
 using Gamarr.Http.REST;
 using Gamarr.Http.REST.Attributes;
@@ -16,11 +19,16 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         private readonly IQualityProfileService _qualityProfileService;
 
-        public QualityProfileController(IQualityProfileService qualityProfileService, ICustomFormatService formatService)
+        public QualityProfileController(IQualityProfileService qualityProfileService,
+                                        ICustomFormatService formatService,
+                                        QualityProfileNameInUseValidator nameInUseValidator)
         {
             _qualityProfileService = qualityProfileService;
 
             SharedValidator.RuleFor(c => c.Name).NotEmpty();
+            SharedValidator.RuleFor(c => c.Name)
+                .Must((v, c) => nameInUseValidator.Validate(v.Id, c))
+                .WithMessage("Should be unique");
             SharedValidator.RuleFor(c => c.MinUpgradeFormatScore).GreaterThanOrEqualTo(1);
             SharedValidator.RuleFor(c => c.Cutoff).ValidCutoff();
             SharedValidator.RuleFor(c => c.Items).ValidItems();
@@ -48,7 +56,16 @@ namespace Gamarr.Api.V3.Profiles.Quality
         public ActionResult<QualityProfileResource> Create([FromBody] QualityProfileResource resource)
         {
             var model = resource.ToModel();
-            model = _qualityProfileService.Add(model);
+
+            try
+            {
+                model = _qualityProfileService.Add(model);
+            }
+            catch (Exception ex) when (UniqueConstraintViolation.IsNameViolation(ex))
+            {
+                throw new ValidationException(new List<ValidationFailure> { new ("Name", "Should be unique") });
+            }
+
             return Created(model.Id);
         }
 

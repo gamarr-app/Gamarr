@@ -6,6 +6,7 @@ using NzbDrone.Core.AutoTagging;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Tags;
+using NzbDrone.Core.Validation;
 using NzbDrone.SignalR;
 using Gamarr.Http;
 using Gamarr.Http.REST;
@@ -21,7 +22,8 @@ namespace Gamarr.Api.V3.Tags
         private readonly ITagService _tagService;
 
         public TagController(IBroadcastSignalRMessage signalRBroadcaster,
-            ITagService tagService)
+            ITagService tagService,
+            TagLabelInUseValidator labelInUseValidator)
             : base(signalRBroadcaster)
         {
             _tagService = tagService;
@@ -30,6 +32,13 @@ namespace Gamarr.Api.V3.Tags
                 .NotEmpty()
                 .Matches("^[a-z0-9-]+$", RegexOptions.IgnoreCase)
                 .WithMessage("Allowed characters a-z, 0-9 and -");
+
+            // Only on PUT: TagService.Add deliberately returns the existing tag
+            // when the label already exists, and the UI relies on that, but a
+            // rename onto another tag's label hits the unique index.
+            PutValidator.RuleFor(c => c.Label)
+                .Must((v, c) => labelInUseValidator.Validate(v.Id, c))
+                .WithMessage("Should be unique");
         }
 
         protected override TagResource GetResourceById(int id)

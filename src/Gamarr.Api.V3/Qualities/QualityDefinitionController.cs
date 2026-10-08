@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Qualities;
+using NzbDrone.Core.Validation;
 using NzbDrone.SignalR;
 using Gamarr.Http;
 using Gamarr.Http.REST;
@@ -17,16 +20,23 @@ namespace Gamarr.Api.V3.Qualities
         IHandle<CommandExecutedEvent>
     {
         private readonly IQualityDefinitionService _qualityDefinitionService;
+        private readonly QualityDefinitionTitleInUseValidator _titleInUseValidator;
 
         public QualityDefinitionController(
             IQualityDefinitionService qualityDefinitionService,
-            IBroadcastSignalRMessage signalRBroadcaster)
+            IBroadcastSignalRMessage signalRBroadcaster,
+            QualityDefinitionTitleInUseValidator titleInUseValidator)
             : base(signalRBroadcaster)
         {
             _qualityDefinitionService = qualityDefinitionService;
+            _titleInUseValidator = titleInUseValidator;
 
             SharedValidator.RuleFor(c => c)
                 .SetValidator(new QualityDefinitionResourceValidator());
+
+            SharedValidator.RuleFor(c => c.Title)
+                .Must((v, c) => titleInUseValidator.Validate(v.Id, c))
+                .WithMessage("Should be unique");
         }
 
         [RestPutById]
@@ -53,6 +63,13 @@ namespace Gamarr.Api.V3.Qualities
         {
             // Read from request
             var qualityDefinitions = resource.ToModel().ToList();
+
+            // This route, not the single-item PUT, is what the UI saves through,
+            // and it bypasses the validator pipeline entirely.
+            if (!_titleInUseValidator.ValidateBatch(qualityDefinitions))
+            {
+                throw new ValidationException(new List<ValidationFailure> { new ("Title", "Should be unique") });
+            }
 
             _qualityDefinitionService.UpdateMany(qualityDefinitions);
 
