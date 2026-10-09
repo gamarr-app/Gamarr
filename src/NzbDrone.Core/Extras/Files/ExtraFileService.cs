@@ -120,7 +120,17 @@ namespace NzbDrone.Core.Extras.Files
                     {
                         // Send to the recycling bin so they can be recovered if necessary
                         var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
-                        _recycleBinProvider.DeleteFile(path, subfolder);
+
+                        try
+                        {
+                            _recycleBinProvider.DeleteFile(path, subfolder);
+                        }
+                        catch (Exception e)
+                        {
+                            // Don't let one extra file's failure abort the rest or skip the DB cleanup below,
+                            // this runs on the event aggregator thread and there is no caller to report the error to.
+                            _logger.Error(e, "Unable to delete extra file: '{0}'", path);
+                        }
                     }
                 }
             }

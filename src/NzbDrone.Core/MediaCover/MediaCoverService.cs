@@ -326,7 +326,16 @@ namespace NzbDrone.Core.MediaCover
                 var path = GetGameCoverPath(game.Id);
                 if (_diskProvider.FolderExists(path))
                 {
-                    _diskProvider.DeleteFolder(path, true);
+                    try
+                    {
+                        _diskProvider.DeleteFolder(path, true);
+                    }
+                    catch (Exception e)
+                    {
+                        // Don't let one game's failure abort the rest of the batch, this runs on the
+                        // event aggregator thread and there is no caller to report the error to.
+                        _logger.Error(e, "Unable to delete cover folder: '{0}'", path);
+                    }
                 }
             }
         }

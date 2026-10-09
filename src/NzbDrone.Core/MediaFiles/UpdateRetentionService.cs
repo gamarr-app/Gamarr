@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using NLog;
@@ -99,7 +100,17 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (_diskProvider.FolderExists(path))
                 {
-                    _recycleBinProvider.DeleteFolder(path);
+                    try
+                    {
+                        _recycleBinProvider.DeleteFolder(path);
+                    }
+                    catch (Exception e)
+                    {
+                        // Keep the DB row so the folder is retried later, and don't abort the remaining
+                        // stale updates. This runs on the event aggregator thread with no caller to report to.
+                        _logger.Error(e, "Unable to delete stale update folder: '{0}'", path);
+                        continue;
+                    }
                 }
 
                 _mediaFileService.Delete(stale, DeleteMediaFileReason.Upgrade);
