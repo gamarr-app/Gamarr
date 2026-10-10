@@ -239,8 +239,14 @@ function GameSearchInput() {
     inputRef.current?.focus();
   }, []);
 
-  const getSectionSuggestions = useCallback((section: Section) => {
-    return section.suggestions;
+  // react-autosuggest keeps `highlightedSectionIndex` in its own state and
+  // doesn't reset it when the section list shrinks, so it can ask us for a
+  // section that no longer exists (e.g. the existing-games section disappears
+  // once a search returns nothing while the add-new section is highlighted).
+  // Both lookups have to tolerate the miss: the library null-checks the
+  // suggestion it gets back, but it crashes if we throw first.
+  const getSectionSuggestions = useCallback((section?: Section) => {
+    return section?.suggestions ?? [];
   }, []);
 
   const renderSectionTitle = useCallback((section: Section) => {
@@ -259,9 +265,12 @@ function GameSearchInput() {
     );
   }, []);
 
-  const getSuggestionValue = useCallback(({ title }: { title: string }) => {
-    return title;
-  }, []);
+  const getSuggestionValue = useCallback(
+    (suggestion?: { title: string }) => {
+      return suggestion?.title ?? value;
+    },
+    [value]
+  );
 
   const renderSuggestion = useCallback(
     (
