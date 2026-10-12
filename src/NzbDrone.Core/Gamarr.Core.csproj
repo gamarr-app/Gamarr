@@ -18,9 +18,12 @@
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="8.0.1" />
     <PackageReference Include="FluentValidation" Version="12.2.0" />
     <PackageReference Include="SharpCompress" Version="1.0.0" />
-    <!-- Pinned to 3.x: ImageSharp 4.0 requires a paid Six Labors licence key and
-         fails the Release build with "No Six Labors license found". -->
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.2.0" />
+    <!-- Pinned to 3.1.12, not just to 3.x: the licence check Six Labors added in
+         4.0 was backported to 3.2.0, which fails the build outright with
+         "Please obtain a license from https://sixlabors.com/pricing/". 3.1.12 is
+         the last version that builds without a paid licence key, so decline any
+         bump of this reference, minor ones included. -->
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NLog" Version="6.2.1" />
     <PackageReference Include="MonoTorrent" Version="3.0.2" />
