@@ -58,7 +58,24 @@ namespace Gamarr.Http.REST
             }
             else
             {
-                var resource = GetResourceById(id);
+                TResource resource;
+
+                try
+                {
+                    resource = GetResourceById(id);
+                }
+                catch (ModelNotFoundException)
+                {
+                    // The row can be gone by the time the event reaches us: an
+                    // upgrade import deletes the file it replaces, and its
+                    // delete handlers are still running when the add event is
+                    // published. There is no caller to report this to — this
+                    // runs on the event aggregator thread, where a throw is
+                    // logged as an error — and the client will have been sent
+                    // the matching Deleted broadcast anyway, so drop it.
+                    return;
+                }
+
                 BroadcastResourceChange(action, resource);
             }
         }

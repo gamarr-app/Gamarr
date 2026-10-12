@@ -511,11 +511,26 @@ namespace NzbDrone.Core.Games
         {
             var game = message.GameFile.Game;
 
+            if (game == null)
+            {
+                // Find, not Get, upstream: the game can be deleted mid-import.
+                return;
+            }
+
             // Base imports (empty RelativePath = the game folder itself) always
             // become the primary file. Subfolder units (Updates/<version>,
             // imported alongside the base) only claim primary when the game has
             // no file yet — an update must not displace the base game.
-            if (message.GameFile.RelativePath.IsNullOrWhiteSpace() || game.GameFileId == 0)
+            //
+            // Take the current primary from the stored row rather than the
+            // attached Game: an upgrade deletes the file it replaces first, and
+            // that delete already cleared GameFileId on the row while the copy
+            // the importer carries still points at the deleted file. Trusting
+            // the stale copy makes a plain replacement look like an alongside
+            // import, leaving the game with no primary file at all.
+            var storedGameFileId = _gameRepository.Find(game.Id)?.GameFileId ?? game.GameFileId;
+
+            if (message.GameFile.RelativePath.IsNullOrWhiteSpace() || storedGameFileId == 0)
             {
                 game.GameFileId = message.GameFile.Id;
                 _gameRepository.Update(game);
