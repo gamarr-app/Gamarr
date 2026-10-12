@@ -260,6 +260,16 @@ jobs:
           cp -r _output/UI _artifacts/$runtime/
           cp LICENSE _artifacts/$runtime/
 
+          # InstallUpdateService expects the downloaded package to contain a
+          # "Gamarr.Update" subfolder next to the app (GetUpdateClientFolder in
+          # PathExtensions.cs) which it moves out and launches to apply the
+          # update. Gamarr.Update builds to its own _output/Gamarr.Update tree
+          # (see Directory.Build.props GamarrOutputType=='Update'), so it has
+          # to be copied in separately — it was never part of the main app's
+          # publish output and was missing from every release asset.
+          mkdir -p _artifacts/$runtime/Gamarr.Update
+          cp -r _output/Gamarr.Update/net10.0/$runtime/publish/* _artifacts/$runtime/Gamarr.Update/
+
           # Remove platform-specific files
           if [[ "$runtime" == win-* ]]; then
             rm -f _artifacts/$runtime/Gamarr.Mono.* 2>/dev/null || true
