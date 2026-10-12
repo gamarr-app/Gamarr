@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Net;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Exceptions;
 
 namespace NzbDrone.Core.RemotePathMappings
 {
@@ -93,12 +94,12 @@ namespace NzbDrone.Core.RemotePathMappings
         {
             if (mapping.Host.IsNullOrWhiteSpace())
             {
-                throw new ArgumentException("Invalid Host");
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Invalid Host");
             }
 
             if (mapping.RemotePath.StartsWith(" "))
             {
-                throw new ArgumentException("Remote Path must not start with a space");
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Remote Path must not start with a space");
             }
 
             var remotePath = new OsPath(mapping.RemotePath);
@@ -106,22 +107,22 @@ namespace NzbDrone.Core.RemotePathMappings
 
             if (remotePath.IsEmpty)
             {
-                throw new ArgumentException("Invalid RemotePath. RemotePath cannot be empty.");
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Invalid RemotePath. RemotePath cannot be empty.");
             }
 
             if (localPath.IsEmpty || !localPath.IsRooted)
             {
-                throw new ArgumentException("Invalid LocalPath. LocalPath cannot be empty and must not be the root.");
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Invalid LocalPath. LocalPath cannot be empty and must not be the root.");
             }
 
             if (!_diskProvider.FolderExists(localPath.FullPath))
             {
-                throw new DirectoryNotFoundException("Can't add mount point directory that doesn't exist.");
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "Can't add mount point directory that doesn't exist.");
             }
 
             if (existing.Exists(r => r.Host == mapping.Host && r.RemotePath == mapping.RemotePath))
             {
-                throw new InvalidOperationException("RemotePath already configured.");
+                throw new NzbDroneClientException(HttpStatusCode.BadRequest, "RemotePath already configured.");
             }
         }
 

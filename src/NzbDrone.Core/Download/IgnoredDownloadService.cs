@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Download
 
         public bool IgnoreDownload(TrackedDownload trackedDownload)
         {
-            var game = trackedDownload.RemoteGame.Game;
+            var game = trackedDownload.RemoteGame?.Game;
 
             if (game == null)
             {

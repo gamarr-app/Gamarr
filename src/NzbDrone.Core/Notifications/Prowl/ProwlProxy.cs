@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.EnvironmentInfo;
@@ -57,6 +58,12 @@ namespace NzbDrone.Core.Notifications.Prowl
             }
             catch (WebException ex)
             {
+                throw new ProwlException("Failed to connect to prowl, please check your settings.", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                // WebException is the legacy type and no longer fires for a refused/unresolvable
+                // connection on .NET 10 - SocketsHttpHandler reports that as HttpRequestException.
                 throw new ProwlException("Failed to connect to prowl, please check your settings.", ex);
             }
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -86,6 +87,14 @@ namespace NzbDrone.Core.Notifications.Twitter
                         }
                     }
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                // WebException above is the legacy type; SocketsHttpHandler reports a refused or
+                // unresolvable connection as HttpRequestException on .NET 10, which carries no
+                // Response to inspect. Without this arm the raw exception escaped SendNotification
+                // uncaught for every real (non-Test) notification send.
+                throw new TwitterException("Failed to connect to Twitter, please check your settings: " + ex.Message, ex);
             }
         }
 

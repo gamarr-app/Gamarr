@@ -83,7 +83,12 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // Cancellation is cooperative and expected: shutting the host down,
             // a browser hanging up mid-request, a resilience pipeline timing out.
             // Nothing here is ever actionable.
-            "OperationCanceledException"
+            "OperationCanceledException",
+
+            // Kestrel throws this from its own request-body reader when the client
+            // disconnects mid-read (e.g. BufferingMiddleware.EnableBuffering awaiting
+            // a body that never finishes arriving). Nothing in our code produces it.
+            "BadHttpRequestException"
         };
 
         // Remote services reject us for reasons that are always the user's configuration
@@ -128,7 +133,15 @@ namespace NzbDrone.Common.Instrumentation.Sentry
 
             // A request that arrived after the DI container was disposed, i.e.
             // in the window between shutdown starting and Kestrel stopping.
-            "Container is disposed"
+            "Container is disposed",
+
+            // A client disconnected mid-stream while we were writing a static
+            // resource (frontend asset, cached image, etc.) to the response body.
+            // Surfaces as a bare IOException, not a Kestrel-specific type, so it
+            // can't be filtered by type name without also hiding real disk I/O
+            // failures — match on the socket-reset message instead.
+            "Broken pipe",
+            "forcibly closed by the remote host"
         };
 
         // exception types in this list will additionally have the exception message added to the

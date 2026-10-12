@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
+using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.RemotePathMappings;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.RemotePathMappingsTests
 
             var mapping = new RemotePathMapping { Host = host, RemotePath = remotePath, LocalPath = localPath };
 
-            Assert.Throws<InvalidOperationException>(() => Subject.Add(mapping));
+            Assert.Throws<NzbDroneClientException>(() => Subject.Add(mapping));
         }
 
         [TestCase("my-server.localdomain", "/mnt/storage/downloads/tv", @"D:\mountedstorage\downloads\tv")]
