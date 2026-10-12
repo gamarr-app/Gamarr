@@ -108,11 +108,17 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
             try
             {
+                // Form parameters rather than query params: HttpClient logs
+                // the request URL (including its query string) at Trace, so
+                // client_id/client_secret would otherwise land in plaintext
+                // in any trace log a user shares for support (#186). Twitch's
+                // token endpoint accepts the client_credentials grant either
+                // way; only the transport changes.
                 var requestBuilder = new HttpRequestBuilder(TokenUrl)
                     .Post()
-                    .AddQueryParam("client_id", clientId)
-                    .AddQueryParam("client_secret", clientSecret)
-                    .AddQueryParam("grant_type", "client_credentials");
+                    .AddFormParameter("client_id", clientId)
+                    .AddFormParameter("client_secret", clientSecret)
+                    .AddFormParameter("grant_type", "client_credentials");
 
                 var request = requestBuilder.Build();
                 var response = _httpClient.Execute(request);

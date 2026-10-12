@@ -113,5 +113,39 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
             result.Should().Be("new_token");
             _cacheMock.Verify(s => s.Set("igdb_token", It.Is<IgdbToken>(t => t.AccessToken == "new_token"), It.IsAny<TimeSpan>()), Times.Once());
         }
+
+        // #186: HttpClient logs the outgoing request (including its query
+        // string) at Trace level. client_id/client_secret must travel as
+        // form data, not query params, or they land in plaintext in any
+        // trace log a user shares for support.
+        [Test]
+        public void should_not_send_credentials_as_query_params()
+        {
+            _cacheMock.Setup(s => s.Find("igdb_token"))
+                .Returns((IgdbToken)null);
+
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.IgdbClientId)
+                .Returns("test_client_id");
+
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.IgdbClientSecret)
+                .Returns("test_client_secret");
+
+            HttpRequest capturedRequest = null;
+
+            var httpResponse = new HttpResponse(new HttpRequest("https://id.twitch.tv/oauth2/token"), new HttpHeader(), "{\"access_token\":\"new_token\",\"expires_in\":7200,\"token_type\":\"bearer\"}");
+
+            Mocker.GetMock<IHttpClient>()
+                .Setup(s => s.Execute(It.IsAny<HttpRequest>()))
+                .Callback<HttpRequest>(r => capturedRequest = r)
+                .Returns(httpResponse);
+
+            Subject.GetAccessToken();
+
+            capturedRequest.Should().NotBeNull();
+            capturedRequest.Url.ToString().Should().NotContain("test_client_id");
+            capturedRequest.Url.ToString().Should().NotContain("test_client_secret");
+        }
     }
 }
