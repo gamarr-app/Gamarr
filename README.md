@@ -61,6 +61,22 @@ though GHCR is the canonical source and has no pull rate limits. Standalone
 builds for Windows, Linux, macOS, and ARM (including Raspberry Pi) are on the
 [releases page](https://github.com/gamarr-app/Gamarr/releases).
 
+### Staying up to date on Docker
+
+The in-app updater cannot help a container — clicking "Update" in Gamarr does
+nothing when it's running in Docker, since the image and tag are managed
+outside the container. Gamarr will warn you in System > Health when a newer
+release is available, but updating still means pulling a new image:
+
+* **Watchtower** — run a [Watchtower](https://containrrr.dev/watchtower/)
+  container alongside Gamarr and it will pull and restart automatically on a
+  schedule.
+* **Unraid** — the Community Applications updater checks for and applies new
+  container versions for you.
+* **Manual** — `docker compose pull && docker compose up -d` (or
+  `docker pull ghcr.io/gamarr-app/gamarr:latest` followed by recreating the
+  container) from the directory with your compose file.
+
 ## Major Features
 
 * **Game-native quality model** — Scene, GOG (DRM-free), Repack, ISO, Retail, and

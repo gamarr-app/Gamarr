@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
@@ -16,22 +17,25 @@ namespace NzbDrone.Core.HealthCheck.Checks
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IAppFolderInfo _appFolderInfo;
-        private readonly ICheckUpdateService _checkUpdateService;
+        private readonly IUpdatePackageProvider _updatePackageProvider;
         private readonly IConfigFileProvider _configFileProvider;
+        private readonly IDeploymentInfoProvider _deploymentInfoProvider;
         private readonly IOsInfo _osInfo;
 
         public UpdateCheck(IDiskProvider diskProvider,
                            IAppFolderInfo appFolderInfo,
-                           ICheckUpdateService checkUpdateService,
+                           IUpdatePackageProvider updatePackageProvider,
                            IConfigFileProvider configFileProvider,
+                           IDeploymentInfoProvider deploymentInfoProvider,
                            IOsInfo osInfo,
                            ILocalizationService localizationService)
             : base(localizationService)
         {
             _diskProvider = diskProvider;
             _appFolderInfo = appFolderInfo;
-            _checkUpdateService = checkUpdateService;
+            _updatePackageProvider = updatePackageProvider;
             _configFileProvider = configFileProvider;
+            _deploymentInfoProvider = deploymentInfoProvider;
             _osInfo = osInfo;
         }
 
@@ -91,16 +95,35 @@ namespace NzbDrone.Core.HealthCheck.Checks
 
             if (BuildInfo.BuildDateTime < DateTime.UtcNow.AddDays(-14))
             {
-                var latestAvailable = _checkUpdateService.AvailableUpdate();
+                // A single GitHub call covers both "is there an update" and
+                // "how many releases behind" so a rate-limited or failed
+                // call only costs one request, not two. GetRecentUpdates
+                // already swallows HTTP exceptions and returns an empty list
+                // on failure, so a GitHub outage/rate limit degrades quietly
+                // here: no banner, no error noise.
+                var newerReleases = _updatePackageProvider
+                    .GetRecentUpdates(_configFileProvider.Branch, BuildInfo.Version)
+                    .Where(u => u.Version != null && u.Version > BuildInfo.Version)
+                    .OrderByDescending(u => u.Version)
+                    .ToList();
 
-                if (latestAvailable != null)
+                if (newerReleases.Any())
                 {
+                    var latestAvailable = newerReleases.First();
+                    var versionsBehindText = newerReleases.Count >= 10 ? "10+" : newerReleases.Count.ToString();
+
+                    var messageKey = _deploymentInfoProvider.PackageUpdateMechanism == UpdateMechanism.Docker
+                        ? "UpdateAvailableDockerHealthCheckMessage"
+                        : "UpdateAvailableHealthCheckMessage";
+
                     return new HealthCheck(GetType(),
                         HealthCheckResult.Warning,
                         HealthCheckReason.UpdateAvailable,
-                        _localizationService.GetLocalizedString("UpdateAvailableHealthCheckMessage", new Dictionary<string, object>
+                        _localizationService.GetLocalizedString(messageKey, new Dictionary<string, object>
                         {
-                            { "version", $"v{latestAvailable.Version}" }
+                            { "version", $"v{latestAvailable.Version}" },
+                            { "currentVersion", $"v{BuildInfo.Version}" },
+                            { "versionsBehind", versionsBehindText }
                         }),
                         "#new-update-is-available");
                 }
