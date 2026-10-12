@@ -1,14 +1,15 @@
-# Gamarr — a self-hosted PVR for your game library
+# Gamarr — Radarr for games, an \*arr-style PVR for your game library
 
 [![Build Status](https://github.com/gamarr-app/Gamarr/actions/workflows/ci.yml/badge.svg)](https://github.com/gamarr-app/Gamarr/actions/workflows/ci.yml)
 [![Docker Pulls](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/gamarr-app/Gamarr/pkgs/container/gamarr)
 [![GitHub Downloads](https://img.shields.io/github/downloads/gamarr-app/Gamarr/total.svg)](https://github.com/gamarr-app/Gamarr/releases)
 [![License](https://img.shields.io/github/license/gamarr-app/Gamarr)](http://www.gnu.org/licenses/gpl.html)
 
-Gamarr is a self-hosted game collection manager and PVR for Usenet and BitTorrent
-users — Radarr, but for your game library. It monitors RSS feeds and indexers for
-the PC and console games you want, hands grabs to your download client, and
-imports, renames, and organizes the results.
+Gamarr is Radarr for video games: a self-hosted \*arr-style PVR and game
+collection manager for Usenet and BitTorrent users, running alongside the rest
+of your arr stack. It monitors RSS feeds and indexers for the PC and console
+games you want, hands grabs to your download client, and imports, renames, and
+organizes the results.
 
 Because games aren't movies, Gamarr also understands the things only games do: it
 recognizes versions, updates, and DLC, and can automatically upgrade your library
