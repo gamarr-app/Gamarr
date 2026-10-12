@@ -255,41 +255,55 @@ jobs:
           runtime="${{ matrix.runtime }}"
           version="${{ steps.version.outputs.version }}"
 
-          mkdir -p _artifacts/$runtime
-          cp -r _output/net10.0/$runtime/publish/* _artifacts/$runtime/
-          cp -r _output/UI _artifacts/$runtime/
-          cp LICENSE _artifacts/$runtime/
+          set -euo pipefail
 
-          # InstallUpdateService expects the downloaded package to contain a
-          # "Gamarr.Update" subfolder next to the app (GetUpdateClientFolder in
-          # PathExtensions.cs) which it moves out and launches to apply the
-          # update. Gamarr.Update builds to its own _output/Gamarr.Update tree
-          # (see Directory.Build.props GamarrOutputType=='Update'), so it has
-          # to be copied in separately — it was never part of the main app's
-          # publish output and was missing from every release asset.
-          mkdir -p _artifacts/$runtime/Gamarr.Update
-          cp -r _output/Gamarr.Update/net10.0/$runtime/publish/* _artifacts/$runtime/Gamarr.Update/
+          # PathExtensions.cs (GetUpdatePackageFolder/GetUpdateClientFolder)
+          # hard-codes the extracted-package top folder name as "Gamarr", with
+          # "Gamarr.Update" nested inside it — NOT the runtime identifier.
+          # Packaging under $runtime/ instead silently breaks the in-app
+          # updater's extraction path for every asset (it never finds
+          # sandbox/Gamarr, so it never finds sandbox/Gamarr/Gamarr.Update
+          # either, regardless of whether Gamarr.Update was copied in).
+          mkdir -p _artifacts/$runtime/Gamarr
+          cp -r _output/net10.0/$runtime/publish/* _artifacts/$runtime/Gamarr/
+          cp -r _output/UI _artifacts/$runtime/Gamarr/
+          cp LICENSE _artifacts/$runtime/Gamarr/
+
+          # Gamarr.Update builds to its own _output/Gamarr.Update tree (see
+          # Directory.Build.props GamarrOutputType=='Update'), so it has to be
+          # copied in separately as Gamarr/Gamarr.Update — it was never part
+          # of the main app's publish output and was missing from every
+          # release asset.
+          updater_src="_output/Gamarr.Update/net10.0/$runtime/publish"
+          if [ ! -d "$updater_src" ] || [ -z "$(ls -A "$updater_src" 2>/dev/null)" ]; then
+            echo "::error::Gamarr.Update publish output missing at $updater_src — the updater binary would be absent from this release asset"
+            exit 1
+          fi
+          mkdir -p _artifacts/$runtime/Gamarr/Gamarr.Update
+          cp -r "$updater_src"/* _artifacts/$runtime/Gamarr/Gamarr.Update/
 
           # Remove platform-specific files
           if [[ "$runtime" == win-* ]]; then
-            rm -f _artifacts/$runtime/Gamarr.Mono.* 2>/dev/null || true
+            rm -f _artifacts/$runtime/Gamarr/Gamarr.Mono.* 2>/dev/null || true
           else
-            rm -f _artifacts/$runtime/Gamarr.Windows.* 2>/dev/null || true
+            rm -f _artifacts/$runtime/Gamarr/Gamarr.Windows.* 2>/dev/null || true
           fi
 
       - name: Create archive (Unix)
         if: ${{ !startsWith(matrix.runtime, 'win-') }}
         shell: bash
         run: |
-          cd _artifacts
-          tar -czvf Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.tar.gz ${{ matrix.runtime }}
+          # Archive root must be "Gamarr/" (see Package step) — not the
+          # runtime id — so cd one level further in than before.
+          cd _artifacts/${{ matrix.runtime }}
+          tar -czvf ../Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.tar.gz Gamarr
 
       - name: Create archive (Windows)
         if: ${{ startsWith(matrix.runtime, 'win-') }}
         shell: bash
         run: |
-          cd _artifacts
-          7z a -tzip Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.zip ${{ matrix.runtime }}
+          cd _artifacts/${{ matrix.runtime }}
+          7z a -tzip ../Gamarr.${{ steps.version.outputs.version }}.${{ matrix.runtime }}.zip Gamarr
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
