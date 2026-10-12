@@ -182,6 +182,29 @@ namespace NzbDrone.Common.Instrumentation.Sentry
         public bool FilterEvents { get; set; }
         public bool SentryEnabled { get; set; }
 
+        // Stable, anonymous installation id, persisted in config.xml and pushed in
+        // by ReconfigureLogging once the config file has been read. Until then we
+        // fall back to the machine-derived token so early-boot events still carry
+        // an id. Never log this value and never expose it in the API or the UI.
+        public string InstallId
+        {
+            get => _installId;
+            set
+            {
+                if (value.IsNullOrWhiteSpace() || value == _installId)
+                {
+                    return;
+                }
+
+                _installId = value;
+                ApplyInstallId();
+            }
+        }
+
+        private string _installId;
+
+        private string CurrentInstallId => _installId.IsNullOrWhiteSpace() ? HashUtil.AnonymousToken() : _installId;
+
         public SentryTarget(string dsn, IAppFolderInfo appFolderInfo)
         {
             _sdk = SentrySdk.Init(o =>
@@ -236,18 +259,37 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             {
                 scope.User = new SentryUser
                 {
-                    Id = HashUtil.AnonymousToken()
+                    Id = CurrentInstallId
                 };
 
                 scope.Contexts.App.Name = BuildInfo.AppName;
                 scope.Contexts.App.Version = BuildInfo.Version.ToString();
                 scope.Contexts.App.StartTime = _startTime;
-                scope.Contexts.App.Hash = HashUtil.AnonymousToken();
+                scope.Contexts.App.Hash = CurrentInstallId;
                 scope.Contexts.App.Build = BuildInfo.Release; // Git commit cache?
 
                 scope.SetTag("culture", Thread.CurrentThread.CurrentCulture.Name);
                 scope.SetTag("branch", BuildInfo.Branch);
                 scope.SetTag("runtime_identifier", System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier);
+            });
+        }
+
+        private void ApplyInstallId()
+        {
+            SentrySdk.ConfigureScope(scope =>
+            {
+                var id = CurrentInstallId;
+
+                if (scope.User == null)
+                {
+                    scope.User = new SentryUser { Id = id };
+                }
+                else
+                {
+                    scope.User.Id = id;
+                }
+
+                scope.Contexts.App.Hash = id;
             });
         }
 

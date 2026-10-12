@@ -115,6 +115,7 @@ namespace NzbDrone.Core.Instrumentation
             {
                 sentryTarget.SentryEnabled = (RuntimeInfo.IsProduction && _configFileProvider.AnalyticsEnabled) || RuntimeInfo.IsDevelopment;
                 sentryTarget.FilterEvents = _configFileProvider.FilterSentryEvents;
+                sentryTarget.InstallId = _configFileProvider.InstallId;
             }
         }
 

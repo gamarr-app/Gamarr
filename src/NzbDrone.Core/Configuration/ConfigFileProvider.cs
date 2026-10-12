@@ -48,6 +48,7 @@ namespace NzbDrone.Core.Configuration
         bool FilterSentryEvents { get; }
         string Branch { get; }
         string ApiKey { get; }
+        string InstallId { get; }
         string SslCertPath { get; }
         string SslCertPassword { get; }
         string UrlBase { get; }
@@ -138,7 +139,8 @@ namespace NzbDrone.Core.Configuration
 
             foreach (var configValue in configValues)
             {
-                if (configValue.Key.Equals("ApiKey", StringComparison.InvariantCultureIgnoreCase))
+                if (configValue.Key.Equals("ApiKey", StringComparison.InvariantCultureIgnoreCase) ||
+                    configValue.Key.Equals("InstallId", StringComparison.InvariantCultureIgnoreCase))
                 {
                     continue;
                 }
@@ -197,6 +199,25 @@ namespace NzbDrone.Core.Configuration
                 }
 
                 return apiKey;
+            }
+        }
+
+        // Anonymous, stable identifier for this installation. Generated once and
+        // persisted to config.xml so it survives container recreates, which would
+        // otherwise change the machine-name derived token on every start.
+        public string InstallId
+        {
+            get
+            {
+                var installId = GetValue("InstallId", GenerateInstallId());
+
+                if (installId.IsNullOrWhiteSpace())
+                {
+                    installId = GenerateInstallId();
+                    SetValue("InstallId", installId);
+                }
+
+                return installId;
             }
         }
 
@@ -467,6 +488,11 @@ namespace NzbDrone.Core.Configuration
         }
 
         private string GenerateApiKey()
+        {
+            return Guid.NewGuid().ToString().Replace("-", "");
+        }
+
+        private string GenerateInstallId()
         {
             return Guid.NewGuid().ToString().Replace("-", "");
         }
