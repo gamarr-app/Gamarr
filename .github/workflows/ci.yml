@@ -434,7 +434,7 @@ jobs:
         run: |
           failed=false
           for result in "${{ needs.frontend-build.result }}" "${{ needs.backend-build.result }}" "${{ needs.frontend-test.result }}" "${{ needs.unit-test-linux.result }}" "${{ needs.unit-test-other.result }}" "${{ needs.integration-test.result }}" "${{ needs.automation-test.result }}"; do
-            if [[ "$result" == "failure" ]]; then
+            if [[ "$result" != "success" ]]; then
               failed=true
             fi
           done
