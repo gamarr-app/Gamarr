@@ -110,33 +110,48 @@ namespace NzbDrone.Core.Extras.Files
             }
             else
             {
-                var game = _gameService.GetGame(message.GameFile.GameId);
+                // Find, not Get: the game row is already gone when this event comes
+                // from deleting the game itself, and throwing on the event
+                // aggregator thread would also skip the DB cleanup below.
+                var game = _gameService.FindGame(message.GameFile.GameId);
 
-                foreach (var extra in _repository.GetFilesByGameFile(gameFile.Id))
+                if (game == null)
                 {
-                    var path = Path.Combine(game.Path, extra.RelativePath);
-
-                    if (_diskProvider.FileExists(path))
-                    {
-                        // Send to the recycling bin so they can be recovered if necessary
-                        var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
-
-                        try
-                        {
-                            _recycleBinProvider.DeleteFile(path, subfolder);
-                        }
-                        catch (Exception e)
-                        {
-                            // Don't let one extra file's failure abort the rest or skip the DB cleanup below,
-                            // this runs on the event aggregator thread and there is no caller to report the error to.
-                            _logger.Error(e, "Unable to delete extra file: '{0}'", path);
-                        }
-                    }
+                    _logger.Debug("Game with ID {0} no longer exists, not deleting extra files from disk.", message.GameFile.GameId);
+                }
+                else
+                {
+                    DeleteExtraFilesFromDisk(game, gameFile);
                 }
             }
 
             _logger.Debug("Deleting Extra from database for game file: {0}", gameFile);
             _repository.DeleteForGameFile(gameFile.Id);
+        }
+
+        private void DeleteExtraFilesFromDisk(Game game, GameFile gameFile)
+        {
+            foreach (var extra in _repository.GetFilesByGameFile(gameFile.Id))
+            {
+                var path = Path.Combine(game.Path, extra.RelativePath);
+
+                if (_diskProvider.FileExists(path))
+                {
+                    // Send to the recycling bin so they can be recovered if necessary
+                    var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
+
+                    try
+                    {
+                        _recycleBinProvider.DeleteFile(path, subfolder);
+                    }
+                    catch (Exception e)
+                    {
+                        // Don't let one extra file's failure abort the rest or skip the DB cleanup in the caller,
+                        // this runs on the event aggregator thread and there is no caller to report the error to.
+                        _logger.Error(e, "Unable to delete extra file: '{0}'", path);
+                    }
+                }
+            }
         }
     }
 }

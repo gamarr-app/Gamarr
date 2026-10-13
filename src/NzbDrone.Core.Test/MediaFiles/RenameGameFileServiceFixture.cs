@@ -32,6 +32,10 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IGameService>()
                   .Setup(s => s.GetGame(_game.Id))
                   .Returns(_game);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(_game.Id))
+                  .Returns(_game);
         }
 
         private void GivenNoGameFiles()

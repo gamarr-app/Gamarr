@@ -682,7 +682,16 @@ namespace NzbDrone.Core.MediaFiles
         {
             if (message.GameId.HasValue)
             {
-                var game = _gameService.GetGame(message.GameId.Value);
+                // Find, not Get: the game can be deleted between this command
+                // being queued and executed.
+                var game = _gameService.FindGame(message.GameId.Value);
+
+                if (game == null)
+                {
+                    _logger.Debug("Game with ID {0} no longer exists, skipping rescan", message.GameId.Value);
+                    return;
+                }
+
                 Scan(game);
             }
             else

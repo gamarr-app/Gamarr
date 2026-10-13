@@ -92,7 +92,9 @@ namespace NzbDrone.Core.Download
             {
                 if (historyItem != null)
                 {
-                    game = _gameService.GetGame(historyItem.GameId);
+                    // Find, not Get: the null check below is the intended handling
+                    // for a game that was deleted after the grab was recorded.
+                    game = _gameService.FindGame(historyItem.GameId);
                 }
 
                 if (game == null)

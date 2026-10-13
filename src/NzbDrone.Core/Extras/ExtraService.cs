@@ -32,6 +32,7 @@ namespace NzbDrone.Core.Extras
         private readonly IDiskProvider _diskProvider;
         private readonly IConfigService _configService;
         private readonly List<IManageExtraFiles> _extraFileManagers;
+        private readonly Logger _logger;
 
         public ExtraService(IMediaFileService mediaFileService,
                             IGameService gameService,
@@ -45,6 +46,7 @@ namespace NzbDrone.Core.Extras
             _diskProvider = diskProvider;
             _configService = configService;
             _extraFileManagers = extraFileManagers.OrderBy(e => e.Order).ToList();
+            _logger = logger;
         }
 
         public void ImportGame(LocalGame localGame, GameFile gameFile, bool isReadOnly)
@@ -169,11 +171,21 @@ namespace NzbDrone.Core.Extras
 
         private List<GameFile> GetGameFiles(int gameId)
         {
+            // Find, not Get: scan and rename events are handled asynchronously, so
+            // the game can be deleted before we get here. One lookup, not one per file.
+            var game = _gameService.FindGame(gameId);
+
+            if (game == null)
+            {
+                _logger.Debug("Game with ID {0} no longer exists, skipping extra file handling", gameId);
+                return new List<GameFile>();
+            }
+
             var gameFiles = _mediaFileService.GetFilesByGame(gameId);
 
             foreach (var gameFile in gameFiles)
             {
-                gameFile.Game = _gameService.GetGame(gameId);
+                gameFile.Game = game;
             }
 
             return gameFiles;

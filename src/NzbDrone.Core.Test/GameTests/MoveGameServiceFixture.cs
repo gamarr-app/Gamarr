@@ -51,6 +51,10 @@ namespace NzbDrone.Core.Test.GameTests
                   .Setup(s => s.GetGame(It.IsAny<int>()))
                   .Returns(_game);
 
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(It.IsAny<int>()))
+                  .Returns(_game);
+
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(It.IsAny<string>()))
                   .Returns(true);

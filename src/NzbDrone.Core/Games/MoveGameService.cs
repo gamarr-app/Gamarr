@@ -86,7 +86,16 @@ namespace NzbDrone.Core.Games
 
         private void RevertPath(int gameId, string path)
         {
-            var game = _gameService.GetGame(gameId);
+            // Runs from the IOException handler above: if the game was deleted
+            // meanwhile there is no path left to revert, and throwing here would
+            // mask the move failure we are already reporting.
+            var game = _gameService.FindGame(gameId);
+
+            if (game == null)
+            {
+                _logger.Debug("Game with ID {0} no longer exists, not reverting its path", gameId);
+                return;
+            }
 
             game.Path = path;
             _gameService.UpdateGame(game);
@@ -94,7 +103,14 @@ namespace NzbDrone.Core.Games
 
         public void Execute(MoveGameCommand message)
         {
-            var game = _gameService.GetGame(message.GameId);
+            var game = _gameService.FindGame(message.GameId);
+
+            if (game == null)
+            {
+                _logger.Debug("Game with ID {0} no longer exists, skipping move", message.GameId);
+                return;
+            }
+
             MoveSingleGame(game, message.SourcePath, message.DestinationPath);
         }
 
@@ -108,7 +124,14 @@ namespace NzbDrone.Core.Games
             for (var index = 0; index < gamesToMove.Count; index++)
             {
                 var s = gamesToMove[index];
-                var game = _gameService.GetGame(s.GameId);
+                var game = _gameService.FindGame(s.GameId);
+
+                if (game == null)
+                {
+                    _logger.Debug("Game with ID {0} no longer exists, skipping move", s.GameId);
+                    continue;
+                }
+
                 var destinationPath = Path.Combine(destinationRootFolder, _filenameBuilder.GetGameFolder(game));
 
                 MoveSingleGame(game, s.SourcePath, destinationPath, index, gamesToMove.Count);

@@ -165,7 +165,16 @@ namespace NzbDrone.Core.MediaFiles
 
         public void Execute(RenameFilesCommand message)
         {
-            var game = _gameService.GetGame(message.GameId);
+            var game = _gameService.FindGame(message.GameId);
+
+            if (game == null)
+            {
+                _logger.Debug("Game with ID {0} no longer exists, skipping rename", message.GameId);
+                _eventAggregator.PublishEvent(new RenameCompletedEvent());
+
+                return;
+            }
+
             var gameFiles = _mediaFileService.GetGames(message.Files);
 
             _logger.ProgressInfo("Renaming {0} files for {1}", gameFiles.Count, game.Title);

@@ -68,6 +68,10 @@ namespace NzbDrone.Core.Test.Games
                   .Setup(s => s.GetGame(It.IsAny<int>()))
                   .Returns(_game);
 
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(It.IsAny<int>()))
+                  .Returns(_game);
+
             Mocker.GetMock<IGameMetadataService>()
                   .Setup(s => s.Get(It.IsAny<int>()))
                   .Returns(_gameMetadata);

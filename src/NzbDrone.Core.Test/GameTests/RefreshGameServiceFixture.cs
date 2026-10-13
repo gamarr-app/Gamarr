@@ -4,6 +4,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.AutoTagging;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Games;
@@ -38,6 +39,10 @@ namespace NzbDrone.Core.Test.GameTests
 
             Mocker.GetMock<IGameService>()
                   .Setup(s => s.GetGame(_game.Id))
+                  .Returns(_existingGame);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(_game.Id))
                   .Returns(_existingGame);
 
             Mocker.GetMock<IGameMetadataService>()
@@ -115,6 +120,51 @@ namespace NzbDrone.Core.Test.GameTests
 
             Mocker.GetMock<IGameMetadataService>()
                 .Verify(v => v.Upsert(It.IsAny<GameMetadata>()), Times.Never());
+
+            ExceptionVerification.ExpectedErrors(1);
+        }
+
+        [Test]
+        public void should_skip_deleted_game_and_still_refresh_the_remaining_games()
+        {
+            var deletedGameId = _game.Id + 100;
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(deletedGameId))
+                  .Returns((Game)null);
+
+            Subject.Execute(new RefreshGameCommand(new List<int> { deletedGameId, _game.Id }));
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(v => v.GetGame(deletedGameId), Times.Never());
+
+            Mocker.GetMock<IGameMetadataService>()
+                .Verify(v => v.Upsert(It.Is<GameMetadata>(s => s.Status == GameStatusType.Deleted)), Times.Once());
+
+            ExceptionVerification.ExpectedErrors(1);
+        }
+
+        [Test]
+        public void should_skip_game_deleted_midway_through_the_refresh()
+        {
+            var deletedGameId = _game.Id + 100;
+            var deletedGame = Builder<Game>.CreateNew()
+                .With(s => s.Id = deletedGameId)
+                .With(s => s.GameMetadata.Value.Status = GameStatusType.Released)
+                .Build();
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(deletedGameId))
+                  .Returns(deletedGame);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GetGame(deletedGameId))
+                  .Throws(new ModelNotFoundException(typeof(Game), deletedGameId));
+
+            Subject.Execute(new RefreshGameCommand(new List<int> { deletedGameId, _game.Id }));
+
+            Mocker.GetMock<IGameMetadataService>()
+                .Verify(v => v.Upsert(It.Is<GameMetadata>(s => s.Status == GameStatusType.Deleted)), Times.Once());
 
             ExceptionVerification.ExpectedErrors(1);
         }

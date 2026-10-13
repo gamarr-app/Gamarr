@@ -270,7 +270,16 @@ namespace NzbDrone.Core.Games
             {
                 foreach (var gameId in message.GameIds)
                 {
-                    var game = _gameService.GetGame(gameId);
+                    // Find, not Get: the game can be deleted between this command
+                    // being queued and executed, and a throw here would abandon
+                    // every remaining id in the batch.
+                    var game = _gameService.FindGame(gameId);
+
+                    if (game == null)
+                    {
+                        _logger.Debug("Game with ID {0} no longer exists, skipping refresh", gameId);
+                        continue;
+                    }
 
                     try
                     {
@@ -281,6 +290,13 @@ namespace NzbDrone.Core.Games
                     catch (GameNotFoundException)
                     {
                         _logger.Error("Game '{0}' (IGDB {1}) was not found, it may have been removed from The Game Database.", game.Title, game.IgdbId);
+                    }
+                    catch (ModelNotFoundException)
+                    {
+                        // Deleted from the library after the lookup above but
+                        // before the refresh read it back.
+                        _logger.Debug("Game '{0}' was deleted during refresh, skipping", game.Title);
+                        continue;
                     }
                     catch (Exception e)
                     {
