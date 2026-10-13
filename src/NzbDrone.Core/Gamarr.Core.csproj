@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MimeKit" Version="4.18.1" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     <Content Include="Localization\Core\**">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
