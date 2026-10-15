@@ -10,3 +10,13 @@
 .blankpad {
   padding: 15px;
 }
+
+.downloading {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+}
+
+.downloadingTitle {
+  margin-right: 10px;
+}

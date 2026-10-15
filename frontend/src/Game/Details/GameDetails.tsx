@@ -28,7 +28,6 @@ import { GamePlatform, Image, Statistics } from 'Game/Game';
 import GameCollectionLabel from 'Game/GameCollectionLabel';
 import GameGenres from 'Game/GameGenres';
 import GamePoster from 'Game/GamePoster';
-import GameStatus from 'Game/GameStatus';
 import getGameStatusDetails from 'Game/getGameStatusDetails';
 import GameHistoryModal from 'Game/History/GameHistoryModal';
 import GameInteractiveSearchModal from 'Game/Search/GameInteractiveSearchModal';
@@ -528,7 +527,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
     images,
     tags,
     isSaving = false,
-    gameFileId,
   } = game;
 
   const { sizeOnDisk = 0 } = statistics;
@@ -945,12 +943,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
           </FieldSet>
 
           <FieldSet legend={translate('Files')}>
-            <GameStatus
-              gameId={id}
-              gameFileId={gameFileId}
-              showMissingStatus={false}
-            />
-
             <GameFileEditorTable gameId={id} />
           </FieldSet>
 

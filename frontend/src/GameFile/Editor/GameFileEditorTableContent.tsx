@@ -1,8 +1,13 @@
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import ProgressBar from 'Components/ProgressBar';
 import Column from 'Components/Table/Column';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import { GameFile } from 'GameFile/GameFile';
+import { kinds } from 'Helpers/Props';
 import { SortDirection } from 'Helpers/Props/sortDirections';
+import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
 import { TableOptionsChangePayload } from 'typings/Table';
 import translate from 'Utilities/String/translate';
 import GameFileEditorRow from './GameFileEditorRow';
@@ -22,6 +27,7 @@ interface GameFileEditorTableContentProps {
 
 function GameFileEditorTableContent(props: GameFileEditorTableContentProps) {
   const {
+    gameId,
     items,
     columns,
     sortKey,
@@ -31,9 +37,37 @@ function GameFileEditorTableContent(props: GameFileEditorTableContentProps) {
     onDeletePress,
   } = props;
 
+  const queueItem = useSelector(
+    useMemo(() => createQueueItemSelectorForHook(gameId ?? 0), [gameId])
+  );
+
+  // A grab in flight is the usual reason this table is empty, so say so here
+  // rather than floating a bare icon above it.
+  const progress = queueItem?.size
+    ? 100 - (queueItem.sizeLeft / queueItem.size) * 100
+    : 0;
+
   return (
     <div>
-      {!items.length && (
+      {queueItem ? (
+        <div className={styles.downloading}>
+          <div className={styles.downloadingTitle}>
+            {items.length
+              ? translate('DownloadingRelease', { title: queueItem.title })
+              : translate('NoGameFilesDownloading', { title: queueItem.title })}
+          </div>
+
+          <ProgressBar
+            progress={progress}
+            kind={kinds.PURPLE}
+            showText={true}
+            width={150}
+            title={queueItem.title}
+          />
+        </div>
+      ) : null}
+
+      {!items.length && !queueItem && (
         <div className={styles.blankpad}>
           {translate('NoGameFilesToManage')}
         </div>

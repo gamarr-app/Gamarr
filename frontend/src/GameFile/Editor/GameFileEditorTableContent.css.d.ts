@@ -3,6 +3,8 @@
 interface CssExports {
   'actions': string;
   'blankpad': string;
+  'downloading': string;
+  'downloadingTitle': string;
   'selectInput': string;
 }
 export const cssExports: CssExports;
