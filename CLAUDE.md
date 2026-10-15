@@ -32,6 +32,34 @@ rule has the full reasoning — read it before you decide a case is an exception
 - **Never inline the Sentry token in a command you commit.** `source .env`
   instead. (Known Gotchas, Common Commands)
 
+## Docker is the primary platform
+
+**Essentially every install is the Docker image on a NAS.** Weekly installs sit
+in the low dozens, almost all of them `ghcr.io` pulls, and a large share are
+running a release months behind. Three consequences for triage:
+
+- **A container-only bug is a total outage for nearly the whole user base**,
+  even when it is invisible to every test and to local development. The
+  breakages that actually reached users were of this shape: a `TMPDIR` the
+  build could not write to, an ASP.NET runtime pin Alpine did not ship, an
+  updater binary missing from the image. None of them were backend logic.
+  Weight them above a frontend defect that affects the same number of people.
+- **Reproduce on the image, not on `_output/net10.0/Gamarr`.** A bare-metal
+  macOS run shares the app code and almost nothing else: not the musl runtime,
+  not the s6 supervision, not the volume layout, not the `abc` user's
+  permissions. "Works locally" is close to no evidence for this class of bug.
+- **Assume the reporter cannot upgrade quickly.** Fixes have to be safe on an
+  old config and an old database, because the install that hit the bug will
+  pull the new image long before anyone migrates anything.
+
+`scripts/check-container-topology.sh` (run by `make check` and by the
+`Container Topology` CI job, which gates `Build Complete`) is the standing guard
+for this: it asserts that the Dockerfile, the s6 service scripts and the
+application's own defaults still agree on the temp directory, the data volume,
+the default port, the healthcheck path and the update method. Every check in it
+corresponds to a drift that has broken, or nearly broken, a release — so when
+one fires, treat it as a production bug and not as a lint complaint.
+
 ## What Gamarr is
 
 Fork of Radarr (which shares roots with Sonarr/Lidarr/Readarr), repurposed as a

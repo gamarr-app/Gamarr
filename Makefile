@@ -49,6 +49,9 @@ check: | $(LOG_DIR)
 	@yarn --silent test > $(LOG_DIR)/jest.log 2>&1 \
 		&& { grep -E "^Tests:" $(LOG_DIR)/jest.log; echo "jest: OK"; } \
 		|| { tail -30 $(LOG_DIR)/jest.log; echo "jest: FAILED"; exit 1; }
+	@./scripts/check-container-topology.sh > $(LOG_DIR)/container-topology.log 2>&1 \
+		&& echo "container topology: OK" \
+		|| { tail -30 $(LOG_DIR)/container-topology.log; echo "container topology: FAILED"; exit 1; }
 
 # NOTE for agents: the Claude Code sandbox SIGKILLs dotnet testhost children.
 # Run `make test` with the sandbox disabled.
