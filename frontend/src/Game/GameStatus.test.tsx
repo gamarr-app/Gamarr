@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ReactNode } from 'react';
 import GameStatus from './GameStatus';
 
@@ -72,120 +72,18 @@ describe('GameStatus', () => {
     mockedUseSelector.mockReturnValue(null); // no queue item
   });
 
-  it('should not render quality badge when showMissingStatus is false and game has file', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: true,
-      grabbed: false,
-    });
-    mockedUseGameFile.mockReturnValue({
-      quality: { quality: { name: 'Repack' } },
-      qualityCutoffNotMet: false,
-      size: 1000000,
-    });
+  it('should render nothing when the game is no longer in the store', () => {
+    mockedUseGame.mockReturnValue(undefined);
+    mockedUseGameFile.mockReturnValue(undefined);
 
     const { container } = render(
-      <GameStatus gameId={1} gameFileId={1} showMissingStatus={false} />
+      <GameStatus gameId={1} gameFileId={undefined} />
     );
 
     expect(container.innerHTML).toBe('');
   });
 
-  it('should render quality badge when showMissingStatus is true and game has file', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: true,
-      grabbed: false,
-    });
-    mockedUseGameFile.mockReturnValue({
-      quality: { quality: { name: 'Repack' } },
-      qualityCutoffNotMet: false,
-      size: 1000000,
-    });
-
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={1} showMissingStatus={true} />
-    );
-
-    expect(container.innerHTML).not.toBe('');
-  });
-
-  it('should not render grabbed icon when showMissingStatus is false', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: true,
-      grabbed: true,
-    });
-    mockedUseGameFile.mockReturnValue(undefined);
-
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={false} />
-    );
-
-    expect(container.innerHTML).toBe('');
-  });
-
-  it('should render grabbed icon when showMissingStatus is true', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: true,
-      grabbed: true,
-    });
-    mockedUseGameFile.mockReturnValue(undefined);
-
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={true} />
-    );
-
-    expect(container.innerHTML).not.toBe('');
-  });
-
-  it('should render missing icon when game is available and monitored with no file', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: true,
-      grabbed: false,
-    });
-    mockedUseGameFile.mockReturnValue(undefined);
-
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={true} />
-    );
-
-    expect(container.innerHTML).not.toBe('');
-  });
-
-  it('should render unmonitored icon when game is not monitored', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: false,
-      grabbed: false,
-    });
-    mockedUseGameFile.mockReturnValue(undefined);
-
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={true} />
-    );
-
-    expect(container.innerHTML).not.toBe('');
-  });
-
-  it('should return null for unmonitored when showMissingStatus is false', () => {
-    mockedUseGame.mockReturnValue({
-      isAvailable: true,
-      monitored: false,
-      grabbed: false,
-    });
-    mockedUseGameFile.mockReturnValue(undefined);
-
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={false} />
-    );
-
-    expect(container.innerHTML).toBe('');
-  });
-
-  it('should always render queue progress when item is queued regardless of showMissingStatus', () => {
+  it('should render queue progress when an item is queued', () => {
     mockedUseGame.mockReturnValue({
       isAvailable: true,
       monitored: true,
@@ -201,11 +99,118 @@ describe('GameStatus', () => {
       trackedDownloadState: 'downloading',
     });
 
-    const { container } = render(
-      <GameStatus gameId={1} gameFileId={undefined} showMissingStatus={false} />
-    );
+    render(<GameStatus gameId={1} gameFileId={undefined} />);
 
-    // Queue progress should always show even with showMissingStatus=false
-    expect(container.innerHTML).not.toBe('');
+    expect(screen.getByTestId('queue-details')).toBeInTheDocument();
+    expect(screen.getByTestId('progress-bar')).toHaveTextContent('50.0%');
+  });
+
+  it('should prefer queue progress over an existing file', () => {
+    mockedUseGame.mockReturnValue({
+      isAvailable: true,
+      monitored: true,
+      grabbed: true,
+    });
+    mockedUseGameFile.mockReturnValue({
+      quality: { quality: { name: 'Repack' } },
+      qualityCutoffNotMet: false,
+      size: 1000000,
+    });
+    mockedUseSelector.mockReturnValue({
+      gameId: 1,
+      size: 1000,
+      sizeLeft: 250,
+      status: 'downloading',
+      trackedDownloadStatus: 'ok',
+      trackedDownloadState: 'downloading',
+    });
+
+    render(<GameStatus gameId={1} gameFileId={1} />);
+
+    expect(screen.getByTestId('queue-details')).toBeInTheDocument();
+    expect(screen.queryByTestId('game-quality')).not.toBeInTheDocument();
+  });
+
+  it('should render the downloading icon when the game is grabbed', () => {
+    mockedUseGame.mockReturnValue({
+      isAvailable: true,
+      monitored: true,
+      grabbed: true,
+    });
+    mockedUseGameFile.mockReturnValue(undefined);
+
+    render(<GameStatus gameId={1} gameFileId={undefined} />);
+
+    expect(screen.getByTestId('icon')).toHaveAttribute(
+      'data-title',
+      'GameIsDownloading'
+    );
+  });
+
+  it('should render the quality badge when the game has a file', () => {
+    mockedUseGame.mockReturnValue({
+      isAvailable: true,
+      monitored: true,
+      grabbed: false,
+    });
+    mockedUseGameFile.mockReturnValue({
+      quality: { quality: { name: 'Repack' } },
+      qualityCutoffNotMet: false,
+      size: 1000000,
+    });
+
+    render(<GameStatus gameId={1} gameFileId={1} />);
+
+    expect(screen.getByTestId('game-quality')).toHaveTextContent(
+      'GameDownloaded'
+    );
+  });
+
+  it('should render the unmonitored icon when the game is not monitored', () => {
+    mockedUseGame.mockReturnValue({
+      isAvailable: true,
+      monitored: false,
+      grabbed: false,
+    });
+    mockedUseGameFile.mockReturnValue(undefined);
+
+    render(<GameStatus gameId={1} gameFileId={undefined} />);
+
+    expect(screen.getByTestId('icon')).toHaveAttribute(
+      'data-title',
+      'GameIsNotMonitored'
+    );
+  });
+
+  it('should render the missing icon when an available game has no file', () => {
+    mockedUseGame.mockReturnValue({
+      isAvailable: true,
+      monitored: true,
+      grabbed: false,
+    });
+    mockedUseGameFile.mockReturnValue(undefined);
+
+    render(<GameStatus gameId={1} gameFileId={undefined} />);
+
+    expect(screen.getByTestId('icon')).toHaveAttribute(
+      'data-title',
+      'GameMissingFromDisk'
+    );
+  });
+
+  it('should render the not-available icon when the game is unreleased', () => {
+    mockedUseGame.mockReturnValue({
+      isAvailable: false,
+      monitored: true,
+      grabbed: false,
+    });
+    mockedUseGameFile.mockReturnValue(undefined);
+
+    render(<GameStatus gameId={1} gameFileId={undefined} />);
+
+    expect(screen.getByTestId('icon')).toHaveAttribute(
+      'data-title',
+      'GameIsNotAvailable'
+    );
   });
 });

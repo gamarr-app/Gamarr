@@ -16,14 +16,12 @@ interface GameStatusProps {
   gameId: number;
   gameEntity?: GameEntity;
   gameFileId: number | undefined;
-  showMissingStatus?: boolean;
   className?: string;
 }
 
 function GameStatus({
   gameId,
   gameFileId,
-  showMissingStatus = true,
   className = styles.center,
 }: GameStatusProps) {
   const game = useGame(gameId) as Game | undefined;
@@ -64,7 +62,7 @@ function GameStatus({
     );
   }
 
-  if (grabbed && showMissingStatus) {
+  if (grabbed) {
     return (
       <div className={className}>
         <Icon name={icons.DOWNLOADING} title={translate('GameIsDownloading')} />
@@ -72,7 +70,7 @@ function GameStatus({
     );
   }
 
-  if (hasGameFile && showMissingStatus) {
+  if (hasGameFile) {
     const quality = gameFile.quality;
     const isCutoffNotMet = gameFile.qualityCutoffNotMet;
 
@@ -86,10 +84,6 @@ function GameStatus({
         />
       </div>
     );
-  }
-
-  if (!showMissingStatus) {
-    return null;
   }
 
   if (!monitored) {
