@@ -84,7 +84,8 @@ function FileEditModalContent(props: FileEditModalContentProps) {
   const onInputChange = useCallback(({ name, value }: InputChangeEvent) => {
     switch (name) {
       case 'languageIds':
-        setLanguageIds(value as number[]);
+        // The language input is single-select, so it reports a bare number.
+        setLanguageIds(Array.isArray(value) ? value : [Number(value)]);
         break;
       case 'indexerFlags':
         setIndexerFlags(value as number);
