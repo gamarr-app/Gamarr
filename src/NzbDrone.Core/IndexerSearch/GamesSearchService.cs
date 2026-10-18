@@ -149,6 +149,12 @@ namespace NzbDrone.Core.IndexerSearch
 
                 _logger.ProgressInfo("Completed component search for {0}. {1} reports downloaded.", component.Title, processed.Grabbed.Count);
             }
+            catch (ModelNotFoundException ex)
+            {
+                // Same race as the bulk loop: the component's game can go away
+                // mid-search, and the component goes with it.
+                _logger.Debug(ex, "Game [{0}] was deleted during the component search, skipping {1}", component.GameId, component.Title);
+            }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Unable to search for component: {0}", component.Title);
@@ -206,9 +212,24 @@ namespace NzbDrone.Core.IndexerSearch
             {
                 List<DownloadDecision> decisions;
 
+                // The list was loaded when the command started; a long search
+                // gives the user plenty of time to delete a game still in it.
+                // That is a skip, not a failure — see the catch below for the
+                // narrower race this check cannot close.
+                if (_gameService.FindGame(gameId.Key) == null)
+                {
+                    _logger.Debug("Game [{0}] was deleted during the search, skipping", gameId.Key);
+                    continue;
+                }
+
                 try
                 {
                     decisions = await _releaseSearchService.GameSearch(gameId.Key, userInvokedSearch, false);
+                }
+                catch (ModelNotFoundException ex)
+                {
+                    _logger.Debug(ex, "Game [{0}] was deleted during the search, skipping", gameId.Key);
+                    continue;
                 }
                 catch (Exception ex)
                 {
