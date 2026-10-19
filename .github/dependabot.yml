@@ -29,11 +29,16 @@ updates:
    groups:
      nuget-minor-patch:
        update-types: ["minor", "patch"]
-   # SixLabors.ImageSharp went commercial-license in 4.0; staying on 3.x.
+   # SixLabors.ImageSharp went commercial-license in 4.0; staying on 3.1.x.
    # The update-types condition alone is not enough: it is not applied to
    # Dependabot *security* updates, which is how 4.1.2 was proposed and merged
    # (#195) and broke the Release build. The explicit range is honoured by both.
+   #
+   # The bound is 3.2.0, not 4.0.0: 3.2.0 BACKPORTED the licence check into the
+   # 3.x line, so it fails the Release build exactly like 4.x does ("No Six
+   # Labors license found"). A ">= 4.0.0" bound let the minor-patch group carry
+   # 3.2.0 in (#202) and broke the Release build a second time.
    ignore:
      - dependency-name: "SixLabors.ImageSharp"
-       versions: [">= 4.0.0"]
-       update-types: ["version-update:semver-major"]
+       versions: [">= 3.2.0"]
+       update-types: ["version-update:semver-major", "version-update:semver-minor"]

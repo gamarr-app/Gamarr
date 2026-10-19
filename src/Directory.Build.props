@@ -101,7 +101,9 @@
   </PropertyGroup>
 
   <!-- ImageSharp advisories only patched in 4.x; we're pinned to 3.1.12 on
-       purpose (4.x requires a paid licence), so these are known-accepted. -->
+       purpose, so these are known-accepted. The ceiling is 3.2.0, not 4.0.0:
+       3.2.0 backported the paid-licence check into 3.x and fails the Release
+       build the same way. See the ignore rule in .github/dependabot.yml. -->
   <ItemGroup>
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-gwg2-r3hj-4w44" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j3p4-wp97-rph4" />
