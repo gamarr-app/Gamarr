@@ -151,14 +151,29 @@ namespace NzbDrone.Core.Extras.Others
                 }
             }
 
+            // Every extra is renamed after the game file, so two extras sharing an
+            // extension resolve to the same destination and the second overwrites
+            // the first (and one matching the game file's own extension overwrites
+            // the game file). Number them when there is more than one match.
+            var copy = 1;
+
             foreach (var file in matchingFiles)
             {
                 try
                 {
-                    var extraFile = ImportFile(localGame.Game, gameFile, file, isReadOnly, Path.GetExtension(file), null);
+                    var suffix = GetSuffix(copy, matchingFiles.Count > 1);
+                    var extraFile = ImportFile(localGame.Game, gameFile, file, isReadOnly, Path.GetExtension(file), suffix);
+
+                    if (extraFile == null)
+                    {
+                        continue;
+                    }
+
                     _mediaFileAttributeService.SetFilePermissions(file);
                     _otherExtraFileService.Upsert(extraFile);
                     importedFiles.Add(extraFile);
+
+                    copy++;
                 }
                 catch (Exception ex)
                 {
@@ -167,6 +182,11 @@ namespace NzbDrone.Core.Extras.Others
             }
 
             return importedFiles;
+        }
+
+        private static string GetSuffix(int copy, bool multipleCopies)
+        {
+            return multipleCopies ? $".{copy}" : string.Empty;
         }
     }
 }

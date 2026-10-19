@@ -80,5 +80,64 @@ namespace NzbDrone.Core.Test.Extras.Others
 
             results.Count.Should().Be(1);
         }
+
+        [Test]
+        public void should_number_multiple_extras_sharing_an_extension()
+        {
+            var files = new List<string>
+            {
+                Path.Combine(_releaseFolder, @"audio_folder_1\Game.Title.2022.mka").AsOsAgnostic(),
+                Path.Combine(_releaseFolder, @"audio_folder_2\Game.Title.2022.mka").AsOsAgnostic(),
+            };
+
+            var results = Subject.ImportFiles(_localGame, _gameFile, files, true).ToList();
+
+            results.Count.Should().Be(2);
+            results[0].RelativePath.AsOsAgnostic().PathEquals("Game Title - 2022.1.mka".AsOsAgnostic()).Should().Be(true);
+            results[1].RelativePath.AsOsAgnostic().PathEquals("Game Title - 2022.2.mka".AsOsAgnostic()).Should().Be(true);
+        }
+
+        [Test]
+        public void should_increment_the_suffix_for_each_additional_extra()
+        {
+            var files = new List<string>
+            {
+                Path.Combine(_releaseFolder, "Game.Title.2022.behind_scenes.mka").AsOsAgnostic(),
+                Path.Combine(_releaseFolder, "Game.Title.2022.commentary.mka").AsOsAgnostic(),
+                Path.Combine(_releaseFolder, @"extras\Game.Title.2022.mka").AsOsAgnostic(),
+            };
+
+            var results = Subject.ImportFiles(_localGame, _gameFile, files, true).ToList();
+
+            results.Count.Should().Be(3);
+            results[0].RelativePath.AsOsAgnostic().PathEquals("Game Title - 2022.1.mka".AsOsAgnostic()).Should().Be(true);
+            results[1].RelativePath.AsOsAgnostic().PathEquals("Game Title - 2022.2.mka".AsOsAgnostic()).Should().Be(true);
+            results[2].RelativePath.AsOsAgnostic().PathEquals("Game Title - 2022.3.mka".AsOsAgnostic()).Should().Be(true);
+        }
+
+        [Test]
+        public void should_not_number_a_single_matching_extra()
+        {
+            var files = new List<string>
+            {
+                Path.Combine(_releaseFolder, "Game.Title.2022.mka").AsOsAgnostic(),
+                Path.Combine(_releaseFolder, "Game.Title.2023.mka").AsOsAgnostic(),
+            };
+
+            var results = Subject.ImportFiles(_localGame, _gameFile, files, true).ToList();
+
+            results.Count.Should().Be(1);
+            results[0].RelativePath.AsOsAgnostic().PathEquals("Game Title - 2022.mka".AsOsAgnostic()).Should().Be(true);
+        }
+
+        [Test]
+        public void should_not_overwrite_the_game_file_with_a_single_same_extension_extra()
+        {
+            var files = new List<string> { Path.Combine(_releaseFolder, "Game.Title.2022.mkv").AsOsAgnostic() };
+
+            var results = Subject.ImportFiles(_localGame, _gameFile, files, true).ToList();
+
+            results.Should().BeEmpty();
+        }
     }
 }
