@@ -6,7 +6,7 @@ using NzbDrone.Core.Localization;
 
 namespace NzbDrone.Core.HealthCheck.Checks
 {
-    [CheckOn(typeof(ConfigSavedEvent))]
+    [CheckOn(typeof(ConfigFileSavedEvent))]
     public class ReleaseBranchCheck : HealthCheckBase
     {
         private readonly IConfigFileProvider _configFileService;
