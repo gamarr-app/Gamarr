@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 ALTER TABLE ""ImportExclusions_temp"" RENAME TO ""ImportExclusions"";
                 CREATE UNIQUE INDEX ""IX_ImportExclusions_IgdbId"" ON ""ImportExclusions"" (""IgdbId"") WHERE ""IgdbId"" > 0;");
 
-            IfDatabase("postgres").Execute.Sql(@"
+            IfDatabase("postgresql").Execute.Sql(@"
                 ALTER TABLE ""ImportExclusions"" DROP CONSTRAINT IF EXISTS ""UC_ImportExclusions_IgdbId"";
                 DROP INDEX IF EXISTS ""IX_ImportExclusions_IgdbId"";
                 CREATE UNIQUE INDEX ""IX_ImportExclusions_IgdbId"" ON ""ImportExclusions"" (""IgdbId"") WHERE ""IgdbId"" > 0;");
