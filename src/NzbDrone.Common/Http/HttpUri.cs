@@ -8,7 +8,7 @@ namespace NzbDrone.Common.Http
 {
     public partial class HttpUri : IEquatable<HttpUri>
     {
-        [GeneratedRegex(@"^(?:(?<scheme>[a-z]+):)?(?://(?<host>[-_A-Z0-9.]+|\[[[A-F0-9:]+\])(?::(?<port>[0-9]{1,5}))?)?(?<path>(?:(?:(?<=^)|/+)[^/?#\r\n]+)+/*|/+)?(?:\?(?<query>[^#\r\n]*))?(?:\#(?<fragment>.*))?$", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"^(?:(?<scheme>[a-z]+):)?(?://(?<host>[-_A-Z0-9.]+|\[[A-F0-9:.]+\])(?::(?<port>[0-9]{1,5}))?)?(?<path>(?:(?:(?<=^)|/+)[^/?#\r\n]+)+/*|/+)?(?:\?(?<query>[^#\r\n]*))?(?:\#(?<fragment>.*))?$", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex UriRegex();
 
         private readonly string _uri;

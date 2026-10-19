@@ -30,7 +30,31 @@ namespace NzbDrone.Core.Validation
         {
             ruleBuilder.NotEmpty();
 
-            return ruleBuilder.Must(x => HostRegex.IsMatch(x) || x.IsValidIpAddress()).WithMessage("must be valid Host without http://");
+            return ruleBuilder.Must(IsValidHost).WithMessage("must be valid Host without http://");
+        }
+
+        private static bool IsValidHost(string host)
+        {
+            if (host.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            if (HostRegex.IsMatch(host))
+            {
+                return true;
+            }
+
+            var address = host.FromUrlHost();
+
+            if (!address.IsValidIpAddress())
+            {
+                return false;
+            }
+
+            // An IPv6 literal is only usable in a URL when it is bracketed, so accept
+            // the bracketed form; brackets around anything else are not a valid host.
+            return address == host || address.Contains(':');
         }
 
         public static IRuleBuilderOptions<T, string> ValidHosts<T>(this IRuleBuilder<T, string> ruleBuilder)
