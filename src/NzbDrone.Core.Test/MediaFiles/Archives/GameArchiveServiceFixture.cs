@@ -5,6 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.MediaFiles.Archives
 {
@@ -396,6 +397,10 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
             File.Exists(Path.Combine(TempFolder, "escaped.dat")).Should().BeFalse();
             File.Exists(Path.Combine(TempFolder, "escaped2.dat")).Should().BeFalse();
             File.Exists(Path.Combine(TempFolder, "absolute.dat")).Should().BeFalse();
+
+            // One per skipped entry. Without this the fixture teardown fails the
+            // test for logging warnings, even though skipping them is the point.
+            ExceptionVerification.ExpectedWarns(3);
         }
     }
 }
