@@ -12,8 +12,16 @@ namespace NzbDrone.Core.MediaFiles.Archives
 {
     public interface IGameArchiveService
     {
-        GameArchiveInspection InspectImportUnit(string path);
+        /// <param name="path">The import unit: a loose file or a release folder.</param>
+        /// <param name="allowWholeArchive">
+        /// When true, an archive that holds no single extractable ROM entry is
+        /// still reported — in whole-archive mode — instead of being refused.
+        /// The caller owns that decision because it depends on the game's
+        /// platform, which this service deliberately knows nothing about.
+        /// </param>
+        GameArchiveInspection InspectImportUnit(string path, bool allowWholeArchive = false);
         void ExtractEntry(GameArchiveInspection inspection, string destinationPath);
+        void ExtractArchive(GameArchiveInspection inspection, string destinationFolder);
     }
 
     /// <summary>
@@ -21,6 +29,12 @@ namespace NzbDrone.Core.MediaFiles.Archives
     /// in a .zip/.rar/.7z (a BlueRoms Switch release is a .7z around one .xci).
     /// Extracting on import is the only way those land as something a console
     /// library scanner can read.
+    ///
+    /// Two modes. Single-entry: exactly one ROM/disc image inside, extracted to
+    /// a file. Whole-archive: no ROM entry at all, which is the ordinary shape of
+    /// a PC release (exe, data files, subfolders) — the entire tree is unpacked
+    /// into the game folder. The caller decides which is allowed, because the
+    /// choice depends on the game's platform and this service never sees it.
     ///
     /// Deliberately separate from <c>NzbDrone.Common.IArchiveService</c>: that one
     /// is the updater/backup tool — ZIP + tar.gz only, and it runs a full-archive
@@ -124,7 +138,7 @@ namespace NzbDrone.Core.MediaFiles.Archives
         /// Header-only: for .7z/.zip/.rar the central directory is parsed and
         /// uncompressed entry sizes read without decompressing any payload.
         /// </summary>
-        public GameArchiveInspection InspectImportUnit(string path)
+        public GameArchiveInspection InspectImportUnit(string path, bool allowWholeArchive = false)
         {
             if (path.IsNullOrWhiteSpace())
             {
@@ -137,10 +151,10 @@ namespace NzbDrone.Core.MediaFiles.Archives
                 {
                     var archive = FindSoleArchiveInFolder(path);
 
-                    return archive == null ? null : Inspect(archive);
+                    return archive == null ? null : Inspect(archive, allowWholeArchive);
                 }
 
-                return IsContainer(path) ? Inspect(path) : null;
+                return IsContainer(path) ? Inspect(path, allowWholeArchive) : null;
             }
             catch (Exception ex)
             {
@@ -207,6 +221,169 @@ namespace NzbDrone.Core.MediaFiles.Archives
             _diskProvider.MoveFile(partialPath, destinationPath);
         }
 
+        /// <summary>
+        /// Extract every entry of a whole-archive inspection into
+        /// <paramref name="destinationFolder"/> — the game folder. Writes the
+        /// tree into a ".partial~" sibling first and only then promotes it, so a
+        /// failed multi-gigabyte extract is never adopted as a game folder by the
+        /// next disk scan.
+        /// </summary>
+        public void ExtractArchive(GameArchiveInspection inspection, string destinationFolder)
+        {
+            var partialPath = destinationFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + ".partial~";
+
+            if (_diskProvider.FolderExists(partialPath))
+            {
+                _logger.Debug("Removing stale partial extraction folder {0}", partialPath);
+                _diskProvider.DeleteFolder(partialPath, true);
+            }
+
+            _logger.Info("Extracting all of {0} to {1}", inspection.ArchivePath, destinationFolder);
+
+            var extracted = 0;
+
+            try
+            {
+                _diskProvider.CreateFolder(partialPath);
+
+                using (var archive = ArchiveFactory.Open(inspection.ArchivePath))
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (entry.IsDirectory || entry.Key.IsNullOrWhiteSpace())
+                        {
+                            continue;
+                        }
+
+                        var relativePath = GetSafeRelativePath(entry.Key);
+
+                        if (relativePath == null)
+                        {
+                            // An entry key can carry "..", a leading "/" or a
+                            // drive letter; writing it verbatim would land
+                            // outside the game folder.
+                            _logger.Warn("Skipping unsafe archive entry '{0}' in {1}", entry.Key, inspection.ArchivePath);
+                            continue;
+                        }
+
+                        var targetPath = Path.Combine(partialPath, relativePath);
+                        var targetFolder = Path.GetDirectoryName(targetPath);
+
+                        if (targetFolder.IsNotNullOrWhiteSpace() && !_diskProvider.FolderExists(targetFolder))
+                        {
+                            _diskProvider.CreateFolder(targetFolder);
+                        }
+
+                        using (var entryStream = entry.OpenEntryStream())
+                        using (var outputStream = _diskProvider.OpenWriteStream(targetPath))
+                        {
+                            entryStream.CopyTo(outputStream);
+                        }
+
+                        extracted++;
+                    }
+                }
+
+                if (extracted == 0)
+                {
+                    throw new GameArchiveExtractionException($"No extractable entries remain in {inspection.ArchivePath}");
+                }
+
+                PromotePartialFolder(partialPath, destinationFolder);
+            }
+            catch (Exception ex)
+            {
+                CleanUpPartialFolder(partialPath);
+
+                if (ex is GameArchiveExtractionException)
+                {
+                    throw;
+                }
+
+                throw new GameArchiveExtractionException($"Failed to extract {inspection.ArchivePath} to {destinationFolder}: {ex.Message}", ex);
+            }
+
+            _logger.Debug("Extracted {0} entries from {1} into {2}", extracted, inspection.ArchivePath, destinationFolder);
+        }
+
+        /// <summary>
+        /// Move the completed partial tree into place. The game folder normally
+        /// already exists (the mover created it), so the contents are moved in
+        /// one level down rather than renaming the directory itself.
+        /// </summary>
+        private void PromotePartialFolder(string partialPath, string destinationFolder)
+        {
+            if (!_diskProvider.FolderExists(destinationFolder))
+            {
+                _diskProvider.MoveFolder(partialPath, destinationFolder);
+
+                return;
+            }
+
+            foreach (var folder in _diskProvider.GetDirectories(partialPath).ToList())
+            {
+                var name = Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+
+                _diskProvider.MoveFolder(folder, Path.Combine(destinationFolder, name));
+            }
+
+            foreach (var file in _diskProvider.GetFiles(partialPath, false).ToList())
+            {
+                _diskProvider.MoveFile(file, Path.Combine(destinationFolder, Path.GetFileName(file)), true);
+            }
+
+            _diskProvider.DeleteFolder(partialPath, true);
+        }
+
+        private void CleanUpPartialFolder(string partialPath)
+        {
+            try
+            {
+                if (_diskProvider.FolderExists(partialPath))
+                {
+                    _diskProvider.DeleteFolder(partialPath, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Never mask the extraction failure with a cleanup failure.
+                _logger.Warn(ex, "Unable to clean up partial extraction folder {0}", partialPath);
+            }
+        }
+
+        /// <summary>
+        /// Normalise an archive entry key to a path that cannot escape the
+        /// destination, or null when it is not safe to write at all.
+        /// </summary>
+        private static string GetSafeRelativePath(string entryKey)
+        {
+            var normalized = entryKey.Replace('\\', '/').Trim();
+
+            if (normalized.IsNullOrWhiteSpace() || normalized.StartsWith("/") || normalized.StartsWith("~/"))
+            {
+                return null;
+            }
+
+            var segments = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (segments.Length == 0)
+            {
+                return null;
+            }
+
+            foreach (var segment in segments)
+            {
+                // ".." escapes, "." is a no-op segment, and a colon is either a
+                // drive letter or an NTFS alternate data stream.
+                if (segment == "." || segment == ".." || segment.Contains(':'))
+                {
+                    return null;
+                }
+            }
+
+            return Path.Combine(segments);
+        }
+
         private string FindSoleArchiveInFolder(string folder)
         {
             var files = _diskProvider.GetFiles(folder, true).ToList();
@@ -233,10 +410,12 @@ namespace NzbDrone.Core.MediaFiles.Archives
             return archives[0];
         }
 
-        private GameArchiveInspection Inspect(string archivePath)
+        private GameArchiveInspection Inspect(string archivePath, bool allowWholeArchive)
         {
             if (SplitVolumeRegex.IsMatch(archivePath))
             {
+                // Refused in both modes: half-handling a multi-volume extract is
+                // worse than leaving the release alone.
                 _logger.Debug("{0} is part of a split archive set, which is not supported", archivePath);
 
                 return null;
@@ -244,14 +423,40 @@ namespace NzbDrone.Core.MediaFiles.Archives
 
             using (var archive = ArchiveFactory.Open(archivePath))
             {
-                var candidates = archive.Entries
-                    .Where(e => !e.IsDirectory &&
-                                e.Key.IsNotNullOrWhiteSpace() &&
-                                ExtractableEntryExtensions.Contains(Path.GetExtension(e.Key)))
+                var files = archive.Entries
+                    .Where(e => !e.IsDirectory && e.Key.IsNotNullOrWhiteSpace())
+                    .ToList();
+
+                var candidates = files
+                    .Where(e => ExtractableEntryExtensions.Contains(Path.GetExtension(e.Key)))
                     .ToList();
 
                 if (candidates.Count != 1)
                 {
+                    // Zero ROM entries is the ordinary shape of a PC release: an
+                    // exe, data files and subfolders, none of which can be
+                    // collapsed into a single game file. Those games import at
+                    // folder granularity anyway, so extract the whole tree.
+                    // Several ROM entries stays refused — picking one would be a
+                    // guess, and merging them is not a folder import.
+                    if (candidates.Count == 0 && allowWholeArchive && files.Count > 0)
+                    {
+                        var totalSize = files.Sum(e => e.Size);
+
+                        _logger.Debug("{0} holds no single extractable game file; extracting all {1} entries ({2} bytes uncompressed) as a game folder",
+                            archivePath,
+                            files.Count,
+                            totalSize);
+
+                        return new GameArchiveInspection
+                        {
+                            ArchivePath = archivePath,
+                            EntryName = null,
+                            EntrySize = totalSize,
+                            ExtractWholeArchive = true
+                        };
+                    }
+
                     _logger.Debug("{0} holds {1} extractable game files, expected exactly 1", archivePath, candidates.Count);
 
                     return null;

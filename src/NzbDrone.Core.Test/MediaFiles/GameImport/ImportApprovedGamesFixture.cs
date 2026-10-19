@@ -133,6 +133,56 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         }
 
         [Test]
+        public void should_record_the_uncompressed_total_for_a_whole_archive_import()
+        {
+            // Lingo.rar is 32.7 MB compressed; the tree that lands on disk is
+            // larger, and that is the number every later upgrade compares on.
+            GivenExistingFileOnDisk();
+
+            var localGame = _approvedDecisions.First().LocalGame;
+            localGame.Path = Path.Combine(localGame.Game.Path, "Lingo.rar");
+            localGame.Size = 94371840;
+            localGame.ArchiveInspection = new GameArchiveInspection
+            {
+                ArchivePath = localGame.Path,
+                EntryName = null,
+                EntrySize = 94371840,
+                ExtractWholeArchive = true
+            };
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFileSize(It.IsAny<string>()))
+                  .Returns(34275328);
+
+            Subject.Import(_approvedDecisions, false);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(f => f.Size == 94371840)), Times.Once());
+        }
+
+        [Test]
+        public void should_record_a_whole_archive_import_on_the_original_file_path()
+        {
+            GivenExistingFileOnDisk();
+            GivenNewDownload();
+
+            var localGame = _approvedDecisions.First().LocalGame;
+            localGame.Path = Path.Combine(_downloadClientItem.OutputPath.ToString(), "Lingo.rar");
+            localGame.ArchiveInspection = new GameArchiveInspection
+            {
+                ArchivePath = localGame.Path,
+                EntryName = null,
+                EntrySize = 94371840,
+                ExtractWholeArchive = true
+            };
+
+            Subject.Import(_approvedDecisions, true, _downloadClientItem);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.Is<GameFile>(f => f.OriginalFilePath.EndsWith("Lingo.rar!*"))), Times.Once());
+        }
+
+        [Test]
         public void should_not_import_any_if_there_are_no_approved_decisions()
         {
             Subject.Import(_rejectedDecisions, false).Where(i => i.Result == ImportResultType.Imported).Should().BeEmpty();

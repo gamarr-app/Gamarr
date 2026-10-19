@@ -49,9 +49,11 @@ namespace NzbDrone.Core.Parser.Model
         public string ImportSubfolder { get; set; }
 
         // Transient: set by the import decision peek when this release is just
-        // an archive wrapping a single game file. When it is set, Path points at
-        // the archive, Size is the UNCOMPRESSED entry size, and the mover
-        // extracts instead of transferring.
+        // an archive — either wrapping a single game file, or (PC/unknown
+        // platform, ExtractWholeArchive) holding a payload tree that imports at
+        // folder granularity. When it is set, Path points at the archive, Size
+        // is the UNCOMPRESSED size, and the mover extracts instead of
+        // transferring.
         public GameArchiveInspection ArchiveInspection { get; set; }
 
         // Best parsed release content type across the available sources

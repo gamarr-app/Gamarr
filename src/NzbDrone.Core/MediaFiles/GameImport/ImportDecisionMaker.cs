@@ -120,21 +120,60 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         /// </summary>
         public void InspectArchive(LocalGame localGame)
         {
-            var inspection = _archiveService.InspectImportUnit(localGame.Path);
+            var allowWholeArchive = AllowsWholeArchiveExtraction(localGame.Game);
+
+            var inspection = _archiveService.InspectImportUnit(localGame.Path, allowWholeArchive);
 
             if (inspection == null)
             {
                 return;
             }
 
-            _logger.Debug("Import unit {0} is an archive-wrapped release; importing {1} ({2} bytes) instead",
-                localGame.Path,
-                inspection.EntryName,
-                inspection.EntrySize);
+            if (inspection.ExtractWholeArchive)
+            {
+                _logger.Debug("Import unit {0} is an archive with no single extractable game file; extracting all of it ({1} bytes) into the game folder",
+                    localGame.Path,
+                    inspection.EntrySize);
+            }
+            else
+            {
+                _logger.Debug("Import unit {0} is an archive-wrapped release; importing {1} ({2} bytes) instead",
+                    localGame.Path,
+                    inspection.EntryName,
+                    inspection.EntrySize);
+            }
 
             localGame.ArchiveInspection = inspection;
             localGame.Path = inspection.ArchivePath;
             localGame.Size = inspection.EntrySize;
+        }
+
+        /// <summary>
+        /// Whether an archive holding no single extractable ROM entry may be
+        /// extracted wholesale into the game folder.
+        ///
+        /// This gate lives here and not in <see cref="IGameArchiveService"/>
+        /// because it depends on the game, which that service does not see. PC
+        /// (and Linux/Mac) releases are an installer tree — exe, data files,
+        /// subfolders — that no single-file extract can represent, and those
+        /// games already import at folder granularity, so the whole tree is the
+        /// right unit. <see cref="PlatformFamily.Unknown"/> is eligible too and
+        /// that is load-bearing: a per-entry platform is optional and most PC
+        /// entries in a real library never set one. A console platform keeps the
+        /// original exactly-one-ROM-entry rule, where collapsing a release into
+        /// one file is both possible and what the library scanner wants.
+        /// </summary>
+        private static bool AllowsWholeArchiveExtraction(Game game)
+        {
+            if (game == null)
+            {
+                return true;
+            }
+
+            return game.Platform is PlatformFamily.Unknown
+                or PlatformFamily.PC
+                or PlatformFamily.Linux
+                or PlatformFamily.Mac;
         }
 
         public ImportDecision GetDecision(LocalGame localGame, DownloadClientItem downloadClientItem)

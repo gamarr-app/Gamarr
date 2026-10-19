@@ -134,7 +134,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                   .Returns(5700000000);
 
             Mocker.GetMock<IGameArchiveService>()
-                  .Setup(s => s.InspectImportUnit(folder))
+                  .Setup(s => s.InspectImportUnit(folder, It.IsAny<bool>()))
                   .Returns(new GameArchiveInspection
                   {
                       ArchivePath = archive,
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                   .Returns(5700000000);
 
             Mocker.GetMock<IGameArchiveService>()
-                  .Setup(s => s.InspectImportUnit(archive))
+                  .Setup(s => s.InspectImportUnit(archive, It.IsAny<bool>()))
                   .Returns(new GameArchiveInspection
                   {
                       ArchivePath = archive,
@@ -176,6 +176,87 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             var decision = Subject.GetImportDecisions(_videoFiles, _game).Single();
 
             decision.LocalGame.Size.Should().Be(7985954816);
+        }
+
+        [TestCase(PlatformFamily.Unknown)]
+        [TestCase(PlatformFamily.PC)]
+        [TestCase(PlatformFamily.Linux)]
+        [TestCase(PlatformFamily.Mac)]
+        public void should_allow_whole_archive_extraction_for_pc_and_unknown_platforms(PlatformFamily platform)
+        {
+            // Unknown is load-bearing: the per-entry platform is optional and
+            // most PC entries in a real library never set one, so refusing
+            // Unknown would leave the reported bug unfixed.
+            var archive = @"C:\Test\Unsorted\Lingo (2021)\Lingo.rar".AsOsAgnostic();
+
+            _game.Platform = platform;
+
+            GivenArchiveRelease(archive);
+
+            Subject.GetImportDecisions(_videoFiles, _game);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Verify(s => s.InspectImportUnit(archive, true), Times.Once());
+        }
+
+        [TestCase(PlatformFamily.NintendoSwitch)]
+        [TestCase(PlatformFamily.PlayStation)]
+        [TestCase(PlatformFamily.Xbox)]
+        [TestCase(PlatformFamily.Nintendo)]
+        public void should_not_allow_whole_archive_extraction_for_a_console_platform(PlatformFamily platform)
+        {
+            // A console release can and should be collapsed into one ROM file,
+            // so it keeps the original reject-unless-exactly-one rule.
+            var archive = @"C:\Test\Unsorted\Kirby (BlueRoms)\Kirby.7z".AsOsAgnostic();
+
+            _game.Platform = platform;
+
+            GivenArchiveRelease(archive);
+
+            Subject.GetImportDecisions(_videoFiles, _game);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Verify(s => s.InspectImportUnit(archive, false), Times.Once());
+        }
+
+        [Test]
+        public void should_carry_a_whole_archive_inspection_onto_the_local_game()
+        {
+            var archive = @"C:\Test\Unsorted\Lingo (2021)\Lingo.rar".AsOsAgnostic();
+
+            _game.Platform = PlatformFamily.Unknown;
+
+            GivenArchiveRelease(archive);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Setup(s => s.InspectImportUnit(archive, true))
+                  .Returns(new GameArchiveInspection
+                  {
+                      ArchivePath = archive,
+                      EntryName = null,
+                      EntrySize = 34275328,
+                      ExtractWholeArchive = true
+                  });
+
+            var decision = Subject.GetImportDecisions(_videoFiles, _game).Single();
+
+            decision.LocalGame.ArchiveInspection.Should().NotBeNull();
+            decision.LocalGame.ArchiveInspection.ExtractWholeArchive.Should().BeTrue();
+            decision.LocalGame.Path.Should().Be(archive);
+
+            // FreeSpaceSpecification and ImportApprovedGame both read this.
+            decision.LocalGame.Size.Should().Be(34275328);
+        }
+
+        private void GivenArchiveRelease(string archive)
+        {
+            GivenAugmentationSuccess();
+            GivenSpecifications(_pass1);
+            GivenVideoFiles(new List<string> { archive });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFileSize(archive))
+                  .Returns(32700000);
         }
 
         [Test]

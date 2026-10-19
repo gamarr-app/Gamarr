@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -177,6 +178,123 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
             var result = Subject.MoveGameFile(_gameFile, _localGame);
 
             result.RelativePath.Should().Be("Kirby [Base].xci");
+        }
+
+        // A PC release: Lingo.rar holds an exe, data files and subfolders and no
+        // ROM entry at all, so the whole tree goes into the game folder.
+        private void GivenWholeArchiveRelease()
+        {
+            _game.Path = @"C:\Games\PC\Lingo (2021)".AsOsAgnostic();
+            _archivePath = @"C:\Downloads\transmission\gamarr\Lingo.rar".AsOsAgnostic();
+
+            _gameFile.RelativePath = "Lingo.rar";
+            _gameFile.Path = _archivePath;
+
+            _localGame.Path = _archivePath;
+            _localGame.Size = 34275328;
+            _localGame.ArchiveInspection = new GameArchiveInspection
+            {
+                ArchivePath = _archivePath,
+                EntryName = null,
+                EntrySize = 34275328,
+                ExtractWholeArchive = true
+            };
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(_archivePath))
+                  .Returns(false);
+        }
+
+        [Test]
+        public void should_extract_the_whole_archive_into_the_game_folder()
+        {
+            GivenWholeArchiveRelease();
+
+            Subject.MoveGameFile(_gameFile, _localGame);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Verify(s => s.ExtractArchive(_localGame.ArchiveInspection, _game.Path), Times.Once());
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Verify(s => s.ExtractEntry(It.IsAny<GameArchiveInspection>(), It.IsAny<string>()), Times.Never());
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(s => s.TransferFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<bool>()), Times.Never());
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>()), Times.Never());
+        }
+
+        [Test]
+        public void should_not_build_a_file_name_for_a_whole_archive_release()
+        {
+            // There is no inner entry to take an extension from; the destination
+            // is the game folder, exactly as a plain folder release produces.
+            GivenWholeArchiveRelease();
+
+            Subject.MoveGameFile(_gameFile, _localGame);
+
+            Mocker.GetMock<IBuildFileNames>()
+                  .Verify(s => s.BuildFilePath(It.IsAny<Game>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void should_record_the_game_folder_itself_as_the_game_file()
+        {
+            GivenWholeArchiveRelease();
+
+            var result = Subject.MoveGameFile(_gameFile, _localGame);
+
+            // Empty RelativePath means the game folder IS the file — the shape
+            // every existing folder release already imports as.
+            result.RelativePath.Should().BeEmpty();
+            _localGame.FileNameBeforeRename.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_never_hardlink_a_whole_archive_release()
+        {
+            GivenWholeArchiveRelease();
+
+            Mocker.GetMock<IConfigService>()
+                  .Setup(s => s.CopyUsingHardlinks)
+                  .Returns(true);
+
+            Subject.CopyGameFile(_gameFile, _localGame);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Verify(s => s.ExtractArchive(_localGame.ArchiveInspection, _game.Path), Times.Once());
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(s => s.TransferFile(It.IsAny<string>(), It.IsAny<string>(), TransferMode.HardLinkOrCopy, It.IsAny<bool>()), Times.Never());
+        }
+
+        [Test]
+        public void should_bypass_the_custom_import_script_for_a_whole_archive_release()
+        {
+            GivenWholeArchiveRelease();
+
+            Subject.MoveGameFile(_gameFile, _localGame);
+
+            Mocker.GetMock<IImportScript>()
+                  .Verify(s => s.TryImport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LocalGame>(), It.IsAny<GameFile>(), It.IsAny<TransferMode>()), Times.Never());
+        }
+
+        [Test]
+        public void should_extract_into_the_import_subfolder_when_one_is_set()
+        {
+            GivenWholeArchiveRelease();
+
+            _localGame.ImportSubfolder = Path.Combine("Updates", "1.2.0");
+
+            var result = Subject.MoveGameFile(_gameFile, _localGame);
+
+            var expected = Path.Combine(_game.Path, _localGame.ImportSubfolder);
+
+            Mocker.GetMock<IGameArchiveService>()
+                  .Verify(s => s.ExtractArchive(_localGame.ArchiveInspection, expected), Times.Once());
+
+            result.RelativePath.Should().Be(_localGame.ImportSubfolder);
         }
     }
 }

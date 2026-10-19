@@ -43,6 +43,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
 
             decision.Accepted.Should().BeFalse();
             decision.Reason.Should().Be(ImportRejectionReason.ArchiveFile);
+            decision.Message.Should().Contain("does not contain a single extractable game file");
         }
 
         [Test]
@@ -55,6 +56,25 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
                 ArchivePath = _localGame.Path,
                 EntryName = "Kirby.xci",
                 EntrySize = 7985954816
+            };
+
+            Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_accept_an_archive_inspected_for_whole_archive_extraction()
+        {
+            // Lingo.rar: a PC payload with no ROM entry at all. Before this it
+            // was rejected on every re-grab with "needs to be extracted
+            // manually", which nobody ever did.
+            GivenFile("Lingo.rar");
+
+            _localGame.ArchiveInspection = new GameArchiveInspection
+            {
+                ArchivePath = _localGame.Path,
+                EntryName = null,
+                EntrySize = 34275328,
+                ExtractWholeArchive = true
             };
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();

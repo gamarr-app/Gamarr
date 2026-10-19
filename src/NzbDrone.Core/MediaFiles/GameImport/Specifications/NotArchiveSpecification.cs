@@ -16,6 +16,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
     /// inspection (unsupported container, split volume set, zero or several game
     /// files inside) is rejected rather than copied across as-is, where no
     /// library scanner could read it.
+    ///
+    /// A successful inspection is accepted in either mode — one ROM entry to
+    /// pull out, or a PC payload to unpack wholesale into the game folder.
     /// </summary>
     public class NotArchiveSpecification : IImportDecisionEngineSpecification
     {

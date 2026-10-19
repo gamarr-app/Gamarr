@@ -17,6 +17,13 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
         private const string EntryName = "Kirby Test Game [0100ABC].xci";
         private const long EntrySize = 1024;
 
+        // A PC-shaped payload: an exe, data files and a subfolder, and not one
+        // console ROM extension anywhere — the shape that could never satisfy the
+        // exactly-one-ROM rule, so every re-grab of it failed identically.
+        private const string PcArchive = "Files/TestPcGameArchive.7z";
+        private const long PcArchiveTotalSize = 1856;
+        private const int PcArchiveFileCount = 4;
+
         private string _archivePath;
 
         [SetUp]
@@ -50,6 +57,22 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                   .Callback<string, string, bool>((source, destination, overwrite) => File.Move(source, destination, overwrite));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.CreateFolder(It.IsAny<string>()))
+                  .Callback<string>(path => Directory.CreateDirectory(path));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.DeleteFolder(It.IsAny<string>(), It.IsAny<bool>()))
+                  .Callback<string, bool>((path, recursive) => Directory.Delete(path, recursive));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetDirectories(It.IsAny<string>()))
+                  .Returns<string>(Directory.GetDirectories);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.MoveFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                  .Callback<string, string, bool>((source, destination, overwrite) => Directory.Move(source, destination));
         }
 
         private string GivenReleaseFolder(bool withLooseGameFile = false)
@@ -208,6 +231,171 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
             Subject.ExtractEntry(inspection, destination);
 
             new FileInfo(destination).Length.Should().Be(EntrySize);
+        }
+
+        [Test]
+        public void should_report_a_whole_archive_inspection_for_a_pc_payload()
+        {
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+
+            inspection.Should().NotBeNull();
+            inspection.ExtractWholeArchive.Should().BeTrue();
+            inspection.EntryName.Should().BeNull();
+        }
+
+        [Test]
+        public void should_sum_the_uncompressed_entry_sizes_in_whole_archive_mode()
+        {
+            // FreeSpaceSpecification budgets on this; the 259-byte archive would
+            // understate the tree that actually gets written.
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+
+            inspection.EntrySize.Should().Be(PcArchiveTotalSize);
+            new FileInfo(GetTestPath(PcArchive)).Length.Should().BeLessThan(PcArchiveTotalSize);
+        }
+
+        [Test]
+        public void should_not_report_a_whole_archive_inspection_unless_the_caller_allows_it()
+        {
+            // A console release keeps the original reject-unless-one-ROM rule;
+            // the platform gate that decides this lives in ImportDecisionMaker.
+            Subject.InspectImportUnit(GetTestPath(PcArchive)).Should().BeNull();
+        }
+
+        [Test]
+        public void should_still_prefer_the_single_rom_entry_when_whole_archive_is_allowed()
+        {
+            var inspection = Subject.InspectImportUnit(_archivePath, true);
+
+            inspection.ExtractWholeArchive.Should().BeFalse();
+            inspection.EntryName.Should().Be(EntryName);
+            inspection.EntrySize.Should().Be(EntrySize);
+        }
+
+        [Test]
+        public void should_refuse_an_archive_with_several_rom_entries_in_either_mode()
+        {
+            // Picking one would be a guess and merging them is not a folder
+            // import, so whole-archive mode deliberately does not cover this.
+            var path = GetTestPath("Files/TestMultiRomGameArchive.7z");
+
+            Subject.InspectImportUnit(path).Should().BeNull();
+            Subject.InspectImportUnit(path, true).Should().BeNull();
+        }
+
+        [TestCase("Lingo.7z.001")]
+        [TestCase("Lingo.part1.rar")]
+        [TestCase("Lingo.r00")]
+        public void should_refuse_split_volumes_even_in_whole_archive_mode(string fileName)
+        {
+            var path = Path.Combine(TempFolder, fileName);
+            File.Copy(GetTestPath(PcArchive), path);
+
+            Subject.InspectImportUnit(path, true).Should().BeNull();
+        }
+
+        [Test]
+        public void should_find_a_pc_archive_inside_a_folder_shaped_release()
+        {
+            var folder = Path.Combine(TempFolder, "Lingo 2 (2025) [FitGirl Repack]");
+            Directory.CreateDirectory(folder);
+            File.Copy(GetTestPath(PcArchive), Path.Combine(folder, "Lingo.2.rar"));
+
+            var inspection = Subject.InspectImportUnit(folder, true);
+
+            inspection.Should().NotBeNull();
+            inspection.ExtractWholeArchive.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_extract_the_whole_archive_into_an_existing_game_folder()
+        {
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            // The mover has already created the game folder by this point.
+            Directory.CreateDirectory(destination);
+
+            Subject.ExtractArchive(inspection, destination);
+
+            File.Exists(Path.Combine(destination, "Lingo.exe")).Should().BeTrue();
+            File.Exists(Path.Combine(destination, "readme.txt")).Should().BeTrue();
+            File.Exists(Path.Combine(destination, "data", "resource.dat")).Should().BeTrue();
+            File.Exists(Path.Combine(destination, "data", "sub", "strings.bin")).Should().BeTrue();
+
+            Directory.GetFiles(destination, "*", SearchOption.AllDirectories).Should().HaveCount(PcArchiveFileCount);
+        }
+
+        [Test]
+        public void should_extract_the_whole_archive_when_the_game_folder_does_not_exist_yet()
+        {
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            Subject.ExtractArchive(inspection, destination);
+
+            File.Exists(Path.Combine(destination, "Lingo.exe")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_remove_the_partial_folder_after_a_whole_archive_extract()
+        {
+            // Otherwise the next DiskScanService.Scan adopts a half-written tree.
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            Subject.ExtractArchive(inspection, destination);
+
+            Directory.Exists(destination + ".partial~").Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_leave_a_partial_folder_behind_when_a_whole_archive_extract_fails()
+        {
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+            inspection.ArchivePath = Path.Combine(TempFolder, "GoneMissing.7z");
+
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            Assert.Throws<GameArchiveExtractionException>(() => Subject.ExtractArchive(inspection, destination));
+
+            Directory.Exists(destination + ".partial~").Should().BeFalse();
+            Directory.Exists(destination).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_replace_a_stale_partial_folder()
+        {
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            Directory.CreateDirectory(destination + ".partial~");
+            File.WriteAllText(Path.Combine(destination + ".partial~", "leftover.dat"), "from a failed run");
+
+            Subject.ExtractArchive(inspection, destination);
+
+            File.Exists(Path.Combine(destination, "leftover.dat")).Should().BeFalse();
+            File.Exists(Path.Combine(destination, "Lingo.exe")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_skip_archive_entries_that_escape_the_destination()
+        {
+            // An entry key is attacker-controlled: "../", a leading "/" and a
+            // drive letter all write outside the game folder if taken verbatim.
+            var inspection = Subject.InspectImportUnit(GetTestPath("Files/TestTraversalGameArchive.zip"), true);
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            Subject.ExtractArchive(inspection, destination);
+
+            File.Exists(Path.Combine(destination, "safe", "ok.dat")).Should().BeTrue();
+            File.Exists(Path.Combine(destination, "Lingo.exe")).Should().BeTrue();
+
+            Directory.GetFiles(destination, "*", SearchOption.AllDirectories).Should().HaveCount(2);
+
+            File.Exists(Path.Combine(TempFolder, "escaped.dat")).Should().BeFalse();
+            File.Exists(Path.Combine(TempFolder, "escaped2.dat")).Should().BeFalse();
+            File.Exists(Path.Combine(TempFolder, "absolute.dat")).Should().BeFalse();
         }
     }
 }

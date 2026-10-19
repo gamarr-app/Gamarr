@@ -79,8 +79,12 @@ namespace NzbDrone.Core.MediaFiles
             var sourcePath = localGame.Path;
             var isFolder = _diskProvider.FolderExists(sourcePath);
 
+            // A whole-archive extract lands as a folder even though its source
+            // path is a file, so it needs the folder destination too.
+            var isFolderDestination = isFolder || IsWholeArchiveExtraction(localGame);
+
             string destinationPath;
-            if (isFolder)
+            if (isFolderDestination)
             {
                 // For folders, move contents into game.Path — or, when an
                 // import subfolder is set (update-alongside imports), into
@@ -101,7 +105,7 @@ namespace NzbDrone.Core.MediaFiles
                 EnsureGameFolder(gameFile, localGame, destinationPath);
             }
 
-            _logger.Debug("Moving game {0}: {1} to {2}", isFolder ? "folder" : "file", sourcePath, destinationPath);
+            _logger.Debug("Moving game {0}: {1} to {2}", isFolderDestination ? "folder" : "file", sourcePath, destinationPath);
 
             return TransferGamePath(gameFile, localGame.Game, sourcePath, destinationPath, TransferMode.Move, isFolder, localGame);
         }
@@ -111,8 +115,11 @@ namespace NzbDrone.Core.MediaFiles
             var sourcePath = localGame.Path;
             var isFolder = _diskProvider.FolderExists(sourcePath);
 
+            // Same file-source-but-folder-destination case as the move path.
+            var isFolderDestination = isFolder || IsWholeArchiveExtraction(localGame);
+
             string destinationPath;
-            if (isFolder)
+            if (isFolderDestination)
             {
                 // Same subfolder routing as the move path.
                 destinationPath = localGame.ImportSubfolder.IsNotNullOrWhiteSpace()
@@ -138,11 +145,15 @@ namespace NzbDrone.Core.MediaFiles
             if (_configService.CopyUsingHardlinks && localGame.ArchiveInspection != null)
             {
                 // Say so explicitly: to a seedbox user who hardlinks everything,
-                // a silent copy here reads as a hardlinking regression.
-                _logger.Debug("Not hardlinking {0}: the game file has to be extracted from the archive", sourcePath);
+                // a silent copy here reads as a hardlinking regression. True for
+                // both modes — compressed bytes can never be hardlinked into
+                // place, whether one entry or the whole tree comes out.
+                _logger.Debug("Not hardlinking {0}: the game {1} has to be extracted from the archive",
+                    sourcePath,
+                    IsWholeArchiveExtraction(localGame) ? "folder" : "file");
             }
 
-            _logger.Debug("Copying game {0}: {1} to {2}", isFolder ? "folder" : "file", sourcePath, destinationPath);
+            _logger.Debug("Copying game {0}: {1} to {2}", isFolderDestination ? "folder" : "file", sourcePath, destinationPath);
             return TransferGamePath(gameFile, localGame.Game, sourcePath, destinationPath, TransferMode.Copy, isFolder, localGame);
         }
 
@@ -151,6 +162,13 @@ namespace NzbDrone.Core.MediaFiles
             Ensure.That(gameFile, () => gameFile).IsNotNull();
             Ensure.That(game, () => game).IsNotNull();
             Ensure.That(destinationPath, () => destinationPath).IsValidPath(PathValidationType.CurrentOs);
+
+            // Whole-archive mode: the source is a file but the import unit is the
+            // tree inside it, so neither TransferFolder nor TransferFile applies.
+            if (IsWholeArchiveExtraction(localGame))
+            {
+                return ExtractArchiveToGameFolder(gameFile, game, destinationPath, localGame);
+            }
 
             if (isFolder)
             {
@@ -258,15 +276,52 @@ namespace NzbDrone.Core.MediaFiles
             return gameFile;
         }
 
+        private static bool IsWholeArchiveExtraction(LocalGame localGame)
+        {
+            return localGame?.ArchiveInspection?.ExtractWholeArchive == true;
+        }
+
         /// <summary>
-        /// The extension the destination must carry. For an archive-wrapped
-        /// release that is the inner entry's — naming XCI bytes "...[Base].7z"
-        /// would leave the game just as invisible to a library scanner, in a new
-        /// and more confusing way.
+        /// Phase two of a whole-archive import: unpack the archive into the game
+        /// folder and record the folder itself as the game file, which is the
+        /// exact shape a plain folder release already produces. The custom
+        /// import script is bypassed for the same reason as the single-entry
+        /// path — a script handed the archive path cannot do the right thing
+        /// with it.
+        /// </summary>
+        private GameFile ExtractArchiveToGameFolder(GameFile gameFile, Game game, string destinationPath, LocalGame localGame)
+        {
+            var importSubfolder = localGame.ImportSubfolder;
+
+            // EnsureGameFolder created the game folder; a subfolder destination
+            // (update-alongside imports) still needs its leaf.
+            if (importSubfolder.IsNotNullOrWhiteSpace() && !_diskProvider.FolderExists(destinationPath))
+            {
+                CreateFolder(destinationPath);
+            }
+
+            _gameArchiveService.ExtractArchive(localGame.ArchiveInspection, destinationPath);
+
+            // Empty RelativePath means the game folder itself IS the file;
+            // update-alongside imports keep their Updates/<version> subfolder.
+            gameFile.RelativePath = importSubfolder.IsNotNullOrWhiteSpace() ? importSubfolder : string.Empty;
+            localGame.FileNameBeforeRename = gameFile.RelativePath;
+
+            _updateGameFileService.ChangeFileDateForFile(gameFile, game);
+
+            return gameFile;
+        }
+
+        /// <summary>
+        /// The extension the destination must carry. For a single-entry
+        /// archive-wrapped release that is the inner entry's — naming XCI bytes
+        /// "...[Base].7z" would leave the game just as invisible to a library
+        /// scanner, in a new and more confusing way. Whole-archive mode has no
+        /// inner entry and never reaches here: its destination is a folder.
         /// </summary>
         private string GetDestinationExtension(LocalGame localGame)
         {
-            if (localGame.ArchiveInspection != null)
+            if (localGame.ArchiveInspection != null && !localGame.ArchiveInspection.ExtractWholeArchive)
             {
                 return Path.GetExtension(localGame.ArchiveInspection.EntryName);
             }

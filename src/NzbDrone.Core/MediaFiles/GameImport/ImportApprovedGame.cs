@@ -236,7 +236,13 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             // Dapper-mapped and a new column would need a migration.
             if (localGame.ArchiveInspection != null)
             {
-                return $"{path}!{localGame.ArchiveInspection.EntryName}";
+                // Whole-archive mode has no single entry; "!*" records that the
+                // whole thing came out of the archive at this path.
+                var entryName = localGame.ArchiveInspection.ExtractWholeArchive
+                    ? "*"
+                    : localGame.ArchiveInspection.EntryName;
+
+                return $"{path}!{entryName}";
             }
 
             return path;
