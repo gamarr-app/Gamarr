@@ -67,6 +67,10 @@ function CheckInput(props: CheckInputProps) {
         return;
       }
 
+      if (event.target === inputRef.current) {
+        return;
+      }
+
       const shiftKey = event.nativeEvent.shiftKey;
       const checked = !(inputRef.current?.checked ?? false);
 
