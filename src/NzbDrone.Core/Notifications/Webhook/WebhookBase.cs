@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
@@ -77,7 +76,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 payload.DeletedFiles = message.OldGameFiles.ConvertAll(x =>
                     new WebhookGameFile(x.GameFile)
                     {
-                        Path = Path.Combine(message.Game.Path, x.GameFile.RelativePath),
+                        Path = x.GameFile.GetPath(message.Game),
                         RecycleBinPath = x.RecycleBinPath
                     });
             }

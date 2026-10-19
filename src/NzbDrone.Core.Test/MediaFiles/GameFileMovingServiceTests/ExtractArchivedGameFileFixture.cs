@@ -245,10 +245,13 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
 
             var result = Subject.MoveGameFile(_gameFile, _localGame);
 
-            // Empty RelativePath means the game folder IS the file — the shape
-            // every existing folder release already imports as.
-            result.RelativePath.Should().BeEmpty();
-            _localGame.FileNameBeforeRename.Should().BeEmpty();
+            // The game folder IS the file, and the record names that folder —
+            // the shape every existing folder release already imports as. An
+            // empty string here was a trap for rename, notifications and the UI.
+            result.RelativePath.Should().Be("Lingo (2021)");
+            _localGame.FileNameBeforeRename.Should().Be("Lingo (2021)");
+            result.IsFolder(_game).Should().BeTrue();
+            result.GetPath(_game).Should().Be(_game.Path);
         }
 
         [Test]

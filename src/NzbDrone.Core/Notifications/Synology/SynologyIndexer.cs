@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using FluentValidation.Results;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
@@ -29,13 +28,13 @@ namespace NzbDrone.Core.Notifications.Synology
             {
                 foreach (var oldFile in message.OldGameFiles)
                 {
-                    var fullPath = Path.Combine(message.Game.Path, oldFile.GameFile.RelativePath);
+                    var fullPath = oldFile.GameFile.GetPath(message.Game);
 
                     _indexerProxy.DeleteFile(fullPath);
                 }
 
                 {
-                    var fullPath = Path.Combine(message.Game.Path, message.GameFile.RelativePath);
+                    var fullPath = message.GameFile.GetPath(message.Game);
 
                     _indexerProxy.AddFile(fullPath);
                 }
@@ -54,7 +53,7 @@ namespace NzbDrone.Core.Notifications.Synology
         {
             if (Settings.UpdateLibrary)
             {
-                var fullPath = Path.Combine(deleteMessage.Game.Path, deleteMessage.GameFile.RelativePath);
+                var fullPath = deleteMessage.GameFile.GetPath(deleteMessage.Game);
                 _indexerProxy.DeleteFile(fullPath);
             }
         }

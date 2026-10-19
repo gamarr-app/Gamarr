@@ -171,11 +171,25 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
         }
 
         [Test]
-        public void should_set_relative_path_to_empty_for_folder_move()
+        public void should_set_relative_path_to_the_folder_name_for_folder_move()
         {
             var result = Subject.MoveGameFile(_gameFile, _localGame);
 
-            result.RelativePath.Should().BeEmpty();
+            result.RelativePath.Should().Be("Game");
+            result.GetPath(_game).Should().Be(_game.Path);
+        }
+
+        [Test]
+        public void should_keep_the_import_subfolder_as_the_relative_path()
+        {
+            // An update imported alongside the base is not the game folder, so
+            // the folder name must not displace its Updates/<version> path.
+            _localGame.ImportSubfolder = @"Updates\1.2.0".AsOsAgnostic();
+
+            var result = Subject.MoveGameFile(_gameFile, _localGame);
+
+            result.RelativePath.Should().Be(@"Updates\1.2.0".AsOsAgnostic());
+            result.IsFolder(_game).Should().BeFalse();
         }
 
         [Test]

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
@@ -44,7 +43,7 @@ namespace NzbDrone.Core.Notifications.Webhook
         public WebhookGame(Game game, GameFile gameFile, List<string> tags)
             : this(game, tags)
         {
-            FilePath = Path.Combine(game.Path, gameFile.RelativePath);
+            FilePath = gameFile.GetPath(game);
         }
     }
 }

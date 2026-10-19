@@ -54,11 +54,11 @@ namespace NzbDrone.Core.Extras.Files
 
         protected TExtraFile ImportFile(Game game, GameFile gameFile, string path, bool readOnly, string extension, string fileNameSuffix = null)
         {
-            // Folder-based game files (empty RelativePath means "the game folder
-            // itself") keep extras inside the game folder, named after it. The
-            // file-based math would resolve to "<library root>/.nfo" and then
-            // throw computing the relative path after the move.
-            var isFolderGameFile = gameFile.RelativePath.IsNullOrWhiteSpace();
+            // Folder-based game files (the game folder itself is the file) keep
+            // extras inside the game folder, named after it. The file-based math
+            // would resolve to "<library root>/.nfo" and then throw computing
+            // the relative path after the move.
+            var isFolderGameFile = gameFile.IsFolder(game);
             var gameFilePath = isFolderGameFile ? game.Path : Path.Combine(game.Path, gameFile.RelativePath);
             var newFolder = isFolderGameFile ? game.Path : Path.GetDirectoryName(gameFilePath);
             var filenameBuilder = new StringBuilder(isFolderGameFile
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.Extras.Files
         {
             _logger.Trace("Renaming extra file: {0}", extraFile);
 
-            var isFolderGameFile = gameFile.RelativePath.IsNullOrWhiteSpace();
+            var isFolderGameFile = gameFile.IsFolder(game);
             var newFolder = isFolderGameFile ? game.Path : Path.GetDirectoryName(Path.Combine(game.Path, gameFile.RelativePath));
             var filenameBuilder = new StringBuilder(isFolderGameFile
                 ? Path.GetFileName(game.Path)

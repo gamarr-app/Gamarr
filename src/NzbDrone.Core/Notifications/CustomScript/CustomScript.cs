@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
             environmentVariables.Add("Gamarr_GameFile_Id", gameFile.Id.ToString());
             environmentVariables.Add("Gamarr_GameFile_RelativePath", gameFile.RelativePath);
-            environmentVariables.Add("Gamarr_GameFile_Path", Path.Combine(game.Path, gameFile.RelativePath));
+            environmentVariables.Add("Gamarr_GameFile_Path", gameFile.GetPath(game));
             environmentVariables.Add("Gamarr_GameFile_Quality", gameFile.Quality.Quality.Name);
             environmentVariables.Add("Gamarr_GameFile_QualityVersion", gameFile.Quality.Revision.Version.ToString());
             environmentVariables.Add("Gamarr_GameFile_ReleaseGroup", gameFile.ReleaseGroup ?? string.Empty);
@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             if (message.OldGameFiles.Any())
             {
                 environmentVariables.Add("Gamarr_DeletedRelativePaths", string.Join("|", message.OldGameFiles.Select(e => e.GameFile.RelativePath)));
-                environmentVariables.Add("Gamarr_DeletedPaths", string.Join("|", message.OldGameFiles.Select(e => Path.Combine(game.Path, e.GameFile.RelativePath))));
+                environmentVariables.Add("Gamarr_DeletedPaths", string.Join("|", message.OldGameFiles.Select(e => e.GameFile.GetPath(game))));
                 environmentVariables.Add("Gamarr_DeletedDateAdded", string.Join("|", message.OldGameFiles.Select(e => e.GameFile.DateAdded)));
                 environmentVariables.Add("Gamarr_DeletedRecycleBinPaths", string.Join("|", message.OldGameFiles.Select(e => e.RecycleBinPath ?? string.Empty)));
             }
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Game_Physical_Release_Date", game.GameMetadata.Value.PhysicalRelease.ToString() ?? string.Empty);
             environmentVariables.Add("Gamarr_GameFile_Ids", string.Join(",", renamedFiles.Select(e => e.GameFile.Id)));
             environmentVariables.Add("Gamarr_GameFile_RelativePaths", string.Join("|", renamedFiles.Select(e => e.GameFile.RelativePath)));
-            environmentVariables.Add("Gamarr_GameFile_Paths", string.Join("|", renamedFiles.Select(e => Path.Combine(game.Path, e.GameFile.RelativePath))));
+            environmentVariables.Add("Gamarr_GameFile_Paths", string.Join("|", renamedFiles.Select(e => e.GameFile.GetPath(game))));
             environmentVariables.Add("Gamarr_GameFile_PreviousRelativePaths", string.Join("|", renamedFiles.Select(e => e.PreviousRelativePath)));
             environmentVariables.Add("Gamarr_GameFile_PreviousPaths", string.Join("|", renamedFiles.Select(e => e.PreviousPath)));
 
@@ -217,7 +217,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Game_Overview", game.GameMetadata.Value.Overview);
             environmentVariables.Add("Gamarr_GameFile_Id", gameFile.Id.ToString());
             environmentVariables.Add("Gamarr_GameFile_RelativePath", gameFile.RelativePath);
-            environmentVariables.Add("Gamarr_GameFile_Path", Path.Combine(game.Path, gameFile.RelativePath));
+            environmentVariables.Add("Gamarr_GameFile_Path", gameFile.GetPath(game));
             environmentVariables.Add("Gamarr_GameFile_Size", gameFile.Size.ToString());
             environmentVariables.Add("Gamarr_GameFile_Quality", gameFile.Quality.Quality.Name);
             environmentVariables.Add("Gamarr_GameFile_QualityVersion", gameFile.Quality.Revision.Version.ToString());

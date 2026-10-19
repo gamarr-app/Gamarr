@@ -149,13 +149,18 @@ namespace NzbDrone.Core.MediaFiles
                 // RelativePath like Updates/<version>) are reconciled by their
                 // own folder's existence and must not be absorbed or deleted by
                 // the base-file logic below.
+                //
+                // A folder-as-file record names the game folder itself, so
+                // <game folder>/<its RelativePath> is nothing on disk: without
+                // the IsFolder guard it would be read as a subfolder unit that
+                // had vanished, and deleted on every rescan.
                 var subfolderUnits = existingGameFiles
-                    .Where(f => f.RelativePath.IsNotNullOrWhiteSpace() &&
+                    .Where(f => !f.IsFolder(game) &&
                                 _diskProvider.FolderExists(Path.Combine(game.Path, f.RelativePath)))
                     .ToList();
 
                 var vanishedSubfolderUnits = existingGameFiles
-                    .Where(f => f.RelativePath.IsNotNullOrWhiteSpace() &&
+                    .Where(f => !f.IsFolder(game) &&
                                 !_diskProvider.FolderExists(Path.Combine(game.Path, f.RelativePath)) &&
                                 !_diskProvider.FileExists(Path.Combine(game.Path, f.RelativePath)))
                     .ToList();
@@ -191,8 +196,8 @@ namespace NzbDrone.Core.MediaFiles
                     // Folder has content - treat the entire folder as a single GameFile
                     var folderSize = _diskProvider.GetFolderSize(game.Path);
 
-                    // Check if we already have a folder-based GameFile (RelativePath is empty)
-                    var existingFolderFile = existingGameFiles.FirstOrDefault(f => f.RelativePath.IsNullOrWhiteSpace());
+                    // Check if we already have a folder-based GameFile
+                    var existingFolderFile = existingGameFiles.FirstOrDefault(f => f.IsFolder(game));
 
                     if (existingFolderFile != null)
                     {
@@ -222,7 +227,7 @@ namespace NzbDrone.Core.MediaFiles
                         var folderGameFile = new GameFile
                         {
                             GameId = game.Id,
-                            RelativePath = string.Empty, // Empty means the folder itself
+                            RelativePath = game.GetFolderRelativePath(), // The folder itself is the file
                             Size = folderSize,
                             DateAdded = sourceFile?.DateAdded ?? DateTime.UtcNow,
                             Quality = sourceFile?.Quality ?? new QualityModel { Quality = Quality.Unknown },
@@ -317,7 +322,7 @@ namespace NzbDrone.Core.MediaFiles
                 .Where(f => !IsUnderSubfolderUnit(subfolderUnits, f.RelativePath))
                 .ToList();
 
-            var folderRecords = records.Where(f => f.RelativePath.IsNullOrWhiteSpace()).ToList();
+            var folderRecords = records.Where(f => f.IsFolder(game)).ToList();
             var metadataSource = folderRecords.FirstOrDefault() ?? records.FirstOrDefault();
 
             // Largest first: a console update/DLC package is always a fraction
@@ -340,7 +345,7 @@ namespace NzbDrone.Core.MediaFiles
 
             foreach (var file in onDisk)
             {
-                var existing = records.FirstOrDefault(r => r.RelativePath.IsNotNullOrWhiteSpace() &&
+                var existing = records.FirstOrDefault(r => !r.IsFolder(game) &&
                                                            RelativePathMatches(r.RelativePath, file.RelativePath) &&
                                                            !reconciled.Contains(r));
 

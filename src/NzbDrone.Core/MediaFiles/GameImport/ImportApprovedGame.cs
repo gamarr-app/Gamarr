@@ -155,7 +155,13 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     }
                     else
                     {
-                        gameFile.RelativePath = localGame.Game.Path.GetRelativePath(gameFile.Path);
+                        // An existing-file import can BE the game folder (a PC
+                        // release imports at folder granularity); GetRelativePath
+                        // throws NotParentException on equal paths, so name the
+                        // folder the same way the mover and the scanner do.
+                        gameFile.RelativePath = localGame.Game.Path.PathEquals(gameFile.Path)
+                            ? localGame.Game.GetFolderRelativePath()
+                            : localGame.Game.Path.GetRelativePath(gameFile.Path);
 
                         // Delete existing files from the DB mapped to this path
                         var previousFiles = _mediaFileService.GetFilesWithRelativePath(localGame.Game.Id, gameFile.RelativePath);

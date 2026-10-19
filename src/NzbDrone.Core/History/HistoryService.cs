@@ -237,7 +237,7 @@ namespace NzbDrone.Core.History
 
             history.Data.Add("FileId", message.ImportedGame.Id.ToString());
             history.Data.Add("DroppedPath", message.GameInfo.Path);
-            history.Data.Add("ImportedPath", Path.Combine(game.Path, message.ImportedGame.RelativePath));
+            history.Data.Add("ImportedPath", message.ImportedGame.GetPath(game));
             history.Data.Add("DownloadClient", message.DownloadClientInfo?.Type);
             history.Data.Add("DownloadClientName", message.DownloadClientInfo?.Name);
             history.Data.Add("ReleaseGroup", message.GameInfo.ReleaseGroup);
@@ -278,7 +278,7 @@ namespace NzbDrone.Core.History
         {
             var sourcePath = message.OriginalPath;
             var sourceRelativePath = message.Game.Path.GetRelativePath(message.OriginalPath);
-            var path = Path.Combine(message.Game.Path, message.GameFile.RelativePath);
+            var path = message.GameFile.GetPath(message.Game);
             var relativePath = message.GameFile.RelativePath;
 
             var history = new GameHistory

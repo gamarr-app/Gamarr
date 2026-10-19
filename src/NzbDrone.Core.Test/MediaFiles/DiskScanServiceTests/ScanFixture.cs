@@ -202,7 +202,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             // Should create a single folder-based GameFile
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Once());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game")), Times.Once());
         }
 
         [Test]
@@ -229,6 +229,42 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             // Should update the existing folder-based GameFile with new size
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Update(It.Is<GameFile>(gf => gf.Id == 1 && gf.Size == 100000L)), Times.Once());
+        }
+
+        [Test]
+        public void should_recognise_a_folder_record_that_names_its_folder()
+        {
+            // A folder-as-file record stores the folder's own name, so there is
+            // nothing on disk at <game folder>/<folder name>. Treating that as a
+            // vanished subfolder unit would delete the record on every rescan,
+            // and failing to recognise it as the folder record would add a
+            // second one beside it.
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
+                       });
+
+            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = "Game", Size = 50000L };
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { existingFile });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.Is<GameFile>(gf => gf.Id == 1 && gf.Size == 100000L)), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.IsAny<GameFile>()), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
         }
 
         [Test]
@@ -342,7 +378,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             // Should create new folder-based record
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Once());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game")), Times.Once());
         }
 
         [Test]
@@ -646,7 +682,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                       gf.Size == 6169789825L)), Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Never());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game")), Times.Never());
         }
 
         [Test]
@@ -671,7 +707,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                   .Verify(v => v.Add(It.Is<GameFile>(gf => gf.Size == 4501057210L)), Times.Never());
 
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Never());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game")), Times.Never());
         }
 
         [Test]
@@ -731,11 +767,11 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
-                      gf.RelativePath == string.Empty &&
+                      gf.RelativePath == "Game" &&
                       gf.Size == 6000L)), Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath != string.Empty)), Times.Never());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath != "Game")), Times.Never());
         }
 
         [Test]
@@ -767,7 +803,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                   .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
 
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty)), Times.Never());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game")), Times.Never());
 
             // Untouched size means no needless write; the update gets its own row.
             Mocker.GetMock<IMediaFileService>()
@@ -979,7 +1015,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(_game);
 
             Mocker.GetMock<IMediaFileService>()
-                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == string.Empty && gf.Size == 10L)), Times.Once());
+                  .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game" && gf.Size == 10L)), Times.Once());
         }
     }
 }

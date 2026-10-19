@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Games.Components;
@@ -64,7 +63,7 @@ namespace Gamarr.Api.V3.GameFiles
                 ReleaseGroup = model.ReleaseGroup,
                 Edition = model.Edition,
                 Version = model.GameVersion?.ToString(),
-                ComponentType = GetComponentType(model.RelativePath, component),
+                ComponentType = GetComponentType(model, null, component),
                 ComponentKey = component?.Key,
                 ComponentTitle = component?.Title,
                 MediaInfo = model.MediaInfo.ToResource(model.SceneName),
@@ -72,8 +71,10 @@ namespace Gamarr.Api.V3.GameFiles
             };
         }
 
-        private static string GetComponentType(string relativePath, GameComponent component = null)
+        private static string GetComponentType(GameFile model, NzbDrone.Core.Games.Game game, GameComponent component = null)
         {
+            var relativePath = model.RelativePath;
+
             if (component != null)
             {
                 return component.ComponentType switch
@@ -90,7 +91,10 @@ namespace Gamarr.Api.V3.GameFiles
                 };
             }
 
-            if (relativePath.IsNullOrWhiteSpace())
+            // The game folder itself IS the file: that is the base game,
+            // whether the record names the folder or (older rows) stores an
+            // empty string.
+            if (model.IsFolder(game))
             {
                 return "base";
             }
@@ -121,7 +125,7 @@ namespace Gamarr.Api.V3.GameFiles
 
                 GameId = model.GameId,
                 RelativePath = model.RelativePath,
-                Path = model.RelativePath.IsNullOrWhiteSpace() ? game.Path : global::System.IO.Path.Combine(game.Path, model.RelativePath),
+                Path = model.GetPath(game),
                 Size = model.Size,
                 DateAdded = model.DateAdded,
                 SceneName = model.SceneName,
@@ -130,7 +134,7 @@ namespace Gamarr.Api.V3.GameFiles
                 Edition = model.Edition,
                 ReleaseGroup = model.ReleaseGroup,
                 Version = model.GameVersion?.ToString(),
-                ComponentType = GetComponentType(model.RelativePath, component),
+                ComponentType = GetComponentType(model, game, component),
                 ComponentKey = component?.Key,
                 ComponentTitle = component?.Title,
                 MediaInfo = model.MediaInfo.ToResource(model.SceneName),

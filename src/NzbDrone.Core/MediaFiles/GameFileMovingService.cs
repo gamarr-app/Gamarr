@@ -190,9 +190,10 @@ namespace NzbDrone.Core.MediaFiles
                 // Move or copy the folder contents using DiskTransferService
                 _diskTransferService.TransferFolder(sourcePath, destinationPath, mode);
 
-                // Empty RelativePath means the game folder itself IS the file;
-                // update-alongside imports keep their Updates/<version> subfolder.
-                gameFile.RelativePath = importSubfolder.IsNotNullOrWhiteSpace() ? importSubfolder : string.Empty;
+                // The game folder itself IS the file, so the record names that
+                // folder; update-alongside imports keep their Updates/<version>
+                // subfolder.
+                gameFile.RelativePath = importSubfolder.IsNotNullOrWhiteSpace() ? importSubfolder : game.GetFolderRelativePath();
 
                 if (localGame is not null)
                 {
@@ -302,9 +303,10 @@ namespace NzbDrone.Core.MediaFiles
 
             _gameArchiveService.ExtractArchive(localGame.ArchiveInspection, destinationPath);
 
-            // Empty RelativePath means the game folder itself IS the file;
-            // update-alongside imports keep their Updates/<version> subfolder.
-            gameFile.RelativePath = importSubfolder.IsNotNullOrWhiteSpace() ? importSubfolder : string.Empty;
+            // The game folder itself IS the file, so the record names that
+            // folder; update-alongside imports keep their Updates/<version>
+            // subfolder.
+            gameFile.RelativePath = importSubfolder.IsNotNullOrWhiteSpace() ? importSubfolder : game.GetFolderRelativePath();
             localGame.FileNameBeforeRename = gameFile.RelativePath;
 
             _updateGameFileService.ChangeFileDateForFile(gameFile, game);

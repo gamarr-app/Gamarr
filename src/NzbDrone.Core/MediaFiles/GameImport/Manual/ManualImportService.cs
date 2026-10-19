@@ -438,7 +438,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
         {
             var item = new ManualImportItem();
 
-            item.Path = Path.Combine(game.Path, gameFile.RelativePath);
+            item.Path = gameFile.GetPath(game);
             item.FolderName = folderName;
             item.RelativePath = gameFile.RelativePath;
             item.Name = Path.GetFileNameWithoutExtension(gameFile.Path);

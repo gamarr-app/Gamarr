@@ -241,7 +241,7 @@ namespace NzbDrone.Core.Games.Components
                 return FindOrStage(existing, toInsert, game, noIntroSlot.ComponentType, noIntroSlot.Key, noIntroSlot.Title, monitored: false);
             }
 
-            if (file.RelativePath.IsNullOrWhiteSpace())
+            if (file.IsFolder(game))
             {
                 return baseComponent;
             }
@@ -297,7 +297,7 @@ namespace NzbDrone.Core.Games.Components
 
         private NoIntroGameComponentSlot ResolveFolderBackedFileSlot(Game game, List<GameFile> files, List<NoIntroGameComponentSlot> noIntroSlots)
         {
-            if (!_diskProvider.FolderExists(game.Path) || !files.Any(file => file.RelativePath.IsNullOrWhiteSpace()))
+            if (!_diskProvider.FolderExists(game.Path) || !files.Any(file => file.IsFolder(game)))
             {
                 return null;
             }

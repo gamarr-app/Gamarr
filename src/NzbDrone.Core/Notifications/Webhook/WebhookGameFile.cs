@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Notifications.Webhook
         {
             Id = gameFile.Id;
             RelativePath = gameFile.RelativePath;
-            Path = System.IO.Path.Combine(gameFile.Game.Path, gameFile.RelativePath);
+            Path = gameFile.GetPath();
             Quality = gameFile.Quality.Quality.Name;
             QualityVersion = gameFile.Quality.Revision.Version;
             ReleaseGroup = gameFile.ReleaseGroup;

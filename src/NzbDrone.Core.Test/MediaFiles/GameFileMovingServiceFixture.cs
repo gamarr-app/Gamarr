@@ -189,7 +189,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
-        public void should_set_relative_path_to_empty_for_folder_move()
+        public void should_set_relative_path_to_the_folder_name_for_folder_move()
         {
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(_localGame.Path))
@@ -201,8 +201,9 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             var result = Subject.MoveGameFile(_gameFile, _localGame);
 
-            // Folder-based GameFiles have empty RelativePath (the folder itself is the game)
-            result.RelativePath.Should().BeEmpty();
+            // Folder-based GameFiles name the game folder (the folder itself is the game)
+            result.RelativePath.Should().Be("TestGame");
+            result.GetPath(_game).Should().Be(_game.Path);
         }
     }
 }

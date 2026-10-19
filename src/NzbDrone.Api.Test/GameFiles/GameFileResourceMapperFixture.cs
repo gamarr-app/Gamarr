@@ -38,6 +38,27 @@ namespace NzbDrone.Api.Test.GameFiles
         }
 
         [Test]
+        public void should_treat_a_record_naming_its_own_folder_as_the_base_game()
+        {
+            // A folder-as-file record stores the folder's name, not an empty
+            // string. Reading it as an ordinary file would badge the base game
+            // as "file" in the UI and resolve its path one level too deep.
+            var game = new Game { Path = "/data/Games/PC/Lingo (2021)" };
+            var gameFile = new GameFile
+            {
+                Id = 43,
+                GameId = 51,
+                RelativePath = "Lingo (2021)"
+            };
+
+            var resource = gameFile.ToResource(game, null, null);
+
+            resource.ComponentType.Should().Be("base");
+            resource.Path.Should().Be(game.Path);
+            resource.RelativePath.Should().Be("Lingo (2021)");
+        }
+
+        [Test]
         public void should_fall_back_to_derived_base_type_when_component_is_unknown()
         {
             var game = new Game { Path = "/games/Mario Kart DS" };

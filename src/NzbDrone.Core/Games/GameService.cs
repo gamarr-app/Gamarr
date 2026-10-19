@@ -517,7 +517,7 @@ namespace NzbDrone.Core.Games
                 return;
             }
 
-            // Base imports (empty RelativePath = the game folder itself) always
+            // Base imports (the game folder itself is the file) always
             // become the primary file. Subfolder units (Updates/<version>,
             // imported alongside the base) only claim primary when the game has
             // no file yet — an update must not displace the base game.
@@ -530,7 +530,7 @@ namespace NzbDrone.Core.Games
             // import, leaving the game with no primary file at all.
             var storedGameFileId = _gameRepository.Find(game.Id)?.GameFileId ?? game.GameFileId;
 
-            if (message.GameFile.RelativePath.IsNullOrWhiteSpace() || storedGameFileId == 0)
+            if (message.GameFile.IsFolder(game) || storedGameFileId == 0)
             {
                 game.GameFileId = message.GameFile.Id;
                 _gameRepository.Update(game);
