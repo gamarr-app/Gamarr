@@ -1,17 +1,21 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FizzWare.NBuilder;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Qualities;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -277,7 +281,9 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                            Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
                        });
 
-            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty, Size = 100000L };
+            // Already carries the folder name, so there is nothing to normalise
+            // either — the scan must not write the row at all.
+            var existingFile = new GameFile { Id = 1, GameId = _game.Id, RelativePath = "Game", Size = 100000L };
             Mocker.GetMock<IMediaFileService>()
                   .Setup(s => s.GetFilesByGame(_game.Id))
                   .Returns(new List<GameFile> { existingFile });
@@ -291,6 +297,132 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             // Should not update if size is the same
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Update(It.IsAny<GameFile>()), Times.Never());
+        }
+
+        // ---------------------------------------------------------------
+        // Legacy folder-as-file rows: written before the folder name landed,
+        // they store RelativePath = "". No migration rewrites them (games 215
+        // and 216 on the live instance), and neither PUT /gamefile nor
+        // RenameGameFileService will touch the field — so a rescan is the only
+        // thing that can heal them.
+        // ---------------------------------------------------------------
+
+        private GameFile GivenLegacyFolderRow(long size)
+        {
+            var legacy = new GameFile
+            {
+                Id = 215,
+                GameId = _game.Id,
+                RelativePath = string.Empty,
+                Size = size,
+                DateAdded = new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                Quality = new QualityModel(Quality.Repack),
+                Languages = new List<Language> { Language.English },
+                ReleaseGroup = "GRP",
+                SceneName = "Some.Game.PC-GRP"
+            };
+
+            _game.GameFileId = legacy.Id;
+            GivenExistingFiles(legacy);
+
+            return legacy;
+        }
+
+        [Test]
+        public void should_normalise_legacy_empty_folder_relative_path_on_scan()
+        {
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
+                       });
+
+            var legacy = GivenLegacyFolderRow(100000L);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
+
+            Subject.Scan(_game);
+
+            // Size is unchanged, so the only reason to write is the path.
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.Is<GameFile>(gf =>
+                      gf.Id == 215 &&
+                      gf.RelativePath == "Game" &&
+                      gf.Size == 100000L &&
+                      gf.Quality.Quality == Quality.Repack &&
+                      gf.Languages.Contains(Language.English) &&
+                      gf.ReleaseGroup == "GRP" &&
+                      gf.SceneName == "Some.Game.PC-GRP" &&
+                      gf.DateAdded == new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc))), Times.Once());
+
+            // Healing it must not look like a vanished path or a migration.
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Add(It.IsAny<GameFile>()), Times.Never());
+
+            legacy.RelativePath.Should().Be("Game");
+        }
+
+        [Test]
+        public void should_heal_legacy_folder_row_and_size_in_one_write()
+        {
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
+                       });
+
+            GivenLegacyFolderRow(50000L);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
+
+            Subject.Scan(_game);
+
+            // Both the path and the size moved; that is still one write.
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.Is<GameFile>(gf =>
+                      gf.Id == 215 &&
+                      gf.RelativePath == "Game" &&
+                      gf.Size == 100000L)), Times.Once());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.IsAny<GameFile>()), Times.Once());
+        }
+
+        [Test]
+        public void should_not_rewrite_folder_row_that_differs_only_in_case()
+        {
+            // IsFolder matches the folder name ordinal-case-insensitively, so
+            // normalisation has to as well — otherwise a case-insensitive
+            // filesystem gets a pointless write on every single rescan.
+            GivenGameFolder();
+
+            GivenFiles(new List<string>
+                       {
+                           Path.Combine(_game.Path, "file1.iso").AsOsAgnostic(),
+                       });
+
+            GivenExistingFiles(new GameFile { Id = 1, GameId = _game.Id, RelativePath = "game", Size = 100000L });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFolderSize(_game.Path))
+                  .Returns(100000L);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Update(It.IsAny<GameFile>()), Times.Never());
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
         }
 
         [Test]

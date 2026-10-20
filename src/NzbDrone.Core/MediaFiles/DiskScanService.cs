@@ -201,11 +201,34 @@ namespace NzbDrone.Core.MediaFiles
 
                     if (existingFolderFile != null)
                     {
-                        // Update existing folder record if size changed
+                        var dirty = false;
+
+                        // Records written before the folder name landed store an
+                        // empty RelativePath, and no migration rewrites them — so
+                        // a rescan is the only thing that can heal them. Both
+                        // shapes are recognised by IsFolder, which is why such a
+                        // row reaches here at all (and why it is excluded from the
+                        // vanished-subfolder sweep above).
+                        var folderRelativePath = game.GetFolderRelativePath();
+
+                        if (folderRelativePath.IsNotNullOrWhiteSpace() &&
+                            !folderRelativePath.Equals(existingFolderFile.RelativePath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _logger.Debug("Normalising folder relative path for {0}: '{1}' -> '{2}'", game.Title, existingFolderFile.RelativePath, folderRelativePath);
+                            existingFolderFile.RelativePath = folderRelativePath;
+                            dirty = true;
+                        }
+
                         if (existingFolderFile.Size != folderSize)
                         {
                             _logger.Debug("Updating folder size for {0}: {1} -> {2}", game.Title, existingFolderFile.Size, folderSize);
                             existingFolderFile.Size = folderSize;
+                            dirty = true;
+                        }
+
+                        // One write, even when both the path and the size moved.
+                        if (dirty)
+                        {
                             _mediaFileService.Update(existingFolderFile);
                         }
                     }
