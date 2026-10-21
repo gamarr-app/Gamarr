@@ -54,6 +54,7 @@ public enum DownloadRejectionReason
     UpdateOnly,
     SeasonPassOnly,
     DlcNotMonitored,
+    UpdateNotMonitored,
     MustContainMissing,
     MustNotContainPresent,
     RepackDisabled,
