@@ -114,6 +114,8 @@ jobs:
 
       - name: Upload sourcemaps to Sentry
         if: env.SENTRY_AUTH_TOKEN != ''
+        # Sourcemaps are a debugging aid; a Sentry outage must not block a release.
+        continue-on-error: true
         run: |
           npx --yes @sentry/cli@2 sourcemaps inject _output/UI
           npx --yes @sentry/cli@2 sourcemaps upload \
