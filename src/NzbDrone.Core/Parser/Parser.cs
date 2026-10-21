@@ -25,7 +25,16 @@ namespace NzbDrone.Core.Parser
         // (no leading lowercase) so an all-lowercase hash cannot match.
         private const string BareTitleFirstWord = @"[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Z][a-z]+(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*";
         private const string BareTitleWord = @"[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4}";
-        private const string BareTitleBody = @"(?:" + BareTitleFirstWord + @")(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:" + BareTitleWord + @")(?:'[a-z]+)?)*";
+
+        // An abbreviated word carries its own dot ("Capt. E Shadow", "Vol. II").
+        // The dot is only allowed immediately before a separator or the end of the
+        // name, which is what keeps a dot-separated scene name out of here: in
+        // "Ace.Fight.Arena" no dot is followed by whitespace, so "Ace." is not a
+        // word and the name still fails as it always has. Without this a single
+        // abbreviation dot sank the whole parse - every word shape below is
+        // letters and digits only, so "Capt." matched nothing at all.
+        private const string BareTitleAbbreviationDot = @"(?:\.(?=\s|$))?";
+        private const string BareTitleBody = @"(?:" + BareTitleFirstWord + @")(?:'[a-z]+)?" + BareTitleAbbreviationDot + @"(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:" + BareTitleWord + @")(?:'[a-z]+)?" + BareTitleAbbreviationDot + @")*";
 
         // The add-on vocabulary a component release carries after the game's own
         // title, as used by the DLC-component shape below. Shared with
@@ -475,6 +484,18 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex MultiRegex = new (@"[_. ](?<multi>multi)[_. ]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // A doubled dot between two words: an abbreviation's own dot plus the
+        // separator of a dot-separated name ("Arena.Capt..E.Shadow").
+        private static readonly Regex DoubledSeparatorDotRegex = new Regex(@"(?<=[A-Za-z0-9])\.{2,}(?=[A-Za-z0-9])", RegexOptions.Compiled);
+
+        private static readonly Regex WhitespaceRegex = new Regex(@"\s", RegexOptions.Compiled);
+
+        // The dot separators of such a name, so the whole name can be respaced:
+        // a run of two or more dots keeps one (it is the abbreviation's), a single
+        // dot is only a separator and becomes a space. Restricted to dots between
+        // LETTERS so a version or build number ("v1.0.2") is left alone.
+        private static readonly Regex LetterSeparatorDotRegex = new Regex(@"(?<=[A-Za-z])\.+(?=[A-Za-z])", RegexOptions.Compiled);
+
         private static Dictionary<string, string> _umlautMappings = new Dictionary<string, string>
         {
             { "ö", "oe" },
@@ -763,10 +784,64 @@ namespace NzbDrone.Core.Parser
                         return consoleResult;
                     }
                 }
+
+                // A dot-separated name whose words include an abbreviation reads
+                // as "Arena.Capt..E.Shadow": the abbreviation's dot and the
+                // separator sit side by side. No release-shape regex recognises
+                // the name (its group is not one we know), and the bare fallback
+                // only reads spaced words, so the console retry hands back a name
+                // that is still fully dotted and fails again. Respace it and try
+                // once more, keeping the abbreviation's dot.
+                // Gated on the doubled dot: an ordinary dot-separated name says
+                // nothing about where its words end, and rewriting those has
+                // never been this parser's job. This runs only after both earlier
+                // attempts have failed, so it cannot change a name that parses.
+                var abbreviationTitle = NormalizeAbbreviationDots(consoleTitle ?? originalTitle);
+
+                if (abbreviationTitle != null)
+                {
+                    Logger.Debug("Retrying with the abbreviation dot separated: '{0}'", abbreviationTitle);
+
+                    var abbreviationResult = ParseGameTitle(abbreviationTitle, isDir, false);
+
+                    if (abbreviationResult != null)
+                    {
+                        // Same reasoning as the console retry above: only the
+                        // title was rewritten, everything else still comes off
+                        // the full release name.
+                        abbreviationResult.Quality = QualityParser.ParseQuality(originalTitle);
+                        abbreviationResult.GameVersion = QualityParser.ParseGameVersion(originalTitle);
+                        abbreviationResult.ContentType = QualityParser.ParseContentType(originalTitle);
+                        abbreviationResult.Platform = PlatformParser.ParsePlatform(originalTitle);
+                        abbreviationResult.PlatformString = PlatformParser.ParsePlatformString(originalTitle);
+                        abbreviationResult.OriginalTitle = originalTitle;
+                        abbreviationResult.ReleaseTitle = originalTitle;
+
+                        return abbreviationResult;
+                    }
+                }
             }
 
             Logger.Debug("Unable to parse {0}", title);
             return null;
+        }
+
+        /// <summary>
+        /// Respace a dot-separated name that carries an abbreviation dot, or null
+        /// if it carries none.
+        /// </summary>
+        private static string NormalizeAbbreviationDots(string title)
+        {
+            if (title.IsNullOrWhiteSpace() || !DoubledSeparatorDotRegex.IsMatch(title))
+            {
+                return null;
+            }
+
+            var normalized = LetterSeparatorDotRegex.Replace(title, m => m.Length > 1 ? ". " : " ");
+
+            normalized = DuplicateSpacesRegex.Replace(normalized, " ").Trim();
+
+            return normalized == title ? null : normalized;
         }
 
         public static int ParseIgdbId(string title)
@@ -904,6 +979,16 @@ namespace NzbDrone.Core.Parser
             gameName = NormalizeAlternativeTitleRegex.Replace(gameName, " AKA ");
             gameName = RequestInfoRegex.Replace(gameName, "").Trim(' ');
 
+            // In a dot-separated name a doubled dot is an abbreviation's own dot
+            // followed by the separator ("Arena.Capt..E.Shadow"), so the pair
+            // becomes one dot and a space. The loop below then has to be told
+            // that the dot belongs to the word before it, which is what the flag
+            // carries: otherwise the single letter after it reads as the start of
+            // an acronym and the dot lands on the wrong token ("Capt E. Shadow").
+            var hasAbbreviationDot = DoubledSeparatorDotRegex.IsMatch(gameName);
+
+            gameName = DoubledSeparatorDotRegex.Replace(gameName, ". ");
+
             var parts = gameName.Split('.');
             gameName = "";
             var n = 0;
@@ -933,6 +1018,26 @@ namespace NzbDrone.Core.Parser
                 {
                     gameName += part + ".";
                     previousAcronym = true;
+                }
+                else if (nextPart.Length > 0 && char.IsWhiteSpace(nextPart[0]) &&
+                         (hasAbbreviationDot || WhitespaceRegex.IsMatch(part)))
+                {
+                    // The dot that ended this part was followed by whitespace: it
+                    // is an abbreviation's own dot and belongs to this word. The
+                    // next part supplies the space, so none is added here.
+                    // Either the doubled dot said so outright, or the part itself
+                    // contains whitespace, meaning the name is space-separated and
+                    // a dot inside it is part of a word. Without that second test
+                    // a dot-separated name standing next to a stray space would
+                    // qualify, and its separator is just a separator
+                    // ("Game.title. AKA.Other.Name").
+                    if (previousAcronym && part.Length > 0 && !char.IsWhiteSpace(part[0]) && part[0] != ':' && part[0] != '-')
+                    {
+                        gameName += " ";
+                    }
+
+                    previousAcronym = false;
+                    gameName += part + ".";
                 }
                 else if (part.ToLower() == "dr")
                 {

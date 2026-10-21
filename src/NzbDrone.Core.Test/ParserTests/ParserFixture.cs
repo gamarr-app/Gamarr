@@ -1079,5 +1079,53 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().NotBeNull($"Failed to parse: {postTitle}");
             result.PrimaryGameTitle.Should().Be(title);
         }
+
+        // Issue #208: an abbreviation ending in a dot, followed by a single-letter
+        // word, made the whole release unparseable - both the spaced form and the
+        // dot-separated form, where the abbreviation's own dot sits next to the
+        // separator and reads as "..". The dot belongs to the abbreviation and
+        // must not migrate onto the single letter.
+        [TestCase("Ace Fight Arena Capt. E Shadow NSW-HR", "Ace Fight Arena Capt. E Shadow")]
+        [TestCase("Ace.Fight.Arena.Capt..E.Shadow.NSW-HR", "Ace Fight Arena Capt. E Shadow")]
+        [TestCase("Ace Fight Arena Capt. E Shadow", "Ace Fight Arena Capt. E Shadow")]
+
+        // The same shape on a name that a release-shape regex claims itself, so
+        // the title is assembled from the dotted capture rather than from the
+        // respaced retry.
+        [TestCase("Ace.Fight.Arena.Capt..E.Shadow-TENOKE", "Ace Fight Arena Capt. E Shadow")]
+
+        // The same name without the abbreviation dot already parsed - regression guard.
+        [TestCase("Ace Fight Arena Capt E Shadow Update v1.0.2 NSW-HR", "Ace Fight Arena Capt E Shadow")]
+
+        // An abbreviation dot at the very END of a name is the trailing separator
+        // as much as the abbreviation's own dot, so it goes with it - but the name
+        // parses, which before this it did not.
+        [TestCase("Ace Fight Arena Capt.", "Ace Fight Arena Capt")]
+        [TestCase("Ace Fight Arena Capt. NSW-HR", "Ace Fight Arena Capt")]
+
+        // An ordinary dot-separated name, no abbreviation anywhere - untouched.
+        [TestCase("Ace.Fight.Arena.Shadow-TENOKE", "Ace Fight Arena Shadow")]
+
+        // A SINGLE dot before a single letter is the existing acronym shape and
+        // keeps its existing reading ("Dragon.Ball.Z.Kakarot" -> "Dragon Ball Z.
+        // Kakarot"): only a doubled dot says the dot belongs to the word before it.
+        [TestCase("Ace.Fight.Arena.Capt.E.Shadow-TENOKE", "Ace Fight Arena Capt E. Shadow")]
+        public void should_parse_abbreviation_dot_before_single_letter(string postTitle, string title)
+        {
+            var result = Parser.Parser.ParseGameTitle(postTitle);
+            result.Should().NotBeNull($"Failed to parse: {postTitle}");
+            result.PrimaryGameTitle.Should().Be(title);
+        }
+
+        // Issue #208, kiosk variant: this one already parsed. Asserted loosely
+        // because the kiosk/demo tokens themselves are issue #207.
+        [Test]
+        public void should_still_parse_dotted_kiosk_release_with_single_letter_word()
+        {
+            var result = Parser.Parser.ParseGameTitle("Ace.Fight.Arena.Capt.E.Shadow.KIOSK.eShop.INTERNAL.NSW-VENOM");
+
+            result.Should().NotBeNull();
+            result.PrimaryGameTitle.Should().StartWith("Ace Fight Arena");
+        }
     }
 }
