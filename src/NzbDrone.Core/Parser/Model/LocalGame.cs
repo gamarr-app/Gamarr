@@ -81,6 +81,18 @@ namespace NzbDrone.Core.Parser.Model
             }
         }
 
+        // A release that fills a component slot (DLC, season pass, update)
+        // imports ALONGSIDE the base game instead of replacing it (#149 phase
+        // 0). Quality parsing can flag an update release that the content-type
+        // parse missed, so both signals count.
+        //
+        // The import decision (UpgradeSpecification) and the mover
+        // (UpgradeMediaFileService) MUST agree on this: the mover imported the
+        // release next to the base while the decision compared it against the
+        // base file, so a DLC download was rejected forever (#204).
+        public bool IsComponentRelease => ContentType.RequiresBaseGame() ||
+                                          Quality?.Quality?.Modifier == Modifier.UPDATE_ONLY;
+
         // Best parsed game version across the available sources. A parsed info
         // always carries a GameVersion object (never null), so pick the first
         // one that actually parsed a version token (HasValue) instead of

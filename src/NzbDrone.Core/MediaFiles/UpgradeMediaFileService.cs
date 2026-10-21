@@ -6,7 +6,6 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles.GameImport;
 using NzbDrone.Core.Parser.Model;
-using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles
 {
@@ -57,10 +56,8 @@ namespace NzbDrone.Core.MediaFiles
             // (gamarr-app/Gamarr#149 phase 0): the base stays, and the release
             // lands in a typed subfolder with its own record.
             var contentType = localGame.ContentType;
-            var importsAlongside = contentType.RequiresBaseGame() ||
-                                   localGame.Quality?.Quality?.Modifier == Modifier.UPDATE_ONLY;
 
-            if (existingFile != null && importsAlongside)
+            if (existingFile != null && localGame.IsComponentRelease)
             {
                 localGame.ImportSubfolder = contentType is ReleaseContentType.DlcOnly or ReleaseContentType.SeasonPass
                     ? Path.Combine("DLC", GetDlcFolderName(localGame))
