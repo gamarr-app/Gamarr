@@ -78,8 +78,12 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex StandaloneDlcRegex = new (@"(?<!ALL)(?<!INCLUDES?)(?<!WITH)[\s._-]DLC(?:[\s._-]|$)(?!BUNDLE|PACK|UNLOCKER|S[\s._-])",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        // Season pass / DLC bundle
-        private static readonly Regex SeasonPassRegex = new (@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLC[\s._-]?BUNDLE|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
+        // Season pass / DLC bundle.
+        // "DLC Unlocker" belongs here: it carries several DLCs at once, and
+        // StandaloneDlcRegex explicitly excludes the wording, so without this it
+        // came back Unknown - which IncludesBaseGame() treats as "assume base
+        // game", the wrong answer for an add-on that needs one.
+        private static readonly Regex SeasonPassRegex = new (@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLCs?[\s._-]?(?:BUNDLE|UNLOCKER)|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Expansion packs

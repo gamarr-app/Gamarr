@@ -17,6 +17,16 @@ namespace NzbDrone.Core.Parser
         // Shared by every "-GROUP$" regex below so new groups land in one place.
         private const string HyphenSceneGroups = "PLAZA|CODEX|SKIDROW|CPY|EMPRESS|FLT|HOODLUM|RAZOR1911|RAZOR|RazorDOX|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|RUNE|HI2U|TENOKE|DELiGHT|DINOByTES|bADkARMA|PLAYMAGiC|voices38|I_KnoW|InsaneRamZes|BiGMAC|rG|Unleashed|TRSi|kDD|oNePiEcE|GOG";
 
+        // The body of a bare game title - no anchors, no capture group - as used
+        // by the terminal fallback regex and by the DLC-component shape just
+        // above it. One definition, so a title that is good enough for one is
+        // good enough for the other. See the comment on the fallback for why each
+        // word shape is what it is; the first word is stricter than the rest
+        // (no leading lowercase) so an all-lowercase hash cannot match.
+        private const string BareTitleFirstWord = @"[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Z][a-z]+(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*";
+        private const string BareTitleWord = @"[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4}";
+        private const string BareTitleBody = @"(?:" + BareTitleFirstWord + @")(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:" + BareTitleWord + @")(?:'[a-z]+)?)*";
+
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(Parser));
 
         private static readonly Regex EditionRegex = new Regex(@"\(?\b(?<edition>(((Recut.|Extended.|Ultimate.)?(Director.?s|Collector.?s|Theatrical|Ultimate|Extended|Despecialized|(Special|Rouge|Final|Assembly|Imperial|Diamond|Signature|Hunter|Rekall)(?=(.(Cut|Edition|Version)))|\d{2,3}(th)?.Anniversary)(?:.(Cut|Edition|Version))?(.(Extended|Uncensored|Remastered|Unrated|Uncut|Open.?Matte|IMAX|Fan.?Edit))?|((Uncensored|Remastered|Unrated|Uncut|Open?.Matte|IMAX|Fan.?Edit|Restored|((2|3|4)in1))))))\b\)?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -294,6 +304,27 @@ namespace NzbDrone.Core.Parser
             // "Spider-Man" which all end in [A-Z][a-z]+ with no second cap-then-letters segment.
             new Regex(@"^(?<title>[A-Za-z0-9][A-Za-z0-9._-]*?[A-Za-z0-9])-(?<releasegroup>[A-Z]{4,}|[A-Z][a-z]+(?:[A-Z][a-z0-9]+)+|[a-z]{2,}\d+)$", RegexOptions.Compiled),
 
+            // DLC / add-on component releases, with a wave or part number that may
+            // be a RANGE, and with or without the "Unlocker" wording:
+            //   "Game Name Wave 1-6 DLC Unlocker", "Game Name Wave 2-4 DLC",
+            //   "Game Name DLC Unlocker"
+            // The "NSW-<GROUP>" suffix such names carry on a Switch tracker is
+            // stripped by the ConsoleTitleParser retry before this is reached.
+            // The bare fallback below cannot do this, for two separate reasons:
+            // "1-6" is none of its word shapes (its hyphen-joined word must lead
+            // with a capital, not a digit), and "DLC" only ever matched there by
+            // accident - as the trailing Roman-numeral group [IVXLCDM]+, since
+            // D, L and C are all numerals. Matching as the Roman suffix means it
+            // had to be the LAST token, which is exactly why "Wave 1 DLC" parsed
+            // while "Wave 1 DLC Unlocker" returned null.
+            // This is kept as its own narrow shape rather than teaching the
+            // fallback's word class about all-caps tokens: that would also make
+            // "<Game> NSW VENOM" match here with the dump tokens glued onto the
+            // game title, instead of being normalised away by the console retry.
+            // The title body is shared with that fallback, so a name still has to
+            // look like a game title to reach the DLC suffix.
+            new Regex(@"^(?<title>" + BareTitleBody + @"(?:\s+(?:Wave|Part|Vol(?:ume)?|Pack|Chapter|Season)\s+\d+(?:\s*-\s*\d+)?)?\s+DLCs?(?:\s+(?:Unlocker|Pack|Bundle))?)$", RegexOptions.Compiled),
+
             // Fallback: Simple game name without any markers (e.g., "Hytale", "My Winter Car", "StarRupture")
             // Only matches if no other regex matched - must look like a proper game title
             // Requirements:
@@ -346,7 +377,7 @@ namespace NzbDrone.Core.Parser
             // This cannot be confused with the " - " separator above, since that one
             // demands whitespace on both sides and this one forbids it, so the two
             // never compete and no new backtracking is introduced.
-            new Regex(@"^(?<title>(?:[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Z][a-z]+(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*)(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4})(?:'[a-z]+)?)*(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
+            new Regex(@"^(?<title>" + BareTitleBody + @"(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
