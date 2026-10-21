@@ -1618,6 +1618,7 @@
   "RecentFolders": "Recent Folders",
   "Recommendation": "Recommendation",
   "Recommended": "Recommended",
+  "RecycleBinRootFolderUnableToWriteHealthCheck": "No recycling bin folder is configured, so deleted game files are moved to a '.recycle' folder inside their root folder, but that is not possible for: {path}. Ensure these paths are writable by the user running {appName}, or configure a recycling bin folder",
   "RecycleBinUnableToWriteHealthCheck": "Unable to write to configured recycling bin folder: {path}. Ensure this path exists and is writable by the user running {appName}",
   "RecyclingBin": "Recycling Bin",
   "RecyclingBinCleanup": "Recycling Bin Cleanup",

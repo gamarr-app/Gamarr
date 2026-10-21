@@ -79,7 +79,7 @@ namespace NzbDrone.Core.MediaFiles
                     catch (Exception e)
                     {
                         _logger.Error(e, "Unable to delete game folder");
-                        throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete game folder");
+                        throw new NzbDroneClientException(HttpStatusCode.Conflict, "Unable to delete game folder: {0}", e.Message);
                     }
                 }
             }
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.MediaFiles
                     catch (Exception e)
                     {
                         _logger.Error(e, "Unable to delete game file");
-                        throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete game file");
+                        throw new NzbDroneClientException(HttpStatusCode.Conflict, "Unable to delete game file: {0}", e.Message);
                     }
                 }
             }

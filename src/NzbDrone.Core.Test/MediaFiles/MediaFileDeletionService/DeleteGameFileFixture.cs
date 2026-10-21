@@ -1,5 +1,6 @@
 using System.IO;
 using FizzWare.NBuilder;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
@@ -138,6 +139,28 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             ExceptionVerification.ExpectedErrors(1);
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_gameFile.Path, "Game Title"), Times.Once());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_gameFile, DeleteMediaFileReason.Manual), Times.Never());
+        }
+
+        [Test]
+        public void should_include_the_underlying_reason_when_deleting_game_file_fails()
+        {
+            GivenRootFolderExists();
+            GivenRootFolderHasFolders();
+            GivenGameFolderExists();
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FileExists(_gameFile.Path))
+                  .Returns(true);
+
+            Mocker.GetMock<IRecycleBinProvider>()
+                  .Setup(s => s.DeleteFile(_gameFile.Path, "Game Title"))
+                  .Throws(new IOException($"Access to the path '{_gameFile.Path}' is denied."));
+
+            var exception = Assert.Throws<NzbDroneClientException>(() => Subject.DeleteGameFile(_game, _gameFile));
+
+            exception.Message.Should().Contain($"Access to the path '{_gameFile.Path}' is denied.");
+
+            ExceptionVerification.ExpectedErrors(1);
         }
     }
 }
