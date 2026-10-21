@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Common.Disk;
 using NLog;
-using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Profiles.Qualities;
@@ -18,32 +16,29 @@ namespace Gamarr.Api.V3.GameComponents
     {
         private readonly IGameComponentService _componentService;
         private readonly IMediaFileService _mediaFileService;
-        private readonly IGameService _gameService;
         private readonly IQualityProfileService _qualityProfileService;
         private readonly INoIntroCatalogEntryRepository _noIntroCatalogEntryRepository;
         private readonly INoIntroCatalogSourceRepository _noIntroCatalogSourceRepository;
         private readonly INoIntroCatalogHashRepository _noIntroCatalogHashRepository;
-        private readonly IDiskProvider _diskProvider;
+        private readonly IGameFileHashService _gameFileHashService;
         private readonly Logger _logger;
 
         public GameComponentController(IGameComponentService componentService,
                                         IMediaFileService mediaFileService,
-                                        IGameService gameService,
                                         IQualityProfileService qualityProfileService,
                                         INoIntroCatalogEntryRepository noIntroCatalogEntryRepository,
                                         INoIntroCatalogSourceRepository noIntroCatalogSourceRepository,
                                         INoIntroCatalogHashRepository noIntroCatalogHashRepository,
-                                        IDiskProvider diskProvider,
+                                        IGameFileHashService gameFileHashService,
                                         Logger logger)
         {
             _componentService = componentService;
             _mediaFileService = mediaFileService;
-            _gameService = gameService;
             _qualityProfileService = qualityProfileService;
             _noIntroCatalogEntryRepository = noIntroCatalogEntryRepository;
             _noIntroCatalogSourceRepository = noIntroCatalogSourceRepository;
             _noIntroCatalogHashRepository = noIntroCatalogHashRepository;
-            _diskProvider = diskProvider;
+            _gameFileHashService = gameFileHashService;
             _logger = logger;
         }
 
@@ -60,13 +55,12 @@ namespace Gamarr.Api.V3.GameComponents
             var noIntroEntries = _noIntroCatalogEntryRepository.All().ToList();
             var noIntroSources = _noIntroCatalogSourceRepository.All().ToList();
             var noIntroHashes = _noIntroCatalogHashRepository.GetByEntryIds(noIntroEntries.Select(x => x.Id).ToList());
-            var game = _gameService.GetGame(gameId);
             var context = new GameComponentNoIntroCatalogContext
             {
                 GameFiles = files,
                 Entries = noIntroEntries,
                 Sources = noIntroSources,
-                HashMatches = GetFileHashMatches(files, game, noIntroHashes)
+                HashMatches = GetFileHashMatches(files, gameId, noIntroHashes)
             };
 
             return _componentService.GetByGame(gameId)
@@ -92,55 +86,53 @@ namespace Gamarr.Api.V3.GameComponents
             return component.ToResource(new GameComponentNoIntroCatalogContext { GameFiles = files });
         }
 
-        private List<NoIntroCatalogFileHashMatch> GetFileHashMatches(List<GameFile> files, Game game, List<NoIntroCatalogHash> catalogHashes)
+        /// <remarks>
+        /// Reads stored hashes only. This used to open every component file and
+        /// compute MD5 + SHA1 + CRC32 over it, which cost 40-400 s per request
+        /// and a pinned CPU core for a multi-GB base file (#205). Files with no
+        /// current triplet are simply left out of the response — the catalog
+        /// resource falls back to title matching and reports no exact hash — and
+        /// a background hash pass is queued so a later load has them.
+        /// </remarks>
+        private List<NoIntroCatalogFileHashMatch> GetFileHashMatches(List<GameFile> files, int gameId, List<NoIntroCatalogHash> catalogHashes)
         {
+            var componentFiles = files.Where(x => x.ComponentId > 0).ToList();
+
+            if (componentFiles.Count == 0)
+            {
+                return new List<NoIntroCatalogFileHashMatch>();
+            }
+
+            var storedHashes = _gameFileHashService.GetCurrentHashes(componentFiles);
+
+            if (storedHashes.Count < componentFiles.Count)
+            {
+                _logger.Debug("{0} of {1} component files of game {2} have no current hashes, queueing a hash pass",
+                    componentFiles.Count - storedHashes.Count,
+                    componentFiles.Count,
+                    gameId);
+
+                _gameFileHashService.QueueHashing(gameId);
+            }
+
             var hashByKey = catalogHashes
                 .GroupBy(x => $"{x.HashType}:{x.HashValue}".ToLowerInvariant())
                 .ToDictionary(x => x.Key, x => x.First());
-            var matches = new List<NoIntroCatalogFileHashMatch>();
 
-            foreach (var file in files.Where(x => x.ComponentId > 0))
-            {
-                var path = file.GetPath(game);
-
-                if (!_diskProvider.FileExists(path))
+            return storedHashes
+                .Select(stored => new { stored.GameFileId, Match = FindMatch(stored, hashByKey) })
+                .Where(x => x.Match != null)
+                .Select(x => new NoIntroCatalogFileHashMatch
                 {
-                    continue;
-                }
-
-                NoIntroHashTriplet hashes;
-
-                try
-                {
-                    using var stream = _diskProvider.OpenReadStream(path);
-                    hashes = NoIntroRomHasher.Compute(stream);
-                }
-                catch (global::System.Exception ex)
-                {
-                    _logger.Warn(ex, "Failed hashing game file {0} for component inspection", path);
-                    continue;
-                }
-
-                var matchedHash = FindMatch(hashes, hashByKey);
-
-                if (matchedHash == null)
-                {
-                    continue;
-                }
-
-                matches.Add(new NoIntroCatalogFileHashMatch
-                {
-                    GameFileId = file.Id,
-                    CatalogEntryId = matchedHash.CatalogEntryId,
-                    HashType = matchedHash.HashType,
-                    HashValue = matchedHash.HashValue
-                });
-            }
-
-            return matches;
+                    GameFileId = x.GameFileId,
+                    CatalogEntryId = x.Match.CatalogEntryId,
+                    HashType = x.Match.HashType,
+                    HashValue = x.Match.HashValue
+                })
+                .ToList();
         }
 
-        private static NoIntroCatalogHash FindMatch(NoIntroHashTriplet hashes, Dictionary<string, NoIntroCatalogHash> catalogHashes)
+        private static NoIntroCatalogHash FindMatch(GameFileHash hashes, Dictionary<string, NoIntroCatalogHash> catalogHashes)
         {
             return TryGetHash("sha1", hashes.Sha1, catalogHashes) ??
                    TryGetHash("md5", hashes.Md5, catalogHashes) ??

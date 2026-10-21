@@ -163,6 +163,7 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<NoIntroVerificationSet>("NoIntroVerificationSets").RegisterModel();
             Mapper.Entity<NoIntroVerificationSnapshot>("NoIntroVerificationSnapshots").RegisterModel();
             Mapper.Entity<NoIntroVerificationResult>("NoIntroVerificationResults").RegisterModel();
+            Mapper.Entity<GameFileHash>("GameFileHashes").RegisterModel();
             Mapper.Entity<Tag>("Tags").RegisterModel();
             Mapper.Entity<ReleaseProfile>("ReleaseProfiles").RegisterModel();
 
