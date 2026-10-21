@@ -80,6 +80,46 @@ namespace NzbDrone.Core.Test.ParserTests
             QualityParser.ParseContentType(title).Should().Be(expected);
         }
 
+        // Kiosk/store demo builds (#207) - the reported shape is the first case
+        [TestCase("Super.Mario.Odyssey.KIOSK.eShop.INTERNAL.NSW-VENOM", ReleaseContentType.Demo)]
+        [TestCase("Super Mario Odyssey KIOSK eShop INTERNAL NSW-VENOM", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Store.Demo-CODEX", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Playable.Demo.NSW-VENOM", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Demo-CODEX", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.DEMO.NSW-VENOM", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Trial.Version-PLAZA", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.TRIAL-RUNE", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Preview.Build-SKIDROW", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.PREVIEW-RELOADED", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Tech.Demo-FLT", ReleaseContentType.Demo)]
+        [TestCase("Game.Name.Shareware-CODEX", ReleaseContentType.Demo)]
+        public void should_detect_demo_and_kiosk_builds(string title, ReleaseContentType expected)
+        {
+            QualityParser.ParseContentType(title).Should().Be(expected);
+        }
+
+        // A demo marker outranks the edition markers: a demo of a complete
+        // edition is still a demo
+        [Test]
+        public void demo_should_outrank_complete_edition()
+        {
+            QualityParser.ParseContentType("Game.Name.Complete.Edition.KIOSK.NSW-VENOM").Should().Be(ReleaseContentType.Demo);
+        }
+
+        // Games whose titles contain a demo-ish word are not demos. The bare
+        // words only count in the metadata tail, and KIOSK needs a leading
+        // delimiter, so a title that opens with it is left alone.
+        [TestCase("Demolition.Company.Gold.Edition-TENOKE")]
+        [TestCase("Trials.of.Mana-CODEX")]
+        [TestCase("Super.Demo.Derby.Racing.Challenge-PLAZA")]
+        [TestCase("Demon.Slayer.The.Hinokami.Chronicles-RUNE")]
+        [TestCase("Kiosk.Simulator-TENOKE")]
+        [TestCase("Preview.Island.Adventure.v1.2-FLT")]
+        public void should_not_classify_titles_containing_demo_words_as_demos(string title)
+        {
+            QualityParser.ParseContentType(title).Should().NotBe(ReleaseContentType.Demo);
+        }
+
         [TestCase("Game.Name.Complete.Edition-CODEX", ReleaseContentType.BaseGameWithAllDlc)]
         [TestCase("Game.Name.GOTY-PLAZA", ReleaseContentType.BaseGameWithAllDlc)]
         [TestCase("Game.Name.Game.of.the.Year-SKIDROW", ReleaseContentType.BaseGameWithAllDlc)]

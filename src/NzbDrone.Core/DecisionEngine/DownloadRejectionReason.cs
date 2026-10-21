@@ -53,6 +53,7 @@ public enum DownloadRejectionReason
     DlcOnly,
     UpdateOnly,
     SeasonPassOnly,
+    DemoBuild,
     DlcNotMonitored,
     UpdateNotMonitored,
     MustContainMissing,

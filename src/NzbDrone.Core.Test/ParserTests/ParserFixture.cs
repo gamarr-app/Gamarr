@@ -127,6 +127,29 @@ namespace NzbDrone.Core.Test.ParserTests
             Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Be(title);
         }
 
+        // Kiosk/store demo builds (#207): the markers and the metadata after
+        // them used to stay inside the parsed game title, e.g.
+        // "Super Mario Odyssey KIOSK eShop INTERNAL NSW"
+        [TestCase("Super.Mario.Odyssey.KIOSK.eShop.INTERNAL.NSW-VENOM", "Super Mario Odyssey")]
+        [TestCase("Super Mario Odyssey KIOSK eShop INTERNAL NSW-VENOM", "Super Mario Odyssey")]
+        [TestCase("Hollow.Knight.Store.Demo-CODEX", "Hollow Knight")]
+        [TestCase("Celeste.Demo-PLAZA", "Celeste")]
+        [TestCase("Hades.II.Trial.Version-FLT", "Hades II")]
+        [TestCase("Stardew.Valley.PREVIEW-RUNE", "Stardew Valley")]
+        public void should_strip_demo_and_kiosk_markers_from_game_title(string postTitle, string title)
+        {
+            Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Be(title);
+        }
+
+        // A demo-ish word that belongs to the game name stays in the title
+        [TestCase("Demolition.Company.Gold.Edition-TENOKE", "Demolition")]
+        [TestCase("Trials.of.Mana-CODEX", "Trials")]
+        [TestCase("Kiosk.Simulator-TENOKE", "Kiosk")]
+        public void should_not_strip_demo_words_that_are_part_of_the_game_title(string postTitle, string expectedWord)
+        {
+            Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Contain(expectedWord);
+        }
+
         [TestCase("[MTBB] Kimi no Na wa. (2016) v2 [97681524].mkv", "Kimi no Na wa", "MTBB", 2016)]
         [TestCase("[sam] Toward the Terra (1980) [BD 1080p TrueHD].mkv", "Toward the Terra", "sam", 1980)]
         public void should_parse_anime_game_title(string postTitle, string title, string releaseGroup, int year)

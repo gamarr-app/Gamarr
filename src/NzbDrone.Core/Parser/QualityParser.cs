@@ -94,6 +94,42 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?ALL[\s._-]?DLC[sS]?|ALL[\s._-]?DLC[sS]?\b(?![\s._-]?(?:BUNDLE|ONLY)))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Kiosk / store-demo builds (#207). A demo is not the base game, so it
+        // must never be grabbed as one - "Game.Name.KIOSK.eShop.INTERNAL.NSW-GRP"
+        // was approved as a full release and imported over nothing.
+        //
+        // Two tiers, because some of these words are also ordinary title words:
+        //
+        //  * Unambiguous markers, matched anywhere in the name. Each is either a
+        //    word no game is named after (KIOSK, SHAREWARE) or a compound that
+        //    only a demo carries ("Store Demo", "Trial Version"). KIOSK still
+        //    requires a leading delimiter so a game actually titled "Kiosk ..."
+        //    is left alone.
+        //  * The bare words DEMO / TRIAL / PREVIEW, which are only markers when
+        //    they sit in the metadata tail: everything after them must itself be
+        //    metadata (an upper-case scene/console token, "eShop", or a version),
+        //    so "Demolition Inc", "Trials of Mana" and "Super Demo Derby Racing"
+        //    do not match. All of it is case-insensitive on purpose - scene names
+        //    use KIOSK and web/store names use "Demo" for the same build - which
+        //    does leave a title whose LAST word is literally "Trial" ambiguous;
+        //    that is the deliberate trade for catching title-cased demos.
+        private static readonly Regex DemoBuildRegex = new (@"(?<demo>(?<=[\s._\-\[(])KIOSK|\b(?:(?:STORE|SHOP|PLAYABLE|TECH(?:NICAL)?|TIMED|KIOSK)[\s._-]?DEMO|DEMO[\s._-]?(?:BUILD|VERSION|DISC)|TRIAL[\s._-]?(?:BUILD|VERSION|EDITION)|PREVIEW[\s._-]?(?:BUILD|VERSION)|SHAREWARE))\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // The bare-word tier. "(?-i:...)" turns IgnoreCase back off for the
+        // all-caps token class alone, so INTERNAL/NSW/VENOM count as metadata
+        // while a lower-case title word does not.
+        private static readonly Regex TrailingDemoBuildRegex = new (@"\b(?<demo>DEMO|TRIAL|PREVIEW)\b(?:[\s._-]+(?:(?-i:[A-Z][A-Z0-9]*)|eShop|nsp|nsz|xci|wux|wud|cia|rar|zip|7z|v?\d[\w.]*))*[\s._-]*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex DemoHasLetterRegex = new (@"[A-Za-z]", RegexOptions.Compiled);
+
+        // The "-GROUP" suffix of a scene name. Removing the demo metadata takes
+        // the group with it, and the title regexes need it: a dotted name with
+        // no trailing group ("Super.Mario.Odyssey") matches none of them, so
+        // dropping the group turned the whole parse into null.
+        private static readonly Regex DemoTrailingGroupRegex = new (@"-(?<group>[A-Za-z0-9]{2,})\s*$", RegexOptions.Compiled);
+
         // Update/Patch only (requires base game)
         private static readonly Regex UpdatePatchOnlyRegex = new (@"\b(?<updateonly>UPDATE[\s._-]?ONLY|PATCH[\s._-]?ONLY|(?:UPDATE|PATCH)[\s._-]?\d+[\s._-]?ONLY|HOTFIX[\s._-]?ONLY)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -326,6 +362,69 @@ namespace NzbDrone.Core.Parser
         }
 
         /// <summary>
+        /// True when the name carries a kiosk/store-demo/trial marker (#207).
+        /// </summary>
+        public static bool IsDemoBuild(string name)
+        {
+            if (name.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            return DemoBuildRegex.IsMatch(name) || TrailingDemoBuildRegex.IsMatch(name);
+        }
+
+        /// <summary>
+        /// Drop a demo/kiosk marker and everything after it, so the game title
+        /// underneath can be read.
+        /// </summary>
+        /// <remarks>
+        /// Everything following the marker is release metadata, exactly as for
+        /// the bare console tokens in <see cref="ConsoleTitleParser"/>:
+        /// "Game.Name.KIOSK.eShop.INTERNAL.NSW-VENOM" left "KIOSK eShop INTERNAL
+        /// NSW" glued onto the parsed title. The trailing tier only matches when
+        /// the rest of the name is metadata already, so nothing that carries the
+        /// game name is lost. Quality, version, content type, platform and
+        /// release group are all parsed from the untouched release name, so this
+        /// is only ever used to feed the title regexes.
+        /// Returns the input unchanged when there is no marker, or when removing
+        /// it would leave nothing usable behind.
+        /// </remarks>
+        public static string RemoveDemoBuildMetadata(string title)
+        {
+            if (title.IsNullOrWhiteSpace())
+            {
+                return title;
+            }
+
+            var match = DemoBuildRegex.Match(title);
+
+            if (!match.Success)
+            {
+                match = TrailingDemoBuildRegex.Match(title);
+            }
+
+            if (!match.Success)
+            {
+                return title;
+            }
+
+            var markerIndex = match.Groups["demo"].Index;
+            var cleaned = title.Substring(0, markerIndex).Trim(' ', '.', '_', '-');
+
+            if (cleaned.IsNullOrWhiteSpace() || !DemoHasLetterRegex.IsMatch(cleaned))
+            {
+                return title;
+            }
+
+            // Put the release group back on, so the name still looks like the
+            // scene shape the title regexes recognise.
+            var groupMatch = DemoTrailingGroupRegex.Match(title, markerIndex);
+
+            return groupMatch.Success ? cleaned + "-" + groupMatch.Groups["group"].Value : cleaned;
+        }
+
+        /// <summary>
         /// Parse the content type from release title (DLC-only, Complete Edition, etc.)
         /// </summary>
         public static ReleaseContentType ParseContentType(string name)
@@ -336,6 +435,14 @@ namespace NzbDrone.Core.Parser
             }
 
             var normalizedName = name.Replace('_', ' ').Replace('.', ' ').Trim();
+
+            // Kiosk/store demos outrank every other marker: a demo of a
+            // complete edition is still a demo and still not the base game.
+            if (IsDemoBuild(normalizedName))
+            {
+                Logger.Trace("Detected demo/kiosk build: {0}", CleanseLogMessage.SanitizeLogParam(name));
+                return ReleaseContentType.Demo;
+            }
 
             // Check for update/patch only first (most specific)
             if (UpdatePatchOnlyRegex.IsMatch(normalizedName))

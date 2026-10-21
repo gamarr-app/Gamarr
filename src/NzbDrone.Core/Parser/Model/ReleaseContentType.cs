@@ -38,7 +38,13 @@ namespace NzbDrone.Core.Parser.Model
         /// <summary>
         /// Expansion pack (may or may not be standalone)
         /// </summary>
-        Expansion = 6
+        Expansion = 6,
+
+        /// <summary>
+        /// Kiosk / store demo, trial or preview build - a cut-down build that
+        /// is neither the base game nor an add-on to it (#207)
+        /// </summary>
+        Demo = 7
     }
 
     public static class ReleaseContentTypeExtensions
@@ -53,6 +59,10 @@ namespace NzbDrone.Core.Parser.Model
                 ReleaseContentType.DlcOnly => true,
                 ReleaseContentType.UpdateOnly => true,
                 ReleaseContentType.SeasonPass => true,
+
+                // Demo is deliberately false: a kiosk build is not content
+                // applied on top of a base game, it is a cut-down replacement
+                // for it. DemoBuildSpecification rejects it outright instead.
                 _ => false
             };
         }

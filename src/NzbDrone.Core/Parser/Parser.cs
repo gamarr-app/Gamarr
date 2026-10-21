@@ -572,6 +572,14 @@ namespace NzbDrone.Core.Parser
 
                 simpleTitle = SwitchTitleIdRegex.Replace(simpleTitle, " ");
 
+                // Kiosk/store demo markers and the metadata after them, so the
+                // game name underneath is what the title regexes see (#207):
+                // "Game.Name.KIOSK.eShop.INTERNAL.NSW-VENOM" otherwise parsed
+                // with "KIOSK eShop INTERNAL NSW" still inside the game title.
+                // The content type is read off the untouched name below, which
+                // is what then rejects the release.
+                simpleTitle = QualityParser.RemoveDemoBuildMetadata(simpleTitle);
+
                 var allRegexes = ReportGameTitleRegex.ToList();
 
                 if (isDir)
