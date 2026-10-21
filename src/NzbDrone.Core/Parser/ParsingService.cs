@@ -82,7 +82,9 @@ namespace NzbDrone.Core.Parser
         // DLC/update/season-pass titles embed the addon's own name
         // ("Hades The Blood Price"), so the exact-title lookup fails.
         // For base-requiring content, match the library game whose clean
-        // title is the longest PREFIX of the release's clean title (#149).
+        // title is the longest PREFIX of the release's clean title (#149) —
+        // but only where the release's title continues into an add-on marker
+        // at that point, and never over a game that matches exactly (#206).
         private Game TryGetGameByTitlePrefix(ParsedGameInfo parsedGameInfo)
         {
             if (!parsedGameInfo.ContentType.RequiresBaseGame())
@@ -92,11 +94,22 @@ namespace NzbDrone.Core.Parser
 
             var cleanReleaseTitle = parsedGameInfo.PrimaryGameTitle.CleanGameTitle();
 
-            var prefixMatch = _gameService.GetAllGames()
+            var candidates = (_gameService.GetAllGames() ?? new List<Game>())
                 .Where(g => g.GameMetadata.Value.CleanTitle.IsNotNullOrWhiteSpace() &&
                             cleanReleaseTitle.StartsWith(g.GameMetadata.Value.CleanTitle))
                 .OrderByDescending(g => g.GameMetadata.Value.CleanTitle.Length)
-                .FirstOrDefault();
+                .ToList();
+
+            // Prefer an exact title match: a release whose own title is a known
+            // game belongs to that game, not to a shorter title it starts with.
+            var exactMatch = candidates.FirstOrDefault(g => g.GameMetadata.Value.CleanTitle == cleanReleaseTitle);
+
+            if (exactMatch != null)
+            {
+                return exactMatch;
+            }
+
+            var prefixMatch = candidates.FirstOrDefault(g => IsAddonOfGameTitle(parsedGameInfo, g.GameMetadata.Value.CleanTitle));
 
             if (prefixMatch != null)
             {
@@ -104,6 +117,86 @@ namespace NzbDrone.Core.Parser
             }
 
             return prefixMatch;
+        }
+
+        // What is left of the release's title once the game's clean title has
+        // been consumed off the front, or null when the game's title is not a
+        // WHOLE-WORD prefix of it. Each prefix is cleaned as a whole rather
+        // than word by word, because cleaning drops articles ("of", "the") and
+        // so is not distributive over words.
+        private static string GetTitleRemainder(string releaseTitle, string cleanGameTitle)
+        {
+            if (releaseTitle.IsNullOrWhiteSpace() || cleanGameTitle.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
+
+            var words = releaseTitle.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (var i = 1; i <= words.Length; i++)
+            {
+                if (string.Join(" ", words.Take(i)).CleanGameTitle() == cleanGameTitle)
+                {
+                    return string.Join(" ", words.Skip(i));
+                }
+            }
+
+            return null;
+        }
+
+        // True when the release's title reads as an add-on OF this game: the
+        // game's title, then an add-on marker ("<Game> Update v1.2", "<Game>
+        // DLC <name>", "<Game> Wave 1 DLC").
+        //
+        // An extra word that is not a marker is what #206 was about: "<Game>
+        // <Word>" is a separate IGDB entry, and its base release and 17 of its
+        // updates were matched to "<Game>" and imported into its folder. A DLC
+        // release is still allowed to lead with the DLC's own name, since that
+        // is how DLC releases are named ("Hades The Blood Price DLC") and the
+        // marker then sits at the end — an UPDATE gets no such latitude, as
+        // "<Game> <Word> Update v2.3.0" is an update of "<Game> <Word>".
+        private static bool IsAddonOfGameTitle(ParsedGameInfo parsedGameInfo, string cleanGameTitle)
+        {
+            return parsedGameInfo.GameTitles.Any(releaseTitle =>
+            {
+                var remainder = GetTitleRemainder(releaseTitle, cleanGameTitle);
+
+                if (remainder == null)
+                {
+                    return false;
+                }
+
+                if (remainder.IsNullOrWhiteSpace() || QualityParser.StartsWithAddonMarker(remainder))
+                {
+                    return true;
+                }
+
+                return parsedGameInfo.ContentType.IncludesDlc() &&
+                       !parsedGameInfo.ContentType.IncludesBaseGame() &&
+                       QualityParser.ParseContentType(remainder).IncludesDlc();
+            });
+        }
+
+        // Prefer the closest title match over a prefix match: when another game
+        // in the library matches MORE of the release's title than the searched
+        // game does — up to all of it — that game owns the release. "<Game>
+        // <Word>" is its own IGDB entry, and a search for "<Game>" returns its
+        // releases too (#206).
+        private bool AnotherGameIsACloserTitleMatch(ParsedGameInfo parsedGameInfo, Game searchedGame, string matchedCleanTitle)
+        {
+            var allGames = _gameService.GetAllGames();
+
+            if (allGames == null)
+            {
+                return false;
+            }
+
+            var cleanTitles = parsedGameInfo.GameTitles.Select(t => t.CleanGameTitle()).ToList();
+
+            return allGames.Any(g => g.Id != searchedGame.Id &&
+                                     g.GameMetadata.Value.CleanTitle.IsNotNullOrWhiteSpace() &&
+                                     g.GameMetadata.Value.CleanTitle.Length > matchedCleanTitle.Length &&
+                                     cleanTitles.Any(ct => ct.StartsWith(g.GameMetadata.Value.CleanTitle)));
         }
 
         public RemoteGame Map(ParsedGameInfo parsedGameInfo, int steamAppId, int igdbId, SearchCriteriaBase searchCriteria = null)
@@ -298,8 +391,18 @@ namespace NzbDrone.Core.Parser
             // base-requiring content, accept the searched game when its clean
             // title is a prefix of the release's clean title (#149) — same
             // fallback GetGame applies outside of search.
-            if (parsedGameInfo.ContentType.RequiresBaseGame() &&
-                possibleTitles.Any(pt => pt.IsNotNullOrWhiteSpace() && cleanTitles.Any(ct => ct.StartsWith(pt))))
+            //
+            // The release's title has to continue into an add-on marker where
+            // the searched game's title ends, and no other game in the library
+            // may match more of that title: a search for "<Game>" returns the
+            // releases of "<Game> <Word>" too, and those belong to that game
+            // (#206).
+            var addonOfTitle = parsedGameInfo.ContentType.RequiresBaseGame()
+                ? possibleTitles.FirstOrDefault(pt => pt.IsNotNullOrWhiteSpace() && IsAddonOfGameTitle(parsedGameInfo, pt))
+                : null;
+
+            if (addonOfTitle != null &&
+                !AnotherGameIsACloserTitleMatch(parsedGameInfo, searchCriteria.Game, addonOfTitle))
             {
                 _logger.Debug("Matched base-requiring release '{0}' to searched game '{1}' by title prefix", parsedGameInfo.PrimaryGameTitle, searchCriteria.Game.Title);
                 return new FindGameResult(searchCriteria.Game, GameMatchType.Title);
@@ -320,6 +423,12 @@ namespace NzbDrone.Core.Parser
                     gameTitlesToCheck.Add(searchCriteria.Game.GameMetadata.Value.OriginalTitle);
                 }
 
+                // The words the parser DID read as the release's title. The
+                // fallback below is only for the words it could not see.
+                var parsedTitleWords = Regex.Split(string.Join(" ", parsedGameInfo.GameTitles).ToLowerInvariant(), @"[^a-z0-9]+")
+                    .Where(w => w.Length > 0)
+                    .ToHashSet();
+
                 foreach (var title in gameTitlesToCheck)
                 {
                     // Keep digit-bearing words regardless of length: dropping the
@@ -332,6 +441,21 @@ namespace NzbDrone.Core.Parser
 
                     if (titleWords.Count >= 2 && titleWords.All(w => releaseWords.Contains(w)))
                     {
+                        // This fallback exists for a title the parser could not
+                        // see at all, because it sat in parentheses: "Factorio
+                        // (… + Space Age DLC)" for "Factorio: Space Age". When
+                        // every word of the game's title is already in the
+                        // title the parser DID read, the exact-title and
+                        // prefix rules above have had their say — and a parsed
+                        // title that adds a word on top of the game's title is
+                        // a different game. Without this, every base release
+                        // of "<Game> <Word>" matched a search for "<Game>" and
+                        // was imported into its folder (#206).
+                        if (titleWords.All(w => parsedTitleWords.Contains(w)))
+                        {
+                            continue;
+                        }
+
                         possibleGame = searchCriteria.Game;
                         break;
                     }

@@ -27,6 +27,13 @@ namespace NzbDrone.Core.Parser
         private const string BareTitleWord = @"[A-Z][a-z]*(?:-(?:[A-Z][a-z]*|[a-z]+|\d+))+|[A-Za-z][a-z]*(?:[A-Z][a-z]+)*|\d+[A-Z][a-z]*|\d{1,4}";
         private const string BareTitleBody = @"(?:" + BareTitleFirstWord + @")(?:'[a-z]+)?(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:" + BareTitleWord + @")(?:'[a-z]+)?)*";
 
+        // The add-on vocabulary a component release carries after the game's own
+        // title, as used by the DLC-component shape below. Shared with
+        // QualityParser's add-on marker check so the title parser and the
+        // title-prefix game match agree on what may follow a game title (#206).
+        internal const string ComponentWaveSuffix = @"(?:Wave|Part|Vol(?:ume)?|Pack|Chapter|Season)\s+\d+(?:\s*-\s*\d+)?";
+        internal const string ComponentDlcSuffix = @"DLCs?(?:\s+(?:Unlocker|Pack|Bundle))?";
+
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(Parser));
 
         private static readonly Regex EditionRegex = new Regex(@"\(?\b(?<edition>(((Recut.|Extended.|Ultimate.)?(Director.?s|Collector.?s|Theatrical|Ultimate|Extended|Despecialized|(Special|Rouge|Final|Assembly|Imperial|Diamond|Signature|Hunter|Rekall)(?=(.(Cut|Edition|Version)))|\d{2,3}(th)?.Anniversary)(?:.(Cut|Edition|Version))?(.(Extended|Uncensored|Remastered|Unrated|Uncut|Open.?Matte|IMAX|Fan.?Edit))?|((Uncensored|Remastered|Unrated|Uncut|Open?.Matte|IMAX|Fan.?Edit|Restored|((2|3|4)in1))))))\b\)?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -323,7 +330,7 @@ namespace NzbDrone.Core.Parser
             // game title, instead of being normalised away by the console retry.
             // The title body is shared with that fallback, so a name still has to
             // look like a game title to reach the DLC suffix.
-            new Regex(@"^(?<title>" + BareTitleBody + @"(?:\s+(?:Wave|Part|Vol(?:ume)?|Pack|Chapter|Season)\s+\d+(?:\s*-\s*\d+)?)?\s+DLCs?(?:\s+(?:Unlocker|Pack|Bundle))?)$", RegexOptions.Compiled),
+            new Regex(@"^(?<title>" + BareTitleBody + @"(?:\s+" + ComponentWaveSuffix + @")?\s+" + ComponentDlcSuffix + @")$", RegexOptions.Compiled),
 
             // Fallback: Simple game name without any markers (e.g., "Hytale", "My Winter Car", "StarRupture")
             // Only matches if no other regex matched - must look like a proper game title

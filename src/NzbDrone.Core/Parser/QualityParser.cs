@@ -112,6 +112,19 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex FullRepackerRegex = new (@"\b(?:FitGirl|DODI|ElAmigos|CorePack|KaOs|xatab)\b|Re?Pack\s+(?:от|by|from)|Steam[-\s]?Rip",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // The add-on markers that may legitimately follow a game's title in a
+        // release name, anchored to the start of whatever follows the title.
+        // The vocabulary is the one already used above and by the title
+        // parser's DLC-component shape (Parser.ComponentWaveSuffix /
+        // Parser.ComponentDlcSuffix) — this adds only the anchor, which is the
+        // part that matters: an unexplained word between the game's title and
+        // the marker means a DIFFERENT game whose title starts with the same
+        // words, not an add-on of that game (#206).
+        private static readonly Regex AddonMarkerPrefixRegex = new (
+            @"^(?:" + Parser.ComponentWaveSuffix + @"|" + Parser.ComponentDlcSuffix +
+            @"|UPDATE|PATCH|HOTFIX|ADDONS?|EXPANSION(?:[\s._-]?(?:PACK|PASS))?|SEASON[\s._-]?PASS|CONTENT[\s._-]?PACK|UNLOCKER|BUNDLE)\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static readonly Regex MultiLangRegex = new (@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -377,6 +390,24 @@ namespace NzbDrone.Core.Parser
 
             // Default to unknown - could be base game only or undetected
             return ReleaseContentType.Unknown;
+        }
+
+        /// <summary>
+        /// True when the text BEGINS with an add-on marker ("Update v1.2",
+        /// "DLC Unlocker", "Wave 1 DLC", "Season Pass"). Used on what is left
+        /// of a release's title after a game's title, to tell an add-on of that
+        /// game from a different game whose title merely starts the same way.
+        /// </summary>
+        public static bool StartsWithAddonMarker(string text)
+        {
+            if (text.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            var normalizedText = text.Replace('_', ' ').Replace('.', ' ').Trim();
+
+            return AddonMarkerPrefixRegex.IsMatch(normalizedText);
         }
 
         public static QualityModel ParseQuality(string name)
