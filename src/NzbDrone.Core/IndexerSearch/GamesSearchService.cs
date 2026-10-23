@@ -7,6 +7,7 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
@@ -17,31 +18,43 @@ namespace NzbDrone.Core.IndexerSearch
 {
     public class GameSearchService : IExecute<GamesSearchCommand>, IExecute<MoviesSearchCommand>, IExecute<MissingGamesSearchCommand>, IExecute<CutoffUnmetGamesSearchCommand>, IExecute<GameComponentSearchCommand>
     {
+        // A library whose games have never had an update imported is every game
+        // in it, and sweeping all of them in one pass is the indexer stampede
+        // this cap exists to prevent. Nothing is dropped: the oldest-searched
+        // games go first, so successive passes drain the backlog.
+        private const int MaxUpdateSweepPerPass = 50;
+
         private readonly IGameService _gameService;
         private readonly IGameCutoffService _gameCutoffService;
         private readonly IGameComponentService _componentService;
+        private readonly IMediaFileService _mediaFileService;
         private readonly ISearchForReleases _releaseSearchService;
         private readonly IProcessDownloadDecisions _processDownloadDecisions;
         private readonly IQueueService _queueService;
         private readonly IGameSearchBackoff _searchBackoff;
+        private readonly IGameUpdateSearchService _updateSearchService;
         private readonly Logger _logger;
 
         public GameSearchService(IGameService gameService,
                                    IGameCutoffService gameCutoffService,
                                    IGameComponentService componentService,
+                                   IMediaFileService mediaFileService,
                                    ISearchForReleases releaseSearchService,
                                    IProcessDownloadDecisions processDownloadDecisions,
                                    IQueueService queueService,
                                    IGameSearchBackoff searchBackoff,
+                                   IGameUpdateSearchService updateSearchService,
                                    Logger logger)
         {
             _gameService = gameService;
             _gameCutoffService = gameCutoffService;
             _componentService = componentService;
+            _mediaFileService = mediaFileService;
             _releaseSearchService = releaseSearchService;
             _processDownloadDecisions = processDownloadDecisions;
             _queueService = queueService;
             _searchBackoff = searchBackoff;
+            _updateSearchService = updateSearchService;
             _logger = logger;
         }
 
@@ -104,6 +117,52 @@ namespace NzbDrone.Core.IndexerSearch
                 {
                     SearchForComponent(slot, message.Trigger == CommandTrigger.Manual);
                 }
+            }
+
+            SearchForGamesWithNoUpdateInstalled(queue, message.Trigger == CommandTrigger.Manual);
+        }
+
+        // A game with a base file and no update of any kind has never had an
+        // update imported, and nothing else will ever surface one for it: RSS
+        // only reports new uploads, so an update released before the game was
+        // added is invisible to it, and the game stops being "missing" the
+        // moment its base file arrives (#210). Once a game does carry an
+        // update, only a newer one would upgrade it — and a newer one is a new
+        // upload, which RSS does see — so this set is self-draining.
+        private void SearchForGamesWithNoUpdateInstalled(List<int> queue, bool userInvokedSearch)
+        {
+            var games = (_gameService.GetAllGames() ?? new List<Game>())
+                .Where(g => g.Monitored && g.MonitorUpdates && !queue.Contains(g.Id))
+                .ToList();
+
+            if (!games.Any())
+            {
+                return;
+            }
+
+            var filesByGame = (_mediaFileService.GetFilesByGames(games.Select(g => g.Id)) ?? new List<GameFile>())
+                .GroupBy(f => f.GameId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var candidates = games
+                .Where(g => filesByGame.TryGetValue(g.Id, out var files) &&
+                            files.Any(GameUpdateSearchService.IsBaseUnit) &&
+                            !files.Any(GameUpdateSearchService.IsUpdateUnit))
+                .Where(g => userInvokedSearch || !_searchBackoff.ShouldSkip(g))
+                .OrderBy(g => g.LastSearchTime ?? DateTime.MinValue)
+                .Take(MaxUpdateSweepPerPass)
+                .ToList();
+
+            if (!candidates.Any())
+            {
+                return;
+            }
+
+            _logger.ProgressInfo("Performing update search for {0} game(s) with no update installed", candidates.Count);
+
+            foreach (var game in candidates)
+            {
+                _updateSearchService.SearchForUpdatesAndMissingDlc(game.Id, userInvokedSearch);
             }
         }
 
