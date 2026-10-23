@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NzbDrone.Common.Extensions;
 
@@ -145,6 +147,15 @@ namespace NzbDrone.Core.Parser
             @"(?<=[\s._-])(?<region>" + RegionPlatformToken + @")\b(?:[\s._-]+" + MetadataTailToken + @")*(?:-[A-Za-z0-9_]{2,})?[\s._-]*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Token boundaries inside a metadata tail. "-" is deliberately NOT a
+        // separator here: it is part of the "NTSC-U" / "NTSC-J" region spelling,
+        // and splitting there would leave an ambiguous bare "NTSC". Tokens that
+        // still carry a "-GROUP" suffix are handled by retrying their hyphen
+        // parts in ParseRegions.
+        private static readonly Regex TailSeparatorRegex = new Regex(
+            @"[\s._/]+",
+            RegexOptions.Compiled);
+
         // The "-GROUP" suffix of a scene name, searched from the anchor onwards.
         private static readonly Regex TrailingGroupNameRegex = new Regex(
             @"-(?<group>[A-Za-z0-9]{2,})\s*$",
@@ -222,6 +233,149 @@ namespace NzbDrone.Core.Parser
             var groupMatch = TrailingGroupNameRegex.Match(title, anchorIndex);
 
             return groupMatch.Success ? cleaned + "-" + groupMatch.Groups["group"].Value : cleaned;
+        }
+
+        /// <summary>
+        /// The regional editions named in a release/scene name, normalised.
+        /// </summary>
+        /// <remarks>
+        /// A regional edition is its own build with its own title ID, so an
+        /// update or DLC for one cannot be applied to another (#213). Only the
+        /// REGION codes count here: <see cref="RegionPlatformToken"/> also holds
+        /// platform and container tokens (NSW, NSP, XCI, ...) which say nothing
+        /// about the edition, and treating "Game.Name.NSW-GRP" as region "NSW"
+        /// would make every such release mismatch every other one.
+        ///
+        /// Anchoring is the same discipline RemoveRegionMetadata uses, and for
+        /// the same reason: a bare upper-case word is only metadata when
+        /// everything between it and the end of the name is also metadata. That
+        /// is what keeps a title word from being read as a region. The codes are
+        /// matched case-sensitively, so "Asia" and "Pal" in an ordinary title do
+        /// not qualify.
+        ///
+        /// Several codes can appear at once ("Game.USA.EUR.NSW-GRP",
+        /// multi-region dumps), so this returns a set and callers compare sets:
+        /// an empty set means "no explicit edition", which must never be treated
+        /// as a mismatch - most titles are a single worldwide edition and a
+        /// false reject there is worse than the bug being fixed.
+        /// </remarks>
+        /// <returns>
+        /// The distinct normalised region codes, empty when the name carries no
+        /// explicit region.
+        /// </returns>
+        public static HashSet<string> ParseRegions(string title)
+        {
+            var regions = new HashSet<string>(StringComparer.Ordinal);
+
+            if (title.IsNullOrWhiteSpace())
+            {
+                return regions;
+            }
+
+            // The anchor proves that everything from the left-most region token
+            // to the end of the name is metadata, so every token in that tail can
+            // be read directly - no second anchoring pass, and no risk of
+            // reaching back into the game name.
+            var match = TrailingRegionMetadataRegex.Match(title);
+
+            if (!match.Success)
+            {
+                return regions;
+            }
+
+            var tail = title.Substring(match.Groups["region"].Index);
+
+            foreach (var token in TailSeparatorRegex.Split(tail))
+            {
+                var normalised = NormalizeRegion(token);
+
+                if (normalised != null)
+                {
+                    regions.Add(normalised);
+                    continue;
+                }
+
+                // "EUR-VENOM": the region is the token's first hyphen part, and
+                // the group name is the rest. Retried only when the whole token
+                // is not itself a region, so "NTSC-U" is never split.
+                if (!token.Contains('-'))
+                {
+                    continue;
+                }
+
+                foreach (var part in token.Split('-'))
+                {
+                    var partRegion = NormalizeRegion(part);
+
+                    if (partRegion != null)
+                    {
+                        regions.Add(partRegion);
+                    }
+                }
+            }
+
+            return regions;
+        }
+
+        /// <summary>
+        /// Fold a region token onto one canonical code, or null when the token is
+        /// a platform/container tag or is too ambiguous to compare.
+        /// </summary>
+        /// <remarks>
+        /// The aliases exist so that two spellings of the same edition do not
+        /// read as a mismatch: JAP is JPN, and the NTSC-x forms name the same
+        /// three regions as USA/JPN/CHN. PAL is folded onto EUR because a PAL
+        /// dump of a Switch/Wii U title IS the European edition - keeping them
+        /// apart would reject a legitimate "PAL" update for an "EUR" base.
+        ///
+        /// A bare NTSC is deliberately dropped rather than guessed: it covers
+        /// USA, JPN and more, so mapping it anywhere invents a mismatch.
+        /// </remarks>
+        public static string NormalizeRegion(string token)
+        {
+            if (token.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
+
+            // Scene region codes are always upper case; the lower-case spellings
+            // are ordinary words ("Asia", "Pal", "Kor"). Checked here rather than
+            // relied on from the tail anchor so a caller passing a raw token
+            // cannot widen it.
+            if (token != token.ToUpperInvariant())
+            {
+                return null;
+            }
+
+            var bare = token.Replace(".", string.Empty).Replace("_", string.Empty).Replace("-", string.Empty);
+
+            switch (bare)
+            {
+                case "EUR":
+                case "PAL":
+                    return "EUR";
+                case "USA":
+                case "NTSCU":
+                    return "USA";
+                case "JPN":
+                case "JAP":
+                case "NTSCJ":
+                    return "JPN";
+                case "CHN":
+                case "NTSCC":
+                    return "CHN";
+                case "ASIA":
+                case "KOR":
+                case "TWN":
+                case "HKG":
+                case "LATAM":
+                    return bare;
+                default:
+
+                    // Platform and container tokens (NSW, NSP, NSZ, XCI, WUX,
+                    // WUD, CIA) and a bare NTSC land here on purpose.
+                    return null;
+            }
         }
 
         /// <summary>

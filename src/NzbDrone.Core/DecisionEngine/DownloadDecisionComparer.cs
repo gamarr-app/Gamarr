@@ -4,6 +4,7 @@ using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Qualities;
@@ -34,8 +35,16 @@ namespace NzbDrone.Core.DecisionEngine
             // the heuristic that a release with a lot of seeders is usually
             // what the user actually wants, even when a "higher quality" but
             // dead torrent also exists.
+            // CompareRegionMatch runs ahead of everything, including peers: a
+            // release whose region tag matches the installed base game is the
+            // only one that can actually be applied to it, so no number of
+            // seeders makes a region-less candidate a better choice (#213).
+            // RegionMatchSpecification has already rejected the outright
+            // mismatches; this only orders what is left, which is "same region"
+            // against "no region stated".
             var comparers = new List<CompareDelegate>
             {
+                CompareRegionMatch,
                 ComparePeersIfTorrent,
                 CompareQuality,
                 CompareCustomFormatScore,
@@ -89,6 +98,42 @@ namespace NzbDrone.Core.DecisionEngine
         private int CompareCustomFormatScore(DownloadDecision x, DownloadDecision y)
         {
             return CompareBy(x.RemoteGame, y.RemoteGame, remoteGame => remoteGame.CustomFormatScore);
+        }
+
+        // 1 when the release states the same region as the installed base game,
+        // 0 when there is nothing to go on. Only add-on releases can match a
+        // base edition, and only a base file that states a region gives anything
+        // to match against, so every other case scores 0 and leaves the ordering
+        // to the comparers below.
+        private int ScoreRegionMatch(RemoteGame remoteGame)
+        {
+            var contentType = remoteGame.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
+
+            if (!contentType.RequiresBaseGame())
+            {
+                return 0;
+            }
+
+            var baseFile = remoteGame.Game?.GameFile;
+
+            if (baseFile == null)
+            {
+                return 0;
+            }
+
+            var baseRegions = ConsoleTitleParser.ParseRegions(baseFile.GetSceneOrFileName());
+
+            if (baseRegions.Count == 0)
+            {
+                return 0;
+            }
+
+            return ConsoleTitleParser.ParseRegions(remoteGame.Release?.Title).Overlaps(baseRegions) ? 1 : 0;
+        }
+
+        private int CompareRegionMatch(DownloadDecision x, DownloadDecision y)
+        {
+            return CompareBy(x.RemoteGame, y.RemoteGame, ScoreRegionMatch);
         }
 
         private int CompareContentType(DownloadDecision x, DownloadDecision y)

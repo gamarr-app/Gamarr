@@ -72,5 +72,6 @@ public enum DownloadRejectionReason
     DiskCustomFormatScoreIncrement,
     DiskUpgradesNotAllowed,
     WantedPlatform,
-    ExecutableFile
+    ExecutableFile,
+    RegionMismatch
 }
