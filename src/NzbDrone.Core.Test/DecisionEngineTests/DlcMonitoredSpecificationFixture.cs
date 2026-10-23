@@ -83,9 +83,39 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_accept_during_user_invoked_search()
+        public void should_accept_during_interactive_search()
         {
-            var criteria = new GameSearchCriteria { UserInvokedSearch = true };
+            var criteria = new GameSearchCriteria { UserInvokedSearch = true, InteractiveSearch = true };
+
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation(false, criteria)).Accepted.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_reject_during_non_interactive_user_invoked_search()
+        {
+            // A game search / "Search All" / missing search sets UserInvokedSearch
+            // but not InteractiveSearch, and must still respect the slot flag (#214).
+            var criteria = new GameSearchCriteria { UserInvokedSearch = true, InteractiveSearch = false };
+
+            var decision = Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation(false, criteria));
+
+            decision.Accepted.Should().BeFalse();
+            decision.Reason.Should().Be(DownloadRejectionReason.DlcNotMonitored);
+        }
+
+        [Test]
+        public void should_accept_monitored_slot_during_non_interactive_user_invoked_search()
+        {
+            // #210 queues component searches only for monitored slots; those must
+            // still come through now that the slot flag is enforced during search.
+            GivenSlots(new GameComponent
+            {
+                ComponentType = GameComponentType.Dlc,
+                Title = "The Blood Price",
+                Monitored = true
+            });
+
+            var criteria = new GameSearchCriteria { UserInvokedSearch = true, InteractiveSearch = false };
 
             Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation(false, criteria)).Accepted.Should().BeTrue();
         }

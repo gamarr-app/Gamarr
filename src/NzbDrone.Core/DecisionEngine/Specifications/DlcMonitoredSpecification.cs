@@ -5,10 +5,23 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
 {
-    // DLC slots are opt-in (created monitored=false from metadata), so RSS and
-    // scheduled searches must not grab a DLC nobody asked for. User-invoked
-    // searches bypass this, matching how MonitoredGameSpecification treats the
-    // game-level flag.
+    // DLC slots are opt-in (created monitored=false from metadata), so nothing
+    // automatic may grab a DLC nobody asked for. Only an *interactive* search
+    // bypasses this: there the user is looking at one named release and picks
+    // it, so the slot flag is not what they are expressing an opinion with.
+    //
+    // UserInvokedSearch is deliberately NOT the gate (#214). It is also true for
+    // a game search, "Search All", a missing search and a cutoff-unmet search -
+    // bulk operations that name a *game*, not a DLC - and gating on it let those
+    // grab DLC for unmonitored slots. Same reasoning as
+    // UpdateMonitoredSpecification: the game-level flag may be bypassed during a
+    // search because the search names that game, but a flag that singles out a
+    // kind of content inside the game may not.
+    //
+    // The interactive bypass only controls how the release is *shown* in the
+    // release list; the grab itself (ReleaseController.DownloadRelease) hands the
+    // report straight to the download service and runs no specifications, so a
+    // deliberate interactive grab of an unmonitored DLC works either way.
     public class DlcMonitoredSpecification : IDownloadDecisionEngineSpecification
     {
         private readonly IGameComponentService _componentService;
@@ -25,9 +38,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
-            if (information.SearchCriteria is { UserInvokedSearch: true })
+            if (information.SearchCriteria is { InteractiveSearch: true })
             {
-                _logger.Debug("Skipping DLC monitored check during search");
+                _logger.Debug("Skipping DLC monitored check during interactive search");
                 return DownloadSpecDecision.Accept();
             }
 
