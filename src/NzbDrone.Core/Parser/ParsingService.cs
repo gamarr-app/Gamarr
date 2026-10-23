@@ -22,6 +22,19 @@ namespace NzbDrone.Core.Parser
 
     public class ParsingService : IParsingService
     {
+        // The segments the parser cut away because they sat in brackets, which
+        // is the only place the all-words fallback is allowed to look for the
+        // words it could not read (#211).
+        private static readonly Regex BracketedSegmentRegex = new Regex(@"[(\[{]([^)\]}]*)[)\]}]", RegexOptions.Compiled);
+
+        // Version numbers carry digits that are not part of any title: "Update
+        // v11.2.0" must not supply the "2" of a sequel's name (#211).
+        private static readonly Regex VersionTokenRegex = new Regex(@"\bv?\d+(?:\.\d+)+\b", RegexOptions.Compiled);
+
+        private static readonly Regex TrailingNumberRegex = new Regex(@"\d+$", RegexOptions.Compiled);
+
+        private static readonly Regex WordSplitRegex = new Regex(@"[^a-z0-9]+", RegexOptions.Compiled);
+
         private static HashSet<ArabicRomanNumeral> _arabicRomanNumeralMappings;
 
         private readonly IGameService _gameService;
@@ -177,6 +190,76 @@ namespace NzbDrone.Core.Parser
             });
         }
 
+        // The words the all-words fallback may read: the title the parser DID
+        // read, plus the bracketed segments it cut away — and nothing else.
+        //
+        // It used to split the WHOLE release name, so every version number,
+        // group tag and platform token was offered up as a title word. That is
+        // how "Aaaaaaaa 3 Update v11.2.0 NSW-GRP" matched a search for
+        // "Aaaaaaaa 2": the "2" of the sequel's name came out of "v11.2.0"
+        // (#211). The fallback exists for a title the parser could not see
+        // because it sat in parentheses ("Factorio (… + Space Age DLC)" for
+        // "Factorio: Space Age"), so the brackets are the only place it needs
+        // to look, and dotted version numbers are dropped even from those.
+        private static HashSet<string> FallbackReleaseWords(ParsedGameInfo parsedGameInfo)
+        {
+            var sources = new List<string>(parsedGameInfo.GameTitles.Where(t => t.IsNotNullOrWhiteSpace()));
+
+            foreach (Match segment in BracketedSegmentRegex.Matches(parsedGameInfo.ReleaseTitle ?? string.Empty))
+            {
+                sources.Add(segment.Groups[1].Value);
+            }
+
+            var text = VersionTokenRegex.Replace(string.Join(" ", sources).ToLowerInvariant(), " ");
+
+            return WordSplitRegex.Split(text)
+                .Where(w => w.Length > 0)
+                .ToHashSet();
+        }
+
+        // True when the release's title and the game's title are the same name
+        // with a DIFFERENT trailing number: "<Game> 3" is not "<Game> 2", it is
+        // its own IGDB entry and usually not even in the library (#211). The
+        // stems have to be identical, so a DLC release whose name happens to end
+        // in a number ("<Game> 8 Booster Course Pass Wave 1") is untouched.
+        private static bool IsDifferentSequel(ParsedGameInfo parsedGameInfo, string gameTitle)
+        {
+            var cleanGameTitle = gameTitle.CleanGameTitle();
+
+            if (cleanGameTitle.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            var gameNumber = TrailingNumberRegex.Match(cleanGameTitle);
+
+            if (!gameNumber.Success)
+            {
+                return false;
+            }
+
+            var gameStem = cleanGameTitle.Substring(0, gameNumber.Index);
+
+            var cleanReleaseTitles = parsedGameInfo.GameTitles
+                .Where(t => t.IsNotNullOrWhiteSpace())
+                .Select(t => t.CleanGameTitle())
+                .ToList();
+
+            if (cleanReleaseTitles.Count == 0)
+            {
+                return false;
+            }
+
+            return cleanReleaseTitles.All(t =>
+            {
+                var releaseNumber = TrailingNumberRegex.Match(t);
+
+                return releaseNumber.Success &&
+                       releaseNumber.Value != gameNumber.Value &&
+                       t.Substring(0, releaseNumber.Index) == gameStem;
+            });
+        }
+
         // Prefer the closest title match over a prefix match: when another game
         // in the library matches MORE of the release's title than the searched
         // game does — up to all of it — that game owns the release. "<Game>
@@ -293,6 +376,14 @@ namespace NzbDrone.Core.Parser
             if (result == null)
             {
                 _logger.Debug($"No matching game for titles '{string.Join(", ", parsedGameInfo.GameTitles)} ({parsedGameInfo.Year})'");
+            }
+            else
+            {
+                // Every mapped release has to carry a match line. An update
+                // release that was approved for a game with nothing logged
+                // about WHY is unauditable, and that silence was half of #211:
+                // the wrong grab was invisible in a trace log until it landed.
+                _logger.Debug("Matched release '{0}' ({1}) to game '{2}' by {3}", parsedGameInfo.PrimaryGameTitle, parsedGameInfo.ContentType, result.Game.Title, result.MatchType);
             }
 
             return result;
@@ -417,6 +508,8 @@ namespace NzbDrone.Core.Parser
             {
                 if (parsedGameInfo.Year < 1800 || possibleGame.GameMetadata.Value.Year == parsedGameInfo.Year || possibleGame.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year)
                 {
+                    _logger.Debug("Matched release '{0}' to searched game '{1}' by exact title", parsedGameInfo.PrimaryGameTitle, possibleGame.Title);
+
                     return new FindGameResult(possibleGame, GameMatchType.Title);
                 }
             }
@@ -464,9 +557,7 @@ namespace NzbDrone.Core.Parser
             // e.g. "Factorio (v2.0.7 + Space Age DLC) [FitGirl Repack]" should match "Factorio: Space Age"
             if (possibleGame == null && parsedGameInfo.ReleaseTitle.IsNotNullOrWhiteSpace())
             {
-                var releaseWords = Regex.Split(parsedGameInfo.ReleaseTitle.ToLowerInvariant(), @"[^a-z0-9]+")
-                    .Where(w => w.Length > 0)
-                    .ToHashSet();
+                var releaseWords = FallbackReleaseWords(parsedGameInfo);
 
                 var gameTitlesToCheck = new List<string> { searchCriteria.Game.GameMetadata.Value.Title };
                 if (searchCriteria.Game.GameMetadata.Value.OriginalTitle.IsNotNullOrWhiteSpace())
@@ -507,6 +598,14 @@ namespace NzbDrone.Core.Parser
                             continue;
                         }
 
+                        // A sequel is a different game, whatever its words add
+                        // up to (#211).
+                        if (IsDifferentSequel(parsedGameInfo, title))
+                        {
+                            _logger.Debug("Not matching release '{0}' to searched game '{1}': a different trailing number is a different game", parsedGameInfo.PrimaryGameTitle, searchCriteria.Game.Title);
+                            continue;
+                        }
+
                         possibleGame = searchCriteria.Game;
                         break;
                     }
@@ -516,6 +615,8 @@ namespace NzbDrone.Core.Parser
                 {
                     if (parsedGameInfo.Year < 1800 || possibleGame.GameMetadata.Value.Year == parsedGameInfo.Year || possibleGame.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year)
                     {
+                        _logger.Debug("Matched release '{0}' to searched game '{1}': every word of the game's title is in the release name", parsedGameInfo.PrimaryGameTitle, possibleGame.Title);
+
                         return new FindGameResult(possibleGame, GameMatchType.Title);
                     }
                 }
