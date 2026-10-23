@@ -25,6 +25,35 @@ namespace NzbDrone.Core.Parser
     {
         private const string ConsoleToken = @"\b(?:NSP|NSZ|XCI|NSW|N?Switch|WiiU|Wii|3DS|CIA|WUX|WUD)\b";
 
+        // The region/platform tags a console release carries between the game
+        // name and the group: "Game.Name.EUR.NSW-GRP", "Game Name JPN NSW-GRP",
+        // "Game.Name.USA.PROPER-GRP" (#209). Used by RemoveRegionMetadata below
+        // as anchors only, not as a vocabulary of everything a scene name may
+        // hold - MetadataTailToken is what absorbs the rest.
+        //
+        // Matched case-sensitively (the (?-i:...) group turns IgnoreCase back
+        // off for this part alone): these are scene tags and always upper case,
+        // whereas "Asia", "Pal" and "Chn" can be, or can start, an ordinary
+        // title word. That is also why only 3-letter-and-longer codes are
+        // listed and "US"/"EU"/"JP" are not.
+        //
+        // NSW is the dangerous one - in real release names it is overwhelmingly
+        // "New South Wales" - so it is NOT trusted as a bare word anywhere. It
+        // is safe here only because of the anchoring: the token has to sit in
+        // the metadata TAIL, i.e. everything between it and the end of the name
+        // must itself be metadata. "Highway Patrol NSW Australia Simulator"
+        // does not qualify; "Game.Name.NSW-VENOM" does. This is the same
+        // discriminator QualityParser's trailing demo tier already uses for the
+        // bare words DEMO/TRIAL/PREVIEW.
+        private const string RegionPlatformToken =
+            @"(?-i:EUR|USA|JPN|JAP|ASIA|KOR|CHN|TWN|HKG|LATAM|PAL|NTSC(?:[._-]?[UJC])?|NSW|NSP|NSZ|XCI|WUX|WUD|CIA)";
+
+        // One token of release metadata: an all-caps scene/console token
+        // (upper case only, so a lower-case title word does not qualify), a
+        // store/container name, or a version.
+        private const string MetadataTailToken =
+            @"(?:(?-i:[A-Z][A-Z0-9]*)|eShop|nsp|nsz|xci|wux|wud|cia|rar|zip|7z|v?\d[\w.]*)";
+
         // Leading platform prefix: "[Switch NSP] Game Name", "[NSW] Game Name".
         // A prefix moves the start of the title, which no existing regex allows
         // for - they all pin the title to the start of the string.
@@ -67,6 +96,72 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex HasLetterRegex = new Regex(@"[A-Za-z]", RegexOptions.Compiled);
 
         private static readonly char[] EdgeTrim = { ' ', '.', '_', '-' };
+
+        // The anchor token, then metadata all the way to the end of the name.
+        // The optional trailing "-Group" is spelled separately because a mixed
+        // case group name ("LiGHTFORCE") is not an all-caps tail token.
+        private static readonly Regex TrailingRegionMetadataRegex = new Regex(
+            @"(?<=[\s._-])(?<region>" + RegionPlatformToken + @")\b(?:[\s._-]+" + MetadataTailToken + @")*(?:-[A-Za-z0-9_]{2,})?[\s._-]*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // The "-GROUP" suffix of a scene name, searched from the anchor onwards.
+        private static readonly Regex TrailingGroupNameRegex = new Regex(
+            @"-(?<group>[A-Za-z0-9]{2,})\s*$",
+            RegexOptions.Compiled);
+
+        /// <summary>
+        /// Drop a trailing region/platform tag and the metadata after it, so the
+        /// game name underneath is what the title regexes see.
+        /// </summary>
+        /// <remarks>
+        /// Unlike <see cref="Normalize"/> this is NOT a post-failure retry: a
+        /// name like "Game.Name.EUR.NSW-GRP" parses perfectly well today, just
+        /// with "EUR NSW" still glued onto the game title, so nothing ever fails
+        /// and no retry fires (#209). The caller therefore tries the stripped
+        /// name FIRST and falls back to the untouched one when the stripped name
+        /// parses to nothing, which is what bounds the risk of stripping early.
+        /// Quality, version, content type, platform and release group are all
+        /// read off the full release name, so this only ever feeds the title
+        /// regexes.
+        /// </remarks>
+        /// <returns>The cleaned name, or null when there is no such tag.</returns>
+        public static string RemoveRegionMetadata(string title)
+        {
+            if (title.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
+
+            var match = TrailingRegionMetadataRegex.Match(title);
+
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            var anchorIndex = match.Groups["region"].Index;
+            var cleaned = title.Substring(0, anchorIndex).Trim(EdgeTrim);
+
+            if (cleaned.IsNullOrWhiteSpace() || !HasLetterRegex.IsMatch(cleaned) || cleaned == title.Trim(EdgeTrim))
+            {
+                return null;
+            }
+
+            // A dot-separated name needs its group back: "Super.Mario.Odyssey"
+            // with no trailing group matches none of the title regexes, so
+            // dropping it turns the whole parse into null. A space-separated
+            // name is the other way round - "Super Mario Odyssey" is read by the
+            // bare-title fallback, and "Super Mario Odyssey-VENOM" is not - so
+            // there the group stays off.
+            if (cleaned.Contains(' '))
+            {
+                return cleaned;
+            }
+
+            var groupMatch = TrailingGroupNameRegex.Match(title, anchorIndex);
+
+            return groupMatch.Success ? cleaned + "-" + groupMatch.Groups["group"].Value : cleaned;
+        }
 
         /// <summary>
         /// Remove console dump decorations from a release name.

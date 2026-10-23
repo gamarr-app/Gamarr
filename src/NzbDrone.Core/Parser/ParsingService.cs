@@ -330,6 +330,22 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
+        // The parsed titles with the year put back on the end, for a game whose
+        // own name ends in a year-like number (#209). Empty when the parse read
+        // no year, so every caller can use it unconditionally.
+        private static List<string> GameTitlesIncludingYear(ParsedGameInfo parsedGameInfo)
+        {
+            if (parsedGameInfo.Year < 1800)
+            {
+                return new List<string>();
+            }
+
+            return parsedGameInfo.GameTitles
+                .Where(t => t.IsNotNullOrWhiteSpace())
+                .Select(t => $"{t} {parsedGameInfo.Year}")
+                .ToList();
+        }
+
         private FindGameResult TryGetGameByTitleAndOrYear(ParsedGameInfo parsedGameInfo)
         {
             var candidates = _gameService.FindByTitleCandidates(parsedGameInfo.GameTitles, out var otherTitles);
@@ -337,6 +353,25 @@ namespace NzbDrone.Core.Parser
             Game gameByTitleAndOrYear;
             if (parsedGameInfo.Year > 1800)
             {
+                // The number the parser read as the release year may be part of
+                // the game's own name - "<Game> 2020" is an IGDB entry that came
+                // out in 2019 - and then neither the title (it lost the number)
+                // nor the year (it is not the release year) matches (#209). So
+                // put the number back on the title and look THAT up first: it
+                // only matches a game actually named that way, which is a
+                // stronger statement than a title match whose year happens to
+                // agree.
+                var titlesIncludingYear = GameTitlesIncludingYear(parsedGameInfo);
+                var yearCandidates = _gameService.FindByTitleCandidates(titlesIncludingYear, out var yearOtherTitles);
+                var gameByTitleIncludingYear = _gameService.FindByTitle(titlesIncludingYear, null, yearOtherTitles, yearCandidates);
+
+                if (gameByTitleIncludingYear != null)
+                {
+                    _logger.Debug("Matched release '{0}' to game '{1}': {2} is part of the game's own title, not the release year", parsedGameInfo.PrimaryGameTitle, gameByTitleIncludingYear.Title, parsedGameInfo.Year);
+
+                    return new FindGameResult(gameByTitleIncludingYear, GameMatchType.Title);
+                }
+
                 gameByTitleAndOrYear = _gameService.FindByTitle(parsedGameInfo.GameTitles, parsedGameInfo.Year, otherTitles, candidates);
                 if (gameByTitleAndOrYear != null)
                 {
@@ -384,6 +419,22 @@ namespace NzbDrone.Core.Parser
                 {
                     return new FindGameResult(possibleGame, GameMatchType.Title);
                 }
+            }
+
+            // Same as in TryGetGameByTitleAndOrYear: the number the parser read
+            // as the release year may be part of the searched game's own name
+            // ("<Game> 2020", released 2019), and then the exact-title check
+            // above fails on the title and the year gate rejects the year
+            // (#209). Putting the number back on has to produce the game's WHOLE
+            // clean title, so this is an exact match and not a loosening of the
+            // prefix rule #206 tightened.
+            var cleanTitlesIncludingYear = GameTitlesIncludingYear(parsedGameInfo).Select(t => t.CleanGameTitle()).ToArray();
+
+            if (possibleTitles.Any(pt => pt.IsNotNullOrWhiteSpace() && cleanTitlesIncludingYear.Contains(pt)))
+            {
+                _logger.Debug("Matched release '{0}' to searched game '{1}': {2} is part of the game's own title, not the release year", parsedGameInfo.PrimaryGameTitle, searchCriteria.Game.Title, parsedGameInfo.Year);
+
+                return new FindGameResult(searchCriteria.Game, GameMatchType.Title);
             }
 
             // DLC/update/season-pass titles embed the addon's own name

@@ -526,12 +526,57 @@ namespace NzbDrone.Core.Parser
 
         public static ParsedGameInfo ParseGameTitle(string title, bool isDir = false)
         {
-            return ParseGameTitle(title, isDir, true);
+            return ParseGameTitle(title, isDir, true, true);
         }
 
-        private static ParsedGameInfo ParseGameTitle(string title, bool isDir, bool allowConsoleRetry)
+        private static ParsedGameInfo ParseGameTitle(string title, bool isDir, bool allowConsoleRetry, bool allowRegionRetry = false)
         {
             var originalTitle = title;
+
+            // A console release carries its region/platform tags between the
+            // game name and the group ("Game.Name.EUR.NSW-GRP"). Those names
+            // parse, so no retry below ever fires for them - they just parse
+            // with "EUR NSW" inside the game title, and then match no game
+            // (#209). So this is attempted FIRST, and only for names that
+            // actually carry such a tag; everything else is untouched. If the
+            // stripped name parses to nothing the full name is parsed below
+            // exactly as before, which is what keeps this from regressing a
+            // name that already worked.
+            if (allowRegionRetry)
+            {
+                var regionTitle = ConsoleTitleParser.RemoveRegionMetadata(title);
+
+                if (regionTitle != null)
+                {
+                    Logger.Debug("Retrying without the region metadata: '{0}'", regionTitle);
+
+                    var regionResult = ParseGameTitle(regionTitle, isDir, true);
+
+                    if (regionResult != null)
+                    {
+                        // Only the title was rewritten; the tokens carrying the
+                        // quality, version, content type, platform and group all
+                        // live in the part that was removed, so they are read off
+                        // the full release name.
+                        regionResult.Quality = QualityParser.ParseQuality(originalTitle);
+                        regionResult.GameVersion = QualityParser.ParseGameVersion(originalTitle);
+                        regionResult.ContentType = QualityParser.ParseContentType(originalTitle);
+                        regionResult.Platform = PlatformParser.ParsePlatform(originalTitle);
+                        regionResult.PlatformString = PlatformParser.ParsePlatformString(originalTitle);
+                        regionResult.Languages = LanguageParser.ParseLanguages(originalTitle);
+                        regionResult.OriginalTitle = originalTitle;
+                        regionResult.ReleaseTitle = originalTitle;
+
+                        if (regionResult.ReleaseGroup.IsNullOrWhiteSpace())
+                        {
+                            regionResult.ReleaseGroup = ReleaseGroupParser.ParseReleaseGroup(originalTitle);
+                        }
+
+                        return regionResult;
+                    }
+                }
+            }
+
             try
             {
                 if (!ValidateBeforeParsing(title))
