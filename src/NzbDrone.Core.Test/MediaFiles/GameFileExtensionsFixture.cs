@@ -162,6 +162,32 @@ namespace NzbDrone.Core.Test.MediaFiles
             gameFile.GetPath(_game).Should().Be(Path.Combine(_game.Path, "GameTitle.exe"));
         }
 
+        [TestCase("Updates/1.2.0")]
+        [TestCase("Updates\\1.2.0")]
+        [TestCase("DLC/Some.Expansion-GRP")]
+        [TestCase("DLC/Some.Expansion-GRP/")]
+        public void should_report_a_subfolder_unit(string relativePath)
+        {
+            var gameFile = Builder<GameFile>.CreateNew()
+                .With(f => f.RelativePath = relativePath)
+                .Build();
+
+            gameFile.IsSubfolderUnit(_game).Should().BeTrue();
+        }
+
+        [TestCase("GameTitle.exe")]
+        [TestCase("GameTitle")]
+        [TestCase("SubFolder")]
+        [TestCase("")]
+        public void should_not_report_a_subfolder_unit(string relativePath)
+        {
+            var gameFile = Builder<GameFile>.CreateNew()
+                .With(f => f.RelativePath = relativePath)
+                .Build();
+
+            gameFile.IsSubfolderUnit(_game).Should().BeFalse();
+        }
+
         [Test]
         public void should_use_attached_game_when_calling_get_path_without_game_parameter()
         {

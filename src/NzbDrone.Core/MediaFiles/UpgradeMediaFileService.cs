@@ -102,6 +102,17 @@ namespace NzbDrone.Core.MediaFiles
                         _logger.Debug("Removing existing game file: {0}", existingFile);
                         recycleBinPath = _recycleBinProvider.DeleteFile(gameFilePath, subfolder);
                     }
+                    else if (_diskProvider.FolderExists(gameFilePath))
+                    {
+                        // The existing record can be a folder unit inside the game
+                        // folder (Updates/<version>, DLC/<name>): not the game
+                        // folder, so the branch above doesn't apply, but a
+                        // directory all the same. FileExists is false for one, so
+                        // this used to orphan the whole folder on disk and then
+                        // delete its row (gamarr-app/Gamarr#215).
+                        _logger.Debug("Removing existing game folder: {0}", gameFilePath);
+                        _recycleBinProvider.DeleteFolder(gameFilePath);
+                    }
                     else
                     {
                         _logger.Warn("Existing game file missing from disk: {0}", gameFilePath);

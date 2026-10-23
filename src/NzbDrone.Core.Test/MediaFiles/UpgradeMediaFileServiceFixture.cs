@@ -168,6 +168,38 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_recycle_an_existing_folder_unit_being_replaced()
+        {
+            // The record being replaced can be an update/DLC folder inside the
+            // game folder: not the game folder itself, so the folder branch
+            // doesn't catch it, and FileExists is false for a directory. That
+            // left the folder on disk and deleted its row (#215).
+            _localGame.Game.GameFileId = 1;
+            _localGame.Game.GameFile = new GameFile
+            {
+                Id = 1,
+                RelativePath = Path.Combine("Updates", "4.9.1")
+            };
+
+            var existingPath = Path.Combine(_localGame.Game.Path, Path.Combine("Updates", "4.9.1"));
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(c => c.FileExists(It.IsAny<string>()))
+                  .Returns(false);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(c => c.FolderExists(existingPath))
+                  .Returns(true);
+
+            Subject.UpgradeGameFile(_gameFile, _localGame);
+
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(existingPath), Times.Once());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(_localGame.Game.Path), Times.Never());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localGame.Game.GameFile, DeleteMediaFileReason.Upgrade), Times.Once());
+        }
+
+        [Test]
         public void should_return_old_game_file_in_oldFiles()
         {
             GivenSingleGameWithSingleGameFile();

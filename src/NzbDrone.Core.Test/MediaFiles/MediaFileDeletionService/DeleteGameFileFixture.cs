@@ -87,6 +87,10 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_gameFile, DeleteMediaFileReason.Manual), Times.Once());
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_gameFile.Path, It.IsAny<string>()), Times.Never());
+
+            // Dropping the row for a path that is genuinely gone is right, but it
+            // has to say so: the silence was the bug in #215.
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
@@ -100,6 +104,30 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_gameFile, DeleteMediaFileReason.Manual), Times.Once());
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_gameFile.Path, It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(It.IsAny<string>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_recycle_the_directory_when_the_record_path_is_a_folder()
+        {
+            GivenRootFolderExists();
+            GivenRootFolderHasFolders();
+            GivenGameFolderExists();
+
+            // FileExists is false for a directory, which is what made this a
+            // silent no-op (#215).
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(_gameFile.Path))
+                  .Returns(true);
+
+            Subject.DeleteGameFile(_game, _gameFile);
+
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(_gameFile.Path), Times.Once());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(_game.Path), Times.Never());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_gameFile, DeleteMediaFileReason.Manual), Times.Once());
         }
 
         [Test]

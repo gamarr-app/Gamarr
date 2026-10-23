@@ -160,11 +160,18 @@ namespace Gamarr.Api.V3.GameFiles
             }
 
             var gameFiles = _mediaFileService.GetGames(resource.GameFileIds);
-            var game = _gameService.GetGame(gameFiles.First().GameId);
 
-            foreach (var gameFile in gameFiles)
+            // Resolve the game per file: a selection can span games, and taking
+            // the first file's game for all of them resolved every later path
+            // under the wrong folder (gamarr-app/Gamarr#215).
+            foreach (var group in gameFiles.GroupBy(f => f.GameId))
             {
-                _mediaFileDeletionService.DeleteGameFile(game, gameFile);
+                var game = _gameService.GetGame(group.Key);
+
+                foreach (var gameFile in group)
+                {
+                    _mediaFileDeletionService.DeleteGameFile(game, gameFile);
+                }
             }
 
             return new { };

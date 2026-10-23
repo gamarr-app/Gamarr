@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
@@ -36,6 +37,15 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             Mocker.GetMock<IDiskProvider>()
                 .Setup(s => s.GetParentFolder(_game.Path))
                 .Returns(RootFolder);
+
+            GivenGameFiles(_folderGameFile);
+        }
+
+        private void GivenGameFiles(params GameFile[] files)
+        {
+            Mocker.GetMock<IMediaFileService>()
+                .Setup(s => s.GetFilesByGame(_game.Id))
+                .Returns(files.ToList());
         }
 
         private void GivenRootFolderExists()
@@ -96,6 +106,8 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(It.IsAny<string>()), Times.Never());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_folderGameFile, DeleteMediaFileReason.Manual), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]
@@ -113,6 +125,55 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(It.IsAny<string>()), Times.Never());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_folderGameFile, DeleteMediaFileReason.Manual), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_refuse_to_delete_the_game_folder_while_components_live_inside_it()
+        {
+            GivenRootFolderExists();
+            GivenRootFolderHasFolders();
+            GivenGameFolderExists();
+            GivenGameFolderHasContent();
+
+            var update = Builder<GameFile>.CreateNew()
+                .With(f => f.Id = _folderGameFile.Id + 1)
+                .With(f => f.RelativePath = Path.Combine("Updates", "4.9.1"))
+                .Build();
+
+            GivenGameFiles(_folderGameFile, update);
+
+            // The base record's path IS the game folder, so recycling it took the
+            // update and DLC folders of other records with it (#215).
+            var exception = Assert.Throws<NzbDroneClientException>(() => Subject.DeleteGameFile(_game, _folderGameFile));
+
+            exception.Message.Should().Contain(update.RelativePath);
+
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_still_delete_the_game_folder_when_the_other_records_are_plain_files()
+        {
+            GivenRootFolderExists();
+            GivenRootFolderHasFolders();
+            GivenGameFolderExists();
+            GivenGameFolderHasContent();
+
+            var sibling = Builder<GameFile>.CreateNew()
+                .With(f => f.Id = _folderGameFile.Id + 1)
+                .With(f => f.RelativePath = "Game Title.xci")
+                .Build();
+
+            GivenGameFiles(_folderGameFile, sibling);
+
+            Subject.DeleteGameFile(_game, _folderGameFile);
+
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFolder(_game.Path), Times.Once());
         }
 
         [Test]

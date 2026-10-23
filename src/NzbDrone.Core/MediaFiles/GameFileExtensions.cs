@@ -90,5 +90,30 @@ namespace NzbDrone.Core.MediaFiles
         {
             return gameFile.IsFolder(gameFile.Game);
         }
+
+        /// <summary>
+        /// Returns true if this GameFile is a unit living in a subfolder of the
+        /// game folder — an update or DLC imported as a folder, so
+        /// Updates/&lt;version&gt; or DLC/&lt;name&gt;.
+        /// </summary>
+        /// <remarks>
+        /// These records are neither the game folder nor a plain file next to
+        /// it: their path is a directory, which is what made deleting them a
+        /// silent no-op (gamarr-app/Gamarr#215). The separator is the only
+        /// reliable marker, since IsFolder deliberately matches the game
+        /// folder's own name and nothing else.
+        /// </remarks>
+        public static bool IsSubfolderUnit(this GameFile gameFile, Game game)
+        {
+            if (gameFile.RelativePath.IsNullOrWhiteSpace() || gameFile.IsFolder(game))
+            {
+                return false;
+            }
+
+            return gameFile.RelativePath
+                .Replace('\\', '/')
+                .Trim('/')
+                .Contains('/');
+        }
     }
 }
