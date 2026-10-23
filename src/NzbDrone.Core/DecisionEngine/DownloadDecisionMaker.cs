@@ -170,7 +170,7 @@ namespace NzbDrone.Core.DecisionEngine
         {
             var contentType = remoteGame.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
 
-            if (contentType != ReleaseContentType.DlcOnly && contentType != ReleaseContentType.SeasonPass)
+            if (!contentType.OccupiesDlcSlot())
             {
                 return;
             }
@@ -183,8 +183,8 @@ namespace NzbDrone.Core.DecisionEngine
 
             var slot = slots.FirstOrDefault(c => c.ComponentType == GameComponentType.Dlc &&
                                                  c.QualityProfileId > 0 &&
-                                                 (GameComponentMatcher.ReleaseMatchesDlcTitle(remoteGame.Release.Title, c.Title) ||
-                                                  GameComponentMatcher.ReleaseMatchesDlcTitle(remoteGame.ParsedGameInfo.PrimaryGameTitle, c.Title)));
+                                                 (GameComponentMatcher.ReleaseMatchesDlcTitle(remoteGame.Release.Title, c.Title, remoteGame.Game?.Title) ||
+                                                  GameComponentMatcher.ReleaseMatchesDlcTitle(remoteGame.ParsedGameInfo.PrimaryGameTitle, c.Title, remoteGame.Game?.Title)));
 
             if (slot == null)
             {

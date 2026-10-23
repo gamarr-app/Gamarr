@@ -164,7 +164,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
 
         private ImportSpecDecision EvaluateComponentRelease(LocalGame localGame, QualityModelComparer qualityComparer, ProperDownloadTypes downloadPropersAndRepacks)
         {
-            var isDlc = localGame.ContentType is ReleaseContentType.DlcOnly or ReleaseContentType.SeasonPass;
+            var isDlc = localGame.ContentType.OccupiesDlcSlot();
             var componentType = isDlc ? GameComponentType.Dlc : GameComponentType.Update;
 
             var installed = isDlc
@@ -228,8 +228,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
             var matchingSlotIds = (_componentService.GetByGame(localGame.Game.Id) ?? new List<GameComponent>())
                 .Where(c => c.Id > 0 &&
                             c.ComponentType == GameComponentType.Dlc &&
-                            (GameComponentMatcher.ReleaseMatchesDlcTitle(releaseName, c.Title) ||
-                             GameComponentMatcher.ReleaseMatchesDlcTitle(c.Title, releaseName)))
+                            (GameComponentMatcher.ReleaseMatchesDlcTitle(releaseName, c.Title, localGame.Game.Title) ||
+                             GameComponentMatcher.ReleaseMatchesDlcTitle(c.Title, releaseName, localGame.Game.Title)))
                 .Select(c => c.Id)
                 .ToHashSet();
 

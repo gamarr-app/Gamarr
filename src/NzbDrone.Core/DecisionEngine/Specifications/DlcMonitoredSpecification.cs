@@ -33,6 +33,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             var contentType = subject.ParsedGameInfo?.ContentType ?? ReleaseContentType.Unknown;
 
+            // Deliberately narrower than ReleaseContentTypeExtensions.OccupiesDlcSlot(),
+            // which also covers Expansion. An expansion may be standalone and
+            // may be its own library entry, and such a game has no DLC slots at
+            // all - gating it here would reject it outright on RSS. A named
+            // expansion that really is an add-on carries an explicit DLC marker
+            // in practice and classifies as DlcOnly, so it is gated below (#212).
             if (contentType != ReleaseContentType.DlcOnly && contentType != ReleaseContentType.SeasonPass)
             {
                 return DownloadSpecDecision.Accept();
@@ -47,9 +53,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                                             .Where(c => c.ComponentType == GameComponentType.Dlc)
                                             .ToList();
 
+            var gameTitle = subject.Game.Title;
+
             var matching = dlcSlots.FirstOrDefault(c =>
-                GameComponentMatcher.ReleaseMatchesDlcTitle(subject.Release.Title, c.Title) ||
-                GameComponentMatcher.ReleaseMatchesDlcTitle(subject.ParsedGameInfo.PrimaryGameTitle, c.Title));
+                GameComponentMatcher.ReleaseMatchesDlcTitle(subject.Release.Title, c.Title, gameTitle) ||
+                GameComponentMatcher.ReleaseMatchesDlcTitle(subject.ParsedGameInfo.PrimaryGameTitle, c.Title, gameTitle));
 
             if (matching == null)
             {

@@ -132,7 +132,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             // own slot (#149). Comparing it against the base file's quality
             // either wrongly rejects it (cutoff met) or wrongly grabs it as a
             // base upgrade. Gate it on whether that DLC is already on disk.
-            if (contentType is ReleaseContentType.DlcOnly or ReleaseContentType.SeasonPass)
+            if (contentType.OccupiesDlcSlot())
             {
                 var dlcFolders = (_mediaFileService.GetFilesByGame(subject.Game.Id) ?? new List<GameFile>())
                     .Where(f => f.RelativePath.IsNotNullOrWhiteSpace() &&

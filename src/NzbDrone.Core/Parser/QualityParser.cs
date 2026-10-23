@@ -83,7 +83,13 @@ namespace NzbDrone.Core.Parser
         // StandaloneDlcRegex explicitly excludes the wording, so without this it
         // came back Unknown - which IncludesBaseGame() treats as "assume base
         // game", the wrong answer for an add-on that needs one.
-        private static readonly Regex SeasonPassRegex = new (@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLCs?[\s._-]?(?:BUNDLE|UNLOCKER)|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
+        // "DLC Pack" belongs here with "DLC Bundle" and "DLC Unlocker": it is
+        // several DLCs at once, and StandaloneDlcRegex explicitly excludes the
+        // wording, so without it "<Title> DLC Pack 2 EUR NSW-GRP" came back
+        // Unknown - which IncludesBaseGame() reads as "assume base game", so the
+        // release was never base-requiring and neither prefix path in
+        // ParsingService would look for its game (#212).
+        private static readonly Regex SeasonPassRegex = new (@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLCs?[\s._-]?(?:BUNDLE|UNLOCKER|PACK)|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Expansion packs
@@ -91,7 +97,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Complete/GOTY editions (base game + all DLC)
-        private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?ALL[\s._-]?DLC[sS]?|ALL[\s._-]?DLC[sS]?\b(?![\s._-]?(?:BUNDLE|ONLY)))\b",
+        private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?(?:ALL[\s._-]?)?DLC[sS]?|ALL[\s._-]?DLC[sS]?\b(?![\s._-]?(?:BUNDLE|ONLY)))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Kiosk / store-demo builds (#207). A demo is not the base game, so it
@@ -116,10 +122,15 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex DemoBuildRegex = new (@"(?<demo>(?<=[\s._\-\[(])KIOSK|\b(?:(?:STORE|SHOP|PLAYABLE|TECH(?:NICAL)?|TIMED|KIOSK)[\s._-]?DEMO|DEMO[\s._-]?(?:BUILD|VERSION|DISC)|TRIAL[\s._-]?(?:BUILD|VERSION|EDITION)|PREVIEW[\s._-]?(?:BUILD|VERSION)|SHAREWARE))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        // The bare-word tier. "(?-i:...)" turns IgnoreCase back off for the
-        // all-caps token class alone, so INTERNAL/NSW/VENOM count as metadata
-        // while a lower-case title word does not.
-        private static readonly Regex TrailingDemoBuildRegex = new (@"\b(?<demo>DEMO|TRIAL|PREVIEW)\b(?:[\s._-]+(?:(?-i:[A-Z][A-Z0-9]*)|eShop|nsp|nsz|xci|wux|wud|cia|rar|zip|7z|v?\d[\w.]*))*[\s._-]*$",
+        // The bare-word tier. The tail-token vocabulary is shared with
+        // ConsoleTitleParser rather than spelled twice: both tiers ask the same
+        // question ("is everything after this point release metadata?"), and
+        // when the two copies drifted, a mixed-case scene tag ended the run in
+        // one and not the other (#212). "(?-i:...)" inside the shared constant
+        // turns IgnoreCase back off for the all-caps token class alone, so
+        // INTERNAL/NSW/VENOM count as metadata while a lower-case title word
+        // does not.
+        private static readonly Regex TrailingDemoBuildRegex = new (@"\b(?<demo>DEMO|TRIAL|PREVIEW)\b(?:[\s._-]+" + ConsoleTitleParser.MetadataTailToken + @")*[\s._-]*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex DemoHasLetterRegex = new (@"[A-Za-z]", RegexOptions.Compiled);
@@ -474,12 +485,20 @@ namespace NzbDrone.Core.Parser
                 return ReleaseContentType.SeasonPass;
             }
 
-            // Check for expansion packs
-            if (ExpansionRegex.IsMatch(normalizedName))
-            {
-                Logger.Trace("Detected expansion pack: {0}", CleanseLogMessage.SanitizeLogParam(name));
-                return ReleaseContentType.Expansion;
-            }
+            // An explicit DLC marker outranks the expansion check below, because
+            // a DLC's OWN NAME commonly contains a content-type word and the
+            // classifier reads the whole name (#212): "<Game> <Name> Expansion
+            // DLC" is a DLC release of an expansion called "<Name> Expansion",
+            // not an expansion pack that happens to say DLC. The marker is the
+            // release's own statement about what it carries; a word inside the
+            // add-on's title is not.
+            //
+            // This sits BELOW the update, complete-edition and season-pass
+            // tiers on purpose, and they keep their precedence: all three are
+            // markers in their own right rather than name words, and each
+            // describes something a bare "DLC" does not ("Update.v2.5.incl.DLC"
+            // patches the base, a complete edition carries the base, and a
+            // season pass carries several DLCs - #203/#204).
 
             // Check for DLC-only releases (explicit "DLC Only", "Addon Only", etc.)
             if (DlcOnlyRegex.IsMatch(normalizedName))
@@ -493,6 +512,13 @@ namespace NzbDrone.Core.Parser
             {
                 Logger.Trace("Detected standalone DLC release: {0}", CleanseLogMessage.SanitizeLogParam(name));
                 return ReleaseContentType.DlcOnly;
+            }
+
+            // Check for expansion packs
+            if (ExpansionRegex.IsMatch(normalizedName))
+            {
+                Logger.Trace("Detected expansion pack: {0}", CleanseLogMessage.SanitizeLogParam(name));
+                return ReleaseContentType.Expansion;
             }
 
             // Default to unknown - could be base game only or undetected

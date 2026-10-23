@@ -237,7 +237,7 @@ namespace NzbDrone.Core.IndexerSearch
                         return contentType == ReleaseContentType.UpdateOnly;
 
                     case GameComponentType.Dlc:
-                        return contentType.IncludesDlc() && !contentType.IncludesBaseGame() && ReleaseMatchesDlcTitle(d, component);
+                        return contentType.OccupiesDlcSlot() && ReleaseMatchesDlcTitle(d, component);
 
                     default:
                         return false;
@@ -247,7 +247,11 @@ namespace NzbDrone.Core.IndexerSearch
 
         private static bool ReleaseMatchesDlcTitle(DownloadDecision decision, GameComponent component)
         {
-            return GameComponentMatcher.ReleaseMatchesDlcTitle(decision.RemoteGame?.Release?.Title, component.Title);
+            // The game's title is what both sides share, so handing it over lets
+            // the matcher compare the slot's own name against the release's
+            // remainder rather than needing the slot's whole title verbatim
+            // (#212).
+            return GameComponentMatcher.ReleaseMatchesDlcTitle(decision.RemoteGame?.Release?.Title, component.Title, decision.RemoteGame?.Game?.Title);
         }
 
         private async Task SearchForBulkGames(List<Game> games, bool userInvokedSearch)

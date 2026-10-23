@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Games.Components
             var noIntroEntries = (_noIntroCatalogEntryRepository.GetByPlatformFamily(game.Platform) ?? Enumerable.Empty<NoIntroCatalogEntry>()).ToList();
             var noIntroSlots = _noIntroComponentPlanner.GetSlots(game, noIntroEntries);
 
-            MergeDuplicateDlcSlots(existing, files);
+            MergeDuplicateDlcSlots(existing, files, game.Title);
 
             var toInsert = new List<GameComponent>();
             var filesToUpdate = new List<GameFile>();
@@ -198,14 +198,14 @@ namespace NzbDrone.Core.Games.Components
         // Point files of matching import-keyed slots at the metadata slot and
         // drop the duplicate, so one DLC never shows as both downloaded and
         // missing.
-        private void MergeDuplicateDlcSlots(List<GameComponent> existing, List<GameFile> files)
+        private void MergeDuplicateDlcSlots(List<GameComponent> existing, List<GameFile> files, string gameTitle)
         {
             var metadataSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && IsMetadataDlcKey(c.Key)).ToList();
             var importSlots = existing.Where(c => c.ComponentType == GameComponentType.Dlc && c.Key.StartsWith("import:")).ToList();
 
             foreach (var importSlot in importSlots)
             {
-                var match = metadataSlots.FirstOrDefault(m => GameComponentMatcher.ReleaseMatchesDlcTitle(importSlot.Title, m.Title));
+                var match = metadataSlots.FirstOrDefault(m => GameComponentMatcher.ReleaseMatchesDlcTitle(importSlot.Title, m.Title, gameTitle));
 
                 if (match == null)
                 {
@@ -264,7 +264,7 @@ namespace NzbDrone.Core.Games.Components
                 // implies the user wants this DLC, so the slot turns monitored.
                 var metadataSlot = existing.Concat(toInsert)
                     .Where(c => c.ComponentType == GameComponentType.Dlc && IsMetadataDlcKey(c.Key))
-                    .FirstOrDefault(c => GameComponentMatcher.ReleaseMatchesDlcTitle(name, c.Title));
+                    .FirstOrDefault(c => GameComponentMatcher.ReleaseMatchesDlcTitle(name, c.Title, game.Title));
 
                 if (metadataSlot != null)
                 {

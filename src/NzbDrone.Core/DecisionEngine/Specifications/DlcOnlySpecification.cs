@@ -27,7 +27,20 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             if (!contentType.RequiresBaseGame())
             {
-                // Expansion packs (may be standalone) and full releases
+                // Full releases, complete editions and demos
+                return DownloadSpecDecision.Accept();
+            }
+
+            // An expansion became base-requiring in #212 so that the prefix
+            // match in ParsingService can find its base game, but it is still
+            // the one content type that MAY be standalone - a standalone
+            // expansion is usually its own library entry, and that game has no
+            // base file on disk precisely because this is the release that would
+            // provide it. Gating it on one would reject it, so this keeps the
+            // accept it had before #212; the slot-level checks downstream are
+            // where an expansion that really is an add-on gets judged.
+            if (contentType == ReleaseContentType.Expansion)
+            {
                 return DownloadSpecDecision.Accept();
             }
 

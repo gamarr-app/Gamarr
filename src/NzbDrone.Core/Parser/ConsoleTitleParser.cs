@@ -48,11 +48,32 @@ namespace NzbDrone.Core.Parser
         private const string RegionPlatformToken =
             @"(?-i:EUR|USA|JPN|JAP|ASIA|KOR|CHN|TWN|HKG|LATAM|PAL|NTSC(?:[._-]?[UJC])?|NSW|NSP|NSZ|XCI|WUX|WUD|CIA)";
 
+        // The scene tags that are conventionally written in MIXED case, so the
+        // all-caps rule below cannot see them: "iNTERNAL", "MULTi5", "MULTi",
+        // "READNFO", "eShop". Spelled out as a closed whitelist and matched
+        // case-insensitively (the enclosing regexes all set IgnoreCase), rather
+        // than loosening the all-caps rule to "any casing" - that rule is the
+        // only thing stopping an ordinary lower-case title word from counting
+        // as metadata.
+        //
+        // Before this list, a mixed-case tag ended the metadata run, the
+        // anchored tail regex failed at the first region token and matched only
+        // a later one, and the earlier region tag stayed glued to the title:
+        // "<Title> DLC Pack 2 EUR MULTi5 NSW-GRP" stripped only from "NSW" and
+        // parsed as a game called "<Title> DLC Pack 2 EUR MULTi5" (#212).
+        // The all-caps spellings (INTERNAL, READNFO, PROPER, REPACK, DLC,
+        // UPDATE) already qualified via the all-caps rule and are listed only
+        // where a mixed-case form exists.
+        private const string MixedCaseSceneTag =
+            @"(?:iNT|INTERNAL|MULTi(?:LANGUAGE)?[._-]?\d*|MULTI[._-]?\d*|READNFO|NFOFIX|DIRFIX|SAMPLEFIX|RERIP|PROPER|REPACK|eShop)";
+
         // One token of release metadata: an all-caps scene/console token
         // (upper case only, so a lower-case title word does not qualify), a
-        // store/container name, or a version.
-        private const string MetadataTailToken =
-            @"(?:(?-i:[A-Z][A-Z0-9]*)|eShop|nsp|nsz|xci|wux|wud|cia|rar|zip|7z|v?\d[\w.]*)";
+        // known mixed-case scene tag, a store/container name, or a version.
+        // Shared with QualityParser's trailing demo tier, which needs the same
+        // "everything after this point is metadata" test (#207).
+        internal const string MetadataTailToken =
+            @"(?:(?-i:[A-Z][A-Z0-9]*)|" + MixedCaseSceneTag + @"|nsp|nsz|xci|wux|wud|cia|rar|zip|7z|v?\d[\w.]*)";
 
         // Leading platform prefix: "[Switch NSP] Game Name", "[NSW] Game Name".
         // A prefix moves the start of the title, which no existing regex allows
@@ -94,6 +115,26 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex HasLetterRegex = new Regex(@"[A-Za-z]", RegexOptions.Compiled);
+
+        // A BARE leading console-platform prefix: "Nintendo Switch Hollow Knight
+        // NSZ RUS Multi9". Unlike the bracketed prefix above this is NOT safe to
+        // remove - "Nintendo Switch Sports" and "Nintendo Switch Sports Club"
+        // are real games, and "Switch" is an ordinary word - so it is used only
+        // as a VETO on the region strip, never as a replacement. See the note on
+        // RemoveRegionMetadata.
+        private static readonly Regex LeadingBarePlatformPrefixRegex = new Regex(
+            @"^(?:Nintendo[\s._-]+)?(?:N?Switch|WiiU|Wii[\s._-]?U|3DS)[\s._-]+\S",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // The anchor tokens that are ALSO the terminator of the title regex
+        // array's "Nintendo Switch <Title> NSP RUS Multi10" shape, and so are
+        // the only ones whose removal can break it. Region tags proper (EUR,
+        // NSW, JPN) are not terminators there, which is why the veto below is
+        // restricted to these three: "Nintendo Switch Sports EUR NSW-GRP"
+        // anchors on EUR, keeps its strip, and still parses.
+        private static readonly Regex DumpTokenAnchorRegex = new Regex(
+            @"^(?:NSP|NSZ|XCI)$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly char[] EdgeTrim = { ' ', '.', '_', '-' };
 
@@ -143,6 +184,26 @@ namespace NzbDrone.Core.Parser
             var cleaned = title.Substring(0, anchorIndex).Trim(EdgeTrim);
 
             if (cleaned.IsNullOrWhiteSpace() || !HasLetterRegex.IsMatch(cleaned) || cleaned == title.Trim(EdgeTrim))
+            {
+                return null;
+            }
+
+            // Leave a name that leads with a bare console-platform prefix alone.
+            // The title regex array has a dedicated shape for these ("Nintendo
+            // Switch <Title> NSP RUS Multi10") and it is TERMINATED by the very
+            // NSP/NSZ/XCI token this method anchors on, so stripping the tail
+            // first takes the terminator away: the shape stops matching, the
+            // bare-title fallback picks the name up instead, and the platform
+            // prefix ends up inside the parsed title. Since the untouched name
+            // parses correctly and the stripped one parses WRONGLY - rather than
+            // not at all - the caller's "fall back when the stripped name parses
+            // to nothing" rule cannot catch it, so the veto has to be here.
+            //
+            // The prefix is not removed instead, because it cannot be: "Nintendo
+            // Switch Sports" is a real game and dropping its first two words
+            // would leave "Sports".
+            if (DumpTokenAnchorRegex.IsMatch(match.Groups["region"].Value) &&
+                LeadingBarePlatformPrefixRegex.IsMatch(cleaned))
             {
                 return null;
             }

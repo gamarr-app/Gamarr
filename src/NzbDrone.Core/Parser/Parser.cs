@@ -979,6 +979,41 @@ namespace NzbDrone.Core.Parser
             return ReplaceGermanUmlauts(NormalizeRegex.Replace(title, string.Empty).ToLowerInvariant()).RemoveAccent();
         }
 
+        /// <summary>
+        /// What is left of <paramref name="title"/> once <paramref name="cleanGameTitle"/>
+        /// has been consumed off the front, or null when the game's title is not
+        /// a WHOLE-WORD prefix of it.
+        /// </summary>
+        /// <remarks>
+        /// Each candidate prefix is cleaned as a whole rather than word by word,
+        /// because <see cref="CleanGameTitle"/> drops articles ("of", "the") and
+        /// so is not distributive over words.
+        ///
+        /// Shared by ParsingService (which asks whether a release reads as an
+        /// add-on OF a game) and GameComponentMatcher (which asks which DLC slot
+        /// of that game the add-on is), so the two agree on where a game's title
+        /// ends and the add-on's own name begins (#212).
+        /// </remarks>
+        public static string GetTitleRemainder(string title, string cleanGameTitle)
+        {
+            if (title.IsNullOrWhiteSpace() || cleanGameTitle.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
+
+            var words = title.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (var i = 1; i <= words.Length; i++)
+            {
+                if (string.Join(" ", words.Take(i)).CleanGameTitle() == cleanGameTitle)
+                {
+                    return string.Join(" ", words.Skip(i));
+                }
+            }
+
+            return null;
+        }
+
         public static string NormalizeGameTitle(string title)
         {
             title = SpecialEpisodeWordRegex.Replace(title, string.Empty);

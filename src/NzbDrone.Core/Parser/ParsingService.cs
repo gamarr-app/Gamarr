@@ -132,31 +132,6 @@ namespace NzbDrone.Core.Parser
             return prefixMatch;
         }
 
-        // What is left of the release's title once the game's clean title has
-        // been consumed off the front, or null when the game's title is not a
-        // WHOLE-WORD prefix of it. Each prefix is cleaned as a whole rather
-        // than word by word, because cleaning drops articles ("of", "the") and
-        // so is not distributive over words.
-        private static string GetTitleRemainder(string releaseTitle, string cleanGameTitle)
-        {
-            if (releaseTitle.IsNullOrWhiteSpace() || cleanGameTitle.IsNullOrWhiteSpace())
-            {
-                return null;
-            }
-
-            var words = releaseTitle.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (var i = 1; i <= words.Length; i++)
-            {
-                if (string.Join(" ", words.Take(i)).CleanGameTitle() == cleanGameTitle)
-                {
-                    return string.Join(" ", words.Skip(i));
-                }
-            }
-
-            return null;
-        }
-
         // True when the release's title reads as an add-on OF this game: the
         // game's title, then an add-on marker ("<Game> Update v1.2", "<Game>
         // DLC <name>", "<Game> Wave 1 DLC").
@@ -172,7 +147,7 @@ namespace NzbDrone.Core.Parser
         {
             return parsedGameInfo.GameTitles.Any(releaseTitle =>
             {
-                var remainder = GetTitleRemainder(releaseTitle, cleanGameTitle);
+                var remainder = Parser.GetTitleRemainder(releaseTitle, cleanGameTitle);
 
                 if (remainder == null)
                 {

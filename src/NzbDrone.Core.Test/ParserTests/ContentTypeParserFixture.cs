@@ -168,7 +168,9 @@ namespace NzbDrone.Core.Test.ParserTests
             ReleaseContentType.SeasonPass.RequiresBaseGame().Should().BeTrue();
             ReleaseContentType.BaseGame.RequiresBaseGame().Should().BeFalse();
             ReleaseContentType.BaseGameWithAllDlc.RequiresBaseGame().Should().BeFalse();
-            ReleaseContentType.Expansion.RequiresBaseGame().Should().BeFalse();
+
+            // An expansion is applied on top of a base game (#212)
+            ReleaseContentType.Expansion.RequiresBaseGame().Should().BeTrue();
             ReleaseContentType.Unknown.RequiresBaseGame().Should().BeFalse();
         }
 

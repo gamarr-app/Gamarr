@@ -59,7 +59,7 @@ namespace NzbDrone.Core.MediaFiles
 
             if (existingFile != null && localGame.IsComponentRelease)
             {
-                localGame.ImportSubfolder = contentType is ReleaseContentType.DlcOnly or ReleaseContentType.SeasonPass
+                localGame.ImportSubfolder = contentType.OccupiesDlcSlot()
                     ? Path.Combine("DLC", GetDlcFolderName(localGame))
                     : Path.Combine("Updates", GetUpdateFolderName(localGame));
 
