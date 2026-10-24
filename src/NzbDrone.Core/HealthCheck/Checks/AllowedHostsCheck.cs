@@ -1,3 +1,4 @@
+using System.Linq;
 using NLog;
 using NzbDrone.Core.Authentication;
 using NzbDrone.Core.Configuration;
@@ -23,7 +24,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
 
         public override HealthCheck Check()
         {
-            var allowedHosts = AllowedHostsParser.Parse(_configFileProvider.AllowedHosts);
+            var allowedHosts = AllowedHostsParser.Parse(_configFileProvider.AllowedHosts).Where(h => !AllowedHostsParser.IsBindAddress(h)).ToList();
 
             // A configured "*" is not a configuration: it accepts every hostname, which is
             // exactly the state this check exists to warn about.
