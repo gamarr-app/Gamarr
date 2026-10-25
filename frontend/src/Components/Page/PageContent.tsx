@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import ErrorBoundary from 'Components/Error/ErrorBoundary';
@@ -10,11 +11,7 @@ interface PageContentProps {
   children: ReactNode;
 }
 
-function PageContent({
-  className = styles.content,
-  title,
-  children,
-}: PageContentProps) {
+function PageContent({ className, title, children }: PageContentProps) {
   return (
     <ErrorBoundary errorComponent={PageContentError}>
       <Helmet>
@@ -24,7 +21,7 @@ function PageContent({
             : window.Gamarr.instanceName}
         </title>
       </Helmet>
-      <div className={className}>{children}</div>
+      <div className={classNames(styles.content, className)}>{children}</div>
     </ErrorBoundary>
   );
 }
