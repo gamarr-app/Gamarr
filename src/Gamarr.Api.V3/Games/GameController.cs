@@ -412,7 +412,11 @@ namespace Gamarr.Api.V3.Games
         private void LinkGameStatistics(GameResource resource, GameStatistics gameStatistics)
         {
             resource.Statistics = gameStatistics.ToResource();
-            resource.HasFile = gameStatistics.GameFileCount > 0;
+
+            // PrimaryFileCount, not GameFileCount: this flag means "the game's
+            // base file row exists", and GameFileCount now counts every unit the
+            // game owns (base + updates + DLC, #149/#221).
+            resource.HasFile = gameStatistics.PrimaryFileCount > 0;
             resource.SizeOnDisk = gameStatistics.SizeOnDisk;
         }
 

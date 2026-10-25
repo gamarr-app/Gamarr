@@ -88,6 +88,61 @@ namespace NzbDrone.Core.Test.GameStatsTests
             stats.First().SizeOnDisk.Should().Be(_gameFile.Size);
         }
 
+        private GameFile GivenUnit(string relativePath, int componentId)
+        {
+            var file = Builder<GameFile>.CreateNew()
+                .With(e => e.GameId = _game.Id)
+                .With(e => e.RelativePath = relativePath)
+                .With(e => e.ComponentId = componentId)
+                .With(e => e.Quality = new QualityModel(Quality.Repack))
+                .With(e => e.Languages = new List<Language> { Language.English })
+                .BuildNew();
+
+            Db.Insert(file);
+
+            return file;
+        }
+
+        // #221: GameFileCount came from the game's single GameFileId pointer, so
+        // it was never anything but 0 or 1 however many units the game owned.
+        [Test]
+        public void should_count_every_unit_the_game_owns()
+        {
+            var baseFile = GivenUnit("game.iso", 0);
+            GivenUnit("Updates/1.2.1/update.iso", 1);
+            GivenUnit("DLC/Season Pass/dlc.iso", 2);
+
+            _game.GameFileId = baseFile.Id;
+            Db.Update(_game);
+
+            var stats = Subject.GameStatistics();
+
+            stats.Should().HaveCount(1);
+            stats.First().GameFileCount.Should().Be(3);
+            stats.First().PrimaryFileCount.Should().Be(1);
+        }
+
+        [Test]
+        public void should_report_no_primary_file_when_the_pointer_is_unset()
+        {
+            GivenUnit("DLC/Season Pass/dlc.iso", 2);
+
+            var stats = Subject.GameStatistics();
+
+            stats.Should().HaveCount(1);
+            stats.First().GameFileCount.Should().Be(1);
+            stats.First().PrimaryFileCount.Should().Be(0);
+        }
+
+        [Test]
+        public void should_have_file_count_of_zero_when_no_game_file()
+        {
+            var stats = Subject.GameStatistics();
+
+            stats.Should().HaveCount(1);
+            stats.First().GameFileCount.Should().Be(0);
+        }
+
         // [Test]
         // public void should_not_duplicate_size_for_multi_game_files()
         // {

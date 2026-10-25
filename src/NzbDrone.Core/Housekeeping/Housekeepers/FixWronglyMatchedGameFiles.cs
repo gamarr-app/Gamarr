@@ -13,6 +13,10 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 
         public void Clean()
         {
+            // Deliberately a no-op, and do NOT revive the SQL below as written: it
+            // assumes one file row per game, so with base + "Updates/<ver>" +
+            // "DLC/<name>" rows (#149) the scalar subqueries match several rows and
+            // would repoint Games.GameFileId at an arbitrary unit (#221).
             /*var mapper = _database.GetDataMapper();
 
             mapper.Execute(@"UPDATE ""Games""

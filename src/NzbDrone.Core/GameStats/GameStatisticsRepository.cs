@@ -43,6 +43,7 @@ namespace NzbDrone.Core.GameStats
             {
                 var file = filesResult.SingleOrDefault(f => f.GameId == e.GameId);
 
+                e.GameFileCount = file?.GameFileCount ?? 0;
                 e.SizeOnDisk = file?.SizeOnDisk ?? 0;
                 e.ReleaseGroupsString = file?.ReleaseGroupsString;
             });
@@ -63,7 +64,7 @@ namespace NzbDrone.Core.GameStats
         {
             return new SqlBuilder(_database.DatabaseType)
                 .Select(@"""Games"".""Id"" AS GameId,
-                        SUM(CASE WHEN ""GameFileId"" > 0 THEN 1 ELSE 0 END) AS GameFileCount")
+                        SUM(CASE WHEN ""GameFileId"" > 0 THEN 1 ELSE 0 END) AS PrimaryFileCount")
                 .GroupBy<Game>(x => x.Id);
         }
 
@@ -73,6 +74,7 @@ namespace NzbDrone.Core.GameStats
             {
                 return new SqlBuilder(_database.DatabaseType)
                     .Select(@"""GameId"",
+                            COUNT(""Id"") AS GameFileCount,
                             SUM(COALESCE(""Size"", 0)) AS SizeOnDisk,
                             GROUP_CONCAT(""ReleaseGroup"", '|') AS ReleaseGroupsString")
                     .GroupBy<GameFile>(x => x.GameId);
@@ -80,6 +82,7 @@ namespace NzbDrone.Core.GameStats
 
             return new SqlBuilder(_database.DatabaseType)
                 .Select(@"""GameId"",
+                        COUNT(""Id"") AS GameFileCount,
                         SUM(COALESCE(""Size"", 0)) AS SizeOnDisk,
                         string_agg(""ReleaseGroup"", '|') AS ReleaseGroupsString")
                 .GroupBy<GameFile>(x => x.GameId);
