@@ -34,7 +34,41 @@ namespace NzbDrone.Core.Parser
         // abbreviation dot sank the whole parse - every word shape below is
         // letters and digits only, so "Capt." matched nothing at all.
         private const string BareTitleAbbreviationDot = @"(?:\.(?=\s|$))?";
-        private const string BareTitleBody = @"(?:" + BareTitleFirstWord + @")(?:'[a-z]+)?" + BareTitleAbbreviationDot + @"(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:" + BareTitleWord + @")(?:'[a-z]+)?" + BareTitleAbbreviationDot + @")*";
+
+        // All-caps words that are release metadata, not part of a game name.
+        // Excluded from the permissive word class below, because neither
+        // normaliser is guaranteed to have taken every such token away: the
+        // region strip of "<Game> REPACK NSW-GRP" anchors on NSW and hands back
+        // "<Game> REPACK". Without this the permissive class would read that
+        // leftover as a title word and the release would match no game - the
+        // same #209 failure the region strip exists to fix, one token later.
+        // Vocabulary mirrors ConsoleTitleParser's region/platform tokens and
+        // mixed-case scene tags, plus the component markers that have their own
+        // shapes above the fallback.
+        private const string BareTitleMetadataWord = @"(?:NSW|NSP|NSZ|XCI|WUX|WUD|CIA|EUR|USA|JPN|JAP|ASIA|KOR|CHN|TWN|HKG|LATAM|PAL|NTSC|INT|INTERNAL|READNFO|NFOFIX|DIRFIX|SAMPLEFIX|RERIP|PROPER|REPACK|MULTI|DLC|DLCS|UPDATE|PATCH|KIOSK|DEMO|TRIAL|PREVIEW)\b";
+
+        // The extra word shapes that are only safe on a NORMALISED pass, i.e.
+        // one whose title came back from ConsoleTitleParser.Normalize or
+        // RemoveRegionMetadata and therefore no longer carries the dump,
+        // platform, region or group tokens (#222): an all-caps brand or acronym
+        // word ("ABCD", "NBA", "WRC24") and a digit-led token ("2K24").
+        // These must NEVER be offered on the first, raw pass - see the comment
+        // on the DLC-component shape for why.
+        private const string NormalizedBareTitleExtraWord = @"(?!" + BareTitleMetadataWord + @")[A-Z]{2,}\d*|\d+[A-Z]+\d*";
+
+        // One template, two instantiations, so the strict body stays exactly
+        // what it has always been and the permissive one can only ever differ by
+        // the extra word shapes.
+        private static string BuildBareTitleBody(string firstWord, string word)
+        {
+            return @"(?:" + firstWord + @")(?:'[a-z]+)?" + BareTitleAbbreviationDot + @"(?:(?:[:,]\s+|\s+-\s+|\s+\+\s+|\s+)(?:" + word + @")(?:'[a-z]+)?" + BareTitleAbbreviationDot + @")*";
+        }
+
+        private static readonly string BareTitleBody = BuildBareTitleBody(BareTitleFirstWord, BareTitleWord);
+
+        private static readonly string NormalizedBareTitleBody = BuildBareTitleBody(
+            BareTitleFirstWord + "|" + NormalizedBareTitleExtraWord,
+            BareTitleWord + "|" + NormalizedBareTitleExtraWord);
 
         // The add-on vocabulary a component release carries after the game's own
         // title, as used by the DLC-component shape below. Shared with
@@ -337,6 +371,10 @@ namespace NzbDrone.Core.Parser
             // fallback's word class about all-caps tokens: that would also make
             // "<Game> NSW VENOM" match here with the dump tokens glued onto the
             // game title, instead of being normalised away by the console retry.
+            // That is still true of THIS, the raw pass. Once the console retry
+            // has run, the tokens are gone and the all-caps words that are left
+            // are the title's own, so ReportGameTitleNormalizedRegex below
+            // repeats both shapes with a permissive word class (#222).
             // The title body is shared with that fallback, so a name still has to
             // look like a game title to reach the DLC suffix.
             new Regex(@"^(?<title>" + BareTitleBody + @"(?:\s+" + ComponentWaveSuffix + @")?\s+" + ComponentDlcSuffix + @")$", RegexOptions.Compiled),
@@ -394,6 +432,28 @@ namespace NzbDrone.Core.Parser
             // demands whitespace on both sides and this one forbids it, so the two
             // never compete and no new backtracking is introduced.
             new Regex(@"^(?<title>" + BareTitleBody + @"(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
+        };
+
+        // The two bare-title shapes again, with the permissive word class, tried
+        // ONLY after every regex above has failed AND the title handed in came
+        // out of ConsoleTitleParser.Normalize / RemoveRegionMetadata (#222).
+        //
+        // A space-separated console release whose name holds an all-caps word -
+        // "ABCD Aaaaa Bbbbb NSW-GROUPX" - matches no shaped regex, so it falls
+        // to the console retry, which correctly hands the bare title back; the
+        // strict fallback then threw it away, while the dotted, underscored and
+        // "Update vX" forms of the same name all parsed. The all-caps exclusion
+        // is there to stop "<Game> NSW VENOM" matching with the dump tokens
+        // glued onto the title, and that reasoning only applies to the RAW name:
+        // by the time one of these runs, those tokens are already gone.
+        //
+        // Appended AFTER the strict array rather than replacing it, so any name
+        // that parses today keeps parsing exactly as it did; the DLC shape stays
+        // ahead of the fallback here for the same reason it does there.
+        private static readonly Regex[] ReportGameTitleNormalizedRegex = new[]
+        {
+            new Regex(@"^(?<title>" + NormalizedBareTitleBody + @"(?:\s+" + ComponentWaveSuffix + @")?\s+" + ComponentDlcSuffix + @")$", RegexOptions.Compiled),
+            new Regex(@"^(?<title>" + NormalizedBareTitleBody + @"(?:\s+[IVXLCDM]+)?)$", RegexOptions.Compiled)
         };
 
         private static readonly Regex[] ReportGameTitleFolderRegex = new[]
@@ -529,7 +589,14 @@ namespace NzbDrone.Core.Parser
             return ParseGameTitle(title, isDir, true, true);
         }
 
-        private static ParsedGameInfo ParseGameTitle(string title, bool isDir, bool allowConsoleRetry, bool allowRegionRetry = false)
+        // titleWasNormalized is true when "title" is not the release name but the
+        // output of ConsoleTitleParser.Normalize / RemoveRegionMetadata, i.e. the
+        // dump, platform, region and group tokens have already been taken off
+        // it. Only then may the permissive bare-title shapes run (#222). It is
+        // deliberately NOT inferred from allowConsoleRetry: the retries pass that
+        // as false and the first raw pass passes it as true, so the two flags
+        // mean opposite things.
+        private static ParsedGameInfo ParseGameTitle(string title, bool isDir, bool allowConsoleRetry, bool allowRegionRetry = false, bool titleWasNormalized = false)
         {
             var originalTitle = title;
 
@@ -550,7 +617,7 @@ namespace NzbDrone.Core.Parser
                 {
                     Logger.Debug("Retrying without the region metadata: '{0}'", regionTitle);
 
-                    var regionResult = ParseGameTitle(regionTitle, isDir, true);
+                    var regionResult = ParseGameTitle(regionTitle, isDir, true, false, true);
 
                     if (regionResult != null)
                     {
@@ -653,6 +720,11 @@ namespace NzbDrone.Core.Parser
                     allRegexes.AddRange(ReportGameTitleFolderRegex);
                 }
 
+                if (titleWasNormalized)
+                {
+                    allRegexes.AddRange(ReportGameTitleNormalizedRegex);
+                }
+
                 foreach (var regex in allRegexes)
                 {
                     var match = regex.Matches(simpleTitle);
@@ -660,6 +732,15 @@ namespace NzbDrone.Core.Parser
                     if (match.Count != 0)
                     {
                         Logger.Trace(regex);
+
+                        // A permissive match is worth saying out loud: it accepts
+                        // words no other shape does, so when it picks the wrong
+                        // title there is otherwise no line in the log to point at.
+                        if (ReportGameTitleNormalizedRegex.Contains(regex))
+                        {
+                            Logger.Debug("Matched '{0}' with the normalized-pass bare title shape", simpleTitle);
+                        }
+
                         try
                         {
                             var result = ParseGameMatchCollection(match);
@@ -810,7 +891,7 @@ namespace NzbDrone.Core.Parser
                 {
                     Logger.Debug("Retrying as a console release: '{0}'", consoleTitle);
 
-                    var consoleResult = ParseGameTitle(consoleTitle, isDir, false);
+                    var consoleResult = ParseGameTitle(consoleTitle, isDir, false, false, true);
 
                     if (consoleResult != null)
                     {
@@ -847,7 +928,13 @@ namespace NzbDrone.Core.Parser
                 {
                     Logger.Debug("Retrying with the abbreviation dot separated: '{0}'", abbreviationTitle);
 
-                    var abbreviationResult = ParseGameTitle(abbreviationTitle, isDir, false);
+                    // The permissive word class is offered here only when the
+                    // name went through ConsoleTitleParser first. With
+                    // consoleTitle null nothing was stripped, so an all-caps
+                    // scene tag the normaliser does not touch (".INTERNAL",
+                    // ".READNFO") would still be sitting in the name and could
+                    // land inside the parsed title.
+                    var abbreviationResult = ParseGameTitle(abbreviationTitle, isDir, false, false, consoleTitle != null);
 
                     if (abbreviationResult != null)
                     {
