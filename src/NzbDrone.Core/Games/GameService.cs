@@ -8,6 +8,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
+using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Parser;
@@ -507,6 +508,13 @@ namespace NzbDrone.Core.Games
             throw new MultipleGamesFoundException(games, "Expected one game, but found {0}. Matching games: {1}", games.Count, string.Join(",", games));
         }
 
+        // Runs before every other GameFileAddedEvent handler: this is the
+        // handler that assigns the imported file as the game's primary file, and
+        // handlers after it read that state. Without the ordering the
+        // post-import update search (#210) could be queued first and start
+        // while GameFileId was still 0, so every update release in it was
+        // rejected as "requires base game (none on disk)" (#216).
+        [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(GameFileAddedEvent message)
         {
             var game = message.GameFile.Game;

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
@@ -46,8 +45,7 @@ namespace NzbDrone.Core.MediaFiles
 
         private static bool IsUpdateUnit(GameFile file)
         {
-            return file.RelativePath.IsNotNullOrWhiteSpace() &&
-                   file.RelativePath.Replace('\\', '/').StartsWith("Updates/");
+            return GameFileUnit.IsUpdate(file);
         }
 
         public void Handle(GameFileAddedEvent message)

@@ -1,3 +1,4 @@
+using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
@@ -5,6 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
+using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.GameTests.GameServiceTests
@@ -94,6 +96,34 @@ namespace NzbDrone.Core.Test.GameTests.GameServiceTests
             Subject.Handle(message);
 
             Mocker.GetMock<IGameRepository>().Verify(v => v.Update(It.IsAny<Game>()), Times.Never());
+        }
+
+        // #216: handlers that react to an import read the primary-file pointer
+        // this handler writes, so it has to run before all of them — the
+        // post-import update search was queued first and saw GameFileId 0.
+        [Test]
+        public void should_assign_the_primary_file_before_any_other_handler_runs()
+        {
+            var order = typeof(GameService).GetMethod(nameof(GameService.Handle), new[] { typeof(GameFileAddedEvent) })
+                                           .GetCustomAttributes(typeof(EventHandleOrderAttribute), true)
+                                           .Cast<EventHandleOrderAttribute>()
+                                           .SingleOrDefault();
+
+            order.Should().NotBeNull();
+            order.EventHandleOrder.Should().Be(EventHandleOrder.First);
+        }
+
+        [Test]
+        public void should_queue_the_post_import_update_search_after_the_assignment()
+        {
+            var order = typeof(IndexerSearch.GameUpdateSearchService)
+                        .GetMethod(nameof(IndexerSearch.GameUpdateSearchService.Handle), new[] { typeof(GameFileAddedEvent) })
+                        .GetCustomAttributes(typeof(EventHandleOrderAttribute), true)
+                        .Cast<EventHandleOrderAttribute>()
+                        .SingleOrDefault();
+
+            order.Should().NotBeNull();
+            order.EventHandleOrder.Should().Be(EventHandleOrder.Last);
         }
     }
 }

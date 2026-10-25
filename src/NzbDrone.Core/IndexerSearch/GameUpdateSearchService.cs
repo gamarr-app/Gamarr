@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Download;
@@ -10,6 +9,7 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
+using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser.Model;
@@ -75,34 +75,28 @@ namespace NzbDrone.Core.IndexerSearch
             _logger = logger;
         }
 
-        // The import layout puts updates under "Updates/" and DLC under "DLC/".
-        // A folder-granularity release is the game folder itself and has an
-        // empty RelativePath; anything that is neither is the base game.
+        // Shared with the rest of the fork (GameFileUnit): updates live under
+        // "Updates/", DLC under "DLC/", everything else — including a
+        // folder-granularity release, whose RelativePath is empty — is base.
         internal static bool IsBaseUnit(GameFile file)
         {
-            return file != null && !IsUpdateUnit(file) && !IsDlcUnit(file);
+            return GameFileUnit.IsBase(file);
         }
 
         internal static bool IsUpdateUnit(GameFile file)
         {
-            return HasPrefix(file, "Updates/");
-        }
-
-        private static bool IsDlcUnit(GameFile file)
-        {
-            return HasPrefix(file, "DLC/");
-        }
-
-        private static bool HasPrefix(GameFile file, string prefix)
-        {
-            return file?.RelativePath.IsNotNullOrWhiteSpace() == true &&
-                   file.RelativePath.Replace('\\', '/').StartsWith(prefix);
+            return GameFileUnit.IsUpdate(file);
         }
 
         /// <summary>
         /// Fires for an auto-import, a manual import and a disk-scan adoption
         /// alike: all three add the file through MediaFileService.Add.
+        ///
+        /// Ordered last so the primary-file assignment in GameService has
+        /// already run and the game row is current before the search is queued
+        /// (#216).
         /// </summary>
+        [EventHandleOrder(EventHandleOrder.Last)]
         public void Handle(GameFileAddedEvent message)
         {
             // An exception from a handler skips every handler after it in the
@@ -116,7 +110,10 @@ namespace NzbDrone.Core.IndexerSearch
                     return;
                 }
 
-                var game = message.GameFile.Game ?? _gameService.FindGame(message.GameFile.GameId);
+                // Stored row first: the Game the importer carries is the copy it
+                // loaded before the import and its GameFileId / monitoring can
+                // already be out of date by the time this runs.
+                var game = _gameService.FindGame(message.GameFile.GameId) ?? message.GameFile.Game;
 
                 if (game == null)
                 {

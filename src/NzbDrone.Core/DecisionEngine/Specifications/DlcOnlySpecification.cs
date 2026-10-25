@@ -1,15 +1,18 @@
 using NLog;
 using NzbDrone.Common.Instrumentation;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
 {
     public class DlcOnlySpecification : IDownloadDecisionEngineSpecification
     {
+        private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
-        public DlcOnlySpecification(Logger logger)
+        public DlcOnlySpecification(IMediaFileService mediaFileService, Logger logger)
         {
+            _mediaFileService = mediaFileService;
             _logger = logger;
         }
 
@@ -50,6 +53,20 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             if (subject.Game?.HasFile == true)
             {
                 _logger.Debug("Release requires the base game and one is on disk, accepting: {0}", CleanseLogMessage.SanitizeLogParam(subject.Release.Title));
+                return DownloadSpecDecision.Accept();
+            }
+
+            // HasFile is only the game's primary-file pointer, and the pointer
+            // is not the same question as "is a base game on disk". The
+            // post-import update search (#210) runs while the base file row
+            // already exists but the pointer has not been written yet, so every
+            // update in it was rejected as "none on disk" and a manual search
+            // minutes later took the same release (#216). The pointer can also
+            // legitimately name a unit other than the base. So before rejecting,
+            // ask the files.
+            if (subject.Game?.Id > 0 && GameFileUnit.HasBaseOnDisk(_mediaFileService.GetFilesByGame(subject.Game.Id)))
+            {
+                _logger.Debug("Release requires the base game and a base file is recorded for the game, accepting: {0}", CleanseLogMessage.SanitizeLogParam(subject.Release.Title));
                 return DownloadSpecDecision.Accept();
             }
 

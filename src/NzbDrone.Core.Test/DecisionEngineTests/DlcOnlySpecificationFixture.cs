@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using FluentAssertions;
+using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -69,6 +72,43 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteGame.ParsedGameInfo.ContentType = contentType;
 
             Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
+        }
+
+        // #216: the post-import update search runs while the base file row
+        // already exists but the game's primary pointer may not have caught up,
+        // and every update was rejected as "none on disk" because of it.
+        [TestCase(ReleaseContentType.DlcOnly)]
+        [TestCase(ReleaseContentType.UpdateOnly)]
+        [TestCase(ReleaseContentType.SeasonPass)]
+        public void should_accept_base_requiring_release_when_a_base_file_exists_but_primary_is_unassigned(ReleaseContentType contentType)
+        {
+            _remoteGame.Game = new NzbDrone.Core.Games.Game { Id = 7, GameFileId = 0 };
+            _remoteGame.ParsedGameInfo.ContentType = contentType;
+
+            GivenFiles(new GameFile { Id = 1, GameId = 7, RelativePath = string.Empty });
+
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeTrue();
+        }
+
+        [TestCase(ReleaseContentType.DlcOnly)]
+        [TestCase(ReleaseContentType.UpdateOnly)]
+        [TestCase(ReleaseContentType.SeasonPass)]
+        public void should_reject_base_requiring_release_when_only_update_and_dlc_files_exist(ReleaseContentType contentType)
+        {
+            _remoteGame.Game = new NzbDrone.Core.Games.Game { Id = 7, GameFileId = 0 };
+            _remoteGame.ParsedGameInfo.ContentType = contentType;
+
+            GivenFiles(new GameFile { Id = 1, GameId = 7, RelativePath = "Updates/v1.0.2" },
+                       new GameFile { Id = 2, GameId = 7, RelativePath = "DLC/The Blood Price" });
+
+            Subject.IsSatisfiedBy(_remoteGame, new ReleaseDecisionInformation()).Accepted.Should().BeFalse();
+        }
+
+        private void GivenFiles(params GameFile[] files)
+        {
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(It.IsAny<int>()))
+                  .Returns(new List<GameFile>(files));
         }
 
         [Test]
