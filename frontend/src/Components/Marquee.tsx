@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import useMeasure from 'Helpers/Hooks/useMeasure';
 
 const FPS = 20;
 const STEP = 1;
@@ -22,8 +23,8 @@ function Marquee(props: MarqueeProps) {
     className = '',
   } = props;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const textRef = useRef<HTMLSpanElement | null>(null);
+  const [containerRef, { width: containerWidth }] = useMeasure();
+  const [textRef, { width: textWidth }] = useMeasure();
   const marqueeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // The step loop reads/writes these every frame. Keeping them in refs
@@ -37,28 +38,43 @@ function Marquee(props: MarqueeProps) {
   const [animatedWidth, setAnimatedWidth] = useState(0);
   const [overflowWidth, setOverflowWidth] = useState(0);
 
-  // Measure whenever the text itself changes. This is the only thing that
-  // should trigger a re-measure, so overflowWidth is intentionally not a dep.
+  // Always restart the scroll from the beginning when the text itself
+  // changes, independent of whether that happens to change the overflow.
   useEffect(() => {
-    const container = containerRef.current;
-    const node = textRef.current;
-
-    if (container && node) {
-      const containerWidth = container.offsetWidth;
-      const textWidth = node.offsetWidth;
-      const newOverflowWidth = textWidth - containerWidth;
-
-      setOverflowWidth((prevOverflowWidth) =>
-        prevOverflowWidth === newOverflowWidth
-          ? prevOverflowWidth
-          : newOverflowWidth
-      );
-    }
-
     animatedWidthRef.current = 0;
     directionRef.current = 0;
     setAnimatedWidth(0);
   }, [text]);
+
+  // Re-measure whenever the container or the text node is resized, not just
+  // when the text changes. The container's width is frequently set from
+  // layout computed after mount (eg. GameDetails sizes it from a measured
+  // sibling), so a one-shot measurement keyed only on text can run against
+  // the box's pre-layout width and never get corrected. containerWidth and
+  // textWidth come from ResizeObserver via useMeasure, so this effect reruns
+  // whenever either box actually changes size.
+  useEffect(() => {
+    if (!containerWidth || !textWidth) {
+      return;
+    }
+
+    const newOverflowWidth = textWidth - containerWidth;
+
+    setOverflowWidth((prevOverflowWidth) => {
+      if (prevOverflowWidth === newOverflowWidth) {
+        return prevOverflowWidth;
+      }
+
+      // The box resized: snap back to the start instead of leaving the
+      // animation mid-scroll (eg. a title that now fits should rest at
+      // right: 0, not keep scrolling from wherever it was).
+      animatedWidthRef.current = 0;
+      directionRef.current = 0;
+      setAnimatedWidth(0);
+
+      return newOverflowWidth;
+    });
+  }, [containerWidth, textWidth]);
 
   // Single effect owns the animation loop. It only depends on primitive
   // values that should actually restart it, so it settles once mounted
