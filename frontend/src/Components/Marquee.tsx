@@ -26,11 +26,20 @@ function Marquee(props: MarqueeProps) {
   const textRef = useRef<HTMLSpanElement | null>(null);
   const marqueeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // The step loop reads/writes these every frame. Keeping them in refs
+  // (instead of state) means the loop never needs to be rebuilt mid-flight.
+  const animatedWidthRef = useRef(0);
+  const directionRef = useRef(0);
+
+  const startRef = useRef<() => void>(() => undefined);
+  const stopRef = useRef<() => void>(() => undefined);
+
   const [animatedWidth, setAnimatedWidth] = useState(0);
   const [overflowWidth, setOverflowWidth] = useState(0);
-  const [direction, setDirection] = useState(0);
 
-  const measureText = useCallback(() => {
+  // Measure whenever the text itself changes. This is the only thing that
+  // should trigger a re-measure, so overflowWidth is intentionally not a dep.
+  useEffect(() => {
     const container = containerRef.current;
     const node = textRef.current;
 
@@ -39,113 +48,103 @@ function Marquee(props: MarqueeProps) {
       const textWidth = node.offsetWidth;
       const newOverflowWidth = textWidth - containerWidth;
 
-      if (newOverflowWidth !== overflowWidth) {
-        setOverflowWidth(newOverflowWidth);
-      }
+      setOverflowWidth((prevOverflowWidth) =>
+        prevOverflowWidth === newOverflowWidth
+          ? prevOverflowWidth
+          : newOverflowWidth
+      );
     }
-  }, [overflowWidth]);
 
-  const startAnimation = useCallback(() => {
-    if (marqueeTimerRef.current) {
-      clearTimeout(marqueeTimerRef.current);
+    animatedWidthRef.current = 0;
+    directionRef.current = 0;
+    setAnimatedWidth(0);
+  }, [text]);
+
+  // Single effect owns the animation loop. It only depends on primitive
+  // values that should actually restart it, so it settles once mounted
+  // instead of re-running (and re-timing) on every animated frame.
+  useEffect(() => {
+    const stop = () => {
+      if (marqueeTimerRef.current) {
+        clearTimeout(marqueeTimerRef.current);
+        marqueeTimerRef.current = null;
+      }
+    };
+
+    stopRef.current = stop;
+
+    // Nothing to animate: the title fits its box. Keep it pinned at 0 and
+    // don't start a timer at all (this is the jitter guard).
+    if (overflowWidth <= 0) {
+      animatedWidthRef.current = 0;
+      directionRef.current = 0;
+      setAnimatedWidth(0);
+      startRef.current = () => undefined;
+
+      return stop;
     }
 
     const animate = () => {
-      setAnimatedWidth((prevAnimatedWidth) => {
-        setDirection((prevDirection) => {
-          const newAnimatedWidth =
-            prevDirection === 0
-              ? prevAnimatedWidth + STEP
-              : prevAnimatedWidth - STEP;
-          let newDirection = prevDirection;
+      const steppedWidth =
+        directionRef.current === 0
+          ? animatedWidthRef.current + STEP
+          : animatedWidthRef.current - STEP;
 
-          const isRoundOver = newAnimatedWidth < 0;
-          const endOfText = newAnimatedWidth > overflowWidth;
+      const isRoundOver = steppedWidth < 0;
 
-          if (endOfText) {
-            newDirection = prevDirection === 1 ? 0 : 1;
-          }
-
-          if (isRoundOver) {
-            if (loop) {
-              newDirection = prevDirection === 0 ? 1 : 0;
-            } else {
-              return prevDirection;
-            }
-          }
-
-          if (!isRoundOver || loop) {
-            marqueeTimerRef.current = setTimeout(animate, TIMEOUT);
-          }
-
-          return newDirection;
-        });
-
-        const newAnimatedWidth =
-          direction === 0 ? prevAnimatedWidth + STEP : prevAnimatedWidth - STEP;
-
-        const isRoundOver = newAnimatedWidth < 0;
-
-        if (isRoundOver && !loop) {
-          return prevAnimatedWidth;
+      if (isRoundOver) {
+        if (loop) {
+          directionRef.current = directionRef.current === 0 ? 1 : 0;
+          animatedWidthRef.current = 0;
+        } else {
+          stop();
+          return;
+        }
+      } else {
+        if (steppedWidth > overflowWidth) {
+          directionRef.current = directionRef.current === 1 ? 0 : 1;
         }
 
-        return newAnimatedWidth;
-      });
+        animatedWidthRef.current = steppedWidth;
+      }
+
+      setAnimatedWidth(animatedWidthRef.current);
+      marqueeTimerRef.current = setTimeout(animate, TIMEOUT);
     };
 
-    const isLeading = animatedWidth === 0;
-    const timeout = isLeading ? 0 : TIMEOUT;
-    marqueeTimerRef.current = setTimeout(animate, timeout);
-  }, [animatedWidth, direction, loop, overflowWidth]);
+    const start = () => {
+      stop();
+      const isLeading = animatedWidthRef.current === 0;
+      marqueeTimerRef.current = setTimeout(animate, isLeading ? 0 : TIMEOUT);
+    };
+
+    startRef.current = start;
+
+    if (hoverToStop) {
+      start();
+    }
+
+    return stop;
+  }, [overflowWidth, hoverToStop, loop]);
 
   const onHandleMouseEnter = useCallback(() => {
     if (hoverToStop) {
-      if (marqueeTimerRef.current) {
-        clearTimeout(marqueeTimerRef.current);
-      }
+      stopRef.current();
     } else if (overflowWidth > 0) {
-      startAnimation();
+      startRef.current();
     }
-  }, [hoverToStop, overflowWidth, startAnimation]);
+  }, [hoverToStop, overflowWidth]);
 
   const onHandleMouseLeave = useCallback(() => {
     if (hoverToStop && overflowWidth > 0) {
-      startAnimation();
+      startRef.current();
     } else {
-      if (marqueeTimerRef.current) {
-        clearTimeout(marqueeTimerRef.current);
-      }
+      stopRef.current();
+      animatedWidthRef.current = 0;
+      directionRef.current = 0;
       setAnimatedWidth(0);
     }
-  }, [hoverToStop, overflowWidth, startAnimation]);
-
-  // Reset animation when text changes
-  useEffect(() => {
-    if (marqueeTimerRef.current) {
-      clearTimeout(marqueeTimerRef.current);
-    }
-    setAnimatedWidth(0);
-    setDirection(0);
-  }, [text.length]);
-
-  // Measure and start animation
-  useEffect(() => {
-    measureText();
-
-    if (hoverToStop) {
-      startAnimation();
-    }
-  }, [measureText, hoverToStop, startAnimation]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (marqueeTimerRef.current) {
-        clearTimeout(marqueeTimerRef.current);
-      }
-    };
-  }, []);
+  }, [hoverToStop, overflowWidth]);
 
   const style: CSSProperties = {
     position: 'relative',
