@@ -804,6 +804,7 @@
   "GameNaming": "Game Naming",
   "GameOnly": "Game Only",
   "GameRequested": "Game Requested",
+  "GameSearchAutosuggestUnavailable": "Search suggestions are unavailable right now. You can still press enter to search.",
   "GameSearchResultsLoadError": "Unable to load results for this game search. Try again later",
   "GameTitle": "Game Title",
   "GameTitleToExcludeHelpText": "The title of the game to exclude (can be anything meaningful)",

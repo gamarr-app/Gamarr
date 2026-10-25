@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react';
 import Autosuggest from 'react-autosuggest';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { createSelector } from 'reselect';
 import { useDebouncedCallback } from 'use-debounce';
@@ -19,7 +19,8 @@ import Icon from 'Components/Icon';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import Game from 'Game/Game';
 import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
-import { icons } from 'Helpers/Props';
+import { icons, messageTypes } from 'Helpers/Props';
+import { hideMessage, showMessage } from 'Store/Actions/appActions';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import createDeepEqualSelector from 'Store/Selectors/createDeepEqualSelector';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
@@ -28,6 +29,7 @@ import GameSearchResult from './GameSearchResult';
 import styles from './GameSearchInput.css';
 
 const ADD_NEW_TYPE = 'addNew';
+const WORKER_ERROR_MESSAGE_ID = 'gameSearchWorkerUnavailable';
 
 interface Match {
   key: string;
@@ -131,6 +133,7 @@ function createGamesSelector() {
 
 function GameSearchInput() {
   const games = useSelector(useMemo(() => createGamesSelector(), []));
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { bindShortcut, unbindShortcut } = useKeyboardShortcuts();
 
@@ -201,15 +204,32 @@ function GameSearchInput() {
     [games]
   );
 
-  const handleWorkerError = useCallback((error: ErrorEvent) => {
-    // If the worker dies mid-search the pending request will never resolve;
-    // clear the loading state so the spinner doesn't stick around forever.
-    console.error('Game search worker error', error.message, error);
-    requestValue.current = null;
-    isLoading.current = false;
-    setRequestLoading(false);
-    setSuggestions([]);
-  }, []);
+  const handleWorkerError = useCallback(
+    (error: ErrorEvent) => {
+      // If the worker dies mid-search the pending request will never resolve;
+      // clear the loading state so the spinner doesn't stick around forever.
+      console.error('Game search worker error', error.message, error);
+      requestValue.current = null;
+      isLoading.current = false;
+      setRequestLoading(false);
+      setSuggestions([]);
+
+      // The worker failing is otherwise a silent dead end for the user:
+      // autosuggest just stops responding with no visible signal. Surface it
+      // through the app's existing transient-message queue (the same one
+      // command throttling uses) instead of only logging to the console.
+      dispatch(
+        showMessage({
+          id: WORKER_ERROR_MESSAGE_ID,
+          name: WORKER_ERROR_MESSAGE_ID,
+          message: translate('GameSearchAutosuggestUnavailable'),
+          type: messageTypes.WARNING,
+          hideAfter: 10,
+        })
+      );
+    },
+    [dispatch]
+  );
 
   const requestSuggestions = useDebouncedCallback((value: string) => {
     if (!isLoading.current) {
@@ -426,8 +446,10 @@ function GameSearchInput() {
         worker.current.terminate();
         worker.current = null;
       }
+
+      dispatch(hideMessage({ id: WORKER_ERROR_MESSAGE_ID }));
     };
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     worker.current?.addEventListener(

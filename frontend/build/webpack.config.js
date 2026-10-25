@@ -19,6 +19,22 @@ module.exports = (env) => {
 
   const distFolder = path.resolve(frontendFolder, '..', '_output', uiFolder);
 
+  // A chunk belongs to a worker entrypoint when any of its chunk groups carries
+  // `worker: true` in its entry options. webpack's WorkerAndWorkletPlugin sets
+  // that flag on every `new Worker(...)` entrypoint it creates
+  // (node_modules/webpack/lib/dependencies/worker/WorkerAndWorkletPlugin.js), so
+  // this identifies the worker chunk by how it was created rather than by name
+  // or a hardcoded content hash.
+  const isWorkerChunk = (chunk) => {
+    for (const group of chunk.groupsIterable) {
+      if (group.options && group.options.worker) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   console.log('Source Folder:', srcFolder);
   console.log('Output Folder:', distFolder);
   console.log('isProduction:', isProduction);
@@ -81,12 +97,25 @@ module.exports = (env) => {
       moduleIds: 'deterministic',
       chunkIds: isProduction ? 'deterministic' : 'named',
       splitChunks: {
-        chunks: 'all',
+        // A worker chunk (created from `new Worker(new URL('./x.worker.ts', ...))`,
+        // e.g. GameSearchInput's fuse.worker.ts) has no window/document global and
+        // runs with its own webpack runtime. If splitChunks pulls shared deps like
+        // fuse.js out into the regular `vendor` chunk, the worker's runtime has to
+        // fetch that chunk at startup via `importScripts(publicPath + 'vendor-....js')`
+        // (webpack/runtime/importScripts chunk loading). That root-relative URL can
+        // fail to resolve against the worker's own base URL in some browser/extension
+        // environments (opaque worker base), throwing
+        // `Uncaught SyntaxError: Failed to execute 'importScripts' ... is invalid`
+        // with no way for app code to recover (see Sentry JAVASCRIPT-8). Excluding
+        // worker chunks from splitChunks means the worker bundle is self-contained —
+        // no importScripts call is emitted for it at all. Duplicating fuse.js into
+        // the worker chunk is the accepted cost.
+        chunks: (chunk) => !isWorkerChunk(chunk),
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendor',
-            chunks: 'all',
+            chunks: (chunk) => !isWorkerChunk(chunk),
             priority: 10,
           },
         },
