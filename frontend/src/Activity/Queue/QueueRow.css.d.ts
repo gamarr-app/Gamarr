@@ -3,6 +3,7 @@
 interface CssExports {
   'actions': string;
   'customFormatScore': string;
+  'game': string;
   'progress': string;
   'protocol': string;
   'quality': string;
