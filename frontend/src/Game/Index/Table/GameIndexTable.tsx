@@ -1,4 +1,3 @@
-import { throttle } from 'lodash';
 import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
@@ -7,6 +6,7 @@ import AppState from 'App/State/AppState';
 import Scroller from 'Components/Scroller/Scroller';
 import Column from 'Components/Table/Column';
 import useMeasure from 'Helpers/Hooks/useMeasure';
+import useVirtualScrollerSync from 'Helpers/Hooks/useVirtualScrollerSync';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
@@ -74,10 +74,6 @@ function Row({
   );
 }
 
-function getWindowScrollTopPosition() {
-  return document.documentElement.scrollTop || document.body.scrollTop || 0;
-}
-
 function GameIndexTable(props: GameIndexTableProps) {
   const {
     items,
@@ -97,32 +93,11 @@ function GameIndexTable(props: GameIndexTableProps) {
     return 38;
   }, []);
 
-  useEffect(() => {
-    const currentScrollerRef = scrollerRef.current as HTMLElement;
-    const currentScrollListener = isSmallScreen ? window : currentScrollerRef;
-
-    const handleScroll = throttle(() => {
-      const { offsetTop = 0 } = currentScrollerRef;
-      const scrollTop =
-        (isSmallScreen
-          ? getWindowScrollTopPosition()
-          : currentScrollerRef.scrollTop) - offsetTop;
-
-      if (listRef.current?.element) {
-        listRef.current.element.scrollTop = scrollTop;
-      }
-    }, 10);
-
-    currentScrollListener.addEventListener('scroll', handleScroll);
-
-    return () => {
-      handleScroll.cancel();
-
-      if (currentScrollListener) {
-        currentScrollListener.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [isSmallScreen, listRef, scrollerRef]);
+  useVirtualScrollerSync({
+    scrollerRef,
+    virtualizedRef: listRef,
+    isSmallScreen,
+  });
 
   useEffect(() => {
     if (jumpToCharacter) {

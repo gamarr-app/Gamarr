@@ -360,7 +360,7 @@ function Collection(props: CollectionProps) {
           {isLoaded && scrollerRef.current && (
             <div className={styles.contentBodyContainer}>
               <ViewComponent
-                scroller={scrollerRef.current}
+                scrollerRef={scrollerRef}
                 items={items}
                 sortKey={sortKey}
                 sortDirection={sortDirection}

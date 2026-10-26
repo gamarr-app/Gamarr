@@ -1,200 +1,102 @@
-import { ReactNode, useCallback, useEffect, useRef } from 'react';
-import { Grid, GridCellProps, WindowScroller } from 'react-virtualized';
-import ModelBase from 'App/ModelBase';
+import classNames from 'classnames';
+import { ReactNode, RefObject, useEffect, useRef } from 'react';
+import { List, ListImperativeAPI, ListProps } from 'react-window';
 import Scroller from 'Components/Scroller/Scroller';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import usePrevious from 'Helpers/Hooks/usePrevious';
+import useVirtualScrollerSync, {
+  scrollToRowStart,
+} from 'Helpers/Hooks/useVirtualScrollerSync';
 import { scrollDirections } from 'Helpers/Props';
-import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import styles from './VirtualTable.css';
 
 const ROW_HEIGHT = 38;
 
-// Static objects: Grid is a PureComponent, so fresh style objects every render
-// would defeat its memoization.
-const GRID_STYLE = {
-  boxSizing: undefined,
-  direction: undefined,
-  height: undefined,
-  position: undefined,
-  willChange: undefined,
-  overflow: undefined,
-  width: undefined,
+const LIST_STYLE = {
+  width: '100%',
+  height: '100%',
+  overflow: 'none',
 };
 
-const CONTAINER_STYLE = {
-  position: undefined,
-};
-
-function overscanIndicesGetter(options: {
-  cellCount: number;
-  overscanCellsCount: number;
-  startIndex: number;
-  stopIndex: number;
-}) {
-  const { cellCount, overscanCellsCount, startIndex, stopIndex } = options;
-
-  // The default getter takes the scroll direction into account,
-  // but that can cause issues. Ignore the scroll direction and
-  // always over return more items.
-
-  const overscanStartIndex = startIndex - overscanCellsCount;
-  const overscanStopIndex = stopIndex + overscanCellsCount;
-
-  return {
-    overscanStartIndex: Math.max(0, overscanStartIndex),
-    overscanStopIndex: Math.min(cellCount - 1, overscanStopIndex),
-  };
-}
-
-interface VirtualTableProps<T extends ModelBase> {
+interface VirtualTableProps<RowProps extends object> {
   isSmallScreen: boolean;
   className?: string;
-  items: T[];
+  items: unknown[];
   scrollIndex?: number;
   scrollTop?: number;
-  scroller: Element;
+  scrollerRef: RefObject<HTMLElement | null>;
   header: ReactNode;
-  headerHeight?: number;
-  rowRenderer: (rowProps: GridCellProps) => ReactNode;
   rowHeight?: number;
+  rowComponent: ListProps<RowProps>['rowComponent'];
+  rowProps: ListProps<RowProps>['rowProps'];
 }
 
-function VirtualTable<T extends ModelBase>({
+function VirtualTable<RowProps extends object>({
   isSmallScreen,
-  className = styles.tableContainer,
+  className,
   items,
-  scroller,
+  scrollerRef,
   scrollIndex,
   scrollTop,
   header,
-  headerHeight = 38,
   rowHeight = ROW_HEIGHT,
-  rowRenderer,
-  ...otherProps
-}: VirtualTableProps<T>) {
-  const [measureRef, bounds] = useMeasure();
-  const gridRef = useRef<Grid>(null);
+  rowComponent,
+  rowProps,
+}: VirtualTableProps<RowProps>) {
+  const [measureRef] = useMeasure();
+  const listRef = useRef<ListImperativeAPI>(null);
   const scrollRestored = useRef(false);
   const previousScrollIndex = usePrevious(scrollIndex);
-  const previousItems = usePrevious(items);
 
-  const width = bounds.width;
-
-  const handleScrollToPosition = useCallback(
-    ({
-      scrollTop = 0,
-      scrollLeft = 0,
-    }: {
-      scrollTop: number;
-      scrollLeft: number;
-    }) => {
-      scroller?.scrollTo({ top: scrollTop, left: scrollLeft });
-    },
-    [scroller]
-  );
-
-  const handleScrollToCell = useCallback(
-    ({
-      rowIndex = 0,
-      columnIndex = 0,
-    }: {
-      rowIndex: number;
-      columnIndex: number;
-    }) => {
-      if (gridRef.current) {
-        const scrollOffset = gridRef.current.getOffsetForCell({
-          rowIndex,
-          columnIndex,
-        });
-
-        handleScrollToPosition(scrollOffset);
-      }
-    },
-    [gridRef, handleScrollToPosition]
-  );
+  useVirtualScrollerSync({
+    scrollerRef,
+    virtualizedRef: listRef,
+    isSmallScreen,
+  });
 
   useEffect(() => {
-    if (gridRef.current && width > 0) {
-      gridRef.current.recomputeGridSize();
-    }
-  }, [width]);
-
-  useEffect(() => {
-    if (
-      gridRef.current &&
-      previousItems &&
-      hasDifferentItemsOrOrder(previousItems, items)
-    ) {
-      gridRef.current.recomputeGridSize();
-    }
-  }, [items, previousItems]);
-
-  useEffect(() => {
-    if (gridRef.current && scrollTop && !scrollRestored.current) {
-      handleScrollToPosition({ scrollLeft: 0, scrollTop });
+    if (scrollTop && !scrollRestored.current) {
       scrollRestored.current = true;
+
+      if (listRef.current?.element) {
+        listRef.current.element.scrollTop = scrollTop;
+      }
+
+      scrollerRef.current?.scrollTo(0, scrollTop);
     }
-  }, [scrollTop, handleScrollToPosition]);
+  }, [scrollTop, scrollerRef]);
 
   useEffect(() => {
-    if (
-      gridRef.current &&
-      scrollIndex != null &&
-      scrollIndex !== previousScrollIndex
-    ) {
-      handleScrollToCell({
+    if (scrollIndex != null && scrollIndex !== previousScrollIndex) {
+      scrollToRowStart({
+        scrollerRef,
+        virtualizedRef: listRef,
         rowIndex: scrollIndex,
-        columnIndex: 0,
+        rowHeight,
       });
     }
-  }, [scrollIndex, previousScrollIndex, handleScrollToCell]);
+  }, [scrollIndex, previousScrollIndex, rowHeight, scrollerRef]);
 
   return (
-    <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
-      {({ height, registerChild, onChildScroll, scrollTop }) => {
-        if (!height) {
-          return null;
-        }
-        return (
-          <div ref={measureRef}>
-            <Scroller
-              className={className}
-              scrollDirection={scrollDirections.HORIZONTAL}
-            >
-              {header}
+    <div ref={measureRef}>
+      <Scroller
+        className={classNames(styles.tableContainer, className)}
+        scrollDirection={scrollDirections.HORIZONTAL}
+      >
+        {header}
 
-              <div ref={registerChild}>
-                <Grid
-                  {...otherProps}
-                  ref={gridRef}
-                  autoContainerWidth={true}
-                  autoHeight={true}
-                  autoWidth={true}
-                  width={width}
-                  height={height}
-                  headerHeight={height - headerHeight}
-                  rowHeight={rowHeight}
-                  rowCount={items.length}
-                  columnCount={1}
-                  columnWidth={width}
-                  scrollTop={scrollTop}
-                  overscanRowCount={2}
-                  cellRenderer={rowRenderer}
-                  overscanIndicesGetter={overscanIndicesGetter}
-                  scrollToAlignment="start"
-                  isScrollingOptout={true}
-                  className={styles.tableBodyContainer}
-                  style={GRID_STYLE}
-                  containerStyle={CONTAINER_STYLE}
-                  onScroll={onChildScroll}
-                />
-              </div>
-            </Scroller>
-          </div>
-        );
-      }}
-    </WindowScroller>
+        <List<RowProps>
+          listRef={listRef}
+          className={styles.tableBodyContainer}
+          style={LIST_STYLE}
+          rowCount={items.length}
+          rowHeight={rowHeight}
+          overscanCount={2}
+          rowProps={rowProps}
+          rowComponent={rowComponent}
+        />
+      </Scroller>
+    </div>
   );
 }
 

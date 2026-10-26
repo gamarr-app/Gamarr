@@ -461,7 +461,7 @@ function DiscoverGame({
           {isLoaded && (
             <div className={styles.contentBodyContainer}>
               <ViewComponent
-                scroller={scrollerRef.current}
+                scrollerRef={scrollerRef}
                 items={items}
                 filters={filters}
                 sortKey={sortKey}

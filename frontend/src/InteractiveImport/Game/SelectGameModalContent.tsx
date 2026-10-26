@@ -1,5 +1,4 @@
-import { throttle } from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
 import TextInput from 'Components/Form/TextInput';
@@ -12,6 +11,7 @@ import Scroller from 'Components/Scroller/Scroller';
 import Column from 'Components/Table/Column';
 import VirtualTableRowButton from 'Components/Table/VirtualTableRowButton';
 import Game from 'Game/Game';
+import useVirtualScrollerSync from 'Helpers/Hooks/useVirtualScrollerSync';
 import { scrollDirections } from 'Helpers/Props';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import { InputChanged } from 'typings/inputs';
@@ -104,29 +104,7 @@ function SelectGameModalContent(props: SelectGameModalContentProps) {
   );
   const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    const currentScrollerRef = scrollerRef.current as HTMLElement;
-    const currentScrollListener = currentScrollerRef;
-
-    const handleScroll = throttle(() => {
-      const { offsetTop = 0 } = currentScrollerRef;
-      const scrollTop = currentScrollerRef.scrollTop - offsetTop;
-
-      if (listRef.current?.element) {
-        listRef.current.element.scrollTop = scrollTop;
-      }
-    }, 10);
-
-    currentScrollListener.addEventListener('scroll', handleScroll);
-
-    return () => {
-      handleScroll.cancel();
-
-      if (currentScrollListener) {
-        currentScrollListener.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [listRef, scrollerRef]);
+  useVirtualScrollerSync({ scrollerRef, virtualizedRef: listRef });
 
   const onFilterChange = useCallback(
     ({ value }: InputChanged<string>) => {

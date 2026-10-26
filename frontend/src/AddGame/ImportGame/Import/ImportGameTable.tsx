@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { CSSProperties, useCallback, useEffect, useRef } from 'react';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
+import { RowComponentProps } from 'react-window';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import Game from 'Game/Game';
@@ -38,7 +39,7 @@ interface ImportGameTableProps {
   selectedState: SelectedState;
   isSmallScreen: boolean;
   allGames: Game[];
-  scroller: Element;
+  scrollerRef: RefObject<HTMLElement | null>;
   onSelectAllChange: (payload: { value: boolean }) => void;
   onSelectedChange: (payload: SelectStateInputProps) => void;
   onRemoveSelectedStateItem: (id: string) => void;
@@ -49,10 +50,38 @@ interface ImportGameTableProps {
   }) => void;
 }
 
-interface RowRendererParams {
-  key: string;
-  rowIndex: number;
-  style: CSSProperties;
+interface RowItemData {
+  items: ImportGameItem[];
+  rootFolderId: number;
+  selectedState: SelectedState;
+  onSelectedChange: (payload: SelectStateInputProps) => void;
+}
+
+function Row({
+  index,
+  style,
+  items,
+  rootFolderId,
+  selectedState,
+  onSelectedChange,
+}: RowComponentProps<RowItemData>) {
+  const item = items[index];
+
+  if (!item) {
+    return null;
+  }
+
+  return (
+    <VirtualTableRow style={style} className="">
+      <ImportGameRowConnector
+        key={item.id}
+        rootFolderId={rootFolderId}
+        isSelected={selectedState[item.id]}
+        id={item.id}
+        onSelectedChange={onSelectedChange}
+      />
+    </VirtualTableRow>
+  );
 }
 
 function ImportGameTable(props: ImportGameTableProps) {
@@ -68,7 +97,7 @@ function ImportGameTable(props: ImportGameTableProps) {
     selectedState,
     isSmallScreen,
     allGames,
-    scroller,
+    scrollerRef,
     onSelectAllChange,
     onSelectedChange,
     onRemoveSelectedStateItem,
@@ -159,26 +188,8 @@ function ImportGameTable(props: ImportGameTableProps) {
     onRemoveSelectedStateItem,
   ]);
 
-  const rowRenderer = useCallback(
-    ({ key, rowIndex, style }: RowRendererParams) => {
-      const item = items[rowIndex];
-
-      if (!item) {
-        return null;
-      }
-
-      return (
-        <VirtualTableRow key={key} style={style} className="">
-          <ImportGameRowConnector
-            key={item.id}
-            rootFolderId={rootFolderId}
-            isSelected={selectedState[item.id]}
-            id={item.id}
-            onSelectedChange={onSelectedChange}
-          />
-        </VirtualTableRow>
-      );
-    },
+  const rowProps = useMemo(
+    () => ({ items, rootFolderId, selectedState, onSelectedChange }),
     [items, rootFolderId, selectedState, onSelectedChange]
   );
 
@@ -187,13 +198,13 @@ function ImportGameTable(props: ImportGameTableProps) {
   }
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ImportGameItem.id is string, not number like ModelBase expects
-    <VirtualTable<any>
+    <VirtualTable<RowItemData>
       items={items}
       isSmallScreen={isSmallScreen}
-      scroller={scroller}
+      scrollerRef={scrollerRef}
       rowHeight={52}
-      rowRenderer={rowRenderer}
+      rowProps={rowProps}
+      rowComponent={Row}
       header={
         <ImportGameHeader
           allSelected={allSelected}
