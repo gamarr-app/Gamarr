@@ -25,6 +25,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game.Title.2010.720p.BluRay.x264.-[YTS.LT]")]
         [TestCase("Game.Title.2010.SUBFRENCH.1080p.WEB.x264-GROUP")]
         [TestCase("Game.Title.2010.En.1080p.WEB.x264-GROUP")]
+        [TestCase("The.Irishman.Game.2019.1080p.WEB.x264-GROUP")]
         public void should_parse_language_unknown(string postTitle)
         {
             var result = Parser.Parser.ParseGameTitle(postTitle, true);
@@ -554,6 +555,15 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             var result = LanguageParser.ParseLanguages(postTitle);
             result.Should().Contain(Language.Georgian);
+        }
+
+        [TestCase("Game.Title.2016.Irish.WEB-DL.h264")]
+        [TestCase("Game.Title.2016.Gaeilge.WEB-DL.h264")]
+        [TestCase("Game.Title.2016.EN-Irish.WEB-DL.h264")]
+        public void should_parse_language_irish(string postTitle)
+        {
+            var result = LanguageParser.ParseLanguages(postTitle);
+            result.Should().Contain(Language.Irish);
         }
 
         [TestCase("Game.Title.en.sub")]
