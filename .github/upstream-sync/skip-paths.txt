@@ -33,8 +33,10 @@
 **/Plexmatch/**
 
 # ---- Both: stuff Gamarr definitively doesn't have ----
+# NOTE: do NOT add **/Languages/** here. Language.cs / LanguageParser.cs are
+# live in this fork, and skipping them dropped Radarr's "Add Irish language"
+# commit (65c33617) until it was caught by hand on 2026-10-26.
 **/Subtitles/**
-**/Languages/**
 frontend/src/Movie/**
 frontend/src/Series/**
 frontend/src/Episode/**
