@@ -6,6 +6,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Crypto;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -74,6 +75,9 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         private void AssertRemoved(params int[] ids)
         {
             Mocker.GetMock<IPendingReleaseRepository>().Verify(c => c.DeleteMany(It.Is<IEnumerable<int>>(s => s.SequenceEqual(ids))));
+
+            Mocker.GetMock<IEventAggregator>()
+                .Verify(v => v.PublishEvent(It.IsAny<PendingReleasesUpdatedEvent>()), Times.Once());
         }
     }
 }

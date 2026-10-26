@@ -225,6 +225,8 @@ namespace NzbDrone.Core.Download.Pending
             var releasesToRemove = gameReleases.Where(c => c.ParsedGameInfo.PrimaryGameTitle == targetItem.ParsedGameInfo.PrimaryGameTitle);
 
             _repository.DeleteMany(releasesToRemove.Select(c => c.Id));
+
+            _eventAggregator.PublishEvent(new PendingReleasesUpdatedEvent());
         }
 
         public RemoteGame OldestPendingRelease(int gameId)
@@ -470,6 +472,8 @@ namespace NzbDrone.Core.Download.Pending
         public void Handle(GamesDeletedEvent message)
         {
             _repository.DeleteByGameIds(message.Games.Select(m => m.Id).ToList());
+
+            _eventAggregator.PublishEvent(new PendingReleasesUpdatedEvent());
         }
 
         public void Handle(GameGrabbedEvent message)
