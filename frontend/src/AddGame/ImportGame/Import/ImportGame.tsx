@@ -157,7 +157,7 @@ function ImportGame(props: ImportGameProps) {
             allSelected={allSelected}
             allUnselected={allUnselected}
             selectedState={selectedState}
-            scroller={scrollerRef.current}
+            scrollerRef={scrollerRef}
             onSelectAllChange={onSelectAllChange}
             onSelectedChange={onSelectedChange}
             onRemoveSelectedStateItem={onRemoveSelectedStateItem}

@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Grid, GridCellRenderer, WindowScroller } from 'react-virtualized';
-import Measure from 'Components/Measure';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
+import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
 import DiscoverGameItemConnector, {
   DiscoverGameProps,
 } from 'DiscoverGame/DiscoverGameItemConnector';
+import useMeasure from 'Helpers/Hooks/useMeasure';
+import useVirtualScrollerSync, {
+  scrollToRowStart,
+} from 'Helpers/Hooks/useVirtualScrollerSync';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
-import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import DiscoverGameOverviewConnector from './DiscoverGameOverviewConnector';
 import styles from './DiscoverGameOverviews.css';
 
@@ -15,6 +17,12 @@ const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
 const columnPaddingSmallScreen = parseInt(
   dimensions.gameIndexColumnPaddingSmallScreen
 );
+
+const LIST_STYLE = {
+  width: '100%',
+  height: '100%',
+  overflow: 'none',
+};
 
 interface OverviewOptions {
   size: string;
@@ -35,7 +43,7 @@ interface DiscoverGameOverviewsProps {
   sortKey?: string;
   overviewOptions: OverviewOptions;
   jumpToCharacter?: string;
-  scroller: Element;
+  scrollerRef: RefObject<HTMLElement | null>;
   showRelativeDates: boolean;
   shortDateFormat: string;
   longDateFormat: string;
@@ -77,184 +85,124 @@ function calculatePosterHeight(posterWidth: number) {
   return Math.ceil((250 / 170) * posterWidth);
 }
 
-function DiscoverGameOverviews(props: DiscoverGameOverviewsProps) {
-  const {
-    items,
-    sortKey,
-    overviewOptions,
-    jumpToCharacter,
-    scroller,
-    showRelativeDates,
-    shortDateFormat,
-    longDateFormat,
-    timeFormat,
+interface RowItemData {
+  items: DiscoverGameItem[];
+  sortKey?: string;
+  posterWidth: number;
+  posterHeight: number;
+  rowHeight: number;
+  overviewOptions: OverviewOptions;
+  showRelativeDates: boolean;
+  shortDateFormat: string;
+  longDateFormat: string;
+  timeFormat: string;
+  isSmallScreen: boolean;
+  selectedState: SelectedState;
+  onSelectedChange: DiscoverGameProps['onSelectedChange'];
+}
+
+function Row({
+  index,
+  style,
+  items,
+  selectedState,
+  ...otherData
+}: RowComponentProps<RowItemData>) {
+  const game = items[index];
+
+  if (!game) {
+    return null;
+  }
+
+  return (
+    <div className={styles.container} style={style}>
+      <DiscoverGameItemConnector
+        key={game.igdbId}
+        component={DiscoverGameOverviewConnector}
+        igdbId={game.igdbId}
+        isSelected={selectedState[game.igdbId]}
+        {...otherData}
+      />
+    </div>
+  );
+}
+
+function DiscoverGameOverviews({
+  items,
+  sortKey,
+  overviewOptions,
+  jumpToCharacter,
+  scrollerRef,
+  showRelativeDates,
+  shortDateFormat,
+  longDateFormat,
+  timeFormat,
+  isSmallScreen,
+  selectedState,
+  onSelectedChange,
+}: DiscoverGameOverviewsProps) {
+  const listRef = useRef<ListImperativeAPI>(null);
+  const [measureRef] = useMeasure();
+  const previousJumpToCharacter = useRef(jumpToCharacter);
+
+  const posterWidth = useMemo(
+    () => calculatePosterWidth(overviewOptions.size, isSmallScreen),
+    [overviewOptions, isSmallScreen]
+  );
+
+  const posterHeight = useMemo(
+    () => calculatePosterHeight(posterWidth),
+    [posterWidth]
+  );
+
+  const rowHeight = useMemo(
+    () =>
+      calculateRowHeight(posterHeight, sortKey, isSmallScreen, overviewOptions),
+    [posterHeight, sortKey, isSmallScreen, overviewOptions]
+  );
+
+  useVirtualScrollerSync({
+    scrollerRef,
+    virtualizedRef: listRef,
     isSmallScreen,
-    selectedState,
-    onSelectedChange,
-  } = props;
+  });
 
-  const gridRef = useRef<Grid | null>(null);
-
-  const [width, setWidth] = useState(0);
-  const [posterWidth, setPosterWidth] = useState(162);
-  const [posterHeight, setPosterHeight] = useState(238);
-  const [rowHeight, setRowHeight] = useState(
-    calculateRowHeight(238, undefined, isSmallScreen, {} as OverviewOptions)
-  );
-
-  const prevItemsRef = useRef(items);
-  const prevSortKeyRef = useRef(sortKey);
-  const prevOverviewOptionsRef = useRef(overviewOptions);
-  const prevJumpToCharacterRef = useRef(jumpToCharacter);
-  const prevWidthRef = useRef(width);
-  const prevRowHeightRef = useRef(rowHeight);
-
-  const calculateGrid = useCallback(
-    (newWidth: number = width) => {
-      const newPosterWidth = calculatePosterWidth(
-        overviewOptions.size,
-        isSmallScreen
-      );
-      const newPosterHeight = calculatePosterHeight(newPosterWidth);
-      const newRowHeight = calculateRowHeight(
-        newPosterHeight,
-        sortKey,
-        isSmallScreen,
-        overviewOptions
-      );
-
-      setWidth(newWidth);
-      setPosterWidth(newPosterWidth);
-      setPosterHeight(newPosterHeight);
-      setRowHeight(newRowHeight);
-    },
-    [width, sortKey, overviewOptions, isSmallScreen]
-  );
-
-  const gridScrollToPosition = useCallback(
-    ({
-      scrollTop = 0,
-      scrollLeft = 0,
-    }: {
-      scrollTop?: number;
-      scrollLeft?: number;
-    }) => {
-      scroller?.scrollTo({ top: scrollTop, left: scrollLeft });
-    },
-    [scroller]
-  );
-
-  const gridScrollToCell = useCallback(
-    ({
-      rowIndex = 0,
-      columnIndex = 0,
-    }: {
-      rowIndex?: number;
-      columnIndex?: number;
-    }) => {
-      const scrollOffset = gridRef.current?.getOffsetForCell({
-        rowIndex,
-        columnIndex,
-      });
-
-      if (scrollOffset) {
-        gridScrollToPosition(scrollOffset);
-      }
-    },
-    [gridScrollToPosition]
-  );
-
-  // Update effect
   useEffect(() => {
     if (
-      prevSortKeyRef.current !== sortKey ||
-      prevOverviewOptionsRef.current !== overviewOptions
-    ) {
-      calculateGrid(width);
-    }
-
-    if (
-      gridRef.current &&
-      (prevWidthRef.current !== width ||
-        prevRowHeightRef.current !== rowHeight ||
-        hasDifferentItemsOrOrder(prevItemsRef.current, items, 'igdbId') ||
-        prevOverviewOptionsRef.current !== overviewOptions)
-    ) {
-      gridRef.current.recomputeGridSize();
-    }
-
-    if (
       jumpToCharacter != null &&
-      jumpToCharacter !== prevJumpToCharacterRef.current
+      jumpToCharacter !== previousJumpToCharacter.current
     ) {
       const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-      if (gridRef.current && index !== -1) {
-        gridScrollToCell({
+      if (index !== -1) {
+        scrollToRowStart({
+          scrollerRef,
+          virtualizedRef: listRef,
           rowIndex: index,
-          columnIndex: 0,
+          rowHeight,
         });
       }
     }
 
-    prevItemsRef.current = items;
-    prevSortKeyRef.current = sortKey;
-    prevOverviewOptionsRef.current = overviewOptions;
-    prevJumpToCharacterRef.current = jumpToCharacter;
-    prevWidthRef.current = width;
-    prevRowHeightRef.current = rowHeight;
-  }, [
-    items,
-    sortKey,
-    overviewOptions,
-    jumpToCharacter,
-    width,
-    rowHeight,
-    calculateGrid,
-    gridScrollToCell,
-  ]);
+    previousJumpToCharacter.current = jumpToCharacter;
+  }, [jumpToCharacter, items, rowHeight, scrollerRef]);
 
-  const setGridRef = useCallback((ref: Grid | null) => {
-    gridRef.current = ref;
-  }, []);
-
-  const onMeasure = useCallback(
-    ({ width: measuredWidth = 0 }: { width?: number }) => {
-      calculateGrid(measuredWidth);
-    },
-    [calculateGrid]
-  );
-
-  const cellRenderer: GridCellRenderer = useCallback(
-    ({ key, rowIndex, style }) => {
-      const game = items[rowIndex];
-
-      if (!game) {
-        return null;
-      }
-
-      return (
-        <div key={key} className={styles.container} style={style}>
-          <DiscoverGameItemConnector
-            key={game.igdbId}
-            component={DiscoverGameOverviewConnector}
-            sortKey={sortKey}
-            posterWidth={posterWidth}
-            posterHeight={posterHeight}
-            rowHeight={rowHeight}
-            overviewOptions={overviewOptions}
-            showRelativeDates={showRelativeDates}
-            shortDateFormat={shortDateFormat}
-            longDateFormat={longDateFormat}
-            timeFormat={timeFormat}
-            isSmallScreen={isSmallScreen}
-            igdbId={game.igdbId}
-            isSelected={selectedState[game.igdbId]}
-            onSelectedChange={onSelectedChange}
-          />
-        </div>
-      );
-    },
+  const rowProps = useMemo(
+    () => ({
+      items,
+      sortKey,
+      posterWidth,
+      posterHeight,
+      rowHeight,
+      overviewOptions,
+      showRelativeDates,
+      shortDateFormat,
+      longDateFormat,
+      timeFormat,
+      isSmallScreen,
+      selectedState,
+      onSelectedChange,
+    }),
     [
       items,
       sortKey,
@@ -273,38 +221,18 @@ function DiscoverGameOverviews(props: DiscoverGameOverviewsProps) {
   );
 
   return (
-    <Measure whitelist={['width']} onMeasure={onMeasure}>
-      <WindowScroller scrollElement={isSmallScreen ? undefined : scroller}>
-        {({ height, registerChild, onChildScroll, scrollTop }) => {
-          if (!height) {
-            return <div />;
-          }
-
-          return (
-            <div ref={registerChild}>
-              <Grid
-                ref={setGridRef}
-                className={styles.grid}
-                autoHeight={true}
-                height={height}
-                columnCount={1}
-                columnWidth={width}
-                rowCount={items.length}
-                rowHeight={rowHeight}
-                width={width}
-                scrollTop={scrollTop}
-                overscanRowCount={2}
-                cellRenderer={cellRenderer}
-                selectedState={selectedState}
-                scrollToAlignment="start"
-                isScrollingOptout={true}
-                onScroll={onChildScroll}
-              />
-            </div>
-          );
-        }}
-      </WindowScroller>
-    </Measure>
+    <div ref={measureRef}>
+      <List<RowItemData>
+        listRef={listRef}
+        className={styles.grid}
+        style={LIST_STYLE}
+        rowCount={items.length}
+        rowHeight={rowHeight}
+        overscanCount={2}
+        rowProps={rowProps}
+        rowComponent={Row}
+      />
+    </div>
   );
 }
 

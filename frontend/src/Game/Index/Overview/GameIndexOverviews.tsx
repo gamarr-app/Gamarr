@@ -1,8 +1,8 @@
-import { throttle } from 'lodash';
 import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { List, ListImperativeAPI, RowComponentProps } from 'react-window';
 import useMeasure from 'Helpers/Hooks/useMeasure';
+import useVirtualScrollerSync from 'Helpers/Hooks/useVirtualScrollerSync';
 import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
@@ -61,10 +61,6 @@ function Row({
   );
 }
 
-function getWindowScrollTopPosition() {
-  return document.documentElement.scrollTop || document.body.scrollTop || 0;
-}
-
 function GameIndexOverviews(props: GameIndexOverviewsProps) {
   const {
     items,
@@ -109,32 +105,11 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
     return heights.reduce((acc, height) => acc + height, 0);
   }, [detailedProgressBar, posterHeight, isSmallScreen]);
 
-  useEffect(() => {
-    const currentScrollerRef = scrollerRef.current as HTMLElement;
-    const currentScrollListener = isSmallScreen ? window : currentScrollerRef;
-
-    const handleScroll = throttle(() => {
-      const { offsetTop = 0 } = currentScrollerRef;
-      const scrollTop =
-        (isSmallScreen
-          ? getWindowScrollTopPosition()
-          : currentScrollerRef.scrollTop) - offsetTop;
-
-      if (listRef.current?.element) {
-        listRef.current.element.scrollTop = scrollTop;
-      }
-    }, 10);
-
-    currentScrollListener.addEventListener('scroll', handleScroll);
-
-    return () => {
-      handleScroll.cancel();
-
-      if (currentScrollListener) {
-        currentScrollListener.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [isSmallScreen, listRef, scrollerRef]);
+  useVirtualScrollerSync({
+    scrollerRef,
+    virtualizedRef: listRef,
+    isSmallScreen,
+  });
 
   useEffect(() => {
     if (jumpToCharacter) {

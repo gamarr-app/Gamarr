@@ -1,4 +1,3 @@
-import { throttle } from 'lodash';
 import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CellComponentProps, Grid, GridImperativeAPI } from 'react-window';
@@ -6,6 +5,7 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import GameIndexPoster from 'Game/Index/Posters/GameIndexPoster';
 import useMeasure from 'Helpers/Hooks/useMeasure';
+import useVirtualScrollerSync from 'Helpers/Hooks/useVirtualScrollerSync';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import { GameIndexItem } from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import dimensions from 'Styles/Variables/dimensions';
@@ -103,10 +103,6 @@ function Cell({
       />
     </div>
   );
-}
-
-function getWindowScrollTopPosition() {
-  return document.documentElement.scrollTop || document.body.scrollTop || 0;
 }
 
 export default function GameIndexPosters(props: GameIndexPostersProps) {
@@ -292,30 +288,11 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
     }
   }, [isSmallScreen, size, scrollerRef, bounds]);
 
-  useEffect(() => {
-    const currentScrollerRef = scrollerRef.current as HTMLElement;
-    const currentScrollListener = isSmallScreen ? window : currentScrollerRef;
-
-    const handleScroll = throttle(() => {
-      const { offsetTop = 0 } = currentScrollerRef;
-      const scrollTop =
-        (isSmallScreen
-          ? getWindowScrollTopPosition()
-          : currentScrollerRef.scrollTop) - offsetTop;
-
-      ref.current?.element?.scrollTo({ left: 0, top: scrollTop });
-    }, 10);
-
-    currentScrollListener.addEventListener('scroll', handleScroll);
-
-    return () => {
-      handleScroll.cancel();
-
-      if (currentScrollListener) {
-        currentScrollListener.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [isSmallScreen, ref, scrollerRef]);
+  useVirtualScrollerSync({
+    scrollerRef,
+    virtualizedRef: ref,
+    isSmallScreen,
+  });
 
   useEffect(() => {
     if (jumpToCharacter) {
