@@ -146,18 +146,12 @@ function Calendar() {
         <Alert kind={kinds.DANGER}>{translate('CalendarLoadError')}</Alert>
       ) : null}
 
-      {!error && isPopulated && view === 'agenda' ? (
+      {!error && isPopulated ? (
         <div className={styles.calendarContent}>
           <CalendarHeader />
-          <Agenda />
-        </div>
-      ) : null}
+          {view === 'agenda' ? null : <DaysOfWeek />}
 
-      {!error && isPopulated && view !== 'agenda' ? (
-        <div className={styles.calendarContent}>
-          <CalendarHeader />
-          <DaysOfWeek />
-          <CalendarDays />
+          {view === 'agenda' ? <Agenda /> : <CalendarDays />}
         </div>
       ) : null}
     </div>

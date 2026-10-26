@@ -16,12 +16,18 @@ import styles from './Menu.css';
 
 interface MenuButtonChildProps {
   onPress?: () => void;
+  'aria-haspopup'?: 'menu';
+  'aria-expanded'?: boolean;
+  'aria-controls'?: string;
 }
 
 interface MenuContentChildProps {
   forwardedRef?: Ref<HTMLDivElement>;
   style?: CSSProperties;
   isOpen?: boolean;
+  id?: string;
+  role?: string;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
 const placementMap: Record<string, Placement> = {
@@ -50,6 +56,7 @@ function Menu({
   const menuContentId = useId();
   const [maxHeight, setMaxHeight] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const shouldRestoreFocus = useRef(false);
 
   const popperModifiers = useMemo(
     () => [
@@ -145,6 +152,73 @@ function Menu({
     }
   }, [isMenuOpen, updateMaxHeight]);
 
+  const focusMenuButton = useCallback(() => {
+    if (document.activeElement !== document.body) {
+      return;
+    }
+
+    document
+      .getElementById(menuButtonId)
+      ?.querySelector<HTMLElement>('button, a[href]')
+      ?.focus();
+  }, [menuButtonId]);
+
+  useEffect(() => {
+    if (!isMenuOpen && shouldRestoreFocus.current) {
+      shouldRestoreFocus.current = false;
+      const focusTimeout = window.setTimeout(focusMenuButton, 100);
+
+      return () => window.clearTimeout(focusTimeout);
+    }
+
+    return undefined;
+  }, [focusMenuButton, isMenuOpen]);
+
+  const handleWindowKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    shouldRestoreFocus.current = true;
+    setIsMenuOpen(false);
+  }, []);
+
+  const handleMenuKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+        return;
+      }
+
+      const items = Array.from(
+        event.currentTarget.querySelectorAll<HTMLElement>(
+          '[role^="menuitem"]:not(:disabled):not([aria-disabled="true"])'
+        )
+      );
+
+      if (!items.length) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+      let nextIndex = currentIndex;
+
+      if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = items.length - 1;
+      } else if (event.key === 'ArrowDown') {
+        nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+      } else {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+      }
+
+      items[nextIndex]?.focus();
+    },
+    []
+  );
+
   const handleMenuButtonPress = useCallback(() => {
     setIsMenuOpen((isOpen) => !isOpen);
   }, []);
@@ -154,6 +228,9 @@ function Menu({
     childrenArray[0] as ReactElement<MenuButtonChildProps>,
     {
       onPress: handleMenuButtonPress,
+      'aria-haspopup': 'menu',
+      'aria-expanded': isMenuOpen,
+      'aria-controls': isMenuOpen ? menuContentId : undefined,
     }
   );
 
@@ -186,6 +263,7 @@ function Menu({
     window.addEventListener('scroll', handleWindowScroll, { capture: true });
     window.addEventListener('click', handleWindowClick);
     window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('keydown', handleWindowKeyDown);
 
     return () => {
       window.removeEventListener('resize', handleWindowResize);
@@ -194,6 +272,7 @@ function Menu({
       });
       window.removeEventListener('click', handleWindowClick);
       window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('keydown', handleWindowKeyDown);
     };
   }, [
     isMenuOpen,
@@ -201,6 +280,7 @@ function Menu({
     handleWindowScroll,
     handleWindowClick,
     handleTouchStart,
+    handleWindowKeyDown,
   ]);
 
   return (
@@ -221,6 +301,9 @@ function Menu({
             },
             ...attributes.popper,
             isOpen: isMenuOpen,
+            id: menuContentId,
+            role: 'menu',
+            onKeyDown: handleMenuKeyDown,
           }
         )}
       </Portal>

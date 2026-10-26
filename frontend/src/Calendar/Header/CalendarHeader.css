@@ -13,6 +13,14 @@
   margin-left: 5px;
 }
 
+.viewButton {
+  composes: button from '~Components/Link/Button.css';
+
+  &[aria-pressed='true'] {
+    opacity: 0.65;
+  }
+}
+
 .titleDesktop,
 .titleMobile {
   text-align: center;

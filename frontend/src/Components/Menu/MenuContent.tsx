@@ -1,8 +1,8 @@
-import { CSSProperties, ReactNode, Ref, useId } from 'react';
+import { CSSProperties, HTMLAttributes, ReactNode, Ref, useId } from 'react';
 import Scroller from 'Components/Scroller/Scroller';
 import styles from './MenuContent.css';
 
-interface MenuContentProps {
+interface MenuContentProps extends HTMLAttributes<HTMLDivElement> {
   forwardedRef?: Ref<HTMLDivElement> | undefined;
   className?: string;
   id?: string;
@@ -18,6 +18,7 @@ function MenuContent({
   children,
   style,
   isOpen,
+  ...otherProps
 }: MenuContentProps) {
   const generatedId = useId();
 
@@ -27,6 +28,7 @@ function MenuContent({
       id={id ?? generatedId}
       className={className}
       style={style}
+      {...otherProps}
     >
       {isOpen ? (
         <Scroller className={styles.scroller}>{children}</Scroller>

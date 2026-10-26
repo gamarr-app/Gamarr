@@ -7,6 +7,7 @@ interface CssExports {
   'titleDesktop': string;
   'titleMobile': string;
   'todayButton': string;
+  'viewButton': string;
   'viewButtonsContainer': string;
   'viewMenu': string;
 }

@@ -22,6 +22,34 @@ import translate from 'Utilities/String/translate';
 import CalendarHeaderViewButton from './CalendarHeaderViewButton';
 import styles from './CalendarHeader.css';
 
+function getNavigationLabels(view: string) {
+  if (view === 'month') {
+    return {
+      previous: translate('CalendarGoToPreviousMonth'),
+      next: translate('CalendarGoToNextMonth'),
+    };
+  }
+
+  if (view === 'week') {
+    return {
+      previous: translate('CalendarGoToPreviousWeek'),
+      next: translate('CalendarGoToNextWeek'),
+    };
+  }
+
+  if (view === 'day') {
+    return {
+      previous: translate('CalendarGoToPreviousDay'),
+      next: translate('CalendarGoToNextDay'),
+    };
+  }
+
+  return {
+    previous: translate('CalendarGoToPreviousRange'),
+    next: translate('CalendarGoToNextRange'),
+  };
+}
+
 function CalendarHeader() {
   const dispatch = useDispatch();
 
@@ -36,6 +64,8 @@ function CalendarHeader() {
   const { longDateFormat } = useSelector(
     useMemo(() => createUISettingsSelector(), [])
   );
+
+  const navigationLabels = getNavigationLabels(view);
 
   const handleViewChange = useCallback(
     (newView: string) => {
@@ -85,13 +115,22 @@ function CalendarHeader() {
 
   return (
     <div>
-      {isSmallScreen ? <div className={styles.titleMobile}>{title}</div> : null}
+      {isSmallScreen ? (
+        <div
+          className={styles.titleMobile}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {title}
+        </div>
+      ) : null}
 
       <div className={styles.header}>
         <div className={styles.navigationButtons}>
           <Button
             buttonGroupPosition="left"
             isDisabled={view === 'agenda'}
+            aria-label={navigationLabels.previous}
             onPress={handlePreviousPress}
           >
             <Icon name={icons.PAGE_PREVIOUS} />
@@ -100,6 +139,7 @@ function CalendarHeader() {
           <Button
             buttonGroupPosition="right"
             isDisabled={view === 'agenda'}
+            aria-label={navigationLabels.next}
             onPress={handleNextPress}
           >
             <Icon name={icons.PAGE_NEXT} />
@@ -115,7 +155,13 @@ function CalendarHeader() {
         </div>
 
         {isSmallScreen ? null : (
-          <div className={styles.titleDesktop}>{title}</div>
+          <div
+            className={styles.titleDesktop}
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {title}
+          </div>
         )}
 
         <div className={styles.viewButtonsContainer}>
@@ -125,7 +171,7 @@ function CalendarHeader() {
 
           {isLargeScreen ? (
             <Menu className={styles.viewMenu} alignMenu={align.RIGHT}>
-              <MenuButton>
+              <MenuButton aria-label={translate('CalendarView')}>
                 <Icon name={icons.VIEW} size={22} />
               </MenuButton>
 
@@ -176,6 +222,7 @@ function CalendarHeader() {
           ) : (
             <>
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="month"
                 selectedView={view}
                 buttonGroupPosition="left"
@@ -183,6 +230,7 @@ function CalendarHeader() {
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="week"
                 selectedView={view}
                 buttonGroupPosition="center"
@@ -190,6 +238,7 @@ function CalendarHeader() {
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="forecast"
                 selectedView={view}
                 buttonGroupPosition="center"
@@ -197,6 +246,7 @@ function CalendarHeader() {
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="day"
                 selectedView={view}
                 buttonGroupPosition="center"
@@ -204,6 +254,7 @@ function CalendarHeader() {
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="agenda"
                 selectedView={view}
                 buttonGroupPosition="right"
