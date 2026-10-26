@@ -1,7 +1,9 @@
+import classNames from 'classnames';
 import { useCallback } from 'react';
 import { CalendarView } from 'Calendar/calendarViews';
 import Button, { ButtonProps } from 'Components/Link/Button';
 import titleCase from 'Utilities/String/titleCase';
+import styles from './CalendarHeaderViewButton.css';
 
 interface CalendarHeaderViewButtonProps extends Omit<
   ButtonProps,
@@ -16,8 +18,11 @@ function CalendarHeaderViewButton({
   view,
   selectedView,
   onPress,
+  className,
   ...otherProps
 }: CalendarHeaderViewButtonProps) {
+  const isSelected = selectedView === view;
+
   const handlePress = useCallback(() => {
     onPress(view);
   }, [view, onPress]);
@@ -25,7 +30,8 @@ function CalendarHeaderViewButton({
   return (
     <Button
       {...otherProps}
-      aria-pressed={selectedView === view}
+      className={classNames(className, isSelected && styles.selected)}
+      aria-pressed={isSelected}
       onPress={handlePress}
     >
       {titleCase(view)}

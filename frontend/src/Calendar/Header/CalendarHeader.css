@@ -15,10 +15,6 @@
 
 .viewButton {
   composes: button from '~Components/Link/Button.css';
-
-  &[aria-pressed='true'] {
-    opacity: 0.65;
-  }
 }
 
 .titleDesktop,
