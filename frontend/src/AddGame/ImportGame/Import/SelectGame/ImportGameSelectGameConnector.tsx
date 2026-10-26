@@ -9,10 +9,12 @@ import {
   setImportGameValue,
 } from 'Store/Actions/importGameActions';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
+import checkIsExistingGame from 'Utilities/Game/isExistingGame';
 import ImportGameSelectGame from './ImportGameSelectGame';
 
 interface SelectedGame {
   igdbId: number;
+  steamAppId?: number;
   title: string;
   year: number;
   studio?: string;
@@ -21,6 +23,7 @@ interface SelectedGame {
 
 interface GameItem {
   igdbId: number;
+  steamAppId?: number;
   title: string;
   year: number;
   studio?: string;
@@ -60,8 +63,7 @@ function ImportGameSelectGameConnector(
             (_.find(importGame.items, { id }) as unknown as ImportGameItem) ||
             {};
           const selectedGame = item.selectedGame;
-          const isExistingGame =
-            !!selectedGame && _.some(games, { igdbId: selectedGame.igdbId });
+          const isExistingGame = checkIsExistingGame(games, selectedGame);
 
           return {
             isLookingUpGame,
@@ -108,16 +110,19 @@ function ImportGameSelectGameConnector(
     [dispatch, id]
   );
 
+  // Take the result itself rather than looking it back up by id: every
+  // Steam-sourced lookup row has `igdbId: 0`, so a find-by-igdbId would always
+  // return the first result no matter which one the user clicked.
   const onGameSelect = useCallback(
-    (igdbId: number) => {
+    (game: GameItem) => {
       dispatch(
         setImportGameValue({
           id,
-          selectedGame: _.find(items, { igdbId }),
+          selectedGame: game,
         })
       );
     },
-    [dispatch, id, items]
+    [dispatch, id]
   );
 
   return (

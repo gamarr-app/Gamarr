@@ -9,6 +9,7 @@ import Game from 'Game/Game';
 import { AppDispatch, createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import getNewGame, { NewGamePayload } from 'Utilities/Game/getNewGame';
+import { isSameGame } from 'Utilities/Game/isExistingGame';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 import { removeItem, set, updateItem } from './baseActions';
@@ -277,8 +278,10 @@ export const actionHandlers = handleThunks({
       const selectedGame = item.selectedGame;
 
       // Make sure we have a selected game and
-      // the same game hasn't been added yet.
-      if (selectedGame && !acc.some((a) => a.igdbId === selectedGame.igdbId)) {
+      // the same game hasn't been added yet. Compare on identity rather than
+      // on igdbId alone: Steam-sourced lookup results all have `igdbId: 0`,
+      // which would collapse every selected row into a single import.
+      if (selectedGame && !acc.some((a) => isSameGame(a, selectedGame))) {
         // selectedGame comes from the lookup API and contains game data
         // item contains the import options (monitor, qualityProfileId, rootFolderPath, etc.)
         const newGame = getNewGame(

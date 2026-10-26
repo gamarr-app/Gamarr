@@ -8,6 +8,7 @@ import { setImportGameValue } from 'Store/Actions/importGameActions';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import { InputChanged } from 'typings/inputs';
 import { SelectStateInputProps } from 'typings/props';
+import checkIsExistingGame from 'Utilities/Game/isExistingGame';
 import ImportGameRow from './ImportGameRow';
 
 interface ImportGameRowConnectorProps {
@@ -36,12 +37,10 @@ function createImportGameRowSelector(id: string) {
     createAllGamesSelector(),
     (item, games) => {
       const selectedGame = item && item.selectedGame;
-      const isExistingGame =
-        !!selectedGame && _.some(games, { igdbId: selectedGame.igdbId });
 
       return {
         ...item,
-        isExistingGame,
+        isExistingGame: checkIsExistingGame(games, selectedGame),
       };
     }
   );

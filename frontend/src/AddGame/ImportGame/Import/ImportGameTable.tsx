@@ -5,6 +5,7 @@ import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import Game from 'Game/Game';
 import { SelectStateInputProps } from 'typings/props';
+import checkIsExistingGame from 'Utilities/Game/isExistingGame';
 import ImportGameHeader from './ImportGameHeader';
 import ImportGameRowConnector from './ImportGameRowConnector';
 
@@ -16,6 +17,7 @@ interface UnmappedFolder {
 
 interface SelectedGame {
   igdbId: number;
+  steamAppId?: number;
 }
 
 interface ImportGameItem {
@@ -72,7 +74,7 @@ function Row({
   }
 
   return (
-    <VirtualTableRow style={style} className="">
+    <VirtualTableRow style={style}>
       <ImportGameRowConnector
         key={item.id}
         rootFolderId={rootFolderId}
@@ -147,9 +149,10 @@ function ImportGameTable(props: ImportGameTableProps) {
       const selectedGame = item.selectedGame;
       const isSelected = selectedState[id];
 
-      const isExistingGame =
-        !!selectedGame &&
-        _.some(prevAllGamesRef.current, { igdbId: selectedGame.igdbId });
+      const isExistingGame = checkIsExistingGame(
+        prevAllGamesRef.current,
+        selectedGame
+      );
 
       // Props doesn't have a selected game or
       // the selected game is an existing game.
