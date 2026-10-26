@@ -21,6 +21,7 @@ import usePrevious from 'Helpers/Hooks/usePrevious';
 import { icons } from 'Helpers/Props';
 import { clearPaths, fetchPaths } from 'Store/Actions/pathActions';
 import { InputChanged } from 'typings/inputs';
+import translate from 'Utilities/String/translate';
 import AutoSuggestInput from './AutoSuggestInput';
 import FormInputButton from './FormInputButton';
 import styles from './PathInput.css';
@@ -239,6 +240,8 @@ export function PathInputInternal(props: PathInputInternalProps) {
               styles.fileBrowserButton,
               hasButton && styles.fileBrowserMiddleButton
             )}
+            title={translate('OpenFileBrowser')}
+            aria-label={translate('OpenFileBrowser')}
             onPress={handleFileBrowserOpenPress}
           >
             <Icon name={icons.FOLDER_OPEN} />

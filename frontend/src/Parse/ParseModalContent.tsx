@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import TextInput from 'Components/Form/TextInput';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
+import IconButton from 'Components/Link/IconButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
@@ -73,9 +74,14 @@ function ParseModalContent(props: ParseModalContentProps) {
             onChange={onInputChange}
           />
 
-          <Button className={styles.clearButton} onPress={onClearPress}>
-            <Icon name={icons.REMOVE} size={20} />
-          </Button>
+          <IconButton
+            className={styles.clearButton}
+            name={icons.REMOVE}
+            size={20}
+            title={translate('ClearParseInput')}
+            aria-label={translate('ClearParseInput')}
+            onPress={onClearPress}
+          />
         </div>
 
         {isFetching ? <LoadingIndicator /> : null}
