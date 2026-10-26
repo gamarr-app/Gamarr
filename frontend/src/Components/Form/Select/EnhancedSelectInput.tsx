@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { usePopper } from 'react-popper';
 import Icon from 'Components/Icon';
+import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import Modal from 'Components/Modal/Modal';
@@ -24,6 +25,7 @@ import ArrayElement from 'typings/Helpers/ArrayElement';
 import { EnhancedSelectInputChanged, InputChanged } from 'typings/inputs';
 import { isMobile as isMobileUtil } from 'Utilities/browser';
 import * as keyCodes from 'Utilities/Constants/keyCodes';
+import translate from 'Utilities/String/translate';
 import TextInput from '../TextInput';
 import HintedSelectInputOption from './HintedSelectInputOption';
 import HintedSelectInputSelectedValue from './HintedSelectInputSelectedValue';
@@ -596,12 +598,14 @@ function EnhancedSelectInput<T extends EnhancedSelectInputValue<V>, V>(
           >
             <Scroller className={styles.optionsModalScroller}>
               <div className={styles.mobileCloseButtonContainer}>
-                <Link
+                <IconButton
                   className={styles.mobileCloseButton}
+                  name={icons.CLOSE}
+                  size={18}
+                  title={translate('CloseOptions')}
+                  aria-label={translate('CloseOptions')}
                   onPress={handleOptionsModalClose}
-                >
-                  <Icon name={icons.CLOSE} size={18} />
-                </Link>
+                />
               </div>
 
               {values.map((v, index) => {

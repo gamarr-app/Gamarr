@@ -4,6 +4,7 @@ import Alert from 'Components/Alert';
 import TextInput from 'Components/Form/TextInput';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
+import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -116,12 +117,14 @@ function AddNewGame(props: AddNewGameProps) {
             onChange={onSearchInputChange}
           />
 
-          <Button
+          <IconButton
             className={styles.clearLookupButton}
+            name={icons.REMOVE}
+            size={20}
+            title={translate('ClearGameSearch')}
+            aria-label={translate('ClearGameSearch')}
             onPress={onClearGameLookupPress}
-          >
-            <Icon name={icons.REMOVE} size={20} />
-          </Button>
+          />
         </div>
 
         {isFetching && <LoadingIndicator />}

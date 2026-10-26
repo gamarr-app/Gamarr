@@ -11,6 +11,7 @@ import {
   fetchOptions,
 } from 'Store/Actions/providerOptionActions';
 import { InputChanged } from 'typings/inputs';
+import translate from 'Utilities/String/translate';
 import TagInput, { TagInputProps } from './TagInput';
 import styles from './DeviceInput.css';
 
@@ -138,7 +139,11 @@ function DeviceInput({
         onTagDelete={handleTagDelete}
       />
 
-      <FormInputButton onPress={handleRefreshPress}>
+      <FormInputButton
+        title={translate('RefreshDevices')}
+        aria-label={translate('RefreshDevices')}
+        onPress={handleRefreshPress}
+      >
         <Icon name={icons.REFRESH} isSpinning={isFetching} />
       </FormInputButton>
     </div>
