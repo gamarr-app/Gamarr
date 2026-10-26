@@ -1,20 +1,25 @@
+import classNames from 'classnames';
 import { HTMLAttributes, ReactNode } from 'react';
 import styles from './VirtualTableRow.css';
 
 interface VirtualTableRowProps extends HTMLAttributes<HTMLDivElement> {
-  className: string;
+  className?: string;
   style: object;
   children?: ReactNode;
 }
 
 function VirtualTableRow({
-  className = styles.row,
+  className,
   children,
   style,
   ...otherProps
 }: VirtualTableRowProps) {
   return (
-    <div className={className} style={style} {...otherProps}>
+    <div
+      className={classNames(styles.row, className)}
+      style={style}
+      {...otherProps}
+    >
       {children}
     </div>
   );
