@@ -13,12 +13,14 @@ function MenuItem({
   className = styles.menuItem,
   children,
   isDisabled = false,
+  role = 'menuitem',
   ...otherProps
 }: MenuItemProps) {
   return (
     <Link
       className={classNames(className, isDisabled && styles.isDisabled)}
       isDisabled={isDisabled}
+      role={role}
       {...otherProps}
     >
       {children}
