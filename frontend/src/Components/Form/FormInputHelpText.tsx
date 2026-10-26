@@ -31,6 +31,7 @@ function FormInputHelpText({
         isWarning && styles.isWarning,
         isCheckInput && styles.isCheckInput
       )}
+      role={isError ? 'alert' : undefined}
     >
       {text}
 
