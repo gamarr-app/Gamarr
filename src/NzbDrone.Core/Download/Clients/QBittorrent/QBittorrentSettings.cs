@@ -83,6 +83,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         [FieldDefinition(14, Label = "DownloadClientQbittorrentSettingsContentLayout", Type = FieldType.Select, SelectOptions = typeof(QBittorrentContentLayout), HelpText = "DownloadClientQbittorrentSettingsContentLayoutHelpText")]
         public int ContentLayout { get; set; }
 
+        [FieldDefinition(15, Label = "DownloadClientQbittorrentSettingsSeedTimeType", Type = FieldType.Select, SelectOptions = typeof(QBittorrentSeedTimeType), Advanced = true, HelpText = "DownloadClientQbittorrentSettingsSeedTimeTypeHelpText")]
+        public int SeedTimeType { get; set; }
+
         public override NzbDroneValidationResult Validate()
         {
             return new NzbDroneValidationResult(Validator.Validate(this));
