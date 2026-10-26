@@ -15,6 +15,7 @@ import styles from './ImportGameSelectGame.css';
 
 interface SelectedGame {
   igdbId: number;
+  steamAppId?: number;
   title: string;
   year: number;
   studio?: string;
@@ -23,6 +24,7 @@ interface SelectedGame {
 
 interface GameItem {
   igdbId: number;
+  steamAppId?: number;
   title: string;
   year: number;
   studio?: string;
@@ -45,7 +47,7 @@ interface ImportGameSelectGameProps {
   isQueued: boolean;
   isLookingUpGame: boolean;
   onSearchInputChange: (term: string) => void;
-  onGameSelect: (igdbId: number) => void;
+  onGameSelect: (game: GameItem) => void;
 }
 
 function ImportGameSelectGame(props: ImportGameSelectGameProps) {
@@ -162,9 +164,9 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
   }, [onSearchInputChange, term]);
 
   const handleGameSelect = useCallback(
-    (igdbId: number) => {
+    (game: GameItem) => {
       setIsOpen(false);
-      onGameSelect(igdbId);
+      onGameSelect(game);
     },
     [onGameSelect]
   );
@@ -264,12 +266,15 @@ function ImportGameSelectGame(props: ImportGameSelectGameProps) {
               </div>
 
               <div className={styles.results}>
-                {items.map((item) => {
+                {items.map((item, index) => {
                   return (
                     <ImportGameSearchResultConnector
-                      key={item.igdbId}
+                      // Steam results share `igdbId: 0`, so the id alone is not
+                      // a unique React key.
+                      key={`${item.steamAppId ?? 0}_${item.igdbId}_${index}`}
                       igdbId={item.igdbId}
-                      steamAppId={0}
+                      steamAppId={item.steamAppId}
+                      game={item}
                       title={item.title}
                       year={item.year}
                       studio={item.studio}

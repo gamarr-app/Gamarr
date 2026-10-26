@@ -5,21 +5,35 @@ import { icons } from 'Helpers/Props';
 import ImportGameTitle from './ImportGameTitle';
 import styles from './ImportGameSearchResult.css';
 
-interface ImportGameSearchResultProps {
+export interface ImportGameSearchResultGame {
   igdbId: number;
+  steamAppId?: number;
+  title: string;
+  year: number;
+  studio?: string;
+}
+
+interface ImportGameSearchResultProps {
+  // `igdbId`/`steamAppId` are also read as ownProps by the connector's
+  // existing-game selector.
+  igdbId: number;
+  steamAppId?: number;
+  game: ImportGameSearchResultGame;
   title: string;
   year: number;
   studio?: string;
   isExistingGame: boolean;
-  onPress: (igdbId: number) => void;
+  onPress: (game: ImportGameSearchResultGame) => void;
 }
 
 function ImportGameSearchResult(props: ImportGameSearchResultProps) {
-  const { igdbId, title, year, studio, isExistingGame, onPress } = props;
+  const { game, title, year, studio, isExistingGame, onPress } = props;
 
+  // Pass the result itself, not an id: Steam-sourced results all share
+  // `igdbId: 0`, so an id would not identify which row was clicked.
   const handlePress = useCallback(() => {
-    onPress(igdbId);
-  }, [igdbId, onPress]);
+    onPress(game);
+  }, [game, onPress]);
 
   return (
     <div className={styles.container}>

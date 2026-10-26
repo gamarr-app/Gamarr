@@ -22,7 +22,9 @@ function ImportGameTitle(props: ImportGameTitleProps) {
       <div className={styles.title}>
         {title}
 
-        {!title.contains(String(year)) && (
+        {/* Steam search results carry no release date, so `year` is 0 there —
+            rendering "(0)" after every title is noise. */}
+        {year > 0 && !title.contains(String(year)) && (
           <span className={styles.year}>({year})</span>
         )}
       </div>
