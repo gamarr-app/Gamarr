@@ -233,10 +233,13 @@ namespace NzbDrone.Core.MediaCover
                 toResize.Add(Tuple.Create(cover, alreadyExists, index));
             }
 
+            // Wait() must be outside the try: if it throws (e.g. the semaphore was
+            // disposed), the permit was never taken, and the finally below would
+            // release one that doesn't belong to this call.
+            _semaphore.Wait();
+
             try
             {
-                _semaphore.Wait();
-
                 foreach (var tuple in toResize)
                 {
                     EnsureResizedCovers(game, tuple.Item1, !tuple.Item2, tuple.Item3);

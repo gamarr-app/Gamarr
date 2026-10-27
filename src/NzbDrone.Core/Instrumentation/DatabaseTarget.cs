@@ -28,12 +28,23 @@ namespace NzbDrone.Core.Instrumentation
 
         public void Register()
         {
+            // AppLifetime nulls LogManager.Configuration on a (non-restart)
+            // shutdown, and this can also be reached via the ConfigurationChanged
+            // event below from a different thread than the one that just reset
+            // the config, so re-read it rather than assume it is still there.
+            var configuration = LogManager.Configuration;
+
+            if (configuration == null)
+            {
+                return;
+            }
+
             var target = new SlowRunningAsyncTargetWrapper(this) { TimeToSleepBetweenBatches = 500 };
 
             Rule = new LoggingRule("*", LogLevel.Info, target);
 
-            LogManager.Configuration.AddTarget(TARGET_NAME, target);
-            LogManager.Configuration.LoggingRules.Add(Rule);
+            configuration.AddTarget(TARGET_NAME, target);
+            configuration.LoggingRules.Add(Rule);
             LogManager.ConfigurationChanged -= OnLogManagerOnConfigurationChanged;
             LogManager.ConfigurationChanged += OnLogManagerOnConfigurationChanged;
             LogManager.ReconfigExistingLoggers();
@@ -42,9 +53,16 @@ namespace NzbDrone.Core.Instrumentation
         public void UnRegister()
         {
             LogManager.ConfigurationChanged -= OnLogManagerOnConfigurationChanged;
-            LogManager.Configuration.RemoveTarget(TARGET_NAME);
-            LogManager.Configuration.LoggingRules.Remove(Rule);
-            LogManager.ReconfigExistingLoggers();
+
+            var configuration = LogManager.Configuration;
+
+            if (configuration != null)
+            {
+                configuration.RemoveTarget(TARGET_NAME);
+                configuration.LoggingRules.Remove(Rule);
+                LogManager.ReconfigExistingLoggers();
+            }
+
             Dispose();
         }
 
