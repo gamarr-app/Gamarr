@@ -46,23 +46,32 @@ namespace Gamarr.Api.V3.Queue
         {
             _broadcastDebounce.Pause();
 
-            var queue = _queueService.GetQueue();
-            var pending = _pendingReleaseService.GetPendingQueue();
-
-            var resource = new QueueStatusResource
+            try
             {
-                TotalCount = queue.Count + pending.Count,
-                Count = queue.Count(q => q.Game != null) + pending.Count,
-                UnknownCount = queue.Count(q => q.Game == null),
-                Errors = queue.Any(q => q.Game != null && q.TrackedDownloadStatus == TrackedDownloadStatus.Error),
-                Warnings = queue.Any(q => q.Game != null && q.TrackedDownloadStatus == TrackedDownloadStatus.Warning),
-                UnknownErrors = queue.Any(q => q.Game == null && q.TrackedDownloadStatus == TrackedDownloadStatus.Error),
-                UnknownWarnings = queue.Any(q => q.Game == null && q.TrackedDownloadStatus == TrackedDownloadStatus.Warning)
-            };
+                var queue = _queueService.GetQueue();
+                var pending = _pendingReleaseService.GetPendingQueue();
 
-            _broadcastDebounce.Resume();
+                var resource = new QueueStatusResource
+                {
+                    TotalCount = queue.Count + pending.Count,
+                    Count = queue.Count(q => q.Game != null) + pending.Count,
+                    UnknownCount = queue.Count(q => q.Game == null),
+                    Errors = queue.Any(q => q.Game != null && q.TrackedDownloadStatus == TrackedDownloadStatus.Error),
+                    Warnings = queue.Any(q => q.Game != null && q.TrackedDownloadStatus == TrackedDownloadStatus.Warning),
+                    UnknownErrors = queue.Any(q => q.Game == null && q.TrackedDownloadStatus == TrackedDownloadStatus.Error),
+                    UnknownWarnings = queue.Any(q => q.Game == null && q.TrackedDownloadStatus == TrackedDownloadStatus.Warning)
+                };
 
-            return resource;
+                return resource;
+            }
+            finally
+            {
+                // Without this, a throw between Pause() and Resume() (e.g. the queue
+                // or pending-release lookup faulting) leaves the debounce paused
+                // forever - every future QueueUpdatedEvent/PendingReleasesUpdatedEvent
+                // is silently swallowed and the queue panel stops updating until restart.
+                _broadcastDebounce.Resume();
+            }
         }
 
         private void BroadcastChange()

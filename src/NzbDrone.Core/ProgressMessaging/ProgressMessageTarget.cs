@@ -56,10 +56,21 @@ namespace NzbDrone.Core.ProgressMessaging
 
         public void Handle(ApplicationStartedEvent message)
         {
+            // AppLifetime nulls LogManager.Configuration on a (non-restart)
+            // shutdown; a shutdown requested while startup is still in flight can
+            // race this handler on another thread and null the config out from
+            // under it.
+            var configuration = LogManager.Configuration;
+
+            if (configuration == null)
+            {
+                return;
+            }
+
             _rule = new LoggingRule("*", LogLevel.Trace, this);
 
-            LogManager.Configuration.AddTarget("ProgressMessagingLogger", this);
-            LogManager.Configuration.LoggingRules.Add(_rule);
+            configuration.AddTarget("ProgressMessagingLogger", this);
+            configuration.LoggingRules.Add(_rule);
             LogManager.ReconfigExistingLoggers();
         }
     }

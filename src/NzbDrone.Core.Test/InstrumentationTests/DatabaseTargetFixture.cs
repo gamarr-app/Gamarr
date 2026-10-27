@@ -5,6 +5,7 @@ using FluentAssertions;
 using NLog;
 using NUnit.Framework;
 using NzbDrone.Common.Instrumentation;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Datastore.Migration.Framework;
 using NzbDrone.Core.Instrumentation;
 using NzbDrone.Core.MediaFiles;
@@ -114,6 +115,48 @@ namespace NzbDrone.Core.Test.InstrumentationTests
         public void Teardown()
         {
             Mocker.Resolve<DatabaseTarget>().UnRegister();
+        }
+
+        [Test]
+        public void register_should_not_throw_when_configuration_is_null()
+        {
+            // AppLifetime nulls LogManager.Configuration on a (non-restart)
+            // shutdown; Register() can be reached again afterwards via the
+            // ConfigurationChanged subscription.
+            var originalConfiguration = LogManager.Configuration;
+
+            try
+            {
+                LogManager.Configuration = null;
+
+                var target = new DatabaseTarget(Mocker.GetMock<IConnectionStringFactory>().Object);
+
+                Assert.DoesNotThrow(() => target.Register());
+            }
+            finally
+            {
+                LogManager.Configuration = originalConfiguration;
+            }
+        }
+
+        [Test]
+        public void unregister_should_not_throw_when_configuration_is_null()
+        {
+            var originalConfiguration = LogManager.Configuration;
+
+            try
+            {
+                var target = new DatabaseTarget(Mocker.GetMock<IConnectionStringFactory>().Object);
+                target.Register();
+
+                LogManager.Configuration = null;
+
+                Assert.DoesNotThrow(() => target.UnRegister());
+            }
+            finally
+            {
+                LogManager.Configuration = originalConfiguration;
+            }
         }
 
         private void WaitForLogWrite(int expectedCount = 1, int timeoutMs = 2000)

@@ -310,9 +310,19 @@ namespace NzbDrone.Common.Http
             }
             finally
             {
-                if (File.Exists(fileNamePart))
+                // Best-effort cleanup only: a throw here (e.g. a NAS-backed volume
+                // rejecting the delete) would replace the real HTTP/exception from
+                // the try above, hiding the actual download failure from the user.
+                try
                 {
-                    File.Delete(fileNamePart);
+                    if (File.Exists(fileNamePart))
+                    {
+                        File.Delete(fileNamePart);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Failed to delete partial download file {0}", fileNamePart);
                 }
             }
         }
