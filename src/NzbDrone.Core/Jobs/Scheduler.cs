@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using NLog;
 using NzbDrone.Common.TPL;
 using NzbDrone.Core.Lifecycle;
@@ -17,8 +19,22 @@ namespace NzbDrone.Core.Jobs
         private readonly ITaskManager _taskManager;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly Logger _logger;
+
         private static readonly Timer Timer = new Timer();
+
+        // System.Timers.Timer is explicitly not thread-safe: its Enabled setter
+        // disposes and nulls an internal System.Threading.Timer, so two threads
+        // toggling it can dereference that field after it has been nulled. Every
+        // touch of Timer goes through this lock.
+        private static readonly object TimerLock = new object();
+
         private static CancellationTokenSource _cancellationTokenSource;
+        private static ElapsedEventHandler _elapsedHandler;
+
+        // Only one scheduling pass may be in flight. The timer keeps ticking
+        // while a pass runs on the thread pool, so without this two passes could
+        // overlap and fight over Timer.Enabled.
+        private static int _executing;
 
         public Scheduler(ITaskManager taskManager, IManageCommandQueue commandQueueManager, Logger logger)
         {
@@ -27,11 +43,36 @@ namespace NzbDrone.Core.Jobs
             _logger = logger;
         }
 
-        private void ExecuteCommands()
+        internal static bool TimerEnabled
         {
+            get
+            {
+                lock (TimerLock)
+                {
+                    return Timer.Enabled;
+                }
+            }
+
+            set
+            {
+                lock (TimerLock)
+                {
+                    Timer.Enabled = value;
+                }
+            }
+        }
+
+        internal void ExecuteCommands()
+        {
+            if (Interlocked.CompareExchange(ref _executing, 1, 0) != 0)
+            {
+                _logger.Trace("Scheduling pass already in progress, skipping this tick");
+                return;
+            }
+
             try
             {
-                Timer.Enabled = false;
+                TimerEnabled = false;
 
                 var tasks = _taskManager.GetPending().ToList();
 
@@ -44,28 +85,79 @@ namespace NzbDrone.Core.Jobs
             }
             finally
             {
-                if (!_cancellationTokenSource.IsCancellationRequested)
+                // Nothing in here may throw. An exception escaping this block
+                // replaces the real failure from the try and, worse, leaves the
+                // timer disabled for the life of the process - every scheduled
+                // task then silently stops until Gamarr is restarted.
+                try
                 {
-                    Timer.Enabled = true;
+                    // A null source means ApplicationStartedEvent has not been
+                    // handled (or its write is not yet visible to this thread).
+                    // Nobody has asked us to stop, so treat it as "not cancelled"
+                    // and keep the scheduler running.
+                    var cancellationTokenSource = _cancellationTokenSource;
+
+                    if (cancellationTokenSource is null || !cancellationTokenSource.IsCancellationRequested)
+                    {
+                        TimerEnabled = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Failed to reschedule the task timer, scheduled tasks may be stopped");
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _executing, 0);
                 }
             }
         }
 
         public void Handle(ApplicationStartedEvent message)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            Timer.Interval = 1000 * 30;
-            Timer.Elapsed += (o, args) => Task.Factory.StartNew(ExecuteCommands, _cancellationTokenSource.Token)
-                .LogExceptions();
+            lock (TimerLock)
+            {
+                _cancellationTokenSource = new CancellationTokenSource();
 
-            Timer.Start();
+                Timer.Interval = 1000 * 30;
+
+                // The timer is static but this handler runs once per Scheduler
+                // instance, and an in-process restart publishes the event again.
+                // Replace the subscription instead of stacking a second one, so
+                // a tick cannot start two overlapping passes (and cannot call
+                // back into an instance from a disposed container).
+                if (_elapsedHandler != null)
+                {
+                    Timer.Elapsed -= _elapsedHandler;
+                }
+
+                _elapsedHandler = OnTimerElapsed;
+                Timer.Elapsed += _elapsedHandler;
+
+                Timer.Start();
+            }
         }
 
         public void Handle(ApplicationShutdownRequested message)
         {
             _logger.Info("Shutting down scheduler");
-            _cancellationTokenSource.Cancel(true);
-            Timer.Stop();
+
+            // Shutdown can be requested before ApplicationStartedEvent has been
+            // handled, which left this field null and threw out of the handler.
+            _cancellationTokenSource?.Cancel(true);
+
+            lock (TimerLock)
+            {
+                Timer.Stop();
+            }
+        }
+
+        private void OnTimerElapsed(object sender, ElapsedEventArgs args)
+        {
+            var cancellationTokenSource = _cancellationTokenSource;
+
+            Task.Factory.StartNew(ExecuteCommands, cancellationTokenSource?.Token ?? CancellationToken.None)
+                .LogExceptions();
         }
     }
 }
