@@ -36,9 +36,14 @@ namespace NzbDrone.Core.Messaging.Commands
 
         private void ExecuteCommands()
         {
+            // Read the static once: Handle(ApplicationStartedEvent) can run
+            // again (in-process restart) and swap it out underneath us, and it
+            // is null if this thread somehow outlives/precedes that handler.
+            var cancellationTokenSource = _cancellationTokenSource;
+
             try
             {
-                foreach (var command in _commandQueueManager.Queue(_cancellationTokenSource.Token))
+                foreach (var command in _commandQueueManager.Queue(cancellationTokenSource?.Token ?? CancellationToken.None))
                 {
                     try
                     {
@@ -50,7 +55,7 @@ namespace NzbDrone.Core.Messaging.Commands
                         // flipping (teardown ordering isn't guaranteed), so a
                         // disposed-container failure is shutdown noise even
                         // when cancellation hasn't been requested yet.
-                        if (_cancellationTokenSource.IsCancellationRequested || IsContainerDisposed(ex))
+                        if (cancellationTokenSource is { IsCancellationRequested: true } || IsContainerDisposed(ex))
                         {
                             _logger.Debug(ex, "Error occurred while executing task {0} during shutdown", command.Name);
                         }
@@ -179,7 +184,10 @@ namespace NzbDrone.Core.Messaging.Commands
         public void Handle(ApplicationShutdownRequested message)
         {
             _logger.Info("Shutting down task execution");
-            _cancellationTokenSource.Cancel(true);
+
+            // Shutdown can be requested before ApplicationStartedEvent has been
+            // handled, which left this field null and threw out of the handler.
+            _cancellationTokenSource?.Cancel(true);
         }
     }
 }
