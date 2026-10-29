@@ -107,10 +107,15 @@ namespace Gamarr.Api.V3.History
             return _historyService.GetByGameId(gameId, eventType).Select(h => MapToResource(h, includeGame)).ToList();
         }
 
+        // skipRedownload and deleteFiles make this the single "this grab was bad, undo it"
+        // action: blocklist the release (BlocklistService handles DownloadFailedEvent), remove
+        // the download from the client (DownloadEventHub, once FailedDownloadService attaches
+        // the TrackedDownload) and optionally delete what it already imported. Both default to
+        // the previous behaviour, so an existing caller is unaffected.
         [HttpPost("failed/{id}")]
-        public object MarkAsFailed([FromRoute] int id)
+        public object MarkAsFailed([FromRoute] int id, [FromQuery] bool skipRedownload = false, [FromQuery] bool deleteFiles = false)
         {
-            _failedDownloadService.MarkAsFailed(id);
+            _failedDownloadService.MarkAsFailed(id, skipRedownload, deleteFiles);
             return new { };
         }
     }
