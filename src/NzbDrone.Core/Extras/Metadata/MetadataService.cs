@@ -104,7 +104,17 @@ namespace NzbDrone.Core.Extras.Metadata
 
                 foreach (var gameFile in gameFiles)
                 {
-                    files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, consumerFiles));
+                    // A single unwritable metadata file (e.g. a read-only library mount)
+                    // must not abort the rest of this game's files, the rest of the
+                    // consumers, or the sibling extra file managers in the same event.
+                    try
+                    {
+                        files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, consumerFiles));
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        _logger.Warn(ex, "Unable to write metadata for {0}: {1}", gameFile, ex.Message);
+                    }
                 }
             }
 
@@ -119,7 +129,14 @@ namespace NzbDrone.Core.Extras.Metadata
 
             foreach (var consumer in _metadataFactory.Enabled())
             {
-                files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, new List<MetadataFile>()));
+                try
+                {
+                    files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, new List<MetadataFile>()));
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                {
+                    _logger.Warn(ex, "Unable to write metadata for {0}: {1}", gameFile, ex.Message);
+                }
             }
 
             _metadataFileService.Upsert(files);
@@ -274,7 +291,18 @@ namespace NzbDrone.Core.Extras.Metadata
                     continue;
                 }
 
-                _otherExtraFileRenamer.RenameOtherExtraFile(game, fullPath);
+                // A read-only mount can throw out of RenameOtherExtraFile (a disk move)
+                // before DownloadImage's own try/catch ever gets a chance to run. One
+                // bad image must not stop the rest of this consumer's images.
+                try
+                {
+                    _otherExtraFileRenamer.RenameOtherExtraFile(game, fullPath);
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                {
+                    _logger.Warn(ex, "Unable to rename existing extra file for {0}: {1}", fullPath, ex.Message);
+                    continue;
+                }
 
                 var metadata = GetMetadataFile(game, existingMetadataFiles, c => c.Type == MetadataType.GameImage &&
                                                                                    c.RelativePath == image.RelativePath) ??
