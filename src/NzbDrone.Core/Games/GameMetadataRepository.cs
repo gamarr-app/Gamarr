@@ -48,6 +48,27 @@ namespace NzbDrone.Core.Games
 
         public bool UpsertMany(List<GameMetadata> metadatas)
         {
+            // Defense in depth: GameMetadata.Title is NOT NULL in the
+            // database. Every known caller (import list mapping, add-game,
+            // collection refresh) should already filter out title-less
+            // entries before getting here, but one bad row in a batch Insert
+            // throws and silently drops the entire batch - so guard here too
+            // rather than trust every call site forever.
+            var usableMetadatas = new List<GameMetadata>();
+
+            foreach (var metadata in metadatas)
+            {
+                if (string.IsNullOrWhiteSpace(metadata.Title))
+                {
+                    _logger.Warn("Skipping game metadata with no title (IgdbId: {0}, SteamAppId: {1})", metadata.IgdbId, metadata.SteamAppId);
+                    continue;
+                }
+
+                usableMetadatas.Add(metadata);
+            }
+
+            metadatas = usableMetadatas;
+
             var updateList = new List<GameMetadata>();
             var addList = new List<GameMetadata>();
             var upToDateCount = 0;

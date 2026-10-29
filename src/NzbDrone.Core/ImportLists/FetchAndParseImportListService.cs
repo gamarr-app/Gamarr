@@ -106,7 +106,7 @@ namespace NzbDrone.Core.ImportLists
                                     (r.SteamAppId > 0 && r.SteamAppId == x.SteamAppId)));
                                 var listGames = MapGameReports(importListReports.Games.Where(x => result.Games.All(r =>
                                     (x.IgdbId == 0 || r.IgdbId != x.IgdbId) &&
-                                    (x.SteamAppId == 0 || r.SteamAppId != x.SteamAppId))))
+                                    (x.SteamAppId == 0 || r.SteamAppId != x.SteamAppId))), importListLocal.Definition.Name)
                                     .Where(x => x.IgdbId > 0 || x.SteamAppId > 0).ToList();
 
                                 listGames.AddRange(alreadyMapped);
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.ImportLists
 
                     if (!importListReports.AnyFailure)
                     {
-                        var listGames = MapGameReports(importListReports.Games)
+                        var listGames = MapGameReports(importListReports.Games, importListLocal.Definition.Name)
                             .Where(x => x.IgdbId > 0 || x.SteamAppId > 0)
                             .DistinctBy(x => x.SteamAppId > 0 ? $"steam:{x.SteamAppId}" : $"igdb:{x.IgdbId}")
                             .ToList();
@@ -193,7 +193,7 @@ namespace NzbDrone.Core.ImportLists
             return result;
         }
 
-        private List<ImportListGame> MapGameReports(IEnumerable<ImportListGame> reports)
+        private List<ImportListGame> MapGameReports(IEnumerable<ImportListGame> reports, string listName)
         {
             var mappedGames = new List<GameMetadata>();
 
@@ -212,6 +212,18 @@ namespace NzbDrone.Core.ImportLists
                 if (mapped == null && (report.IgdbId > 0 || !string.IsNullOrWhiteSpace(report.Title)))
                 {
                     mapped = _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = report.Title, IgdbId = report.IgdbId, Year = report.Year });
+                }
+
+                // A lookup miss can hand back the bare report shell unchanged
+                // (metadata source proxies fall back to "return the input
+                // as-is" when nothing is found upstream), which leaves Title
+                // unset. That can't be inserted (GameMetadata.Title is NOT
+                // NULL) and must not take the rest of the list's batch down
+                // with it.
+                if (mapped != null && string.IsNullOrWhiteSpace(mapped.Title))
+                {
+                    _logger.Warn("Skipping report with no resolvable title from Import List {0} (IgdbId: {1}, SteamAppId: {2}, Year: {3})", listName, report.IgdbId, report.SteamAppId, report.Year);
+                    continue;
                 }
 
                 if (mapped != null)

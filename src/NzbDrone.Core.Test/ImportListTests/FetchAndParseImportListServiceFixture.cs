@@ -10,6 +10,7 @@ using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.ImportListTests
 {
@@ -39,7 +40,7 @@ namespace NzbDrone.Core.Test.ImportListTests
 
             Mocker.GetMock<ISearchForNewGame>()
                 .Setup(v => v.MapGameToIgdbGame(It.IsAny<GameMetadata>()))
-                .Returns<GameMetadata>(m => new GameMetadata { IgdbId = m.IgdbId });
+                .Returns<GameMetadata>(m => new GameMetadata { IgdbId = m.IgdbId, Title = m.Title });
         }
 
         private void GivenList(int id, bool enabled, bool enabledAuto, ImportListFetchResult fetchResult)
@@ -184,6 +185,39 @@ namespace NzbDrone.Core.Test.ImportListTests
             var listResult = Subject.Fetch();
             listResult.AnyFailure.Should().BeFalse();
             listResult.Games.Count.Should().Be(5);
+        }
+
+        [Test]
+        public void should_skip_report_with_unresolvable_title_but_still_store_rest_of_batch()
+        {
+            var listId = 1;
+
+            var badReport = new ImportListGame { IgdbId = 919191 };
+
+            // Simulate a metadata source that, on a failed/empty lookup, falls
+            // back to handing back the input report unchanged - which leaves
+            // Title unset because the report only carried an IgdbId.
+            Mocker.GetMock<ISearchForNewGame>()
+                .Setup(v => v.MapGameToIgdbGame(It.Is<GameMetadata>(m => m.IgdbId == badReport.IgdbId)))
+                .Returns(new GameMetadata { IgdbId = badReport.IgdbId });
+
+            var allReports = new List<ImportListGame>(_listGames) { badReport };
+            var fetchResult = new ImportListFetchResult { Games = allReports, AnyFailure = false };
+            GivenList(listId, true, true, fetchResult);
+
+            var listResult = Subject.Fetch();
+
+            listResult.AnyFailure.Should().BeFalse();
+            listResult.Games.Count.Should().Be(5);
+            listResult.Games.Should().NotContain(g => g.IgdbId == badReport.IgdbId);
+
+            Mocker.GetMock<IGameMetadataService>()
+                .Verify(v => v.UpsertMany(It.Is<List<GameMetadata>>(l => l.Count == 5 && l.All(m => !string.IsNullOrWhiteSpace(m.Title)))), Times.Once());
+
+            Mocker.GetMock<IImportListGameService>()
+                .Verify(v => v.SyncGamesForList(It.IsAny<List<ImportListGame>>(), listId), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }
