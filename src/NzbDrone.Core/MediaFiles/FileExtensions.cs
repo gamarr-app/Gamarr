@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace NzbDrone.Core.MediaFiles
@@ -57,6 +58,7 @@ namespace NzbDrone.Core.MediaFiles
         // the import side must allow those through unless they are masquerading.
         public static HashSet<string> UnsafeExecutableExtensions => new (StringComparer.OrdinalIgnoreCase)
         {
+            ".appx",
             ".bat",
             ".cmd",
             ".com",
@@ -65,6 +67,7 @@ namespace NzbDrone.Core.MediaFiles
             ".js",
             ".jse",
             ".msi",
+            ".msix",
             ".pif",
             ".ps1",
             ".scr",
@@ -72,6 +75,49 @@ namespace NzbDrone.Core.MediaFiles
             ".vbs",
             ".wsf",
             ".wsh"
+        };
+
+        // Windows installer/package formats. .exe/.msi are legitimate game
+        // payloads when they ship alongside real game data (a repack's
+        // setup.exe next to its .bin files) — see IsInstallerOnlyPayload,
+        // which is the only place these get treated as dangerous on their own.
+        // .msix/.appx are folded in here too: they are never a recognised game
+        // file extension (MediaFileExtensions), so a bare one is already
+        // rejected elsewhere, but they get the same "installer, not data"
+        // classification for this check.
+        public static HashSet<string> WindowsInstallerExtensions => new (StringComparer.OrdinalIgnoreCase)
+        {
+            ".appx",
+            ".exe",
+            ".msi",
+            ".msix"
+        };
+
+        // Files that carry no game content either way: a readme, a checksum
+        // list, GOG's install metadata. A payload that is nothing but an
+        // installer plus one of these is still "nothing but an installer" —
+        // these don't count as the "real content" that would clear it.
+        public static HashSet<string> IncidentalFileExtensions => new (StringComparer.OrdinalIgnoreCase)
+        {
+            ".bmp",
+            ".cfg",
+            ".diz",
+            ".gif",
+            ".ico",
+            ".info",
+            ".ini",
+            ".jpg",
+            ".jpeg",
+            ".json",
+            ".log",
+            ".md5",
+            ".nfo",
+            ".pdf",
+            ".png",
+            ".rtf",
+            ".sfv",
+            ".txt",
+            ".url"
         };
 
         // Content extensions that never legitimately sit in front of an
@@ -133,6 +179,36 @@ namespace NzbDrone.Core.MediaFiles
 
             return ContentExtensions.Contains(precedingExtension) ||
                    MediaFileExtensions.IsGameFileExtension(precedingExtension);
+        }
+
+        /// <summary>
+        /// True when a release's payload is nothing but Windows installer
+        /// executables (.exe/.msi/.msix/.appx) plus incidental metadata
+        /// (readme, checksum list, GOG's goggame-*.info, ...) — no actual game
+        /// data. Used wherever the full set of paths in a candidate payload is
+        /// already known (a folder's files, an archive's entries, or a
+        /// single-file release treated as a one-element list) — never walks
+        /// the disk itself.
+        ///
+        /// The payload is the only signal available for a release whose title
+        /// carries no group token to check against: the 2026-10-26 incident
+        /// this guards against was a trojan .msi blocklisted under the bare
+        /// game title "Castlevania: Belmont's Curse", with no release group
+        /// anywhere in it.
+        /// </summary>
+        public static bool IsInstallerOnlyPayload(IEnumerable<string> paths)
+        {
+            var extensions = paths.Select(GetEffectiveExtension).ToList();
+
+            if (!extensions.Any(e => WindowsInstallerExtensions.Contains(e)))
+            {
+                return false;
+            }
+
+            var hasOtherContent = extensions.Any(e =>
+                !WindowsInstallerExtensions.Contains(e) && !IncidentalFileExtensions.Contains(e));
+
+            return !hasOtherContent;
         }
 
         public static string RemoveFileExtension(string title)

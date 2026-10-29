@@ -22,6 +22,13 @@ namespace NzbDrone.Core.MediaFiles
         public string Message { get; set; }
         public ReleaseStructureConfidence Confidence { get; set; }
         public List<string> SuspiciousFiles { get; set; } = new List<string>();
+
+        // True when the payload is nothing but Windows installer executables
+        // (plus incidental metadata) — no release-group recognition involved,
+        // so an unknown/unrecognised group can't hide behind this field the
+        // way it can behind Confidence == Low. Checked and rejected
+        // independently of the group-matching logic below.
+        public bool IsInstallerOnlyPayload { get; set; }
     }
 
     public enum ReleaseStructureConfidence
@@ -248,6 +255,25 @@ namespace NzbDrone.Core.MediaFiles
                 result.Confidence = ReleaseStructureConfidence.Low;
                 result.Message = $"Found suspicious files that may be malware: {string.Join(", ", result.SuspiciousFiles.Take(5))}";
                 Logger.Warn("Release contains suspicious files: {0}", string.Join(", ", result.SuspiciousFiles));
+                return result;
+            }
+
+            // Installer-only payloads are rejected ahead of any group logic,
+            // claimed or detected: an unrecognised group with no suspicious
+            // filenames would otherwise fall through to the Low-confidence
+            // "allow" branch at the bottom of this method — that is exactly
+            // the gap a 2026-10-26 incident went through (a trojan .msi
+            // blocklisted under the bare game title "Castlevania: Belmont's
+            // Curse", no release group anywhere in the title). This check
+            // does not key off the group name at all, so it still catches
+            // that shape.
+            if (FileExtensions.IsInstallerOnlyPayload(relativeFiles))
+            {
+                result.IsInstallerOnlyPayload = true;
+                result.IsValid = false;
+                result.Confidence = ReleaseStructureConfidence.High;
+                result.Message = "Payload contains only Windows installer files (.exe/.msi/.msix/.appx) with no other game content";
+                Logger.Warn("Release '{0}' payload is installer files only: {1}", releaseTitle, string.Join(", ", relativeFiles));
                 return result;
             }
 

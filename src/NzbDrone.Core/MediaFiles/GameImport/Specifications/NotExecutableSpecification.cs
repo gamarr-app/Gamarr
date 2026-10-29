@@ -38,6 +38,27 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Specifications
                     extension);
             }
 
+            // .exe/.msi/.msix/.appx are legitimate PC payloads ONLY when they
+            // ship alongside real game content — a FitGirl/DODI/ElAmigos
+            // repack's setup.exe sits next to .bin/.dat files. LocalGame.
+            // OtherVideoFiles already records whether this import batch holds
+            // other game files alongside this one (set once, upstream in
+            // ImportDecisionMaker, from the files already being imported — no
+            // extra disk walk here). When this file is alone, the payload is
+            // nothing but an installer and gets no benefit of the doubt: a
+            // 2026-10-26 incident shipped a trojan .msi exactly this way,
+            // under a bare game title with no release-group token to catch it
+            // on.
+            if (!localGame.OtherVideoFiles && FileExtensions.WindowsInstallerExtensions.Contains(extension))
+            {
+                _logger.Debug("[{0}] is the only file in this release and is a Windows installer", path);
+
+                return ImportSpecDecision.Reject(
+                    ImportRejectionReason.InstallerOnlyPayload,
+                    "Caution: Payload contains only a Windows installer ('{0}') with no other game content",
+                    extension);
+            }
+
             // .exe and .msi are legitimate game payloads (repack and GOG
             // installers ship them, see MediaFileExtensions), so they survive
             // the check above. Everything else on the unsafe list — .scr, .com,
