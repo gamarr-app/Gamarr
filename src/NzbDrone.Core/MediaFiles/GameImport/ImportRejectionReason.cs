@@ -29,5 +29,6 @@ public enum ImportRejectionReason
     SuspiciousReleaseStructure,
     ReleaseGroupMismatch,
     VirusDetected,
-    VirusScanFailed
+    VirusScanFailed,
+    InstallerOnlyPayload
 }

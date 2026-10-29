@@ -218,6 +218,16 @@ namespace NzbDrone.Core.MediaFiles
                 };
             }
 
+            if (structureValidation.IsInstallerOnlyPayload)
+            {
+                _logger.Warn("Installer-only payload for release '{0}': {1}", cleanedUpName, structureValidation.Message);
+                return new List<ImportResult>
+                {
+                    RejectionResult(ImportRejectionReason.InstallerOnlyPayload,
+                        $"Caution: {structureValidation.Message}")
+                };
+            }
+
             if (!structureValidation.IsValid && structureValidation.Confidence == ReleaseStructureConfidence.High)
             {
                 _logger.Warn("Release structure mismatch for '{0}': {1}", cleanedUpName, structureValidation.Message);

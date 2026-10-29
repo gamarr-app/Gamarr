@@ -258,5 +258,51 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             ExceptionVerification.IgnoreWarns();
         }
+
+        // Real incident (2026-10-26): a release listed under the bare game
+        // title "Castlevania: Belmont's Curse" — no release group token
+        // anywhere — was a single trojan .msi. No claimed group, no detected
+        // group, no suspicious filename: title/group filtering could not
+        // catch this, only the payload shape (nothing but an installer).
+        [Test]
+        public void should_reject_folder_with_only_an_installer_and_no_claimed_group()
+        {
+            GivenFolderExists();
+            GivenFiles("Midnight Edition Setup.msi");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, null, "Castlevania: Belmont's Curse");
+
+            result.IsInstallerOnlyPayload.Should().BeTrue();
+            result.IsValid.Should().BeFalse();
+            result.Confidence.Should().Be(ReleaseStructureConfidence.High);
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void should_reject_folder_with_installer_plus_only_incidental_files()
+        {
+            GivenFolderExists();
+            GivenFiles("setup.exe", "readme.txt", "checksum.md5");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, null, "Some.Game");
+
+            result.IsInstallerOnlyPayload.Should().BeTrue();
+            result.IsValid.Should().BeFalse();
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void should_not_flag_a_normal_repack_as_installer_only()
+        {
+            GivenFolderExists();
+            GivenFiles("setup.exe", "fg-01.bin", "fg-02.bin", "MD5");
+
+            var result = Subject.ValidateReleaseStructure(TestPath, "FitGirl", "Some.Game-FitGirl");
+
+            result.IsInstallerOnlyPayload.Should().BeFalse();
+            result.IsValid.Should().BeTrue();
+        }
     }
 }

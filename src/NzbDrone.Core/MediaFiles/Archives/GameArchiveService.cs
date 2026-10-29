@@ -441,6 +441,24 @@ namespace NzbDrone.Core.MediaFiles.Archives
                     // guess, and merging them is not a folder import.
                     if (candidates.Count == 0 && allowWholeArchive && files.Count > 0)
                     {
+                        // Whole-archive extraction copies the tree verbatim into
+                        // the game folder with no further per-file checks
+                        // (NotExecutableSpecification never sees the individual
+                        // entries — the LocalGame it evaluates points at the
+                        // archive, not at what's inside it). An archive wrapping
+                        // nothing but Windows installers would otherwise land in
+                        // the library unexamined, so refuse the whole-archive
+                        // path for that shape and fall through to the "holds N
+                        // extractable game files, expected exactly 1" refusal
+                        // below — NotArchiveSpecification then rejects the
+                        // uninspected archive outright.
+                        if (FileExtensions.IsInstallerOnlyPayload(files.Select(e => e.Key)))
+                        {
+                            _logger.Debug("{0} holds no single extractable game file and its entries are nothing but Windows installers; refusing whole-archive extraction", archivePath);
+
+                            return null;
+                        }
+
                         var totalSize = files.Sum(e => e.Size);
 
                         _logger.Debug("{0} holds no single extractable game file; extracting all {1} entries ({2} bytes uncompressed) as a game folder",

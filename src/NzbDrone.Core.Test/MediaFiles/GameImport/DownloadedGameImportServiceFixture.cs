@@ -215,6 +215,40 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         }
 
         [Test]
+        public void should_reject_folder_release_with_installer_only_payload_even_with_unknown_group()
+        {
+            // Real incident shape: unknown/unclaimed release group, so the
+            // generic !IsValid-with-High-confidence branch is the only thing
+            // standing between an installer-only payload and the library —
+            // IsInstallerOnlyPayload must be checked on its own, not folded
+            // into the Confidence gate (that gate stays permissive for
+            // ordinary unknown-group releases, see the Low-confidence test
+            // above).
+            GivenGameParsedFromFolder();
+
+            Mocker.GetMock<IReleaseStructureValidator>()
+                  .Setup(s => s.ValidateReleaseStructure(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(new ReleaseStructureValidationResult
+                  {
+                      IsValid = false,
+                      IsInstallerOnlyPayload = true,
+                      SuspiciousFiles = new List<string>(),
+                      Confidence = ReleaseStructureConfidence.High,
+                      Message = "Payload contains only Windows installer files"
+                  });
+
+            var result = Subject.ProcessPath(_folderPath, ImportMode.Auto, _game, _downloadClientItem);
+
+            result.Should().HaveCount(1);
+            result.First().Result.Should().Be(ImportResultType.Rejected);
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Verify(v => v.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
         public void should_not_reject_when_release_structure_invalid_with_low_confidence()
         {
             GivenGameParsedFromFolder();

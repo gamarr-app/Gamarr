@@ -25,6 +25,11 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
         private const long PcArchiveTotalSize = 1856;
         private const int PcArchiveFileCount = 4;
 
+        // One lone .msi, nothing else — the shape of the 2026-10-26 incident
+        // (a trojan .msi archived under a bare game title with no release
+        // group token anywhere to catch it on).
+        private const string InstallerOnlyArchive = "Files/TestInstallerOnlyArchive.zip";
+
         private string _archivePath;
 
         [SetUp]
@@ -377,6 +382,16 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
 
             File.Exists(Path.Combine(destination, "leftover.dat")).Should().BeFalse();
             File.Exists(Path.Combine(destination, "Lingo.exe")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_refuse_whole_archive_extraction_when_entries_are_installer_only()
+        {
+            // Whole-archive extraction copies the tree verbatim with no
+            // further per-file checks, so an archive wrapping nothing but a
+            // Windows installer must never take that path — it has to fall
+            // through to the "not exactly one ROM entry" refusal instead.
+            Subject.InspectImportUnit(GetTestPath(InstallerOnlyArchive), true).Should().BeNull();
         }
 
         [Test]

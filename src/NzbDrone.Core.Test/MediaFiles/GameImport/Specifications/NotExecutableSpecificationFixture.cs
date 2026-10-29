@@ -66,13 +66,16 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
         }
 
         // Repack, GOG and store installers legitimately ship these, and
-        // MediaFileExtensions maps them to Quality.Scene.
+        // MediaFileExtensions maps them to Quality.Scene — but only when they
+        // ship alongside other game files (OtherVideoFiles = true). A bare
+        // installer with nothing else is covered separately below.
         [TestCase("setup.exe")]
         [TestCase("Game.Title.2023.exe")]
         [TestCase("Game.Title.2023.msi")]
         public void should_accept_a_plain_installer(string fileName)
         {
             GivenFile(fileName);
+            _localGame.OtherVideoFiles = true;
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
         }
@@ -91,6 +94,34 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Specifications
         public void should_accept_when_path_is_missing()
         {
             _localGame.Path = null;
+
+            Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
+        }
+
+        // Real incident (2026-10-26): a release listed under the bare game
+        // title "Castlevania: Belmont's Curse" (no release group token
+        // anywhere) was a single trojan .msi. With no sibling game files,
+        // OtherVideoFiles stays false and the installer gets no benefit of
+        // the doubt.
+        [TestCase("Game.Title.2023.msi")]
+        [TestCase("setup.exe")]
+        public void should_reject_a_bare_installer_with_no_other_game_files(string fileName)
+        {
+            GivenFile(fileName);
+            _localGame.OtherVideoFiles = false;
+
+            var decision = Subject.IsSatisfiedBy(_localGame, null);
+
+            decision.Accepted.Should().BeFalse();
+            decision.Reason.Should().Be(ImportRejectionReason.InstallerOnlyPayload);
+        }
+
+        [TestCase("Game.Title.2023.msi")]
+        [TestCase("setup.exe")]
+        public void should_accept_an_installer_when_other_game_files_are_present(string fileName)
+        {
+            GivenFile(fileName);
+            _localGame.OtherVideoFiles = true;
 
             Subject.IsSatisfiedBy(_localGame, null).Accepted.Should().BeTrue();
         }
