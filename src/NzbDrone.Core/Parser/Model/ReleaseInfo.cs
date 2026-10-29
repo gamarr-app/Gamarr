@@ -60,6 +60,16 @@ namespace NzbDrone.Core.Parser.Model
         [JsonIgnore]
         public virtual bool IsMagnetOnly => false;
 
+        // Identity for de-duping search results. The indexer-supplied Guid alone is not enough:
+        // RssParser only mints one when the <guid> element is absent, so a blank element, or a
+        // tracker that derives the guid from the title, hands every same-title release the same
+        // Guid - and a DistinctBy on that silently drops the clean siblings of an unparseable
+        // release, leaving the user one row that says "Unable to parse release". Title and Size
+        // separate those; a genuine duplicate of the same release is equal in all three.
+        // DownloadUrl is deliberately excluded, since some indexers mint a per-request token.
+        [JsonIgnore]
+        public string DedupeKey => $"{Guid}_{Title}_{Size}";
+
         [JsonIgnore]
         public int Age => DateTime.UtcNow.Subtract(PublishDate).Days;
 

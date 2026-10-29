@@ -250,5 +250,85 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             Mocker.GetMock<IGameService>()
                 .Verify(s => s.GetGame(_game.Id), Times.Once());
         }
+
+        private void GivenDecisions(params DownloadDecision[] decisions)
+        {
+            Mocker.GetMock<IMakeDownloadDecision>()
+                .Setup(s => s.GetSearchDecision(It.IsAny<List<Parser.Model.ReleaseInfo>>(), It.IsAny<SearchCriteriaBase>()))
+                .Returns(decisions.ToList());
+        }
+
+        private DownloadDecision GivenUnparseableDecision(string guid, string title, long size)
+        {
+            var remoteGame = new RemoteGame
+            {
+                Release = new Parser.Model.ReleaseInfo { Guid = guid, Title = title, Size = size },
+                ParsedGameInfo = new ParsedGameInfo()
+            };
+
+            return new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.UnableToParse, "Unable to parse release"));
+        }
+
+        private DownloadDecision GivenAcceptedDecision(string guid, string title, long size)
+        {
+            var remoteGame = new RemoteGame
+            {
+                Game = _game,
+                Release = new Parser.Model.ReleaseInfo { Guid = guid, Title = title, Size = size },
+                ParsedGameInfo = new ParsedGameInfo()
+            };
+
+            return new DownloadDecision(remoteGame);
+        }
+
+        // A feed that reports a blank <guid> used to give every release the same de-dupe
+        // identity, so one unparseable release took out all of its clean siblings.
+        [Test]
+        public async Task should_not_drop_parseable_releases_sharing_a_blank_guid_with_an_unparseable_one()
+        {
+            WatchForSearchCriteria();
+
+            GivenDecisions(
+                GivenUnparseableDecision(string.Empty, "Some.Garbled.Release", 100),
+                GivenAcceptedDecision(string.Empty, "Clean Game Release GROUP", 200),
+                GivenAcceptedDecision(string.Empty, "Clean Game Release OTHERGROUP", 300));
+
+            var result = await Subject.GameSearch(_game, true, false);
+
+            result.Should().HaveCount(3);
+            result.Count(d => d.Approved).Should().Be(2);
+        }
+
+        // Same title, different releases: two repacks of one game differ in size, and both
+        // have to survive even when the unparseable one carries the same title.
+        [Test]
+        public async Task should_not_drop_same_title_releases_that_differ_in_size()
+        {
+            WatchForSearchCriteria();
+
+            GivenDecisions(
+                GivenUnparseableDecision(string.Empty, "Clean Game Release", 100),
+                GivenAcceptedDecision(string.Empty, "Clean Game Release", 200));
+
+            var result = await Subject.GameSearch(_game, true, false);
+
+            result.Should().HaveCount(2);
+        }
+
+        // The real duplicate case must keep working: the same release returned twice is
+        // identical in guid, title and size, and is still collapsed to one row.
+        [Test]
+        public async Task should_still_de_dupe_identical_reports()
+        {
+            WatchForSearchCriteria();
+
+            GivenDecisions(
+                GivenAcceptedDecision("abc", "Clean Game Release", 200),
+                GivenAcceptedDecision("abc", "Clean Game Release", 200));
+
+            var result = await Subject.GameSearch(_game, true, false);
+
+            result.Should().HaveCount(1);
+        }
     }
 }

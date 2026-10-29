@@ -240,9 +240,14 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
         >
           <TableBody>
             {items.map((item) => {
+              // Guid alone is not a unique row identity: an indexer that reports a blank
+              // or title-derived guid gave every same-title release the same React key,
+              // and React renders one row per key - so a release could disappear from the
+              // table even when the API returned it. Mirrors ReleaseInfo.DedupeKey on the
+              // backend.
               return (
                 <InteractiveSearchRow
-                  key={`${item.indexerId}-${item.guid}`}
+                  key={`${item.indexerId}-${item.guid}-${item.title}-${item.size}`}
                   {...item}
                   searchPayload={searchPayload}
                   onGrabPress={handleGrabPress}

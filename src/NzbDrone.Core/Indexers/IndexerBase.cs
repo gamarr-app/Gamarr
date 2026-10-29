@@ -74,7 +74,10 @@ namespace NzbDrone.Core.Indexers
 
         protected virtual IList<ReleaseInfo> CleanupReleases(IEnumerable<ReleaseInfo> releases)
         {
-            var result = releases.DistinctBy(v => v.Guid).ToList();
+            // DedupeKey, not Guid: a feed with a blank or title-derived <guid> gave every
+            // same-title release the same identity here, and whichever one happened to arrive
+            // first was the only one the decision engine ever saw.
+            var result = releases.DistinctBy(v => v.DedupeKey).ToList();
             var settings = Definition.Settings as IIndexerSettings;
 
             result.ForEach(c =>

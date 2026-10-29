@@ -207,8 +207,15 @@ namespace NzbDrone.Core.IndexerSearch
 
         private List<DownloadDecision> DeDupeDecisions(List<DownloadDecision> decisions)
         {
-            // De-dupe reports by guid so duplicate results aren't returned. Pick the one with the least rejections and higher indexer priority.
-            return decisions.GroupBy(d => d.RemoteGame.Release.Guid)
+            // De-dupe reports so duplicate results aren't returned. Pick the one with the least
+            // rejections and higher indexer priority.
+            //
+            // Keyed on ReleaseInfo.DedupeKey (guid + title + size) rather than the guid alone:
+            // grouping by guid collapsed every release of a feed that reports a blank or
+            // title-derived <guid> into a single row, so one unparseable release could hide all
+            // of its clean same-title siblings. The rejection-count ordering below only chooses
+            // between members of a group, so it cannot rescue a sibling that the key swallowed.
+            return decisions.GroupBy(d => d.RemoteGame.Release.DedupeKey)
                 .Select(d => d.OrderBy(v => v.Rejections.Count()).ThenBy(v => v.RemoteGame?.Release?.IndexerPriority ?? IndexerDefinition.DefaultPriority).First())
                 .ToList();
         }
