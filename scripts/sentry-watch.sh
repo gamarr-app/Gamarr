@@ -99,27 +99,43 @@ log "Fetching unresolved issues from Sentry..."
 # Sentry's org-wide rate limit and its 5xx blips are both transient, and a
 # single one of them used to wake the channel — inference spent on something
 # that fixes itself by the next run. Retry a few times first; only a failure
-# that survives the backoff is worth anyone reading. Worst case this adds ~45s
-# to a job that runs every 15 minutes.
-for attempt in 1 2 3; do
-    HTTP_CODE=$(curl -s -o /tmp/sentry-issues.json -w "%{http_code}" \
+# that survives the backoff is worth anyone reading.
+#
+# Four attempts, not three: on 2026-10-30 this endpoint spent a stretch of
+# minutes answering 502 while sentry.io's own status page read green and
+# /api/0/ answered 200, and three attempts 15s apart all landed inside it. The
+# same query measured 24s, 12s and 4s minutes later, so budget generously —
+# --max-time has to stay well above the slow-but-working case or the retry
+# itself becomes the failure. Worst case this adds ~105s of sleep plus up to
+# 4x60s of waiting to a job that runs every 15 minutes.
+for attempt in 1 2 3 4; do
+    HTTP_CODE=$(curl -s --connect-timeout 15 --max-time 60 \
+        -o /tmp/sentry-issues.json -w "%{http_code}" \
         -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
         "https://sentry.io/api/0/organizations/${SENTRY_ORG}/issues/?query=is:unresolved&sort=date&limit=25")
 
     case "$HTTP_CODE" in
-        429|5??|000) ;;   # transient: rate limited, Sentry-side error, or no connection
+        429|5??|000) ;;   # transient: rate limited, Sentry-side error, timeout, or no connection
         *) break ;;
     esac
 
-    if [ "$attempt" -lt 3 ]; then
-        log "Sentry API returned HTTP $HTTP_CODE (attempt $attempt/3), retrying..."
+    if [ "$attempt" -lt 4 ]; then
+        log "Sentry API returned HTTP $HTTP_CODE (attempt $attempt/4), retrying..."
         sleep $(( attempt * 15 ))
     fi
 done
 
 if [ "$HTTP_CODE" != "200" ]; then
     log "ERROR: Sentry API returned HTTP $HTTP_CODE"
-    [ -f /tmp/sentry-issues.json ] && cat /tmp/sentry-issues.json >> "$LOG_FILE"
+
+    # Head only. A Sentry 5xx body is its ~500-line HTML error page, and
+    # dumping it whole put 19,000 lines and 1.3 MB into this log for one
+    # outage, which is what anyone tailing it has to scroll past.
+    if [ -f /tmp/sentry-issues.json ]; then
+        head -c 2000 /tmp/sentry-issues.json >> "$LOG_FILE"
+        printf '\n[body truncated to 2000 bytes of %s]\n' \
+            "$(wc -c < /tmp/sentry-issues.json | tr -d ' ')" >> "$LOG_FILE"
+    fi
     notify_failure "http" "Sentry watch could not reach Sentry: HTTP $HTTP_CODE. Tail $LOG_FILE on gamarr for the body."
     exit 1
 fi
