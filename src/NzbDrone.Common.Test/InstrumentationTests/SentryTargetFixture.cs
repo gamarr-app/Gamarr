@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using FluentAssertions;
 using NLog;
@@ -125,6 +126,30 @@ namespace NzbDrone.Common.Test.InstrumentationTests
             _subject.IsSentryMessage(log).Should().BeFalse();
         }
 
+        [Test]
+        public void should_filter_event_for_proxy_tunnel_407_exception()
+        {
+            var ex = new HttpRequestException("The proxy tunnel request to proxy 'http://gluetun:8888/' failed with status code '407'.");
+            var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_filter_event_for_socks_authentication_failure_exception()
+        {
+            var ex = new HttpRequestException("Failed to authenticate with the SOCKS server");
+            var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_filter_event_for_proxy_tunnel_407_exception_nested_as_inner_exception()
+        {
+            var ex = new Exception("outer", new HttpRequestException("The proxy tunnel request to proxy 'http://gluetun:8888/' failed with status code '407'."));
+            var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
         private static HttpException GivenHttpException(HttpStatusCode statusCode)
         {
             var request = new HttpRequest("https://indexer.example.com/api");
@@ -135,6 +160,7 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         [TestCase(HttpStatusCode.Unauthorized)]
         [TestCase(HttpStatusCode.Forbidden)]
         [TestCase(HttpStatusCode.PaymentRequired)]
+        [TestCase(HttpStatusCode.ProxyAuthenticationRequired)]
         public void should_filter_event_for_http_exceptions_caused_by_user_configuration(HttpStatusCode statusCode)
         {
             var log = GivenLogEvent(LogLevel.Error, GivenHttpException(statusCode), "test");

@@ -93,11 +93,15 @@ namespace NzbDrone.Common.Instrumentation.Sentry
 
         // Remote services reject us for reasons that are always the user's configuration
         // (bad/expired API key, IP not whitelisted, account not on the required tier).
+        // ProxyAuthenticationRequired (407) is the user's own HTTP proxy rejecting our
+        // outbound call because they haven't set credentials for it in Gamarr's proxy
+        // settings — already surfaced to them by ProxyCheck.
         private static readonly HashSet<HttpStatusCode> FilteredHttpStatusCodes = new HashSet<HttpStatusCode>
         {
             HttpStatusCode.Unauthorized,
             HttpStatusCode.Forbidden,
-            HttpStatusCode.PaymentRequired
+            HttpStatusCode.PaymentRequired,
+            HttpStatusCode.ProxyAuthenticationRequired
         };
 
         // HttpException is only ever thrown for calls Gamarr made *out* to someone else
@@ -141,7 +145,15 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // can't be filtered by type name without also hiding real disk I/O
             // failures — match on the socket-reset message instead.
             "Broken pipe",
-            "forcibly closed by the remote host"
+            "forcibly closed by the remote host",
+
+            // The user's own HTTP/SOCKS proxy rejecting or failing our outbound
+            // call (e.g. a 407 because no/bad credentials are set in Gamarr's
+            // proxy settings) — their setup, not our code, and already surfaced
+            // to them by ProxyCheck.
+            "The proxy tunnel request to proxy",
+            "Failed to authenticate with the SOCKS server",
+            "SOCKS server failed to connect to the destination"
         };
 
         // exception types in this list will additionally have the exception message added to the
