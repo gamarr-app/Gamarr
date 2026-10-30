@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -63,9 +64,25 @@ namespace NzbDrone.Core.RomCatalog
         {
             var fileById = gameFiles.ToDictionary(x => x.Id);
 
-            return _repository.GetByGameFileIds(fileById.Keys.ToList())
-                .Where(hash => fileById[hash.GameFileId].Size == hash.Size)
-                .ToList();
+            try
+            {
+                return _repository.GetByGameFileIds(fileById.Keys.ToList())
+                    .Where(hash => fileById[hash.GameFileId].Size == hash.Size)
+                    .ToList();
+            }
+            catch (DbException ex)
+            {
+                // Same exposure as PlatformRootFolders (Sentry
+                // DOTNET-ASPNETCORE-36): GameFileHashes was added by a
+                // migration whose version an install can have recorded
+                // without the table existing, and this is read by the
+                // components GET. "No hashes yet" is an ordinary state here —
+                // the hashing command fills them in — so degrade to it rather
+                // than 500 the components panel.
+                _logger.Error(ex, "Unable to read stored game file hashes; treating them as not yet computed. Restart Gamarr to let the repair migration recreate the table.");
+
+                return new List<GameFileHash>();
+            }
         }
 
         public void QueueHashing(int gameId)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using FluentAssertions;
 using Moq;
@@ -35,6 +36,37 @@ namespace NzbDrone.Core.Test.RootFolderTests
             Mocker.GetMock<IPlatformRootFolderRepository>()
                   .Setup(s => s.Update(It.IsAny<PlatformRootFolder>()))
                   .Returns<PlatformRootFolder>(p => p);
+        }
+
+        [Test]
+        public void should_report_no_mappings_when_the_table_is_missing()
+        {
+            // Sentry DOTNET-ASPNETCORE-36: `no such table:
+            // PlatformRootFolders` on GET /api/v3/platformrootfolder 500'd the
+            // root folder settings page. An install whose VersionInfo already
+            // records migration 17 never re-runs it, so the endpoint has to
+            // stay usable on the way to the repair migration.
+            Mocker.GetMock<IPlatformRootFolderRepository>()
+                  .Setup(s => s.All())
+                  .Throws(new SQLiteException(SQLiteErrorCode.Error, "SQL logic error no such table: PlatformRootFolders"));
+
+            Subject.All().Should().BeEmpty();
+
+            ExceptionVerification.ExpectedErrors(1);
+        }
+
+        [Test]
+        public void should_still_resolve_a_default_root_folder_when_the_table_is_missing()
+        {
+            Mocker.GetMock<IPlatformRootFolderRepository>()
+                  .Setup(s => s.All())
+                  .Throws(new SQLiteException(SQLiteErrorCode.Error, "SQL logic error no such table: PlatformRootFolders"));
+
+            GivenRootFolders(new RootFolder { Id = 1, Path = @"C:\Test\Games".AsOsAgnostic() });
+
+            Subject.GetDefaultRootFolderPath(PlatformFamily.Unknown).Should().Be(@"C:\Test\Games".AsOsAgnostic());
+
+            ExceptionVerification.ExpectedErrors(1);
         }
 
         private void GivenPlatformDefaults(params PlatformRootFolder[] defaults)

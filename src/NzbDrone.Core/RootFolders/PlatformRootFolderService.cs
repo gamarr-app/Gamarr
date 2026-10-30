@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using NLog;
@@ -57,9 +58,37 @@ namespace NzbDrone.Core.RootFolders
             return $"No root folder was supplied and no default is configured for platform {platform} — add a platform root folder mapping, an 'unknown' catch-all, or a root folder.";
         }
 
+        /// <summary>
+        /// Platform mappings are an optional convenience: every caller already
+        /// copes with an empty list (GetDefaultRootFolderPath falls through to
+        /// a configured root folder, the UI shows its empty state). So a
+        /// database that cannot answer the question is reported as "no
+        /// mappings" rather than propagated — Sentry DOTNET-ASPNETCORE-36 was
+        /// a `no such table: PlatformRootFolders` turning GET
+        /// /api/v3/platformrootfolder into a 500, which takes the whole root
+        /// folder settings page down with it.
+        ///
+        /// Narrow on purpose: DbException only, i.e. the storage layer failing
+        /// to produce rows. Anything else (a mapping bug, a converter throwing
+        /// on a bad row) is a real defect and still surfaces.
+        /// </summary>
         public List<PlatformRootFolder> All()
         {
-            return _cache.Get("all", () => _repository.All().ToList(), TimeSpan.FromSeconds(10));
+            return _cache.Get("all", LoadAll, TimeSpan.FromSeconds(10));
+        }
+
+        private List<PlatformRootFolder> LoadAll()
+        {
+            try
+            {
+                return _repository.All().ToList();
+            }
+            catch (DbException ex)
+            {
+                _logger.Error(ex, "Unable to read platform root folder mappings; continuing without them. Restart Gamarr to let the repair migration recreate the table.");
+
+                return new List<PlatformRootFolder>();
+            }
         }
 
         public PlatformRootFolder Get(int id)
