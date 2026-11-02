@@ -170,222 +170,195 @@ function MediaManagement() {
             validationErrors={validationErrors}
             validationWarnings={validationWarnings}
           >
-            {showAdvancedSettings ? (
-              <FieldSet legend={translate('Folders')}>
+            <FieldSet legend={translate('Folders')}>
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('CreateEmptyGameFolders')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  isDisabled={
+                    settings.deleteEmptyFolders.value &&
+                    !settings.createEmptyGameFolders.value
+                  }
+                  name="createEmptyGameFolders"
+                  helpText={translate('CreateEmptyGameFoldersHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.createEmptyGameFolders}
+                />
+              </FormGroup>
+
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('DeleteEmptyFolders')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  isDisabled={
+                    settings.createEmptyGameFolders.value &&
+                    !settings.deleteEmptyFolders.value
+                  }
+                  name="deleteEmptyFolders"
+                  helpText={translate('DeleteEmptyGameFoldersHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.deleteEmptyFolders}
+                />
+              </FormGroup>
+
+              <FormGroup
+                advancedSettings={showAdvancedSettings}
+                isAdvanced={true}
+                size={sizes.MEDIUM}
+              >
+                <FormLabel>{translate('UpdateRetentionCount')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.NUMBER}
+                  name="updateRetentionCount"
+                  min={0}
+                  helpText={translate('UpdateRetentionCountHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.updateRetentionCount}
+                />
+              </FormGroup>
+
+              <FormGroup
+                advancedSettings={showAdvancedSettings}
+                isAdvanced={true}
+                size={sizes.MEDIUM}
+              >
+                <FormLabel>
+                  {translate('UpdateRetentionKeepOnePerMajor')}
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="updateRetentionKeepOnePerMajor"
+                  helpText={translate('UpdateRetentionKeepOnePerMajorHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.updateRetentionKeepOnePerMajor}
+                />
+              </FormGroup>
+            </FieldSet>
+
+            <FieldSet legend={translate('Importing')}>
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('UpgradeGameVersions')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="upgradeGameVersions"
+                  helpText={translate('UpgradeGameVersionsHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.upgradeGameVersions}
+                />
+              </FormGroup>
+
+              <FormGroup
+                advancedSettings={showAdvancedSettings}
+                isAdvanced={true}
+                size={sizes.MEDIUM}
+              >
+                <FormLabel>{translate('SkipFreeSpaceCheck')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="skipFreeSpaceCheckWhenImporting"
+                  helpText={translate('SkipFreeSpaceCheckHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.skipFreeSpaceCheckWhenImporting}
+                />
+              </FormGroup>
+
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('MinimumFreeSpace')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.NUMBER}
+                  unit="MB"
+                  name="minimumFreeSpaceWhenImporting"
+                  helpText={translate('MinimumFreeSpaceHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.minimumFreeSpaceWhenImporting}
+                />
+              </FormGroup>
+
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('UseHardlinksInsteadOfCopy')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="copyUsingHardlinks"
+                  helpText={translate('CopyUsingHardlinksGameHelpText')}
+                  helpTextWarning={translate(
+                    'CopyUsingHardlinksHelpTextWarning'
+                  )}
+                  onChange={handleInputChange}
+                  {...settings.copyUsingHardlinks}
+                />
+              </FormGroup>
+
+              <FormGroup
+                advancedSettings={showAdvancedSettings}
+                isAdvanced={true}
+                size={sizes.MEDIUM}
+              >
+                <FormLabel>{translate('ImportUsingScript')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="useScriptImport"
+                  helpText={translate('ImportUsingScriptHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.useScriptImport}
+                />
+              </FormGroup>
+
+              {settings.useScriptImport.value ? (
                 <FormGroup
                   advancedSettings={showAdvancedSettings}
                   isAdvanced={true}
-                  size={sizes.MEDIUM}
                 >
-                  <FormLabel>{translate('CreateEmptyGameFolders')}</FormLabel>
+                  <FormLabel>{translate('ImportScriptPath')}</FormLabel>
 
                   <FormInputGroup
-                    type={inputTypes.CHECK}
-                    isDisabled={
-                      settings.deleteEmptyFolders.value &&
-                      !settings.createEmptyGameFolders.value
-                    }
-                    name="createEmptyGameFolders"
-                    helpText={translate('CreateEmptyGameFoldersHelpText')}
+                    type={inputTypes.PATH}
+                    includeFiles={true}
+                    name="scriptImportPath"
+                    helpText={translate('ImportScriptPathHelpText')}
                     onChange={handleInputChange}
-                    {...settings.createEmptyGameFolders}
+                    {...settings.scriptImportPath}
                   />
                 </FormGroup>
+              ) : null}
 
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>{translate('DeleteEmptyFolders')}</FormLabel>
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('ImportExtraFiles')}</FormLabel>
 
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    isDisabled={
-                      settings.createEmptyGameFolders.value &&
-                      !settings.deleteEmptyFolders.value
-                    }
-                    name="deleteEmptyFolders"
-                    helpText={translate('DeleteEmptyGameFoldersHelpText')}
-                    onChange={handleInputChange}
-                    {...settings.deleteEmptyFolders}
-                  />
-                </FormGroup>
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="importExtraFiles"
+                  helpText={translate('ImportExtraFilesGameHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.importExtraFiles}
+                />
+              </FormGroup>
 
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>{translate('UpdateRetentionCount')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.NUMBER}
-                    name="updateRetentionCount"
-                    min={0}
-                    helpText={translate('UpdateRetentionCountHelpText')}
-                    onChange={handleInputChange}
-                    {...settings.updateRetentionCount}
-                  />
-                </FormGroup>
-
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>
-                    {translate('UpdateRetentionKeepOnePerMajor')}
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="updateRetentionKeepOnePerMajor"
-                    helpText={translate(
-                      'UpdateRetentionKeepOnePerMajorHelpText'
-                    )}
-                    onChange={handleInputChange}
-                    {...settings.updateRetentionKeepOnePerMajor}
-                  />
-                </FormGroup>
-              </FieldSet>
-            ) : null}
-
-            {showAdvancedSettings ? (
-              <FieldSet legend={translate('Importing')}>
-                <FormGroup size={sizes.MEDIUM}>
-                  <FormLabel>{translate('UpgradeGameVersions')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="upgradeGameVersions"
-                    helpText={translate('UpgradeGameVersionsHelpText')}
-                    onChange={handleInputChange}
-                    {...settings.upgradeGameVersions}
-                  />
-                </FormGroup>
-
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>{translate('SkipFreeSpaceCheck')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="skipFreeSpaceCheckWhenImporting"
-                    helpText={translate('SkipFreeSpaceCheckHelpText')}
-                    onChange={handleInputChange}
-                    {...settings.skipFreeSpaceCheckWhenImporting}
-                  />
-                </FormGroup>
-
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>{translate('MinimumFreeSpace')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.NUMBER}
-                    unit="MB"
-                    name="minimumFreeSpaceWhenImporting"
-                    helpText={translate('MinimumFreeSpaceHelpText')}
-                    onChange={handleInputChange}
-                    {...settings.minimumFreeSpaceWhenImporting}
-                  />
-                </FormGroup>
-
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>
-                    {translate('UseHardlinksInsteadOfCopy')}
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="copyUsingHardlinks"
-                    helpText={translate('CopyUsingHardlinksGameHelpText')}
-                    helpTextWarning={translate(
-                      'CopyUsingHardlinksHelpTextWarning'
-                    )}
-                    onChange={handleInputChange}
-                    {...settings.copyUsingHardlinks}
-                  />
-                </FormGroup>
-
-                <FormGroup
-                  advancedSettings={showAdvancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
-                  <FormLabel>{translate('ImportUsingScript')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="useScriptImport"
-                    helpText={translate('ImportUsingScriptHelpText')}
-                    onChange={handleInputChange}
-                    {...settings.useScriptImport}
-                  />
-                </FormGroup>
-
-                {settings.useScriptImport.value ? (
-                  <FormGroup
-                    advancedSettings={showAdvancedSettings}
-                    isAdvanced={true}
-                  >
-                    <FormLabel>{translate('ImportScriptPath')}</FormLabel>
-
-                    <FormInputGroup
-                      type={inputTypes.PATH}
-                      includeFiles={true}
-                      name="scriptImportPath"
-                      helpText={translate('ImportScriptPathHelpText')}
-                      onChange={handleInputChange}
-                      {...settings.scriptImportPath}
-                    />
-                  </FormGroup>
-                ) : null}
-
-                <FormGroup size={sizes.MEDIUM}>
+              {settings.importExtraFiles.value ? (
+                <FormGroup>
                   <FormLabel>{translate('ImportExtraFiles')}</FormLabel>
 
                   <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="importExtraFiles"
-                    helpText={translate('ImportExtraFilesGameHelpText')}
+                    type={inputTypes.TEXT}
+                    name="extraFileExtensions"
+                    helpTexts={[
+                      translate('ExtraFileExtensionsHelpText'),
+                      translate('ExtraFileExtensionsHelpTextsExamples'),
+                    ]}
                     onChange={handleInputChange}
-                    {...settings.importExtraFiles}
+                    {...settings.extraFileExtensions}
                   />
                 </FormGroup>
-
-                {settings.importExtraFiles.value ? (
-                  <FormGroup
-                    advancedSettings={showAdvancedSettings}
-                    isAdvanced={true}
-                  >
-                    <FormLabel>{translate('ImportExtraFiles')}</FormLabel>
-
-                    <FormInputGroup
-                      type={inputTypes.TEXT}
-                      name="extraFileExtensions"
-                      helpTexts={[
-                        translate('ExtraFileExtensionsHelpText'),
-                        translate('ExtraFileExtensionsHelpTextsExamples'),
-                      ]}
-                      onChange={handleInputChange}
-                      {...settings.extraFileExtensions}
-                    />
-                  </FormGroup>
-                ) : null}
-              </FieldSet>
-            ) : null}
+              ) : null}
+            </FieldSet>
 
             <FieldSet legend={translate('FileManagement')}>
               <FormGroup size={sizes.MEDIUM}>
@@ -400,11 +373,7 @@ function MediaManagement() {
                 />
               </FormGroup>
 
-              <FormGroup
-                advancedSettings={showAdvancedSettings}
-                isAdvanced={true}
-                size={sizes.MEDIUM}
-              >
+              <FormGroup size={sizes.MEDIUM}>
                 <FormLabel>{translate('DownloadPropersAndRepacks')}</FormLabel>
 
                 <FormInputGroup
@@ -446,10 +415,7 @@ function MediaManagement() {
                 />
               </FormGroup>
 
-              <FormGroup
-                advancedSettings={showAdvancedSettings}
-                isAdvanced={true}
-              >
+              <FormGroup>
                 <FormLabel>{translate('ChangeFileDate')}</FormLabel>
 
                 <FormInputGroup
@@ -462,10 +428,7 @@ function MediaManagement() {
                 />
               </FormGroup>
 
-              <FormGroup
-                advancedSettings={showAdvancedSettings}
-                isAdvanced={true}
-              >
+              <FormGroup>
                 <FormLabel>{translate('RecyclingBin')}</FormLabel>
 
                 <FormInputGroup
@@ -478,10 +441,7 @@ function MediaManagement() {
                 />
               </FormGroup>
 
-              <FormGroup
-                advancedSettings={showAdvancedSettings}
-                isAdvanced={true}
-              >
+              <FormGroup>
                 <FormLabel>{translate('RecyclingBinCleanup')}</FormLabel>
 
                 <FormInputGroup

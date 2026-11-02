@@ -54,10 +54,10 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
         [FieldDefinition(6, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategoryHelpText")]
         public string GameCategory { get; set; }
 
-        [FieldDefinition(7, Label = "PostImportCategory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
+        [FieldDefinition(7, Label = "PostImportCategory", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
         public string GameImportedCategory { get; set; }
 
-        [FieldDefinition(8, Label = "Directory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientRTorrentSettingsDirectoryHelpText")]
+        [FieldDefinition(8, Label = "Directory", Type = FieldType.Textbox, HelpText = "DownloadClientRTorrentSettingsDirectoryHelpText")]
         public string GameDirectory { get; set; }
 
         [FieldDefinition(9, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(RTorrentPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]

@@ -9,23 +9,18 @@ import General from 'typings/Settings/General';
 import translate from 'Utilities/String/translate';
 
 interface BackupSettingsProps {
-  advancedSettings: boolean;
   settings: PendingSection<General>;
   onInputChange: (change: InputChanged) => void;
 }
 
 function BackupSettings(props: BackupSettingsProps) {
-  const { advancedSettings, settings, onInputChange } = props;
+  const { settings, onInputChange } = props;
 
   const { backupFolder, backupInterval, backupRetention } = settings;
 
-  if (!advancedSettings) {
-    return null;
-  }
-
   return (
     <FieldSet legend={translate('Backups')}>
-      <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+      <FormGroup>
         <FormLabel>{translate('Folder')}</FormLabel>
 
         <FormInputGroup
@@ -38,7 +33,7 @@ function BackupSettings(props: BackupSettingsProps) {
         />
       </FormGroup>
 
-      <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+      <FormGroup>
         <FormLabel>{translate('Interval')}</FormLabel>
 
         <FormInputGroup
@@ -51,7 +46,7 @@ function BackupSettings(props: BackupSettingsProps) {
         />
       </FormGroup>
 
-      <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+      <FormGroup>
         <FormLabel>{translate('Retention')}</FormLabel>
 
         <FormInputGroup

@@ -174,7 +174,7 @@ function EditDownloadClientModalContent({
               );
             })}
 
-            <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+            <FormGroup>
               <FormLabel>{translate('ClientPriority')}</FormLabel>
 
               <FormInputGroup

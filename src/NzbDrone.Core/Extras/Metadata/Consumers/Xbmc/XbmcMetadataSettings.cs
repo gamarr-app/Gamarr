@@ -33,10 +33,10 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
         [FieldDefinition(2, Label = "MetadataSettingsGameMetadataLanguage", Type = FieldType.Select, SelectOptions = typeof(RealLanguageFieldConverter), Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataLanguageHelpText")]
         public int GameMetadataLanguage { get; set; }
 
-        [FieldDefinition(3, Label = "MetadataSettingsGameMetadataUrl", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataUrlHelpText", Advanced = true)]
+        [FieldDefinition(3, Label = "MetadataSettingsGameMetadataUrl", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataUrlHelpText")]
         public bool GameMetadataURL { get; set; }
 
-        [FieldDefinition(4, Label = "MetadataSettingsGameMetadataCollectionName", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataCollectionNameHelpText", Advanced = true)]
+        [FieldDefinition(4, Label = "MetadataSettingsGameMetadataCollectionName", Type = FieldType.Checkbox, Section = MetadataSectionType.Metadata, HelpText = "MetadataXmbcSettingsGameMetadataCollectionNameHelpText")]
         public bool AddCollectionName { get; set; }
 
         [FieldDefinition(5, Label = "MetadataSettingsGameImages", Type = FieldType.Checkbox, Section = MetadataSectionType.Image, HelpText = "fanart.jpg, poster.jpg")]

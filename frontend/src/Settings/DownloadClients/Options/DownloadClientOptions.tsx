@@ -100,15 +100,11 @@ function DownloadClientOptions({
         </Alert>
       ) : null}
 
-      {hasSettings && !isFetching && !error && advancedSettings ? (
+      {hasSettings && !isFetching && !error ? (
         <div>
           <FieldSet legend={translate('CompletedDownloadHandling')}>
             <Form>
-              <FormGroup
-                advancedSettings={advancedSettings}
-                isAdvanced={true}
-                size={sizes.MEDIUM}
-              >
+              <FormGroup size={sizes.MEDIUM}>
                 <FormLabel>{translate('Enable')}</FormLabel>
 
                 <FormInputGroup
@@ -147,11 +143,7 @@ function DownloadClientOptions({
 
           <FieldSet legend={translate('FailedDownloadHandling')}>
             <Form>
-              <FormGroup
-                advancedSettings={advancedSettings}
-                isAdvanced={true}
-                size={sizes.MEDIUM}
-              >
+              <FormGroup size={sizes.MEDIUM}>
                 <FormLabel>{translate('AutoRedownloadFailed')}</FormLabel>
 
                 <FormInputGroup
@@ -164,11 +156,7 @@ function DownloadClientOptions({
               </FormGroup>
 
               {settings.autoRedownloadFailed.value ? (
-                <FormGroup
-                  advancedSettings={advancedSettings}
-                  isAdvanced={true}
-                  size={sizes.MEDIUM}
-                >
+                <FormGroup size={sizes.MEDIUM}>
                   <FormLabel>
                     {translate('AutoRedownloadFailedFromInteractiveSearch')}
                   </FormLabel>

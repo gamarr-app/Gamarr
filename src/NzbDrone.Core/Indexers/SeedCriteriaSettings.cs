@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Indexers
         [FieldDefinition(0, Type = FieldType.Number, Label = "IndexerSettingsSeedRatio", HelpText = "IndexerSettingsSeedRatioHelpText")]
         public double? SeedRatio { get; set; }
 
-        [FieldDefinition(1, Type = FieldType.Number, Label = "IndexerSettingsSeedTime", Unit = "minutes", HelpText = "IndexerSettingsSeedTimeHelpText", Advanced = true)]
+        [FieldDefinition(1, Type = FieldType.Number, Label = "IndexerSettingsSeedTime", Unit = "minutes", HelpText = "IndexerSettingsSeedTimeHelpText")]
         public int? SeedTime { get; set; }
     }
 }

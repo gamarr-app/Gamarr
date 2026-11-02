@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         [FieldDefinition(2, Label = "UseSsl", Type = FieldType.Checkbox, HelpText = "DownloadClientQbittorrentSettingsUseSslHelpText")]
         public bool UseSsl { get; set; }
 
-        [FieldDefinition(3, Label = "UrlBase", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientSettingsUrlBaseHelpText")]
+        [FieldDefinition(3, Label = "UrlBase", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsUrlBaseHelpText")]
         [FieldToken(TokenField.HelpText, "UrlBase", "clientName", "qBittorrent")]
         [FieldToken(TokenField.HelpText, "UrlBase", "url", "http://[host]:[port]/[urlBase]/api")]
         public string UrlBase { get; set; }
@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         [FieldDefinition(7, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategoryHelpText")]
         public string GameCategory { get; set; }
 
-        [FieldDefinition(8, Label = "PostImportCategory", Type = FieldType.Textbox, Advanced = true, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
+        [FieldDefinition(8, Label = "PostImportCategory", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsPostImportCategoryHelpText")]
         public string GameImportedCategory { get; set; }
 
         [FieldDefinition(9, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(QBittorrentPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         [FieldDefinition(14, Label = "DownloadClientQbittorrentSettingsContentLayout", Type = FieldType.Select, SelectOptions = typeof(QBittorrentContentLayout), HelpText = "DownloadClientQbittorrentSettingsContentLayoutHelpText")]
         public int ContentLayout { get; set; }
 
-        [FieldDefinition(15, Label = "DownloadClientQbittorrentSettingsSeedTimeType", Type = FieldType.Select, SelectOptions = typeof(QBittorrentSeedTimeType), Advanced = true, HelpText = "DownloadClientQbittorrentSettingsSeedTimeTypeHelpText")]
+        [FieldDefinition(15, Label = "DownloadClientQbittorrentSettingsSeedTimeType", Type = FieldType.Select, SelectOptions = typeof(QBittorrentSeedTimeType), HelpText = "DownloadClientQbittorrentSettingsSeedTimeTypeHelpText")]
         public int SeedTimeType { get; set; }
 
         public override NzbDroneValidationResult Validate()

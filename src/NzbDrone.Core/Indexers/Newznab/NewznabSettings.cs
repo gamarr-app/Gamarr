@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         [FieldDefinition(4, Label = "IndexerSettingsAdditionalParameters", HelpText = "IndexerNewznabSettingsAdditionalParametersHelpText", Advanced = true)]
         public string AdditionalParameters { get; set; }
 
-        [FieldDefinition(5, Type = FieldType.Select, SelectOptions = typeof(RealLanguageFieldConverter), Label = "IndexerSettingsMultiLanguageRelease", HelpText = "IndexerSettingsMultiLanguageReleaseHelpText", Advanced = true)]
+        [FieldDefinition(5, Type = FieldType.Select, SelectOptions = typeof(RealLanguageFieldConverter), Label = "IndexerSettingsMultiLanguageRelease", HelpText = "IndexerSettingsMultiLanguageReleaseHelpText")]
         public IEnumerable<int> MultiLanguages { get; set; }
 
         [FieldDefinition(6, Type = FieldType.Select, SelectOptions = typeof(FailDownloads), Label = "IndexerSettingsFailDownloads", HelpText = "IndexerSettingsFailDownloadsHelpText", Advanced = true)]

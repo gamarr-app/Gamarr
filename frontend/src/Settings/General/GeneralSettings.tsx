@@ -222,7 +222,6 @@ function GeneralSettings() {
             />
 
             <LoggingSettings
-              advancedSettings={showAdvancedSettings}
               settings={settings}
               onInputChange={handleInputChange}
             />
@@ -241,7 +240,6 @@ function GeneralSettings() {
             />
 
             <BackupSettings
-              advancedSettings={showAdvancedSettings}
               settings={settings}
               onInputChange={handleInputChange}
             />

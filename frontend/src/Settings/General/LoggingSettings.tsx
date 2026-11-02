@@ -30,13 +30,12 @@ const logLevelOptions = [
 ];
 
 interface LoggingSettingsProps {
-  advancedSettings: boolean;
   settings: PendingSection<General>;
   onInputChange: (change: InputChanged) => void;
 }
 
 function LoggingSettings(props: LoggingSettingsProps) {
-  const { advancedSettings, settings, onInputChange } = props;
+  const { settings, onInputChange } = props;
 
   const { logLevel, logSizeLimit } = settings;
 
@@ -59,7 +58,7 @@ function LoggingSettings(props: LoggingSettingsProps) {
         />
       </FormGroup>
 
-      <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+      <FormGroup>
         <FormLabel>{translate('LogSizeLimit')}</FormLabel>
 
         <FormInputGroup

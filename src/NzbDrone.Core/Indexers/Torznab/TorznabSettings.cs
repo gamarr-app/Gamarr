@@ -55,13 +55,13 @@ namespace NzbDrone.Core.Indexers.Torznab
             RequiredFlags = Array.Empty<int>();
         }
 
-        [FieldDefinition(9, Type = FieldType.Number, Label = "IndexerSettingsMinimumSeeders", HelpText = "IndexerSettingsMinimumSeedersHelpText", Advanced = true)]
+        [FieldDefinition(9, Type = FieldType.Number, Label = "IndexerSettingsMinimumSeeders", HelpText = "IndexerSettingsMinimumSeedersHelpText")]
         public int MinimumSeeders { get; set; }
 
         [FieldDefinition(10)]
         public SeedCriteriaSettings SeedCriteria { get; set; } = new ();
 
-        [FieldDefinition(11, Type = FieldType.Checkbox, Label = "IndexerSettingsRejectBlocklistedTorrentHashes", HelpText = "IndexerSettingsRejectBlocklistedTorrentHashesHelpText", Advanced = true)]
+        [FieldDefinition(11, Type = FieldType.Checkbox, Label = "IndexerSettingsRejectBlocklistedTorrentHashes", HelpText = "IndexerSettingsRejectBlocklistedTorrentHashesHelpText")]
         public bool RejectBlocklistedTorrentHashesWhileGrabbing { get; set; }
 
         [FieldDefinition(12, Type = FieldType.Select, SelectOptions = typeof(IndexerFlags), Label = "IndexerSettingsRequiredFlags", HelpText = "IndexerSettingsRequiredFlagsHelpText", HelpLink = "https://github.com/gamarr-app/Gamarr/wiki/settings#indexer-flags", Advanced = true)]

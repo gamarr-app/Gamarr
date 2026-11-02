@@ -29,12 +29,10 @@ const SECTION = 'naming';
 
 function createNamingSelector() {
   return createSelector(
-    (state: AppState) => state.settings.advancedSettings,
     (state: AppState) => state.settings.namingExamples,
     createSettingsSectionSelector(SECTION),
-    (advancedSettings, namingExamples, sectionSettings) => {
+    (namingExamples, sectionSettings) => {
       return {
-        advancedSettings,
         examples: namingExamples.item,
         examplesPopulated: namingExamples.isPopulated,
         ...sectionSettings,
@@ -51,7 +49,6 @@ interface NamingModalOptions {
 
 function Naming() {
   const {
-    advancedSettings,
     isFetching,
     error,
     settings,
@@ -255,11 +252,7 @@ function Naming() {
             </FormGroup>
           ) : null}
 
-          <FormGroup
-            advancedSettings={advancedSettings}
-            isAdvanced={true}
-            size={sizes.MEDIUM}
-          >
+          <FormGroup size={sizes.MEDIUM}>
             <FormLabel>{translate('GameFolderFormat')}</FormLabel>
 
             <FormInputGroup

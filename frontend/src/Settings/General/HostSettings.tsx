@@ -90,7 +90,7 @@ function HostSettings(props: HostSettingsProps) {
         />
       </FormGroup>
 
-      <FormGroup advancedSettings={advancedSettings} isAdvanced={true}>
+      <FormGroup>
         <FormLabel>{translate('InstanceName')}</FormLabel>
 
         <FormInputGroup
