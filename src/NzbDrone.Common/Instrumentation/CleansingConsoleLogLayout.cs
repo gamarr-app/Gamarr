@@ -16,19 +16,21 @@ public class CleansingConsoleLogLayout : Layout
 
     protected override string GetFormattedMessage(LogEventInfo logEvent)
     {
-        var message = _innerLayout.Render(logEvent);
-        return RuntimeInfo.IsProduction ? CleanseLogMessage.Cleanse(message) : message;
+        return RuntimeInfo.IsProduction
+            ? CleanseLogMessage.Cleanse(logEvent, _innerLayout.Render)
+            : _innerLayout.Render(logEvent);
     }
 
     protected override void RenderFormattedMessage(LogEventInfo logEvent, StringBuilder target)
     {
-        target.Append(_innerLayout.Render(logEvent));
-
-        if (RuntimeInfo.IsProduction)
+        if (!RuntimeInfo.IsProduction)
         {
-            var result = CleanseLogMessage.Cleanse(target.ToString());
-            target.Clear();
-            target.Append(result);
+            target.Append(_innerLayout.Render(logEvent));
+
+            return;
         }
+
+        var result = CleanseLogMessage.Cleanse(logEvent, _innerLayout.Render);
+        target.Append(result);
     }
 }
