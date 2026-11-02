@@ -26,7 +26,9 @@ export const useInitializeLanguage = () => {
   const { data } = useLanguage();
 
   useEffect(() => {
-    moment.locale(data?.identifier);
+    // Pass an array so moment falls back to the base locale (e.g. 'nb' for
+    // 'nb-NO') and finally to English instead of silently keeping the previous one
+    moment.locale([data?.identifier ?? 'en', 'en']);
   }, [data]);
 };
 

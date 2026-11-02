@@ -42,6 +42,26 @@ namespace NzbDrone.Core.Test.Localization
         }
 
         [Test]
+        public void should_get_string_in_norwegian()
+        {
+            Mocker.GetMock<IConfigService>().Setup(m => m.UILanguage).Returns((int)Language.Norwegian);
+
+            var localizedString = Subject.GetLocalizedString("Activity");
+
+            localizedString.Should().Be("Aktivitet");
+
+            ExceptionVerification.ExpectedErrors(0);
+        }
+
+        [Test]
+        public void should_get_norwegian_bokmal_identifier_for_norwegian()
+        {
+            Mocker.GetMock<IConfigService>().Setup(m => m.UILanguage).Returns((int)Language.Norwegian);
+
+            Subject.GetLanguageIdentifier().Should().Be("nb-NO");
+        }
+
+        [Test]
         public void should_get_string_in_default_dictionary_if_unknown_language_and_string_exists()
         {
             Mocker.GetMock<IConfigService>().Setup(m => m.UILanguage).Returns(0);
