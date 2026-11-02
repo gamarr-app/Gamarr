@@ -355,12 +355,16 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
         public void Handle(GamesBulkEditedEvent message)
         {
+            var gameIds = message.Games.Select(m => m.Id).ToHashSet();
+            var igdbIds = message.Games.Where(m => m.IgdbId > 0).Select(m => m.IgdbId).ToHashSet();
+            var steamAppIds = message.Games.Where(m => m.SteamAppId > 0).Select(m => m.SteamAppId).ToHashSet();
+
             var cachedItems = _cache.Values
                 .Where(t =>
                     t.RemoteGame?.Game != null &&
-                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id ||
-                        (m.IgdbId > 0 && m.IgdbId == t.RemoteGame.Game.IgdbId) ||
-                        (m.SteamAppId > 0 && m.SteamAppId == t.RemoteGame.Game.SteamAppId)))
+                    (gameIds.Contains(t.RemoteGame.Game.Id) ||
+                     igdbIds.Contains(t.RemoteGame.Game.IgdbId) ||
+                     steamAppIds.Contains(t.RemoteGame.Game.SteamAppId)))
                 .ToList();
 
             if (cachedItems.Any())
@@ -373,12 +377,16 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
         public void Handle(GamesDeletedEvent message)
         {
+            var gameIds = message.Games.Select(m => m.Id).ToHashSet();
+            var igdbIds = message.Games.Where(m => m.IgdbId > 0).Select(m => m.IgdbId).ToHashSet();
+            var steamAppIds = message.Games.Where(m => m.SteamAppId > 0).Select(m => m.SteamAppId).ToHashSet();
+
             var cachedItems = _cache.Values
                 .Where(t =>
                     t.RemoteGame?.Game != null &&
-                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id ||
-                        (m.IgdbId > 0 && m.IgdbId == t.RemoteGame.Game.IgdbId) ||
-                        (m.SteamAppId > 0 && m.SteamAppId == t.RemoteGame.Game.SteamAppId)))
+                    (gameIds.Contains(t.RemoteGame.Game.Id) ||
+                     igdbIds.Contains(t.RemoteGame.Game.IgdbId) ||
+                     steamAppIds.Contains(t.RemoteGame.Game.SteamAppId)))
                 .ToList();
 
             if (cachedItems.Any())
