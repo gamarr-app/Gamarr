@@ -296,5 +296,26 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             ExceptionVerification.ExpectedErrors(1);
         }
+
+        [Test]
+        public void should_include_parsed_game_info_when_exception_is_caught()
+        {
+            GivenSpecifications(_pass1);
+
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
+                     .Throws<TestException>();
+
+            _reports = new List<ReleaseInfo>
+                {
+                    new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" },
+                };
+
+            var result = Subject.GetRssDecision(_reports);
+
+            result.Should().HaveCount(1);
+            result.First().RemoteGame.ParsedGameInfo.Should().NotBeNull();
+
+            ExceptionVerification.ExpectedErrors(1);
+        }
     }
 }

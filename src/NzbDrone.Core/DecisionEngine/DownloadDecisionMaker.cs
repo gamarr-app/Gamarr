@@ -77,12 +77,13 @@ namespace NzbDrone.Core.DecisionEngine
             foreach (var report in reports)
             {
                 DownloadDecision decision = null;
+                ParsedGameInfo parsedGameInfo = null;
                 _logger.ProgressTrace("Processing release {0}/{1}", reportNumber, reports.Count);
                 _logger.Debug("Processing release '{0}' from '{1}'", report.Title, report.Indexer);
 
                 try
                 {
-                    var parsedGameInfo = Parser.Parser.ParseGameTitle(report.Title);
+                    parsedGameInfo = Parser.Parser.ParseGameTitle(report.Title);
 
                     if (parsedGameInfo != null && !parsedGameInfo.PrimaryGameTitle.IsNullOrWhiteSpace())
                     {
@@ -140,7 +141,22 @@ namespace NzbDrone.Core.DecisionEngine
                 {
                     _logger.Error(e, "Couldn't process release.");
 
-                    var remoteGame = new RemoteGame { Release = report, ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria) };
+                    // Without a ParsedGameInfo the interactive search view fails to
+                    // render the whole result set, so fall back to a title-only parse.
+                    parsedGameInfo ??= new ParsedGameInfo
+                    {
+                        Languages = LanguageParser.ParseLanguages(report.Title),
+                        Quality = QualityParser.ParseQuality(report.Title)
+                    };
+
+                    var remoteGame = new RemoteGame
+                    {
+                        Release = report,
+                        ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria),
+                        ParsedGameInfo = parsedGameInfo,
+                        Languages = parsedGameInfo.Languages,
+                    };
+
                     decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Error, "Unexpected error processing release"));
                 }
 
