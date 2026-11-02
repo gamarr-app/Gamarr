@@ -78,6 +78,44 @@
   }
 }
 
+.outline {
+  --outlineColor: var(--textColor);
+
+  border-color: var(--outlineColor);
+  background-color: transparent;
+  color: var(--outlineColor);
+
+  &:hover {
+    border-color: var(--outlineColor);
+    background-color: color-mix(in oklch, var(--outlineColor) 12%, transparent);
+    color: var(--outlineColor);
+  }
+
+  &:global(.isDisabled):hover {
+    background-color: transparent;
+  }
+
+  &.default {
+    border-color: var(--borderColor);
+  }
+
+  &.primary {
+    --outlineColor: var(--primaryColor);
+  }
+
+  &.success {
+    --outlineColor: var(--successColor);
+  }
+
+  &.warning {
+    --outlineColor: var(--warningColor);
+  }
+
+  &.danger {
+    --outlineColor: var(--dangerColor);
+  }
+}
+
 /*
  * Sizes
  */

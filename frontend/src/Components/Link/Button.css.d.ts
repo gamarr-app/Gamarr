@@ -8,6 +8,7 @@ interface CssExports {
   'large': string;
   'left': string;
   'medium': string;
+  'outline': string;
   'primary': string;
   'right': string;
   'small': string;

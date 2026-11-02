@@ -10,6 +10,7 @@ export interface ButtonProps extends Omit<LinkProps, 'children' | 'size'> {
   buttonGroupPosition?: Extract<Align, keyof typeof styles>;
   kind?: Extract<Kind, keyof typeof styles>;
   size?: Extract<Size, keyof typeof styles>;
+  outline?: boolean;
   children: Required<LinkProps['children']>;
 }
 
@@ -18,6 +19,7 @@ export default function Button({
   buttonGroupPosition,
   kind = kinds.DEFAULT,
   size = sizes.MEDIUM,
+  outline = false,
   ...otherProps
 }: ButtonProps) {
   return (
@@ -26,6 +28,7 @@ export default function Button({
         className,
         styles[kind],
         styles[size],
+        outline && styles.outline,
         buttonGroupPosition && styles[buttonGroupPosition]
       )}
       {...otherProps}
