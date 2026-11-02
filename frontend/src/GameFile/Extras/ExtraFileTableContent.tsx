@@ -36,7 +36,12 @@ const columns: Column[] = [
   },
   {
     name: 'action',
-    label: <IconButton name={icons.ADVANCED_SETTINGS} />,
+    label: (
+      <IconButton
+        name={icons.ADVANCED_SETTINGS}
+        aria-label={translate('TableOptionsButton')}
+      />
+    ),
     isVisible: true,
   },
 ];

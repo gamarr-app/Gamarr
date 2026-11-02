@@ -118,7 +118,10 @@ export const defaultState = {
     {
       name: 'actions',
       columnLabel: () => translate('Actions'),
-      label: React.createElement(IconButton, { name: icons.ADVANCED_SETTINGS }),
+      label: React.createElement(IconButton, {
+        name: icons.ADVANCED_SETTINGS,
+        'aria-label': translate('TableOptionsButton'),
+      }),
       isVisible: true,
       isModifiable: false,
     },

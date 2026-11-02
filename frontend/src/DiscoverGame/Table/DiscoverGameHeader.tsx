@@ -77,6 +77,7 @@ function DiscoverGameHeader({
             >
               <IconButton
                 name={icons.ADVANCED_SETTINGS}
+                aria-label={translate('TableOptionsButton')}
                 onPress={handleTableOptionsPress}
               />
             </VirtualTableHeaderCell>

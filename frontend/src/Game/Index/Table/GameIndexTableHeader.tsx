@@ -15,6 +15,7 @@ import {
   setGameTableOption,
 } from 'Store/Actions/gameIndexActions';
 import { CheckInputChanged } from 'typings/inputs';
+import translate from 'Utilities/String/translate';
 import GameIndexTableOptions from './GameIndexTableOptions';
 import styles from './GameIndexTableHeader.css';
 
@@ -83,7 +84,10 @@ function GameIndexTableHeader(props: GameIndexTableHeaderProps) {
                 optionsComponent={GameIndexTableOptions}
                 onTableOptionChange={onTableOptionChange}
               >
-                <IconButton name={icons.ADVANCED_SETTINGS} />
+                <IconButton
+                  name={icons.ADVANCED_SETTINGS}
+                  aria-label={translate('TableOptionsButton')}
+                />
               </TableOptionsModalWrapper>
             </VirtualTableHeaderCell>
           );
