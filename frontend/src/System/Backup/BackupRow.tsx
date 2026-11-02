@@ -50,6 +50,9 @@ function BackupRow(props: BackupRowProps) {
     onDeleteBackupPress(id);
   }, [id, onDeleteBackupPress]);
 
+  const restoreLabel = translate('RestoreBackupWithName', { name });
+  const deleteLabel = translate('DeleteBackupWithName', { name });
+
   let iconClassName = icons.SCHEDULED;
   let iconTooltip = translate('Scheduled');
 
@@ -79,13 +82,15 @@ function BackupRow(props: BackupRowProps) {
 
       <TableRowCell className={styles.actions}>
         <IconButton
-          title={translate('RestoreBackup')}
+          title={restoreLabel}
+          aria-label={restoreLabel}
           name={icons.RESTORE}
           onPress={onRestorePress}
         />
 
         <IconButton
-          title={translate('DeleteBackup')}
+          title={deleteLabel}
+          aria-label={deleteLabel}
           name={icons.DELETE}
           onPress={onDeletePress}
         />
@@ -101,7 +106,7 @@ function BackupRow(props: BackupRowProps) {
       <ConfirmModal
         isOpen={isConfirmDeleteModalOpen}
         kind={kinds.DANGER}
-        title={translate('DeleteBackup')}
+        title={deleteLabel}
         message={translate('DeleteBackupMessageText', {
           name,
         })}
