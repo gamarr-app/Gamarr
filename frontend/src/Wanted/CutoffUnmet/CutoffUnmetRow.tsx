@@ -124,6 +124,7 @@ function CutoffUnmetRow({
             <GameSearchCell
               key={name}
               gameId={id}
+              gameTitle={title}
               gameEntity="wanted.cutoffUnmet"
             />
           );

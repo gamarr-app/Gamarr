@@ -71,6 +71,11 @@ function GameHistoryRow({
     setIsMarkAsFailedModalOpen(false);
   }, []);
 
+  const detailsLabel = translate('DetailsForTitle', { title: sourceTitle });
+  const markAsFailedLabel = translate('MarkAsFailedWithTitle', {
+    title: sourceTitle,
+  });
+
   return (
     <TableRow>
       <HistoryEventTypeCell eventType={eventType} data={data} />
@@ -96,11 +101,17 @@ function GameHistoryRow({
       <RelativeDateCell date={date} includeSeconds={true} includeTime={true} />
 
       <TableRowCell className={styles.actions}>
-        <IconButton name={icons.INFO} onPress={handleDetailsPress} />
+        <IconButton
+          name={icons.INFO}
+          title={detailsLabel}
+          aria-label={detailsLabel}
+          onPress={handleDetailsPress}
+        />
 
         {eventType === 'grabbed' ? (
           <IconButton
-            title={translate('MarkAsFailed')}
+            title={markAsFailedLabel}
+            aria-label={markAsFailedLabel}
             name={icons.REMOVE}
             size={14}
             onPress={handleMarkAsFailedPress}

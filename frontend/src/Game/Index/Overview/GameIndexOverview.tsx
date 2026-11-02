@@ -142,6 +142,10 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
 
   const overviewHeight = contentHeight - titleRowHeight;
 
+  const refreshGameLabel = translate('RefreshGameWithTitle', { title });
+  const searchForGameLabel = translate('SearchForGameWithTitle', { title });
+  const editGameLabel = translate('EditGameWithTitle', { title });
+
   return (
     <div>
       <div className={styles.content}>
@@ -208,7 +212,8 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
 
               <SpinnerIconButton
                 name={icons.REFRESH}
-                title={translate('RefreshGame')}
+                title={refreshGameLabel}
+                aria-label={refreshGameLabel}
                 isSpinning={isRefreshingGame}
                 onPress={onRefreshPress}
               />
@@ -217,7 +222,8 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
                 <SpinnerIconButton
                   className={styles.actions}
                   name={icons.SEARCH}
-                  title={translate('SearchForGame')}
+                  title={searchForGameLabel}
+                  aria-label={searchForGameLabel}
                   isSpinning={isSearchingGame}
                   onPress={onSearchPress}
                 />
@@ -225,7 +231,8 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
 
               <IconButton
                 name={icons.EDIT}
-                title={translate('EditGame')}
+                title={editGameLabel}
+                aria-label={editGameLabel}
                 onPress={onEditGamePress}
               />
             </div>

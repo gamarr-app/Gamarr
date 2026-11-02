@@ -115,6 +115,7 @@ function MissingRow({
             <GameSearchCell
               key={name}
               gameId={id}
+              gameTitle={title}
               gameEntity="wanted.missing"
             />
           );

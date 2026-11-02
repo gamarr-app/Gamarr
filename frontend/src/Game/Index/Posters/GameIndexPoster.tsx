@@ -156,6 +156,10 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     height: `${posterHeight}px`,
   };
 
+  const refreshGameLabel = translate('RefreshGameWithTitle', { title });
+  const searchForGameLabel = translate('SearchForGameWithTitle', { title });
+  const editGameLabel = translate('EditGameWithTitle', { title });
+
   return (
     <div className={styles.content}>
       <div className={styles.posterContainer} title={title}>
@@ -166,7 +170,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         <Label className={styles.controls}>
           <SpinnerIconButton
             name={icons.REFRESH}
-            title={translate('RefreshGame')}
+            title={refreshGameLabel}
+            aria-label={refreshGameLabel}
             isSpinning={isRefreshingGame}
             onPress={onRefreshPress}
           />
@@ -175,7 +180,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
             <SpinnerIconButton
               className={styles.action}
               name={icons.SEARCH}
-              title={translate('SearchForGame')}
+              title={searchForGameLabel}
+              aria-label={searchForGameLabel}
               isSpinning={isSearchingGame}
               onPress={onSearchPress}
             />
@@ -183,7 +189,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
 
           <IconButton
             name={icons.EDIT}
-            title={translate('EditGame')}
+            title={editGameLabel}
+            aria-label={editGameLabel}
             onPress={onEditGamePress}
           />
 

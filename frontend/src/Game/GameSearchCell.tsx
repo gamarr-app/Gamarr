@@ -15,10 +15,11 @@ import styles from './GameSearchCell.css';
 
 interface GameSearchCellProps {
   gameId: number;
+  gameTitle: string;
   gameEntity?: GameEntity;
 }
 
-function GameSearchCell({ gameId }: GameSearchCellProps) {
+function GameSearchCell({ gameId, gameTitle }: GameSearchCellProps) {
   const executingCommands = useSelector(
     useMemo(() => createExecutingCommandsSelector(), [])
   );
@@ -35,6 +36,13 @@ function GameSearchCell({ gameId }: GameSearchCellProps) {
     setInteractiveSearchModalClosed,
   ] = useModalOpenState(false);
 
+  const automaticSearchLabel = translate('AutomaticSearchForGame', {
+    gameTitle,
+  });
+  const interactiveSearchLabel = translate('InteractiveSearchForGame', {
+    gameTitle,
+  });
+
   const handleSearchPress = useCallback(() => {
     dispatch(
       executeCommand({
@@ -49,13 +57,15 @@ function GameSearchCell({ gameId }: GameSearchCellProps) {
       <SpinnerIconButton
         name={icons.SEARCH}
         isSpinning={isSearching}
-        title={translate('AutomaticSearch')}
+        title={automaticSearchLabel}
+        aria-label={automaticSearchLabel}
         onPress={handleSearchPress}
       />
 
       <IconButton
         name={icons.INTERACTIVE}
-        title={translate('InteractiveSearch')}
+        title={interactiveSearchLabel}
+        aria-label={interactiveSearchLabel}
         onPress={setInteractiveSearchModalOpen}
       />
 

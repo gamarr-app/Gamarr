@@ -269,6 +269,13 @@ function GameComponentRow({
     [component.id, onProfileChange]
   );
 
+  const automaticSearchLabel = translate('AutomaticSearchForGame', {
+    gameTitle: component.title,
+  });
+  const interactiveSearchLabel = translate('InteractiveSearchForGame', {
+    gameTitle: component.title,
+  });
+
   return (
     <TableRow>
       <TableRowCell>
@@ -318,14 +325,16 @@ function GameComponentRow({
       <TableRowCell>
         <SpinnerIconButton
           name={icons.SEARCH}
-          title={translate('AutomaticSearch')}
+          title={automaticSearchLabel}
+          aria-label={automaticSearchLabel}
           isSpinning={isSearching}
           onPress={handleSearchPress}
         />
 
         <IconButton
           name={icons.INTERACTIVE}
-          title={translate('InteractiveSearch')}
+          title={interactiveSearchLabel}
+          aria-label={interactiveSearchLabel}
           onPress={handleInteractiveSearchPress}
         />
 

@@ -158,6 +158,11 @@ function QueueRow(props: QueueRowProps) {
     status === 'completed' && trackedDownloadStatus === 'warning';
   const isPending =
     status === 'delay' || status === 'downloadClientUnavailable';
+  const interactiveImportLabel = translate('InteractiveImportWithTitle', {
+    title,
+  });
+  const grabLabel = translate('GrabWithTitle', { title });
+  const removeFromQueueLabel = translate('RemoveFromQueueWithTitle', { title });
 
   return (
     <TableRow>
@@ -322,6 +327,8 @@ function QueueRow(props: QueueRowProps) {
               {showInteractiveImport ? (
                 <IconButton
                   name={icons.INTERACTIVE}
+                  title={interactiveImportLabel}
+                  aria-label={interactiveImportLabel}
                   onPress={handleInteractiveImportPress}
                 />
               ) : null}
@@ -330,14 +337,17 @@ function QueueRow(props: QueueRowProps) {
                 <SpinnerIconButton
                   name={icons.DOWNLOAD}
                   kind={grabError ? kinds.DANGER : kinds.DEFAULT}
+                  title={grabLabel}
+                  aria-label={grabLabel}
                   isSpinning={isGrabbing}
                   onPress={handleGrabPress}
                 />
               ) : null}
 
               <SpinnerIconButton
-                title={translate('RemoveFromQueue')}
                 name={icons.REMOVE}
+                title={removeFromQueueLabel}
+                aria-label={removeFromQueueLabel}
                 isSpinning={isRemoving}
                 onPress={handleRemoveQueueItemPress}
               />

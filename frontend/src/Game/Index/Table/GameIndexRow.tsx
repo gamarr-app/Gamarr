@@ -141,6 +141,10 @@ function GameIndexRow(props: GameIndexRowProps) {
     [selectDispatch]
   );
 
+  const refreshGameLabel = translate('RefreshGameWithTitle', { title });
+  const searchForGameLabel = translate('SearchForGameWithTitle', { title });
+  const editGameLabel = translate('EditGameWithTitle', { title });
+
   return (
     <>
       {isSelectMode ? (
@@ -436,7 +440,8 @@ function GameIndexRow(props: GameIndexRowProps) {
 
               <SpinnerIconButton
                 name={icons.REFRESH}
-                title={translate('RefreshGame')}
+                title={refreshGameLabel}
+                aria-label={refreshGameLabel}
                 isSpinning={isRefreshingGame}
                 onPress={onRefreshPress}
               />
@@ -444,7 +449,8 @@ function GameIndexRow(props: GameIndexRowProps) {
               {showSearchAction ? (
                 <SpinnerIconButton
                   name={icons.SEARCH}
-                  title={translate('SearchForGame')}
+                  title={searchForGameLabel}
+                  aria-label={searchForGameLabel}
                   isSpinning={isSearchingGame}
                   onPress={onSearchPress}
                 />
@@ -452,7 +458,8 @@ function GameIndexRow(props: GameIndexRowProps) {
 
               <IconButton
                 name={icons.EDIT}
-                title={translate('EditGame')}
+                title={editGameLabel}
+                aria-label={editGameLabel}
                 onPress={onEditGamePress}
               />
             </VirtualTableRowCell>
