@@ -20,5 +20,10 @@ sed -i 's|^#DatabaseDirectory.*|DatabaseDirectory /var/lib/clamav|' /etc/clamav/
 chown -R abc:abc /run/clamav /var/lib/clamav /var/log/clamav
 
 # download initial virus database
+# Bounded to 60s: freshclam has no built-in network timeout, and a stalled
+# CDN download here would block init-config (and therefore app startup)
+# indefinitely. A timeout or failure is non-fatal -- clamd/freshclam retry
+# on their own schedule, and starting with stale/missing definitions is far
+# better than not starting at all.
 echo "**** updating clamav database ****"
-s6-setuidgid abc freshclam --quiet || echo "**** freshclam update failed, clamd will retry ****"
+timeout 60 s6-setuidgid abc freshclam --quiet || echo "**** freshclam update timed out or failed, will retry in background ****"
