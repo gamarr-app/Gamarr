@@ -147,6 +147,13 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "Broken pipe",
             "forcibly closed by the remote host",
 
+            // The Unix wording of "forcibly closed by the remote host" above: the
+            // peer (download client, indexer, reverse proxy) dropped an established
+            // connection mid-request. Surfaces as a SocketException wrapped in an
+            // IOException wrapped in an HttpRequestException, so only the innermost
+            // message names the cause. Nothing on our side can prevent it.
+            "Connection reset by peer",
+
             // The user's own HTTP/SOCKS proxy rejecting or failing our outbound
             // call (e.g. a 407 because no/bad credentials are set in Gamarr's
             // proxy settings) — their setup, not our code, and already surfaced

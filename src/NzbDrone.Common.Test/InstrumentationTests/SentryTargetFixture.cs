@@ -150,6 +150,21 @@ namespace NzbDrone.Common.Test.InstrumentationTests
             _subject.IsSentryMessage(log).Should().BeFalse();
         }
 
+        [Test]
+        public void should_filter_event_for_connection_reset_by_peer_wrapped_in_a_http_request_exception()
+        {
+            // The exact chain a download client or indexer dropping an established
+            // connection produces on Linux/macOS: only the innermost SocketException
+            // names the cause, the outer message is the generic
+            // "An error occurred while sending the request."
+            var socketException = new SocketException((int)SocketError.ConnectionReset, "Connection reset by peer");
+            var ioException = new IOException("Unable to read data from the transport connection: Connection reset by peer.", socketException);
+            var ex = new HttpRequestException("An error occurred while sending the request.", ioException);
+
+            var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
         private static HttpException GivenHttpException(HttpStatusCode statusCode)
         {
             var request = new HttpRequest("https://indexer.example.com/api");
