@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
@@ -113,9 +114,14 @@ namespace NzbDrone.Core.Test.ImportList
                   .Returns(cleanLevel);
         }
 
-        private void GivenList(int id, bool enabledAuto)
+        private void GivenList(int id, bool enabledAuto, HashSet<int> tags = null)
         {
             var importListDefinition = new ImportListDefinition { Id = id, EnableAuto = enabledAuto };
+
+            if (tags != null)
+            {
+                importListDefinition.Tags = tags;
+            }
 
             Mocker.GetMock<IImportListFactory>()
                   .Setup(v => v.Get(id))
@@ -436,6 +442,56 @@ namespace NzbDrone.Core.Test.ImportList
 
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 7 && s.All(m => m.IgdbId != _existingGames[0].IgdbId)), true), Times.Once());
+        }
+
+        [Test]
+        public void should_not_add_game_on_exclusion_list_with_duplicate_exclusions()
+        {
+            _importListFetch.Games.ForEach(m => m.ListId = 1);
+
+            GivenList(1, true);
+            GivenCleanLevel("disabled");
+
+            Mocker.GetMock<IImportListExclusionService>()
+                  .Setup(v => v.All())
+                  .Returns(new List<ImportListExclusion>
+                  {
+                      new ImportListExclusion { IgdbId = _importListFetch.Games[0].IgdbId },
+                      new ImportListExclusion { IgdbId = _importListFetch.Games[0].IgdbId }
+                  });
+
+            Subject.Execute(_commandAll);
+
+            Mocker.GetMock<IAddGameService>()
+                  .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 4 && s.All(m => m.IgdbId != _importListFetch.Games[0].IgdbId)), true), Times.Once());
+        }
+
+        [Test]
+        public void should_not_share_tag_collection_between_games_from_the_same_list()
+        {
+            _importListFetch.Games.ForEach(m => m.ListId = 1);
+
+            GivenList(1, true, new HashSet<int> { 1 });
+            GivenCleanLevel("disabled");
+
+            List<Game> addedGames = null;
+
+            Mocker.GetMock<IAddGameService>()
+                  .Setup(v => v.AddGames(It.IsAny<List<Game>>(), It.IsAny<bool>()))
+                  .Callback<List<Game>, bool>((games, _) => addedGames = games)
+                  .Returns(new List<Game>());
+
+            Subject.Execute(_commandAll);
+
+            addedGames.Should().HaveCount(5);
+            addedGames.Should().OnlyContain(g => g.Tags.SetEquals(new[] { 1 }));
+
+            // Each game must own its tag set, not alias the (shared) list definition's
+            addedGames.Select(g => g.Tags).Should().OnlyHaveUniqueItems();
+
+            addedGames.First().Tags.Add(99);
+
+            addedGames.Skip(1).Should().OnlyContain(g => g.Tags.SetEquals(new[] { 1 }));
         }
     }
 }

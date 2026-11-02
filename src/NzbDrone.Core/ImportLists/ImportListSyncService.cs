@@ -74,7 +74,7 @@ namespace NzbDrone.Core.ImportLists
             ProcessListItems(listItemsResult);
         }
 
-        private void ProcessGameReport(ImportListDefinition importList, ImportListGame report, List<ImportListExclusion> listExclusions, List<int> dbGameSteamIds, List<int> dbGameIgdbIds, List<Game> gamesToAdd)
+        private void ProcessGameReport(ImportListDefinition importList, ImportListGame report, ListItemIds listExclusions, HashSet<int> dbGameSteamIds, HashSet<int> dbGameIgdbIds, ListItemIds pendingGameIds, List<Game> gamesToAdd)
         {
             // Need either Steam App ID (primary) or IGDB ID (secondary) to proceed
             if ((report.SteamAppId == 0 && report.IgdbId == 0) || !importList.EnableAuto)
@@ -90,47 +90,45 @@ namespace NzbDrone.Core.ImportLists
                 return;
             }
 
-            // Check to see if game excluded (by Steam App ID or IGDB ID).
-            // FirstOrDefault: a report can match one exclusion by Steam id
-            // and a different one by IGDB id — Single would throw.
-            var excludedGame = listExclusions.FirstOrDefault(s =>
-                (report.SteamAppId > 0 && s.SteamAppId == report.SteamAppId) ||
-                (report.IgdbId > 0 && s.IgdbId == report.IgdbId));
-
-            if (excludedGame != null)
+            // Check to see if game excluded (by Steam App ID or IGDB ID)
+            if (listExclusions.Contains(report.SteamAppId, report.IgdbId))
             {
                 _logger.Debug("Steam:{0}/IGDB:{1} [{2}] Rejected due to list exclusion", report.SteamAppId, report.IgdbId, report.Title);
                 return;
             }
 
             // Append Game if not already in DB or already on add list
-            var alreadyInList = gamesToAdd.Any(s =>
-                (report.SteamAppId > 0 && s.SteamAppId == report.SteamAppId) ||
-                (report.IgdbId > 0 && s.IgdbId == report.IgdbId));
-
-            if (!alreadyInList)
+            if (pendingGameIds.Contains(report.SteamAppId, report.IgdbId))
             {
-                var monitorType = importList.Monitor;
-
-                gamesToAdd.Add(new Game
-                {
-                    Monitored = monitorType != MonitorTypes.None,
-                    RootFolderPath = importList.RootFolderPath,
-                    QualityProfileId = importList.QualityProfileId,
-                    MinimumAvailability = importList.MinimumAvailability,
-                    Tags = importList.Tags,
-                    SteamAppId = report.SteamAppId,
-                    IgdbId = report.IgdbId,
-                    Title = report.Title,
-                    Year = report.Year,
-                    AddOptions = new AddGameOptions
-                    {
-                        SearchForGame = monitorType != MonitorTypes.None && importList.SearchOnAdd,
-                        Monitor = monitorType,
-                        AddMethod = AddGameMethod.List
-                    }
-                });
+                return;
             }
+
+            var monitorType = importList.Monitor;
+
+            gamesToAdd.Add(new Game
+            {
+                Monitored = monitorType != MonitorTypes.None,
+                RootFolderPath = importList.RootFolderPath,
+                QualityProfileId = importList.QualityProfileId,
+                MinimumAvailability = importList.MinimumAvailability,
+
+                // Copy the definition's tags: the definition instance is shared
+                // across every item contributed by that list, so assigning it
+                // directly would let one list's tags leak onto another's games.
+                Tags = new HashSet<int>(importList.Tags),
+                SteamAppId = report.SteamAppId,
+                IgdbId = report.IgdbId,
+                Title = report.Title,
+                Year = report.Year,
+                AddOptions = new AddGameOptions
+                {
+                    SearchForGame = monitorType != MonitorTypes.None && importList.SearchOnAdd,
+                    Monitor = monitorType,
+                    AddMethod = AddGameMethod.List
+                }
+            });
+
+            pendingGameIds.Add(report.SteamAppId, report.IgdbId);
         }
 
         private void ProcessListItems(ImportListFetchResult listFetchResult)
@@ -155,9 +153,10 @@ namespace NzbDrone.Core.ImportLists
 
             var listedGames = listFetchResult.Games.ToList();
 
-            var importExclusions = _listExclusionService.All();
-            var dbGameSteamIds = _gameService.AllGameSteamAppIds();
-            var dbGameIgdbIds = _gameService.AllGameIgdbIds();
+            var importExclusions = new ListItemIds(_listExclusionService.All().Select(e => (e.SteamAppId, e.IgdbId)));
+            var dbGameSteamIds = _gameService.AllGameSteamAppIds().ToHashSet();
+            var dbGameIgdbIds = _gameService.AllGameIgdbIds().ToHashSet();
+            var pendingGameIds = new ListItemIds();
             var gamesToAdd = new List<Game>();
 
             var groupedGames = listedGames.GroupBy(x => x.ListId);
@@ -171,7 +170,7 @@ namespace NzbDrone.Core.ImportLists
                     // Process if we have either Steam App ID or IGDB ID
                     if (game.SteamAppId != 0 || game.IgdbId != 0)
                     {
-                        ProcessGameReport(importList, game, importExclusions, dbGameSteamIds, dbGameIgdbIds, gamesToAdd);
+                        ProcessGameReport(importList, game, importExclusions, dbGameSteamIds, dbGameIgdbIds, pendingGameIds, gamesToAdd);
                     }
                 }
             }
@@ -202,7 +201,7 @@ namespace NzbDrone.Core.ImportLists
                 return;
             }
 
-            var listGames = _listGameService.GetAllListGames();
+            var listGames = new ListItemIds(_listGameService.GetAllListGames().Select(c => (c.SteamAppId, c.IgdbId)));
 
             var gamesInLibrary = _gameService.GetAllGames();
 
@@ -211,11 +210,7 @@ namespace NzbDrone.Core.ImportLists
             foreach (var game in gamesInLibrary)
             {
                 // Check if game exists in lists by Steam App ID (primary) or IGDB ID (secondary)
-                var gameExists = listGames.Any(c =>
-                    (game.SteamAppId > 0 && c.SteamAppId == game.SteamAppId) ||
-                    (game.IgdbId > 0 && c.IgdbId == game.IgdbId));
-
-                if (!gameExists)
+                if (!listGames.Contains(game.SteamAppId, game.IgdbId))
                 {
                     switch (_configService.ListSyncLevel)
                     {
@@ -240,6 +235,49 @@ namespace NzbDrone.Core.ImportLists
             }
 
             _gameService.UpdateGame(gamesToUpdate, true);
+        }
+
+        /// <summary>
+        /// Hash-set wrapper over the identity ids of a set of list items (or
+        /// exclusions), so membership tests are O(1) instead of a nested scan.
+        /// Only positive ids are ever matched: 0 means "not set" for both
+        /// Steam App ID (primary) and IGDB ID (secondary).
+        /// </summary>
+        private class ListItemIds
+        {
+            private readonly HashSet<int> _steamAppIds = new HashSet<int>();
+            private readonly HashSet<int> _igdbIds = new HashSet<int>();
+
+            public ListItemIds()
+            {
+            }
+
+            public ListItemIds(IEnumerable<(int SteamAppId, int IgdbId)> items)
+            {
+                foreach (var item in items)
+                {
+                    Add(item.SteamAppId, item.IgdbId);
+                }
+            }
+
+            public void Add(int steamAppId, int igdbId)
+            {
+                if (steamAppId > 0)
+                {
+                    _steamAppIds.Add(steamAppId);
+                }
+
+                if (igdbId > 0)
+                {
+                    _igdbIds.Add(igdbId);
+                }
+            }
+
+            public bool Contains(int steamAppId, int igdbId)
+            {
+                return (steamAppId > 0 && _steamAppIds.Contains(steamAppId)) ||
+                       (igdbId > 0 && _igdbIds.Contains(igdbId));
+            }
         }
     }
 }
