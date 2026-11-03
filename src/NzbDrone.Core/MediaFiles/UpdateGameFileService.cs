@@ -82,7 +82,22 @@ namespace NzbDrone.Core.MediaFiles
 
         private bool ChangeFileDate(string filePath, DateTime date)
         {
-            if (DateTime.TryParse(_diskProvider.FileGetLastWrite(filePath).ToLongDateString(), out var oldDateTime))
+            DateTime lastWrite;
+
+            try
+            {
+                lastWrite = _diskProvider.FileGetLastWrite(filePath);
+            }
+            catch (Exception ex) when (ex is System.IO.IOException || ex is UnauthorizedAccessException)
+            {
+                // An unreadable file (storage I/O error, permissions) must not
+                // abort the date pass for every other file of the scanned game.
+                _logger.Warn(ex, "Unable to read date of file [{0}]", filePath);
+
+                return false;
+            }
+
+            if (DateTime.TryParse(lastWrite.ToLongDateString(), out var oldDateTime))
             {
                 if (!DateTime.Equals(date, oldDateTime))
                 {

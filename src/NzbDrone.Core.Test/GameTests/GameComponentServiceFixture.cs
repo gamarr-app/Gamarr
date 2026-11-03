@@ -332,6 +332,39 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
+        public void should_not_throw_when_listing_folder_backed_file_throws_io_exception()
+        {
+            _game.Platform = PlatformFamily.NintendoDS;
+            _game.Path = "/games/Mario Kart DS";
+            _game.GameMetadata.Value.DlcReferences = new List<DlcReference>();
+
+            var file = new GameFile { Id = 1, GameId = _game.Id, RelativePath = string.Empty };
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(m => m.GetFilesByGame(_game.Id))
+                  .Returns(new List<GameFile> { file });
+
+            Mocker.GetMock<NzbDrone.Common.Disk.IDiskProvider>()
+                  .Setup(d => d.FolderExists(_game.Path))
+                  .Returns(true);
+
+            Mocker.GetMock<NzbDrone.Common.Disk.IDiskProvider>()
+                  .Setup(d => d.GetFiles(_game.Path, true))
+                  .Throws(new System.IO.IOException("I/O error"));
+
+            Mocker.GetMock<INoIntroCatalogEntryRepository>()
+                  .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))
+                  .Returns(new List<NoIntroCatalogEntry>
+                  {
+                      Entry("Mario Kart DS (Europe) (En,Fr,De,Es,It)", PlatformFamily.NintendoDS, "0201 - Mario Kart DS (Europe) (En,Fr,De,Es,It).nds")
+                  });
+
+            Subject.Invoking(s => s.EnsureComponents(_game)).Should().NotThrow();
+
+            NzbDrone.Test.Common.ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
         public void should_be_idempotent_when_components_already_exist()
         {
             Mocker.GetMock<IGameComponentRepository>()

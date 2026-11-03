@@ -302,7 +302,23 @@ namespace NzbDrone.Core.Games.Components
                 return null;
             }
 
-            var matchingSlots = _diskProvider.GetFiles(game.Path, true)
+            IEnumerable<string> filesOnDisk;
+
+            try
+            {
+                filesOnDisk = _diskProvider.GetFiles(game.Path, true).ToList();
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                // Listing the folder can fail on an unhealthy mount; component
+                // reconciliation (scan and import events) must carry on without
+                // the folder-backed slot hint.
+                _logger.Warn(ex, "Unable to list files in {0} to resolve its component slot", game.Path);
+
+                return null;
+            }
+
+            var matchingSlots = filesOnDisk
                 .Select(Path.GetFileName)
                 .Where(name => name.IsNotNullOrWhiteSpace())
                 .Select(name => _noIntroComponentPlanner.FindSlotForFileName(noIntroSlots, name))
