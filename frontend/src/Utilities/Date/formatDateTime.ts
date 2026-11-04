@@ -45,7 +45,9 @@ function formatDateTime(
   }
 
   const relativeDay = getRelativeDay(date, includeRelativeDay);
-  const formattedDate = moment(date).format(dateFormat || DEFAULT_LONG_DATE_FORMAT);
+  const formattedDate = moment(date).format(
+    dateFormat || DEFAULT_LONG_DATE_FORMAT
+  );
   const formattedTime = formatTime(date, timeFormat, {
     includeMinuteZero: true,
     includeSeconds,

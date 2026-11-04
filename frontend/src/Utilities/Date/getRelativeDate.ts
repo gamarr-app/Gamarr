@@ -38,7 +38,8 @@ function getRelativeDate({
   // rather than crashing the page.
   const shortDateFormat = shortDateFormatOption || DEFAULT_SHORT_DATE_FORMAT;
   const timeFormat =
-    timeFormatOption || (includeTime || timeForToday ? DEFAULT_TIME_FORMAT : '');
+    timeFormatOption ||
+    (includeTime || timeForToday ? DEFAULT_TIME_FORMAT : '');
 
   const isTodayDate = isToday(date);
   const time = timeFormat
