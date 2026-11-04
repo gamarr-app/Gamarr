@@ -1,6 +1,12 @@
 import formatDate from './formatDate';
 import formatDateTime from './formatDateTime';
 
+jest.mock('Utilities/String/translate', () => ({
+  __esModule: true,
+  default: (key: string, tokens?: Record<string, string>) =>
+    `${key}:${Object.values(tokens ?? {}).join('|')}`,
+}));
+
 describe('formatDateTime', () => {
   it('should return empty string for null', () => {
     expect(formatDateTime(null, 'MMM D YYYY', 'h(:mm)a')).toBe('');
