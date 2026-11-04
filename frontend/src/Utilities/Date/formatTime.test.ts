@@ -37,6 +37,15 @@ describe('formatTime', () => {
     expect(result).toContain(':45');
   });
 
+  it('should fall back to a default format when timeFormat is undefined', () => {
+    const result = formatTime('2024-01-15T14:30:00Z', undefined);
+    expect(result).toMatch(/\d{1,2}:30(am|pm)/);
+  });
+
+  it('should fall back to a default format when timeFormat is empty', () => {
+    expect(() => formatTime('2024-01-15T14:30:00Z', '')).not.toThrow();
+  });
+
   it('should format 24-hour time correctly', () => {
     const result = formatTime('2024-01-15T14:30:00Z', 'HH:mm');
     expect(result).toMatch(/\d{2}:\d{2}/);

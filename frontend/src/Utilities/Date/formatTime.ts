@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { DEFAULT_TIME_FORMAT } from './defaultFormats';
 
 interface FormatTimeOptions {
   includeMinuteZero?: boolean;
@@ -7,7 +8,7 @@ interface FormatTimeOptions {
 
 function formatTime(
   date: string | undefined | null,
-  timeFormat: string,
+  timeFormat: string | undefined | null,
   { includeMinuteZero = false, includeSeconds = false }: FormatTimeOptions = {}
 ): string {
   if (!date) {
@@ -15,7 +16,7 @@ function formatTime(
   }
 
   const time = moment(date);
-  let format = timeFormat;
+  let format = timeFormat || DEFAULT_TIME_FORMAT;
 
   if (includeSeconds) {
     format = format.replace(/\(?:mm\)?/, ':mm:ss');

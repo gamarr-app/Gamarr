@@ -6,6 +6,10 @@ import isToday from 'Utilities/Date/isToday';
 import isTomorrow from 'Utilities/Date/isTomorrow';
 import isYesterday from 'Utilities/Date/isYesterday';
 import translate from 'Utilities/String/translate';
+import {
+  DEFAULT_SHORT_DATE_FORMAT,
+  DEFAULT_TIME_FORMAT,
+} from './defaultFormats';
 
 interface GetRelativeDateOptions {
   date?: string;
@@ -19,9 +23,9 @@ interface GetRelativeDateOptions {
 
 function getRelativeDate({
   date,
-  shortDateFormat,
+  shortDateFormat: shortDateFormatOption,
   showRelativeDates,
-  timeFormat,
+  timeFormat: timeFormatOption,
   includeSeconds = false,
   timeForToday = false,
   includeTime = false,
@@ -30,11 +34,11 @@ function getRelativeDate({
     return '';
   }
 
-  if ((includeTime || timeForToday) && !timeFormat) {
-    throw new Error(
-      "getRelativeDate: 'timeFormat' is required when 'includeTime' or 'timeForToday' is true"
-    );
-  }
+  // Settings may be missing a format (old config, partial payload); fall back
+  // rather than crashing the page.
+  const shortDateFormat = shortDateFormatOption || DEFAULT_SHORT_DATE_FORMAT;
+  const timeFormat =
+    timeFormatOption || (includeTime || timeForToday ? DEFAULT_TIME_FORMAT : '');
 
   const isTodayDate = isToday(date);
   const time = timeFormat

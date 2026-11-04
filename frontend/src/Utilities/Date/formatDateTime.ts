@@ -1,5 +1,6 @@
 import moment from 'moment';
 import translate from 'Utilities/String/translate';
+import { DEFAULT_LONG_DATE_FORMAT } from './defaultFormats';
 import formatTime from './formatTime';
 import isToday from './isToday';
 import isTomorrow from './isTomorrow';
@@ -32,8 +33,8 @@ function getRelativeDay(date: string, includeRelativeDate: boolean): string {
 
 function formatDateTime(
   date: string | undefined | null,
-  dateFormat: string,
-  timeFormat: string,
+  dateFormat: string | undefined | null,
+  timeFormat: string | undefined | null,
   {
     includeSeconds = false,
     includeRelativeDay = false,
@@ -44,7 +45,7 @@ function formatDateTime(
   }
 
   const relativeDay = getRelativeDay(date, includeRelativeDay);
-  const formattedDate = moment(date).format(dateFormat);
+  const formattedDate = moment(date).format(dateFormat || DEFAULT_LONG_DATE_FORMAT);
   const formattedTime = formatTime(date, timeFormat, {
     includeMinuteZero: true,
     includeSeconds,
