@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Indexers.Torznab
             return settings.BaseUrl != null && ApiKeyWhiteList.Any(c => settings.BaseUrl.ToLowerInvariant().Contains(c));
         }
 
-        private static readonly Regex AdditionalParametersRegex = new (@"(&.+?\=.+?)+", RegexOptions.Compiled);
+        private static readonly Regex AdditionalParametersRegex = new (@"(&.+?\=.+?)+", RegexOptions.NonBacktracking);
 
         public TorznabSettingsValidator()
         {
