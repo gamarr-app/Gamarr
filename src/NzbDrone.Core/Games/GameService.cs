@@ -136,17 +136,24 @@ namespace NzbDrone.Core.Games
         {
             var candidates = FindByTitleCandidates(new List<string> { title }, out var otherTitles);
 
-            return FindByTitle(new List<string> { title }, null, otherTitles, candidates);
+            return ReturnSingleGameOrNull(FindMatches(new List<string> { title }, null, otherTitles, candidates));
         }
 
         public Game FindByTitle(string title, int year)
         {
             var candidates = FindByTitleCandidates(new List<string> { title }, out var otherTitles);
 
-            return FindByTitle(new List<string> { title }, year, otherTitles, candidates);
+            return ReturnSingleGameOrNull(FindMatches(new List<string> { title }, year, otherTitles, candidates));
         }
 
+        // Throws MultipleGamesFoundException when ambiguous: callers on the
+        // parsing / tracked-download path catch it and surface the candidates.
         public Game FindByTitle(List<string> titles, int? year, List<string> otherTitles, List<Game> candidates)
+        {
+            return ReturnSingleGameOrThrow(FindMatches(titles, year, otherTitles, candidates));
+        }
+
+        private List<Game> FindMatches(List<string> titles, int? year, List<string> otherTitles, List<Game> candidates)
         {
             var cleanTitles = titles.Select(t => t.CleanGameTitle().ToLowerInvariant());
 
@@ -176,7 +183,7 @@ namespace NzbDrone.Core.Games
                     .AllWithYear(year).ToList();
             }
 
-            return ReturnSingleGameOrThrow(result.ToList());
+            return result;
         }
 
         public List<Game> FindByTitleCandidates(List<string> titles, out List<string> otherTitles)
@@ -491,6 +498,23 @@ namespace NzbDrone.Core.Games
         public List<Game> GetMainGamesOnly()
         {
             return _gameRepository.GetMainGamesOnly();
+        }
+
+        // Ambiguous (same title, different years, none picked by the year) is
+        // treated as no match, so the caller falls back to "pick manually".
+        private Game ReturnSingleGameOrNull(List<Game> games)
+        {
+            if (games.Count == 1)
+            {
+                return games.First();
+            }
+
+            if (games.Count > 1)
+            {
+                _logger.Debug("Found {0} games matching the title, treating as no match: {1}", games.Count, string.Join(",", games));
+            }
+
+            return null;
         }
 
         private Game ReturnSingleGameOrThrow(List<Game> games)
