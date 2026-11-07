@@ -59,6 +59,11 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // the console; Kestrel logging it too just crash-loops into Sentry.
             "AddressInUseException",
 
+            // A native export missing from the host OS (seen: crypt32's
+            // CryptProtectMemory on a Windows Insider build, called from inside
+            // ASP.NET Core DataProtection). Nothing we ship can supply it.
+            "EntryPointNotFoundException",
+
             // Filter SingleInstance Termination Exceptions
             "TerminateApplicationException",
 

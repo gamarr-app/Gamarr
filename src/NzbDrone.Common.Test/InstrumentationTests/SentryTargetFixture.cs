@@ -220,6 +220,15 @@ namespace NzbDrone.Common.Test.InstrumentationTests
             _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "Hosting failed to start")).Should().BeFalse();
         }
 
+        [Test]
+        public void should_filter_event_when_the_os_lacks_a_native_export()
+        {
+            // DataProtection's key ring read on a Windows build missing crypt32!CryptProtectMemory.
+            var ex = new EntryPointNotFoundException("Entry point was not found.");
+
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "An error occurred while reading the key ring.")).Should().BeFalse();
+        }
+
         private class AddressInUseException : Exception
         {
             public AddressInUseException(string message, Exception innerException)
