@@ -37,6 +37,10 @@ function ImportListExclusionRow(props: ImportListExclusionRowProps) {
     setDeleteImportListExclusionModalClosed,
   ] = useModalOpenState(false);
 
+  const editLabel = translate('EditImportListExclusionWithTitle', {
+    title: gameTitle,
+  });
+
   const handleDeletePress = useCallback(() => {
     dispatch(deleteImportListExclusion({ id }));
   }, [id, dispatch]);
@@ -56,6 +60,8 @@ function ImportListExclusionRow(props: ImportListExclusionRowProps) {
       <TableRowCell className={styles.actions}>
         <IconButton
           name={icons.EDIT}
+          title={editLabel}
+          aria-label={editLabel}
           onPress={setEditImportListExclusionModalOpen}
         />
       </TableRowCell>
