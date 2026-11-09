@@ -2,13 +2,13 @@
   "radarr": {
     "remote": "https://github.com/Radarr/Radarr.git",
     "branch": "develop",
-    "last_sha": "0c78421d553f8395fee14171892da60650123c97",
-    "last_sha_note": "As of 2026-07-25: ported HttpRequestMessage dispose fix, Lazy HttpResponse<T> deserialize, UpgradableSpecification log indices, cover cache-busting by RemoteUrl hash (69f8cea). Already present: BasicRepository bulk transactions. N/A: SkyHook rating enum case + search-error suppression (custom proxies; aggregate must tolerate per-source failures)."
+    "last_sha": "7e3f80c98d01481430ab356f6d7322fc5dc381ee",
+    "last_sha_note": "As of 2026-11-09: ported JSON error snippet, qBittorrent root_path (already present), ntfy icon (Gamarr logo) + custom headers, Happy Eyeballs IP/log/analyzer fixes, blank UI page, compact API JSON, NUnit-uncollected tests, Postgres password log redaction, folder-path Manual Import labels, full Transmission labels. Already present: 4c08c2cf Happy Eyeballs dispatcher, 35538cb5 expired cache values, f324ff88 System action labels. N/A: 4e4a8183 Kometa removal (gamarr has no Kometa consumer)."
   },
   "sonarr": {
     "remote": "https://github.com/Sonarr/Sonarr.git",
     "branch": "develop",
-    "last_sha": "709c9f6483b6d37d6d4f29f60212cb339afddff1",
-    "last_sha_note": "As of 2026-07-25: LanguageIntConverter null-guard already present; streaming-extension media-info probing N/A (no ffprobe); cookie test already diverged with a still-future 2-digit year."
+    "last_sha": "c018578e4b79ee048575c02d7a8aa2b929e4b837",
+    "last_sha_note": "As of 2026-11-09: ported font ligatures off, edit-settings button a11y, custom filter button labels, typed HTTP responses from bytes, deletion confirmation file stats (as Game files). N/A: c7e87b16 delete-files progress typo (no such message in gamarr)."
   }
 }
