@@ -218,6 +218,13 @@ namespace NzbDrone.Core.MediaFiles.GameImport
 
                     importResults.Add(new ImportResult(importDecision, "Failed to import game, unable to move existing file to the Recycle Bin."));
                 }
+                catch (UnauthorizedAccessException e)
+                {
+                    _logger.Warn(e, "Couldn't import game " + localGame);
+                    _eventAggregator.PublishEvent(new GameImportFailedEvent(e, localGame, newDownload, downloadClientItem));
+
+                    importResults.Add(new ImportResult(importDecision, "Failed to import game due to permission issues.", e.Message));
+                }
                 catch (Exception e)
                 {
                     _logger.Warn(e, "Couldn't import game " + localGame);
