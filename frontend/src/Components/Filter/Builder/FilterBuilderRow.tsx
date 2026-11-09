@@ -277,10 +277,7 @@ function FilterBuilderRow(props: FilterBuilderRowProps) {
     .sort(sortByProp('value'));
 
   const ValueComponent = getRowValueConnector(selectedFilterBuilderProp);
-  const selectedFilterLabel = selectedFilterBuilderProp?.label as
-    | string
-    | (() => string)
-    | undefined;
+  const selectedFilterLabel = selectedFilterBuilderProp?.label as string | (() => string) | undefined;
   const addFilterLabel = translate('AddFilterCondition');
 
   const filterLabel =
