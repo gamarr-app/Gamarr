@@ -103,6 +103,10 @@ namespace NzbDrone.Host
             .AddJsonOptions(options =>
             {
                 STJson.ApplySerializerSettings(options.JsonSerializerOptions);
+
+#if !DEBUG
+                options.JsonSerializerOptions.WriteIndented = false;
+#endif
             })
             .AddControllersAsServices();
 
