@@ -1,0 +1,95 @@
+{
+  "_comment": "Token renames applied to upstream patches (paths and hunk lines) by scripts/upstream_translate.py. Longest match wins. Only add a token if the measurement (scripts/upstream_translate.py check) shows it turns conflicts into clean applies without breaking others.",
+  "common": [],
+  "radarr": [
+    [
+      "Radarr",
+      "Gamarr"
+    ],
+    [
+      "radarr",
+      "gamarr"
+    ],
+    [
+      "RADARR",
+      "GAMARR"
+    ],
+    [
+      "Movies",
+      "Games"
+    ],
+    [
+      "movies",
+      "games"
+    ],
+    [
+      "MOVIES",
+      "GAMES"
+    ],
+    [
+      "Movie",
+      "Game"
+    ],
+    [
+      "movie",
+      "game"
+    ],
+    [
+      "MOVIE",
+      "GAME"
+    ]
+  ],
+  "sonarr": [
+    [
+      "Sonarr",
+      "Gamarr"
+    ],
+    [
+      "sonarr",
+      "gamarr"
+    ],
+    [
+      "SONARR",
+      "GAMARR"
+    ],
+    [
+      "Series",
+      "Game"
+    ],
+    [
+      "series",
+      "game"
+    ],
+    [
+      "SERIES",
+      "GAME"
+    ],
+    [
+      "TvImportedCategory",
+      "GameImportedCategory"
+    ],
+    [
+      "TvCategory",
+      "GameCategory"
+    ],
+    [
+      "TvDirectory",
+      "GameDirectory"
+    ],
+    [
+      "RemoteEpisode",
+      "RemoteGame"
+    ],
+    [
+      "EpisodeFile",
+      "GameFile"
+    ],
+    [
+      "episodeFile",
+      "gameFile"
+    ]
+  ],
+  "paths_common": [],
+  "paths_radarr": [],
+  "paths_sonarr": []
+}

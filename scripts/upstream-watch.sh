@@ -85,17 +85,19 @@ for r in $REMOTES; do
     fi
 done
 
+# Patches are checked against origin/main's committed tree through a throwaway
+# index, not the working tree, so whatever branch or dirt the checkout carries
+# does not move commits between buckets. A failed origin fetch is not fatal: the
+# last-fetched origin/main is still a fine base.
+git fetch --quiet origin main 2>>"$LOG_FILE" || log "NOTE: origin fetch failed; using last-fetched origin/main."
+BASE="${UPSTREAM_BASE:-origin/main}"
+git rev-parse --verify --quiet "$BASE" >/dev/null || BASE=HEAD
+
 rm -f "$(dirname "$STATE_FILE")"/gamarr-upstream-fail-*.stamp
 mkdir -p "$(dirname "$STATE_FILE")"
 
-# The apply-check below tests patches against the working tree, so a dirty tree
-# can flip a commit between the "clean" and "needs a port" bucket. Read-only
-# either way — just worth knowing when reading the log afterwards.
-if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
-    log "NOTE: working tree is dirty; apply-check results may be off."
-fi
-
 SUMMARY=$(SINCE="$SINCE" DRY_RUN="$DRY_RUN" REMOTES="$REMOTES" BRANCH="$BRANCH" \
+    BASE="$BASE" SCRIPTS_DIR="$REPO_DIR/scripts" \
     python3 - "$STATE_FILE" <<'PY' 2>>"$LOG_FILE"
 import json, os, re, subprocess, sys
 
@@ -104,6 +106,12 @@ since   = os.environ.get('SINCE', '')
 dry_run = os.environ.get('DRY_RUN') == '1'
 remotes = os.environ['REMOTES'].split()
 branch  = os.environ['BRANCH']
+sys.dont_write_bytecode = True
+sys.path.insert(0, os.environ['SCRIPTS_DIR'])
+import upstream_translate as ut  # noqa: E402
+
+tree = ut.Tree(os.environ['BASE'])
+maps = {r: ut.load_map(r) for r in remotes}
 
 
 def git(*args):
@@ -114,10 +122,11 @@ state = {}
 if os.path.exists(state_file):
     state = json.load(open(state_file))
 
-# Paths as they exist in Gamarr right now. A commit touching a path we do not
-# have is one we renamed (Movie -> Game) or dropped, so it needs a human port
-# rather than a patch, and is reported separately at most as a one-line mention.
-gamarr_paths = set(git('ls-tree', '-r', '--name-only', 'HEAD').split('\n'))
+# A path "is ours" if it exists here as-is or after the Movie->Game / Series->Game
+# translation in upstream-rename-map.json. Matching raw paths only used to drop
+# every commit under frontend/src/Movie or Radarr.Api.V3 on the floor unseen.
+def ours(remote, path):
+    return ut.resolve(path, tree, maps[remote])[1] in ('same', 'mapped', 'renamed')
 
 # Noise we never want to hear about. Weblate churns dozens of files a week,
 # upstream's own version bumps are meaningless here, and Gamarr has Dependabot
@@ -128,7 +137,8 @@ SKIP_SUBJECT = re.compile(
     r'|^Bump .* dependencies'
     r'|^Update major version'
     r'|^New translations '
-    r'|^Automated .*(translation|weblate)',
+    r'|^Automated .*(translation|weblate)'
+    r'|^Automated API Docs update',
     re.I)
 
 
@@ -138,7 +148,7 @@ def interesting(remote, sha, subject, author, files):
     files = [f for f in files if f]
     if not files:
         return None
-    present = [f for f in files if f in gamarr_paths]
+    present = [f for f in files if ours(remote, f)]
     if not present:
         return None
     return {
@@ -147,19 +157,31 @@ def interesting(remote, sha, subject, author, files):
     }
 
 
-def applies_cleanly(remote, sha):
-    """Does upstream's patch still apply to our tree as-is? This is the single
-    strongest cheap signal: a clean apply means we never diverged on those lines,
-    so taking the fix is a cherry-pick rather than a rewrite."""
-    patch = subprocess.run(
-        ['git', 'format-patch', '-1', '--stdout', sha],
-        capture_output=True, text=True)
-    if patch.returncode != 0 or not patch.stdout:
-        return None
-    check = subprocess.run(
-        ['git', 'apply', '--check', '-'],
-        input=patch.stdout, capture_output=True, text=True)
-    return check.returncode == 0
+def verdict(remote, sha):
+    """How does upstream's patch land here? 'raw' is a plain cherry-pick; 'paths',
+    'tokens', 'json' and '3way' apply once upstream_translate.py has rewritten it
+    (scripts/upstream-port.sh does that); 'present' is already in; 'partial-*'
+    applies to every file we have and the rest are upstream-only; 'conflict' is a
+    hand port. See upstream_translate.analyse for the per-file details."""
+    res = ut.analyse(remote, sha, tree, maps[remote], three_way=True)
+    return ut.summarise(res) if res else 'conflict'
+
+
+# Sonarr changes often reach Radarr later under the same subject, and Gamarr's
+# shared files descend from Radarr, so Radarr's version is usually the one that
+# applies. Look further back than this run's range for a twin.
+def norm_subject(s):
+    s = re.sub(r'(?i)\b(sonarr|radarr)\b|\(#\d+\)', '', s)
+    return re.sub(r'\W+', ' ', s).strip().lower()
+
+
+radarr_subjects = {}
+if 'radarr' in remotes:
+    for ln in git('log', '--since', '6 months ago', '--format=%H%x01%s',
+                  f'radarr/{branch}').split('\n'):
+        if '\x01' in ln:
+            h, s = ln.split('\x01', 1)
+            radarr_subjects.setdefault(norm_subject(s), h)
 
 
 found = []
@@ -205,7 +227,18 @@ for remote in remotes:
 
 # Only the survivors pay for blob fetches.
 for c in found:
-    c['clean'] = applies_cleanly(c['remote'], c['sha'])
+    c['verdict'] = verdict(c['remote'], c['sha'])
+    c['clean'] = c['verdict'] == 'raw'
+    c['twin'] = (radarr_subjects.get(norm_subject(c['subject']))
+                 if c['remote'] == 'sonarr' else None)
+tree.cleanup()
+
+RANK = {'raw': 0, 'paths': 1, 'tokens': 1, 'json': 1, '3way': 2,
+        'present': 3, 'conflict': 5, 'missing': 6}
+
+
+def rank(v):
+    return RANK.get(v.replace('partial-', ''), 5) + (0.5 if v.startswith('partial-') else 0)
 
 if not found:
     sys.exit(1)
@@ -219,9 +252,11 @@ for c in found:
     if key in merged:
         m = merged[key]
         m['remote'] = f"{m['remote']}+{c['remote']}"
-        # Prefer whichever upstream we can take the patch from directly.
-        if c['clean'] and not m['clean']:
-            m['sha'], m['clean'], m['hit'], m['n'] = c['sha'], True, c['hit'], c['n']
+        # Prefer whichever upstream we can take the patch from most directly.
+        if rank(c['verdict']) < rank(m['verdict']):
+            for k in ('sha', 'clean', 'hit', 'n', 'verdict', 'twin'):
+                m[k] = c[k]
+            m['remote'] = f"{c['remote']}+{m['remote'].split('+')[0]}"
     else:
         merged[key] = dict(c)
 found = list(merged.values())
@@ -229,25 +264,37 @@ found = list(merged.values())
 for c in found:
     c['ratio'] = c['hit'] / c['n'] if c['n'] else 0
 
-clean = [c for c in found if c['clean']]
+def line(c, extra=''):
+    t = (f"  (radarr twin {c['twin'][:8]})"
+         if c.get('twin') and 'radarr' not in c['remote'] else '')
+    return f"    - {c['remote']} {c['sha'][:8]}  {c['subject'][:80]}{extra}{t}"
+
+
+clean   = [c for c in found if c['verdict'] == 'raw']
+xlated  = [c for c in found if c['verdict'] in ('paths', 'tokens', 'json', '3way')
+           or (c['verdict'].startswith('partial-') and c['ratio'] >= 0.5)]
+present = [c for c in found if c['verdict'] == 'present']
+rest    = [c for c in found if c not in clean and c not in xlated and c not in present]
 # A commit where most of the touched files do not exist here is an upstream domain
 # feature wearing a few shared files — worth a count, not eight lines of Discord.
-dirty = sorted((c for c in found if not c['clean']),
-               key=lambda c: -c['ratio'])
-near   = [c for c in dirty if c['ratio'] >= 0.5]
-far    = [c for c in dirty if c['ratio'] < 0.5]
+rest.sort(key=lambda c: -c['ratio'])
+near = [c for c in rest if c['ratio'] >= 0.5]
+far  = [c for c in rest if c['ratio'] < 0.5]
 
-lines = [f"Upstream: {len(clean) + len(near)} commit(s) in Radarr/Sonarr worth a look."]
+lines = [f"Upstream: {len(clean) + len(xlated) + len(near)} commit(s) in Radarr/Sonarr worth a look."]
 if clean:
     lines.append(f"  Applies cleanly to gamarr as-is ({len(clean)}):")
-    for c in clean:
-        lines.append(f"    - {c['remote']} {c['sha'][:8]}  {c['subject'][:80]}")
+    lines += [line(c) for c in clean]
+if xlated:
+    lines.append(f"  Applies after Movie->Game translation / en.json merge / 3-way "
+                 f"({len(xlated)}) — `scripts/upstream-port.sh <remote> <sha>`:")
+    lines += [line(c, f"  [{c['verdict']}]") for c in xlated]
 if near:
-    lines.append(f"  Mostly our files, needs a port ({len(near)}):")
-    for c in near:
-        lines.append(
-            f"    - {c['remote']} {c['sha'][:8]}  {c['subject'][:80]}"
-            f"  [{c['hit']}/{c['n']} paths]")
+    lines.append(f"  Mostly our files, needs a hand port ({len(near)}):")
+    lines += [line(c, f"  [{c['hit']}/{c['n']} paths]") for c in near]
+if present:
+    lines.append(f"  Already in gamarr, nothing to do ({len(present)}): "
+                 + ", ".join(f"{c['remote']} {c['sha'][:8]}" for c in present))
 if far:
     lines.append(
         f"  Plus {len(far)} commit(s) that are mostly upstream-only paths "
@@ -256,7 +303,9 @@ if far:
 lines.append(
     "Review each: decide whether it is relevant to a game PVR at all, cherry-pick "
     "or port the ones that are, and say which you skipped and why. "
-    "`git show <sha>` has the diff.")
+    "`scripts/upstream-port.sh <remote> <sha>` applies what it can and leaves "
+    "conflict markers for the rest; for a Sonarr commit with a radarr twin, port the "
+    "twin — gamarr's shared files descend from Radarr.")
 
 if not dry_run:
     with open(state_file, 'w') as f:
