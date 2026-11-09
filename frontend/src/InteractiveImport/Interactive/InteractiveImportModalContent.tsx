@@ -63,6 +63,7 @@ import createClientSideCollectionSelector, {
 import { SortCallback } from 'typings/callbacks';
 import { CheckInputChanged } from 'typings/inputs';
 import { SelectStateInputProps } from 'typings/props';
+import formatBytes from 'Utilities/Number/formatBytes';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
@@ -440,6 +441,23 @@ function InteractiveImportModalContent(
     },
     [invalidRowsSelected, setInvalidRowsSelected]
   );
+
+  const { totalDeleteGameFileCount, totalDeleteGameFileSize } = useMemo(() => {
+    return items.reduce(
+      (acc, item) => {
+        if (selectedIds.indexOf(item.id) > -1 && item.gameFileId) {
+          acc.totalDeleteGameFileCount++;
+          acc.totalDeleteGameFileSize += item.size;
+        }
+
+        return acc;
+      },
+      {
+        totalDeleteGameFileCount: 0,
+        totalDeleteGameFileSize: 0,
+      }
+    );
+  }, [items, selectedIds]);
 
   const onDeleteSelectedPress = useCallback(() => {
     setIsConfirmDeleteModalOpen(true);
@@ -921,7 +939,18 @@ function InteractiveImportModalContent(
         isOpen={isConfirmDeleteModalOpen}
         kind={kinds.DANGER}
         title={translate('DeleteSelectedGameFiles')}
-        message={translate('DeleteSelectedGameFilesHelpText')}
+        message={
+          <>
+            <div>{translate('DeleteSelectedGameFilesHelpText')}</div>
+
+            <div className={styles.deleteFilesMessage}>
+              {translate('DeleteSelectedGameFilesCount', {
+                gameFileCount: totalDeleteGameFileCount,
+                size: formatBytes(totalDeleteGameFileSize),
+              })}
+            </div>
+          </>
+        }
         confirmLabel={translate('Delete')}
         onConfirm={onConfirmDelete}
         onCancel={onConfirmDeleteModalClose}

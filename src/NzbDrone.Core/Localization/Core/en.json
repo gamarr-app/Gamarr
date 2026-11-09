@@ -408,6 +408,7 @@
   "DeleteSelectedDownloadClientsMessageText": "Are you sure you want to delete {count} selected download client(s)?",
   "DeleteSelectedGame": "Delete Selected Game",
   "DeleteSelectedGameFiles": "Delete Selected Game Files",
+  "DeleteSelectedGameFilesCount": "{gameFileCount} game files totaling {size}",
   "DeleteSelectedGameFilesHelpText": "Are you sure you want to delete the selected game files?",
   "DeleteSelectedGames": "Delete Selected Games",
   "DeleteSelectedImportListExclusionsMessageText": "Are you sure you want to delete the selected import list exclusions?",

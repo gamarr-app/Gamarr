@@ -3,6 +3,7 @@
 interface CssExports {
   'bulkSelect': string;
   'deleteButton': string;
+  'deleteFilesMessage': string;
   'errorMessage': string;
   'filterContainer': string;
   'filterText': string;

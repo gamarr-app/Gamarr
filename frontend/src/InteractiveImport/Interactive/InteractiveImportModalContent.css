@@ -50,6 +50,11 @@
   color: var(--dangerColor);
 }
 
+.deleteFilesMessage {
+  margin-top: 20px;
+  color: var(--warningColor);
+}
+
 @media only screen and (max-width: $breakpointSmall) {
   .footer {
     .leftButtons,
