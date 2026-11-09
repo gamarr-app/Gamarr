@@ -65,10 +65,7 @@ namespace NzbDrone.Core.Games
             if (newGame.Platform != PlatformFamily.Unknown &&
                 _gameService.GetAllGames().Any(g => g.GameMetadataId == newGame.GameMetadata.Value.Id))
             {
-                var metadataCopy = newGame.GameMetadata.Value.JsonClone();
-                metadataCopy.Id = 0;
-
-                newGame.GameMetadata = _gameMetadataService.Insert(metadataCopy);
+                newGame.GameMetadata = CloneMetadata(newGame.GameMetadata.Value);
             }
 
             newGame.GameMetadataId = newGame.GameMetadata.Value.Id;
@@ -103,6 +100,8 @@ namespace NzbDrone.Core.Games
 
                     game.Added = added;
 
+                    EnsureNotBatchDuplicate(game, gamesToAdd);
+
                     gamesToAdd.Add(game);
                 }
                 catch (ValidationException ex)
@@ -116,10 +115,108 @@ namespace NzbDrone.Core.Games
                 }
             }
 
-            _gameMetadataService.UpsertMany(gamesToAdd.Select(x => x.GameMetadata.Value).ToList());
-            gamesToAdd.ForEach(x => x.GameMetadataId = x.GameMetadata.Value.Id);
+            // UpsertMany matches rows by SteamAppId/IgdbId, so two entries for
+            // the same title would share one metadata row, and
+            // Games.GameMetadataId is unique. Only the first entry of each
+            // title is upserted; later (different-platform) entries get a
+            // cloned row, as in the single-add path.
+            var clonedFrom = new Dictionary<Game, Game>();
 
-            return _gameService.AddGames(gamesToAdd);
+            foreach (var game in gamesToAdd)
+            {
+                var first = gamesToAdd.First(x => ReferenceEquals(x, game) || SameGame(x, game));
+
+                if (!ReferenceEquals(first, game))
+                {
+                    clonedFrom[game] = first;
+                }
+            }
+
+            _gameMetadataService.UpsertMany(gamesToAdd.Where(x => !clonedFrom.ContainsKey(x)).Select(x => x.GameMetadata.Value).ToList());
+
+            var usedMetadataIds = new HashSet<int>();
+            var result = new List<Game>();
+
+            foreach (var game in gamesToAdd)
+            {
+                if (clonedFrom.TryGetValue(game, out var source))
+                {
+                    game.GameMetadata = CloneMetadata(source.GameMetadata.Value);
+                }
+                else
+                {
+                    var metadataId = game.GameMetadata.Value.Id;
+
+                    // The validator only checks paths, so an existing game on
+                    // this metadata row (or an earlier entry in this batch)
+                    // would hit the unique index on insert.
+                    if (metadataId > 0 && (usedMetadataIds.Contains(metadataId) || _gameService.ExistsByMetadataId(metadataId)))
+                    {
+                        if (game.Platform == PlatformFamily.Unknown)
+                        {
+                            var failure = new ValidationException(new List<ValidationFailure>
+                            {
+                                new ValidationFailure("IgdbId", $"'{game.Title}' is already in the library.", game.IgdbId)
+                            });
+
+                            if (!ignoreErrors)
+                            {
+                                throw failure;
+                            }
+
+                            _logger.Debug("IgdbId {0} was not added, the game already exists. {1}", game.IgdbId, failure.Message);
+                            continue;
+                        }
+
+                        game.GameMetadata = CloneMetadata(game.GameMetadata.Value);
+                    }
+                }
+
+                if (game.GameMetadata.Value.Id > 0)
+                {
+                    usedMetadataIds.Add(game.GameMetadata.Value.Id);
+                }
+
+                game.GameMetadataId = game.GameMetadata.Value.Id;
+                result.Add(game);
+            }
+
+            return _gameService.AddGames(result);
+        }
+
+        private GameMetadata CloneMetadata(GameMetadata metadata)
+        {
+            var metadataCopy = metadata.JsonClone();
+            metadataCopy.Id = 0;
+
+            return _gameMetadataService.Insert(metadataCopy);
+        }
+
+        private static bool SameGame(Game a, Game b)
+        {
+            var am = a.GameMetadata.Value;
+            var bm = b.GameMetadata.Value;
+
+            return (am.IgdbId > 0 && am.IgdbId == bm.IgdbId) ||
+                   (am.SteamAppId > 0 && am.SteamAppId == bm.SteamAppId);
+        }
+
+        // Same title in the same batch is only allowed once per platform. An
+        // Unknown platform is platform-agnostic and conflicts with any other.
+        private static void EnsureNotBatchDuplicate(Game game, List<Game> accepted)
+        {
+            var clash = accepted.Any(x => SameGame(x, game) &&
+                                          (x.Platform == game.Platform ||
+                                           x.Platform == PlatformFamily.Unknown ||
+                                           game.Platform == PlatformFamily.Unknown));
+
+            if (clash)
+            {
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new ValidationFailure("IgdbId", $"'{game.Title}' appears more than once in this request for platform {game.Platform}. Path: {game.Path}", game.IgdbId)
+                });
+            }
         }
 
         private Game AddSkyhookData(Game newGame)

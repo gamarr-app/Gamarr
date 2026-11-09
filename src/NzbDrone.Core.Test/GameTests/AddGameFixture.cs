@@ -382,5 +382,159 @@ namespace NzbDrone.Core.Test.GameTests
             Mocker.GetMock<IGameService>()
                   .Verify(s => s.AddGame(It.IsAny<Game>()), Times.Never());
         }
+
+        // Bulk add: Games.GameMetadataId is unique, UpsertMany matches rows by
+        // IgdbId, so two entries for one title used to share a metadata row and
+        // the insert threw "UNIQUE constraint failed: Games.GameMetadataId".
+        private void GivenBatchMocks(params int[] igdbIds)
+        {
+            GivenValidPath();
+
+            foreach (var id in igdbIds)
+            {
+                var igdbId = id;
+
+                Mocker.GetMock<IProvideGameInfo>()
+                      .Setup(s => s.GetGameInfoByIgdbId(igdbId))
+                      .Returns(() => new GameMetadata { IgdbId = igdbId, Title = "Game " + igdbId, Platforms = new List<GamePlatform>() });
+            }
+
+            Mocker.GetMock<IGameMetadataService>()
+                  .Setup(s => s.UpsertMany(It.IsAny<List<GameMetadata>>()))
+                  .Callback<List<GameMetadata>>(list =>
+                  {
+                      foreach (var m in list)
+                      {
+                          m.Id = m.IgdbId * 10;
+                      }
+                  })
+                  .Returns(true);
+
+            var nextCloneId = 9000;
+
+            Mocker.GetMock<IGameMetadataService>()
+                  .Setup(s => s.Insert(It.IsAny<GameMetadata>()))
+                  .Returns<GameMetadata>(m =>
+                  {
+                      m.Id = nextCloneId++;
+                      return m;
+                  });
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.AddGames(It.IsAny<List<Game>>()))
+                  .Returns<List<Game>>(g => g);
+        }
+
+        private static Game BatchGame(int igdbId, PlatformFamily platform, string folder)
+        {
+            return new Game
+            {
+                IgdbId = igdbId,
+                Platform = platform,
+                Path = @"C:\Test\Games\" + folder
+            };
+        }
+
+        [Test]
+        public void should_drop_same_game_same_platform_duplicates_in_a_batch()
+        {
+            GivenBatchMocks(1);
+
+            var result = Subject.AddGames(new List<Game>
+            {
+                BatchGame(1, PlatformFamily.PC, "A"),
+                BatchGame(1, PlatformFamily.PC, "B")
+            }, true);
+
+            result.Should().HaveCount(1);
+            result[0].Path.Should().Be(@"C:\Test\Games\A");
+            result[0].GameMetadataId.Should().Be(10);
+        }
+
+        [Test]
+        public void should_drop_same_game_with_unknown_platform_duplicates_in_a_batch()
+        {
+            GivenBatchMocks(1);
+
+            var result = Subject.AddGames(new List<Game>
+            {
+                BatchGame(1, PlatformFamily.Unknown, "A"),
+                BatchGame(1, PlatformFamily.PC, "B")
+            }, true);
+
+            result.Should().HaveCount(1);
+        }
+
+        [Test]
+        public void should_throw_validation_for_a_same_game_batch_when_not_ignoring_errors()
+        {
+            GivenBatchMocks(1);
+
+            Assert.Throws<ValidationException>(() => Subject.AddGames(new List<Game>
+            {
+                BatchGame(1, PlatformFamily.PC, "A"),
+                BatchGame(1, PlatformFamily.PC, "B")
+            }));
+
+            Mocker.GetMock<IGameService>()
+                  .Verify(s => s.AddGames(It.IsAny<List<Game>>()), Times.Never());
+        }
+
+        [Test]
+        public void should_give_a_cross_platform_batch_entry_its_own_metadata_row()
+        {
+            GivenBatchMocks(1);
+
+            var result = Subject.AddGames(new List<Game>
+            {
+                BatchGame(1, PlatformFamily.PC, "A"),
+                BatchGame(1, PlatformFamily.NintendoSwitch, "B")
+            });
+
+            result.Should().HaveCount(2);
+            result.Select(g => g.GameMetadataId).Should().OnlyHaveUniqueItems();
+            result[0].GameMetadataId.Should().Be(10);
+            result[1].GameMetadataId.Should().Be(9000);
+
+            Mocker.GetMock<IGameMetadataService>()
+                  .Verify(s => s.UpsertMany(It.Is<List<GameMetadata>>(l => l.Count == 1)), Times.Once());
+        }
+
+        [Test]
+        public void should_clone_metadata_when_an_existing_game_already_uses_the_row()
+        {
+            GivenBatchMocks(1);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.ExistsByMetadataId(10))
+                  .Returns(true);
+
+            var result = Subject.AddGames(new List<Game>
+            {
+                BatchGame(1, PlatformFamily.NintendoSwitch, "A")
+            });
+
+            result.Should().HaveCount(1);
+            result[0].GameMetadataId.Should().Be(9000);
+        }
+
+        [Test]
+        public void should_skip_a_platform_agnostic_entry_when_an_existing_game_uses_the_row()
+        {
+            GivenBatchMocks(1, 2);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.ExistsByMetadataId(10))
+                  .Returns(true);
+
+            var result = Subject.AddGames(new List<Game>
+            {
+                BatchGame(1, PlatformFamily.Unknown, "A"),
+                BatchGame(2, PlatformFamily.PC, "B")
+            }, true);
+
+            result.Should().HaveCount(1);
+            result[0].IgdbId.Should().Be(2);
+        }
     }
 }
