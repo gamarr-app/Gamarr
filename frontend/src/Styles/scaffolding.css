@@ -18,6 +18,7 @@ body {
   color: var(--textColor);
   font-family:
     'Roboto', 'open sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-variant-ligatures: none;
 }
 
 body {
