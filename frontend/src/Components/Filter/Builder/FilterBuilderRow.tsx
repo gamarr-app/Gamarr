@@ -276,6 +276,21 @@ function FilterBuilderRow(props: FilterBuilderRowProps) {
     .sort(sortByProp('value'));
 
   const ValueComponent = getRowValueConnector(selectedFilterBuilderProp);
+  const selectedFilterLabel = selectedFilterBuilderProp?.label;
+  const addFilterLabel = translate('AddFilterCondition');
+
+  const filterLabel =
+    typeof selectedFilterLabel === 'function'
+      ? selectedFilterLabel()
+      : selectedFilterLabel;
+
+  const removeFilterLabel = filterLabel
+    ? translate('RemoveFilterConditionWithName', {
+        name: filterLabel,
+        index: index + 1,
+        count: filterCount,
+      })
+    : translate('RemoveFilterCondition');
 
   return (
     <div className={styles.filterRow}>
@@ -325,11 +340,18 @@ function FilterBuilderRow(props: FilterBuilderRowProps) {
       <div className={styles.actionsContainer}>
         <IconButton
           name={icons.SUBTRACT}
+          title={removeFilterLabel}
+          aria-label={removeFilterLabel}
           isDisabled={filterCount === 1}
           onPress={handleRemovePress}
         />
 
-        <IconButton name={icons.ADD} onPress={handleAddPress} />
+        <IconButton
+          name={icons.ADD}
+          title={addFilterLabel}
+          aria-label={addFilterLabel}
+          onPress={handleAddPress}
+        />
       </div>
     </div>
   );

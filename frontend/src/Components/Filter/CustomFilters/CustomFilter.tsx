@@ -67,15 +67,24 @@ function CustomFilter(props: CustomFilterProps) {
     dispatchDeleteCustomFilter({ id });
   }, [id, dispatchDeleteCustomFilter]);
 
+  const editLabel = translate('EditCustomFilterName', { name: label });
+  const removeLabel = translate('RemoveCustomFilterName', { name: label });
+
   return (
     <div className={styles.customFilter}>
       <div className={styles.label}>{label}</div>
 
       <div className={styles.actions}>
-        <IconButton name={icons.EDIT} onPress={handleEditPress} />
+        <IconButton
+          name={icons.EDIT}
+          title={editLabel}
+          aria-label={editLabel}
+          onPress={handleEditPress}
+        />
 
         <SpinnerIconButton
-          title={translate('RemoveFilter')}
+          title={removeLabel}
+          aria-label={removeLabel}
           name={icons.REMOVE}
           isSpinning={isDeleting}
           onPress={handleRemovePress}
