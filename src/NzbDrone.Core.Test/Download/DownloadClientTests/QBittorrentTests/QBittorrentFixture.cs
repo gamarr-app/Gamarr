@@ -408,6 +408,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             result.OutputPath.FullPath.Should().Be(Path.Combine(torrent.SavePath, "Elden.Ring.12"));
         }
 
+        [Test]
         public void missingFiles_item_should_have_required_properties()
         {
             var torrent = new QBittorrentTorrent
