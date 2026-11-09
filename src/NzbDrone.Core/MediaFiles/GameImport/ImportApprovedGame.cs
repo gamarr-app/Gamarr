@@ -221,7 +221,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                 catch (Exception e)
                 {
                     _logger.Warn(e, "Couldn't import game " + localGame);
-                    importResults.Add(new ImportResult(importDecision, "Failed to import game"));
+                    importResults.Add(new ImportResult(importDecision, "Failed to import game", e.Message));
                 }
             }
 
