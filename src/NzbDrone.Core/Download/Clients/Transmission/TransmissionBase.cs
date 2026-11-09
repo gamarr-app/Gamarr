@@ -41,6 +41,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
         {
             var configFunc = new Lazy<TransmissionConfig>(() => _proxy.GetConfig(Settings));
             var torrents = _proxy.GetTorrents(null, Settings);
+            var downloadDirectory = GetDownloadDirectory();
 
             var items = new List<DownloadClientItem>();
 
@@ -48,30 +49,26 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             {
                 var outputPath = new OsPath(torrent.DownloadDir);
 
-                if (Settings.GameCategory.IsNotNullOrWhiteSpace() && SupportsLabels && torrent.Labels is { Count: > 0 })
+                if (Settings.GameCategory.IsNotNullOrWhiteSpace() && SupportsLabels)
                 {
-                    if (!torrent.Labels.Contains(Settings.GameCategory, StringComparer.InvariantCultureIgnoreCase))
+                    // For people who are moving from Transmission 3 -> 4, torrents predating
+                    // labels are still matched by their category subfolder.
+                    if (torrent.Labels is { Count: > 0 })
+                    {
+                        if (!torrent.Labels.Contains(Settings.GameCategory, StringComparer.InvariantCultureIgnoreCase))
+                        {
+                            continue;
+                        }
+                    }
+                    else if (!outputPath.FullPath.Split('\\', '/').Contains(Settings.GameCategory))
                     {
                         continue;
                     }
                 }
-                else
+
+                if (downloadDirectory.IsNotNullOrWhiteSpace() && !new OsPath(downloadDirectory).Contains(outputPath))
                 {
-                    if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
-                    {
-                        if (!new OsPath(Settings.GameDirectory).Contains(outputPath))
-                        {
-                            continue;
-                        }
-                    }
-                    else if (Settings.GameCategory.IsNotNullOrWhiteSpace())
-                    {
-                        var directories = outputPath.FullPath.Split('\\', '/');
-                        if (!directories.Contains(Settings.GameCategory))
-                        {
-                            continue;
-                        }
-                    }
+                    continue;
                 }
 
                 outputPath = _remotePathMappingService.RemapRemoteToLocal(Settings.Host, outputPath);
@@ -189,22 +186,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
         public override DownloadClientInfo GetStatus()
         {
-            string destDir;
-
-            if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
-            {
-                destDir = Settings.GameDirectory;
-            }
-            else
-            {
-                var config = _proxy.GetConfig(Settings);
-                destDir = config.DownloadDir;
-
-                if (Settings.GameCategory.IsNotNullOrWhiteSpace())
-                {
-                    destDir = $"{destDir}/{Settings.GameCategory}";
-                }
-            }
+            var destDir = GetDownloadDirectory() ?? _proxy.GetConfig(Settings).DownloadDir;
 
             return new DownloadClientInfo
             {
@@ -253,6 +235,11 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 return;
             }
 
+            if (!SupportsLabels && Settings.GameCategory.IsNotNullOrWhiteSpace() && Settings.GameDirectory.IsNotNullOrWhiteSpace())
+            {
+                failures.Add(new NzbDroneValidationFailure("GameCategory", "Cannot use Category and Directory"));
+            }
+
             failures.AddIfNotNull(TestGetTorrents());
         }
 
@@ -268,15 +255,12 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 return Settings.GameDirectory;
             }
 
-            if (!Settings.GameCategory.IsNotNullOrWhiteSpace())
+            if (SupportsLabels || Settings.GameCategory.IsNullOrWhiteSpace())
             {
                 return null;
             }
 
-            var config = _proxy.GetConfig(Settings);
-            var destDir = config.DownloadDir;
-
-            return $"{destDir.TrimEnd('/')}/{Settings.GameCategory}";
+            return $"{_proxy.GetConfig(Settings).DownloadDir.TrimEnd('/')}/{Settings.GameCategory}";
         }
 
         protected ValidationFailure TestConnection()

@@ -95,8 +95,12 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public async Task Download_with_category_should_force_directory()
+        public async Task Download_with_category_on_v3_should_force_directory()
         {
+            Mocker.GetMock<ITransmissionProxy>()
+                .Setup(v => v.GetClientVersion(It.IsAny<TransmissionSettings>(), It.IsAny<bool>()))
+                .Returns("3.0.6");
+
             GivenGameCategory();
             GivenSuccessfulDownload();
 
@@ -111,8 +115,66 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public async Task Download_with_category_should_not_have_double_slashes()
+        public void should_not_allow_category_and_directory_on_v3()
         {
+            Mocker.GetMock<ITransmissionProxy>()
+                .Setup(v => v.GetClientVersion(It.IsAny<TransmissionSettings>(), It.IsAny<bool>()))
+                .Returns("3.0.6");
+
+            GivenGameCategory();
+            GivenGameDirectory();
+
+            Subject.Test().IsValid.Should().BeFalse();
+        }
+
+        [Test]
+        public void should_allow_category_and_directory_on_v4()
+        {
+            GivenGameCategory();
+            GivenGameDirectory();
+
+            Subject.Test().IsValid.Should().BeTrue();
+        }
+
+        [Test]
+        public async Task Download_with_category_on_v4_should_not_force_directory()
+        {
+            GivenGameCategory();
+            GivenSuccessfulDownload();
+
+            var remoteGame = CreateRemoteGame();
+
+            var id = await Subject.Download(remoteGame, CreateIndexer());
+
+            id.Should().NotBeNullOrEmpty();
+
+            Mocker.GetMock<ITransmissionProxy>()
+                .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), null, It.IsAny<TransmissionSettings>()), Times.Once());
+        }
+
+        [Test]
+        public async Task Download_with_directory_and_category_on_v4_should_use_directory()
+        {
+            GivenGameDirectory();
+            GivenGameCategory();
+            GivenSuccessfulDownload();
+
+            var remoteGame = CreateRemoteGame();
+
+            var id = await Subject.Download(remoteGame, CreateIndexer());
+
+            id.Should().NotBeNullOrEmpty();
+
+            Mocker.GetMock<ITransmissionProxy>()
+                .Verify(v => v.AddTorrentFromData(It.IsAny<byte[]>(), @"C:/Downloads/Finished/gamarr", It.IsAny<TransmissionSettings>()), Times.Once());
+        }
+
+        [Test]
+        public async Task Download_with_category_on_v3_should_not_have_double_slashes()
+        {
+            Mocker.GetMock<ITransmissionProxy>()
+                .Setup(v => v.GetClientVersion(It.IsAny<TransmissionSettings>(), It.IsAny<bool>()))
+                .Returns("3.0.6");
             GivenGameCategory();
             GivenSuccessfulDownload();
 
@@ -237,7 +299,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public void should_exclude_items_not_in_TvDirectory()
+        public void should_exclude_items_not_in_GameDirectory()
         {
             GivenGameDirectory();
 
