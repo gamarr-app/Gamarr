@@ -34,7 +34,7 @@ namespace Gamarr.Api.V3.Games
         {
             var newGames = resource.ToModel();
 
-            return _addGameService.AddGames(newGames).ToResource(0);
+            return _addGameService.AddGames(newGames, true).ToResource(0);
         }
     }
 }
