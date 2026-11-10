@@ -22,6 +22,35 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
                   .Returns("Some Warning Message");
         }
 
+        [TestCase(@"C:\Gamarr", @"C:\Gamarr")]
+        [TestCase(@"C:\Gamarr", @"C:\Gamarr\data")]
+        public void should_return_error_when_app_data_is_inside_startup_folder(string startupFolder, string appDataFolder)
+        {
+            Mocker.GetMock<IAppFolderInfo>()
+                  .Setup(s => s.StartUpFolder)
+                  .Returns(startupFolder.AsOsAgnostic());
+
+            Mocker.GetMock<IAppFolderInfo>()
+                  .Setup(s => s.AppDataFolder)
+                  .Returns(appDataFolder.AsOsAgnostic());
+
+            Subject.Check().ShouldBeError();
+        }
+
+        [Test]
+        public void should_not_return_error_when_startup_folder_is_inside_app_data()
+        {
+            Mocker.GetMock<IAppFolderInfo>()
+                  .Setup(s => s.StartUpFolder)
+                  .Returns(@"C:\ProgramData\Gamarr\bin".AsOsAgnostic());
+
+            Mocker.GetMock<IAppFolderInfo>()
+                  .Setup(s => s.AppDataFolder)
+                  .Returns(@"C:\ProgramData\Gamarr".AsOsAgnostic());
+
+            Subject.Check().ShouldBeOk();
+        }
+
         [Test]
         public void should_return_error_when_app_folder_is_write_protected_and_update_automatically_is_enabled()
         {

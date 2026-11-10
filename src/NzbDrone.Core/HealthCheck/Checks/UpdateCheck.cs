@@ -43,6 +43,29 @@ namespace NzbDrone.Core.HealthCheck.Checks
         {
             var startupFolder = _appFolderInfo.StartUpFolder;
             var uiFolder = Path.Combine(startupFolder, "UI");
+            var appDataFolder = _appFolderInfo.AppDataFolder;
+
+            // The updater replaces the whole program folder, so InstallUpdateService
+            // refuses when the data folder lives in it. Say so up front, in plain
+            // words, instead of only failing when an update is attempted.
+            if (_configFileProvider.UpdateMechanism == UpdateMechanism.BuiltIn &&
+                !_osInfo.IsDocker &&
+                startupFolder.IsNotNullOrWhiteSpace() &&
+                appDataFolder.IsNotNullOrWhiteSpace() &&
+                (startupFolder.PathEquals(appDataFolder) || startupFolder.IsParentPath(appDataFolder)))
+            {
+                return new HealthCheck(GetType(),
+                    HealthCheckResult.Error,
+                    HealthCheckReason.UpdateAppDataInStartupFolder,
+                    _localizationService.GetLocalizedString(
+                        "UpdateCheckAppDataInStartupFolderMessage",
+                        new Dictionary<string, object>
+                        {
+                            { "appDataFolder", appDataFolder },
+                            { "startupFolder", startupFolder }
+                        }),
+                    "#cannot-install-update-because-the-data-folder-is-inside-the-program-folder");
+            }
 
             if (_configFileProvider.UpdateAutomatically &&
                 _configFileProvider.UpdateMechanism == UpdateMechanism.BuiltIn &&

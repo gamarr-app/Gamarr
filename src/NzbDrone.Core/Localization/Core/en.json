@@ -2108,6 +2108,7 @@
   "UpdateAutomaticallyHelpText": "Automatically download and install updates. You will still be able to install from System: Updates",
   "UpdateAvailableDockerHealthCheckMessage": "New update is available: {version} (currently running {currentVersion}, {versionsBehind} release(s) behind). This container does not auto-update - pull the new image to upgrade: Watchtower, the Unraid Community Applications updater, or `docker compose pull && docker compose up -d`.",
   "UpdateAvailableHealthCheckMessage": "New update is available: {version} (currently running {currentVersion}, {versionsBehind} release(s) behind). Go to System > Updates to install it.",
+  "UpdateCheckAppDataInStartupFolderMessage": "Gamarr can't update itself because its data folder '{appDataFolder}' is inside its program folder '{startupFolder}'. An update replaces the program folder, which would delete your settings and database. Move the program files to a folder of their own, or reinstall with the Windows installer, then update again.",
   "UpdateCheckStartupNotWritableMessage": "Cannot install update because startup folder '{startupFolder}' is not writable by the user '{userName}'.",
   "UpdateCheckStartupTranslocationMessage": "Cannot install update because startup folder '{startupFolder}' is in an App Translocation folder.",
   "UpdateCheckUINotWritableMessage": "Cannot install update because UI folder '{uiFolder}' is not writable by the user '{userName}'.",

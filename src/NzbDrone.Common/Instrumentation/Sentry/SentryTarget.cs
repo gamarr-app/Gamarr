@@ -130,6 +130,7 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // installer's \bin). The updater refuses on purpose and the UI shows
             // the reason; it's the user's layout, not a code fault.
             "which will cause data lost during the upgrade",
+            "An update replaces the program folder, which would delete your settings",
 
             // Environmental network failures reaching download clients/indexers
             // (service down, host renamed, DNS broken) — user setup, not code.

@@ -227,7 +227,7 @@ namespace NzbDrone.Core.Update
             if (_appFolderInfo.StartUpFolder.IsParentPath(_appFolderInfo.AppDataFolder) ||
                 _appFolderInfo.StartUpFolder.PathEquals(_appFolderInfo.AppDataFolder))
             {
-                throw new UpdateFailedException("Your Gamarr configuration '{0}' is being stored in application folder '{1}' which will cause data lost during the upgrade. Please remove any symlinks or redirects before trying again.", _appFolderInfo.AppDataFolder, _appFolderInfo.StartUpFolder);
+                throw new UpdateFailedException("Gamarr can't update itself because its data folder '{0}' is inside its program folder '{1}'. An update replaces the program folder, which would delete your settings and database. Move the program files to a folder of their own, or reinstall with the Windows installer, then update again.", _appFolderInfo.AppDataFolder, _appFolderInfo.StartUpFolder);
             }
         }
 
