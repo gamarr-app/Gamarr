@@ -125,6 +125,12 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             // Fix openflixr being stupid with permissions
             "openflixr",
 
+            // Windows install with Gamarr's binaries inside its own data folder
+            // (e.g. the zip extracted into C:\ProgramData\Gamarr rather than the
+            // installer's \bin). The updater refuses on purpose and the UI shows
+            // the reason; it's the user's layout, not a code fault.
+            "which will cause data lost during the upgrade",
+
             // Environmental network failures reaching download clients/indexers
             // (service down, host renamed, DNS broken) — user setup, not code.
             "Connection refused",
