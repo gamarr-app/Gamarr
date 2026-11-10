@@ -116,6 +116,15 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Proxies
                 else
                 {
                     var msg = $"Failed to {operation}. Reason: {responseContent.Error.GetMessage(api)}";
+
+                    // Login rejected by the DiskStation (wrong password, 2-step code
+                    // required, blocked IP...): the user's credentials, not a bug.
+                    if (api == DiskStationApi.Auth && responseContent.Error.Code >= 400 && responseContent.Error.Code < 500)
+                    {
+                        _logger.Warn(msg);
+                        throw new DownloadClientAuthenticationException(msg);
+                    }
+
                     _logger.Error(msg);
 
                     if (responseContent.Error.SessionError)

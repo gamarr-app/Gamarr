@@ -440,7 +440,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
                 return $"{destDir.TrimEnd('/')}/{Settings.TvCategory}";
             }
 
-            return destDir.TrimEnd('/');
+            return destDir?.TrimEnd('/');
         }
     }
 }
