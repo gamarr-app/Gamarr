@@ -177,7 +177,26 @@ namespace NzbDrone.Common.Disk
         {
             Ensure.That(path, () => path).IsValidPath(PathValidationType.CurrentOs);
 
-            return GetFiles(path, true).Sum(e => new FileInfo(e).Length);
+            return GetFiles(path, true).Sum(GetLengthOrZero);
+        }
+
+        // A file can vanish between enumeration and the stat (moved, deleted,
+        // an installer cleaning up) or be a broken symlink. One such file must
+        // not fail the size of the whole folder, and with it the disk scan.
+        private static long GetLengthOrZero(string file)
+        {
+            try
+            {
+                return new FileInfo(file).Length;
+            }
+            catch (FileNotFoundException)
+            {
+                return 0;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;
+            }
         }
 
         public long GetFileSize(string path)
