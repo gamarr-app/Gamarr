@@ -53,6 +53,9 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game Title 2023 Game Boy Color USA ROM", PlatformFamily.NintendoGBC, "GBC")]
         [TestCase("Game Title 2023 GB USA ROM", PlatformFamily.NintendoGB, "GB")]
         [TestCase("Game Title 2023 Game Boy USA ROM", PlatformFamily.NintendoGB, "GB")]
+        [TestCase("Pokemon Red (GB)", PlatformFamily.NintendoGB, "GB")]
+        [TestCase("Pokemon Red [GB]", PlatformFamily.NintendoGB, "GB")]
+        [TestCase("Pokemon Red (GB) (From 1 MB)", PlatformFamily.NintendoGB, "GB")]
         public void should_parse_nintendo_platform(string postTitle, PlatformFamily expectedFamily, string expectedString)
         {
             var result = PlatformParser.ParsePlatform(postTitle);
@@ -90,6 +93,12 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Game Title 2023 GOG")]
         [TestCase("Game.Title.2023.FitGirl.Repack")]
         [TestCase("Game Title (2023) MULTI5")]
+        [TestCase("Cyberpunk 2077 - Ultimate Edition (v2.3 + All DLCs + Dev Tools + Bonus Content + MULTi19) (From 71.1 GB) (Ultra-Fast Install) [DODI Repack]")]
+        [TestCase("Game Title (From 4.2 GB) [DODI Repack]")]
+        [TestCase("Game Title (71GB) Repack")]
+        [TestCase("Game Title 71 GB Repack")]
+        [TestCase("Game Title 1,5 GB Repack")]
+        [TestCase("Game Title 12 XB Repack")]
         public void should_return_unknown_for_pc_releases(string postTitle)
         {
             var result = PlatformParser.ParsePlatform(postTitle);

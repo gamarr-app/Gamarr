@@ -469,6 +469,25 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
 
                 var file = message.Files[i];
                 var game = _gameService.GetGame(file.GameId);
+
+                // The item can vanish between listing and import (an earlier item
+                // moved it, or the download client cleaned up). Skip just this
+                // one instead of letting the exception abort the whole batch.
+                if (!_diskProvider.FolderExists(file.Path) && !_diskProvider.FileExists(file.Path))
+                {
+                    var missingMessage = $"File no longer exists: {file.Path}";
+
+                    _logger.Warn(missingMessage);
+
+                    imported.Add(new ImportResult(
+                        new ImportDecision(
+                            new LocalGame { Path = file.Path, Game = game },
+                            new ImportRejection(ImportRejectionReason.InvalidFilePath, missingMessage)),
+                        missingMessage));
+
+                    continue;
+                }
+
                 var fileGameInfo = Parser.Parser.ParseGamePath(file.Path) ?? new ParsedGameInfo();
 
                 // user-chosen ?? item's own name (via ParseManualVersion) ??
