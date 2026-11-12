@@ -11,9 +11,10 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Needed by GenerateResourceUsePreserializedResources. SDK 11 (which global.json's
-         latestMajor roll-forward picks up on GitHub's dependency-submission runner) calls it
-         in-box for net10.0-windows and fails restore with NU1510; SDK 10 still wants it. -->
-    <PackageReference Include="System.Resources.Extensions" Version="10.0.14" NoWarn="NU1510" />
+         latestMajor roll-forward picks up on GitHub's dependency-submission runner) ships it
+         in-box for net10.0-windows and fails restore with NU1510 (per-reference NoWarn is not
+         honoured for it), so only reference it on older SDKs, which still need it. -->
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.14" Condition="$([MSBuild]::VersionLessThan('$(NETCoreSdkVersion)', '11.0'))" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NzbDrone.Host\Gamarr.Host.csproj" />
