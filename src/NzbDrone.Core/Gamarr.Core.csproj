@@ -23,7 +23,7 @@
          "Please obtain a license from https://sixlabors.com/pricing/". 3.1.12 is
          the last version that builds without a paid licence key, so decline any
          bump of this reference, minor ones included. -->
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NLog" Version="6.2.2" />
     <PackageReference Include="MonoTorrent" Version="3.0.2" />
