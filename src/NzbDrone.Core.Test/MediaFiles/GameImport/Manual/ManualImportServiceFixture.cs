@@ -93,6 +93,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Manual
 
             Mocker.GetMock<IImportApprovedGame>()
                   .Verify(v => v.Import(It.Is<List<ImportDecision>>(d => d.Single().LocalGame.Path == present), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]

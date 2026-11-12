@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex XboxRegex = new Regex(
-            @"\bXbox\b|(?<!\d[.,]?\d*\s*)\bXB\b|\[(?:Xbox|XB)\]",
+            @"\bXbox\b|(?<!(?<!\d)\d{1,3}(?:[.,]\d+)?\s*)\bXB\b|\[(?:Xbox|XB)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Nintendo platforms
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex NintendoGBRegex = new Regex(
-            @"(?<!\d[.,]?\d*\s*)\bGB\b|\b(?:Game\s*Boy|Nintendo\s*Game\s*Boy)\b|\[(?:GB|Game\s*Boy|Nintendo\s*Game\s*Boy)\]",
+            @"(?<!(?<!\d)\d{1,3}(?:[.,]\d+)?\s*)\bGB\b|\b(?:Game\s*Boy|Nintendo\s*Game\s*Boy)\b|\[(?:GB|Game\s*Boy|Nintendo\s*Game\s*Boy)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // PC/Mac/Linux platforms
