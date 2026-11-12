@@ -10,7 +10,10 @@
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Resources.Extensions" Version="10.0.14" />
+    <!-- Needed by GenerateResourceUsePreserializedResources. SDK 11 (which global.json's
+         latestMajor roll-forward picks up on GitHub's dependency-submission runner) calls it
+         in-box for net10.0-windows and fails restore with NU1510; SDK 10 still wants it. -->
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.14" NoWarn="NU1510" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NzbDrone.Host\Gamarr.Host.csproj" />
