@@ -403,6 +403,15 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             }
             catch (Exception ex)
             {
+                if (ex.InnerException is HttpException { Response.StatusCode: System.Net.HttpStatusCode.NotFound })
+                {
+                    _logger.Warn("SABnzbd API not found at the configured address: {0}", ex.Message);
+                    return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientSabnzbdValidationApiNotFound"))
+                    {
+                        DetailedDescription = ex.Message
+                    };
+                }
+
                 _logger.Error(ex, ex.Message);
                 return new NzbDroneValidationFailure("Host", _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect", new Dictionary<string, object> { { "clientName", Name } }))
                        {

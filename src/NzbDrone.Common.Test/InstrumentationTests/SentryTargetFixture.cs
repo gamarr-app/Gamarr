@@ -200,6 +200,33 @@ namespace NzbDrone.Common.Test.InstrumentationTests
             _subject.IsSentryMessage(log).Should().BeTrue();
         }
 
+        [TestCase(HttpStatusCode.BadRequest)]
+        [TestCase(HttpStatusCode.NotFound)]
+        [TestCase(HttpStatusCode.MethodNotAllowed)]
+        public void should_filter_event_for_4xx_from_download_client(HttpStatusCode statusCode)
+        {
+            var ex = new DownloadClientException("Unable to connect to SABnzbd", GivenHttpException(statusCode));
+            var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_download_client_exception_without_http_cause()
+        {
+            var ex = new DownloadClientException("Unexpected response", new InvalidOperationException("boom"));
+            var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeTrue();
+        }
+
+        // Stand-in: the filter matches on type name, and this project can't reference Core.
+        private class DownloadClientException : Exception
+        {
+            public DownloadClientException(string message, Exception inner)
+                : base(message, inner)
+            {
+            }
+        }
+
         [Test]
         public void should_filter_event_for_wrapped_http_exception_caused_by_user_configuration()
         {

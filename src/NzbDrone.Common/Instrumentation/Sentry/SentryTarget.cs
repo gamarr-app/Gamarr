@@ -452,8 +452,27 @@ namespace NzbDrone.Common.Instrumentation.Sentry
 
                         // Check the whole inner exception chain so filtered exceptions
                         // wrapped by e.g. ReleaseDownloadException are still filtered
+                        var wrappedByDownloadClient = false;
+
                         for (var inner = ex; inner != null; inner = inner.InnerException)
                         {
+                            if (inner.GetType().Name == "DownloadClientException")
+                            {
+                                wrappedByDownloadClient = true;
+                            }
+
+                            // A 4xx (404 wrong URL Base, 400, 405...) from the user's own download
+                            // client is a misconfigured host/port/URL Base, not a Gamarr bug.
+                            if (wrappedByDownloadClient &&
+                                inner is HttpException clientHttpEx &&
+                                clientHttpEx.Response != null &&
+                                (int)clientHttpEx.Response.StatusCode >= 400 &&
+                                (int)clientHttpEx.Response.StatusCode < 500)
+                            {
+                                isSentry = false;
+                                break;
+                            }
+
                             if (FilteredExceptionTypeNames.Contains(inner.GetType().Name))
                             {
                                 isSentry = false;

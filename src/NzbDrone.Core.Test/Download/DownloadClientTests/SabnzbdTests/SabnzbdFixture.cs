@@ -544,6 +544,25 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         }
 
         [Test]
+        public void should_return_api_not_found_failure_and_only_warn_on_404()
+        {
+            var request = new NzbDrone.Common.Http.HttpRequest("http://192.168.99.11:8080/api?mode=version");
+            var response = new NzbDrone.Common.Http.HttpResponse(request, new NzbDrone.Common.Http.HttpHeader(), string.Empty, System.Net.HttpStatusCode.NotFound);
+            var httpEx = new NzbDrone.Common.Http.HttpException(request, response);
+
+            Mocker.GetMock<ISabnzbdProxy>()
+                  .Setup(v => v.GetVersion(It.IsAny<SabnzbdSettings>()))
+                  .Throws(new DownloadClientException("Unable to connect to SABnzbd, {0}", httpEx, httpEx.Message));
+
+            var result = new NzbDroneValidationResult(Subject.Test());
+
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().ContainSingle(e => e.PropertyName == "Host");
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
         public void should_test_develop_version_successfully()
         {
             Mocker.GetMock<ISabnzbdProxy>()
