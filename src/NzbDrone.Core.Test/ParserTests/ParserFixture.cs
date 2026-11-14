@@ -122,6 +122,9 @@ namespace NzbDrone.Core.Test.ParserTests
         // Scene releases with hyphenated groups
         [TestCase("ELDEN RING-PLAZA", "ELDEN RING")]
         [TestCase("ELDEN RING Shadow of the Erdtree-RUNE", "ELDEN RING Shadow of the Erdtree")]
+
+        // Asterisks are stripped before matching, so the title offsets don't fit the raw name
+        [TestCase("Super Mario 64 3D *Full*", "Super Mario 64 3D Full")]
         public void should_parse_game_title(string postTitle, string title)
         {
             Parser.Parser.ParseGameTitle(postTitle).PrimaryGameTitle.Should().Be(title);

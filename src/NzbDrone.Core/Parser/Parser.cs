@@ -753,10 +753,18 @@ namespace NzbDrone.Core.Parser
 
                                 if (simpleTitleReplaceString.IsNotNullOrWhiteSpace())
                                 {
-                                    if (match[0].Groups["title"].Success)
+                                    var titleGroup = match[0].Groups["title"];
+
+                                    // The match ran on simpleTitle, which has had characters
+                                    // stripped or replaced ("*Full*" loses its asterisks), so
+                                    // its offsets only apply here when the text lines up.
+                                    // Otherwise fall back to a plain replace.
+                                    if (titleGroup.Success &&
+                                        titleGroup.Index + titleGroup.Length <= simpleReleaseTitle.Length &&
+                                        string.CompareOrdinal(simpleReleaseTitle, titleGroup.Index, titleGroup.Value, 0, titleGroup.Length) == 0)
                                     {
-                                        simpleReleaseTitle = simpleReleaseTitle.Remove(match[0].Groups["title"].Index, match[0].Groups["title"].Length)
-                                                                               .Insert(match[0].Groups["title"].Index, simpleTitleReplaceString.Contains('.') ? "A.Game" : "A Game");
+                                        simpleReleaseTitle = simpleReleaseTitle.Remove(titleGroup.Index, titleGroup.Length)
+                                                                               .Insert(titleGroup.Index, simpleTitleReplaceString.Contains('.') ? "A.Game" : "A Game");
                                     }
                                     else
                                     {
