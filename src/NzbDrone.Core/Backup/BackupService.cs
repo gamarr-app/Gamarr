@@ -28,6 +28,8 @@ namespace NzbDrone.Core.Backup
 
     public class BackupService : IBackupService, IExecute<BackupCommand>
     {
+        private static readonly object BackupLock = new object();
+
         private readonly IMainDatabase _maindDb;
         private readonly IMakeDatabaseBackup _makeDatabaseBackup;
         private readonly IDiskTransferService _diskTransferService;
@@ -63,6 +65,15 @@ namespace NzbDrone.Core.Backup
         }
 
         public void Backup(BackupType backupType)
+        {
+            // The update installer calls this directly, outside the command queue, so serialise here as well.
+            lock (BackupLock)
+            {
+                BackupInternal(backupType);
+            }
+        }
+
+        private void BackupInternal(BackupType backupType)
         {
             _logger.ProgressInfo("Starting Backup");
 

@@ -325,5 +325,12 @@ namespace NzbDrone.Core.Test.Backup
 
             result.Should().BeEmpty();
         }
+
+        [Test]
+        public void backup_command_should_be_type_exclusive()
+        {
+            // Concurrent backups share one temp folder; a second run's cleanup hit files the first was still zipping.
+            new BackupCommand().IsTypeExclusive.Should().BeTrue();
+        }
     }
 }

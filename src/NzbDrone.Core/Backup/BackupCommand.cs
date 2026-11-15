@@ -20,6 +20,9 @@ namespace NzbDrone.Core.Backup
         public override bool SendUpdatesToClient => true;
 
         public override bool UpdateScheduledTask => Type == BackupType.Scheduled;
+
+        // Every backup shares one temp folder, so a second run's cleanup would delete files the first is still zipping.
+        public override bool IsTypeExclusive => true;
     }
 
     public enum BackupType
