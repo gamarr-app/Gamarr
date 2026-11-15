@@ -284,6 +284,20 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             return decisions.Select(decision => MapItem(decision, rootFolder, downloadId, directoryInfo.Name)).ToList();
         }
 
+        private Game TryGetGame(string title)
+        {
+            try
+            {
+                return _parsingService.GetGame(title);
+            }
+            catch (MultipleGamesFoundException e)
+            {
+                _logger.Warn(e, "Unable to match game by title");
+
+                return null;
+            }
+        }
+
         private ManualImportItem ProcessFile(string rootFolder, string baseFolder, string file, string downloadId, Game game = null)
         {
             try
@@ -293,12 +307,12 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
 
                 if (game == null)
                 {
-                    game = _parsingService.GetGame(relativeFile.Split('\\', '/')[0]);
+                    game = TryGetGame(relativeFile.Split('\\', '/')[0]);
                 }
 
                 if (game == null)
                 {
-                    game = _parsingService.GetGame(relativeFile);
+                    game = TryGetGame(relativeFile);
                 }
 
                 if (trackedDownload != null && game == null)

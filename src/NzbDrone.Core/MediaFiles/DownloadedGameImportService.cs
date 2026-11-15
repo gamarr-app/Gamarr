@@ -168,7 +168,21 @@ namespace NzbDrone.Core.MediaFiles
         private List<ImportResult> ProcessFolder(DirectoryInfo directoryInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
         {
             var cleanedUpName = GetCleanedUpFolderName(directoryInfo.Name);
-            var game = _parsingService.GetGame(cleanedUpName);
+            Game game;
+
+            try
+            {
+                game = _parsingService.GetGame(cleanedUpName);
+            }
+            catch (MultipleGamesFoundException e)
+            {
+                _logger.Warn(e, "Unable to match folder {0} to a single game", cleanedUpName);
+
+                return new List<ImportResult>
+                       {
+                           UnknownGameResult(string.Format("Found multiple games matching folder: {0}", string.Join(", ", e.Games)))
+                       };
+            }
 
             if (game == null)
             {
@@ -321,7 +335,21 @@ namespace NzbDrone.Core.MediaFiles
 
         private List<ImportResult> ProcessFile(FileInfo fileInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
         {
-            var game = _parsingService.GetGame(Path.GetFileNameWithoutExtension(fileInfo.Name));
+            Game game;
+
+            try
+            {
+                game = _parsingService.GetGame(Path.GetFileNameWithoutExtension(fileInfo.Name));
+            }
+            catch (MultipleGamesFoundException e)
+            {
+                _logger.Warn(e, "Unable to match file {0} to a single game", fileInfo.Name);
+
+                return new List<ImportResult>
+                       {
+                           UnknownGameResult(string.Format("Found multiple games matching file: {0}", string.Join(", ", e.Games)), fileInfo.FullName)
+                       };
+            }
 
             if (game == null)
             {

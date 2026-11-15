@@ -178,6 +178,50 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             AssertNotReadyToImport();
         }
 
+        private void GivenMultipleGamesMatch()
+        {
+            var games = new List<Game> { new Game { Id = 1 }, new Game { Id = 2 } };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.GetGame("Cyberpunk.2077.v2.1-CODEX"))
+                  .Throws(new MultipleGamesFoundException(games, "Expected one game, but found {0}", games.Count));
+        }
+
+        [Test]
+        public void should_use_history_game_when_multiple_games_match_the_title()
+        {
+            _trackedDownload.DownloadItem.DownloadId = "1234";
+            GivenMultipleGamesMatch();
+
+            Mocker.GetMock<IHistoryService>()
+                  .Setup(s => s.FindByDownloadId("1234"))
+                  .Returns(new List<GameHistory>
+                  {
+                      new GameHistory { GameId = 2, EventType = GameHistoryEventType.Grabbed, Data = new Dictionary<string, string>() }
+                  });
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindGame(2))
+                  .Returns(new Game { Id = 2 });
+
+            Subject.Check(_trackedDownload);
+
+            AssertReadyToImport();
+        }
+
+        [Test]
+        public void should_block_import_when_multiple_games_match_and_there_is_no_history()
+        {
+            _trackedDownload.DownloadItem.Category = "games";
+            GivenNoGrabbedHistory();
+            GivenMultipleGamesMatch();
+
+            Subject.Check(_trackedDownload);
+
+            AssertNotReadyToImport();
+            _trackedDownload.State.Should().Be(TrackedDownloadState.ImportBlocked);
+        }
+
         private void AssertNotReadyToImport()
         {
             _trackedDownload.State.Should().NotBe(TrackedDownloadState.ImportPending);

@@ -86,7 +86,24 @@ namespace NzbDrone.Core.Download
                 return;
             }
 
-            var game = _parsingService.GetGame(trackedDownload.DownloadItem.Title);
+            Game game = null;
+
+            try
+            {
+                game = _parsingService.GetGame(trackedDownload.DownloadItem.Title);
+            }
+            catch (MultipleGamesFoundException e)
+            {
+                // The same title can exist once per platform. The grab history's
+                // game id is authoritative when we have it.
+                if (historyItem == null)
+                {
+                    trackedDownload.Warn("Unable to import automatically, found multiple games: {0}", string.Join(", ", e.Games));
+                    SetStateToImportBlocked(trackedDownload);
+
+                    return;
+                }
+            }
 
             if (game == null)
             {
