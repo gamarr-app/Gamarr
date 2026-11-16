@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 throw new NotImplementedException();
             }
 
-            public override void OnDownload(DownloadMessage downloadMessage)
+            public override void OnDownload(DownloadMessage message)
             {
                 TestLogger.Info("OnDownload was called");
             }
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnGameAdded was called");
             }
 
-            public override void OnGameFileDelete(GameFileDeleteMessage message)
+            public override void OnGameFileDelete(GameFileDeleteMessage deleteMessage)
             {
                 TestLogger.Info("OnGameFileDelete was called");
             }
@@ -78,12 +78,12 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnGameDelete was called");
             }
 
-            public override void OnHealthIssue(NzbDrone.Core.HealthCheck.HealthCheck artist)
+            public override void OnHealthIssue(NzbDrone.Core.HealthCheck.HealthCheck healthCheck)
             {
                 TestLogger.Info("OnHealthIssue was called");
             }
 
-            public override void OnHealthRestored(Core.HealthCheck.HealthCheck healthCheck)
+            public override void OnHealthRestored(Core.HealthCheck.HealthCheck previousCheck)
             {
                 TestLogger.Info("OnHealthRestored was called");
             }

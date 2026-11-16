@@ -311,7 +311,8 @@ namespace NzbDrone.Core.Test.Blocklisting
 
             Mocker.GetMock<IBlocklistRepository>()
                   .Verify(v => v.Insert(It.Is<Blocklist>(b =>
-                      b.TorrentInfoHash == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")), Times.Once());
+                      b.TorrentInfoHash == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")),
+                      Times.Once());
         }
 
         [Test]
@@ -328,7 +329,8 @@ namespace NzbDrone.Core.Test.Blocklisting
 
             Mocker.GetMock<IBlocklistRepository>()
                   .Verify(v => v.Insert(It.Is<Blocklist>(b =>
-                      b.TorrentInfoHash == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")), Times.Once());
+                      b.TorrentInfoHash == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")),
+                      Times.Once());
         }
 
         [Test]
@@ -342,7 +344,8 @@ namespace NzbDrone.Core.Test.Blocklisting
 
             Mocker.GetMock<IBlocklistRepository>()
                   .Verify(v => v.Insert(It.Is<Blocklist>(b =>
-                      b.TorrentInfoHash == "AAAABBBBCCCCDDDDEEEEFFFF00001111222233334")), Times.Once());
+                      b.TorrentInfoHash == "AAAABBBBCCCCDDDDEEEEFFFF00001111222233334")),
+                      Times.Once());
         }
 
         [Test]
@@ -384,7 +387,8 @@ namespace NzbDrone.Core.Test.Blocklisting
                       b.GameId == 1 &&
                       b.SourceTitle == _torrentInfo.Title &&
                       b.TorrentInfoHash == _torrentInfo.InfoHash &&
-                      b.Message == "Test message")), Times.Once());
+                      b.Message == "Test message")),
+                      Times.Once());
         }
 
         [Test]

@@ -444,7 +444,8 @@ namespace NzbDrone.Core.Test.GameTests
             {
                 BatchGame(1, PlatformFamily.PC, "A"),
                 BatchGame(1, PlatformFamily.PC, "B")
-            }, true);
+            },
+            true);
 
             result.Should().HaveCount(1);
             result[0].Path.Should().Be(@"C:\Test\Games\A");
@@ -460,7 +461,8 @@ namespace NzbDrone.Core.Test.GameTests
             {
                 BatchGame(1, PlatformFamily.Unknown, "A"),
                 BatchGame(1, PlatformFamily.PC, "B")
-            }, true);
+            },
+            true);
 
             result.Should().HaveCount(1);
         }
@@ -531,7 +533,8 @@ namespace NzbDrone.Core.Test.GameTests
             {
                 BatchGame(1, PlatformFamily.Unknown, "A"),
                 BatchGame(2, PlatformFamily.PC, "B")
-            }, true);
+            },
+            true);
 
             result.Should().HaveCount(1);
             result[0].IgdbId.Should().Be(2);

@@ -44,7 +44,8 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.Push(
                       It.Is<GamesSearchCommand>(c => c.GameIds.Contains(_game.Id)),
                       CommandPriority.Normal,
-                      CommandTrigger.Unspecified), Times.Once());
+                      CommandTrigger.Unspecified),
+                      Times.Once());
         }
 
         [Test]
@@ -58,7 +59,8 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.Push(
                       It.IsAny<GamesSearchCommand>(),
                       It.IsAny<CommandPriority>(),
-                      It.IsAny<CommandTrigger>()), Times.Never());
+                      It.IsAny<CommandTrigger>()),
+                      Times.Never());
         }
 
         [Test]
@@ -76,7 +78,8 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.Push(
                       It.IsAny<GamesSearchCommand>(),
                       It.IsAny<CommandPriority>(),
-                      It.IsAny<CommandTrigger>()), Times.Never());
+                      It.IsAny<CommandTrigger>()),
+                      Times.Never());
         }
 
         [Test]
@@ -174,7 +177,8 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.Push(
                       It.Is<GamesSearchCommand>(c => c.GameIds.Contains(_game.Id)),
                       CommandPriority.Normal,
-                      CommandTrigger.Unspecified), Times.Once());
+                      CommandTrigger.Unspecified),
+                      Times.Once());
         }
     }
 }

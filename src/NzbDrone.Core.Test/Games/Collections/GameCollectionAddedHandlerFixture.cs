@@ -34,7 +34,8 @@ namespace NzbDrone.Core.Test.Games.Collections
                   .Verify(v => v.Push(
                       It.Is<RefreshCollectionsCommand>(c => c.CollectionIds.Contains(_collection.Id)),
                       CommandPriority.Normal,
-                      CommandTrigger.Unspecified), Times.Once());
+                      CommandTrigger.Unspecified),
+                      Times.Once());
         }
 
         [Test]
@@ -48,7 +49,8 @@ namespace NzbDrone.Core.Test.Games.Collections
                   .Verify(v => v.Push(
                       It.Is<RefreshCollectionsCommand>(c => c.CollectionIds.Count == 1 && c.CollectionIds[0] == 55),
                       CommandPriority.Normal,
-                      CommandTrigger.Unspecified), Times.Once());
+                      CommandTrigger.Unspecified),
+                      Times.Once());
         }
     }
 }
