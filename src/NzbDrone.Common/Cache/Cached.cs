@@ -84,7 +84,7 @@ namespace NzbDrone.Common.Cache
         {
             Ensure.That(key, () => key).IsNotNullOrWhiteSpace();
 
-            lifeTime = lifetime ?? _defaultLifeTime;
+            lifeTime = lifeTime ?? _defaultLifeTime;
 
             if (_store.TryGetValue(key, out var cacheItem) && !cacheItem.IsExpired())
             {
