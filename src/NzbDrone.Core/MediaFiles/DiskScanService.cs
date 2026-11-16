@@ -465,7 +465,7 @@ namespace NzbDrone.Core.MediaFiles
         // their own components (#149). Only VERSIONED update-style names are
         // touched — a bare "patch"/"DLC" folder is often integral game content
         // and must not be relocated.
-        private static readonly Regex NestedUpdateFolderRegex = new (@"^(update|patch|hotfix)e?s?(?=[\s._-]|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex NestedUpdateFolderRegex = new(@"^(update|patch|hotfix)e?s?(?=[\s._-]|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private void NormalizeNestedUpdateFolders(Game game)
         {

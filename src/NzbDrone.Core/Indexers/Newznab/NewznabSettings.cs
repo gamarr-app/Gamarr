@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             return settings.BaseUrl != null && ApiKeyWhiteList.Any(c => settings.BaseUrl.ToLowerInvariant().Contains(c));
         }
 
-        private static readonly Regex AdditionalParametersRegex = new (@"(&.+?\=.+?)+", RegexOptions.NonBacktracking);
+        private static readonly Regex AdditionalParametersRegex = new(@"(&.+?\=.+?)+", RegexOptions.NonBacktracking);
 
         public NewznabSettingsValidator()
         {
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Indexers.Newznab
 
     public class NewznabSettings : PropertywiseEquatable<NewznabSettings>, IIndexerSettings
     {
-        private static readonly NewznabSettingsValidator Validator = new ();
+        private static readonly NewznabSettingsValidator Validator = new();
 
         public NewznabSettings()
         {

@@ -12,62 +12,62 @@ namespace NzbDrone.Core.Parser
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(QualityParser));
 
         // Scene groups - most common game scene release groups
-        private static readonly Regex SceneGroupRegex = new (@"\b(?<scene>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE)\b",
+        private static readonly Regex SceneGroupRegex = new(@"\b(?<scene>CODEX|PLAZA|SKIDROW|CPY|EMPRESS|FLT|DOGE|HOODLUM|RAZOR1911|RELOADED|PROPHET|DARKSiDERS|TiNYiSO|CHRONOS|SiMPLEX|ALI213|3DM|STEAMPUNKS|FCKDRM|ANOMALY|RUNE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Cracked indicators
-        private static readonly Regex CrackedRegex = new (@"\b(?<cracked>CRACKED|CRACK[\s._-]?ONLY|CRACK[\s._-]?FIX|NO[\s._-]?DRM)\b",
+        private static readonly Regex CrackedRegex = new(@"\b(?<cracked>CRACKED|CRACK[\s._-]?ONLY|CRACK[\s._-]?FIX|NO[\s._-]?DRM)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // GOG releases
-        private static readonly Regex GOGRegex = new (@"\b(?<gog>GOG(?:[._-]?RIP)?)\b",
+        private static readonly Regex GOGRegex = new(@"\b(?<gog>GOG(?:[._-]?RIP)?)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Steam releases
-        private static readonly Regex SteamRegex = new (@"\b(?<steam>STEAM[\s._-]?RIP|STEAM[\s._-]?UNLOCKED)\b",
+        private static readonly Regex SteamRegex = new(@"\b(?<steam>STEAM[\s._-]?RIP|STEAM[\s._-]?UNLOCKED)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Epic Games releases
-        private static readonly Regex EpicRegex = new (@"\b(?<epic>EPIC[\s._-]?(?:GAMES)?[\s._-]?RIP)\b",
+        private static readonly Regex EpicRegex = new(@"\b(?<epic>EPIC[\s._-]?(?:GAMES)?[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Origin/EA releases
-        private static readonly Regex OriginRegex = new (@"\b(?<origin>ORIGIN[\s._-]?RIP|EA[\s._-]?(?:APP)?[\s._-]?RIP)\b",
+        private static readonly Regex OriginRegex = new(@"\b(?<origin>ORIGIN[\s._-]?RIP|EA[\s._-]?(?:APP)?[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Uplay/Ubisoft Connect releases
-        private static readonly Regex UplayRegex = new (@"\b(?<uplay>UPLAY[\s._-]?RIP|UBISOFT[\s._-]?CONNECT[\s._-]?RIP)\b",
+        private static readonly Regex UplayRegex = new(@"\b(?<uplay>UPLAY[\s._-]?RIP|UBISOFT[\s._-]?CONNECT[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Repack releases (FitGirl, DODI, XATAB, etc.)
-        private static readonly Regex RepackRegex = new (@"\b(?<repack>REPACK|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|MR[\s._-]?DJ|KAOS|DARCK[\s._-]?REPACKS?|MASQUERADE|CHOVKA|DECEPTICON|WANTERLUDE|R[\s.]?G[\s._-]?(?:МЕХАНИКИ|МЕХАНІКИ|MECHANICS|CATALYST|FREEDOM|STEAMGAMES))\b",
+        private static readonly Regex RepackRegex = new(@"\b(?<repack>REPACK|FITGIRL|DODI|XATAB|ELAMIGOS|COREPACK|MR[\s._-]?DJ|KAOS|DARCK[\s._-]?REPACKS?|MASQUERADE|CHOVKA|DECEPTICON|WANTERLUDE|R[\s.]?G[\s._-]?(?:МЕХАНИКИ|МЕХАНІКИ|MECHANICS|CATALYST|FREEDOM|STEAMGAMES))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // ISO/Retail releases
-        private static readonly Regex ISORegex = new (@"\b(?<iso>ISO|DISC[\s._-]?IMAGE)\b",
+        private static readonly Regex ISORegex = new(@"\b(?<iso>ISO|DISC[\s._-]?IMAGE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex RetailRegex = new (@"\b(?<retail>RETAIL|DVD[\s._-]?RIP|BD[\s._-]?RIP)\b",
+        private static readonly Regex RetailRegex = new(@"\b(?<retail>RETAIL|DVD[\s._-]?RIP|BD[\s._-]?RIP)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Portable releases
-        private static readonly Regex PortableRegex = new (@"\b(?<portable>PORTABLE|NO[\s._-]?INSTALL)\b",
+        private static readonly Regex PortableRegex = new(@"\b(?<portable>PORTABLE|NO[\s._-]?INSTALL)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Special modifiers
-        private static readonly Regex PreloadRegex = new (@"\b(?<preload>PRELOAD|PRE[\s._-]?RELEASE)\b",
+        private static readonly Regex PreloadRegex = new(@"\b(?<preload>PRELOAD|PRE[\s._-]?RELEASE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches releases that are updates/patches only (not full games)
         // Examples: "Game Update v1.2", "Game Language Pack", but NOT "Game v1.2 FitGirl"
-        private static readonly Regex UpdateOnlyRegex = new (@"\b(?<update>UPDATE(?:[\s._-]?ONLY)?|PATCH(?:[\s._-]?ONLY)?|LANGUAGE[\s._-]?PACK|HOTFIX)\b",
+        private static readonly Regex UpdateOnlyRegex = new(@"\b(?<update>UPDATE(?:[\s._-]?ONLY)?|PATCH(?:[\s._-]?ONLY)?|LANGUAGE[\s._-]?PACK|HOTFIX)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex DLCRegex = new (@"\b(?<dlc>(?:INCL(?:UDES?)?[\s._-]?)?(?:ALL[\s._-]?)?DLC[sS]?|DLC[\s._-]?(?:PACK|UNLOCKER)|COMPLETE[\s._-]?(?:EDITION|PACK)|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR)\b",
+        private static readonly Regex DLCRegex = new(@"\b(?<dlc>(?:INCL(?:UDES?)?[\s._-]?)?(?:ALL[\s._-]?)?DLC[sS]?|DLC[\s._-]?(?:PACK|UNLOCKER)|COMPLETE[\s._-]?(?:EDITION|PACK)|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // DLC-only releases (requires base game) - standalone "DLC" but NOT "All DLC", "DLC Bundle", "Includes DLC"
-        private static readonly Regex DlcOnlyRegex = new (@"\b(?<dlconly>DLC[\s._-]?ONLY|ADDON[\s._-]?ONLY|EXPANSION[\s._-]?ONLY)\b",
+        private static readonly Regex DlcOnlyRegex = new(@"\b(?<dlconly>DLC[\s._-]?ONLY|ADDON[\s._-]?ONLY|EXPANSION[\s._-]?ONLY)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Standalone DLC (not part of "All DLC", "DLC Bundle", etc.). The
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Parser
         // check for the qualifier word directly adjacent to it — with the
         // separator inside the lookbehind ("ALL[\s._-]") nothing ever matched
         // it and "Game.All.DLC" was misread as standalone DLC.
-        private static readonly Regex StandaloneDlcRegex = new (@"(?<!ALL)(?<!INCLUDES?)(?<!WITH)[\s._-]DLC(?:[\s._-]|$)(?!BUNDLE|PACK|UNLOCKER|S[\s._-])",
+        private static readonly Regex StandaloneDlcRegex = new(@"(?<!ALL)(?<!INCLUDES?)(?<!WITH)[\s._-]DLC(?:[\s._-]|$)(?!BUNDLE|PACK|UNLOCKER|S[\s._-])",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Season pass / DLC bundle.
@@ -89,15 +89,15 @@ namespace NzbDrone.Core.Parser
         // Unknown - which IncludesBaseGame() reads as "assume base game", so the
         // release was never base-requiring and neither prefix path in
         // ParsingService would look for its game (#212).
-        private static readonly Regex SeasonPassRegex = new (@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLCs?[\s._-]?(?:BUNDLE|UNLOCKER|PACK)|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
+        private static readonly Regex SeasonPassRegex = new(@"\b(?<seasonpass>SEASON[\s._-]?PASS|DLCs?[\s._-]?(?:BUNDLE|UNLOCKER|PACK)|EXPANSION[\s._-]?PASS|CONTENT[\s._-]?PACK)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Expansion packs
-        private static readonly Regex ExpansionRegex = new (@"\b(?<expansion>EXPANSION(?:[\s._-]?PACK)?|STANDALONE[\s._-]?EXPANSION)\b",
+        private static readonly Regex ExpansionRegex = new(@"\b(?<expansion>EXPANSION(?:[\s._-]?PACK)?|STANDALONE[\s._-]?EXPANSION)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Complete/GOTY editions (base game + all DLC)
-        private static readonly Regex CompleteEditionRegex = new (@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?(?:ALL[\s._-]?)?DLC[sS]?|ALL[\s._-]?DLC[sS]?\b(?![\s._-]?(?:BUNDLE|ONLY)))\b",
+        private static readonly Regex CompleteEditionRegex = new(@"\b(?<complete>COMPLETE[\s._-]?(?:EDITION|PACK)|DEFINITIVE[\s._-]?EDITION|ULTIMATE[\s._-]?EDITION|GOTY|GAME[\s._-]?OF[\s._-]?THE[\s._-]?YEAR|GOLD[\s._-]?EDITION|LEGENDARY[\s._-]?EDITION|PREMIUM[\s._-]?EDITION|(?:INCL(?:UDES?)?|WITH)[\s._-]?(?:ALL[\s._-]?)?DLC[sS]?|ALL[\s._-]?DLC[sS]?\b(?![\s._-]?(?:BUNDLE|ONLY)))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Kiosk / store-demo builds (#207). A demo is not the base game, so it
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Parser
         //    use KIOSK and web/store names use "Demo" for the same build - which
         //    does leave a title whose LAST word is literally "Trial" ambiguous;
         //    that is the deliberate trade for catching title-cased demos.
-        private static readonly Regex DemoBuildRegex = new (@"(?<demo>(?<=[\s._\-\[(])KIOSK|\b(?:(?:STORE|SHOP|PLAYABLE|TECH(?:NICAL)?|TIMED|KIOSK)[\s._-]?DEMO|DEMO[\s._-]?(?:BUILD|VERSION|DISC)|TRIAL[\s._-]?(?:BUILD|VERSION|EDITION)|PREVIEW[\s._-]?(?:BUILD|VERSION)|SHAREWARE))\b",
+        private static readonly Regex DemoBuildRegex = new(@"(?<demo>(?<=[\s._\-\[(])KIOSK|\b(?:(?:STORE|SHOP|PLAYABLE|TECH(?:NICAL)?|TIMED|KIOSK)[\s._-]?DEMO|DEMO[\s._-]?(?:BUILD|VERSION|DISC)|TRIAL[\s._-]?(?:BUILD|VERSION|EDITION)|PREVIEW[\s._-]?(?:BUILD|VERSION)|SHAREWARE))\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // The bare-word tier. The tail-token vocabulary is shared with
@@ -130,25 +130,25 @@ namespace NzbDrone.Core.Parser
         // turns IgnoreCase back off for the all-caps token class alone, so
         // INTERNAL/NSW/VENOM count as metadata while a lower-case title word
         // does not.
-        private static readonly Regex TrailingDemoBuildRegex = new (@"\b(?<demo>DEMO|TRIAL|PREVIEW)\b(?:[\s._-]+" + ConsoleTitleParser.MetadataTailToken + @")*[\s._-]*$",
+        private static readonly Regex TrailingDemoBuildRegex = new(@"\b(?<demo>DEMO|TRIAL|PREVIEW)\b(?:[\s._-]+" + ConsoleTitleParser.MetadataTailToken + @")*[\s._-]*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex DemoHasLetterRegex = new (@"[A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex DemoHasLetterRegex = new(@"[A-Za-z]", RegexOptions.Compiled);
 
         // The "-GROUP" suffix of a scene name. Removing the demo metadata takes
         // the group with it, and the title regexes need it: a dotted name with
         // no trailing group ("Super.Mario.Odyssey") matches none of them, so
         // dropping the group turned the whole parse into null.
-        private static readonly Regex DemoTrailingGroupRegex = new (@"-(?<group>[A-Za-z0-9]{2,})\s*$", RegexOptions.Compiled);
+        private static readonly Regex DemoTrailingGroupRegex = new(@"-(?<group>[A-Za-z0-9]{2,})\s*$", RegexOptions.Compiled);
 
         // Update/Patch only (requires base game)
-        private static readonly Regex UpdatePatchOnlyRegex = new (@"\b(?<updateonly>UPDATE[\s._-]?ONLY|PATCH[\s._-]?ONLY|(?:UPDATE|PATCH)[\s._-]?\d+[\s._-]?ONLY|HOTFIX[\s._-]?ONLY)\b",
+        private static readonly Regex UpdatePatchOnlyRegex = new(@"\b(?<updateonly>UPDATE[\s._-]?ONLY|PATCH[\s._-]?ONLY|(?:UPDATE|PATCH)[\s._-]?\d+[\s._-]?ONLY|HOTFIX[\s._-]?ONLY)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Real scene updates are "Game.Update.v1.2-GRP" with no "only" marker.
         // The version requirement keeps games whose titles contain the word
         // (e.g. "Patch Quest") from classifying as updates.
-        private static readonly Regex VersionedUpdateRegex = new (@"\b(?:UPDATE|PATCH|HOTFIX)[\s._-]?(?:v?\d|BUILD\b)",
+        private static readonly Regex VersionedUpdateRegex = new(@"\b(?:UPDATE|PATCH|HOTFIX)[\s._-]?(?:v?\d|BUILD\b)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Repacker bundles are full games even when the name carries an
@@ -156,7 +156,7 @@ namespace NzbDrone.Core.Parser
         // "FitGirl Repack ... Day 1 Patch Build 8008283") — they must not
         // classify as update-only. The scene REPACK tag alone doesn't match:
         // "Game.Update.v1.7.REPACK-GRP" is still an update.
-        private static readonly Regex FullRepackerRegex = new (@"\b(?:FitGirl|DODI|ElAmigos|CorePack|KaOs|xatab)\b|Re?Pack\s+(?:от|by|from)|Steam[-\s]?Rip",
+        private static readonly Regex FullRepackerRegex = new(@"\b(?:FitGirl|DODI|ElAmigos|CorePack|KaOs|xatab)\b|Re?Pack\s+(?:от|by|from)|Steam[-\s]?Rip",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // The add-on markers that may legitimately follow a game's title in a
@@ -167,22 +167,22 @@ namespace NzbDrone.Core.Parser
         // part that matters: an unexplained word between the game's title and
         // the marker means a DIFFERENT game whose title starts with the same
         // words, not an add-on of that game (#206).
-        private static readonly Regex AddonMarkerPrefixRegex = new (
+        private static readonly Regex AddonMarkerPrefixRegex = new(
             @"^(?:" + Parser.ComponentWaveSuffix + @"|" + Parser.ComponentDlcSuffix +
             @"|UPDATE|PATCH|HOTFIX|ADDONS?|EXPANSION(?:[\s._-]?(?:PACK|PASS))?|SEASON[\s._-]?PASS|CONTENT[\s._-]?PACK|UNLOCKER|BUNDLE)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex MultiLangRegex = new (@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",
+        private static readonly Regex MultiLangRegex = new(@"\b(?<multilang>MULTI[._-]?\d+|MULTi(?:LANGUAGE)?)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Proper/Repack revision patterns
-        private static readonly Regex ProperRegex = new (@"\b(?<proper>PROPER)\b",
+        private static readonly Regex ProperRegex = new(@"\b(?<proper>PROPER)\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex VersionRegex = new (@"[._\s-]v?(?<version>\d+(?:\.\d+)+)(?:[._\s-]|$)|[._\s-](?:BUILD|B)[._\s-]?(?<version>\d+)",
+        private static readonly Regex VersionRegex = new(@"[._\s-]v?(?<version>\d+(?:\.\d+)+)(?:[._\s-]|$)|[._\s-](?:BUILD|B)[._\s-]?(?<version>\d+)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex RealRegex = new (@"\b(?<real>REAL|PROPER[._-]?FIX)\b",
+        private static readonly Regex RealRegex = new(@"\b(?<real>REAL|PROPER[._-]?FIX)\b",
             RegexOptions.Compiled);
 
         // More comprehensive version regex for game releases
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.Parser
         // 9. Build number (Build 12345, B12345)
         // 10. Update/Patch version
         // Negative lookahead excludes file sizes (52.9 GB)
-        private static readonly Regex GameVersionRegex = new (
+        private static readonly Regex GameVersionRegex = new(
             @"[._\-\s\[\(]v[\.\s]?(?<version>\d+(?:\.\d+){1,3}[a-z]?\d*)(?![._]?\d*\s*[GMKT]i?B)(?=[._\-\s\]\)<,]|$)|" +
             @"[._\-\s\[\(]v(?<spaceversion>\d+(?:\s+\d+){1,3})(?=[\s\-._\]\),]|$)|" +   // before dateversion so "v2026 05 25" doesn't collapse to just "2026"
             @"[._\-\s\[\(]v(?<dateversion>\d{4,})(?=[._\-\s\]\)<,]|$)|" +

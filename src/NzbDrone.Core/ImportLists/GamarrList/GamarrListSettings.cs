@@ -14,7 +14,7 @@ namespace NzbDrone.Core.ImportLists.GamarrList
 
     public class GamarrListSettings : ImportListSettingsBase<GamarrListSettings>
     {
-        private static readonly GamarrSettingsValidator Validator = new ();
+        private static readonly GamarrSettingsValidator Validator = new();
 
         [FieldDefinition(0, Label = "List URL", HelpText = "The URL for the game list")]
         public string Url { get; set; }

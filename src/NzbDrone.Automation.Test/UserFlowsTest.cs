@@ -43,17 +43,17 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='Queue']").First).ToBeVisibleAsync();
 
             // History tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "History" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "History" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='History']").First).ToBeVisibleAsync();
 
             // Blocklist tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Blocklist" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Blocklist" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Blocklist']").First).ToBeVisibleAsync();
 
             // Back to Queue
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Queue" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Queue" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Queue']").First).ToBeVisibleAsync();
         }
@@ -67,12 +67,12 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='Missing']").First).ToBeVisibleAsync();
 
             // Cutoff Unmet tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Cutoff Unmet" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Cutoff Unmet" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='CutoffUnmet']").First).ToBeVisibleAsync();
 
             // Back to Missing
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Missing" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Missing" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Missing']").First).ToBeVisibleAsync();
         }
@@ -86,27 +86,27 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='Health']").First).ToBeVisibleAsync();
 
             // Tasks tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Tasks" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Tasks" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Tasks']").First).ToBeVisibleAsync();
 
             // Backup tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Backup" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Backup" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Backups']").First).ToBeVisibleAsync();
 
             // Updates tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Updates" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Updates" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='Updates']").First).ToBeVisibleAsync();
 
             // Events tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Events" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Events" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='LogsTable']").First).ToBeVisibleAsync();
 
             // Log Files tab
-            await Page.GetByRole(AriaRole.Link, new () { Name = "Log Files" }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = "Log Files" }).First.ClickAsync();
             await WaitForNoSpinner();
             await Expect(Page.Locator("div[class*='LogFiles']").First).ToBeVisibleAsync();
         }
@@ -134,7 +134,7 @@ namespace NzbDrone.Automation.Test
 
             foreach (var (linkText, expectedClass) in settingsLinks)
             {
-                await Page.GetByRole(AriaRole.Link, new () { Name = linkText, Exact = true }).First.ClickAsync();
+                await Page.GetByRole(AriaRole.Link, new() { Name = linkText, Exact = true }).First.ClickAsync();
                 await WaitForNoSpinner();
                 await Expect(Page.Locator($"div[class*='{expectedClass}']").First).ToBeVisibleAsync();
             }

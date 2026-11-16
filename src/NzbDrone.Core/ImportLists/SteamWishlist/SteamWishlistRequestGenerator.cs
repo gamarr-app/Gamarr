@@ -11,7 +11,7 @@ namespace NzbDrone.Core.ImportLists.SteamWishlist
 {
     public class SteamWishlistRequestGenerator : IImportListRequestGenerator
     {
-        private static readonly Regex SteamId64Regex = new (@"<steamID64>\s*(?<id>\d+)\s*</steamID64>", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex SteamId64Regex = new(@"<steamID64>\s*(?<id>\d+)\s*</steamID64>", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public SteamWishlistSettings Settings { get; set; }
         public IHttpClient HttpClient { get; set; }

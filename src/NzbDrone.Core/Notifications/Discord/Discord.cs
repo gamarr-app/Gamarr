@@ -270,7 +270,7 @@ namespace NzbDrone.Core.Notifications.Discord
                 Title = game.Title,
                 Description = "Game Added",
                 Color = (int)DiscordColors.Success,
-                Fields = new List<DiscordField> { new () { Name = "Links", Value = GetLinksString(game) } }
+                Fields = new List<DiscordField> { new() { Name = "Links", Value = GetLinksString(game) } }
             };
 
             if (Settings.ImportFields.Contains((int)DiscordImportFieldType.Poster))
@@ -327,7 +327,7 @@ namespace NzbDrone.Core.Notifications.Discord
                 Title = game.Title,
                 Description = deleteMessage.DeletedFilesMessage,
                 Color = (int)DiscordColors.Danger,
-                Fields = new List<DiscordField> { new () { Name = "Links", Value = GetLinksString(game) } }
+                Fields = new List<DiscordField> { new() { Name = "Links", Value = GetLinksString(game) } }
             };
 
             if (Settings.ImportFields.Contains((int)DiscordImportFieldType.Poster))
@@ -370,8 +370,8 @@ namespace NzbDrone.Core.Notifications.Discord
                 Color = (int)DiscordColors.Danger,
                 Fields = new List<DiscordField>
                 {
-                    new () { Name = "Reason", Value = reason.ToString() },
-                    new () { Name = "File name", Value = string.Format("```{0}```", deletedFile) }
+                    new() { Name = "Reason", Value = reason.ToString() },
+                    new() { Name = "File name", Value = string.Format("```{0}```", deletedFile) }
                 },
                 Timestamp = DateTime.UtcNow.ToString("O"),
             };
@@ -435,12 +435,12 @@ namespace NzbDrone.Core.Notifications.Discord
                 Color = (int)DiscordColors.Standard,
                 Fields = new List<DiscordField>
                 {
-                    new ()
+                    new()
                     {
                         Name = "Previous Version",
                         Value = updateMessage.PreviousVersion.ToString()
                     },
-                    new ()
+                    new()
                     {
                         Name = "New Version",
                         Value = updateMessage.NewVersion.ToString()

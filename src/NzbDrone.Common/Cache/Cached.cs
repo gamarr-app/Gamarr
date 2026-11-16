@@ -39,10 +39,10 @@ namespace NzbDrone.Common.Cache
             _rollingExpiry = rollingExpiry;
         }
 
-        public void Set(string key, T value, TimeSpan? lifeTime = null)
+        public void Set(string key, T value, TimeSpan? lifetime = null)
         {
             Ensure.That(key, () => key).IsNotNullOrWhiteSpace();
-            _store[key] = new CacheItem(value, lifeTime ?? _defaultLifeTime);
+            _store[key] = new CacheItem(value, lifetime ?? _defaultLifeTime);
         }
 
         public T Find(string key)
@@ -84,7 +84,7 @@ namespace NzbDrone.Common.Cache
         {
             Ensure.That(key, () => key).IsNotNullOrWhiteSpace();
 
-            lifeTime = lifeTime ?? _defaultLifeTime;
+            lifeTime = lifetime ?? _defaultLifeTime;
 
             if (_store.TryGetValue(key, out var cacheItem) && !cacheItem.IsExpired())
             {

@@ -8,7 +8,7 @@ namespace NzbDrone.Common.Instrumentation.Sentry
     public static class SentryCleanser
     {
         private static readonly Regex Http5xxFailure =
-            new (@"HTTP request failed:\s*\[5\d\d:", RegexOptions.Compiled);
+            new(@"HTTP request failed:\s*\[5\d\d:", RegexOptions.Compiled);
 
         private static readonly string[] ExternalMetadataLoggers =
         {
