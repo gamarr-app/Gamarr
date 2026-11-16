@@ -25,19 +25,19 @@ namespace NzbDrone.Core.Notifications.Slack
         public override string Name => "Slack";
         public override string Link => "https://my.slack.com/services/new/incoming-webhook/";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
             var attachments = new List<Attachment>
             {
                 new()
                 {
-                    Fallback = message.Message,
-                    Title = message.Game.Title,
-                    Text = message.Message,
+                    Fallback = grabMessage.Message,
+                    Title = grabMessage.Game.Title,
+                    Text = grabMessage.Message,
                     Color = "warning"
                 }
             };
-            var payload = CreatePayload($"Grabbed: {message.Message}", attachments);
+            var payload = CreatePayload($"Grabbed: {grabMessage.Message}", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }

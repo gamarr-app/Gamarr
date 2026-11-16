@@ -35,17 +35,17 @@ namespace NzbDrone.Core.Games.Collections
             _logger = logger;
         }
 
-        public GameCollection AddCollection(GameCollection newCollection)
+        public GameCollection AddCollection(GameCollection collection)
         {
-            var existing = _repo.GetByIgdbId(newCollection.IgdbId);
+            var existing = _repo.GetByIgdbId(collection.IgdbId);
 
             if (existing == null)
             {
-                var collection = _repo.Insert(newCollection);
+                var added = _repo.Insert(collection);
 
-                _eventAggregator.PublishEvent(new CollectionAddedEvent(collection));
+                _eventAggregator.PublishEvent(new CollectionAddedEvent(added));
 
-                return collection;
+                return added;
             }
 
             return existing;

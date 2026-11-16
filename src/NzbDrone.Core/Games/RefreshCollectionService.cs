@@ -180,7 +180,8 @@ namespace NzbDrone.Core.Games
                         },
                         Monitored = true,
                         Tags = collection.Tags
-                    }).ToList(), true);
+                    }).ToList(),
+                        true);
                 }
             }
         }

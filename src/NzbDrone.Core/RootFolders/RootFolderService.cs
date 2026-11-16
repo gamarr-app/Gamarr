@@ -101,38 +101,38 @@ namespace NzbDrone.Core.RootFolders
             return rootFolders;
         }
 
-        public RootFolder Add(RootFolder rootFolder)
+        public RootFolder Add(RootFolder rootDir)
         {
             var all = All();
 
-            if (string.IsNullOrWhiteSpace(rootFolder.Path) || !Path.IsPathRooted(rootFolder.Path))
+            if (string.IsNullOrWhiteSpace(rootDir.Path) || !Path.IsPathRooted(rootDir.Path))
             {
                 throw new ArgumentException("Invalid path");
             }
 
-            if (!_diskProvider.FolderExists(rootFolder.Path))
+            if (!_diskProvider.FolderExists(rootDir.Path))
             {
                 throw new DirectoryNotFoundException("Can't add root directory that doesn't exist.");
             }
 
-            if (all.Exists(r => r.Path.PathEquals(rootFolder.Path)))
+            if (all.Exists(r => r.Path.PathEquals(rootDir.Path)))
             {
                 throw new InvalidOperationException("Recent directory already exists.");
             }
 
-            if (!_diskProvider.FolderWritable(rootFolder.Path))
+            if (!_diskProvider.FolderWritable(rootDir.Path))
             {
-                throw new UnauthorizedAccessException($"Root folder path '{rootFolder.Path}' is not writable by user '{Environment.UserName}'");
+                throw new UnauthorizedAccessException($"Root folder path '{rootDir.Path}' is not writable by user '{Environment.UserName}'");
             }
 
-            _rootFolderRepository.Insert(rootFolder);
+            _rootFolderRepository.Insert(rootDir);
 
             var gamePaths = _gameRepository.AllGamePaths();
 
-            GetDetails(rootFolder, gamePaths, true);
+            GetDetails(rootDir, gamePaths, true);
             _cache.Clear();
 
-            return rootFolder;
+            return rootDir;
         }
 
         public void Remove(int id)

@@ -25,9 +25,9 @@ namespace NzbDrone.Core.Notifications.Notifiarr
         public override string Link => "https://notifiarr.com";
         public override string Name => "Notifiarr";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
-            _proxy.SendNotification(BuildOnGrabPayload(message), Settings);
+            _proxy.SendNotification(BuildOnGrabPayload(grabMessage), Settings);
         }
 
         public override void OnDownload(DownloadMessage message)

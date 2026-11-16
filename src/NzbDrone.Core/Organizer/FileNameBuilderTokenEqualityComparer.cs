@@ -13,14 +13,14 @@ namespace NzbDrone.Core.Organizer
         {
         }
 
-        public bool Equals(string s1, string s2)
+        public bool Equals(string x, string y)
         {
-            return SimplifyToken(s1).Equals(SimplifyToken(s2));
+            return SimplifyToken(x).Equals(SimplifyToken(y));
         }
 
-        public int GetHashCode(string str)
+        public int GetHashCode(string obj)
         {
-            return SimplifyToken(str).GetHashCode();
+            return SimplifyToken(obj).GetHashCode();
         }
 
         private static string SimplifyToken(string token)

@@ -19,9 +19,9 @@ namespace NzbDrone.Core.Notifications.Twitter
         public override string Name => "Twitter";
         public override string Link => "https://twitter.com/";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
-            _twitterService.SendNotification($"[Gamarr] Grabbed: {message.Message}", Settings);
+            _twitterService.SendNotification($"[Gamarr] Grabbed: {grabMessage.Message}", Settings);
         }
 
         public override void OnDownload(DownloadMessage message)

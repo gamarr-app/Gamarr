@@ -174,11 +174,11 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             _logger.Debug("{0} removed correctly", item.DownloadId);
         }
 
-        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContents)
         {
             var hashedSerialNumber = _serialNumberProvider.GetSerialNumber(Settings);
 
-            DsTaskProxy.AddTaskFromData(fileContent, filename, GetDownloadDirectory(), Settings);
+            DsTaskProxy.AddTaskFromData(fileContents, filename, GetDownloadDirectory(), Settings);
 
             var items = GetTasks().Where(t => t.Additional.Detail["uri"] == filename);
 

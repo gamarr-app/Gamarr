@@ -31,18 +31,18 @@ namespace NzbDrone.Core.ImportLists.RSSImport
             _logger = logger;
         }
 
-        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importListResponse)
         {
-            _importResponse = importResponse;
+            _importResponse = importListResponse;
 
             var games = new List<ImportListGame>();
 
-            if (!PreProcess(importResponse))
+            if (!PreProcess(importListResponse))
             {
                 return games;
             }
 
-            var document = LoadXmlDocument(importResponse);
+            var document = LoadXmlDocument(importListResponse);
             var items = GetItems(document);
 
             foreach (var item in items)
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.ImportLists.RSSImport
                 catch (Exception itemEx)
                 {
                     // itemEx.Data.Add("Item", item.Title());
-                    _logger.Error(itemEx, "An error occurred while processing list feed item from {0}", importResponse.Request.Url);
+                    _logger.Error(itemEx, "An error occurred while processing list feed item from {0}", importListResponse.Request.Url);
                 }
             }
 

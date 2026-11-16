@@ -176,18 +176,18 @@ namespace NzbDrone.Core.MetadataSource
             return result;
         }
 
-        public GameCollection GetCollectionInfo(int collectionId)
+        public GameCollection GetCollectionInfo(int igdbId)
         {
             // RAWG doesn't have collection support, try IGDB
             if (HasIgdbCredentials)
             {
                 try
                 {
-                    return _igdbProxy.GetCollectionInfo(collectionId);
+                    return _igdbProxy.GetCollectionInfo(igdbId);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to get collection info from IGDB: {0}", collectionId);
+                    _logger.Warn(ex, "Failed to get collection info from IGDB: {0}", igdbId);
                 }
             }
 

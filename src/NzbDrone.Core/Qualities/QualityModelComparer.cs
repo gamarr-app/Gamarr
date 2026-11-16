@@ -24,9 +24,9 @@ namespace NzbDrone.Core.Qualities
             return leftIndex.CompareTo(rightIndex, respectGroupOrder);
         }
 
-        public int Compare(Quality left, Quality right)
+        public int Compare(Quality x, Quality y)
         {
-            return Compare(left, right, false);
+            return Compare(x, y, false);
         }
 
         public int Compare(Quality left, Quality right, bool respectGroupOrder)
@@ -37,9 +37,9 @@ namespace NzbDrone.Core.Qualities
             return leftIndex.CompareTo(rightIndex, respectGroupOrder);
         }
 
-        public int Compare(QualityModel left, QualityModel right)
+        public int Compare(QualityModel x, QualityModel y)
         {
-            return Compare(left, right, false);
+            return Compare(x, y, false);
         }
 
         public int Compare(QualityModel left, QualityModel right, bool respectGroupOrder)

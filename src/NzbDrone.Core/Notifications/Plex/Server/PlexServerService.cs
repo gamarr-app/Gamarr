@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             UpdateLibrary(new[] { game }, settings);
         }
 
-        public void UpdateLibrary(IEnumerable<Game> multipleGames, PlexServerSettings settings)
+        public void UpdateLibrary(IEnumerable<Game> game, PlexServerSettings settings)
         {
             try
             {
@@ -56,9 +56,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 var sections = GetSections(settings);
 
-                foreach (var game in multipleGames)
+                foreach (var item in game)
                 {
-                    UpdateSections(game, sections, settings);
+                    UpdateSections(item, sections, settings);
                 }
 
                 _logger.Debug("Finished sending Update Request to Plex Server (took {0} ms)", watch.ElapsedMilliseconds);

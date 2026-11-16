@@ -28,9 +28,9 @@ namespace NzbDrone.Core.Notifications.Gotify
         public override string Name => "Gotify";
         public override string Link => "https://gotify.net/";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
-            SendNotification(GAME_GRABBED_TITLE, message.Message, message.Game);
+            SendNotification(GAME_GRABBED_TITLE, grabMessage.Message, grabMessage.Game);
         }
 
         public override void OnDownload(DownloadMessage message)
@@ -63,9 +63,9 @@ namespace NzbDrone.Core.Notifications.Gotify
             SendNotification(HEALTH_RESTORED_TITLE, $"The following issue is now resolved: {previousCheck.Message}", null);
         }
 
-        public override void OnApplicationUpdate(ApplicationUpdateMessage message)
+        public override void OnApplicationUpdate(ApplicationUpdateMessage updateMessage)
         {
-            SendNotification(APPLICATION_UPDATE_TITLE, message.Message, null);
+            SendNotification(APPLICATION_UPDATE_TITLE, updateMessage.Message, null);
         }
 
         public override void OnManualInteractionRequired(ManualInteractionRequiredMessage message)

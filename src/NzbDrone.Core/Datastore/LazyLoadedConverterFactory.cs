@@ -17,9 +17,9 @@ namespace NzbDrone.Core.Datastore
             return typeToConvert.GetGenericTypeDefinition() == typeof(LazyLoaded<>);
         }
 
-        public override JsonConverter CreateConverter(Type type, JsonSerializerOptions options)
+        public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
         {
-            var childType = type.GetGenericArguments()[0];
+            var childType = typeToConvert.GetGenericArguments()[0];
 
             return (JsonConverter)Activator.CreateInstance(
                 typeof(LazyLoadedConverter<>).MakeGenericType(childType),

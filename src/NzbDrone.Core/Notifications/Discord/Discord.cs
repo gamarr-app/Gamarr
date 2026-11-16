@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Notifications.Discord
         public override string Name => "Discord";
         public override string Link => "https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
             var embed = new Embed
             {
@@ -43,9 +43,9 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = !string.IsNullOrEmpty(message.Game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{message.Game.GameMetadata.Value.IgdbSlug}" : null,
+                Url = !string.IsNullOrEmpty(grabMessage.Game.GameMetadata.Value.IgdbSlug) ? $"https://www.igdb.com/games/{grabMessage.Game.GameMetadata.Value.IgdbSlug}" : null,
                 Description = "Game Grabbed",
-                Title = GetTitle(message.Game),
+                Title = GetTitle(grabMessage.Game),
                 Color = (int)DiscordColors.Standard,
                 Fields = new List<DiscordField>(),
                 Timestamp = DateTime.UtcNow.ToString("O")
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Notifications.Discord
             {
                 embed.Thumbnail = new DiscordImage
                 {
-                    Url = message.Game.GameMetadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster)?.RemoteUrl
+                    Url = grabMessage.Game.GameMetadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster)?.RemoteUrl
                 };
             }
 
@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Notifications.Discord
             {
                 embed.Image = new DiscordImage
                 {
-                    Url = message.Game.GameMetadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Fanart)?.RemoteUrl
+                    Url = grabMessage.Game.GameMetadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Fanart)?.RemoteUrl
                 };
             }
 
@@ -74,55 +74,55 @@ namespace NzbDrone.Core.Notifications.Discord
                 switch ((DiscordGrabFieldType)field)
                 {
                     case DiscordGrabFieldType.Overview:
-                        var overview = message.Game.GameMetadata.Value.Overview ?? "";
+                        var overview = grabMessage.Game.GameMetadata.Value.Overview ?? "";
                         discordField.Name = "Overview";
                         discordField.Value = overview.Length <= 300 ? overview : $"{overview.AsSpan(0, 300)}...";
                         break;
                     case DiscordGrabFieldType.Rating:
                         discordField.Name = "Rating";
-                        discordField.Value = message.Game.GameMetadata.Value.Ratings.Igdb?.Value.ToString() ?? string.Empty;
+                        discordField.Value = grabMessage.Game.GameMetadata.Value.Ratings.Igdb?.Value.ToString() ?? string.Empty;
                         break;
                     case DiscordGrabFieldType.Genres:
                         discordField.Name = "Genres";
-                        discordField.Value = message.Game.GameMetadata.Value.Genres.Take(5).Join(", ");
+                        discordField.Value = grabMessage.Game.GameMetadata.Value.Genres.Take(5).Join(", ");
                         break;
                     case DiscordGrabFieldType.Quality:
                         discordField.Name = "Quality";
                         discordField.Inline = true;
-                        discordField.Value = message.Quality.Quality.Name;
+                        discordField.Value = grabMessage.Quality.Quality.Name;
                         break;
                     case DiscordGrabFieldType.Group:
                         discordField.Name = "Group";
-                        discordField.Value = message.RemoteGame.ParsedGameInfo.ReleaseGroup;
+                        discordField.Value = grabMessage.RemoteGame.ParsedGameInfo.ReleaseGroup;
                         break;
                     case DiscordGrabFieldType.Size:
                         discordField.Name = "Size";
-                        discordField.Value = BytesToString(message.RemoteGame.Release.Size);
+                        discordField.Value = BytesToString(grabMessage.RemoteGame.Release.Size);
                         discordField.Inline = true;
                         break;
                     case DiscordGrabFieldType.Release:
                         discordField.Name = "Release";
-                        discordField.Value = string.Format("```{0}```", message.RemoteGame.Release.Title);
+                        discordField.Value = string.Format("```{0}```", grabMessage.RemoteGame.Release.Title);
                         break;
                     case DiscordGrabFieldType.Links:
                         discordField.Name = "Links";
-                        discordField.Value = GetLinksString(message.Game);
+                        discordField.Value = GetLinksString(grabMessage.Game);
                         break;
                     case DiscordGrabFieldType.CustomFormats:
                         discordField.Name = "Custom Formats";
-                        discordField.Value = string.Join("|", message.RemoteGame.CustomFormats);
+                        discordField.Value = string.Join("|", grabMessage.RemoteGame.CustomFormats);
                         break;
                     case DiscordGrabFieldType.CustomFormatScore:
                         discordField.Name = "Custom Format Score";
-                        discordField.Value = message.RemoteGame.CustomFormatScore.ToString();
+                        discordField.Value = grabMessage.RemoteGame.CustomFormatScore.ToString();
                         break;
                     case DiscordGrabFieldType.Indexer:
                         discordField.Name = "Indexer";
-                        discordField.Value = message.RemoteGame.Release.Indexer;
+                        discordField.Value = grabMessage.RemoteGame.Release.Indexer;
                         break;
                     case DiscordGrabFieldType.Tags:
                         discordField.Name = "Tags";
-                        discordField.Value = GetTagLabels(message.Game)?.Join(", ") ?? string.Empty;
+                        discordField.Value = GetTagLabels(grabMessage.Game)?.Join(", ") ?? string.Empty;
                         break;
                 }
 

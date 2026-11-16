@@ -37,12 +37,12 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         // patch can be a number (releases) or 'x' (git)
         private static readonly Regex VersionRegex = new Regex(@"(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+|x)", RegexOptions.Compiled);
 
-        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContents)
         {
             var category = Settings.GameCategory;
             var priority = remoteGame.Game.GameMetadata.Value.IsRecentGame ? Settings.RecentGamePriority : Settings.OlderGamePriority;
 
-            var response = _proxy.DownloadNzb(fileContent, filename, category, priority, Settings);
+            var response = _proxy.DownloadNzb(fileContents, filename, category, priority, Settings);
 
             if (response == null || response.Ids.Empty())
             {

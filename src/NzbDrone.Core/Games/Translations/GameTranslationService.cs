@@ -41,18 +41,18 @@ namespace NzbDrone.Core.Games.Translations
             _translationRepo.Delete(title);
         }
 
-        public List<GameTranslation> UpdateTranslations(List<GameTranslation> translations, GameMetadata gameMetadata)
+        public List<GameTranslation> UpdateTranslations(List<GameTranslation> titles, GameMetadata game)
         {
-            var gameMetadataId = gameMetadata.Id;
+            var gameMetadataId = game.Id;
 
             // First update the game ids so we can correlate them later
-            translations.ForEach(t => t.GameMetadataId = gameMetadataId);
+            titles.ForEach(t => t.GameMetadataId = gameMetadataId);
 
             // Then throw out any we don't have languages for
-            translations = translations.Where(t => t.Language != null).ToList();
+            titles = titles.Where(t => t.Language != null).ToList();
 
             // Then make sure they are all distinct languages
-            translations = translations.DistinctBy(t => t.Language).ToList();
+            titles = titles.DistinctBy(t => t.Language).ToList();
 
             // Now find translations to delete, update and insert
             var existingTranslations = _translationRepo.FindByGameMetadataId(gameMetadataId);
@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Games.Translations
             var addList = new List<GameTranslation>();
             var upToDateCount = 0;
 
-            foreach (var translation in translations)
+            foreach (var translation in titles)
             {
                 var existingTranslation = existingTranslations.FirstOrDefault(x => x.Language == translation.Language);
 
@@ -90,9 +90,9 @@ namespace NzbDrone.Core.Games.Translations
             _translationRepo.UpdateMany(updateList);
             _translationRepo.InsertMany(addList);
 
-            _logger.Debug("[{0}] {1} translations up to date; Updating {2}, Adding {3}, Deleting {4} entries.", gameMetadata.Title, upToDateCount, updateList.Count, addList.Count, existingTranslations.Count);
+            _logger.Debug("[{0}] {1} translations up to date; Updating {2}, Adding {3}, Deleting {4} entries.", game.Title, upToDateCount, updateList.Count, addList.Count, existingTranslations.Count);
 
-            return translations;
+            return titles;
         }
 
         public void HandleAsync(GamesDeletedEvent message)

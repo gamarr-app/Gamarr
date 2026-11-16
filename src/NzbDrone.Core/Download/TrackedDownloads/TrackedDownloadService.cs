@@ -310,9 +310,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
             var trackedDownload = _cache.Find(message.DownloadId);
 
-            if (trackedDownload is { State: TrackedDownloadState.Imported or
-                                            TrackedDownloadState.Failed or
-                                            TrackedDownloadState.Ignored })
+            if (trackedDownload is { State: TrackedDownloadState.Imported or TrackedDownloadState.Failed or TrackedDownloadState.Ignored })
             {
                 _cache.Remove(message.DownloadId);
             }

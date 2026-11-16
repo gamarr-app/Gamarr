@@ -36,14 +36,14 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
             _proxy = proxy;
         }
 
-        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContents)
         {
             var category = Settings.GameCategory;
 
             var priority = remoteGame.Game.GameMetadata.Value.IsRecentGame ? Settings.RecentGamePriority : Settings.OlderGamePriority;
 
             var addpaused = Settings.AddPaused;
-            var response = _proxy.DownloadNzb(fileContent, filename, category, priority, addpaused, Settings);
+            var response = _proxy.DownloadNzb(fileContents, filename, category, priority, addpaused, Settings);
 
             if (response == null)
             {

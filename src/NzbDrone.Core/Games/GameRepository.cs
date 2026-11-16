@@ -63,8 +63,8 @@ namespace NzbDrone.Core.Games
             _alternativeTitleRepository = alternativeTitleRepository;
         }
 
-        protected override IEnumerable<Game> PagedQuery(SqlBuilder builder) =>
-            _database.QueryJoined<Game, GameMetadata>(builder, (game, gameMetadata) =>
+        protected override IEnumerable<Game> PagedQuery(SqlBuilder sql) =>
+            _database.QueryJoined<Game, GameMetadata>(sql, (game, gameMetadata) =>
             {
                 game.GameMetadata = gameMetadata;
                 return game;
