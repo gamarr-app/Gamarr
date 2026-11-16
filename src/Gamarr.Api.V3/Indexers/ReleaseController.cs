@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Exceptions;
@@ -179,6 +180,10 @@ namespace Gamarr.Api.V3.Indexers
             catch (SearchFailedException ex)
             {
                 throw new NzbDroneClientException(HttpStatusCode.BadRequest, ex.Message);
+            }
+            catch (ModelNotFoundException ex)
+            {
+                throw new NzbDroneClientException(HttpStatusCode.NotFound, ex.Message);
             }
             catch (Exception ex)
             {
