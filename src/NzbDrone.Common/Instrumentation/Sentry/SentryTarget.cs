@@ -473,7 +473,12 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                                 break;
                             }
 
-                            if (FilteredExceptionTypeNames.Contains(inner.GetType().Name))
+                            // Match OperationCanceledException by type, not name: its subclass
+                            // TaskCanceledException is what an outbound HTTP timeout throws
+                            // (an indexer or Jackett not answering a .torrent download in time),
+                            // and the exact-name set above never matched it.
+                            if (inner is OperationCanceledException ||
+                                FilteredExceptionTypeNames.Contains(inner.GetType().Name))
                             {
                                 isSentry = false;
                                 break;

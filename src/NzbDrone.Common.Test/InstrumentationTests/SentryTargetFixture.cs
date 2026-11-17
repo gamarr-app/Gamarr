@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using FluentAssertions;
 using NLog;
 using NUnit.Framework;
@@ -162,6 +163,20 @@ namespace NzbDrone.Common.Test.InstrumentationTests
             var ex = new HttpRequestException("An error occurred while sending the request.", ioException);
 
             var log = GivenLogEvent(LogLevel.Error, ex, "test");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_filter_event_for_http_timeout_wrapped_in_a_web_exception()
+        {
+            // The chain an indexer's .torrent download timing out produces:
+            // ManagedHttpDispatcher wraps the TaskCanceledException in a WebException.
+            var socketException = new SocketException((int)SocketError.OperationAborted, "Operation canceled");
+            var ioException = new IOException("Unable to read data from the transport connection: Operation canceled.", socketException);
+            var canceled = new TaskCanceledException("The operation was canceled.", ioException);
+            var ex = new WebException("Http request timed out", canceled, WebExceptionStatus.Timeout, null);
+
+            var log = GivenLogEvent(LogLevel.Error, ex, "Downloading torrent file for game 'test' failed");
             _subject.IsSentryMessage(log).Should().BeFalse();
         }
 
