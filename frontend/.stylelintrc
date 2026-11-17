@@ -40,7 +40,6 @@
     ],
     "declaration-block-no-redundant-longhand-properties": true,
     "declaration-block-no-shorthand-property-overrides": true,
-    "declaration-block-single-line-max-declarations": 1,
     "font-family-name-quotes": "always-unless-keyword",
     "function-calc-no-unspaced-operator": true,
     "function-linear-gradient-no-nonstandard-direction": true,
