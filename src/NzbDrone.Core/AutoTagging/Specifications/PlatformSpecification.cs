@@ -18,7 +18,7 @@ namespace NzbDrone.Core.AutoTagging.Specifications
 
     public class PlatformSpecification : AutoTaggingSpecificationBase
     {
-        private static readonly PlatformSpecificationValidator Validator = new ();
+        private static readonly PlatformSpecificationValidator Validator = new();
 
         public override int Order => 2;
         public override string ImplementationName => "Platform";

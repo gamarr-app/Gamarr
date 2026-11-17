@@ -38,11 +38,13 @@ namespace NzbDrone.Core.Test.NotificationTests
                     new DeletedGameFile(new GameFile
                     {
                         RelativePath = "oldgamefile1.mkv"
-                    }, null),
+                    },
+                    null),
                     new DeletedGameFile(new GameFile
                     {
                         RelativePath = "oldgamefile2.mkv"
-                    }, null)
+                    },
+                    null)
                 }
             };
 

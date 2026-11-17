@@ -30,9 +30,9 @@ namespace NzbDrone.Core.ImportLists.ImportListGames
             _logger = logger;
         }
 
-        public ImportListGame AddListGame(ImportListGame exclusion)
+        public ImportListGame AddListGame(ImportListGame listGame)
         {
-            return _importListGameRepository.Insert(exclusion);
+            return _importListGameRepository.Insert(listGame);
         }
 
         public List<ImportListGame> AddListGames(List<ImportListGame> listGames)

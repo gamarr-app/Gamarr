@@ -32,7 +32,11 @@ namespace NzbDrone.Core.ThingiProvider
         [MemberwiseEqualityIgnore]
         public IProviderConfig Settings
         {
-            get => _settings;
+            get
+            {
+                return _settings;
+            }
+
             set
             {
                 _settings = value;

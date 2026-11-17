@@ -157,11 +157,11 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             return Json.Deserialize<TransmissionConfig>(result.Arguments.ToJson());
         }
 
-        public void RemoveTorrent(string hashString, bool removeData, TransmissionSettings settings)
+        public void RemoveTorrent(string hash, bool removeData, TransmissionSettings settings)
         {
             var arguments = new Dictionary<string, object>
             {
-                { "ids", new List<string> { hashString } },
+                { "ids", new List<string> { hash } },
                 { "delete-local-data", removeData }
             };
 

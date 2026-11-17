@@ -100,7 +100,8 @@ namespace NzbDrone.Core.Test.Blocklisting
             Mocker.GetMock<IBlocklistRepository>()
                   .Verify(v => v.Insert(It.Is<Blocklist>(b =>
                       b.Size == 8031189401L &&
-                      b.Indexer == "1337x (Prowlarr)")), Times.Once());
+                      b.Indexer == "1337x (Prowlarr)")),
+                      Times.Once());
         }
     }
 }

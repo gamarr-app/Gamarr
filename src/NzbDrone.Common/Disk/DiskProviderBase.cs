@@ -407,11 +407,11 @@ namespace NzbDrone.Common.Disk
             File.SetLastWriteTime(path, dateTime);
         }
 
-        public bool IsFileLocked(string file)
+        public bool IsFileLocked(string path)
         {
             try
             {
-                using (File.Open(file, FileMode.Open, FileAccess.Read, FileShare.None))
+                using (File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None))
                 {
                     return false;
                 }

@@ -95,7 +95,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(s => s.PublishEvent<GameFolderCreatedEvent>(It.Is<GameFolderCreatedEvent>(p =>
-                      p.GameFolder.IsNotNullOrWhiteSpace())), Times.Once());
+                      p.GameFolder.IsNotNullOrWhiteSpace())),
+                      Times.Once());
         }
 
         [Test]
@@ -109,7 +110,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(s => s.PublishEvent<GameFolderCreatedEvent>(It.Is<GameFolderCreatedEvent>(p =>
-                      p.GameFolder.IsNotNullOrWhiteSpace())), Times.Never());
+                      p.GameFolder.IsNotNullOrWhiteSpace())),
+                      Times.Never());
         }
     }
 

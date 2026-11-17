@@ -118,9 +118,9 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
             {
                 _logger.Debug("Generating Game Metadata for: {0}", Path.Combine(game.Path, gameFile.RelativePath));
 
-                var gameMetadataLanguage = Settings.GameMetadataLanguage == (int)Language.Original ?
-                    (int)game.GameMetadata.Value.OriginalLanguage :
-                    Settings.GameMetadataLanguage;
+                var gameMetadataLanguage = Settings.GameMetadataLanguage == (int)Language.Original
+                    ? (int)game.GameMetadata.Value.OriginalLanguage
+                    : Settings.GameMetadataLanguage;
 
                 var gameTranslations = _gameTranslationsService.GetAllTranslationsForGameMetadata(game.GameMetadataId);
                 var selectedSettingsLanguage = Language.FindById(gameMetadataLanguage);

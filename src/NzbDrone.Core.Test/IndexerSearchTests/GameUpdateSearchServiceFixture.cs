@@ -76,7 +76,8 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             Mocker.GetMock<IManageCommandQueue>()
                 .Verify(v => v.Push(It.IsAny<GameUpdateSearchCommand>(),
                                     It.IsAny<CommandPriority>(),
-                                    It.IsAny<CommandTrigger>()), times);
+                                    It.IsAny<CommandTrigger>()),
+                                    times);
         }
 
         private void VerifySearched(int gameId, Times times)
@@ -282,12 +283,14 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             Mocker.GetMock<IManageCommandQueue>()
                 .Verify(v => v.Push(It.Is<GameComponentSearchCommand>(c => c.ComponentId == 21),
                                     It.IsAny<CommandPriority>(),
-                                    It.IsAny<CommandTrigger>()), Times.Once());
+                                    It.IsAny<CommandTrigger>()),
+                                    Times.Once());
 
             Mocker.GetMock<IManageCommandQueue>()
                 .Verify(v => v.Push(It.Is<GameComponentSearchCommand>(c => c.ComponentId == 22),
                                     It.IsAny<CommandPriority>(),
-                                    It.IsAny<CommandTrigger>()), Times.Never());
+                                    It.IsAny<CommandTrigger>()),
+                                    Times.Never());
         }
 
         [Test]
@@ -314,7 +317,8 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             Mocker.GetMock<IManageCommandQueue>()
                 .Verify(v => v.Push(It.IsAny<GameComponentSearchCommand>(),
                                     It.IsAny<CommandPriority>(),
-                                    It.IsAny<CommandTrigger>()), Times.Never());
+                                    It.IsAny<CommandTrigger>()),
+                                    Times.Never());
         }
 
         // Backing off a game whose searches keep coming back empty is the only

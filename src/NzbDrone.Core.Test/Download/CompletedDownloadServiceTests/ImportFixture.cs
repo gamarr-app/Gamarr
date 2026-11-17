@@ -106,11 +106,13 @@ namespace NzbDrone.Core.Test.Download
                            {
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")),
+                                   "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.11.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.11.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")),
+                                   "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -130,11 +132,13 @@ namespace NzbDrone.Core.Test.Download
                            {
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure"),
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")),
+                                   "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision(
-                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")), "Test Failure")
+                                       new LocalGame { Path = @"C:\TestPath\Elden.Ring.v1.10.iso" }, new ImportRejection(ImportRejectionReason.Unknown, "Rejected!")),
+                                   "Test Failure")
                            });
 
             _trackedDownload.RemoteGame.Game = new Game();

@@ -60,15 +60,15 @@ namespace NzbDrone.Core.Games.AlternativeTitles
             _titleRepo.Delete(title);
         }
 
-        public List<AlternativeTitle> UpdateTitles(List<AlternativeTitle> titles, GameMetadata gameMetadata)
+        public List<AlternativeTitle> UpdateTitles(List<AlternativeTitle> titles, GameMetadata game)
         {
-            var gameMetadataId = gameMetadata.Id;
+            var gameMetadataId = game.Id;
 
             // First update the game ids so we can correlate them later.
             titles.ForEach(t => t.GameMetadataId = gameMetadataId);
 
             // Then make sure none of them are the same as the main title.
-            titles = titles.Where(t => t.CleanTitle != gameMetadata.CleanTitle).ToList();
+            titles = titles.Where(t => t.CleanTitle != game.CleanTitle).ToList();
 
             // Then make sure they are all distinct titles
             titles = titles.DistinctBy(t => t.CleanTitle).ToList();
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Games.AlternativeTitles
             _titleRepo.UpdateMany(updateList);
             _titleRepo.InsertMany(addList);
 
-            _logger.Debug("[{0}] {1} alternative titles up to date; Updating {2}, Adding {3}, Deleting {4} entries.", gameMetadata.Title, upToDateCount, updateList.Count, addList.Count, existingTitles.Count);
+            _logger.Debug("[{0}] {1} alternative titles up to date; Updating {2}, Adding {3}, Deleting {4} entries.", game.Title, upToDateCount, updateList.Count, addList.Count, existingTitles.Count);
 
             return titles;
         }

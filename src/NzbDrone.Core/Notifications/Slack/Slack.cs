@@ -25,19 +25,19 @@ namespace NzbDrone.Core.Notifications.Slack
         public override string Name => "Slack";
         public override string Link => "https://my.slack.com/services/new/incoming-webhook/";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
-                    Fallback = message.Message,
-                    Title = message.Game.Title,
-                    Text = message.Message,
+                    Fallback = grabMessage.Message,
+                    Title = grabMessage.Game.Title,
+                    Text = grabMessage.Message,
                     Color = "warning"
                 }
             };
-            var payload = CreatePayload($"Grabbed: {message.Message}", attachments);
+            var payload = CreatePayload($"Grabbed: {grabMessage.Message}", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Fallback = message.Message,
                     Title = message.Game.Title,
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Title = deleteMessage.Game.Title,
                     Text = Path.Combine(deleteMessage.Game.Path, deleteMessage.GameFile.RelativePath)
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Title = deleteMessage.Game.Title,
                     Text = deleteMessage.DeletedFilesMessage
@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Title = healthCheck.Source.Name,
                     Text = healthCheck.Message,
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Title = previousCheck.Source.Name,
                     Text = $"The following issue is now resolved: {previousCheck.Message}",
@@ -147,7 +147,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Title = Environment.MachineName,
                     Text = updateMessage.Message,
@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Notifications.Slack
         {
             var attachments = new List<Attachment>
             {
-                new ()
+                new()
                 {
                     Title = Environment.MachineName,
                     Text = message.Message,

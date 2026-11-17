@@ -34,9 +34,9 @@ namespace NzbDrone.Core.Notifications.Pushcut
             _proxy.SendNotification(GAME_GRABBED_TITLE, grabMessage?.Message, GetPosterUrl(grabMessage.Game), GetLinks(grabMessage.Game), Settings);
         }
 
-        public override void OnDownload(DownloadMessage downloadMessage)
+        public override void OnDownload(DownloadMessage message)
         {
-            _proxy.SendNotification(downloadMessage.OldGameFiles.Any() ? GAME_UPGRADED_TITLE : GAME_DOWNLOADED_TITLE, downloadMessage.Message, GetPosterUrl(downloadMessage.Game), GetLinks(downloadMessage.Game), Settings);
+            _proxy.SendNotification(message.OldGameFiles.Any() ? GAME_UPGRADED_TITLE : GAME_DOWNLOADED_TITLE, message.Message, GetPosterUrl(message.Game), GetLinks(message.Game), Settings);
         }
 
         public override void OnGameAdded(Game game)
@@ -69,9 +69,9 @@ namespace NzbDrone.Core.Notifications.Pushcut
             _proxy.SendNotification(APPLICATION_UPDATE_TITLE_BRANDED, updateMessage.Message, null, new List<NotificationMetadataLink>(), Settings);
         }
 
-        public override void OnManualInteractionRequired(ManualInteractionRequiredMessage manualInteractionRequiredMessage)
+        public override void OnManualInteractionRequired(ManualInteractionRequiredMessage message)
         {
-            _proxy.SendNotification(MANUAL_INTERACTION_REQUIRED_TITLE_BRANDED, manualInteractionRequiredMessage.Message, null, new List<NotificationMetadataLink>(), Settings);
+            _proxy.SendNotification(MANUAL_INTERACTION_REQUIRED_TITLE_BRANDED, message.Message, null, new List<NotificationMetadataLink>(), Settings);
         }
 
         private string GetPosterUrl(Game game)

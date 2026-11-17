@@ -18,9 +18,9 @@ namespace NzbDrone.Core.Notifications
         {
             Game = game;
             DeletedFiles = deleteFiles;
-            DeletedFilesMessage = DeletedFiles ?
-                "Game removed and all files were deleted" :
-                "Game removed, files were not deleted";
+            DeletedFilesMessage = DeletedFiles
+                ? "Game removed and all files were deleted"
+                : "Game removed, files were not deleted";
             Message = game.Title + " - " + DeletedFilesMessage;
         }
     }

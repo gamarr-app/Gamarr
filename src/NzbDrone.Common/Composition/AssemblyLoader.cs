@@ -85,7 +85,7 @@ namespace NzbDrone.Common.Composition
             }
         }
 
-        private static IntPtr LoadNativeLib(string libraryName, Assembly assembly, DllImportSearchPath? dllImportSearchPath)
+        private static nint LoadNativeLib(string libraryName, Assembly assembly, DllImportSearchPath? dllImportSearchPath)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(libraryName);
 

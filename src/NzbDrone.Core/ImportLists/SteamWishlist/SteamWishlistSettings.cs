@@ -14,7 +14,7 @@ namespace NzbDrone.Core.ImportLists.SteamWishlist
 
     public class SteamWishlistSettings : ImportListSettingsBase<SteamWishlistSettings>
     {
-        private static readonly SteamWishlistSettingsValidator Validator = new ();
+        private static readonly SteamWishlistSettingsValidator Validator = new();
 
         public SteamWishlistSettings()
         {

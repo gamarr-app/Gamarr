@@ -18,7 +18,7 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "ValidCutoffValidator";
 
-        public override bool IsValid(ValidationContext<T> context, int cutoff)
+        public override bool IsValid(ValidationContext<T> context, int value)
         {
             var instance = context.InstanceToValidate;
             var items = instance.Items;
@@ -28,19 +28,19 @@ namespace Gamarr.Api.V3.Profiles.Quality
                 return false;
             }
 
-            var cutoffItem = items.SingleOrDefault(i => (i.Quality == null && i.Id == cutoff) || i.Quality?.Id == cutoff);
+            var cutoffItem = items.SingleOrDefault(i => (i.Quality == null && i.Id == value) || i.Quality?.Id == value);
 
             if (cutoffItem == null)
             {
                 context.MessageFormatter.AppendArgument("ValidationMessage",
-                    $"Cutoff ID '{cutoff}' does not match any quality or group in the profile");
+                    $"Cutoff ID '{value}' does not match any quality or group in the profile");
                 return false;
             }
 
             if (!cutoffItem.Allowed)
             {
                 context.MessageFormatter.AppendArgument("ValidationMessage",
-                    $"Cutoff quality/group '{cutoffItem.Name ?? cutoffItem.Quality?.Name ?? cutoff.ToString()}' must be allowed");
+                    $"Cutoff quality/group '{cutoffItem.Name ?? cutoffItem.Quality?.Name ?? value.ToString()}' must be allowed");
                 return false;
             }
 

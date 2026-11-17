@@ -22,11 +22,13 @@ namespace NzbDrone.Core.Datastore
         {
             _configFileProvider = configFileProvider;
 
-            MainDbConnection = _configFileProvider.PostgresHost.IsNotNullOrWhiteSpace() ? GetPostgresConnectionString(_configFileProvider.PostgresMainDb) :
-                GetConnectionString(appFolderInfo.GetDatabase());
+            MainDbConnection = _configFileProvider.PostgresHost.IsNotNullOrWhiteSpace()
+                ? GetPostgresConnectionString(_configFileProvider.PostgresMainDb)
+                : GetConnectionString(appFolderInfo.GetDatabase());
 
-            LogDbConnection = _configFileProvider.PostgresHost.IsNotNullOrWhiteSpace() ? GetPostgresConnectionString(_configFileProvider.PostgresLogDb) :
-                GetConnectionString(appFolderInfo.GetLogDatabase());
+            LogDbConnection = _configFileProvider.PostgresHost.IsNotNullOrWhiteSpace()
+                ? GetPostgresConnectionString(_configFileProvider.PostgresLogDb)
+                : GetConnectionString(appFolderInfo.GetLogDatabase());
         }
 
         public DatabaseConnectionInfo MainDbConnection { get; private set; }

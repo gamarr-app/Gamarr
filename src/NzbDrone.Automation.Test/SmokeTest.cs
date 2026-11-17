@@ -15,7 +15,7 @@ namespace NzbDrone.Automation.Test
             // Page is already navigated to BaseUrl by TestSetup. Just verify
             // the SPA bootstrapped and rendered the sidebar — that's enough
             // to prove auth + bundle + bootstrap + render all work.
-            await Expect(Page.GetByRole(AriaRole.Link, new () { Name = "Games" }).First).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Games" }).First).ToBeVisibleAsync();
             await TakeScreenshotAsync("smoke_root");
         }
     }

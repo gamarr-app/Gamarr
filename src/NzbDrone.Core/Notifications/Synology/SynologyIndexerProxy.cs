@@ -42,29 +42,29 @@ namespace NzbDrone.Core.Notifications.Synology
             }
         }
 
-        public void AddFile(string filePath)
+        public void AddFile(string filepath)
         {
-            ExecuteCommand("-a " + Escape(filePath));
+            ExecuteCommand("-a " + Escape(filepath));
         }
 
-        public void DeleteFile(string filePath)
+        public void DeleteFile(string filepath)
         {
-            ExecuteCommand("-d " + Escape(filePath));
+            ExecuteCommand("-d " + Escape(filepath));
         }
 
-        public void AddFolder(string folderPath)
+        public void AddFolder(string folderpath)
         {
-            ExecuteCommand("-A " + Escape(folderPath));
+            ExecuteCommand("-A " + Escape(folderpath));
         }
 
-        public void DeleteFolder(string folderPath)
+        public void DeleteFolder(string folderpath)
         {
-            ExecuteCommand("-D " + Escape(folderPath));
+            ExecuteCommand("-D " + Escape(folderpath));
         }
 
-        public void UpdateFolder(string folderPath)
+        public void UpdateFolder(string folderpath)
         {
-            ExecuteCommand("-R " + Escape(folderPath));
+            ExecuteCommand("-R " + Escape(folderpath));
         }
 
         public void UpdateLibrary()

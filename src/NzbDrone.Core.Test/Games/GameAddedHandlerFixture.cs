@@ -33,7 +33,8 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.Push(
                       It.Is<RefreshGameCommand>(c => c.GameIds.Contains(_game.Id) && c.IsNewGame == true),
                       CommandPriority.Normal,
-                      CommandTrigger.Unspecified), Times.Once());
+                      CommandTrigger.Unspecified),
+                      Times.Once());
         }
 
         [Test]
@@ -47,7 +48,8 @@ namespace NzbDrone.Core.Test.Games
                   .Verify(v => v.Push(
                       It.Is<RefreshGameCommand>(c => c.GameIds.Count == 1 && c.GameIds[0] == 42),
                       CommandPriority.Normal,
-                      CommandTrigger.Unspecified), Times.Once());
+                      CommandTrigger.Unspecified),
+                      Times.Once());
         }
 
         [Test]
@@ -82,7 +84,8 @@ namespace NzbDrone.Core.Test.Games
                       c[0].GameIds[0] == 10 &&
                       c[1].GameIds[0] == 20 &&
                       c[0].IsNewGame == true &&
-                      c[1].IsNewGame == true)), Times.Once());
+                      c[1].IsNewGame == true)),
+                      Times.Once());
         }
     }
 }

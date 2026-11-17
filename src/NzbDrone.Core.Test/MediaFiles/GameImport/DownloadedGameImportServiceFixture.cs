@@ -387,7 +387,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                       _downloadClientItem,
                       It.IsAny<ParsedGameInfo>(),
                       true,
-                      It.IsAny<bool>()), Times.Once());
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]

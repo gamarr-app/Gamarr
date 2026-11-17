@@ -23,16 +23,16 @@ namespace NzbDrone.Core.ImportLists.Rss
             _logger = logger;
         }
 
-        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importResponse)
+        public virtual IList<ImportListGame> ParseResponse(ImportListResponse importListResponse)
         {
             var games = new List<ImportListGame>();
 
-            if (!PreProcess(importResponse))
+            if (!PreProcess(importListResponse))
             {
                 return games;
             }
 
-            var document = LoadXmlDocument(importResponse);
+            var document = LoadXmlDocument(importListResponse);
             var items = GetItems(document).ToList();
 
             foreach (var item in items)
@@ -45,15 +45,15 @@ namespace NzbDrone.Core.ImportLists.Rss
                 }
                 catch (UnsupportedFeedException itemEx)
                 {
-                    itemEx.WithData("FeedUrl", importResponse.Request.Url);
+                    itemEx.WithData("FeedUrl", importListResponse.Request.Url);
                     itemEx.WithData("ItemTitle", item.Title());
                     throw;
                 }
                 catch (Exception itemEx)
                 {
-                    itemEx.WithData("FeedUrl", importResponse.Request.Url);
+                    itemEx.WithData("FeedUrl", importListResponse.Request.Url);
                     itemEx.WithData("ItemTitle", item.Title());
-                    _logger.Error(itemEx, "An error occurred while processing feed item from {0}", importResponse.Request.Url);
+                    _logger.Error(itemEx, "An error occurred while processing feed item from {0}", importListResponse.Request.Url);
                 }
             }
 

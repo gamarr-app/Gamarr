@@ -45,7 +45,7 @@ namespace NzbDrone.Core.MediaFiles.Archives
         /// <summary>
         /// Container formats we will look inside. Deliberately short.
         /// </summary>
-        public static readonly HashSet<string> ContainerExtensions = new (StringComparer.OrdinalIgnoreCase)
+        public static readonly HashSet<string> ContainerExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             ".7z",
             ".rar",
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.MediaFiles.Archives
         /// repack .dat) are excluded on purpose — those archives hold a whole
         /// installer tree that must not be collapsed into one file.
         /// </summary>
-        public static readonly HashSet<string> ExtractableEntryExtensions = new (StringComparer.OrdinalIgnoreCase)
+        public static readonly HashSet<string> ExtractableEntryExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             // Nintendo Switch — the case this was built for; ownfoil only reads these three
             ".nsp",
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.MediaFiles.Archives
         // nothing else here, and MediaFileExtensions.SplitVolumeRegex actively
         // makes ".001" look like a game file extension. v1 refuses all of them
         // rather than half-handling a multi-volume extract.
-        private static readonly Regex SplitVolumeRegex = new (
+        private static readonly Regex SplitVolumeRegex = new(
             @"(\.part\d+\.rar|\.(?:7z|zip|rar)\.\d{3}|\.r\d{2}|\.z\d{2})$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 

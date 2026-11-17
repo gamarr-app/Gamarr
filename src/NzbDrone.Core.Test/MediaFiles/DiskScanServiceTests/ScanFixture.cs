@@ -356,7 +356,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                       gf.Languages.Contains(Language.English) &&
                       gf.ReleaseGroup == "GRP" &&
                       gf.SceneName == "Some.Game.PC-GRP" &&
-                      gf.DateAdded == new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc))), Times.Once());
+                      gf.DateAdded == new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc))),
+                      Times.Once());
 
             // Healing it must not look like a vanished path or a migration.
             Mocker.GetMock<IMediaFileService>()
@@ -391,7 +392,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                   .Verify(v => v.Update(It.Is<GameFile>(gf =>
                       gf.Id == 215 &&
                       gf.RelativePath == "Game" &&
-                      gf.Size == 100000L)), Times.Once());
+                      gf.Size == 100000L)),
+                      Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Update(It.IsAny<GameFile>()), Times.Once());
@@ -554,7 +556,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                   .Verify(v => v.MoveFolder(
                       Path.Combine(_game.Path, "update_1.7.1").AsOsAgnostic(),
                       Path.Combine(_game.Path, "Updates", "v1.7.1").AsOsAgnostic(),
-                      false), Times.Once());
+                      false),
+                      Times.Once());
         }
 
         [Test]
@@ -609,7 +612,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == Path.Combine("Updates", "v1.7.1") &&
-                      gf.GameVersion.HasValue)), Times.Once());
+                      gf.GameVersion.HasValue)),
+                      Times.Once());
         }
 
         [Test]
@@ -690,7 +694,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
-                      gf.RelativePath == Path.Combine("Updates", "v1.7.1"))), Times.Once());
+                      gf.RelativePath == Path.Combine("Updates", "v1.7.1"))),
+                      Times.Once());
         }
 
         private void GivenDlcSlot(string title)
@@ -738,7 +743,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                   .Verify(v => v.MoveFolder(
                       dlcDir,
                       Path.Combine(_game.Path, "DLC", "The.Blood.Price.DLC").AsOsAgnostic(),
-                      false), Times.Once());
+                      false),
+                      Times.Once());
         }
 
         [Test]
@@ -811,7 +817,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == "Kirby and the Forgotten Land [v0].nsp" &&
-                      gf.Size == 6169789825L)), Times.Once());
+                      gf.Size == 6169789825L)),
+                      Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game")), Times.Never());
@@ -857,7 +864,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == "Pokemon Let's Go, Pikachu! [v0].nsp" &&
-                      gf.Size == 4465458938L)), Times.Once());
+                      gf.Size == 4465458938L)),
+                      Times.Once());
         }
 
         [TestCase(PlatformFamily.NintendoSwitch)]
@@ -900,7 +908,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == "Game" &&
-                      gf.Size == 6000L)), Times.Once());
+                      gf.Size == 6000L)),
+                      Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath != "Game")), Times.Never());
@@ -944,7 +953,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == "Kirby and the Forgotten Land [v65536][1.1.0][UPD].nsp" &&
-                      gf.Size == 50953289L)), Times.Once());
+                      gf.Size == 50953289L)),
+                      Times.Once());
         }
 
         [Test]
@@ -962,11 +972,13 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
-                      gf.RelativePath == "Kirby and the Forgotten Land [01004D300C5AE000][v0][Base].nsp")), Times.Once());
+                      gf.RelativePath == "Kirby and the Forgotten Land [01004D300C5AE000][v0][Base].nsp")),
+                      Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
-                      gf.RelativePath == "Kirby and the Forgotten Land [v0].nsp")), Times.Once());
+                      gf.RelativePath == "Kirby and the Forgotten Land [v0].nsp")),
+                      Times.Once());
         }
 
         [Test]
@@ -1001,12 +1013,14 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                       gf.Id == 146 &&
                       gf.RelativePath == "Pokemon Let's Go, Pikachu! [010003F003A34000][v0].nsp" &&
                       gf.Size == 4465458938L &&
-                      gf.SceneName == "Pokemon.Lets.Go.Pikachu.NSW-GRP")), Times.Once());
+                      gf.SceneName == "Pokemon.Lets.Go.Pikachu.NSW-GRP")),
+                      Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf =>
                       gf.RelativePath == "Pokemon Let's Go, Pikachu! [010003F003A34800][v131072].nsp" &&
-                      gf.Size == 35598272L)), Times.Once());
+                      gf.Size == 35598272L)),
+                      Times.Once());
 
             // The folder row is recycled, never deleted — deleting it would
             // null out Game.GameFileId.

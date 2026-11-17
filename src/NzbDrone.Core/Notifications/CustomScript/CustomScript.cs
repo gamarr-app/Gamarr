@@ -53,11 +53,11 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override ProviderMessage Message => new ProviderMessage(_localizationService.GetLocalizedString("NotificationsCustomScriptSettingsProviderMessage", new Dictionary<string, object> { { "eventTypeTest", "Test" } }), ProviderMessageType.Warning);
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
-            var game = message.Game;
-            var remoteGame = message.RemoteGame;
-            var quality = message.Quality;
+            var game = grabMessage.Game;
+            var remoteGame = grabMessage.RemoteGame;
+            var quality = grabMessage.Quality;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Gamarr_EventType", "Grab");
@@ -80,9 +80,9 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Gamarr_Release_Quality", quality.Quality.Name);
             environmentVariables.Add("Gamarr_Release_QualityVersion", quality.Revision.Version.ToString());
             environmentVariables.Add("Gamarr_IndexerFlags", remoteGame.Release.IndexerFlags.ToString());
-            environmentVariables.Add("Gamarr_Download_Client", message.DownloadClientName ?? string.Empty);
-            environmentVariables.Add("Gamarr_Download_Client_Type", message.DownloadClientType ?? string.Empty);
-            environmentVariables.Add("Gamarr_Download_Id", message.DownloadId ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Client", grabMessage.DownloadClientName ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Client_Type", grabMessage.DownloadClientType ?? string.Empty);
+            environmentVariables.Add("Gamarr_Download_Id", grabMessage.DownloadId ?? string.Empty);
             environmentVariables.Add("Gamarr_Release_CustomFormat", string.Join("|", remoteGame.CustomFormats));
             environmentVariables.Add("Gamarr_Release_CustomFormatScore", remoteGame.CustomFormatScore.ToString());
 

@@ -105,7 +105,8 @@ namespace NzbDrone.Core.Test.Backup
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     TransferMode.Copy,
-                    It.IsAny<bool>()), Times.Once());
+                    It.IsAny<bool>()),
+                    Times.Once());
         }
 
         [Test]
@@ -116,7 +117,8 @@ namespace NzbDrone.Core.Test.Backup
             Mocker.GetMock<IArchiveService>()
                 .Verify(c => c.CreateZip(
                     It.Is<string>(s => s.Contains("gamarr_backup")),
-                    It.IsAny<IEnumerable<string>>()), Times.Once());
+                    It.IsAny<IEnumerable<string>>()),
+                    Times.Once());
         }
 
         [Test]
@@ -183,14 +185,16 @@ namespace NzbDrone.Core.Test.Backup
                 .Verify(c => c.MoveFile(
                     It.Is<string>(s => s.Contains("Config.xml")),
                     It.IsAny<string>(),
-                    true), Times.Once());
+                    true),
+                    Times.Once());
 
             // Database restored
             Mocker.GetMock<IDiskProvider>()
                 .Verify(c => c.MoveFile(
                     It.Is<string>(s => s.Contains("gamarr.db")),
                     It.IsAny<string>(),
-                    true), Times.Once());
+                    true),
+                    Times.Once());
         }
 
         [Test]
@@ -212,7 +216,8 @@ namespace NzbDrone.Core.Test.Backup
                 .Verify(c => c.MoveFile(
                     It.Is<string>(s => s.Contains("nzbdrone.db")),
                     It.IsAny<string>(),
-                    true), Times.Once());
+                    true),
+                    Times.Once());
         }
 
         [Test]

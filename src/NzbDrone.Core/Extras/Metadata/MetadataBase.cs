@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Extras.Metadata
         public abstract MetadataFileResult GameMetadata(Game game, GameFile gameFile);
         public abstract List<ImageFileResult> GameImages(Game game);
 
-        public virtual object RequestAction(string action, IDictionary<string, string> query)
+        public virtual object RequestAction(string stage, IDictionary<string, string> query)
         {
             return null;
         }

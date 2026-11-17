@@ -171,9 +171,9 @@ namespace NzbDrone.Core.Indexers.Torznab
             return null;
         }
 
-        public override object RequestAction(string action, IDictionary<string, string> query)
+        public override object RequestAction(string stage, IDictionary<string, string> query)
         {
-            if (action == "newznabCategories")
+            if (stage == "newznabCategories")
             {
                 List<NewznabCategory> categories = null;
                 try
@@ -191,7 +191,7 @@ namespace NzbDrone.Core.Indexers.Torznab
                 };
             }
 
-            return base.RequestAction(action, query);
+            return base.RequestAction(stage, query);
         }
 
         private int GetProviderPageSize()

@@ -220,9 +220,9 @@ namespace NzbDrone.Core.Datastore
             return model;
         }
 
-        public void InsertMany(IList<TModel> models)
+        public void InsertMany(IList<TModel> model)
         {
-            if (models.Any(x => x.Id != 0))
+            if (model.Any(x => x.Id != 0))
             {
                 throw new InvalidOperationException("Can't insert model with existing ID != 0");
             }
@@ -231,9 +231,9 @@ namespace NzbDrone.Core.Datastore
             {
                 using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
-                    foreach (var model in models)
+                    foreach (var item in model)
                     {
-                        Insert(conn, tran, model);
+                        Insert(conn, tran, item);
                     }
 
                     tran.Commit();
@@ -258,9 +258,9 @@ namespace NzbDrone.Core.Datastore
             return model;
         }
 
-        public void UpdateMany(IList<TModel> models)
+        public void UpdateMany(IList<TModel> model)
         {
-            if (models.Any(x => x.Id == 0))
+            if (model.Any(x => x.Id == 0))
             {
                 throw new InvalidOperationException("Can't update model with ID 0");
             }
@@ -268,7 +268,7 @@ namespace NzbDrone.Core.Datastore
             using (var conn = _database.OpenConnection())
             using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
             {
-                UpdateFields(conn, tran, models, _properties);
+                UpdateFields(conn, tran, model, _properties);
                 tran.Commit();
             }
         }
@@ -306,9 +306,9 @@ namespace NzbDrone.Core.Datastore
             }
         }
 
-        public void DeleteMany(List<TModel> models)
+        public void DeleteMany(List<TModel> model)
         {
-            DeleteMany(models.Select(m => m.Id));
+            DeleteMany(model.Select(m => m.Id));
         }
 
         public TModel Upsert(TModel model)

@@ -15,7 +15,7 @@ namespace NzbDrone.Core.ImportLists.SteamLibrary
 
     public class SteamLibrarySettings : ImportListSettingsBase<SteamLibrarySettings>
     {
-        private static readonly SteamLibrarySettingsValidator Validator = new ();
+        private static readonly SteamLibrarySettingsValidator Validator = new();
 
         public SteamLibrarySettings()
         {

@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Notifications
             return GetType().Name;
         }
 
-        public virtual object RequestAction(string action, IDictionary<string, string> query)
+        public virtual object RequestAction(string stage, IDictionary<string, string> query)
         {
             return null;
         }

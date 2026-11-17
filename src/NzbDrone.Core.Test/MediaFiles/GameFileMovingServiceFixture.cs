@@ -85,7 +85,8 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Verify(s => s.TransferFolder(
                       _localGame.Path,
                       _game.Path,
-                      TransferMode.Move), Times.Once());
+                      TransferMode.Move),
+                      Times.Once());
         }
 
         [Test]
@@ -110,7 +111,8 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Verify(s => s.TransferFolder(
                       _localGame.Path,
                       _game.Path,
-                      TransferMode.Copy), Times.Once());
+                      TransferMode.Copy),
+                      Times.Once());
         }
 
         [Test]

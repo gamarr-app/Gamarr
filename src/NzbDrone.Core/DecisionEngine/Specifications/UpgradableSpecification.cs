@@ -31,13 +31,13 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             _logger = logger;
         }
 
-        public UpgradeableRejectReason IsUpgradable(QualityProfile qualityProfile, QualityModel currentQuality, List<CustomFormat> currentCustomFormats, QualityModel newQuality, List<CustomFormat> newCustomFormats)
+        public UpgradeableRejectReason IsUpgradable(QualityProfile profile, QualityModel currentQuality, List<CustomFormat> currentCustomFormats, QualityModel newQuality, List<CustomFormat> newCustomFormats)
         {
-            var qualityComparer = new QualityModelComparer(qualityProfile);
+            var qualityComparer = new QualityModelComparer(profile);
             var qualityCompare = qualityComparer.Compare(newQuality?.Quality, currentQuality.Quality);
             var downloadPropersAndRepacks = _configService.DownloadPropersAndRepacks;
 
-            if (qualityCompare > 0 && QualityCutoffNotMet(qualityProfile, currentQuality, newQuality))
+            if (qualityCompare > 0 && QualityCutoffNotMet(profile, currentQuality, newQuality))
             {
                 _logger.Debug("New item has a better quality. Existing: {0}. New: {1}", currentQuality, newQuality);
                 return UpgradeableRejectReason.None;
@@ -60,9 +60,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return UpgradeableRejectReason.None;
             }
 
-            if (!qualityProfile.UpgradeAllowed)
+            if (!profile.UpgradeAllowed)
             {
-                _logger.Debug("Quality profile '{0}' does not allow upgrading. Skipping.", qualityProfile.Name);
+                _logger.Debug("Quality profile '{0}' does not allow upgrading. Skipping.", profile.Name);
 
                 return UpgradeableRejectReason.UpgradesNotAllowed;
             }
@@ -79,12 +79,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             {
                 _logger.Debug("Existing item meets cut-off for quality, skipping. Existing: {0}. Cutoff: {1}",
                     currentQuality,
-                    qualityProfile.Items[qualityProfile.GetIndex(qualityProfile.Cutoff).Index]);
+                    profile.Items[profile.GetIndex(profile.Cutoff).Index]);
                 return UpgradeableRejectReason.QualityCutoff;
             }
 
-            var currentFormatScore = qualityProfile.CalculateCustomFormatScore(currentCustomFormats);
-            var newFormatScore = qualityProfile.CalculateCustomFormatScore(newCustomFormats);
+            var currentFormatScore = profile.CalculateCustomFormatScore(currentCustomFormats);
+            var newFormatScore = profile.CalculateCustomFormatScore(newCustomFormats);
 
             if (newFormatScore <= currentFormatScore)
             {
@@ -96,21 +96,21 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return UpgradeableRejectReason.CustomFormatScore;
             }
 
-            if (currentFormatScore >= qualityProfile.CutoffFormatScore)
+            if (currentFormatScore >= profile.CutoffFormatScore)
             {
                 _logger.Debug("Existing item meets cut-off for custom formats, skipping. Existing: [{0}] ({1}). Cutoff score: {2}",
                     currentCustomFormats.ConcatToString(),
                     currentFormatScore,
-                    qualityProfile.CutoffFormatScore);
+                    profile.CutoffFormatScore);
                 return UpgradeableRejectReason.CustomFormatCutoff;
             }
 
-            if (newFormatScore < currentFormatScore + qualityProfile.MinUpgradeFormatScore)
+            if (newFormatScore < currentFormatScore + profile.MinUpgradeFormatScore)
             {
                 _logger.Debug("New item's custom formats [{0}] ({1}) do not meet minimum custom format score increment of {2} required for upgrade, skipping. Existing: [{3}] ({4}).",
                               newCustomFormats.ConcatToString(),
                               newFormatScore,
-                              qualityProfile.MinUpgradeFormatScore,
+                              profile.MinUpgradeFormatScore,
                               currentCustomFormats.ConcatToString(),
                               currentFormatScore);
                 return UpgradeableRejectReason.MinCustomFormatScore;

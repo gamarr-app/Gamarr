@@ -81,8 +81,8 @@ namespace NzbDrone.Core.Blocklisting
             return builder;
         }
 
-        protected override IEnumerable<Blocklist> PagedQuery(SqlBuilder builder) =>
-            _database.QueryJoined<Blocklist, Game>(builder, (blocklist, game) =>
+        protected override IEnumerable<Blocklist> PagedQuery(SqlBuilder sql) =>
+            _database.QueryJoined<Blocklist, Game>(sql, (blocklist, game) =>
             {
                 blocklist.Game = game;
                 return blocklist;

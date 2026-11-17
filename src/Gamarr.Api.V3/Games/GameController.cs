@@ -295,7 +295,8 @@ namespace Gamarr.Api.V3.Games
                     GameId = game.Id,
                     SourcePath = sourcePath,
                     DestinationPath = destinationPath
-                }, trigger: CommandTrigger.Manual);
+                },
+                trigger: CommandTrigger.Manual);
             }
 
             var model = gamesResource.ToModel(game);

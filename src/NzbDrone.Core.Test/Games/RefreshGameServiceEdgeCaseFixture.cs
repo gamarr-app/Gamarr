@@ -127,7 +127,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IAlternativeTitleService>()
                   .Verify(v => v.UpdateTitles(
                       It.Is<List<AlternativeTitle>>(list => list.Count == 2),
-                      It.IsAny<GameMetadata>()), Times.Once());
+                      It.IsAny<GameMetadata>()),
+                      Times.Once());
         }
 
         [Test]
@@ -140,7 +141,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IAlternativeTitleService>()
                   .Verify(v => v.UpdateTitles(
                       It.Is<List<AlternativeTitle>>(list => list.Count == 0),
-                      It.IsAny<GameMetadata>()), Times.Once());
+                      It.IsAny<GameMetadata>()),
+                      Times.Once());
         }
 
         [Test]
@@ -159,7 +161,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IGameTranslationService>()
                   .Verify(v => v.UpdateTranslations(
                       It.Is<List<GameTranslation>>(list => list.Count == 2),
-                      It.IsAny<GameMetadata>()), Times.Once());
+                      It.IsAny<GameMetadata>()),
+                      Times.Once());
         }
 
         [Test]
@@ -172,7 +175,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IGameTranslationService>()
                   .Verify(v => v.UpdateTranslations(
                       It.Is<List<GameTranslation>>(list => list.Count == 0),
-                      It.IsAny<GameMetadata>()), Times.Once());
+                      It.IsAny<GameMetadata>()),
+                      Times.Once());
         }
 
         [Test]
@@ -212,7 +216,8 @@ namespace NzbDrone.Core.Test.Games
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(v => v.PublishEvent(It.Is<GameScanSkippedEvent>(
-                      e => e.Reason == GameScanSkippedReason.NeverRescanAfterRefresh)), Times.Once());
+                      e => e.Reason == GameScanSkippedReason.NeverRescanAfterRefresh)),
+                      Times.Once());
         }
 
         [Test]
@@ -252,7 +257,8 @@ namespace NzbDrone.Core.Test.Games
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(v => v.PublishEvent(It.Is<GameScanSkippedEvent>(
-                      e => e.Reason == GameScanSkippedReason.RescanAfterManualRefreshOnly)), Times.Once());
+                      e => e.Reason == GameScanSkippedReason.RescanAfterManualRefreshOnly)),
+                      Times.Once());
         }
 
         [Test]

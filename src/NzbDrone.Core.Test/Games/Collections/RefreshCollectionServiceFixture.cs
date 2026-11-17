@@ -121,7 +121,9 @@ namespace NzbDrone.Core.Test.Games.Collections
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.Count == 2 &&
                       g.Any(x => x.IgdbId == 201) &&
-                      g.Any(x => x.IgdbId == 202)), It.IsAny<bool>()), Times.Once());
+                      g.Any(x => x.IgdbId == 202)),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -134,7 +136,9 @@ namespace NzbDrone.Core.Test.Games.Collections
                       g.All(x => x.QualityProfileId == _collection.QualityProfileId) &&
                       g.All(x => x.RootFolderPath == _collection.RootFolderPath) &&
                       g.All(x => x.Monitored == true) &&
-                      g.All(x => x.Tags.Contains(1))), It.IsAny<bool>()), Times.Once());
+                      g.All(x => x.Tags.Contains(1))),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -145,7 +149,9 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.All(x => x.AddOptions.AddMethod == AddGameMethod.Collection) &&
-                      g.All(x => x.AddOptions.SearchForGame == _collection.SearchOnAdd)), It.IsAny<bool>()), Times.Once());
+                      g.All(x => x.AddOptions.SearchForGame == _collection.SearchOnAdd)),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -160,7 +166,9 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.Count == 1 &&
-                      g[0].IgdbId == 202), It.IsAny<bool>()), Times.Once());
+                      g[0].IgdbId == 202),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -178,7 +186,9 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.Count == 1 &&
-                      g[0].IgdbId == 201), It.IsAny<bool>()), Times.Once());
+                      g[0].IgdbId == 201),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -208,7 +218,9 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.Count == 2 &&
-                      g.All(x => x.IgdbId == 201 || x.IgdbId == 202)), It.IsAny<bool>()), Times.Once());
+                      g.All(x => x.IgdbId == 201 || x.IgdbId == 202)),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -230,7 +242,9 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.Count == 3 &&
-                      g.Any(x => x.IgdbId == 205)), It.IsAny<bool>()), Times.Once());
+                      g.Any(x => x.IgdbId == 205)),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -278,7 +292,8 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(v => v.UpdateCollection(It.Is<GameCollection>(c =>
-                      c.Title == "Updated Collection Title")), Times.Once());
+                      c.Title == "Updated Collection Title")),
+                      Times.Once());
         }
 
         [Test]
@@ -288,7 +303,8 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(v => v.UpdateCollection(It.Is<GameCollection>(c =>
-                      c.Overview == "Updated overview")), Times.Once());
+                      c.Overview == "Updated overview")),
+                      Times.Once());
         }
 
         [Test]
@@ -299,7 +315,8 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(v => v.UpdateCollection(It.Is<GameCollection>(c =>
                       c.CleanTitle == "updatedcollectiontitle" &&
-                      c.SortTitle == "updated collection title")), Times.Once());
+                      c.SortTitle == "updated collection title")),
+                      Times.Once());
         }
 
         [Test]
@@ -310,7 +327,8 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(v => v.UpdateCollection(It.Is<GameCollection>(c =>
                       c.LastInfoSync.HasValue &&
-                      c.LastInfoSync.Value >= DateTime.UtcNow.AddMinutes(-1))), Times.Once());
+                      c.LastInfoSync.Value >= DateTime.UtcNow.AddMinutes(-1))),
+                      Times.Once());
         }
 
         [Test]
@@ -322,7 +340,8 @@ namespace NzbDrone.Core.Test.Games.Collections
                   .Verify(v => v.UpsertMany(It.Is<List<GameMetadata>>(g =>
                       g.Count == 2 &&
                       g.Any(x => x.IgdbId == 201) &&
-                      g.Any(x => x.IgdbId == 202))), Times.Once());
+                      g.Any(x => x.IgdbId == 202))),
+                      Times.Once());
         }
 
         [Test]
@@ -332,7 +351,8 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.UpsertMany(It.Is<List<GameMetadata>>(g =>
-                      g.All(x => x.CollectionIgdbId == _collection.IgdbId))), Times.Once());
+                      g.All(x => x.CollectionIgdbId == _collection.IgdbId))),
+                      Times.Once());
         }
 
         [Test]
@@ -354,7 +374,8 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.DeleteMany(It.Is<List<GameMetadata>>(g =>
                       g.Count == 1 &&
-                      g[0].IgdbId == 999)), Times.Once());
+                      g[0].IgdbId == 999)),
+                      Times.Once());
         }
 
         [Test]
@@ -618,7 +639,9 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
                       g.Count == 1 &&
-                      g[0].IgdbId == 203), It.IsAny<bool>()), Times.Once());
+                      g[0].IgdbId == 203),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -673,7 +696,9 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
-                      g.All(x => x.MinimumAvailability == GameStatusType.EarlyAccess)), It.IsAny<bool>()), Times.Once());
+                      g.All(x => x.MinimumAvailability == GameStatusType.EarlyAccess)),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -694,7 +719,9 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(g =>
-                      g.All(x => x.IgdbId != 206)), It.IsAny<bool>()), Times.Once());
+                      g.All(x => x.IgdbId != 206)),
+                      It.IsAny<bool>()),
+                      Times.Once());
         }
 
         [Test]
@@ -712,7 +739,8 @@ namespace NzbDrone.Core.Test.Games.Collections
             Mocker.GetMock<IGameCollectionService>()
                   .Verify(v => v.UpdateCollection(It.Is<GameCollection>(c =>
                       c.Images.Count == 1 &&
-                      c.Images[0].Url == "http://example.com/image.jpg")), Times.Once());
+                      c.Images[0].Url == "http://example.com/image.jpg")),
+                      Times.Once());
         }
 
         [Test]

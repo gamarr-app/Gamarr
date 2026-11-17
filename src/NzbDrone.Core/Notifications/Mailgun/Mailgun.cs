@@ -28,9 +28,9 @@ namespace NzbDrone.Core.Notifications.Mailgun
             _proxy.SendNotification(GAME_GRABBED_TITLE, grabMessage.Message, Settings);
         }
 
-        public override void OnDownload(DownloadMessage downloadMessage)
+        public override void OnDownload(DownloadMessage message)
         {
-            _proxy.SendNotification(downloadMessage.OldGameFiles.Count > 0 ? GAME_UPGRADED_TITLE : GAME_DOWNLOADED_TITLE, downloadMessage.Message, Settings);
+            _proxy.SendNotification(message.OldGameFiles.Count > 0 ? GAME_UPGRADED_TITLE : GAME_DOWNLOADED_TITLE, message.Message, Settings);
         }
 
         public override void OnGameAdded(Game game)
@@ -52,14 +52,14 @@ namespace NzbDrone.Core.Notifications.Mailgun
             _proxy.SendNotification(GAME_DELETED_TITLE, body, Settings);
         }
 
-        public override void OnHealthIssue(HealthCheck.HealthCheck healthCheckMessage)
+        public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)
         {
-            _proxy.SendNotification(HEALTH_ISSUE_TITLE, healthCheckMessage.Message, Settings);
+            _proxy.SendNotification(HEALTH_ISSUE_TITLE, healthCheck.Message, Settings);
         }
 
-        public override void OnHealthRestored(HealthCheck.HealthCheck previousCheckMessage)
+        public override void OnHealthRestored(HealthCheck.HealthCheck previousCheck)
         {
-            _proxy.SendNotification(HEALTH_RESTORED_TITLE_BRANDED, $"The following issue is now resolved: {previousCheckMessage.Message}", Settings);
+            _proxy.SendNotification(HEALTH_RESTORED_TITLE_BRANDED, $"The following issue is now resolved: {previousCheck.Message}", Settings);
         }
 
         public override void OnApplicationUpdate(ApplicationUpdateMessage updateMessage)

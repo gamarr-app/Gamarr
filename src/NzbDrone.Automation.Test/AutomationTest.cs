@@ -15,7 +15,7 @@ namespace NzbDrone.Automation.Test
     {
         private NzbDroneRunner _runner;
         protected string ApiKey => _runner?.ApiKey;
-        protected List<string> ConsoleErrors { get; private set; } = new ();
+        protected List<string> ConsoleErrors { get; private set; } = new();
         protected const string BaseUrl = "http://localhost:6767";
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace NzbDrone.Automation.Test
         protected async Task ClickNavLinkAsync(string text)
         {
             // Use First() because sidebar may have parent + child links with same name
-            await Page.GetByRole(AriaRole.Link, new () { Name = text }).First.ClickAsync();
+            await Page.GetByRole(AriaRole.Link, new() { Name = text }).First.ClickAsync();
             await WaitForNoSpinner();
         }
 

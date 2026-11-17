@@ -8,7 +8,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public static class FileExtensions
     {
-        private static readonly Regex FileExtensionRegex = new (@"\.[a-z0-9]{2,4}$",
+        private static readonly Regex FileExtensionRegex = new(@"\.[a-z0-9]{2,4}$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly HashSet<string> UsenetExtensions = new HashSet<string>()
@@ -17,7 +17,7 @@ namespace NzbDrone.Core.MediaFiles
             ".nzb"
         };
 
-        public static HashSet<string> ArchiveExtensions => new (StringComparer.OrdinalIgnoreCase)
+        public static HashSet<string> ArchiveExtensions => new(StringComparer.OrdinalIgnoreCase)
         {
             ".7z",
             ".bz2",
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.MediaFiles
             ".tgz",
             ".zip"
         };
-        public static HashSet<string> DangerousExtensions => new (StringComparer.OrdinalIgnoreCase)
+        public static HashSet<string> DangerousExtensions => new(StringComparer.OrdinalIgnoreCase)
         {
             ".arj",
             ".lnk",
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.MediaFiles
             ".vbs",
             ".zipx"
         };
-        public static HashSet<string> ExecutableExtensions => new (StringComparer.OrdinalIgnoreCase)
+        public static HashSet<string> ExecutableExtensions => new(StringComparer.OrdinalIgnoreCase)
         {
             ".bat",
             ".cmd",
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.MediaFiles
         // also covers script hosts and installer formats. Note that .exe and
         // .msi are legitimate game payloads in MediaFileExtensions — callers on
         // the import side must allow those through unless they are masquerading.
-        public static HashSet<string> UnsafeExecutableExtensions => new (StringComparer.OrdinalIgnoreCase)
+        public static HashSet<string> UnsafeExecutableExtensions => new(StringComparer.OrdinalIgnoreCase)
         {
             ".appx",
             ".bat",
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.MediaFiles
         // file extension (MediaFileExtensions), so a bare one is already
         // rejected elsewhere, but they get the same "installer, not data"
         // classification for this check.
-        public static HashSet<string> WindowsInstallerExtensions => new (StringComparer.OrdinalIgnoreCase)
+        public static HashSet<string> WindowsInstallerExtensions => new(StringComparer.OrdinalIgnoreCase)
         {
             ".appx",
             ".exe",
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.MediaFiles
         // list, GOG's install metadata. A payload that is nothing but an
         // installer plus one of these is still "nothing but an installer" —
         // these don't count as the "real content" that would clear it.
-        public static HashSet<string> IncidentalFileExtensions => new (StringComparer.OrdinalIgnoreCase)
+        public static HashSet<string> IncidentalFileExtensions => new(StringComparer.OrdinalIgnoreCase)
         {
             ".bmp",
             ".cfg",
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.MediaFiles
         // Content extensions that never legitimately sit in front of an
         // executable one. "Show.S01E01.mkv.exe" is a Windows binary wearing a
         // video file's name; only the LAST extension is what the OS honours.
-        private static readonly HashSet<string> ContentExtensions = new (StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> ContentExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             ".avi",
             ".flac",

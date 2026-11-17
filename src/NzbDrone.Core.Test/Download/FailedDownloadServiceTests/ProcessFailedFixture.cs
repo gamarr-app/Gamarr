@@ -100,7 +100,8 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
             Mocker.GetMock<IEventAggregator>()
                   .Verify(v => v.PublishEvent(It.Is<DownloadFailedEvent>(c =>
                       c.TrackedDownload == null &&
-                      c.DownloadId == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")), Times.Once());
+                      c.DownloadId == "511567EACF51EE0B303D2A9B9EDB4A9B214B3D92")),
+                      Times.Once());
         }
 
         private void AssertDownloadNotFailed()

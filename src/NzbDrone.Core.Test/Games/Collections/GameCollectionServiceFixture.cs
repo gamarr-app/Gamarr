@@ -133,7 +133,8 @@ namespace NzbDrone.Core.Test.Games.Collections
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(v => v.PublishEvent(It.Is<CollectionEditedEvent>(e =>
-                      e.Collection == updatedCollection && e.OldCollection == _collection)), Times.Once());
+                      e.Collection == updatedCollection && e.OldCollection == _collection)),
+                      Times.Once());
         }
 
         [Test]

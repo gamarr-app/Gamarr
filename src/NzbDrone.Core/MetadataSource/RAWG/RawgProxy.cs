@@ -139,7 +139,7 @@ namespace NzbDrone.Core.MetadataSource.RAWG
             }
         }
 
-        public GameCollection GetCollectionInfo(int collectionId)
+        public GameCollection GetCollectionInfo(int igdbId)
         {
             // RAWG doesn't have direct collection support like IGDB
             // Return null for now - could potentially use game_series in future

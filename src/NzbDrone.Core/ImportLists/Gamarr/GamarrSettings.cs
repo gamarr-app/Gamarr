@@ -17,7 +17,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
 
     public class GamarrSettings : ImportListSettingsBase<GamarrSettings>
     {
-        private static readonly GamarrSettingsValidator Validator = new ();
+        private static readonly GamarrSettingsValidator Validator = new();
 
         public GamarrSettings()
         {
