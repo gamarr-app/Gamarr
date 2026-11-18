@@ -9,6 +9,7 @@ using NzbDrone.Common.Serializer;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download.Aggregation;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Components;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Profiles.Qualities;
@@ -137,27 +138,24 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                     }
                 }
+                catch (MultipleGamesFoundException e)
+                {
+                    // Per-platform duplicates (the same game added once per platform) make a
+                    // title-only match ambiguous: a normal library state, not an error. Reject
+                    // the release with a reason the user can act on instead of reporting it.
+                    _logger.Warn("Release '{0}' matches more than one game in the library: {1}", report.Title, string.Join(", ", e.Games));
+
+                    parsedGameInfo = FallbackParsedGameInfo(parsedGameInfo, report);
+                    decision = new DownloadDecision(FallbackRemoteGame(parsedGameInfo, report, pushedRelease, searchCriteria),
+                        new DownloadRejection(DownloadRejectionReason.UnknownGame, "Matches more than one game in the library. Search from the game you want it for instead."));
+                }
                 catch (Exception e)
                 {
                     _logger.Error(e, "Couldn't process release.");
 
-                    // Without a ParsedGameInfo the interactive search view fails to
-                    // render the whole result set, so fall back to a title-only parse.
-                    parsedGameInfo ??= new ParsedGameInfo
-                    {
-                        Languages = LanguageParser.ParseLanguages(report.Title),
-                        Quality = QualityParser.ParseQuality(report.Title)
-                    };
-
-                    var remoteGame = new RemoteGame
-                    {
-                        Release = report,
-                        ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria),
-                        ParsedGameInfo = parsedGameInfo,
-                        Languages = parsedGameInfo.Languages,
-                    };
-
-                    decision = new DownloadDecision(remoteGame, new DownloadRejection(DownloadRejectionReason.Error, "Unexpected error processing release"));
+                    parsedGameInfo = FallbackParsedGameInfo(parsedGameInfo, report);
+                    decision = new DownloadDecision(FallbackRemoteGame(parsedGameInfo, report, pushedRelease, searchCriteria),
+                        new DownloadRejection(DownloadRejectionReason.Error, "Unexpected error processing release"));
                 }
 
                 reportNumber++;
@@ -214,6 +212,28 @@ namespace NzbDrone.Core.DecisionEngine
                 _logger.Debug("Using quality profile '{0}' from DLC slot '{1}' for {2}", profile.Name, slot.Title, CleanseLogMessage.SanitizeLogParam(remoteGame.Release.Title));
                 remoteGame.ComponentQualityProfile = profile;
             }
+        }
+
+        // Without a ParsedGameInfo the interactive search view fails to
+        // render the whole result set, so fall back to a title-only parse.
+        private static ParsedGameInfo FallbackParsedGameInfo(ParsedGameInfo parsedGameInfo, ReleaseInfo report)
+        {
+            return parsedGameInfo ?? new ParsedGameInfo
+            {
+                Languages = LanguageParser.ParseLanguages(report.Title),
+                Quality = QualityParser.ParseQuality(report.Title)
+            };
+        }
+
+        private RemoteGame FallbackRemoteGame(ParsedGameInfo parsedGameInfo, ReleaseInfo report, bool pushedRelease, SearchCriteriaBase searchCriteria)
+        {
+            return new RemoteGame
+            {
+                Release = report,
+                ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria),
+                ParsedGameInfo = parsedGameInfo,
+                Languages = parsedGameInfo.Languages,
+            };
         }
 
         private DownloadDecision GetDecisionForReport(RemoteGame remoteGame, ReleaseDecisionInformation information)

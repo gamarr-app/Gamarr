@@ -317,5 +317,30 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             ExceptionVerification.ExpectedErrors(1);
         }
+
+        [Test]
+        public void should_reject_without_error_when_release_matches_multiple_games()
+        {
+            GivenSpecifications(_pass1);
+
+            var games = new List<Game> { new Game { Id = 1, Title = "Ocarina" }, new Game { Id = 2, Title = "Ocarina" } };
+
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
+                     .Throws(new MultipleGamesFoundException(games, "Expected one game, but found {0}", games.Count));
+
+            _reports = new List<ReleaseInfo>
+                {
+                    new ReleaseInfo { Title = "Cyberpunk.2077.v2.1-CODEX" },
+                };
+
+            var result = Subject.GetRssDecision(_reports);
+
+            result.Should().HaveCount(1);
+            result.First().Approved.Should().BeFalse();
+            result.First().Rejections.Single().Reason.Should().Be(DownloadRejectionReason.UnknownGame);
+            result.First().RemoteGame.ParsedGameInfo.Should().NotBeNull();
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
     }
 }
