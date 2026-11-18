@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
@@ -11,6 +12,7 @@ using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.MediaCoverTests
 {
@@ -260,6 +262,22 @@ namespace NzbDrone.Core.Test.MediaCoverTests
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void should_warn_not_error_when_cover_file_in_use_during_game_delete()
+        {
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(v => v.FolderExists(It.IsAny<string>()))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(v => v.DeleteFolder(It.IsAny<string>(), true))
+                  .Throws(new IOException("The process cannot access the file because it is being used by another process."));
+
+            Subject.HandleAsync(new GamesDeletedEvent(new List<Game> { _game }, false, false));
+
+            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }

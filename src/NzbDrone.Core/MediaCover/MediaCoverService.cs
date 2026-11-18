@@ -333,6 +333,13 @@ namespace NzbDrone.Core.MediaCover
                     {
                         _diskProvider.DeleteFolder(path, true);
                     }
+                    catch (IOException e)
+                    {
+                        // A cover download still in flight for this game holds its .part file open
+                        // (Windows refuses the delete). That is a race with the user's own delete,
+                        // not a fault, so leave the leftover folder and don't report it as an error.
+                        _logger.Warn(e, "Unable to delete cover folder, a file in it is in use: '{0}'", path);
+                    }
                     catch (Exception e)
                     {
                         // Don't let one game's failure abort the rest of the batch, this runs on the
