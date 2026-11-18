@@ -95,5 +95,47 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
 
             result.Should().Be(_game);
         }
+
+        private void GivenSameTitleOnPlatforms(params PlatformFamily[] platforms)
+        {
+            var games = new List<Game>();
+
+            for (var i = 0; i < platforms.Length; i++)
+            {
+                games.Add(new Game
+                {
+                    Id = i + 1,
+                    Platform = platforms[i],
+                    GameMetadata = new GameMetadata { Title = "Kirby and the Forgotten Land", CleanTitle = "kirbyforgottenland" }
+                });
+            }
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByTitleCandidates(It.IsAny<List<string>>(), out It.Ref<List<string>>.IsAny))
+                  .Returns(games);
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByTitle(It.IsAny<List<string>>(), It.IsAny<int?>(), It.IsAny<List<string>>(), It.IsAny<List<Game>>()))
+                  .Throws(new MultipleGamesFoundException(games, "Expected one game"));
+        }
+
+        [Test]
+        public void should_pick_the_entry_for_the_release_platform_when_the_title_is_in_the_library_on_several_platforms()
+        {
+            GivenSameTitleOnPlatforms(PlatformFamily.PC, PlatformFamily.NintendoSwitch);
+
+            var game = Subject.GetGame("Kirby and the Forgotten Land - Nintendo Switch");
+
+            game.Should().NotBeNull();
+            game.Platform.Should().Be(PlatformFamily.NintendoSwitch);
+        }
+
+        [Test]
+        public void should_still_throw_when_the_release_platform_does_not_pick_one_entry()
+        {
+            GivenSameTitleOnPlatforms(PlatformFamily.NintendoSwitch, PlatformFamily.NintendoSwitch);
+
+            Assert.Throws<MultipleGamesFoundException>(() => Subject.GetGame("Kirby and the Forgotten Land - Nintendo Switch"));
+        }
     }
 }

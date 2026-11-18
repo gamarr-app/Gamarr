@@ -25,6 +25,7 @@ namespace NzbDrone.Core.Games
         // Secondary identifiers
         Game FindByIgdbId(int igdbid);
         List<Game> FindByIgdbId(List<int> igdbids);
+        List<Game> FindAllByIgdbIdOrSteamAppId(int igdbId, int steamAppId);
         List<int> AllGameIgdbIds();
         Game FindByRawgId(int rawgId);
 
@@ -225,6 +226,23 @@ namespace NzbDrone.Core.Games
         public Game FindByIgdbId(int igdbid)
         {
             return Query(x => x.GameMetadata.Value.IgdbId == igdbid).FirstOrDefault();
+        }
+
+        public List<Game> FindAllByIgdbIdOrSteamAppId(int igdbId, int steamAppId)
+        {
+            var results = new List<Game>();
+
+            if (igdbId > 0)
+            {
+                results.AddRange(Query(x => x.GameMetadata.Value.IgdbId == igdbId));
+            }
+
+            if (steamAppId > 0)
+            {
+                results.AddRange(Query(x => x.GameMetadata.Value.SteamAppId == steamAppId));
+            }
+
+            return results.DistinctBy(x => x.Id).ToList();
         }
 
         public List<Game> FindByIgdbId(List<int> igdbids)

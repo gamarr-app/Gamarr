@@ -68,7 +68,8 @@ namespace Gamarr.Api.V3.Games
                            SystemFolderValidator systemFolderValidator,
                            QualityProfileExistsValidator qualityProfileExistsValidator,
                            RootFolderExistsValidator rootFolderExistsValidator,
-                           GameFolderAsRootFolderValidator gameFolderAsRootFolderValidator)
+                           GameFolderAsRootFolderValidator gameFolderAsRootFolderValidator,
+                           GameDuplicateValidator gameDuplicateValidator)
             : base(signalRBroadcaster)
         {
             _gamesService = gamesService;
@@ -121,6 +122,26 @@ namespace Gamarr.Api.V3.Games
             PutValidator.RuleFor(s => s.Path).Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .IsValidPath();
+
+            // Re-platforming an entry onto a sibling's platform would make the
+            // pair a same-platform duplicate. Only checked when the platform
+            // actually changes, so a legacy Unknown + platformed pair can
+            // still be edited.
+            PutValidator.RuleFor(s => s.Platform)
+                .Must((resource, platform) =>
+                {
+                    var stored = gamesService.GetGame(resource.Id);
+
+                    if (stored == null || stored.Platform == platform)
+                    {
+                        return true;
+                    }
+
+                    var probe = new Game { Id = stored.Id, Platform = platform, GameMetadata = stored.GameMetadata };
+
+                    return gameDuplicateValidator.FindDuplicate(probe) == null;
+                })
+                .WithMessage("This title is already in the library for that platform");
 
             SharedValidator.RuleFor(s => s.QualityProfileId).Cascade(CascadeMode.Stop)
                 .ValidId()

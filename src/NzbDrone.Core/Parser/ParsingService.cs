@@ -412,6 +412,32 @@ namespace NzbDrone.Core.Parser
                 .ToList();
         }
 
+        // Same title once per platform (#150): when the title matches several
+        // library entries, let the release's parsed platform pick one before
+        // giving up with MultipleGamesFoundException. Every caller that
+        // catches that exception (decision maker, tracked/completed
+        // downloads, import, manual import) comes through here.
+        private Game FindByTitleForPlatform(List<string> titles, int? year, List<string> otherTitles, List<Game> candidates, PlatformFamily releasePlatform)
+        {
+            try
+            {
+                return _gameService.FindByTitle(titles, year, otherTitles, candidates);
+            }
+            catch (MultipleGamesFoundException e)
+            {
+                var game = GamePlatformMatcher.SelectForReleasePlatform(e.Games, releasePlatform);
+
+                if (game == null)
+                {
+                    throw;
+                }
+
+                _logger.Debug("Title matched {0} library entries, release platform {1} picked '{2}' ({3})", e.Games.Count, releasePlatform, game.Title, game.Platform);
+
+                return game;
+            }
+        }
+
         private FindGameResult TryGetGameByTitleAndOrYear(ParsedGameInfo parsedGameInfo)
         {
             var candidates = _gameService.FindByTitleCandidates(parsedGameInfo.GameTitles, out var otherTitles);
@@ -429,7 +455,7 @@ namespace NzbDrone.Core.Parser
                 // agree.
                 var titlesIncludingYear = GameTitlesIncludingYear(parsedGameInfo);
                 var yearCandidates = _gameService.FindByTitleCandidates(titlesIncludingYear, out var yearOtherTitles);
-                var gameByTitleIncludingYear = _gameService.FindByTitle(titlesIncludingYear, null, yearOtherTitles, yearCandidates);
+                var gameByTitleIncludingYear = FindByTitleForPlatform(titlesIncludingYear, null, yearOtherTitles, yearCandidates, parsedGameInfo.Platform);
 
                 if (gameByTitleIncludingYear != null)
                 {
@@ -438,7 +464,7 @@ namespace NzbDrone.Core.Parser
                     return new FindGameResult(gameByTitleIncludingYear, GameMatchType.Title);
                 }
 
-                gameByTitleAndOrYear = _gameService.FindByTitle(parsedGameInfo.GameTitles, parsedGameInfo.Year, otherTitles, candidates);
+                gameByTitleAndOrYear = FindByTitleForPlatform(parsedGameInfo.GameTitles, parsedGameInfo.Year, otherTitles, candidates, parsedGameInfo.Platform);
                 if (gameByTitleAndOrYear != null)
                 {
                     return new FindGameResult(gameByTitleAndOrYear, GameMatchType.Title);
@@ -447,7 +473,7 @@ namespace NzbDrone.Core.Parser
                 return null;
             }
 
-            gameByTitleAndOrYear = _gameService.FindByTitle(parsedGameInfo.GameTitles, null, otherTitles, candidates);
+            gameByTitleAndOrYear = FindByTitleForPlatform(parsedGameInfo.GameTitles, null, otherTitles, candidates, parsedGameInfo.Platform);
             if (gameByTitleAndOrYear != null)
             {
                 return new FindGameResult(gameByTitleAndOrYear, GameMatchType.Title);

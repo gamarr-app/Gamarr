@@ -31,6 +31,7 @@ namespace NzbDrone.Core.Games
 
         // Secondary identifiers
         Game FindByIgdbId(int igdbid);
+        List<Game> FindByIgdbIdOrSteamAppId(int igdbId, int steamAppId);
         List<int> AllGameIgdbIds();
         Game FindByRawgId(int rawgId);
 
@@ -218,6 +219,13 @@ namespace NzbDrone.Core.Games
         public Game FindByIgdbId(int igdbid)
         {
             return _gameRepository.FindByIgdbId(igdbid);
+        }
+
+        // Every entry for the title, one per platform (#150); FindByIgdbId
+        // returns only the first.
+        public List<Game> FindByIgdbIdOrSteamAppId(int igdbId, int steamAppId)
+        {
+            return _gameRepository.FindAllByIgdbIdOrSteamAppId(igdbId, steamAppId);
         }
 
         // Primary identifier - Steam App ID

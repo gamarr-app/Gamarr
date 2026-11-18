@@ -23,6 +23,12 @@ namespace NzbDrone.Core.Games
 
     public class AddGameService : IAddGameService
     {
+        // Validation reads the library and the insert writes it, so two
+        // overlapping adds of the same title (a double-submitted add dialog,
+        // an import-list sync racing a manual add) both passed the duplicate
+        // and path checks and both inserted. Serialise check-then-insert.
+        private static readonly object AddLock = new object();
+
         private readonly IGameService _gameService;
         private readonly IGameMetadataService _gameMetadataService;
         private readonly IProvideGameInfo _gameInfo;
@@ -52,7 +58,17 @@ namespace NzbDrone.Core.Games
         {
             Ensure.That(newGame, () => newGame).IsNotNull();
 
+            // The metadata fetch is a network call; keep it outside the lock.
             newGame = AddSkyhookData(newGame);
+
+            lock (AddLock)
+            {
+                return AddGameLocked(newGame);
+            }
+        }
+
+        private Game AddGameLocked(Game newGame)
+        {
             newGame = SetPropertiesAndValidate(newGame);
 
             _logger.Info("Adding Game {0} Path: [{1}]", newGame, newGame.Path);
@@ -78,6 +94,14 @@ namespace NzbDrone.Core.Games
         }
 
         public List<Game> AddGames(List<Game> newGames, bool ignoreErrors = false)
+        {
+            lock (AddLock)
+            {
+                return AddGamesLocked(newGames, ignoreErrors);
+            }
+        }
+
+        private List<Game> AddGamesLocked(List<Game> newGames, bool ignoreErrors)
         {
             var added = DateTime.UtcNow;
             var gamesToAdd = new List<Game>();
