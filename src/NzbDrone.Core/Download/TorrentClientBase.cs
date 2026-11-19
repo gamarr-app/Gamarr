@@ -180,7 +180,7 @@ namespace NzbDrone.Core.Download
             {
                 if (ex.Response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
                 {
-                    _logger.Error(ex, "Downloading torrent file for game '{0}' failed since it no longer exists ({1})", remoteGame.Release.Title, torrentUrl);
+                    _logger.Warn(ex, "Downloading torrent file for game '{0}' failed since it no longer exists ({1})", remoteGame.Release.Title, torrentUrl);
                     throw new ReleaseUnavailableException(remoteGame.Release, "Downloading torrent failed", ex);
                 }
 

@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Download
             {
                 if (ex.Response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
                 {
-                    _logger.Error(ex, "Downloading nzb file for game '{0}' failed since it no longer exists ({1})", remoteGame.Release.Title, url);
+                    _logger.Warn(ex, "Downloading nzb file for game '{0}' failed since it no longer exists ({1})", remoteGame.Release.Title, url);
                     throw new ReleaseUnavailableException(remoteGame.Release, "Downloading nzb failed", ex);
                 }
 
