@@ -151,7 +151,7 @@ fi
 # Diff against what we have already reported, write the new state, and print a
 # human-readable summary for Discord. Exits 1 when there is nothing new.
 SUMMARY=$(python3 - "$STATE_FILE" <<'PY' 2>>"$LOG_FILE"
-import json, os, sys
+import json, os, sys, urllib.request
 
 state_file = sys.argv[1]
 issues = json.load(open('/tmp/sentry-issues.json'))
@@ -163,15 +163,32 @@ new = [i for i in issues if str(i['id']) not in seen and i['level'] == 'error']
 if not new:
     sys.exit(1)
 
+
+def latest_release(issue_id):
+    """Release of the issue's latest event, so triage can tell a live bug from an
+    old install re-reporting. Best effort: a failed lookup must not drop the alert."""
+    try:
+        req = urllib.request.Request(
+            f"https://sentry.io/api/0/organizations/gamarr/issues/{issue_id}/events/latest/",
+            headers={'Authorization': 'Bearer ' + os.environ['SENTRY_AUTH_TOKEN']})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            ev = json.load(r)
+        return (ev.get('release') or {}).get('version') or 'unknown'
+    except Exception:
+        return 'unknown'
+
+
 lines = [f"Sentry: {len(new)} new unresolved issue(s) in gamarr."]
 for i in new:
     lines.append(
         f"  - {i['shortId']} [{i['id']}] {i['title']} "
-        f"({i['count']} event(s), first seen {i['firstSeen']})"
+        f"({i['count']} event(s), first seen {i['firstSeen']}, "
+        f"latest event on release {latest_release(i['id'])})"
     )
 lines.append(
     "Token is in ~/github/gamarr/.env. Pull each one's latest event, work out "
-    "whether it is a real bug or environment noise, fix what is real, and resolve them."
+    "whether it is a real bug or environment noise, fix what is real, and resolve them "
+    "with scripts/sentry-resolve.sh <id...> (resolves in the next release, so old installs do not reopen them)."
 )
 
 with open(state_file, 'w') as f:
