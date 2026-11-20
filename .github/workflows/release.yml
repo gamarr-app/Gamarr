@@ -284,6 +284,26 @@ jobs:
           mkdir -p _artifacts/$runtime/Gamarr/Gamarr.Update
           cp -r "$updater_src"/* _artifacts/$runtime/Gamarr/Gamarr.Update/
 
+          # The updater boots the same DI container as the app, and
+          # AssemblyLoader requires the platform assembly next to it. Without
+          # it every in-app update dies with "Required assembly
+          # 'Gamarr.Windows.dll' is missing from ...gamarr_update" (Sentry
+          # DOTNET-ASPNETCORE-2V). build.sh does the same copy.
+          if [[ "$runtime" == win-* ]]; then
+            platform_glob="Gamarr.Windows.*"
+          else
+            platform_glob="Gamarr.Mono.*"
+          fi
+          if ! compgen -G "_artifacts/$runtime/Gamarr/$platform_glob" > /dev/null; then
+            echo "::error::$platform_glob missing from the app publish output for $runtime — the updater could not start"
+            exit 1
+          fi
+          cp _artifacts/$runtime/Gamarr/$platform_glob _artifacts/$runtime/Gamarr/Gamarr.Update/
+          if [[ "$runtime" != win-* ]]; then
+            cp _artifacts/$runtime/Gamarr/Mono.Posix.NETStandard.* _artifacts/$runtime/Gamarr/Gamarr.Update/ 2>/dev/null || true
+            cp _artifacts/$runtime/Gamarr/libMonoPosixHelper.* _artifacts/$runtime/Gamarr/Gamarr.Update/ 2>/dev/null || true
+          fi
+
           # Remove platform-specific files
           if [[ "$runtime" == win-* ]]; then
             rm -f _artifacts/$runtime/Gamarr/Gamarr.Mono.* 2>/dev/null || true

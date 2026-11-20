@@ -33,16 +33,26 @@ namespace Gamarr.Api.V3.Profiles.Quality
             SharedValidator.RuleFor(c => c.Cutoff).ValidCutoff();
             SharedValidator.RuleFor(c => c.Items).ValidItems();
 
+            // A client that omits formatItems binds null; that is a validation
+            // failure, not a crash in the rules below (DOTNET-ASPNETCORE-4F).
+            SharedValidator.RuleFor(c => c.FormatItems).NotNull();
+
             SharedValidator.RuleFor(c => c.FormatItems).Must(items =>
             {
                 var all = formatService.All().Select(f => f.Id).ToList();
                 var ids = items.Select(i => i.Format);
 
                 return all.Except(ids).Empty();
-            }).WithMessage("All Custom Formats and no extra ones need to be present inside your Profile! Try refreshing your browser.");
+            }).When(c => c.FormatItems != null)
+            .WithMessage("All Custom Formats and no extra ones need to be present inside your Profile! Try refreshing your browser.");
 
             SharedValidator.RuleFor(c => c).Custom((profile, context) =>
             {
+                if (profile.FormatItems == null || profile.FormatItems.Count == 0)
+                {
+                    return;
+                }
+
                 if (profile.FormatItems.Where(x => x.Score > 0).Sum(x => x.Score) < profile.MinFormatScore &&
                     profile.FormatItems.Max(x => x.Score) < profile.MinFormatScore)
                 {
