@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             // The row stays so the folder can be retried, instead of leaving an
             // untracked folder the next scan re-adopts.
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<GameFile>(), It.IsAny<DeleteMediaFileReason>()), Times.Never());
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]

@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             // ...and consumers waiting on completion must still hear back.
             Mocker.GetMock<IEventAggregator>().Verify(v => v.PublishEvent(It.IsAny<DeleteCompletedEvent>()), Times.Once());
 
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }

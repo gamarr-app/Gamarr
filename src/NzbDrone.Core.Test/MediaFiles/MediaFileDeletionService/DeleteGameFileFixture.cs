@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Assert.Throws<NzbDroneClientException>(() => Subject.DeleteGameFile(_game, _gameFile));
 
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_gameFile.Path, "Game Title"), Times.Once());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_gameFile, DeleteMediaFileReason.Manual), Times.Never());
         }
@@ -188,7 +188,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             exception.Message.Should().Contain($"Access to the path '{_gameFile.Path}' is denied.");
 
-            ExceptionVerification.ExpectedErrors(1);
+            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }
