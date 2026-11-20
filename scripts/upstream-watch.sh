@@ -225,6 +225,22 @@ for remote in remotes:
 
     new_state[remote] = tip
 
+# Ported commits carry an "(upstream radarr <sha>)" trailer, short or full, and
+# the watermark does not stop one resurfacing (--since, a reset state file, a
+# Sonarr twin). Drop anything origin/main already mentions. A short trailer SHA
+# counts when it is a 7+ char prefix of the upstream one, which is what
+# `git log --grep=<sha>` per candidate would find, in a single pass.
+ported = set()
+for tok in re.findall(r'\b[0-9a-f]{7,40}\b', git('log', os.environ['BASE'], '--format=%B')):
+    ported.add(tok)
+
+
+def already_ported(sha):
+    return any(sha[:n] in ported for n in range(7, len(sha) + 1))
+
+
+found = [c for c in found if not already_ported(c['sha'])]
+
 # Only the survivors pay for blob fetches.
 for c in found:
     c['verdict'] = verdict(c['remote'], c['sha'])
