@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -69,6 +70,13 @@ namespace Gamarr.Http.Frontend.Mappers
             {
                 _logger.Debug(ex, "Failed to fetch proxied media cover for hash: {0}", hash);
                 return new StatusCodeResult((int)(ex.Response?.StatusCode ?? HttpStatusCode.BadGateway));
+            }
+            catch (Exception ex) when (ex is WebException or HttpRequestException or TaskCanceledException)
+            {
+                // The cover host timed out or was unreachable: nothing to report, the
+                // browser just shows a missing image and asks again on the next view.
+                _logger.Debug(ex, "Failed to reach the cover host for hash: {0}", hash);
+                return new StatusCodeResult((int)HttpStatusCode.GatewayTimeout);
             }
         }
     }

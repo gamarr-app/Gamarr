@@ -362,6 +362,12 @@ namespace NzbDrone.Core.Extras.Metadata
                 // unreachable image host was logged at Error and shipped to Sentry.
                 _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
+            catch (IOException ex)
+            {
+                // The partial download or the game folder vanished mid-write (game
+                // deleted/moved, flaky mount): a lost race, retried on the next refresh.
+                _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);

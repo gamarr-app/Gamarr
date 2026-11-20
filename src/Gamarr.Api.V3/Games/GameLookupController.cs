@@ -103,6 +103,12 @@ namespace Gamarr.Api.V3.Games
         [Produces("application/json")]
         public GameResource SearchByRawgId(int rawgId)
         {
+            // Not a server fault: RAWG lookups need the user's own API key.
+            if (string.IsNullOrWhiteSpace(_configService.RawgApiKey))
+            {
+                throw new BadRequestException("RAWG API key not configured. Set it in Settings > General to look games up by RAWG id.");
+            }
+
             var availDelay = _configService.AvailabilityDelay;
             var metadata = _rawgProxy.GetGameInfo(rawgId);
 

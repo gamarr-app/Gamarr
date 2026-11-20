@@ -94,7 +94,19 @@ namespace NzbDrone.Core.Download
                 throw new ReleaseDownloadException(remoteGame.Release, "Downloading nzb failed", ex);
             }
 
-            _nzbValidationService.Validate(filename, nzbData);
+            try
+            {
+                _nzbValidationService.Validate(filename, nzbData);
+            }
+            catch (InvalidNzbException ex)
+            {
+                // The indexer answered the NZB request with an error document (bad key,
+                // grab limit, release removed) instead of an NZB. That is a failed grab,
+                // reported like every other one, not an unhandled 500.
+                _logger.Warn(ex, "Indexer returned an invalid NZB for game '{0}' ({1})", remoteGame.Release.Title, url);
+
+                throw new ReleaseDownloadException(remoteGame.Release, ex.Message, ex);
+            }
 
             _logger.Info("Adding report [{0}] to the queue.", remoteGame.Release.Title);
             return AddFromNzbFile(remoteGame, filename, nzbData);

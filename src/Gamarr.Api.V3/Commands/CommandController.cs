@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Composition;
 using NzbDrone.Common.Serializer;
@@ -78,7 +79,19 @@ namespace Gamarr.Api.V3.Commands
                     ? CommandPriority.High
                     : CommandPriority.Normal;
 
-                var command = STJson.Deserialize(body, commandType) as Command;
+                Command command;
+
+                try
+                {
+                    command = STJson.Deserialize(body, commandType) as Command;
+                }
+                catch (JsonException e)
+                {
+                    // A field the command can't hold (an enum value from a newer or
+                    // hand-written client, a wrong type): the caller's mistake, so a
+                    // 400 that names the field instead of a 500 that reaches Sentry.
+                    throw new BadRequestException($"Invalid body for command '{commandResource.Name}': {e.Message}");
+                }
 
                 if (command == null)
                 {

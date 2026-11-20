@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Organizer
                               .WithMessage(GetIllegalCharacterMessage)
                               .Must(value => !HasDeprecatedTokens(value))
                               .WithMessage(GetDeprecatedTokenMessage)
-                              .Must(value => FileNameBuilder.GameTitleRegex.IsMatch(value))
+                              .Must(value => value != null && FileNameBuilder.GameTitleRegex.IsMatch(value))
                               .WithMessage("Must contain game title");
         }
 

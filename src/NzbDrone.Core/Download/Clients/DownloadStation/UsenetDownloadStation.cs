@@ -269,7 +269,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
                 _logger.Error(ex, ex.Message);
                 return new NzbDroneValidationFailure("Username", _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailure"))
                 {
-                    DetailedDescription = _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailureDetail", new Dictionary<string, object> { { "clientName", Name } })
+                    DetailedDescription = _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailureDetail", new Dictionary<string, object> { { "clientName", Name } }) + " " + ex.Message
                 };
             }
             catch (WebException ex)

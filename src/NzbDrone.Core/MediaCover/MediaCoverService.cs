@@ -225,6 +225,14 @@ namespace NzbDrone.Core.MediaCover
                     // unreachable cover host was logged at Error and shipped to Sentry.
                     _logger.Warn("Couldn't download media cover for {0}. {1}", game, e.Message);
                 }
+                catch (IOException e)
+                {
+                    // The partial file (or the game's cover folder) vanished mid-download:
+                    // the game was deleted and its cover folder cleaned up while this
+                    // refresh was still running, or the config volume dropped the file.
+                    // The next refresh fetches the cover again; nothing here is a code fault.
+                    _logger.Warn("Couldn't download media cover for {0}. {1}", game, e.Message);
+                }
                 catch (Exception e)
                 {
                     _logger.Error(e, "Couldn't download media cover for {0}", game);

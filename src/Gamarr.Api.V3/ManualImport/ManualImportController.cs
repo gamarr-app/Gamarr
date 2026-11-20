@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
@@ -50,7 +51,19 @@ namespace Gamarr.Api.V3.ManualImport
 
             foreach (var item in items)
             {
-                var processedItem = _manualImportService.ReprocessItem(item.Path, item.DownloadId, item.GameId, item.ReleaseGroup, item.Version, item.Quality, item.Languages, item.IndexerFlags);
+                ManualImportItem processedItem;
+
+                try
+                {
+                    processedItem = _manualImportService.ReprocessItem(item.Path, item.DownloadId, item.GameId, item.ReleaseGroup, item.Version, item.Quality, item.Languages, item.IndexerFlags);
+                }
+                catch (FileNotFoundException e)
+                {
+                    // The listed file was moved or deleted after the list was loaded
+                    // (another import, the download client cleaning up): the caller's
+                    // list is stale, not a server fault.
+                    throw new BadRequestException(e.Message);
+                }
 
                 item.Game = processedItem.Game.ToResource(0);
                 item.IndexerFlags = processedItem.IndexerFlags;
