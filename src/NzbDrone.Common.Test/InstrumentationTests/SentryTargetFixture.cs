@@ -167,6 +167,14 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         }
 
         [Test]
+        public void should_filter_event_for_network_share_host_is_down()
+        {
+            var ex = new IOException("Host is down : '/nas-share/Some Game/fg-01.bin'");
+            var log = GivenLogEvent(LogLevel.Error, ex, "Failed to properly rollback the file move");
+            _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
         public void should_filter_event_for_http_timeout_wrapped_in_a_web_exception()
         {
             // The chain an indexer's .torrent download timing out produces:

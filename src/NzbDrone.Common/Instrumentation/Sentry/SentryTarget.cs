@@ -142,6 +142,11 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             "No such host is known",
             "Resource temporarily unavailable",
 
+            // EHOSTDOWN: a network share (SMB/NFS mount of a NAS) dropped while
+            // we were reading or writing a file on it. The NAS went to sleep or
+            // offline. It is still logged locally; nothing in our code to fix.
+            "Host is down",
+
             // The logging pipeline itself failing, not the thing being logged.
             // On Windows service installs Kestrel's EventLog sink throws all
             // through shutdown once the event log handle is torn down.
