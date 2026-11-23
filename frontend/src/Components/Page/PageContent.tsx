@@ -11,6 +11,8 @@ interface PageContentProps {
   children: ReactNode;
 }
 
+export const MAIN_CONTENT_ID = 'main-content';
+
 function PageContent({ className, title, children }: PageContentProps) {
   return (
     <ErrorBoundary errorComponent={PageContentError}>
@@ -21,7 +23,13 @@ function PageContent({ className, title, children }: PageContentProps) {
             : window.Gamarr.instanceName}
         </title>
       </Helmet>
-      <div className={classNames(styles.content, className)}>{children}</div>
+      <div
+        id={MAIN_CONTENT_ID}
+        className={classNames(styles.content, className)}
+        tabIndex={-1}
+      >
+        {children}
+      </div>
     </ErrorBoundary>
   );
 }
