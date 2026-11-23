@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using NLog;
@@ -54,6 +55,32 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Proxies
             _apiName = apiName;
         }
 
+        private bool TryReplaceSessionId(HttpRequestBuilder requestBuilder, DownloadStationSettings settings)
+        {
+            var inQuery = requestBuilder.QueryParams.Any(p => p.Key == "_sid");
+            var inForm = requestBuilder.FormData.Any(f => f.Name == "_sid");
+
+            if (!inQuery && !inForm)
+            {
+                return false;
+            }
+
+            var sid = _sessionCache.Get(GenerateSessionCacheKey(settings), () => AuthenticateClient(settings), TimeSpan.FromHours(6));
+
+            if (inQuery)
+            {
+                requestBuilder.AddQueryParam("_sid", sid, true);
+            }
+
+            if (inForm)
+            {
+                requestBuilder.FormData.RemoveAll(f => f.Name == "_sid");
+                requestBuilder.AddFormParameter("_sid", sid);
+            }
+
+            return true;
+        }
+
         private string GenerateSessionCacheKey(DownloadStationSettings settings)
         {
             return $"{settings.Username}@{settings.Host}:{settings.Port}";
@@ -70,7 +97,8 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Proxies
         private DiskStationResponse<T> ProcessRequest<T>(HttpRequestBuilder requestBuilder,
                                                          string operation,
                                                          DiskStationApi api,
-                                                         DownloadStationSettings settings)
+                                                         DownloadStationSettings settings,
+                                                         bool isSessionRetry = false)
             where T : new()
         {
             var request = requestBuilder.Build();
@@ -132,17 +160,31 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Proxies
                         throw new DownloadClientAuthenticationException(msg);
                     }
 
-                    _logger.Error(msg);
-
                     if (responseContent.Error.SessionError)
                     {
                         _sessionCache.Remove(GenerateSessionCacheKey(settings));
 
                         if (responseContent.Error.Code == 105)
                         {
+                            _logger.Error(msg);
                             throw new DownloadClientAuthenticationException(msg);
                         }
+
+                        // 106/107/119: the cached session expired, was kicked out by
+                        // another login, or the DSM restarted. Sign in again and
+                        // repeat the call once, instead of failing the poll and
+                        // putting the client into backoff for a routine expiry.
+                        if (!isSessionRetry && TryReplaceSessionId(requestBuilder, settings))
+                        {
+                            _logger.Debug("{0}, signing in again and retrying", msg);
+                            return ProcessRequest<T>(requestBuilder, operation, api, settings, true);
+                        }
+
+                        _logger.Warn(msg);
+                        throw new DownloadClientUnavailableException(msg);
                     }
+
+                    _logger.Error(msg);
 
                     throw new DownloadClientException(msg);
                 }
