@@ -91,7 +91,10 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
             try
             {
-                downloadClientItems = downloadClient.GetItems().ToList();
+                // An item without an id can't be tracked; a null id would throw on the cache lookup
+                downloadClientItems = downloadClient.GetItems()
+                    .Where(i => !string.IsNullOrWhiteSpace(i.DownloadId))
+                    .ToList();
 
                 _downloadClientStatusService.RecordSuccess(downloadClient.Definition.Id);
                 _trackedDownloadService.StopTrackingMissing(downloadClient.Definition.Id, downloadClientItems.Select(i => i.DownloadId).ToList());

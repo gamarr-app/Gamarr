@@ -87,6 +87,12 @@ namespace NzbDrone.Core.Download.Clients.Aria2
                     continue;
                 }
 
+                // aria2 also runs plain HTTP/FTP downloads; without an info hash it isn't a torrent we sent
+                if (string.IsNullOrWhiteSpace(torrent.InfoHash))
+                {
+                    continue;
+                }
+
                 var completedLength = long.Parse(torrent.CompletedLength);
                 var totalLength = long.Parse(torrent.TotalLength);
                 var uploadedLength = long.Parse(torrent.UploadLength);
