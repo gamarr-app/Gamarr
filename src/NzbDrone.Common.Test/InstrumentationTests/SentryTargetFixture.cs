@@ -279,6 +279,25 @@ namespace NzbDrone.Common.Test.InstrumentationTests
             _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "An error occurred while reading the key ring.")).Should().BeFalse();
         }
 
+        [TestCase("Release-dev", false)]
+        [TestCase("Debug-dev", false)]
+        [TestCase("Release-nightly", true)]
+        [TestCase("Release-stable", true)]
+        public void should_report_missing_platform_assembly_only_from_official_builds(string branch, bool reported)
+        {
+            var ex = new FileNotFoundException(
+                "Required assembly 'Gamarr.Windows.dll' is missing from 'C:\\build\\'. " +
+                "If this is a self-built package, build with -p:Platform=Windows.");
+
+            SentryTarget.IsSelfBuiltMissingAssembly(ex, branch).Should().Be(!reported);
+        }
+
+        [Test]
+        public void should_not_treat_other_missing_files_as_self_built_assembly()
+        {
+            SentryTarget.IsSelfBuiltMissingAssembly(new FileNotFoundException("Could not find file 'config.xml'"), "Release-dev").Should().BeFalse();
+        }
+
         private class AddressInUseException : Exception
         {
             public AddressInUseException(string message, Exception innerException)

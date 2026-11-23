@@ -407,6 +407,20 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             return fingerPrint;
         }
 
+        // AssemblyLoader's startup check: the platform assembly (Gamarr.Windows /
+        // Gamarr.Mono) is missing because someone built the solution without
+        // -p:Platform. The exception message already tells them how to fix it.
+        // A "-dev" configuration stamp only comes from a self-built package
+        // (release.yml rejects it), so it is their build, not a packaging bug.
+        // Official packages still report it, since there it would be ours.
+        public static bool IsSelfBuiltMissingAssembly(Exception ex, string branch)
+        {
+            return ex is System.IO.FileNotFoundException &&
+                   ex.Message.StartsWith("Required assembly '", StringComparison.Ordinal) &&
+                   branch != null &&
+                   branch.EndsWith("-dev", StringComparison.OrdinalIgnoreCase);
+        }
+
         public bool IsSentryMessage(LogEventInfo logEvent)
         {
             if (logEvent.Properties.ContainsKey("Sentry"))
@@ -484,6 +498,12 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                             // and the exact-name set above never matched it.
                             if (inner is OperationCanceledException ||
                                 FilteredExceptionTypeNames.Contains(inner.GetType().Name))
+                            {
+                                isSentry = false;
+                                break;
+                            }
+
+                            if (IsSelfBuiltMissingAssembly(inner, BuildInfo.Branch))
                             {
                                 isSentry = false;
                                 break;
