@@ -67,3 +67,8 @@ updates:
        update-types: ["version-update:semver-major"]
      - dependency-name: "System.*"
        update-types: ["version-update:semver-major"]
+   # Swashbuckle 11 is split per project the same way (Api.V3 vs Host), so the
+   # PR fails restore with NU1605 against Host's 10.x. Take the major by hand,
+   # bumping every Swashbuckle reference in one commit.
+     - dependency-name: "Swashbuckle.AspNetCore*"
+       update-types: ["version-update:semver-major"]
