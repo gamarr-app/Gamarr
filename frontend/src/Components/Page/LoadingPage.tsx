@@ -8,7 +8,7 @@ const gamarrLogo =
 function LoadingPage() {
   return (
     <div className={styles.page}>
-      <img className={styles.logoFull} src={gamarrLogo} />
+      <img alt="" className={styles.logoFull} src={gamarrLogo} />
       <LoadingMessage />
       <LoadingIndicator />
     </div>
