@@ -81,6 +81,46 @@ namespace NzbDrone.Api.Test.ClientSchemaTests
 
             exception.Content.ToString().Should().Contain("firstName");
         }
+
+        [Test]
+        public void should_reject_int_list_holding_objects()
+        {
+            var fields = new List<Field>
+            {
+                new Field
+                {
+                    Name = "categories",
+                    Value = JsonDocument.Parse("[{\"id\":2000,\"name\":\"Games\"}]").RootElement
+                }
+            };
+
+            var exception = Assert.Throws<BadRequestException>(() => SchemaBuilder.ReadFromSchema(fields, typeof(ListTestModel), new ListTestModel()));
+
+            exception.Content.ToString().Should().Contain("categories");
+        }
+
+        [Test]
+        public void should_read_int_list()
+        {
+            var fields = new List<Field>
+            {
+                new Field
+                {
+                    Name = "categories",
+                    Value = JsonDocument.Parse("[2000, 4050]").RootElement
+                }
+            };
+
+            var model = (ListTestModel)SchemaBuilder.ReadFromSchema(fields, typeof(ListTestModel), new ListTestModel());
+
+            model.Categories.Should().Equal(2000, 4050);
+        }
+    }
+
+    public class ListTestModel
+    {
+        [FieldDefinition(0, Label = "Categories")]
+        public IEnumerable<int> Categories { get; set; }
     }
 
     public class TestModel

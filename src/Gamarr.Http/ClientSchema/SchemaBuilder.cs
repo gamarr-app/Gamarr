@@ -315,11 +315,11 @@ namespace Gamarr.Http.ClientSchema
                     }
                     else if (fieldValue is JsonElement e && e.ValueKind == JsonValueKind.Array)
                     {
-                        return e.EnumerateArray().Select(s => s.GetInt32());
+                        return e.EnumerateArray().Select(s => s.GetInt32()).ToList();
                     }
                     else
                     {
-                        return fieldValue.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToInt32(s));
+                        return fieldValue.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToInt32(s)).ToList();
                     }
                 };
             }
@@ -333,11 +333,11 @@ namespace Gamarr.Http.ClientSchema
                     }
                     else if (fieldValue is JsonElement e && e.ValueKind == JsonValueKind.Array)
                     {
-                        return e.EnumerateArray().Select(s => s.GetString());
+                        return e.EnumerateArray().Select(s => s.GetString()).ToList();
                     }
                     else
                     {
-                        return fieldValue.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(v => v.Trim());
+                        return fieldValue.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(v => v.Trim()).ToList();
                     }
                 };
             }
