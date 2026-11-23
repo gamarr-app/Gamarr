@@ -48,3 +48,12 @@ updates:
    # and blocked the other bumps. Held until that cleanup is done by hand.
      - dependency-name: "StyleCop.Analyzers"
        versions: [">= 1.2.0"]
+   # DryIoc 6 removed CreateChild overloads that DryIoc.Microsoft.DependencyInjection
+   # 6.x calls and obsoleted Rules.WithMicrosoftDependencyInjectionRules (CS0618
+   # is an error here). Dependabot also splits it per project (#253 Common,
+   # #254 Host/Update), so neither PR can pass alone. Sonarr and Radarr are still
+   # on DryIoc 5.4.3; follow them and take the major only alongside upstream.
+     - dependency-name: "DryIoc.dll"
+       update-types: ["version-update:semver-major"]
+     - dependency-name: "DryIoc.Microsoft.DependencyInjection"
+       update-types: ["version-update:semver-major"]
