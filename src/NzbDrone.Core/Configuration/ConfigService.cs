@@ -529,7 +529,20 @@ namespace NzbDrone.Core.Configuration
 
         private T GetValueEnum<T>(string key, T defaultValue)
         {
-            return (T)Enum.Parse(typeof(T), GetValue(key, defaultValue), true);
+            var value = GetValue(key, defaultValue);
+
+            if (Enum.TryParse(typeof(T), value, true, out var parsed) && Enum.IsDefined(typeof(T), parsed))
+            {
+                return (T)parsed;
+            }
+
+            _logger.Warn("Setting {0} has '{1}', which is not a valid value ({2}). Using {3}.",
+                key,
+                value,
+                string.Join(", ", Enum.GetNames(typeof(T))),
+                defaultValue);
+
+            return defaultValue;
         }
 
         public string GetValue(string key, object defaultValue, bool persist = false)

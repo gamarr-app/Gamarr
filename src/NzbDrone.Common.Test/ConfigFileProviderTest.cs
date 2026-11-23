@@ -162,6 +162,34 @@ namespace NzbDrone.Common.Test
         }
 
         [Test]
+        public void should_fall_back_to_enabled_when_authentication_required_is_not_a_valid_value()
+        {
+            _configFileContents = "<Config><AuthenticationRequired>Disabled</AuthenticationRequired></Config>";
+
+            Subject.AuthenticationRequired.Should().Be(AuthenticationRequiredType.Enabled);
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_fall_back_to_forms_when_authentication_method_is_not_a_valid_value()
+        {
+            _configFileContents = "<Config><AuthenticationMethod>Basic</AuthenticationMethod></Config>";
+
+            Subject.AuthenticationMethod.Should().Be(AuthenticationType.Forms);
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_read_authentication_required_case_insensitively()
+        {
+            _configFileContents = "<Config><AuthenticationRequired>disabledforlocaladdresses</AuthenticationRequired></Config>";
+
+            Subject.AuthenticationRequired.Should().Be(AuthenticationRequiredType.DisabledForLocalAddresses);
+        }
+
+        [Test]
         public void SaveDictionary_should_save_proper_value()
         {
             var port = 20555;

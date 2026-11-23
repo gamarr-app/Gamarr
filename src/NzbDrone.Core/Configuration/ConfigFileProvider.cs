@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -90,6 +91,9 @@ namespace NzbDrone.Core.Configuration
         private static readonly Regex HiddenCharacterRegex = new Regex("[^a-z0-9]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly object Mutex = new object();
+        private static readonly NLog.Logger Logger = NzbDroneLogger.GetLogger(typeof(ConfigFileProvider));
+
+        private readonly ConcurrentDictionary<string, string> _warnedInvalidValues = new ConcurrentDictionary<string, string>();
 
         public ConfigFileProvider(IAppFolderInfo appFolderInfo,
                                   ICacheManager cacheManager,
@@ -235,7 +239,7 @@ namespace NzbDrone.Core.Configuration
 
                 return Enum.TryParse<AuthenticationType>(_authOptions.Method, out var enumValue)
                     ? enumValue
-                    : GetValueEnum("AuthenticationMethod", AuthenticationType.None);
+                    : GetValueEnum("AuthenticationMethod", AuthenticationType.None, AuthenticationType.Forms, true);
             }
         }
 
@@ -334,7 +338,37 @@ namespace NzbDrone.Core.Configuration
 
         public T GetValueEnum<T>(string key, T defaultValue, bool persist = true)
         {
-            return (T)Enum.Parse(typeof(T), GetValue(key, defaultValue, persist), true);
+            return GetValueEnum(key, defaultValue, defaultValue, persist);
+        }
+
+        // A hand-edited config.xml with a value the enum doesn't have (e.g.
+        // <AuthenticationRequired>Disabled</AuthenticationRequired>) used to throw
+        // from every request's authorization handler, so the whole UI and API
+        // answered 500. Fall back and say what the valid values are instead.
+        private T GetValueEnum<T>(string key, T defaultValue, T invalidValue, bool persist)
+        {
+            var value = GetValue(key, defaultValue, persist);
+
+            if (Enum.TryParse(typeof(T), value, true, out var parsed) && Enum.IsDefined(typeof(T), parsed))
+            {
+                return (T)parsed;
+            }
+
+            // AuthenticationMethod is read on every request: warn once per bad value, not per call.
+            if (_warnedInvalidValues.TryGetValue(key, out var warned) && warned == value)
+            {
+                return invalidValue;
+            }
+
+            _warnedInvalidValues[key] = value;
+
+            Logger.Warn("config.xml has '{0}' for {1}, which is not a valid value ({2}). Using {3}.",
+                value,
+                key,
+                string.Join(", ", Enum.GetNames(typeof(T))),
+                invalidValue);
+
+            return invalidValue;
         }
 
         public string GetValue(string key, object defaultValue, bool persist = true)
