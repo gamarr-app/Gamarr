@@ -57,3 +57,13 @@ updates:
        update-types: ["version-update:semver-major"]
      - dependency-name: "DryIoc.Microsoft.DependencyInjection"
        update-types: ["version-update:semver-major"]
+   # Runtime-band packages (Microsoft.Extensions.*, Microsoft.AspNetCore.*,
+   # System.*) follow the .NET major we target (net10). Dependabot proposes the
+   # 11.x majors per project (#255, #258, #259), which fails restore with NU1605
+   # downgrades against the projects left on 10.x. Take them with the TFM bump.
+     - dependency-name: "Microsoft.Extensions.*"
+       update-types: ["version-update:semver-major"]
+     - dependency-name: "Microsoft.AspNetCore.*"
+       update-types: ["version-update:semver-major"]
+     - dependency-name: "System.*"
+       update-types: ["version-update:semver-major"]
