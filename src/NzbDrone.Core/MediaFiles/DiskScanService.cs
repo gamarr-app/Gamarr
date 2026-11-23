@@ -275,10 +275,16 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            var filesOnDisk = GetNonVideoFiles(game.Path);
-            var possibleExtraFiles = FilterPaths(game.Path, filesOnDisk);
-
             RemoveEmptyGameFolder(game.Path);
+
+            var possibleExtraFiles = new List<string>();
+
+            if (_diskProvider.FolderExists(game.Path))
+            {
+                var extraFiles = GetNonVideoFiles(game.Path);
+                possibleExtraFiles = FilterPaths(game.Path, extraFiles);
+            }
+
             CompletedScanning(game, possibleExtraFiles);
         }
 

@@ -285,37 +285,39 @@ namespace NzbDrone.Core.MediaFiles
         [EventHandleOrder(EventHandleOrder.Last)]
         public void Handle(GameFileDeletedEvent message)
         {
-            if (_configService.DeleteEmptyFolders)
+            if (!_configService.DeleteEmptyFolders || message.Reason == DeleteMediaFileReason.MissingFromDisk)
             {
-                var game = message.GameFile.Game;
-                var gamePath = game.Path;
-                var folder = message.GameFile.Path.GetParentPath();
+                return;
+            }
 
-                try
+            var game = message.GameFile.Game;
+            var gamePath = game.Path;
+            var folder = message.GameFile.Path.GetParentPath();
+
+            try
+            {
+                while (gamePath.IsParentPath(folder))
                 {
-                    while (gamePath.IsParentPath(folder))
+                    if (_diskProvider.FolderExists(folder))
                     {
-                        if (_diskProvider.FolderExists(folder))
-                        {
-                            _diskProvider.RemoveEmptySubfolders(folder);
-                        }
-
-                        folder = folder.GetParentPath();
+                        _diskProvider.RemoveEmptySubfolders(folder);
                     }
 
-                    _diskProvider.RemoveEmptySubfolders(gamePath);
+                    folder = folder.GetParentPath();
+                }
 
-                    if (_diskProvider.FolderEmpty(gamePath))
-                    {
-                        _diskProvider.DeleteFolder(gamePath, true);
-                    }
-                }
-                catch (Exception e)
+                _diskProvider.RemoveEmptySubfolders(gamePath);
+
+                if (_diskProvider.FolderEmpty(gamePath))
                 {
-                    // Best effort cleanup on the event aggregator thread, an unhandled error here would
-                    // only surface as a lost task.
-                    _logger.Error(e, "Unable to remove empty folders for game path: '{0}'", gamePath);
+                    _diskProvider.DeleteFolder(gamePath, true);
                 }
+            }
+            catch (Exception e)
+            {
+                // Best effort cleanup on the event aggregator thread, an unhandled error here would
+                // only surface as a lost task.
+                _logger.Error(e, "Unable to remove empty folders for game path: '{0}'", gamePath);
             }
         }
     }
