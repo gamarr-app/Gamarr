@@ -8,7 +8,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.15" />
     <PackageReference Include="NLog" Version="6.2.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.3.0" />
-    <PackageReference Include="Sentry" Version="6.13.0" />
+    <PackageReference Include="Sentry" Version="7.0.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.15" />
     <ProjectReference Include="..\NzbDrone.Core\Gamarr.Core.csproj" />
     <ProjectReference Include="..\NzbDrone.Common\Gamarr.Common.csproj" />
