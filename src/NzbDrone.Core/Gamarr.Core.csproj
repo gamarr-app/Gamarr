@@ -39,7 +39,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.15" />
     <PackageReference Include="MimeKit" Version="5.0.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.3.0" />
-    <PackageReference Include="Sentry" Version="6.13.0" />
+    <PackageReference Include="Sentry" Version="7.0.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.15" />
     <Content Include="Localization\Core\**">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
