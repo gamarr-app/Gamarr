@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Parser
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(LanguageParser));
 
         // Detect Cyrillic characters (Russian, Ukrainian, Bulgarian, etc.)
-        private static readonly Regex CyrillicRegex = new Regex(@"[\u0400-\u04FF]", RegexOptions.Compiled);
+        private static readonly Regex CyrillicRegex = new Regex(@"[\u0400-\u04FF]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private static readonly Regex LanguageRegex = new Regex(@"(?:\W|_|^)(?<english>\beng\b)|
                                                                             (?<italian>\b(?:ita|italian)\b)|
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Parser
                                                                             (?<georgian>\b(?:georgian|geo|ka|kat)\b)|
                                                                             (?<irish>\b(?:irish|gaeilge)\b)|
                                                                             (?<original>\b(?:orig|original)\b)",
-                                                                RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+                                                                RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace);
 
         private static readonly Regex CaseSensitiveLanguageRegex = new Regex(@"(?:(?i)(?<!SUB[\W|_|^]))(?:(?<english>\bEN\b)|
                                                                                                           (?<lithuanian>\bLT\b)|
@@ -55,17 +55,17 @@ namespace NzbDrone.Core.Parser
                                                                                                           (?<slovak>\bSK\b)|
                                                                                                           (?<german>\bDE\b)|
                                                                                                           (?<spanish>\b(?<!DTS[._ -])ES\b))(?:(?i)(?![\W|_|^]SUB))",
-                                                                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+                                                                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex GermanDualLanguageRegex = new (@"(?<!WEB[-_. ]?)\bDL\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex GermanMultiLanguageRegex = new (@"\bML\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex NoIntroLanguageListRegex = new (@"[\(\[](?<codes>[a-z]{2,3}(?:,[a-z]{2,3})+)[\)\]]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex GermanDualLanguageRegex = new (@"(?<!WEB[-_. ]?)\bDL\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex GermanMultiLanguageRegex = new (@"\bML\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex NoIntroLanguageListRegex = new (@"[\(\[](?<codes>[a-z]{2,3}(?:,[a-z]{2,3})+)[\)\]]", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-        private static readonly Regex SubtitleLanguageRegex = new Regex(".+?([-_. ](?<tags>forced|foreign|default|cc|psdh|sdh))*[-_. ](?<iso_code>[a-z]{2,3})([-_. ](?<tags>forced|foreign|default|cc|psdh|sdh))*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex SubtitleLanguageRegex = new Regex(".+?([-_. ](?<tags>forced|foreign|default|cc|psdh|sdh))*[-_. ](?<iso_code>[a-z]{2,3})([-_. ](?<tags>forced|foreign|default|cc|psdh|sdh))*$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         public static List<Language> ParseLanguages(string title)
         {
-            var lowerTitle = title.ToLower();
+            var lowerTitle = title.ToLowerInvariant();
             var languages = new List<Language>();
 
             if (lowerTitle.Contains("english"))
@@ -506,7 +506,7 @@ namespace NzbDrone.Core.Parser
                 var match = SubtitleLanguageRegex.Match(simpleFilename);
                 var languageTags = match.Groups["tags"].Captures
                     .Where(tag => !tag.Value.Empty())
-                    .Select(tag => tag.Value.ToLower());
+                    .Select(tag => tag.Value.ToLowerInvariant());
                 return languageTags.ToList();
             }
             catch (Exception ex)
@@ -529,7 +529,7 @@ namespace NzbDrone.Core.Parser
                 if (languageMatch.Success)
                 {
                     var isoCode = languageMatch.Groups["iso_code"].Value;
-                    var isoLanguage = IsoLanguages.Find(isoCode.ToLower());
+                    var isoLanguage = IsoLanguages.Find(isoCode.ToLowerInvariant());
 
                     return isoLanguage?.Language ?? Language.Unknown;
                 }
