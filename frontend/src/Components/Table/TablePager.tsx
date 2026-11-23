@@ -53,9 +53,9 @@ function TablePager({
   }, []);
 
   const handlePageSelect = useCallback(
-    ({ value }: InputChanged<number>) => {
+    ({ value }: InputChanged<string>) => {
       setIsShowingPageSelect(false);
-      onPageSelect(value);
+      onPageSelect(Number(value));
     },
     [onPageSelect]
   );
