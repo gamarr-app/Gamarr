@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -182,7 +183,22 @@ namespace NzbDrone.Core.ThingiProvider
 
         protected virtual List<TProviderDefinition> Active()
         {
-            return All().Where(c => c.Settings.Validate().IsValid).ToList();
+            return All().Where(IsValidSettings).ToList();
+        }
+
+        private bool IsValidSettings(TProviderDefinition definition)
+        {
+            // One provider's validator throwing (e.g. a regex timeout while the host is stalled)
+            // must not take down the whole task that asked for the active providers.
+            try
+            {
+                return definition.Settings.Validate().IsValid;
+            }
+            catch (RegexMatchTimeoutException ex)
+            {
+                _logger.Warn(ex, "Timed out validating settings for {0}, skipping it this time", definition.Name);
+                return false;
+            }
         }
 
         public void SetProviderCharacteristics(TProviderDefinition definition)
