@@ -1149,5 +1149,69 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileService>()
                   .Verify(v => v.Add(It.Is<GameFile>(gf => gf.RelativePath == "Game" && gf.Size == 10L)), Times.Once());
         }
+
+        [Test]
+        public void should_complete_scan_if_game_folder_is_removed_while_cleaning_media_files()
+        {
+            GivenGameFolder();
+
+            var gameFolderDeleted = false;
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(_game.Path))
+                  .Returns(() => !gameFolderDeleted);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(_game.Path, true))
+                  .Returns(() => gameFolderDeleted ? throw new DirectoryNotFoundException() : Array.Empty<string>());
+
+            Mocker.GetMock<IMediaFileTableCleanupService>()
+                  .Setup(s => s.Clean(_game, It.IsAny<List<string>>()))
+                  .Callback(() => gameFolderDeleted = true);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.Is<GameScannedEvent>(c => c.Game == _game && c.PossibleExtraFiles.Count == 0)), Times.Once());
+        }
+
+        [Test]
+        public void should_not_scan_for_extra_files_after_deleting_empty_game_folder()
+        {
+            GivenGameFolder();
+
+            var gameFolderDeleted = false;
+
+            Mocker.GetMock<IConfigService>()
+                  .Setup(s => s.DeleteEmptyFolders)
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(_game.Path))
+                  .Returns(() => !gameFolderDeleted);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderEmpty(_game.Path))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.DeleteFolder(_game.Path, true))
+                  .Callback(() => gameFolderDeleted = true);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(_game.Path, true))
+                  .Returns(() => gameFolderDeleted ? throw new DirectoryNotFoundException() : Array.Empty<string>());
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.DeleteFolder(_game.Path, true), Times.Once());
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.GetFiles(_game.Path, true), Times.Once());
+
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.Is<GameScannedEvent>(c => c.Game == _game && c.PossibleExtraFiles.Count == 0)), Times.Once());
+        }
     }
 }
