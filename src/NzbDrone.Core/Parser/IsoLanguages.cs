@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Parser
                                                                new IsoLanguage("ga", "", "gle", "Irish", Language.Irish)
                                                            };
 
-        private static readonly Dictionary<string, Language> AlternateIsoCodeMappings = new ()
+        private static readonly Dictionary<string, Language> AlternateIsoCodeMappings = new()
         {
             { "cn", Language.Chinese }
         };
@@ -91,9 +91,9 @@ namespace NzbDrone.Core.Parser
 
                 if (isoArray.Length > 1)
                 {
-                    isoLanguages = isoLanguages.Any(l => l.CountryCode == isoArray[1].ToLower()) ?
-                        isoLanguages.Where(l => l.CountryCode == isoArray[1].ToLower()).ToList() :
-                        isoLanguages.Where(l => string.IsNullOrEmpty(l.CountryCode)).ToList();
+                    isoLanguages = isoLanguages.Any(l => l.CountryCode == isoArray[1].ToLower())
+                        ? isoLanguages.Where(l => l.CountryCode == isoArray[1].ToLower()).ToList()
+                        : isoLanguages.Where(l => string.IsNullOrEmpty(l.CountryCode)).ToList();
                 }
 
                 return isoLanguages.FirstOrDefault();

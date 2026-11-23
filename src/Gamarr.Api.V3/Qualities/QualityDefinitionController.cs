@@ -68,7 +68,7 @@ namespace Gamarr.Api.V3.Qualities
             // and it bypasses the validator pipeline entirely.
             if (!_titleInUseValidator.ValidateBatch(qualityDefinitions))
             {
-                throw new ValidationException(new List<ValidationFailure> { new ("Title", "Should be unique") });
+                throw new ValidationException(new List<ValidationFailure> { new("Title", "Should be unique") });
             }
 
             _qualityDefinitionService.UpdateMany(qualityDefinitions);

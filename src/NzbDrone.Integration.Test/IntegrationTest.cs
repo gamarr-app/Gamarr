@@ -24,7 +24,7 @@ namespace NzbDrone.Integration.Test
 
         protected int Port { get; private set; }
 
-        protected PostgresOptions PostgresOptions { get; set; } = new ();
+        protected PostgresOptions PostgresOptions { get; set; } = new();
 
         protected override string RootUrl => $"http://localhost:{Port}/";
 

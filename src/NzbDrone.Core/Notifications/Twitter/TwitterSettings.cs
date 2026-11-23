@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Notifications.Twitter
 
     public class TwitterSettings : NotificationSettingsBase<TwitterSettings>
     {
-        private static readonly TwitterSettingsValidator Validator = new ();
+        private static readonly TwitterSettingsValidator Validator = new();
 
         public TwitterSettings()
         {

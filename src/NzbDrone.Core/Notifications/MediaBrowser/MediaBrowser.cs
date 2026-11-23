@@ -52,19 +52,19 @@ namespace NzbDrone.Core.Notifications.Emby
             UpdateIfEnabled(game, Modified);
         }
 
-        public override void OnHealthIssue(HealthCheck.HealthCheck message)
+        public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)
         {
             if (Settings.Notify)
             {
-                _mediaBrowserService.Notify(Settings, HEALTH_ISSUE_TITLE_BRANDED, message.Message);
+                _mediaBrowserService.Notify(Settings, HEALTH_ISSUE_TITLE_BRANDED, healthCheck.Message);
             }
         }
 
-        public override void OnHealthRestored(HealthCheck.HealthCheck previousMessage)
+        public override void OnHealthRestored(HealthCheck.HealthCheck previousCheck)
         {
             if (Settings.Notify)
             {
-                _mediaBrowserService.Notify(Settings, HEALTH_RESTORED_TITLE_BRANDED, $"The following issue is now resolved: {previousMessage.Message}");
+                _mediaBrowserService.Notify(Settings, HEALTH_RESTORED_TITLE_BRANDED, $"The following issue is now resolved: {previousCheck.Message}");
             }
         }
 

@@ -87,7 +87,7 @@ namespace Gamarr.Api.V3.Indexers
 
             if (decision?.RemoteGame.ParsedGameInfo == null)
             {
-                throw new ValidationException(new List<ValidationFailure> { new ("Title", "Unable to parse", release.Title) });
+                throw new ValidationException(new List<ValidationFailure> { new("Title", "Unable to parse", release.Title) });
             }
 
             if (grabResult != ProcessedDecisionResult.Grabbed)

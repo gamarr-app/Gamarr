@@ -89,15 +89,15 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             return new ValidationResult(failures);
         }
 
-        public override object RequestAction(string action, IDictionary<string, string> query)
+        public override object RequestAction(string stage, IDictionary<string, string> query)
         {
-            if (action == "startOAuth")
+            if (stage == "startOAuth")
             {
                 Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
 
                 return _plexTvService.GetPinUrl();
             }
-            else if (action == "continueOAuth")
+            else if (stage == "continueOAuth")
             {
                 Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
 
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 return _plexTvService.GetSignInUrl(query["callbackUrl"], Convert.ToInt32(query["id"]), query["code"]);
             }
-            else if (action == "getOAuthToken")
+            else if (stage == "getOAuthToken")
             {
                 Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
 
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                 };
             }
 
-            if (action == "servers")
+            if (stage == "servers")
             {
                 Settings.Validate().Filter("AuthToken").ThrowOnError();
 

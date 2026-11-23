@@ -26,10 +26,10 @@ namespace NzbDrone.Core.Indexers.TorrentRss
             _logger = logger;
         }
 
-        public TorrentRssParser GetParser(TorrentRssIndexerSettings indexerSettings)
+        public TorrentRssParser GetParser(TorrentRssIndexerSettings settings)
         {
-            var key = indexerSettings.ToJson();
-            var parserSettings = _settingsCache.Get(key, () => DetectParserSettings(indexerSettings), TimeSpan.FromDays(7));
+            var key = settings.ToJson();
+            var parserSettings = _settingsCache.Get(key, () => DetectParserSettings(settings), TimeSpan.FromDays(7));
 
             if (parserSettings.UseEZTVFormat)
             {

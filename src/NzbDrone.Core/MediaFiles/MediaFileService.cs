@@ -59,9 +59,9 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileRepository.Update(gameFile);
         }
 
-        public void Update(List<GameFile> gameFiles)
+        public void Update(List<GameFile> gameFile)
         {
-            _mediaFileRepository.UpdateMany(gameFiles);
+            _mediaFileRepository.UpdateMany(gameFile);
         }
 
         public void Delete(GameFile gameFile, DeleteMediaFileReason reason)
@@ -115,9 +115,9 @@ namespace NzbDrone.Core.MediaFiles
             return _mediaFileRepository.Get(id);
         }
 
-        public List<GameFile> GetFilesWithRelativePath(int gameId, string relativePath)
+        public List<GameFile> GetFilesWithRelativePath(int gameIds, string relativePath)
         {
-            return _mediaFileRepository.GetFilesWithRelativePath(gameId, relativePath);
+            return _mediaFileRepository.GetFilesWithRelativePath(gameIds, relativePath);
         }
 
         public void HandleAsync(GamesDeletedEvent message)

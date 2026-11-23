@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             _httpClient = httpClient;
         }
 
-        public void SendWebhook(WebhookPayload body, WebhookSettings settings)
+        public void SendWebhook(WebhookPayload payload, WebhookSettings settings)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 };
 
                 request.Headers.ContentType = "application/json";
-                request.SetContent(body.ToJson());
+                request.SetContent(payload.ToJson());
 
                 if (settings.Username.IsNotNullOrWhiteSpace() || settings.Password.IsNotNullOrWhiteSpace())
                 {

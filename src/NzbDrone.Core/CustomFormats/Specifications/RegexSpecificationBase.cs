@@ -24,7 +24,11 @@ namespace NzbDrone.Core.CustomFormats
         [FieldDefinition(1, Label = "CustomFormatsSpecificationRegularExpression", HelpText = "CustomFormatsSpecificationRegularExpressionHelpText")]
         public string Value
         {
-            get => _raw;
+            get
+            {
+                return _raw;
+            }
+
             set
             {
                 _raw = value;

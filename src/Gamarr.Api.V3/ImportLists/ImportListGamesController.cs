@@ -152,9 +152,11 @@ namespace Gamarr.Api.V3.ImportLists
                 // match (IgdbId == 0) into a single arbitrary row, and one
                 // Steam-only library game marked all of them as existing.
                 var groupedListGames = realResults.GroupBy(x =>
-                    x.IgdbId > 0 ? $"igdb-{x.IgdbId}"
-                    : x.SteamAppId > 0 ? $"steam-{x.SteamAppId}"
-                    : $"title-{x.Title}-{x.Year}");
+                    x.IgdbId > 0
+                        ? $"igdb-{x.IgdbId}"
+                        : x.SteamAppId > 0
+                            ? $"steam-{x.SteamAppId}"
+                            : $"title-{x.Title}-{x.Year}");
 
                 // Distinct Games
                 realResults = groupedListGames.Select(x =>
@@ -245,7 +247,8 @@ namespace Gamarr.Api.V3.ImportLists
                 resource.Folder = _fileNameBuilder.GetGameFolder(new Game
                 {
                     GameMetadata = currentGame.GameMetadata
-                }, namingConfig);
+                },
+                namingConfig);
 
                 yield return resource;
             }

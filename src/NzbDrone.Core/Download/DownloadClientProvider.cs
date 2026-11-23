@@ -52,9 +52,9 @@ namespace NzbDrone.Core.Download
 
             var matchingTagsClients = availableProviders.Where(i => i.Definition.Tags.Intersect(tags).Any()).ToList();
 
-            availableProviders = matchingTagsClients.Count > 0 ?
-                matchingTagsClients :
-                availableProviders.Where(i => i.Definition.Tags.Empty()).ToList();
+            availableProviders = matchingTagsClients.Count > 0
+                                ? matchingTagsClients
+                                : availableProviders.Where(i => i.Definition.Tags.Empty()).ToList();
 
             if (!availableProviders.Any())
             {

@@ -140,9 +140,9 @@ namespace NzbDrone.Common.OAuth
             return GetEnumerator();
         }
 
-        public virtual void Add(WebParameter parameter)
+        public virtual void Add(WebParameter item)
         {
-            _parameters.Add(parameter);
+            _parameters.Add(item);
         }
 
         public virtual void Clear()
@@ -150,19 +150,19 @@ namespace NzbDrone.Common.OAuth
             _parameters.Clear();
         }
 
-        public virtual bool Contains(WebParameter parameter)
+        public virtual bool Contains(WebParameter item)
         {
-            return _parameters.Contains(parameter);
+            return _parameters.Contains(item);
         }
 
-        public virtual void CopyTo(WebParameter[] parameters, int arrayIndex)
+        public virtual void CopyTo(WebParameter[] array, int arrayIndex)
         {
-            _parameters.CopyTo(parameters, arrayIndex);
+            _parameters.CopyTo(array, arrayIndex);
         }
 
-        public virtual bool Remove(WebParameter parameter)
+        public virtual bool Remove(WebParameter item)
         {
-            return _parameters.Remove(parameter);
+            return _parameters.Remove(item);
         }
 
         public virtual int Count
@@ -175,14 +175,14 @@ namespace NzbDrone.Common.OAuth
             get { return _parameters.IsReadOnly; }
         }
 
-        public virtual int IndexOf(WebParameter parameter)
+        public virtual int IndexOf(WebParameter item)
         {
-            return _parameters.IndexOf(parameter);
+            return _parameters.IndexOf(item);
         }
 
-        public virtual void Insert(int index, WebParameter parameter)
+        public virtual void Insert(int index, WebParameter item)
         {
-            _parameters.Insert(index, parameter);
+            _parameters.Insert(index, item);
         }
 
         public virtual void RemoveAt(int index)

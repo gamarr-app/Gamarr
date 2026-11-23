@@ -125,8 +125,8 @@ namespace NzbDrone.Core.History
             return builder;
         }
 
-        protected override IEnumerable<GameHistory> PagedQuery(SqlBuilder builder) =>
-            _database.QueryJoined<GameHistory, Game, QualityProfile>(builder, (hist, game, profile) =>
+        protected override IEnumerable<GameHistory> PagedQuery(SqlBuilder sql) =>
+            _database.QueryJoined<GameHistory, Game, QualityProfile>(sql, (hist, game, profile) =>
             {
                 hist.Game = game;
                 hist.Game.QualityProfile = profile;

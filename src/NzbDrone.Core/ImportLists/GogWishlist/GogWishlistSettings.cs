@@ -14,7 +14,7 @@ namespace NzbDrone.Core.ImportLists.GogWishlist
 
     public class GogWishlistSettings : ImportListSettingsBase<GogWishlistSettings>
     {
-        private static readonly GogWishlistSettingsValidator Validator = new ();
+        private static readonly GogWishlistSettingsValidator Validator = new();
 
         public GogWishlistSettings()
         {

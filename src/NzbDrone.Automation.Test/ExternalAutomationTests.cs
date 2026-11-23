@@ -148,7 +148,7 @@ namespace NzbDrone.Automation.Test
             await Expect(Page.Locator("div[class*='ModalContent']").First).ToBeVisibleAsync();
 
             // Click the Add Game button
-            var addButton = Page.GetByRole(AriaRole.Button, new () { Name = "Add Game" });
+            var addButton = Page.GetByRole(AriaRole.Button, new() { Name = "Add Game" });
             await Expect(addButton).ToBeVisibleAsync();
             await addButton.ClickAsync();
 

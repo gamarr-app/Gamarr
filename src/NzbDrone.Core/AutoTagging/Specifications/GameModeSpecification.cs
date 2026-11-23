@@ -18,7 +18,7 @@ namespace NzbDrone.Core.AutoTagging.Specifications
 
     public class GameModeSpecification : AutoTaggingSpecificationBase
     {
-        private static readonly GameModeSpecificationValidator Validator = new ();
+        private static readonly GameModeSpecificationValidator Validator = new();
 
         public override int Order => 2;
         public override string ImplementationName => "Game Mode";

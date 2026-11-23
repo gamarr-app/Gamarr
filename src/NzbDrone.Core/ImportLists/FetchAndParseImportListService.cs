@@ -106,7 +106,8 @@ namespace NzbDrone.Core.ImportLists
                                     (r.SteamAppId > 0 && r.SteamAppId == x.SteamAppId)));
                                 var listGames = MapGameReports(importListReports.Games.Where(x => result.Games.All(r =>
                                     (x.IgdbId == 0 || r.IgdbId != x.IgdbId) &&
-                                    (x.SteamAppId == 0 || r.SteamAppId != x.SteamAppId))), importListLocal.Definition.Name)
+                                    (x.SteamAppId == 0 || r.SteamAppId != x.SteamAppId))),
+                                    importListLocal.Definition.Name)
                                     .Where(x => x.IgdbId > 0 || x.SteamAppId > 0).ToList();
 
                                 listGames.AddRange(alreadyMapped);

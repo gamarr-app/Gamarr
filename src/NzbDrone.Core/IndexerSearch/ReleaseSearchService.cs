@@ -161,9 +161,9 @@ namespace NzbDrone.Core.IndexerSearch
 
         private async Task<List<DownloadDecision>> Dispatch(Func<IIndexer, Task<IList<ReleaseInfo>>> searchAction, SearchCriteriaBase criteriaBase)
         {
-            var indexers = criteriaBase.InteractiveSearch ?
-                _indexerFactory.InteractiveSearchEnabled() :
-                _indexerFactory.AutomaticSearchEnabled();
+            var indexers = criteriaBase.InteractiveSearch
+                ? _indexerFactory.InteractiveSearchEnabled()
+                : _indexerFactory.AutomaticSearchEnabled();
 
             // Filter indexers to untagged indexers and indexers with intersecting tags
             indexers = indexers.Where(i => i.Definition.Tags.Empty() || i.Definition.Tags.Intersect(criteriaBase.Game.Tags).Any()).ToList();

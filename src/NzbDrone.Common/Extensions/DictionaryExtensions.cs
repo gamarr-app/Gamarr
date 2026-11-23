@@ -31,9 +31,9 @@ namespace NzbDrone.Common.Extensions
         }
 
         public static IDictionary<TNewKey, TNewValue> SelectDictionary<TKey, TValue, TNewKey, TNewValue>(this IDictionary<TKey, TValue> dictionary,
-            Func<KeyValuePair<TKey, TValue>, ValueTuple<TNewKey, TNewValue>> selection)
+            Func<KeyValuePair<TKey, TValue>, (TNewKey Key, TNewValue Value)> selection)
         {
-            return dictionary.Select(selection).ToDictionary(t => t.Item1, t => t.Item2);
+            return dictionary.Select(selection).ToDictionary(t => t.Key, t => t.Value);
         }
 
         public static IDictionary<TNewKey, TNewValue> SelectDictionary<TKey, TValue, TNewKey, TNewValue>(

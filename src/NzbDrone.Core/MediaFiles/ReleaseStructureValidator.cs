@@ -290,12 +290,12 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     var claimedValidation = ValidateAgainstPattern(relativeFiles, claimedPattern, claimedKey);
 
-                    if (claimedValidation.isValid)
+                    if (claimedValidation.IsValid)
                     {
                         result.DetectedGroup = KnownGroups.Keys.First(k => string.Equals(k, claimedKey, StringComparison.OrdinalIgnoreCase));
                         result.IsValid = true;
                         result.Confidence = ReleaseStructureConfidence.High;
-                        result.Message = claimedValidation.message;
+                        result.Message = claimedValidation.Message;
                         return result;
                     }
                 }
@@ -346,13 +346,13 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     // Claims to be from a known group but doesn't match the structure
                     var validationResult = ValidateAgainstPattern(relativeFiles, pattern, normalizedClaimed);
-                    result.IsValid = validationResult.isValid;
-                    result.Message = validationResult.message;
-                    result.Confidence = validationResult.isValid ? ReleaseStructureConfidence.High : ReleaseStructureConfidence.Low;
+                    result.IsValid = validationResult.IsValid;
+                    result.Message = validationResult.Message;
+                    result.Confidence = validationResult.IsValid ? ReleaseStructureConfidence.High : ReleaseStructureConfidence.Low;
 
-                    if (!validationResult.isValid)
+                    if (!validationResult.IsValid)
                     {
-                        Logger.Warn("Release claims to be {0} but doesn't match expected structure: {1}", releaseGroup, validationResult.message);
+                        Logger.Warn("Release claims to be {0} but doesn't match expected structure: {1}", releaseGroup, validationResult.Message);
                     }
 
                     return result;
@@ -463,7 +463,7 @@ namespace NzbDrone.Core.MediaFiles
             return null;
         }
 
-        private (bool isValid, string message) ValidateAgainstPattern(List<string> files, ReleaseGroupPattern pattern, string groupName)
+        private (bool IsValid, string Message) ValidateAgainstPattern(List<string> files, ReleaseGroupPattern pattern, string groupName)
         {
             // Check required patterns
             var missingRequired = new List<string>();

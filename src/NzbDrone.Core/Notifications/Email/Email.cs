@@ -65,14 +65,14 @@ namespace NzbDrone.Core.Notifications.Email
             SendEmail(Settings, GAME_DELETED_TITLE_BRANDED, body);
         }
 
-        public override void OnHealthIssue(HealthCheck.HealthCheck message)
+        public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)
         {
-            SendEmail(Settings, HEALTH_ISSUE_TITLE_BRANDED, message.Message);
+            SendEmail(Settings, HEALTH_ISSUE_TITLE_BRANDED, healthCheck.Message);
         }
 
-        public override void OnHealthRestored(HealthCheck.HealthCheck previousMessage)
+        public override void OnHealthRestored(HealthCheck.HealthCheck previousCheck)
         {
-            SendEmail(Settings, HEALTH_RESTORED_TITLE_BRANDED, $"The following issue is now resolved: {previousMessage.Message}");
+            SendEmail(Settings, HEALTH_RESTORED_TITLE_BRANDED, $"The following issue is now resolved: {previousCheck.Message}");
         }
 
         public override void OnApplicationUpdate(ApplicationUpdateMessage updateMessage)

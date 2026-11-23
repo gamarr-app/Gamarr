@@ -151,7 +151,8 @@ namespace NzbDrone.Core.Test.Games
                       m.IgdbDlcIds.Count == 3 &&
                       m.IgdbDlcIds.Contains(200) &&
                       m.IgdbDlcIds.Contains(201) &&
-                      m.IgdbDlcIds.Contains(202))), Times.Once());
+                      m.IgdbDlcIds.Contains(202))),
+                      Times.Once());
         }
 
         [Test]
@@ -165,7 +166,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
                       m.IgdbDlcIds.Count == 2 &&
-                      m.IgdbDlcIds.Contains(300))), Times.Once());
+                      m.IgdbDlcIds.Contains(300))),
+                      Times.Once());
         }
 
         [Test]
@@ -179,7 +181,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
                       m.IgdbDlcIds.Count == 2 &&
-                      m.IgdbDlcIds.Contains(400))), Times.Once());
+                      m.IgdbDlcIds.Contains(400))),
+                      Times.Once());
         }
 
         [Test]
@@ -195,7 +198,8 @@ namespace NzbDrone.Core.Test.Games
                       m.IgdbDlcIds.Count == 3 &&
                       m.IgdbDlcIds.Contains(500) &&
                       m.IgdbDlcIds.Contains(501) &&
-                      m.IgdbDlcIds.Contains(502))), Times.Once());
+                      m.IgdbDlcIds.Contains(502))),
+                      Times.Once());
         }
 
         [Test]
@@ -210,7 +214,8 @@ namespace NzbDrone.Core.Test.Games
                       m.SteamDlcIds.Count == 3 &&
                       m.SteamDlcIds.Contains(100200) &&
                       m.SteamDlcIds.Contains(100201) &&
-                      m.SteamDlcIds.Contains(100202))), Times.Once());
+                      m.SteamDlcIds.Contains(100202))),
+                      Times.Once());
         }
 
         [Test]
@@ -377,7 +382,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
                       m.CollectionIgdbId == 500 &&
-                      m.CollectionTitle == "Test Collection")), Times.Once());
+                      m.CollectionTitle == "Test Collection")),
+                      Times.Once());
         }
 
         [Test]
@@ -393,7 +399,8 @@ namespace NzbDrone.Core.Test.Games
             Mocker.GetMock<IGameMetadataService>()
                   .Verify(v => v.Upsert(It.Is<GameMetadata>(m =>
                       m.CollectionIgdbId == 0 &&
-                      m.CollectionTitle == null)), Times.Once());
+                      m.CollectionTitle == null)),
+                      Times.Once());
         }
 
         [Test]

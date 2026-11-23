@@ -29,10 +29,10 @@ namespace NzbDrone.Core.Indexers.Newznab
             _logger = logger;
         }
 
-        public NewznabCapabilities GetCapabilities(NewznabSettings indexerSettings)
+        public NewznabCapabilities GetCapabilities(NewznabSettings settings)
         {
-            var key = indexerSettings.ToJson();
-            var capabilities = _capabilitiesCache.Get(key, () => FetchCapabilities(indexerSettings), TimeSpan.FromDays(7));
+            var key = settings.ToJson();
+            var capabilities = _capabilitiesCache.Get(key, () => FetchCapabilities(settings), TimeSpan.FromDays(7));
 
             return capabilities;
         }

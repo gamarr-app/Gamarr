@@ -79,7 +79,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
             return new ImportListFetchResult { Games = CleanupListItems(games), AnyFailure = anyFailure };
         }
 
-        public override object RequestAction(string action, IDictionary<string, string> query)
+        public override object RequestAction(string stage, IDictionary<string, string> query)
         {
             // Return early if there is not an API key
             if (Settings.ApiKey.IsNullOrWhiteSpace())
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
 
             Settings.Validate().Filter("ApiKey").ThrowOnError();
 
-            if (action == "getProfiles")
+            if (stage == "getProfiles")
             {
                 var devices = _gamarrV3Proxy.GetProfiles(Settings);
 
@@ -107,7 +107,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
                 };
             }
 
-            if (action == "getTags")
+            if (stage == "getTags")
             {
                 var devices = _gamarrV3Proxy.GetTags(Settings);
 
@@ -122,7 +122,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
                 };
             }
 
-            if (action == "getRootFolders")
+            if (stage == "getRootFolders")
             {
                 var remoteRootFolders = _gamarrV3Proxy.GetRootFolders(Settings);
 

@@ -170,9 +170,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                 return;
             }
 
-            var error = response.Contains("_children") ?
-                        Json.Deserialize<PlexError>(response) :
-                        Json.Deserialize<PlexResponse<PlexError>>(response).MediaContainer;
+            var error = response.Contains("_children")
+                        ? Json.Deserialize<PlexError>(response)
+                        : Json.Deserialize<PlexResponse<PlexError>>(response).MediaContainer;
 
             if (error != null && !error.Error.IsNullOrWhiteSpace())
             {

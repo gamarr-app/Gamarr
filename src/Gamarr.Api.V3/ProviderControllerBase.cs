@@ -94,7 +94,7 @@ namespace Gamarr.Api.V3
             }
             catch (Exception ex) when (UniqueConstraintViolation.IsNameViolation(ex))
             {
-                throw new ValidationException(new List<ValidationFailure> { new ("Name", "Should be unique") });
+                throw new ValidationException(new List<ValidationFailure> { new("Name", "Should be unique") });
             }
 
             return Created(providerDefinition.Id);

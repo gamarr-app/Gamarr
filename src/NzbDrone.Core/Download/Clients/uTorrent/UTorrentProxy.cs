@@ -71,14 +71,14 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             return configuration;
         }
 
-        public UTorrentResponse GetTorrents(string cacheId, UTorrentSettings settings)
+        public UTorrentResponse GetTorrents(string cacheID, UTorrentSettings settings)
         {
             var requestBuilder = BuildRequest(settings)
                 .AddQueryParam("list", 1);
 
-            if (cacheId.IsNotNullOrWhiteSpace())
+            if (cacheID.IsNotNullOrWhiteSpace())
             {
-                requestBuilder.AddQueryParam("cid", cacheId);
+                requestBuilder.AddQueryParam("cid", cacheID);
             }
 
             var result = ProcessRequest(requestBuilder, settings);

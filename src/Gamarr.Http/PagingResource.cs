@@ -21,7 +21,7 @@ namespace Gamarr.Http
         public string SortKey { get; set; }
         public SortDirection SortDirection { get; set; }
         public int TotalRecords { get; set; }
-        public List<TResource> Records { get; set; } = new ();
+        public List<TResource> Records { get; set; } = new();
 
         public PagingResource()
         {
@@ -52,9 +52,11 @@ namespace Gamarr.Http
                 SortDirection = pagingResource.SortDirection,
             };
 
-            pagingSpec.SortKey = pagingResource.SortKey != null &&
+            var isAllowedSortKey = pagingResource.SortKey != null &&
                                  allowedSortKeys is { Count: > 0 } &&
-                                 allowedSortKeys.Contains(pagingResource.SortKey)
+                                 allowedSortKeys.Contains(pagingResource.SortKey);
+
+            pagingSpec.SortKey = isAllowedSortKey
                 ? pagingResource.SortKey
                 : defaultSortKey;
 

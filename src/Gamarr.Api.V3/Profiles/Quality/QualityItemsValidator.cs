@@ -27,9 +27,9 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "AllowedValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> list)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            return list != null && list.Any(c => c.Allowed);
+            return value != null && value.Any(c => c.Allowed);
         }
 
         protected override string GetDefaultMessageTemplate(string errorCode) => "Must contain at least one allowed quality";
@@ -39,14 +39,14 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "GroupItemValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
-            return !items.Any(i => i.Name.IsNotNullOrWhiteSpace() && i.Items.Count <= 1);
+            return !value.Any(i => i.Name.IsNotNullOrWhiteSpace() && i.Items.Count <= 1);
         }
 
         protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must contain multiple qualities";
@@ -56,14 +56,14 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "QualityNameValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
-            return !items.Any(i => i.Name.IsNotNullOrWhiteSpace() && i.Quality != null);
+            return !value.Any(i => i.Name.IsNotNullOrWhiteSpace() && i.Quality != null);
         }
 
         protected override string GetDefaultMessageTemplate(string errorCode) => "Individual qualities should not be named";
@@ -73,14 +73,14 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "ItemGroupNameValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
-            return !items.Any(i => i.Quality == null && i.Name.IsNullOrWhiteSpace());
+            return !value.Any(i => i.Quality == null && i.Name.IsNullOrWhiteSpace());
         }
 
         protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must have a name";
@@ -90,14 +90,14 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "ItemGroupIdValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
-            return !items.Any(i => i.Quality == null && i.Id == 0);
+            return !value.Any(i => i.Quality == null && i.Id == 0);
         }
 
         protected override string GetDefaultMessageTemplate(string errorCode) => "Groups must have an ID";
@@ -107,14 +107,14 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "UniqueIdValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
-            var ids = items.Where(i => i.Id > 0).Select(i => i.Id);
+            var ids = value.Where(i => i.Id > 0).Select(i => i.Id);
             var groupedIds = ids.GroupBy(i => i);
 
             return groupedIds.All(g => g.Count() == 1);
@@ -127,16 +127,16 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "UniqueQualityIdValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
             var qualityIds = new HashSet<int>();
 
-            foreach (var item in items)
+            foreach (var item in value)
             {
                 if (item.Id > 0)
                 {
@@ -171,16 +171,16 @@ namespace Gamarr.Api.V3.Profiles.Quality
     {
         public override string Name => "AllQualitiesValidator";
 
-        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> items)
+        public override bool IsValid(ValidationContext<T> context, IList<QualityProfileQualityItemResource> value)
         {
-            if (items == null)
+            if (value == null)
             {
                 return false;
             }
 
             var qualityIds = new HashSet<int>();
 
-            foreach (var item in items)
+            foreach (var item in value)
             {
                 if (item.Id > 0)
                 {

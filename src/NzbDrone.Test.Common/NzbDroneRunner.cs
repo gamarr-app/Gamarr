@@ -21,8 +21,8 @@ namespace NzbDrone.Test.Common
     {
         private readonly IProcessProvider _processProvider;
         private readonly RestClient _restClient;
-        private readonly object _outputLock = new ();
-        private readonly StringBuilder _capturedOutput = new ();
+        private readonly object _outputLock = new();
+        private readonly StringBuilder _capturedOutput = new();
         private Process _nzbDroneProcess;
 
         public string AppData { get; private set; }
@@ -204,7 +204,7 @@ namespace NzbDrone.Test.Common
 
         private void Start(string executable, string dllPath)
         {
-            StringDictionary envVars = new ();
+            StringDictionary envVars = new();
 
             // Set DOTNET_ROOT if the runtime is in the home directory (common on macOS)
             var homeDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");

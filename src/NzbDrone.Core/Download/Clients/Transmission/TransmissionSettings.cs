@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
     public class TransmissionSettings : DownloadClientSettingsBase<TransmissionSettings>
     {
-        private static readonly TransmissionSettingsValidator Validator = new ();
+        private static readonly TransmissionSettingsValidator Validator = new();
 
         public TransmissionSettings()
         {

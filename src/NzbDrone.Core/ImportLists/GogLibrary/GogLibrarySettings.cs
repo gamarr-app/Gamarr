@@ -14,7 +14,7 @@ namespace NzbDrone.Core.ImportLists.GogLibrary
 
     public class GogLibrarySettings : ImportListSettingsBase<GogLibrarySettings>
     {
-        private static readonly GogLibrarySettingsValidator Validator = new ();
+        private static readonly GogLibrarySettingsValidator Validator = new();
 
         public GogLibrarySettings()
         {

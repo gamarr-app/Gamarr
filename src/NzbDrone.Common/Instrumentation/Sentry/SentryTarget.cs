@@ -224,7 +224,11 @@ namespace NzbDrone.Common.Instrumentation.Sentry
         // an id. Never log this value and never expose it in the API or the UI.
         public string InstallId
         {
-            get => _installId;
+            get
+            {
+                return _installId;
+            }
+
             set
             {
                 if (value.IsNullOrWhiteSpace() || value == _installId)

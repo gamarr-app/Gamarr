@@ -83,7 +83,7 @@ namespace NzbDrone.Core.MediaFiles
         // (old-style RAR sets), .z01-.z99 (split zip). These can't live in the
         // extension map: the parser strips trailing Extensions members from
         // release titles, which would eat version suffixes like "v1.001".
-        private static readonly Regex SplitVolumeRegex = new (@"^\.(?:\d{3}|r\d{2}|z\d{2})$",
+        private static readonly Regex SplitVolumeRegex = new(@"^\.(?:\d{3}|r\d{2}|z\d{2})$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static HashSet<string> Extensions => new HashSet<string>(_fileExtensions.Keys, StringComparer.OrdinalIgnoreCase);

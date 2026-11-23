@@ -19,9 +19,9 @@ namespace NzbDrone.Core.Notifications.Twitter
         public override string Name => "Twitter";
         public override string Link => "https://twitter.com/";
 
-        public override void OnGrab(GrabMessage message)
+        public override void OnGrab(GrabMessage grabMessage)
         {
-            _twitterService.SendNotification($"[Gamarr] Grabbed: {message.Message}", Settings);
+            _twitterService.SendNotification($"[Gamarr] Grabbed: {grabMessage.Message}", Settings);
         }
 
         public override void OnDownload(DownloadMessage message)
@@ -64,9 +64,9 @@ namespace NzbDrone.Core.Notifications.Twitter
             _twitterService.SendNotification($"Manual Interaction Required: {message.Message}", Settings);
         }
 
-        public override object RequestAction(string action, IDictionary<string, string> query)
+        public override object RequestAction(string stage, IDictionary<string, string> query)
         {
-            if (action == "startOAuth")
+            if (stage == "startOAuth")
             {
                 Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
 
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Notifications.Twitter
                     oauthUrl = oauthRedirectUrl
                 };
             }
-            else if (action == "getOAuthToken")
+            else if (stage == "getOAuthToken")
             {
                 Settings.Validate().Filter("ConsumerKey", "ConsumerSecret").ThrowOnError();
 

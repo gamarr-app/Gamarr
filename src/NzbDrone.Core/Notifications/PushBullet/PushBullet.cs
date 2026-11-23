@@ -74,9 +74,9 @@ namespace NzbDrone.Core.Notifications.PushBullet
             return new ValidationResult(failures);
         }
 
-        public override object RequestAction(string action, IDictionary<string, string> query)
+        public override object RequestAction(string stage, IDictionary<string, string> query)
         {
-            if (action == "getDevices")
+            if (stage == "getDevices")
             {
                 // Return early if there is not an API key
                 if (Settings.ApiKey.IsNullOrWhiteSpace())

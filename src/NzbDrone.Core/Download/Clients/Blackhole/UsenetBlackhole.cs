@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             ScanGracePeriod = TimeSpan.FromSeconds(30);
         }
 
-        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteGame remoteGame, string filename, byte[] fileContents)
         {
             var title = remoteGame.Release.Title;
 
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
 
             using (var stream = _diskProvider.OpenWriteStream(filepath))
             {
-                stream.Write(fileContent, 0, fileContent.Length);
+                stream.Write(fileContents, 0, fileContents.Length);
             }
 
             _logger.Debug("NZB Download succeeded, saved to: {0}", filepath);

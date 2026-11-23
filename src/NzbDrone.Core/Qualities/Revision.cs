@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Qualities
 
         public override int GetHashCode()
         {
-            return Version ^ Real << 8;
+            return Version ^ (Real << 8);
         }
 
         public override bool Equals(object obj)
