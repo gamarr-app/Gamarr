@@ -42,3 +42,9 @@ updates:
      - dependency-name: "SixLabors.ImageSharp"
        versions: [">= 3.2.0"]
        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+   # StyleCop.Analyzers 1.3 adds ~400 violations and flips SA1000 (`new (x)` vs
+   # `new(x)`), so the bump and the code cleanup must land in one commit. Riding
+   # in the minor-patch group it turned every group PR red (#243, #249, #250)
+   # and blocked the other bumps. Held until that cleanup is done by hand.
+     - dependency-name: "StyleCop.Analyzers"
+       versions: [">= 1.2.0"]
