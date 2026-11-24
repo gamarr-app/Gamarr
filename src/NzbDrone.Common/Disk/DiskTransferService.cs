@@ -88,8 +88,19 @@ namespace NzbDrone.Common.Disk
                 if (sourceMount != null && targetMount != null && sourceMount.RootDirectory == targetMount.RootDirectory)
                 {
                     _logger.Debug("Rename Directory [{0}] > [{1}]", sourcePath, targetPath);
-                    _diskProvider.MoveFolder(sourcePath, targetPath);
-                    return mode;
+
+                    try
+                    {
+                        _diskProvider.MoveFolder(sourcePath, targetPath);
+                        return mode;
+                    }
+                    catch (IOException ex) when (IsCrossDeviceLink(ex))
+                    {
+                        // The mount table can report one mount for paths the kernel treats as
+                        // separate devices (bind mounts, btrfs subvolumes, ZFS datasets), so a
+                        // plain rename fails with EXDEV. Fall through to copy-then-delete.
+                        _logger.Debug(ex, "Rename across devices not possible, copying [{0}] > [{1}] instead", sourcePath, targetPath);
+                    }
                 }
             }
 
@@ -528,6 +539,12 @@ namespace NzbDrone.Common.Disk
             }
 
             throw new IOException(string.Format("File {0} incomplete, data loss may have occurred. [{1}] was {2} bytes long instead of the expected {3}.", action, targetPath, targetSize, originalSize));
+        }
+
+        private static bool IsCrossDeviceLink(IOException ex)
+        {
+            // EXDEV is errno 18 on Linux, macOS and the BSDs; .NET surfaces the raw errno as HResult.
+            return ex.HResult == 18 || ex.Message.Contains("Cross-device link", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool ShouldIgnore(DirectoryInfo folder)

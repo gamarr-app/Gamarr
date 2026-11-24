@@ -721,6 +721,27 @@ namespace NzbDrone.Common.Test.DiskTests
         }
 
         [Test]
+        public void TransferFolder_should_copy_when_same_mount_rename_is_cross_device()
+        {
+            WithEmulatedDiskProvider();
+
+            var src = @"C:\Base1\TestDir1".AsOsAgnostic();
+            var dst = @"C:\Base1\TestDir2".AsOsAgnostic();
+
+            WithMockMount(@"C:\Base1".AsOsAgnostic());
+            WithExistingFile(@"C:\Base1\TestDir1\test.file.txt".AsOsAgnostic());
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(v => v.MoveFolder(src, dst, false))
+                  .Throws(new IOException("Cross-device link", 18));
+
+            Subject.TransferFolder(src, dst, TransferMode.Move);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.CreateFolder(dst), Times.Once());
+        }
+
+        [Test]
         public void TransferFolder_should_not_use_movefolder_if_on_same_mount_but_target_already_exists()
         {
             WithEmulatedDiskProvider();
