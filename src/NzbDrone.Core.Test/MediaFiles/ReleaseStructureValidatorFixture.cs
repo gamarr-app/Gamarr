@@ -30,6 +30,21 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_fail_closed_when_folder_cannot_be_enumerated()
+        {
+            GivenFolderExists();
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(d => d.GetFiles(TestPath, true))
+                  .Throws(new System.UnauthorizedAccessException("denied"));
+
+            var result = Subject.ValidateReleaseStructure(TestPath, "FitGirl", "Some.Game-FitGirl");
+
+            result.IsValid.Should().BeFalse();
+            result.Message.Should().Contain("Unable to read");
+        }
+
+        [Test]
         public void should_return_invalid_when_folder_does_not_exist()
         {
             GivenFolderExists(false);

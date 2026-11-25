@@ -16,12 +16,16 @@ namespace NzbDrone.Core.Organizer
 
         private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 
+        // Null contract: FluentValidation runs every rule even after one fails, so each rule
+        // below receives null/blank input. NotEmpty is the only rule that reports it; every
+        // other rule treats a null or blank value as "not applicable" (passes) and its message
+        // factory returns an empty string, so a blank format yields exactly one error.
         public static IRuleBuilderOptions<T, string> ValidGameFormat<T>(this IRuleBuilder<T, string> ruleBuilder)
         {
             return ruleBuilder.NotEmpty()
                               .Must(value => !HasIllegalCharacters(value))
                               .WithMessage(GetIllegalCharacterMessage)
-                              .Must(value => IsValidGameFormat(value))
+                              .Must(IsValidGameFormat)
                               .WithMessage("Must contain either game title and release year OR Original Title/Filename");
         }
 
@@ -32,19 +36,24 @@ namespace NzbDrone.Core.Organizer
                               .WithMessage(GetIllegalCharacterMessage)
                               .Must(value => !HasDeprecatedTokens(value))
                               .WithMessage(GetDeprecatedTokenMessage)
-                              .Must(value => value != null && FileNameBuilder.GameTitleRegex.IsMatch(value))
+                              .Must(HasGameTitleToken)
                               .WithMessage("Must contain game title");
         }
 
         private static bool IsValidGameFormat(string value)
         {
-            if (value == null)
+            if (value.IsNullOrWhiteSpace())
             {
-                return false;
+                return true;
             }
 
             return (FileNameBuilder.GameTitleRegex.IsMatch(value) && FileNameBuilder.ReleaseYearRegex.IsMatch(value) && !OriginalTokenRegex.IsMatch(value)) ||
                    OriginalTokenRegex.IsMatch(value);
+        }
+
+        private static bool HasGameTitleToken(string value)
+        {
+            return value.IsNullOrWhiteSpace() || FileNameBuilder.GameTitleRegex.IsMatch(value);
         }
 
         private static bool HasIllegalCharacters(string value)
@@ -70,7 +79,7 @@ namespace NzbDrone.Core.Organizer
 
         private static bool HasDeprecatedTokens(string value)
         {
-            if (value == null)
+            if (value.IsNullOrWhiteSpace())
             {
                 return false;
             }
@@ -80,7 +89,7 @@ namespace NzbDrone.Core.Organizer
 
         private static string GetDeprecatedTokenMessage<T>(T instance, string value)
         {
-            if (value == null)
+            if (value.IsNullOrWhiteSpace())
             {
                 return string.Empty;
             }

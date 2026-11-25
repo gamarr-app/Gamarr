@@ -137,8 +137,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
 
                 if (sabHistoryItem.Status == SabnzbdDownloadStatus.Failed)
                 {
-                    if (sabHistoryItem.FailMessage.IsNotNullOrWhiteSpace() &&
-                        sabHistoryItem.FailMessage.Equals("Unpacking failed, write error or disk is full?", StringComparison.InvariantCultureIgnoreCase))
+                    if (SabnzbdErrorParser.IsUnpackWriteError(sabHistoryItem.FailMessage))
                     {
                         historyItem.Status = DownloadItemStatus.Warning;
                     }
@@ -426,19 +425,11 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             {
                 _proxy.GetConfig(Settings);
             }
-            catch (Exception ex)
+            catch (SabnzbdAuthenticationException ex)
             {
-                if (ex.Message.ContainsIgnoreCase("API Key Incorrect"))
-                {
-                    return new ValidationFailure("APIKey", _localizationService.GetLocalizedString("DownloadClientValidationApiKeyIncorrect"));
-                }
-
-                if (ex.Message.ContainsIgnoreCase("API Key Required"))
-                {
-                    return new ValidationFailure("APIKey", _localizationService.GetLocalizedString("DownloadClientValidationApiKeyRequired"));
-                }
-
-                throw;
+                return ex.Reason == SabnzbdAuthError.ApiKeyRequired
+                    ? new ValidationFailure("APIKey", _localizationService.GetLocalizedString("DownloadClientValidationApiKeyRequired"))
+                    : new ValidationFailure("APIKey", _localizationService.GetLocalizedString("DownloadClientValidationApiKeyIncorrect"));
             }
 
             return null;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -187,7 +188,8 @@ namespace NzbDrone.Core.Games.Components
                 NoIntroRomComponentType.Multiboot => GameComponentType.NoIntroMultiboot,
                 NoIntroRomComponentType.Video => GameComponentType.NoIntroVideo,
                 NoIntroRomComponentType.Bios => GameComponentType.NoIntroBios,
-                _ => GameComponentType.NoIntroRomhackOrUnverified
+                NoIntroRomComponentType.RomhackOrUnverified => GameComponentType.NoIntroRomhackOrUnverified,
+                _ => throw new ArgumentOutOfRangeException(nameof(componentType), componentType, "Unmapped No-Intro ROM component type")
             };
         }
 
@@ -199,7 +201,8 @@ namespace NzbDrone.Core.Games.Components
                 GameComponentType.NoIntroMultiboot => "multiboot",
                 GameComponentType.NoIntroVideo => "video",
                 GameComponentType.NoIntroBios => "bios",
-                _ => "unverified"
+                GameComponentType.NoIntroRomhackOrUnverified => "unverified",
+                _ => throw new ArgumentOutOfRangeException(nameof(componentType), componentType, "Not a No-Intro component type")
             };
         }
     }

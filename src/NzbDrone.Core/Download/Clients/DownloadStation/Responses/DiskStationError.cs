@@ -27,11 +27,11 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Responses
             AuthMessages = new Dictionary<int, string>
             {
                 { 400, "No such account or incorrect password" },
-                { 401, "Disabled account" },
-                { 402, "Denied permission" },
-                { 403, "2-step authentication code required" },
-                { 404, "Failed to authenticate 2-step authentication code" },
-                { 406, "Enforce to authenticate with 2-factor authentication code" },
+                { 401, "Guest or disabled account" },
+                { 402, "Permission denied" },
+                { 403, "2-step verification code required" },
+                { 404, "Failed to authenticate 2-step verification code" },
+                { 406, "2-step verification is enforced for this account" },
                 { 407, "Blocked IP source" },
                 { 408, "Expired password cannot change" },
                 { 409, "Expired password" },
@@ -81,6 +81,27 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Responses
         }
 
         public int Code { get; set; }
+
+        /// <summary>
+        /// Documented SYNO.API.Auth login failures (DSM Login Web API guide). Only the OTP
+        /// codes (403, 404, 406) involve 2-step verification; the rest are plain account
+        /// problems and must not be reported as such.
+        /// </summary>
+        public static string GetAuthHint(int code)
+        {
+            return code switch
+            {
+                400 => "Check the username and password.",
+                401 => "The DSM account is a guest or is disabled. Enable it or use another account.",
+                402 => "The DSM account is not permitted to sign in. Give it permission for Download Station.",
+                403 => OtpHint,
+                404 => "The 2-step verification code was rejected. " + OtpHint,
+                406 => OtpHint,
+                _ => null
+            };
+        }
+
+        private const string OtpHint = "Gamarr cannot answer a 2-step verification prompt: use a dedicated DSM account for Gamarr that does not require it (and has Download Station permission).";
 
         public bool SessionError => Code == 105 || Code == 106 || Code == 107 || Code == 119;
 

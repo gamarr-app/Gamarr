@@ -275,7 +275,7 @@ namespace NzbDrone.Core.DecisionEngine
                 e.Data.Add("report", remoteGame.Release.ToJson());
                 e.Data.Add("parsed", remoteGame.ParsedGameInfo.ToJson());
                 _logger.Error(e, "Couldn't evaluate decision on {0}, with spec: {1}", remoteGame.Release.Title, spec.GetType().Name);
-                return new DownloadRejection(DownloadRejectionReason.DecisionError, $"{spec.GetType().Name}: {e.Message}");
+                return new DownloadRejection(DownloadRejectionReason.DecisionError, "Unable to evaluate this release against the decision rules; see the log for details");
             }
 
             return null;

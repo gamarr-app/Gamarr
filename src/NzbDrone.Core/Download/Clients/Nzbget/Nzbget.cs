@@ -286,13 +286,13 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
                                 { { "clientName", Name }, { "requiredVersion", "12.0" }, { "reportedVersion", version } }));
                 }
             }
+            catch (DownloadClientAuthenticationException)
+            {
+                // Raised by NzbgetProxy on an HTTP 401, not inferred from message text.
+                return new ValidationFailure("Username", _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailure"));
+            }
             catch (Exception ex)
             {
-                if (ex.Message.ContainsIgnoreCase("Authentication failed"))
-                {
-                    return new ValidationFailure("Username", _localizationService.GetLocalizedString("DownloadClientValidationAuthenticationFailure"));
-                }
-
                 _logger.Debug(ex, "Unable to connect to NZBGet");
                 return new ValidationFailure("Host",
                     _localizationService.GetLocalizedString("DownloadClientValidationUnableToConnect",

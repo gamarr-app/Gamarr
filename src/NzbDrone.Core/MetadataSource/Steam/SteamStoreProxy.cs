@@ -497,7 +497,13 @@ namespace NzbDrone.Core.MetadataSource.Steam
             {
                 "game" => GameType.MainGame,
                 "dlc" => GameType.DlcAddon,
-                "demo" => GameType.MainGame, // Treat demos as games for now
+                
+                // GameType has no Demo member: demo-ness is modelled as ReleaseContentType.Demo on
+                // releases (DemoBuildSpecification), not on metadata. A Steam demo is its own appid
+                // and is only reachable here by an explicit lookup, so it is recorded as a
+                // MainGame entry; adding a metadata-level Demo type would need a schema and UI
+                // change that is out of scope for this mapping.
+                "demo" => GameType.MainGame,
                 "advertising" => GameType.MainGame,
                 "mod" => GameType.Mod,
                 "video" => GameType.MainGame, // Should be filtered out earlier

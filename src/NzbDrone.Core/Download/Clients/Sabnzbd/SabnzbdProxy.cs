@@ -208,7 +208,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
 
             if (result.Failed)
             {
-                throw new DownloadClientException("Error response received from SABnzbd: {0}", result.Error);
+                throw CreateError(result.Error);
             }
 
             return result;
@@ -247,6 +247,18 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             return response;
         }
 
+        private static DownloadClientException CreateError(string error)
+        {
+            var authError = SabnzbdErrorParser.ParseAuthError(error);
+
+            if (authError != SabnzbdAuthError.None)
+            {
+                return new SabnzbdAuthenticationException(authError, error);
+            }
+
+            return new DownloadClientException("Error response received from SABnzbd: {0}", error);
+        }
+
         private void CheckForError(HttpResponse response)
         {
             if (!Json.TryDeserialize<SabnzbdJsonError>(response.Content, out var result))
@@ -269,7 +281,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
 
             if (result.Failed)
             {
-                throw new DownloadClientException("Error response received from SABnzbd: {0}", result.Error);
+                throw CreateError(result.Error);
             }
         }
     }

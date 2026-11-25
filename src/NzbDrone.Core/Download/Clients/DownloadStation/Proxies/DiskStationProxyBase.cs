@@ -149,11 +149,11 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Proxies
                     // required, blocked IP...): the user's credentials, not a bug.
                     if (api == DiskStationApi.Auth && responseContent.Error.Code >= 400 && responseContent.Error.Code < 500)
                     {
-                        // Gamarr can't answer a 2-step prompt on every request, so say what
-                        // to do about it instead of just repeating the DSM code.
-                        if (responseContent.Error.Code is 403 or 404 or 406)
+                        var hint = DiskStationError.GetAuthHint(responseContent.Error.Code);
+
+                        if (hint.IsNotNullOrWhiteSpace())
                         {
-                            msg += ". Gamarr cannot sign in with 2-step verification: use a dedicated DSM account for Gamarr that does not require it (and has Download Station permission).";
+                            msg += ". " + hint;
                         }
 
                         _logger.Warn(msg);

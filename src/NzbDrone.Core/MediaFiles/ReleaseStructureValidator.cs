@@ -244,6 +244,16 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             var files = GetAllFiles(path);
+
+            if (files == null)
+            {
+                // Fail closed: a folder we cannot enumerate has not been checked, so it must
+                // not read as a clean release with nothing suspicious in it.
+                result.Message = "Unable to read the release folder, so its contents could not be verified";
+                result.IsValid = false;
+                return result;
+            }
+
             var relativeFiles = files.Select(f => GetRelativePath(path, f)).ToList();
 
             // Always check for suspicious files first - these are never okay
@@ -397,8 +407,8 @@ namespace NzbDrone.Core.MediaFiles
             }
             catch (Exception ex)
             {
-                Logger.Warn(ex, "Failed to enumerate files in {0}", path);
-                return new List<string>();
+                Logger.Warn(ex, "Failed to enumerate files in {0}; rejecting the release as unverifiable", path);
+                return null;
             }
         }
 

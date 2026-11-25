@@ -141,8 +141,11 @@ namespace NzbDrone.Core.MetadataSource.RAWG
 
         public GameCollection GetCollectionInfo(int collectionId)
         {
-            // RAWG doesn't have direct collection support like IGDB
-            // Return null for now - could potentially use game_series in future
+            // RAWG has no collection entity. Its /games/{id}/game-series endpoint only lists
+            // sibling games and offers no stable series id to key a GameCollection on, so
+            // there is nothing to look up by id. Null is the IProvideGameInfo "not found"
+            // answer, which both callers (AddGameCollectionService, RefreshCollectionService)
+            // already handle.
             return null;
         }
 

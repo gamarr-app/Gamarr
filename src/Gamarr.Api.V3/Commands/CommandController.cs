@@ -90,7 +90,10 @@ namespace Gamarr.Api.V3.Commands
                     // A field the command can't hold (an enum value from a newer or
                     // hand-written client, a wrong type): the caller's mistake, so a
                     // 400 that names the field instead of a 500 that reaches Sentry.
-                    throw new BadRequestException($"Invalid body for command '{commandResource.Name}': {e.Message}");
+                    // JsonException.Message embeds serializer internals (CLR type names, line and byte
+                    // offsets); the Path is the caller-facing part.
+                    var field = string.IsNullOrWhiteSpace(e.Path) || e.Path == "$" ? "the request body" : $"'{e.Path.TrimStart('$', '.')}'";
+                    throw new BadRequestException($"Invalid value for {field} in command '{commandResource.Name}'");
                 }
 
                 if (command == null)

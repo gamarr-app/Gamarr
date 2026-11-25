@@ -270,15 +270,12 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     return new ImportRejection(result.Reason, result.Message);
                 }
             }
-            catch (NotImplementedException e)
-            {
-                _logger.Warn(e, "Spec " + spec.ToString() + " currently does not implement evaluation for games.");
-                return null;
-            }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Couldn't evaluate decision on {0}", localGame.Path);
-                return new ImportRejection(ImportRejectionReason.DecisionError, $"{spec.GetType().Name}: {ex.Message}");
+                // One faulty spec must not take down the whole import, but the exception text is
+                // an implementation detail: log it in full and give the user a generic reason.
+                _logger.Error(ex, "Couldn't evaluate decision on {0} with spec {1}", localGame.Path, spec.GetType().Name);
+                return new ImportRejection(ImportRejectionReason.DecisionError, "Unable to evaluate this file against the import rules; see the log for details");
             }
 
             return null;
