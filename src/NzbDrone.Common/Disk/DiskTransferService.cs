@@ -543,8 +543,12 @@ namespace NzbDrone.Common.Disk
 
         private static bool IsCrossDeviceLink(IOException ex)
         {
-            // EXDEV is errno 18 on Linux, macOS and the BSDs; .NET surfaces the raw errno as HResult.
-            return ex.HResult == 18 || ex.Message.Contains("Cross-device link", StringComparison.OrdinalIgnoreCase);
+            // On Unix .NET surfaces the raw errno as HResult: EXDEV is 18 on Linux, macOS and the BSDs.
+            // On Windows it is ERROR_NOT_SAME_DEVICE (17) wrapped as an HRESULT.
+            const int unixExdev = 18;
+            const int windowsNotSameDevice = unchecked((int)0x80070011);
+
+            return OperatingSystem.IsWindows() ? ex.HResult == windowsNotSameDevice : ex.HResult == unixExdev;
         }
 
         private bool ShouldIgnore(DirectoryInfo folder)

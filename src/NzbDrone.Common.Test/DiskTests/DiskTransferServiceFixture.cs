@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -733,7 +734,7 @@ namespace NzbDrone.Common.Test.DiskTests
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(v => v.MoveFolder(src, dst, false))
-                  .Throws(new IOException("Cross-device link", 18));
+                  .Throws(new IOException("Cross-device link", OperatingSystem.IsWindows() ? unchecked((int)0x80070011) : 18));
 
             Subject.TransferFolder(src, dst, TransferMode.Move);
 

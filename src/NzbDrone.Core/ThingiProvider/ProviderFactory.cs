@@ -188,15 +188,23 @@ namespace NzbDrone.Core.ThingiProvider
 
         private bool IsValidSettings(TProviderDefinition definition)
         {
-            // One provider's validator throwing (e.g. a regex timeout while the host is stalled)
-            // must not take down the whole task that asked for the active providers.
+            // Settings that cannot be shown valid are not active. A validator that throws must
+            // only drop its own provider, not the whole task asking for active providers
+            // (RSS sync, search, notifications).
             try
             {
                 return definition.Settings.Validate().IsValid;
             }
             catch (RegexMatchTimeoutException ex)
             {
+                // Validator patterns are linear; a timeout means the host stalled mid-match.
                 _logger.Warn(ex, "Timed out validating settings for {0}, skipping it this time", definition.Name);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // A validator bug: keep it visible (Error reaches Sentry) but isolate it.
+                _logger.Error(ex, "Validating settings for {0} failed, skipping it", definition.Name);
                 return false;
             }
         }
