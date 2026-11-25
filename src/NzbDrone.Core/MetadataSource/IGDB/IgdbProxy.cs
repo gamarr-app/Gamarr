@@ -34,8 +34,6 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
         protected virtual int RetryDelayBaseMs => 1000;
 
-        private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(10);
-
         private const string GameFields = @"
             fields id, name, slug, summary, storyline, category, status,
             first_release_date, aggregated_rating, aggregated_rating_count,
@@ -59,6 +57,8 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             age_ratings.*, release_dates.*, release_dates.platform.*,
             websites.*, external_games.*;
         ";
+
+        private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(10);
 
         // IGDB free tier allows 4 requests per second
         private static readonly TimeSpan RateLimitInterval = TimeSpan.FromMilliseconds(250);

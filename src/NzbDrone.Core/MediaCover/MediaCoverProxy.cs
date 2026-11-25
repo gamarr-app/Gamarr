@@ -65,7 +65,7 @@ namespace NzbDrone.Core.MediaCover
             var url = GetUrl(hash);
 
             var request = new HttpRequest(url);
-            
+
             // HttpClient takes no token, so a client abort can't cancel the fetch itself;
             // WaitAsync lets the request thread stop waiting on it as soon as the caller goes away.
             var response = await _httpClient.GetAsync(request).WaitAsync(cancellationToken);

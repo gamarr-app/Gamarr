@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using NLog;
 using NzbDrone.Common.Cache;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Download.Clients.DownloadStation.Responses;

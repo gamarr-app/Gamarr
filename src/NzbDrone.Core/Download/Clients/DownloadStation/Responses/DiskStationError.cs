@@ -4,6 +4,8 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Responses
 {
     public class DiskStationError
     {
+        private const string OtpHint = "Gamarr cannot answer a 2-step verification prompt: use a dedicated DSM account for Gamarr that does not require it (and has Download Station permission).";
+
         private static readonly Dictionary<int, string> CommonMessages;
         private static readonly Dictionary<int, string> AuthMessages;
         private static readonly Dictionary<int, string> DownloadStationTaskMessages;
@@ -100,8 +102,6 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation.Responses
                 _ => null
             };
         }
-
-        private const string OtpHint = "Gamarr cannot answer a 2-step verification prompt: use a dedicated DSM account for Gamarr that does not require it (and has Download Station permission).";
 
         public bool SessionError => Code == 105 || Code == 106 || Code == 107 || Code == 119;
 

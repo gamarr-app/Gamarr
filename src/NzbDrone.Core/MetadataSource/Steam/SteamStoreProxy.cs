@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -497,7 +498,7 @@ namespace NzbDrone.Core.MetadataSource.Steam
             {
                 "game" => GameType.MainGame,
                 "dlc" => GameType.DlcAddon,
-                
+
                 // GameType has no Demo member: demo-ness is modelled as ReleaseContentType.Demo on
                 // releases (DemoBuildSpecification), not on metadata. A Steam demo is its own appid
                 // and is only reachable here by an explicit lookup, so it is recorded as a
