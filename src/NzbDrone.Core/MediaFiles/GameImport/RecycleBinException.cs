@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using NzbDrone.Common.Exceptions;
 
 namespace NzbDrone.Core.MediaFiles.GameImport
 {
-    public class RecycleBinException : DirectoryNotFoundException
+    public class RecycleBinException : DirectoryNotFoundException, IEnvironmentalException
     {
         public RecycleBinException()
         {

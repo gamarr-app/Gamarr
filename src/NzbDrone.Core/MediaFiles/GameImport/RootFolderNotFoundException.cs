@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using NzbDrone.Common.Exceptions;
 
 namespace NzbDrone.Core.MediaFiles.GameImport
 {
-    public class RootFolderNotFoundException : DirectoryNotFoundException
+    public class RootFolderNotFoundException : DirectoryNotFoundException, IEnvironmentalException
     {
         public RootFolderNotFoundException()
         {

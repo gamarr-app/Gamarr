@@ -3,13 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
+using DryIoc;
 using NLog;
 using NLog.Common;
 using NLog.Targets;
 using Npgsql;
+using NzbDrone.Common.Composition;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Exceptions;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using Sentry;
@@ -43,58 +49,157 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             PostgresErrorCodes.ProgramLimitExceeded
         };
 
-        // use string and not Type so we don't need a reference to the project
-        // where these are defined
+        // Exceptions defined in assemblies Common cannot reference (Core, Host,
+        // and Kestrel, which Common has no dependency on), so the only handle is
+        // the type name. Everything Common can reference is matched by real type in
+        // IsFilteredByType instead.
         private static readonly HashSet<string> FilteredExceptionTypeNames = new HashSet<string>
         {
-            // UnauthorizedAccessExceptions will just be user configuration issues
-            "UnauthorizedAccessException",
-
-            // Filter out people stuck in boot loops
+            // Core: filter people stuck in boot loops
             "CorruptDatabaseException",
 
-            // The configured port is already taken — a second instance, an
-            // unrelated app on 6767, or a container restarting faster than the
-            // old one releases the socket. ConsoleApp already explains this at
-            // the console; Kestrel logging it too just crash-loops into Sentry.
+            // Kestrel (not referenced by Common): the configured port is already
+            // taken (a second instance, an unrelated app on 6767, or a container
+            // restarting faster than the old one releases the socket).
+            // ConsoleApp already explains this at the console; Kestrel logging it
+            // too just crash-loops into Sentry.
             "AddressInUseException",
+
+            // Host: filter SingleInstance Termination Exceptions
+            "TerminateApplicationException",
+
+            // Core: the user's download client refused a grab (bad NZB/torrent,
+            // client-side limits) - surfaced in the UI, not an app bug
+            "DownloadClientRejectedReleaseException",
+
+            // Core: the download client is switched off, unreachable or behind a
+            // broken reverse proxy - environmental, and already surfaced as a
+            // health check
+            "DownloadClientUnavailableException",
+
+            // Core: wrong username/password/API key for the download client
+            "DownloadClientAuthenticationException",
+
+            // Kestrel (not referenced by Common): thrown from its own request-body
+            // reader when the client disconnects mid-read (e.g.
+            // BufferingMiddleware.EnableBuffering awaiting a body that never
+            // finishes arriving). Nothing in our code produces it.
+            "BadHttpRequestException"
+        };
+
+        // Errors from the socket layer that mean "the other end or the network
+        // between us is not behaving": user setup, not code.
+        private static readonly HashSet<SocketError> FilteredSocketErrors = new HashSet<SocketError>
+        {
+            // Service down, host renamed, DNS broken
+            SocketError.ConnectionRefused,
+            SocketError.HostUnreachable,
+            SocketError.NetworkUnreachable,
+            SocketError.HostNotFound,
+            SocketError.TryAgain,
+            SocketError.HostDown,
+
+            // The peer (download client, indexer, reverse proxy, a browser
+            // streaming a static asset) dropped an established connection.
+            // Broken pipe (EPIPE) maps to Shutdown.
+            SocketError.ConnectionReset,
+            SocketError.ConnectionAborted,
+            SocketError.Shutdown
+        };
+
+        // errno values carried in IOException.HResult on Unix, for a network share
+        // (SMB/NFS mount of a NAS) that dropped while we read or wrote a file on it:
+        // EHOSTDOWN, and EAGAIN ("Resource temporarily unavailable"). The numbers
+        // differ between Linux and macOS.
+        private static readonly int ErrnoHostDown = OperatingSystem.IsMacOS() ? 64 : 112;
+        private static readonly int ErrnoWouldBlock = OperatingSystem.IsMacOS() ? 35 : 11;
+
+        private static bool IsFilteredByType(Exception ex)
+        {
+            // Cancellation is cooperative and expected: shutting the host down, a
+            // browser hanging up mid-request, a resilience pipeline timing out
+            // (TaskCanceledException, an outbound HTTP timeout, is a subclass).
+            if (ex is OperationCanceledException)
+            {
+                return true;
+            }
+
+            // UnauthorizedAccessExceptions will just be user configuration issues
+            if (ex is UnauthorizedAccessException)
+            {
+                return true;
+            }
 
             // A native export missing from the host OS (seen: crypt32's
             // CryptProtectMemory on a Windows Insider build, called from inside
             // ASP.NET Core DataProtection). Nothing we ship can supply it.
-            "EntryPointNotFoundException",
-
-            // Filter SingleInstance Termination Exceptions
-            "TerminateApplicationException",
-
-            // User config issue, root folder missing, etc.
-            "DirectoryNotFoundException",
+            if (ex is EntryPointNotFoundException)
+            {
+                return true;
+            }
 
             // A remote server (indexer, Prowlarr, etc.) told us to back off
-            "TooManyRequestsException",
+            if (ex is TooManyRequestsException)
+            {
+                return true;
+            }
 
-            // The user's download client refused a grab (bad NZB/torrent,
-            // client-side limits) — surfaced in the UI, not an app bug
-            "DownloadClientRejectedReleaseException",
+            // A request that arrived after the DI container was disposed, i.e. in the
+            // window between shutdown starting and Kestrel stopping.
+            if (ex is ContainerException ce && ce.Error == Error.ContainerIsDisposed)
+            {
+                return true;
+            }
 
-            // The download client is switched off, unreachable or behind a
-            // broken reverse proxy — environmental, and already surfaced as a
-            // health check
-            "DownloadClientUnavailableException",
+            if (ex is ObjectDisposedException ode && ode.ObjectName == "Container")
+            {
+                return true;
+            }
 
-            // Wrong username/password/API key for the download client
-            "DownloadClientAuthenticationException",
+            // A missing directory is the user's configuration (root folder gone,
+            // share unmounted) when the runtime itself reports it, or when we
+            // flagged it as such. One thrown from our own code is a path we built,
+            // which may be a bug, so it reports.
+            if (ex is DirectoryNotFoundException &&
+                (ex is IEnvironmentalException || IsThrownByTheRuntime(ex)))
+            {
+                return true;
+            }
 
-            // Cancellation is cooperative and expected: shutting the host down,
-            // a browser hanging up mid-request, a resilience pipeline timing out.
-            // Nothing here is ever actionable.
-            "OperationCanceledException",
+            if (ex is SocketException socketEx && FilteredSocketErrors.Contains(socketEx.SocketErrorCode))
+            {
+                return true;
+            }
 
-            // Kestrel throws this from its own request-body reader when the client
-            // disconnects mid-read (e.g. BufferingMiddleware.EnableBuffering awaiting
-            // a body that never finishes arriving). Nothing in our code produces it.
-            "BadHttpRequestException"
-        };
+            if (ex is HttpRequestException httpRequestEx &&
+                (httpRequestEx.HttpRequestError == HttpRequestError.ConnectionError ||
+                 httpRequestEx.HttpRequestError == HttpRequestError.NameResolutionError ||
+
+                 // The user's own HTTP/SOCKS proxy rejecting or failing our outbound call
+                 // (e.g. a 407 because no/bad credentials are set in Gamarr's proxy
+                 // settings): their setup, and already surfaced by ProxyCheck.
+                 httpRequestEx.HttpRequestError == HttpRequestError.ProxyTunnelError))
+            {
+                return true;
+            }
+
+            if (ex is IOException && !OperatingSystem.IsWindows() &&
+                (ex.HResult == ErrnoHostDown || ex.HResult == ErrnoWouldBlock))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsThrownByTheRuntime(Exception ex)
+        {
+            var assemblyName = ex.TargetSite?.DeclaringType?.Assembly.GetName().Name;
+
+            return assemblyName != null &&
+                   (assemblyName.StartsWith("System.", StringComparison.Ordinal) ||
+                    assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal));
+        }
 
         // Remote services reject us for reasons that are always the user's configuration
         // (bad/expired API key, IP not whitelisted, account not on the required tier).
@@ -117,65 +222,34 @@ namespace NzbDrone.Common.Instrumentation.Sentry
             return FilteredHttpStatusCodes.Contains(statusCode) || (int)statusCode >= 500;
         }
 
+        // Text matching is the last resort, only for third-party or cross-assembly
+        // failures that expose no typed handle. Each entry says why.
         public static readonly List<string> FilteredExceptionMessages = new List<string>
         {
-            // Swallow the many, many exceptions flowing through from Jackett
+            // Jackett's IndexerException surfaces only as text inside a wrapping
+            // exception; its assembly is not ours and not referenced.
             "Jackett.Common.IndexerException",
 
-            // Fix openflixr being stupid with permissions
+            // openflixr's permissions breakage reaches us as a plain Exception whose
+            // message names the install; there is no type or code to key on.
             "openflixr",
 
-            // Windows install with Gamarr's binaries inside its own data folder
-            // (e.g. the zip extracted into C:\ProgramData\Gamarr rather than the
-            // installer's \bin). The updater refuses on purpose and the UI shows
-            // the reason; it's the user's layout, not a code fault.
+            // Windows install with Gamarr's binaries inside its own data folder.
+            // Thrown as UpdateFailedException from Core (not referenceable here) and
+            // it carries no error code. The updater refuses on purpose and the UI
+            // shows the reason; it's the user's layout, not a code fault.
             "which will cause data lost during the upgrade",
             "An update replaces the program folder, which would delete your settings",
 
-            // Environmental network failures reaching download clients/indexers
-            // (service down, host renamed, DNS broken) — user setup, not code.
-            "Connection refused",
-            "No route to host",
-            "Host is unreachable",
-            "Network is unreachable",
-            "Name or service not known",
-            "No such host is known",
-            "Resource temporarily unavailable",
-
-            // EHOSTDOWN: a network share (SMB/NFS mount of a NAS) dropped while
-            // we were reading or writing a file on it. The NAS went to sleep or
-            // offline. It is still logged locally; nothing in our code to fix.
-            "Host is down",
-
-            // The logging pipeline itself failing, not the thing being logged.
-            // On Windows service installs Kestrel's EventLog sink throws all
-            // through shutdown once the event log handle is torn down.
+            // The logging pipeline itself failing, not the thing being logged. On
+            // Windows service installs Kestrel's EventLog sink throws through
+            // shutdown once the event log handle is torn down; the wrapper is a
+            // plain exception with no typed handle.
             "An error occurred while writing to logger(s)",
 
-            // A request that arrived after the DI container was disposed, i.e.
-            // in the window between shutdown starting and Kestrel stopping.
-            "Container is disposed",
-
-            // A client disconnected mid-stream while we were writing a static
-            // resource (frontend asset, cached image, etc.) to the response body.
-            // Surfaces as a bare IOException, not a Kestrel-specific type, so it
-            // can't be filtered by type name without also hiding real disk I/O
-            // failures — match on the socket-reset message instead.
-            "Broken pipe",
-            "forcibly closed by the remote host",
-
-            // The Unix wording of "forcibly closed by the remote host" above: the
-            // peer (download client, indexer, reverse proxy) dropped an established
-            // connection mid-request. Surfaces as a SocketException wrapped in an
-            // IOException wrapped in an HttpRequestException, so only the innermost
-            // message names the cause. Nothing on our side can prevent it.
-            "Connection reset by peer",
-
-            // The user's own HTTP/SOCKS proxy rejecting or failing our outbound
-            // call (e.g. a 407 because no/bad credentials are set in Gamarr's
-            // proxy settings) — their setup, not our code, and already surfaced
-            // to them by ProxyCheck.
-            "The proxy tunnel request to proxy",
+            // SOCKS proxy failures from the SOCKS connector are plain
+            // HttpRequestExceptions with HttpRequestError.Unknown, so only the text
+            // names the cause. The user's own proxy, surfaced by ProxyCheck.
             "Failed to authenticate with the SOCKS server",
             "SOCKS server failed to connect to the destination"
         };
@@ -415,8 +489,7 @@ namespace NzbDrone.Common.Instrumentation.Sentry
         // Official packages still report it, since there it would be ours.
         public static bool IsSelfBuiltMissingAssembly(Exception ex, string branch)
         {
-            return ex is System.IO.FileNotFoundException &&
-                   ex.Message.StartsWith("Required assembly '", StringComparison.Ordinal) &&
+            return ex is MissingPlatformAssemblyException &&
                    branch != null &&
                    branch.EndsWith("-dev", StringComparison.OrdinalIgnoreCase);
         }
@@ -456,17 +529,17 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                             isSentry = false;
                         }
 
-                        var pgEx = logEvent.Exception as PostgresException;
+                        var pgEx = ex as PostgresException;
                         if (pgEx != null && FilteredPostgresErrorCodes.Contains(pgEx.SqlState))
                         {
-                            return false;
+                            isSentry = false;
                         }
 
                         // We don't care about transient network and timeout errors
-                        var npgEx = logEvent.Exception as NpgsqlException;
+                        var npgEx = ex as NpgsqlException;
                         if (npgEx != null && npgEx.IsTransient)
                         {
-                            return false;
+                            isSentry = false;
                         }
 
                         // Check the whole inner exception chain so filtered exceptions
@@ -492,11 +565,7 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                                 break;
                             }
 
-                            // Match OperationCanceledException by type, not name: its subclass
-                            // TaskCanceledException is what an outbound HTTP timeout throws
-                            // (an indexer or Jackett not answering a .torrent download in time),
-                            // and the exact-name set above never matched it.
-                            if (inner is OperationCanceledException ||
+                            if (IsFilteredByType(inner) ||
                                 FilteredExceptionTypeNames.Contains(inner.GetType().Name))
                             {
                                 isSentry = false;

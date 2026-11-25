@@ -8,8 +8,11 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NLog;
+using Npgsql;
 using NUnit.Framework;
+using NzbDrone.Common.Composition;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Exceptions;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation.Sentry;
 using NzbDrone.Test.Common;
@@ -130,7 +133,7 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         [Test]
         public void should_filter_event_for_proxy_tunnel_407_exception()
         {
-            var ex = new HttpRequestException("The proxy tunnel request to proxy 'http://gluetun:8888/' failed with status code '407'.");
+            var ex = new HttpRequestException(HttpRequestError.ProxyTunnelError, "The proxy tunnel request to proxy 'http://gluetun:8888/' failed with status code '407'.");
             var log = GivenLogEvent(LogLevel.Error, ex, "test");
             _subject.IsSentryMessage(log).Should().BeFalse();
         }
@@ -146,7 +149,7 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         [Test]
         public void should_filter_event_for_proxy_tunnel_407_exception_nested_as_inner_exception()
         {
-            var ex = new Exception("outer", new HttpRequestException("The proxy tunnel request to proxy 'http://gluetun:8888/' failed with status code '407'."));
+            var ex = new Exception("outer", new HttpRequestException(HttpRequestError.ProxyTunnelError, "The proxy tunnel request to proxy 'http://gluetun:8888/' failed with status code '407'."));
             var log = GivenLogEvent(LogLevel.Error, ex, "test");
             _subject.IsSentryMessage(log).Should().BeFalse();
         }
@@ -169,9 +172,120 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         [Test]
         public void should_filter_event_for_network_share_host_is_down()
         {
-            var ex = new IOException("Host is down : '/nas-share/Some Game/fg-01.bin'");
+            Assume.That(OperatingSystem.IsWindows(), Is.False);
+
+            var ex = new ErrnoIOException("Host is down : '/nas-share/Some Game/fg-01.bin'", OperatingSystem.IsMacOS() ? 64 : 112);
             var log = GivenLogEvent(LogLevel.Error, ex, "Failed to properly rollback the file move");
             _subject.IsSentryMessage(log).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_io_exception_that_only_mentions_host_is_down()
+        {
+            var ex = new IOException("Host is down : '/nas-share/Some Game/fg-01.bin'");
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeTrue();
+        }
+
+        [TestCase(SocketError.ConnectionRefused)]
+        [TestCase(SocketError.HostUnreachable)]
+        [TestCase(SocketError.NetworkUnreachable)]
+        [TestCase(SocketError.HostNotFound)]
+        [TestCase(SocketError.TryAgain)]
+        [TestCase(SocketError.ConnectionReset)]
+        [TestCase(SocketError.Shutdown)]
+        public void should_filter_event_for_environmental_socket_errors(SocketError error)
+        {
+            var ex = new HttpRequestException(HttpRequestError.ConnectionError, "An error occurred while sending the request.", new SocketException((int)error));
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_filter_event_for_broken_pipe_on_a_socket()
+        {
+            var io = new IOException("Unable to write data to the transport connection: Broken pipe.", new SocketException((int)SocketError.Shutdown));
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, io, "test")).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_exception_whose_text_mentions_a_socket_failure()
+        {
+            var ex = new InvalidOperationException("Connection refused by our own validator");
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_unrelated_socket_error()
+        {
+            var ex = new SocketException((int)SocketError.AccessDenied);
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_filter_event_for_disposed_container()
+        {
+            var container = new DryIoc.Container();
+            container.Dispose();
+
+            var ex = Assert.Catch<Exception>(() => container.Resolve<string>());
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_text_saying_container_is_disposed()
+        {
+            var ex = new InvalidOperationException("Container is disposed");
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_filter_event_for_directory_not_found_thrown_by_the_runtime()
+        {
+            var ex = Assert.Throws<DirectoryNotFoundException>(() => Directory.GetFiles(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())));
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_directory_not_found_we_threw_ourselves()
+        {
+            Exception ex = null;
+
+            try
+            {
+                throw new DirectoryNotFoundException("Game folder path does not exist: /bad/path");
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_filter_event_for_directory_not_found_marked_environmental()
+        {
+            var ex = new EnvironmentalDirectoryNotFoundException();
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, ex, "test")).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_report_aggregate_holding_a_real_bug_next_to_a_transient_npgsql_exception()
+        {
+            var agg = new AggregateException(
+                new NpgsqlException("timeout", new TimeoutException()),
+                new NotImplementedException());
+
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, agg, "test")).Should().BeTrue();
+        }
+
+        [Test]
+        public void should_filter_aggregate_of_only_transient_npgsql_exceptions()
+        {
+            var agg = new AggregateException(
+                new NpgsqlException("timeout", new TimeoutException()),
+                new NpgsqlException("timeout", new TimeoutException()));
+
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Error, agg, "test")).Should().BeFalse();
         }
 
         [Test]
@@ -285,9 +399,10 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         [TestCase("Release-stable", true)]
         public void should_report_missing_platform_assembly_only_from_official_builds(string branch, bool reported)
         {
-            var ex = new FileNotFoundException(
+            var ex = new MissingPlatformAssemblyException(
                 "Required assembly 'Gamarr.Windows.dll' is missing from 'C:\\build\\'. " +
-                "If this is a self-built package, build with -p:Platform=Windows.");
+                "If this is a self-built package, build with -p:Platform=Windows.",
+                "Gamarr.Windows.dll");
 
             SentryTarget.IsSelfBuiltMissingAssembly(ex, branch).Should().Be(!reported);
         }
@@ -296,6 +411,26 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         public void should_not_treat_other_missing_files_as_self_built_assembly()
         {
             SentryTarget.IsSelfBuiltMissingAssembly(new FileNotFoundException("Could not find file 'config.xml'"), "Release-dev").Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_treat_plain_file_not_found_with_matching_text_as_self_built_assembly()
+        {
+            var ex = new FileNotFoundException("Required assembly 'Gamarr.Windows.dll' is missing");
+
+            SentryTarget.IsSelfBuiltMissingAssembly(ex, "Release-dev").Should().BeFalse();
+        }
+
+        private class ErrnoIOException : IOException
+        {
+            public ErrnoIOException(string message, int errno)
+                : base(message, errno)
+            {
+            }
+        }
+
+        private class EnvironmentalDirectoryNotFoundException : DirectoryNotFoundException, IEnvironmentalException
+        {
         }
 
         private class AddressInUseException : Exception
