@@ -1,4 +1,5 @@
 using System;
+using Gamarr.Http.ErrorManagement;
 
 namespace Gamarr.Api.V3
 {
@@ -10,10 +11,7 @@ namespace Gamarr.Api.V3
         // as the same validation error instead of a 500.
         public static bool IsNameViolation(Exception ex)
         {
-            var message = ex.Message;
-
-            return message.Contains("Name") &&
-                   (message.Contains("UNIQUE constraint failed") || message.Contains("duplicate key"));
+            return DatabaseConstraint.IsUniqueViolationOnColumn(ex, "Name");
         }
     }
 }

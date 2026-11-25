@@ -64,16 +64,16 @@ namespace Gamarr.Http.ErrorManagement
             {
                 statusCode = HttpStatusCode.Conflict;
             }
+            else if (DatabaseConstraint.IsUniqueViolation(exception) &&
+                     (context.Request.Method == "PUT" || context.Request.Method == "POST"))
+            {
+                // Duplicate of an existing row. NOT NULL / foreign-key failures
+                // are our bugs and stay 500s.
+                statusCode = HttpStatusCode.Conflict;
+                _logger.Error(exception, "[{0} {1}]", context.Request.Method, context.Request.Path);
+            }
             else if (exception is SQLiteException sqLiteException)
             {
-                if (context.Request.Method == "PUT" || context.Request.Method == "POST")
-                {
-                    if (sqLiteException.Message.Contains("constraint failed"))
-                    {
-                        statusCode = HttpStatusCode.Conflict;
-                    }
-                }
-
                 _logger.Error(sqLiteException, "[{0} {1}]", context.Request.Method, context.Request.Path);
             }
             else
