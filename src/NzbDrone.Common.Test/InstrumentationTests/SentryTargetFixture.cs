@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using DryIoc;
 using FluentAssertions;
 using NLog;
 using Npgsql;
@@ -223,7 +224,7 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         [Test]
         public void should_filter_event_for_disposed_container()
         {
-            var container = new DryIoc.Container();
+            var container = new Container();
             container.Dispose();
 
             var ex = Assert.Catch<Exception>(() => container.Resolve<string>());
