@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -48,7 +47,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FileGetLastWrite(_badFile.GetPath(_game)))
-                  .Throws(new IOException("I/O error"));
+                  .Throws(new UnauthorizedAccessException("Access denied"));
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FileGetLastWrite(_goodFile.GetPath(_game)))

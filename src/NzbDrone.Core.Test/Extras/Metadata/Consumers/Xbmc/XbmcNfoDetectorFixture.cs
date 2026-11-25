@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
@@ -55,7 +54,7 @@ namespace NzbDrone.Core.Test.Extras.Metadata.Consumers.Xbmc
             // whole scan event.
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.ReadAllText(_path))
-                  .Throws(new IOException("I/O error"));
+                  .Throws(new UnauthorizedAccessException("Access denied"));
 
             Subject.IsXbmcNfoFile(_path).Should().BeFalse();
 
@@ -79,7 +78,7 @@ namespace NzbDrone.Core.Test.Extras.Metadata.Consumers.Xbmc
         {
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFileSize(_path))
-                  .Throws(new IOException("I/O error"));
+                  .Throws(new UnauthorizedAccessException("Access denied"));
 
             Subject.IsXbmcNfoFile(_path).Should().BeFalse();
 

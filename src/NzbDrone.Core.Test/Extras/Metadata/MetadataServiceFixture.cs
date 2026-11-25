@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FizzWare.NBuilder;
@@ -63,7 +64,7 @@ namespace NzbDrone.Core.Test.Extras.Metadata
             // file throws IOException out of WriteAllText while a sibling is fine.
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.WriteAllText(Path.Combine(_game.Path, "unwritable.nfo"), It.IsAny<string>()))
-                  .Throws(new IOException("Read-only file system"));
+                  .Throws(new UnauthorizedAccessException("Access denied"));
         }
 
         [Test]

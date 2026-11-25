@@ -42,6 +42,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             result.IsValid.Should().BeFalse();
             result.Message.Should().Contain("Unable to read");
+
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]

@@ -350,7 +350,7 @@ namespace NzbDrone.Core.Test.GameTests
 
             Mocker.GetMock<NzbDrone.Common.Disk.IDiskProvider>()
                   .Setup(d => d.GetFiles(_game.Path, true))
-                  .Throws(new System.IO.IOException("I/O error"));
+                  .Throws(new System.UnauthorizedAccessException("Access denied"));
 
             Mocker.GetMock<INoIntroCatalogEntryRepository>()
                   .Setup(r => r.GetByPlatformFamily(PlatformFamily.NintendoDS))

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FizzWare.NBuilder;
@@ -121,7 +122,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IRecycleBinProvider>()
                 .Setup(s => s.DeleteFolder(_componentPath))
-                .Throws(new IOException($"Access to the path '{_componentPath}' is denied."));
+                .Throws(new UnauthorizedAccessException($"Access to the path '{_componentPath}' is denied."));
 
             var exception = Assert.Throws<NzbDroneClientException>(() => Subject.DeleteGameFile(_game, _componentFile));
 

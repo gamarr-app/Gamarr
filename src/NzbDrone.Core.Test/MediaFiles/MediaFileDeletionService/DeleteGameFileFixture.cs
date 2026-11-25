@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using FizzWare.NBuilder;
 using FluentAssertions;
@@ -160,7 +161,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IRecycleBinProvider>()
                   .Setup(s => s.DeleteFile(_gameFile.Path, "Game Title"))
-                  .Throws(new IOException());
+                  .Throws(new UnauthorizedAccessException());
 
             Assert.Throws<NzbDroneClientException>(() => Subject.DeleteGameFile(_game, _gameFile));
 
@@ -182,7 +183,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Mocker.GetMock<IRecycleBinProvider>()
                   .Setup(s => s.DeleteFile(_gameFile.Path, "Game Title"))
-                  .Throws(new IOException($"Access to the path '{_gameFile.Path}' is denied."));
+                  .Throws(new UnauthorizedAccessException($"Access to the path '{_gameFile.Path}' is denied."));
 
             var exception = Assert.Throws<NzbDroneClientException>(() => Subject.DeleteGameFile(_game, _gameFile));
 

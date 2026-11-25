@@ -674,6 +674,10 @@ namespace NzbDrone.Core.Test.MetadataSource
             result.Should().NotBeNull();
             result.Should().BeEmpty();
 
+            // The null-dependency proxies throw a NullReferenceException, which is not a
+            // transport failure: the aggregate must swallow it but log it at Error
+            // (Steam always runs, so it is counted too).
+            ExceptionVerification.ExpectedErrors(1);
             ExceptionVerification.IgnoreWarns();
         }
 
@@ -685,6 +689,10 @@ namespace NzbDrone.Core.Test.MetadataSource
 
             act.Should().NotThrow();
 
+            // The null-dependency proxies throw a NullReferenceException, which is not a
+            // transport failure: the aggregate must swallow it but log it at Error
+            // (Steam always runs, so it is counted too).
+            ExceptionVerification.ExpectedErrors(1);
             ExceptionVerification.IgnoreWarns();
         }
 
@@ -698,6 +706,10 @@ namespace NzbDrone.Core.Test.MetadataSource
 
             act.Should().NotThrow();
 
+            // The null-dependency proxies throw a NullReferenceException, which is not a
+            // transport failure: the aggregate must swallow it but log it at Error
+            // (Steam always runs, so it is counted too).
+            ExceptionVerification.ExpectedErrors(2);
             ExceptionVerification.IgnoreWarns();
         }
 
@@ -711,6 +723,10 @@ namespace NzbDrone.Core.Test.MetadataSource
 
             act.Should().NotThrow();
 
+            // The null-dependency proxies throw a NullReferenceException, which is not a
+            // transport failure: the aggregate must swallow it but log it at Error
+            // (Steam always runs, so it is counted too).
+            ExceptionVerification.ExpectedErrors(2);
             ExceptionVerification.IgnoreWarns();
         }
 
