@@ -112,8 +112,7 @@ namespace NzbDrone.Core.ImportLists
                     _importListStatusService.RecordFailure(Definition.Id);
                 }
 
-                if (webException.Message.Contains("502") || webException.Message.Contains("503") ||
-                    webException.Message.Contains("timed out"))
+                if (webException.Status is WebExceptionStatus.Timeout or WebExceptionStatus.ReceiveFailure or WebExceptionStatus.ConnectionClosed)
                 {
                     _logger.Warn("{0} server is currently unavailable. {1} {2}", this, url, webException.Message);
                 }

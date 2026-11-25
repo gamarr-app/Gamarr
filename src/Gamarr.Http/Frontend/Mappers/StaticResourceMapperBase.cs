@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -54,7 +55,7 @@ namespace Gamarr.Http.Frontend.Mappers
 
         public abstract bool CanHandle(string resourceUrl);
 
-        public Task<IActionResult> GetResponse(string resourceUrl)
+        public Task<IActionResult> GetResponse(string resourceUrl, CancellationToken cancellationToken = default)
         {
             var filePath = Map(resourceUrl);
 

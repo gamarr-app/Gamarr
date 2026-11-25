@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Newtonsoft.Json;
 using NLog;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Common.TPL;
@@ -32,6 +33,8 @@ namespace NzbDrone.Core.MetadataSource.IGDB
         private const int MaxRetries = 3;
 
         protected virtual int RetryDelayBaseMs => 1000;
+
+        private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(10);
 
         private const string GameFields = @"
             fields id, name, slug, summary, storyline, category, status,
@@ -477,9 +480,9 @@ namespace NzbDrone.Core.MetadataSource.IGDB
                 }
                 catch (Exception ex) when (attempt < MaxRetries && IsTransientException(ex))
                 {
-                    var delay = (int)Math.Pow(2, attempt) * RetryDelayBaseMs;
-                    _logger.Warn("IGDB request failed (attempt {0}/{1}), retrying in {2}ms: {3}", attempt + 1, MaxRetries + 1, delay, ex.Message);
-                    Thread.Sleep(delay);
+                    var delay = GetRetryDelay(attempt, null);
+                    _logger.Warn("IGDB request failed (attempt {0}/{1}), retrying in {2}ms: {3}", attempt + 1, MaxRetries + 1, (int)delay.TotalMilliseconds, ex.Message);
+                    WaitBeforeRetry(delay);
                     continue;
                 }
 
@@ -498,10 +501,23 @@ namespace NzbDrone.Core.MetadataSource.IGDB
 
                     if (attempt < MaxRetries && RetryableStatusCodes.Contains(response.StatusCode))
                     {
-                        var delay = (int)Math.Pow(2, attempt) * RetryDelayBaseMs;
-                        _logger.Warn("IGDB API returned {0} (attempt {1}/{2}), retrying in {3}ms", response.StatusCode, attempt + 1, MaxRetries + 1, delay);
-                        Thread.Sleep(delay);
-                        continue;
+                        var delay = GetRetryDelay(attempt, response);
+
+                        // A server-requested wait longer than we are willing to hold a request
+                        // thread for is not retried at all: surface it, like the other proxies do.
+                        if (delay <= MaxRetryDelay)
+                        {
+                            _logger.Warn("IGDB API returned {0} (attempt {1}/{2}), retrying in {3}ms", response.StatusCode, attempt + 1, MaxRetries + 1, (int)delay.TotalMilliseconds);
+                            WaitBeforeRetry(delay);
+                            continue;
+                        }
+
+                        _logger.Warn("IGDB API returned {0} asking for a {1}s wait, longer than the {2}s limit; not retrying", response.StatusCode, (int)delay.TotalSeconds, (int)MaxRetryDelay.TotalSeconds);
+                    }
+
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        throw new TooManyRequestsException(request, response);
                     }
 
                     _logger.Error("IGDB API error: {0} - {1}", response.StatusCode, response.Content);
@@ -519,6 +535,36 @@ namespace NzbDrone.Core.MetadataSource.IGDB
             return ex is System.Net.Http.HttpRequestException ||
                    ex is System.Threading.Tasks.TaskCanceledException ||
                    ex is TimeoutException;
+        }
+
+        // Honours Retry-After when IGDB sends one, otherwise backs off exponentially.
+        private TimeSpan GetRetryDelay(int attempt, HttpResponse response)
+        {
+            var retryAfter = response?.Headers["Retry-After"];
+
+            if (retryAfter.IsNotNullOrWhiteSpace())
+            {
+                if (int.TryParse(retryAfter, NumberStyles.None, CultureInfo.InvariantCulture, out var seconds))
+                {
+                    return TimeSpan.FromSeconds(seconds);
+                }
+
+                if (DateTimeOffset.TryParse(retryAfter, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+                {
+                    var wait = date - DateTimeOffset.UtcNow;
+                    return wait > TimeSpan.Zero ? wait : TimeSpan.Zero;
+                }
+            }
+
+            return TimeSpan.FromMilliseconds(Math.Pow(2, attempt) * RetryDelayBaseMs);
+        }
+
+        // Waits through the shared igdb_api rate-limit slot rather than sleeping privately, so
+        // concurrent searches queue behind one backoff instead of each sleeping and then
+        // retrying together. The caller bounds the delay by MaxRetryDelay.
+        private void WaitBeforeRetry(TimeSpan delay)
+        {
+            _rateLimitService.WaitAndPulse("igdb_api", delay > RateLimitInterval ? delay : RateLimitInterval);
         }
 
         private void EnforceRateLimit()

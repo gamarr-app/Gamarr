@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NzbDrone.Common.Http;
@@ -198,6 +201,11 @@ namespace NzbDrone.Core.MetadataSource.Steam
         // dlcforapp returns every visible DLC's id + name in a single call,
         // unlike appdetails which lists bare ids (and would need one request
         // per DLC to resolve names — the N+1 the 1 req/sec throttle forbids).
+        //
+        // Returns null when the fetch failed, so the caller can tell "Steam
+        // could not be reached" from "this game genuinely has no DLC" (an empty
+        // list). A null leaves DlcReferences unset, and the refresh keeps the
+        // DLC data it already had instead of reading the outage as no DLC.
         private List<DlcReference> FetchDlcReferences(int steamAppId)
         {
             var request = new HttpRequestBuilder($"{StoreApiBaseUrl}dlcforapp/")
@@ -212,10 +220,15 @@ namespace NzbDrone.Core.MetadataSource.Steam
 
                 return ParseDlcForApp(response.Content);
             }
+            catch (Exception ex) when (ex is HttpException or HttpRequestException or WebException or TaskCanceledException or JsonException)
+            {
+                _logger.Warn(ex, "Failed to fetch DLC names for Steam App ID {0}; keeping previous DLC data", steamAppId);
+                return null;
+            }
             catch (Exception ex)
             {
-                _logger.Debug(ex, "Failed to fetch DLC names for Steam App ID {0}", steamAppId);
-                return new List<DlcReference>();
+                _logger.Error(ex, "Unexpected error fetching DLC names for Steam App ID {0}; keeping previous DLC data", steamAppId);
+                return null;
             }
         }
 

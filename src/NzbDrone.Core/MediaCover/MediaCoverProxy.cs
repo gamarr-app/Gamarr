@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
@@ -14,7 +15,7 @@ namespace NzbDrone.Core.MediaCover
         string RegisterUrl(string url);
 
         string GetUrl(string hash);
-        Task<byte[]> GetImage(string hash);
+        Task<byte[]> GetImage(string hash, CancellationToken cancellationToken = default);
     }
 
     public class MediaCoverProxy : IMediaCoverProxy
@@ -59,12 +60,15 @@ namespace NzbDrone.Core.MediaCover
             return result;
         }
 
-        public async Task<byte[]> GetImage(string hash)
+        public async Task<byte[]> GetImage(string hash, CancellationToken cancellationToken = default)
         {
             var url = GetUrl(hash);
 
             var request = new HttpRequest(url);
-            var response = await _httpClient.GetAsync(request);
+            
+            // HttpClient takes no token, so a client abort can't cancel the fetch itself;
+            // WaitAsync lets the request thread stop waiting on it as soon as the caller goes away.
+            var response = await _httpClient.GetAsync(request).WaitAsync(cancellationToken);
 
             return response.ResponseData;
         }

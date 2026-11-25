@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using NLog;
@@ -37,7 +39,7 @@ namespace Gamarr.Http.Frontend.Mappers
             return resourceUrl.StartsWith("/MediaCoverProxy/", StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public async Task<IActionResult> GetResponse(string resourceUrl)
+        public async Task<IActionResult> GetResponse(string resourceUrl, CancellationToken cancellationToken = default)
         {
             var match = _regex.Match(resourceUrl);
 
@@ -51,7 +53,7 @@ namespace Gamarr.Http.Frontend.Mappers
 
             try
             {
-                var imageData = await _mediaCoverProxy.GetImage(hash);
+                var imageData = await _mediaCoverProxy.GetImage(hash, cancellationToken);
 
                 if (!_mimeTypeProvider.TryGetContentType(filename, out var contentType))
                 {
@@ -59,6 +61,13 @@ namespace Gamarr.Http.Frontend.Mappers
                 }
 
                 return new FileContentResult(imageData, contentType);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // The browser went away (navigated off, scrolled past): not an upstream
+                // timeout, so don't blame the cover host. Nobody reads the response.
+                _logger.Trace("Client aborted proxied media cover request for hash: {0}", hash);
+                return new StatusCodeResult(StatusCodes.Status499ClientClosedRequest);
             }
             catch (KeyNotFoundException)
             {
@@ -73,7 +82,10 @@ namespace Gamarr.Http.Frontend.Mappers
             }
             catch (Exception ex) when (ex is WebException or HttpRequestException or TaskCanceledException)
             {
-                // The cover host timed out or was unreachable: nothing to report, the
+                // ManagedHttpDispatcher reports a cover host timeout as a WebException
+                // (Status Timeout) and a connect failure as HttpRequestException; a
+                // TaskCanceledException that reaches here was not the client's abort
+                // (handled above), so it is the upstream timing out. Nothing to report: nothing to report, the
                 // browser just shows a missing image and asks again on the next view.
                 _logger.Debug(ex, "Failed to reach the cover host for hash: {0}", hash);
                 return new StatusCodeResult((int)HttpStatusCode.GatewayTimeout);

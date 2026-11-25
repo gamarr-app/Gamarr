@@ -54,7 +54,7 @@ namespace Gamarr.Http.Frontend
 
             if (mapper != null)
             {
-                var result = await mapper.GetResponse(path);
+                var result = await mapper.GetResponse(path, HttpContext.RequestAborted);
 
                 if (result != null)
                 {

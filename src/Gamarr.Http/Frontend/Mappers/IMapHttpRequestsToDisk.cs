@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,6 @@ namespace Gamarr.Http.Frontend.Mappers
     {
         string Map(string resourceUrl);
         bool CanHandle(string resourceUrl);
-        Task<IActionResult> GetResponse(string resourceUrl);
+        Task<IActionResult> GetResponse(string resourceUrl, CancellationToken cancellationToken = default);
     }
 }

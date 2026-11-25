@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.Cache;
+using NzbDrone.Common.Http;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
@@ -533,6 +536,26 @@ namespace NzbDrone.Core.MetadataSource
             return results;
         }
 
+        /// <summary>
+        /// One provider failing must not sink the aggregate, so callers still return an
+        /// empty list - but only transport failures (the provider being unreachable, slow
+        /// or erroring) are an expected Warn. Anything else is a bug in our own code
+        /// (e.g. a NullReferenceException) and must not read as "no results".
+        /// </summary>
+        private void LogProviderFailure(Exception ex, string provider, string title)
+        {
+            var safeTitle = CleanseLogMessage.SanitizeLogParam(title);
+
+            if (ex is HttpException or HttpRequestException or WebException or TaskCanceledException)
+            {
+                _logger.Warn(ex, "Failed to search {0} for '{1}'", provider, safeTitle);
+            }
+            else
+            {
+                _logger.Error(ex, "Unexpected error searching {0} for '{1}'", provider, safeTitle);
+            }
+        }
+
         private List<Game> SearchForNewGameUncached(string title, string lowerTitle)
         {
             var allResults = new List<Game>();
@@ -548,7 +571,7 @@ namespace NzbDrone.Core.MetadataSource
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to lookup IGDB game for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                    LogProviderFailure(ex, "IGDB", title);
                     return new List<Game>();
                 }
             }
@@ -645,7 +668,7 @@ namespace NzbDrone.Core.MetadataSource
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Failed to search Steam for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                    LogProviderFailure(ex, "Steam", title);
                     return new List<Game>();
                 }
             });
@@ -659,7 +682,7 @@ namespace NzbDrone.Core.MetadataSource
                     }
                     catch (Exception ex)
                     {
-                        _logger.Warn(ex, "Failed to search IGDB for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                        LogProviderFailure(ex, "IGDB", title);
                         return new List<Game>();
                     }
                 })
@@ -674,7 +697,7 @@ namespace NzbDrone.Core.MetadataSource
                     }
                     catch (Exception ex)
                     {
-                        _logger.Warn(ex, "Failed to search RAWG for '{0}'", CleanseLogMessage.SanitizeLogParam(title));
+                        LogProviderFailure(ex, "RAWG", title);
                         return new List<Game>();
                     }
                 })

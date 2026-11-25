@@ -90,6 +90,57 @@ namespace NzbDrone.Core.Test.MetadataSource.IGDB
         }
 
         [Test]
+        public void should_honour_retry_after_on_too_many_requests()
+        {
+            var callCount = 0;
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
+                  .Returns(() =>
+                  {
+                      callCount++;
+                      if (callCount == 1)
+                      {
+                          var limited = CreateTypedResponse(HttpStatusCode.TooManyRequests);
+                          limited.Headers["Retry-After"] = "3";
+                          return limited;
+                      }
+
+                      return CreateSuccessResponse(100);
+                  });
+
+            Subject.GetGameInfoByIgdbId(100).Should().NotBeNull();
+
+            Mocker.GetMock<IRateLimitService>()
+                  .Verify(v => v.WaitAndPulse("igdb_api", TimeSpan.FromSeconds(3)), Times.Once());
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void should_not_retry_when_retry_after_exceeds_the_limit()
+        {
+            var callCount = 0;
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.Post<List<IgdbGameResource>>(It.IsAny<HttpRequest>()))
+                  .Returns(() =>
+                  {
+                      callCount++;
+                      var limited = CreateTypedResponse(HttpStatusCode.TooManyRequests);
+                      limited.Headers["Retry-After"] = "3600";
+                      return limited;
+                  });
+
+            Assert.Throws<TooManyRequestsException>(() => Subject.GetGameInfoByIgdbId(100));
+
+            callCount.Should().Be(1);
+
+            ExceptionVerification.IgnoreWarns();
+            ExceptionVerification.IgnoreErrors();
+        }
+
+        [Test]
         public void should_retry_on_too_many_requests_status()
         {
             var callCount = 0;

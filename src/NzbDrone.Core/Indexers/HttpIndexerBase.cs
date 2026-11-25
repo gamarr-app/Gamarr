@@ -204,8 +204,7 @@ namespace NzbDrone.Core.Indexers
                     _indexerStatusService.RecordFailure(Definition.Id);
                 }
 
-                if (webException.Message.Contains("502") || webException.Message.Contains("503") ||
-                    webException.Message.Contains("504") || webException.Message.Contains("timed out"))
+                if (webException.Status is WebExceptionStatus.Timeout or WebExceptionStatus.ReceiveFailure or WebExceptionStatus.ConnectionClosed)
                 {
                     _logger.Warn("{0} server is currently unavailable. {1} {2}", this, url, webException.Message);
                 }
@@ -477,8 +476,7 @@ namespace NzbDrone.Core.Indexers
                     return new ValidationFailure(string.Empty, "Unable to connect to indexer connection failure. Check your connection to the indexer's server and DNS." + webException.Message);
                 }
 
-                if (webException.Message.Contains("502") || webException.Message.Contains("503") ||
-                    webException.Message.Contains("504") || webException.Message.Contains("timed out"))
+                if (webException.Status is WebExceptionStatus.Timeout or WebExceptionStatus.ReceiveFailure or WebExceptionStatus.ConnectionClosed)
                 {
                     return new ValidationFailure(string.Empty, "Unable to connect to indexer, indexer's server is unavailable. Try again later. " + webException.Message);
                 }
