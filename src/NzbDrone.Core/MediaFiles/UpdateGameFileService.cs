@@ -88,11 +88,12 @@ namespace NzbDrone.Core.MediaFiles
             {
                 lastWrite = _diskProvider.FileGetLastWrite(filePath);
             }
-            catch (Exception ex) when (ex is System.IO.IOException || ex is UnauthorizedAccessException)
+            catch (Exception ex)
             {
-                // An unreadable file (storage I/O error, permissions) must not
-                // abort the date pass for every other file of the scanned game.
-                _logger.Warn(ex, "Unable to read date of file [{0}]", filePath);
+                // One unreadable file must not abort the date pass for every other file of
+                // the scanned game. Storage I/O errors and permissions are the user's
+                // environment (Warn); anything else, such as a bad path, is ours (Error).
+                _logger.Log(DiskErrors.IsEnvironmental(ex) ? LogLevel.Warn : LogLevel.Error, ex, "Unable to read date of file [{0}]", filePath);
 
                 return false;
             }

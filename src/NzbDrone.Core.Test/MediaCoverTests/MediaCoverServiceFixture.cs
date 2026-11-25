@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Http;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Events;
@@ -33,6 +34,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                 .Build();
 
             Mocker.GetMock<IGameService>().Setup(m => m.GetGame(It.Is<int>(id => id == _game.Id))).Returns(_game);
+            Mocker.GetMock<IGameService>().Setup(m => m.FindGame(It.Is<int>(id => id == _game.Id))).Returns(_game);
         }
 
         [Test]
@@ -273,11 +275,72 @@ namespace NzbDrone.Core.Test.MediaCoverTests
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(v => v.DeleteFolder(It.IsAny<string>(), true))
-                  .Throws(new IOException("The process cannot access the file because it is being used by another process."));
+                  .Throws(new IOException("in use", OperatingSystem.IsWindows() ? unchecked((int)0x80070020) : 16));
 
             Subject.HandleAsync(new GamesDeletedEvent(new List<Game> { _game }, false, false));
 
             ExceptionVerification.ExpectedWarns(1);
+        }
+
+        private void SetupDownloadThrows(Exception exception)
+        {
+            Mocker.GetMock<ICoverExistsSpecification>()
+                  .Setup(v => v.AlreadyExists(It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(false);
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(v => v.DownloadFile(It.IsAny<string>(), It.IsAny<string>()))
+                  .Throws(exception);
+        }
+
+        [Test]
+        public void should_not_download_covers_for_a_game_that_was_deleted()
+        {
+            Mocker.GetMock<IGameService>().Setup(m => m.FindGame(_game.Id)).Returns((Game)null);
+
+            Mocker.GetMock<ICoverExistsSpecification>()
+                  .Setup(v => v.AlreadyExists(It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(false);
+
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
+
+            Mocker.GetMock<IHttpClient>()
+                  .Verify(v => v.DownloadFile(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void should_warn_when_cover_download_is_denied_by_permissions()
+        {
+            SetupDownloadThrows(new UnauthorizedAccessException());
+
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_warn_when_cover_folder_vanished_because_game_was_deleted()
+        {
+            SetupDownloadThrows(new DirectoryNotFoundException());
+
+            // The game exists at the pre-download check, then is gone when the failure is classified.
+            Mocker.GetMock<IGameService>().SetupSequence(m => m.FindGame(_game.Id))
+                  .Returns(_game)
+                  .Returns((Game)null);
+
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_log_error_when_cover_folder_is_missing_but_game_still_exists()
+        {
+            SetupDownloadThrows(new DirectoryNotFoundException());
+
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
+
+            ExceptionVerification.ExpectedErrors(1);
         }
     }
 }

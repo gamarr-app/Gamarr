@@ -111,9 +111,9 @@ namespace NzbDrone.Core.Extras.Metadata
                     {
                         files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, consumerFiles));
                     }
-                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    catch (Exception ex)
                     {
-                        _logger.Warn(ex, "Unable to write metadata for {0}: {1}", gameFile, ex.Message);
+                        _logger.Log(IsEnvironmental(game, ex) ? LogLevel.Warn : LogLevel.Error, ex, "Unable to write metadata for {0}: {1}", gameFile, ex.Message);
                     }
                 }
             }
@@ -133,9 +133,9 @@ namespace NzbDrone.Core.Extras.Metadata
                 {
                     files.AddIfNotNull(ProcessGameMetadata(consumer, game, gameFile, new List<MetadataFile>()));
                 }
-                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Unable to write metadata for {0}: {1}", gameFile, ex.Message);
+                    _logger.Log(IsEnvironmental(game, ex) ? LogLevel.Warn : LogLevel.Error, ex, "Unable to write metadata for {0}: {1}", gameFile, ex.Message);
                 }
             }
 
@@ -298,9 +298,9 @@ namespace NzbDrone.Core.Extras.Metadata
                 {
                     _otherExtraFileRenamer.RenameOtherExtraFile(game, fullPath);
                 }
-                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                catch (Exception ex)
                 {
-                    _logger.Warn(ex, "Unable to rename existing extra file for {0}: {1}", fullPath, ex.Message);
+                    _logger.Log(IsEnvironmental(game, ex) ? LogLevel.Warn : LogLevel.Error, ex, "Unable to rename existing extra file for {0}: {1}", fullPath, ex.Message);
                     continue;
                 }
 
@@ -362,16 +362,27 @@ namespace NzbDrone.Core.Extras.Metadata
                 // unreachable image host was logged at Error and shipped to Sentry.
                 _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
-            catch (IOException ex)
+            catch (Exception ex) when (IsEnvironmental(game, ex))
             {
-                // The partial download or the game folder vanished mid-write (game
-                // deleted/moved, flaky mount): a lost race, retried on the next refresh.
+                // A permissions/mount fault, or the game folder was removed under us after
+                // the caller verified it (game deleted/moved mid-refresh): a lost race or the
+                // user's environment, retried on the next refresh. A missing path while the
+                // game folder still exists is not covered, it is our bug and falls to Error.
                 _logger.Warn(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Couldn't download image {0} for {1}. {2}", image.Url, game, ex.Message);
             }
+        }
+
+        // Environmental disk faults are the user's to fix (Warn). A missing path only counts
+        // when the game folder itself is verifiably gone (the callers check it exists before
+        // writing, so it was removed under us); with the folder still present it is our bug.
+        private bool IsEnvironmental(Game game, Exception ex)
+        {
+            return DiskErrors.IsEnvironmental(ex) ||
+                   (DiskErrors.IsMissing(ex) && !_diskProvider.FolderExists(game.Path));
         }
 
         private void SaveMetadataFile(string path, string contents)

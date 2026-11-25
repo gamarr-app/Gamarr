@@ -84,7 +84,7 @@ namespace NzbDrone.Core.MediaFiles
                     }
                     catch (Exception e)
                     {
-                        _logger.Log(IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game folder");
+                        _logger.Log(DiskErrors.IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game folder");
                         throw new NzbDroneClientException(HttpStatusCode.Conflict, "Unable to delete game folder: {0}", e.Message);
                     }
                 }
@@ -113,7 +113,7 @@ namespace NzbDrone.Core.MediaFiles
                     }
                     catch (Exception e)
                     {
-                        _logger.Log(IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game file");
+                        _logger.Log(DiskErrors.IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game file");
                         throw new NzbDroneClientException(HttpStatusCode.Conflict, "Unable to delete game file: {0}", e.Message);
                     }
                 }
@@ -133,7 +133,7 @@ namespace NzbDrone.Core.MediaFiles
                     }
                     catch (Exception e)
                     {
-                        _logger.Log(IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game folder");
+                        _logger.Log(DiskErrors.IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game folder");
                         throw new NzbDroneClientException(HttpStatusCode.Conflict, "Unable to delete game folder: {0}", e.Message);
                     }
                 }
@@ -228,13 +228,6 @@ namespace NzbDrone.Core.MediaFiles
             _componentRepository.Delete(slot.Id);
         }
 
-        // A permissions or locked-file failure on the user's own disk: they are told
-        // (409 / log line), and nothing in Gamarr can fix it, so it is not an Error.
-        private static bool IsEnvironmental(Exception e)
-        {
-            return e is System.IO.IOException or UnauthorizedAccessException;
-        }
-
         public void HandleAsync(GamesDeletedEvent message)
         {
             if (message.DeleteFiles)
@@ -273,7 +266,7 @@ namespace NzbDrone.Core.MediaFiles
                         {
                             // Don't let one game's failure abort the rest of the batch or prevent DeleteCompletedEvent,
                             // this runs on the event aggregator thread and there is no caller to report the error to.
-                            _logger.Log(IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game folder: '{0}'", game.Path);
+                            _logger.Log(DiskErrors.IsEnvironmental(e) ? LogLevel.Warn : LogLevel.Error, e, "Unable to delete game folder: '{0}'", game.Path);
                         }
                     }
                 }

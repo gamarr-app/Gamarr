@@ -53,9 +53,11 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.Xbmc
 
                 return _regex.IsMatch(content);
             }
-            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            catch (Exception ex)
             {
-                _logger.Warn(ex, "Unable to read possible nfo file: {0}", path);
+                // A concurrent delete/rename by another importer is a real race, so a vanished
+                // file is tolerated here; other environmental faults warn, anything else is ours.
+                _logger.Log(DiskErrors.IsEnvironmental(ex, allowMissing: true) ? LogLevel.Warn : LogLevel.Error, ex, "Unable to read possible nfo file: {0}", path);
 
                 return false;
             }

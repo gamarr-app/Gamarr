@@ -35,6 +35,7 @@ namespace NzbDrone.Core.MediaCover
         private readonly ICoverExistsSpecification _coverExistsSpecification;
         private readonly IConfigFileProvider _configFileProvider;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IGameService _gameService;
         private readonly Logger _logger;
 
         private readonly ICached<bool> _coverExistsCache;
@@ -57,6 +58,7 @@ namespace NzbDrone.Core.MediaCover
                                  ICoverExistsSpecification coverExistsSpecification,
                                  IConfigFileProvider configFileProvider,
                                  IEventAggregator eventAggregator,
+                                 IGameService gameService,
                                  ICacheManager cacheManager,
                                  Logger logger)
         {
@@ -67,6 +69,7 @@ namespace NzbDrone.Core.MediaCover
             _coverExistsSpecification = coverExistsSpecification;
             _configFileProvider = configFileProvider;
             _eventAggregator = eventAggregator;
+            _gameService = gameService;
             _logger = logger;
 
             _coverExistsCache = cacheManager.GetCache<bool>(GetType(), "coverExists");
@@ -160,6 +163,11 @@ namespace NzbDrone.Core.MediaCover
             }
         }
 
+        private bool GameStillExists(Game game)
+        {
+            return _gameService.FindGame(game.Id) != null;
+        }
+
         private string GetGameCoverPath(int gameId)
         {
             return Path.Combine(_coverRootFolder, gameId.ToString());
@@ -197,6 +205,17 @@ namespace NzbDrone.Core.MediaCover
 
                     if (!alreadyExists)
                     {
+                        // A refresh can outlive the game it was queued for (the user deleted
+                        // it, and its cover folder was cleaned up, while this event waited or
+                        // an earlier cover downloaded). Stop here rather than write into a
+                        // folder that is being torn down. The re-check in the catch below
+                        // covers the remaining window between this check and the write.
+                        if (!GameStillExists(game))
+                        {
+                            _logger.Debug("{0} was deleted before its cover refresh finished, skipping the remaining covers", game);
+                            return updated;
+                        }
+
                         DownloadCover(game, cover, fileName);
                         updated = true;
                     }
@@ -225,12 +244,14 @@ namespace NzbDrone.Core.MediaCover
                     // unreachable cover host was logged at Error and shipped to Sentry.
                     _logger.Warn("Couldn't download media cover for {0}. {1}", game, e.Message);
                 }
-                catch (IOException e)
+                catch (Exception e) when (DiskErrors.IsEnvironmental(e) || (DiskErrors.IsMissing(e) && !GameStillExists(game)))
                 {
-                    // The partial file (or the game's cover folder) vanished mid-download:
-                    // the game was deleted and its cover folder cleaned up while this
-                    // refresh was still running, or the config volume dropped the file.
-                    // The next refresh fetches the cover again; nothing here is a code fault.
+                    // A permissions/mount/space fault on the user's config volume, or the game
+                    // was deleted (and its cover folder cleaned up) in the instant between the
+                    // existence check above and the write. That window cannot be closed without
+                    // locking deletes against downloads; the next refresh fetches the cover
+                    // again. A missing path while the game still exists is our bug, so it is
+                    // not matched here and reaches the Error arm below.
                     _logger.Warn("Couldn't download media cover for {0}. {1}", game, e.Message);
                 }
                 catch (Exception e)
@@ -341,11 +362,12 @@ namespace NzbDrone.Core.MediaCover
                     {
                         _diskProvider.DeleteFolder(path, true);
                     }
-                    catch (IOException e)
+                    catch (Exception e) when (DiskErrors.IsEnvironmental(e))
                     {
                         // A cover download still in flight for this game holds its .part file open
-                        // (Windows refuses the delete). That is a race with the user's own delete,
-                        // not a fault, so leave the leftover folder and don't report it as an error.
+                        // (Windows refuses the delete with a sharing violation). That is a race with
+                        // the user's own delete, not a fault, so leave the leftover folder and don't
+                        // report it as an error. Any other failure falls to the Error arm below.
                         _logger.Warn(e, "Unable to delete cover folder, a file in it is in use: '{0}'", path);
                     }
                     catch (Exception e)

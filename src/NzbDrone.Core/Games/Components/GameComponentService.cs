@@ -308,12 +308,13 @@ namespace NzbDrone.Core.Games.Components
             {
                 filesOnDisk = _diskProvider.GetFiles(game.Path, true).ToList();
             }
-            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            catch (Exception ex)
             {
-                // Listing the folder can fail on an unhealthy mount; component
-                // reconciliation (scan and import events) must carry on without
-                // the folder-backed slot hint.
-                _logger.Warn(ex, "Unable to list files in {0} to resolve its component slot", game.Path);
+                // Component reconciliation (scan and import events) must carry on without
+                // the folder-backed slot hint. An unhealthy mount or permissions is the
+                // user's environment (Warn); anything else, such as a bad path we built,
+                // is ours (Error).
+                _logger.Log(DiskErrors.IsEnvironmental(ex) ? LogLevel.Warn : LogLevel.Error, ex, "Unable to list files in {0} to resolve its component slot", game.Path);
 
                 return null;
             }
