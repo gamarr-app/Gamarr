@@ -156,12 +156,18 @@ namespace NzbDrone.Common.Instrumentation.Sentry
                 return true;
             }
 
+            // Exceptions we raise ourselves and mark as always being the user's
+            // environment or configuration (root folder gone, config folder not
+            // writable) rather than a Gamarr fault.
+            if (ex is IEnvironmentalException)
+            {
+                return true;
+            }
+
             // A missing directory is the user's configuration (root folder gone,
-            // share unmounted) when the runtime itself reports it, or when we
-            // flagged it as such. One thrown from our own code is a path we built,
-            // which may be a bug, so it reports.
-            if (ex is DirectoryNotFoundException &&
-                (ex is IEnvironmentalException || IsThrownByTheRuntime(ex)))
+            // share unmounted) when the runtime itself reports it. One thrown from
+            // our own code is a path we built, which may be a bug, so it reports.
+            if (ex is DirectoryNotFoundException && IsThrownByTheRuntime(ex))
             {
                 return true;
             }

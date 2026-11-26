@@ -270,6 +270,20 @@ namespace NzbDrone.Common.Test.InstrumentationTests
         }
 
         [Test]
+        public void should_filter_event_for_app_folder_not_writable()
+        {
+            var ex = new AppFolderNotWritableException("AppFolder {0} is not writable", "/config");
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Fatal, ex, "test")).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_not_filter_event_for_other_startup_failures()
+        {
+            var ex = new GamarrStartupException("Something else broke");
+            _subject.IsSentryMessage(GivenLogEvent(LogLevel.Fatal, ex, "test")).Should().BeTrue();
+        }
+
+        [Test]
         public void should_report_aggregate_holding_a_real_bug_next_to_a_transient_npgsql_exception()
         {
             var agg = new AggregateException(

@@ -43,7 +43,7 @@ namespace NzbDrone.Common.EnvironmentInfo
             }
             catch (UnauthorizedAccessException)
             {
-                throw new GamarrStartupException("Cannot create AppFolder, Access to the path {0} is denied", _appFolderInfo.AppDataFolder);
+                throw new AppFolderNotWritableException("Cannot create AppFolder {0}: access is denied for the user '{1}'", _appFolderInfo.AppDataFolder, Environment.UserName);
             }
 
             if (OsInfo.IsWindows)
@@ -53,7 +53,7 @@ namespace NzbDrone.Common.EnvironmentInfo
 
             if (!_diskProvider.FolderWritable(_appFolderInfo.AppDataFolder))
             {
-                throw new GamarrStartupException("AppFolder {0} is not writable", _appFolderInfo.AppDataFolder);
+                throw new AppFolderNotWritableException("AppFolder {0} is not writable by the user '{1}'. Give that user write access to the folder (in Docker, check PUID/PGID and the volume's ownership)", _appFolderInfo.AppDataFolder, Environment.UserName);
             }
 
             InitializeMonoApplicationData();
