@@ -1080,7 +1080,7 @@ namespace NzbDrone.Core.Parser
 
             // The single-character-word exception in NormalizeRegex exists to protect acronyms
             // ("N.K.L.E"), which must read the same whatever the separator, so collapse it first.
-            var collapsed = CleanTitleSeparatorRegex.Replace(title, " ").Trim();
+            var collapsed = CleanTitleSeparatorRegex.Replace(title, " ");
 
             return ReplaceGermanUmlauts(NormalizeRegex.Replace(collapsed, string.Empty).ToLowerInvariant()).RemoveAccent();
         }
