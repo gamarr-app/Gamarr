@@ -505,6 +505,11 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex NormalizeRegex = new Regex(@"((?:\b|_)(?<!^|[^a-zA-Z0-9_']\w[^a-zA-Z0-9_'])([aà](?!$|[^a-zA-Z0-9_']\w[^a-zA-Z0-9_'])|an|the|and|or|of)(?!$)(?:\b|_))|\W|_",
                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // Separators (anything but word chars and apostrophes, plus underscores) collapse to a
+        // single space before NormalizeRegex runs, so its single-character-word exception sees
+        // "3: The" and "3 The" identically.
+        private static readonly Regex CleanTitleSeparatorRegex = new Regex(@"[^\w']+|_+", RegexOptions.Compiled);
+
         private static readonly Regex ReportIgdbId = new Regex(@"igdb(id)?-(?<igdbid>\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly RegexReplace SimpleTitleRegex = new RegexReplace(@"(?:(480|540|576|720|1080|2160)[ip]|[xh][\W_]?26[45]|DD\W?5\W1|[<>?*]|848x480|1280x720|1920x1080|3840x2160|4096x2160|(8|10)b(it)?|10-bit)\s*?(?![a-b0-9])",
@@ -1071,7 +1076,11 @@ namespace NzbDrone.Core.Parser
                 return title;
             }
 
-            return ReplaceGermanUmlauts(NormalizeRegex.Replace(title, string.Empty).ToLowerInvariant()).RemoveAccent();
+            // The single-character-word exception in NormalizeRegex exists to protect acronyms
+            // ("N.K.L.E"), which must read the same whatever the separator, so collapse it first.
+            var collapsed = CleanTitleSeparatorRegex.Replace(title, " ").Trim();
+
+            return ReplaceGermanUmlauts(NormalizeRegex.Replace(collapsed, string.Empty).ToLowerInvariant()).RemoveAccent();
         }
 
         /// <summary>
