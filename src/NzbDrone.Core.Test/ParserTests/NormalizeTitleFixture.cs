@@ -188,5 +188,24 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             "Tokyo Ghoul A".CleanGameTitle().Should().Be("tokyoghoula");
         }
+
+        [TestCase("Aaaa Bbbb 3: The Cccc Dddd", "aaaabbbb3thecccdddd")]
+        [TestCase("Aaaa Bbbb 3 The Cccc Dddd", "aaaabbbb3thecccdddd")]
+        [TestCase("Aaaa.Bbbb.3.The.Cccc.Dddd", "aaaabbbb3thecccdddd")]
+        [TestCase("Aaaa_Bbbb_3_The_Cccc_Dddd", "aaaabbbb3thecccdddd")]
+        [TestCase("Aaaa Bbbb - The Cccc", "aaaabbbbcccc")]
+        [TestCase("Aaaa Bbbb: The Cccc", "aaaabbbbcccc")]
+        [TestCase("Aaaa Bbbb The Cccc", "aaaabbbbcccc")]
+        public void should_clean_title_the_same_whatever_the_separator(string title, string expected)
+        {
+            title.CleanGameTitle().Should().Be(expected);
+        }
+
+        [Test]
+        public void should_clean_colon_and_space_forms_of_a_title_identically()
+        {
+            "Aaaa Bbbb 3: The Cccc".CleanGameTitle().Should().Be("Aaaa Bbbb 3 The Cccc".CleanGameTitle());
+            "Aaaa N: The Cccc".CleanGameTitle().Should().Be("Aaaa N The Cccc".CleanGameTitle());
+        }
     }
 }
