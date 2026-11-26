@@ -502,7 +502,9 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex NormalizeAlternativeTitleRegex = new Regex(@"[ ]+(?:A\.K\.A\.)[ ]+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex NormalizeRegex = new Regex(@"((?:\b|_)(?<!^|[^a-zA-Z0-9_']\w[^a-zA-Z0-9_'])([aà](?!$|[^a-zA-Z0-9_']\w[^a-zA-Z0-9_'])|an|the|and|or|of)(?!$)(?:\b|_))|\W|_",
+        // Articles are kept next to a single-LETTER word (acronyms such as "N.K.L.E"), not next to a
+        // lone digit: "Game 3: The Sequel" and "Game 3 The Sequel" must clean the same.
+        private static readonly Regex NormalizeRegex = new Regex(@"((?:\b|_)(?<!^|[^a-zA-Z0-9_'][a-zA-Z][^a-zA-Z0-9_'])([aà](?!$|[^a-zA-Z0-9_'][a-zA-Z][^a-zA-Z0-9_'])|an|the|and|or|of)(?!$)(?:\b|_))|\W|_",
                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Separators (anything but word chars and apostrophes, plus underscores) collapse to a
