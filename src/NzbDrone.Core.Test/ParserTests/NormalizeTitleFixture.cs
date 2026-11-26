@@ -189,10 +189,10 @@ namespace NzbDrone.Core.Test.ParserTests
             "Tokyo Ghoul A".CleanGameTitle().Should().Be("tokyoghoula");
         }
 
-        [TestCase("Aaaa Bbbb 3: The Cccc Dddd", "aaaabbbb3thecccdddd")]
-        [TestCase("Aaaa Bbbb 3 The Cccc Dddd", "aaaabbbb3thecccdddd")]
-        [TestCase("Aaaa.Bbbb.3.The.Cccc.Dddd", "aaaabbbb3thecccdddd")]
-        [TestCase("Aaaa_Bbbb_3_The_Cccc_Dddd", "aaaabbbb3thecccdddd")]
+        [TestCase("Aaaa Bbbb 3: The Cccc Dddd", "aaaabbbb3ccccdddd")]
+        [TestCase("Aaaa Bbbb 3 The Cccc Dddd", "aaaabbbb3ccccdddd")]
+        [TestCase("Aaaa.Bbbb.3.The.Cccc.Dddd", "aaaabbbb3ccccdddd")]
+        [TestCase("Aaaa_Bbbb_3_The_Cccc_Dddd", "aaaabbbb3ccccdddd")]
         [TestCase("Aaaa Bbbb - The Cccc", "aaaabbbbcccc")]
         [TestCase("Aaaa Bbbb: The Cccc", "aaaabbbbcccc")]
         [TestCase("Aaaa Bbbb The Cccc", "aaaabbbbcccc")]
@@ -206,6 +206,7 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             "Aaaa Bbbb 3: The Cccc".CleanGameTitle().Should().Be("Aaaa Bbbb 3 The Cccc".CleanGameTitle());
             "Aaaa N: The Cccc".CleanGameTitle().Should().Be("Aaaa N The Cccc".CleanGameTitle());
+            "Aaaa N The Cccc".CleanGameTitle().Should().Be("aaaanthecccc");
         }
     }
 }
