@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 
                 if (clean != (string)row.Clean)
                 {
-                    changed.Add(new { Id = (int)(long)row.Id, Clean = clean });
+                    changed.Add(new { Id = System.Convert.ToInt32((object)row.Id), Clean = clean });
                 }
             }
 
