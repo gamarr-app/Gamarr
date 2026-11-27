@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
@@ -85,7 +86,8 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Verify(s => s.TransferFolder(
                       _localGame.Path,
                       _game.Path,
-                      TransferMode.Move), Times.Once());
+                      TransferMode.Move,
+                      It.IsAny<Func<string, bool>>()), Times.Once());
         }
 
         [Test]
@@ -110,7 +112,8 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Verify(s => s.TransferFolder(
                       _localGame.Path,
                       _game.Path,
-                      TransferMode.Copy), Times.Once());
+                      TransferMode.Copy,
+                      It.IsAny<Func<string, bool>>()), Times.Once());
         }
 
         [Test]
@@ -185,7 +188,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             Subject.MoveGameFile(_gameFile, _localGame);
 
             Mocker.GetMock<IDiskTransferService>()
-                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>()), Times.Never());
+                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<Func<string, bool>>()), Times.Never());
         }
 
         [Test]

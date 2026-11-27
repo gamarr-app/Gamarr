@@ -322,6 +322,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("ExtraFileExtensions", value); }
         }
 
+        public string UserIgnoredExtensions
+        {
+            get { return GetValue("UserIgnoredExtensions", string.Empty); }
+
+            set { SetValue("UserIgnoredExtensions", value); }
+        }
+
         public bool AutoRenameFolders
         {
             get { return GetValueBoolean("AutoRenameFolders", false); }

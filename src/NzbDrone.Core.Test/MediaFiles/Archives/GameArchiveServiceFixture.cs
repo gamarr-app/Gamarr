@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Archives;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -330,6 +331,33 @@ namespace NzbDrone.Core.Test.MediaFiles.Archives
             File.Exists(Path.Combine(destination, "data", "sub", "strings.bin")).Should().BeTrue();
 
             Directory.GetFiles(destination, "*", SearchOption.AllDirectories).Should().HaveCount(PcArchiveFileCount);
+        }
+
+        [Test]
+        public void should_not_inspect_an_archive_whose_extension_is_ignored()
+        {
+            Mocker.GetMock<IIgnoredExtensionService>()
+                  .Setup(s => s.IsIgnored(It.IsAny<string>()))
+                  .Returns<string>(p => Path.GetExtension(p) == ".7z");
+
+            Subject.InspectImportUnit(_archivePath).Should().BeNull();
+        }
+
+        [Test]
+        public void should_leave_ignored_entries_out_of_a_whole_archive_extraction()
+        {
+            var inspection = Subject.InspectImportUnit(GetTestPath(PcArchive), true);
+            var destination = Path.Combine(TempFolder, "Lingo (2021)");
+
+            Mocker.GetMock<IIgnoredExtensionService>()
+                  .Setup(s => s.IsIgnored(It.IsAny<string>()))
+                  .Returns<string>(p => Path.GetExtension(p) == ".txt");
+
+            Subject.ExtractArchive(inspection, destination);
+
+            File.Exists(Path.Combine(destination, "Lingo.exe")).Should().BeTrue();
+            File.Exists(Path.Combine(destination, "readme.txt")).Should().BeFalse();
+            Directory.GetFiles(destination, "*", SearchOption.AllDirectories).Should().HaveCount(PcArchiveFileCount - 1);
         }
 
         [Test]

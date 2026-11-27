@@ -44,6 +44,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IRootFolderService _rootFolderService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Games.Components.IGameComponentRepository _componentRepository;
+        private readonly IIgnoredExtensionService _ignoredExtensionService;
         private readonly Logger _logger;
 
         public DiskScanService(IDiskProvider diskProvider,
@@ -56,6 +57,7 @@ namespace NzbDrone.Core.MediaFiles
                                IRootFolderService rootFolderService,
                                IEventAggregator eventAggregator,
                                Games.Components.IGameComponentRepository componentRepository,
+                               IIgnoredExtensionService ignoredExtensionService,
                                Logger logger)
         {
             _diskProvider = diskProvider;
@@ -68,6 +70,7 @@ namespace NzbDrone.Core.MediaFiles
             _rootFolderService = rootFolderService;
             _eventAggregator = eventAggregator;
             _componentRepository = componentRepository;
+            _ignoredExtensionService = ignoredExtensionService;
             _logger = logger;
         }
 
@@ -642,7 +645,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
-            var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)))
+            var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)) && !_ignoredExtensionService.IsIgnored(file))
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, CleanseLogMessage.SanitizeLogParam(path));
@@ -657,7 +660,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
-            var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)))
+            var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.IsGameFileExtension(Path.GetExtension(file)) && !_ignoredExtensionService.IsIgnored(file))
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, CleanseLogMessage.SanitizeLogParam(path));

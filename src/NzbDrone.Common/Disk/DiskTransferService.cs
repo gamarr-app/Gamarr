@@ -11,6 +11,7 @@ namespace NzbDrone.Common.Disk
     public interface IDiskTransferService
     {
         TransferMode TransferFolder(string sourcePath, string targetPath, TransferMode mode);
+        TransferMode TransferFolder(string sourcePath, string targetPath, TransferMode mode, Func<string, bool> skipFile);
         TransferMode TransferFile(string sourcePath, string targetPath, TransferMode mode, bool overwrite = false);
         int MirrorFolder(string sourcePath, string targetPath);
     }
@@ -46,6 +47,16 @@ namespace NzbDrone.Common.Disk
 
         public TransferMode TransferFolder(string sourcePath, string targetPath, TransferMode mode)
         {
+            return TransferFolder(sourcePath, targetPath, mode, null);
+        }
+
+        /// <summary>
+        /// Transfers a folder tree, leaving out every file <paramref name="skipFile"/>
+        /// accepts (by full path). A Move with skipped files never takes the
+        /// whole-folder rename shortcut, since that would carry them along.
+        /// </summary>
+        public TransferMode TransferFolder(string sourcePath, string targetPath, TransferMode mode, Func<string, bool> skipFile)
+        {
             Ensure.That(sourcePath, () => sourcePath).IsValidPath(PathValidationType.CurrentOs);
             Ensure.That(targetPath, () => targetPath).IsValidPath(PathValidationType.CurrentOs);
 
@@ -79,7 +90,9 @@ namespace NzbDrone.Common.Disk
                 _diskProvider.MoveFolder(tempPath, sourcePath);
             }
 
-            if (mode == TransferMode.Move && !_diskProvider.FolderExists(targetPath))
+            var hasSkippedFiles = skipFile != null && _diskProvider.GetFiles(sourcePath, true).Any(skipFile);
+
+            if (mode == TransferMode.Move && !hasSkippedFiles && !_diskProvider.FolderExists(targetPath))
             {
                 var sourceMount = _diskProvider.GetMount(sourcePath);
                 var targetMount = _diskProvider.GetMount(targetPath);
@@ -120,13 +133,19 @@ namespace NzbDrone.Common.Disk
                     continue;
                 }
 
-                result &= TransferFolder(subDir.FullName, Path.Combine(targetPath, subDir.Name), mode);
+                result &= TransferFolder(subDir.FullName, Path.Combine(targetPath, subDir.Name), mode, skipFile);
             }
 
             foreach (var sourceFile in _diskProvider.GetFileInfos(sourcePath))
             {
                 if (ShouldIgnore(sourceFile))
                 {
+                    continue;
+                }
+
+                if (skipFile != null && skipFile(sourceFile.FullName))
+                {
+                    _logger.Debug("Skipping ignored file [{0}]", sourceFile.FullName);
                     continue;
                 }
 

@@ -30,5 +30,6 @@ public enum ImportRejectionReason
     ReleaseGroupMismatch,
     VirusDetected,
     VirusScanFailed,
-    InstallerOnlyPayload
+    InstallerOnlyPayload,
+    IgnoredExtension
 }

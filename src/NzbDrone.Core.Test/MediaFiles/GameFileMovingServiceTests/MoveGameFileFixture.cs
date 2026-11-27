@@ -167,7 +167,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
             Subject.MoveGameFile(_gameFile, _localGame);
 
             Mocker.GetMock<IDiskTransferService>()
-                .Verify(v => v.TransferFolder(_sourceFolderPath, _game.Path, TransferMode.Move), Times.Once());
+                .Verify(v => v.TransferFolder(_sourceFolderPath, _game.Path, TransferMode.Move, It.IsAny<Func<string, bool>>()), Times.Once());
         }
 
         [Test]

@@ -116,11 +116,13 @@ namespace NzbDrone.Core.MediaFiles.Archives
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IDiskProvider _diskProvider;
+        private readonly IIgnoredExtensionService _ignoredExtensionService;
         private readonly Logger _logger;
 
-        public GameArchiveService(IDiskProvider diskProvider, Logger logger)
+        public GameArchiveService(IDiskProvider diskProvider, IIgnoredExtensionService ignoredExtensionService, Logger logger)
         {
             _diskProvider = diskProvider;
+            _ignoredExtensionService = ignoredExtensionService;
             _logger = logger;
         }
 
@@ -154,7 +156,8 @@ namespace NzbDrone.Core.MediaFiles.Archives
                     return archive == null ? null : Inspect(archive, allowWholeArchive);
                 }
 
-                return IsContainer(path) ? Inspect(path, allowWholeArchive) : null;
+                // An archive type the user ignores is never a game payload.
+                return IsContainer(path) && !_ignoredExtensionService.IsIgnored(path) ? Inspect(path, allowWholeArchive) : null;
             }
             catch (Exception ex)
             {
@@ -252,6 +255,12 @@ namespace NzbDrone.Core.MediaFiles.Archives
                     {
                         if (entry.IsDirectory || entry.Key.IsNullOrWhiteSpace())
                         {
+                            continue;
+                        }
+
+                        if (_ignoredExtensionService.IsIgnored(entry.Key))
+                        {
+                            _logger.Debug("Skipping ignored archive entry '{0}' in {1}", entry.Key, inspection.ArchivePath);
                             continue;
                         }
 
@@ -386,7 +395,9 @@ namespace NzbDrone.Core.MediaFiles.Archives
 
         private string FindSoleArchiveInFolder(string folder)
         {
-            var files = _diskProvider.GetFiles(folder, true).ToList();
+            // Ignored files are not part of the release as far as the import is
+            // concerned, so they can neither be the archive nor veto it.
+            var files = _diskProvider.GetFiles(folder, true).Where(f => !_ignoredExtensionService.IsIgnored(f)).ToList();
 
             // Anything already importable on its own means the folder is not a
             // bare archive wrapper — leave it to the normal folder transfer.

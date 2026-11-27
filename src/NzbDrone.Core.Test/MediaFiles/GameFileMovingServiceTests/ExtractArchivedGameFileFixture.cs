@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
@@ -98,7 +99,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
                   .Verify(s => s.TransferFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<bool>()), Times.Never());
 
             Mocker.GetMock<IDiskTransferService>()
-                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>()), Times.Never());
+                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<Func<string, bool>>()), Times.Never());
         }
 
         [Test]
@@ -222,7 +223,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameFileMovingServiceTests
                   .Verify(s => s.TransferFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<bool>()), Times.Never());
 
             Mocker.GetMock<IDiskTransferService>()
-                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>()), Times.Never());
+                  .Verify(s => s.TransferFolder(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<Func<string, bool>>()), Times.Never());
         }
 
         [Test]

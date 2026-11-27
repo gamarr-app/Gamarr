@@ -42,6 +42,7 @@ namespace NzbDrone.Core.Configuration
         string ScriptImportPath { get; set; }
         bool ImportExtraFiles { get; set; }
         string ExtraFileExtensions { get; set; }
+        string UserIgnoredExtensions { get; set; }
         RescanAfterRefreshType RescanAfterRefresh { get; set; }
         bool AutoRenameFolders { get; set; }
 

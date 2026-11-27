@@ -32,6 +32,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileAttributeService _mediaFileAttributeService;
         private readonly IImportScript _scriptImportDecider;
         private readonly IGameArchiveService _gameArchiveService;
+        private readonly IIgnoredExtensionService _ignoredExtensionService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IConfigService _configService;
@@ -44,6 +45,7 @@ namespace NzbDrone.Core.MediaFiles
                                 IMediaFileAttributeService mediaFileAttributeService,
                                 IImportScript scriptImportDecider,
                                 IGameArchiveService gameArchiveService,
+                                IIgnoredExtensionService ignoredExtensionService,
                                 IRootFolderService rootFolderService,
                                 IEventAggregator eventAggregator,
                                 IConfigService configService,
@@ -56,6 +58,7 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileAttributeService = mediaFileAttributeService;
             _scriptImportDecider = scriptImportDecider;
             _gameArchiveService = gameArchiveService;
+            _ignoredExtensionService = ignoredExtensionService;
             _rootFolderService = rootFolderService;
             _eventAggregator = eventAggregator;
             _configService = configService;
@@ -188,7 +191,7 @@ namespace NzbDrone.Core.MediaFiles
                 }
 
                 // Move or copy the folder contents using DiskTransferService
-                _diskTransferService.TransferFolder(sourcePath, destinationPath, mode);
+                _diskTransferService.TransferFolder(sourcePath, destinationPath, mode, _ignoredExtensionService.IsIgnored);
 
                 // The game folder itself IS the file, so the record names that
                 // folder; update-alongside imports keep their Updates/<version>

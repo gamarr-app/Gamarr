@@ -358,6 +358,21 @@ function MediaManagement() {
                   />
                 </FormGroup>
               ) : null}
+
+              <FormGroup>
+                <FormLabel>{translate('UserIgnoredExtensions')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.TEXT}
+                  name="userIgnoredExtensions"
+                  helpTexts={[
+                    translate('UserIgnoredExtensionsHelpText'),
+                    translate('UserIgnoredExtensionsHelpTextsExamples'),
+                  ]}
+                  onChange={handleInputChange}
+                  {...settings.userIgnoredExtensions}
+                />
+              </FormGroup>
             </FieldSet>
 
             <FieldSet legend={translate('FileManagement')}>

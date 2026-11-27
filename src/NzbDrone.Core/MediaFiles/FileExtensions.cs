@@ -8,6 +8,34 @@ namespace NzbDrone.Core.MediaFiles
 {
     public static class FileExtensions
     {
+        /// <summary>
+        /// Parse the user's comma separated "ignored extensions" setting into a
+        /// case-insensitive set of dotted extensions. Tolerates a leading dot or
+        /// none, stray whitespace, empty segments and ";" or newline separators.
+        /// </summary>
+        public static HashSet<string> ParseIgnoredExtensions(string setting)
+        {
+            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (string.IsNullOrWhiteSpace(setting))
+            {
+                return result;
+            }
+
+            foreach (var raw in setting.Split(new[] { ',', ';', '
+', '' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var extension = raw.Trim().TrimStart('.').Trim();
+
+                if (extension.Length > 0)
+                {
+                    result.Add("." + extension);
+                }
+            }
+
+            return result;
+        }
+
         private static readonly Regex FileExtensionRegex = new (@"\.[a-z0-9]{2,4}$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 

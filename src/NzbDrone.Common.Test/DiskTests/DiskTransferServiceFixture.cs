@@ -431,6 +431,52 @@ namespace NzbDrone.Common.Test.DiskTests
             VerifyCopyFolder(source.FullName, destination.FullName);
         }
 
+        private DirectoryInfo GetFolderWithNfoFiles()
+        {
+            var source = new DirectoryInfo(GetTempFilePath());
+            Directory.CreateDirectory(Path.Combine(source.FullName, "sub"));
+            File.WriteAllText(Path.Combine(source.FullName, "game.iso"), "game");
+            File.WriteAllText(Path.Combine(source.FullName, "info.nfo"), "nfo");
+            File.WriteAllText(Path.Combine(source.FullName, "sub", "readme.NFO"), "nfo");
+            File.WriteAllText(Path.Combine(source.FullName, "sub", "data.bin"), "data");
+
+            return source;
+        }
+
+        private static bool IsNfo(string path) => Path.GetExtension(path).Equals(".nfo", StringComparison.OrdinalIgnoreCase);
+
+        [Test]
+        public void CopyFolder_should_leave_out_skipped_files()
+        {
+            WithRealDiskProvider();
+
+            var source = GetFolderWithNfoFiles();
+            var destination = new DirectoryInfo(GetTempFilePath());
+
+            Subject.TransferFolder(source.FullName, destination.FullName, TransferMode.Copy, IsNfo);
+
+            File.Exists(Path.Combine(destination.FullName, "game.iso")).Should().BeTrue();
+            File.Exists(Path.Combine(destination.FullName, "sub", "data.bin")).Should().BeTrue();
+            File.Exists(Path.Combine(destination.FullName, "info.nfo")).Should().BeFalse();
+            File.Exists(Path.Combine(destination.FullName, "sub", "readme.NFO")).Should().BeFalse();
+        }
+
+        [Test]
+        public void MoveFolder_should_leave_out_skipped_files_instead_of_renaming_the_folder()
+        {
+            WithRealDiskProvider();
+
+            var source = GetFolderWithNfoFiles();
+            var destination = new DirectoryInfo(GetTempFilePath());
+
+            Subject.TransferFolder(source.FullName, destination.FullName, TransferMode.Move, IsNfo);
+
+            File.Exists(Path.Combine(destination.FullName, "game.iso")).Should().BeTrue();
+            File.Exists(Path.Combine(destination.FullName, "sub", "data.bin")).Should().BeTrue();
+            File.Exists(Path.Combine(destination.FullName, "info.nfo")).Should().BeFalse();
+            File.Exists(Path.Combine(destination.FullName, "sub", "readme.NFO")).Should().BeFalse();
+        }
+
         [Test]
         public void CopyFolder_should_overwrite_existing_folder()
         {

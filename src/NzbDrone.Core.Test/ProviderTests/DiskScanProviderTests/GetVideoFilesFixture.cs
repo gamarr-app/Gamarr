@@ -44,6 +44,23 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
         }
 
         [Test]
+        public void should_leave_out_files_with_an_ignored_extension()
+        {
+            GivenFiles(GetFiles(@"C:\Test\"));
+
+            Mocker.GetMock<IIgnoredExtensionService>()
+                  .Setup(s => s.IsIgnored(It.IsAny<string>()))
+                  .Returns<string>(p => Path.GetExtension(p) == ".zip" || Path.GetExtension(p) == ".txt");
+
+            var video = Subject.GetVideoFiles(@"C:\Test\").Select(Path.GetFileName).ToList();
+            var other = Subject.GetNonVideoFiles(@"C:\Test\").Select(Path.GetFileName).ToList();
+
+            video.Should().NotContain("Game4.zip");
+            video.Should().Contain("Game1.iso");
+            other.Should().NotContain("readme.txt");
+        }
+
+        [Test]
         public void should_check_all_directories()
         {
             var path = @"C:\Test\";
