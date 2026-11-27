@@ -22,8 +22,7 @@ namespace NzbDrone.Core.MediaFiles
                 return result;
             }
 
-            foreach (var raw in setting.Split(new[] { ',', ';', '
-', '' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var raw in setting.Split(new[] { ',', ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var extension = raw.Trim().TrimStart('.').Trim();
 
