@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using NzbDrone.Core.Configuration;
 
