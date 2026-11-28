@@ -28,7 +28,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (extension.Length > 0)
                 {
-                    result.Add("." + extension);
+                    result.Add("." + extension.ToLowerInvariant());
                 }
             }
 

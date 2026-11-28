@@ -90,7 +90,7 @@ namespace NzbDrone.Common.Disk
                 _diskProvider.MoveFolder(tempPath, sourcePath);
             }
 
-            var hasSkippedFiles = skipFile != null && _diskProvider.GetFiles(sourcePath, true).Any(skipFile);
+            var hasSkippedFiles = skipFile != null && ContainsSkippedFile(sourcePath, skipFile);
 
             if (mode == TransferMode.Move && !hasSkippedFiles && !_diskProvider.FolderExists(targetPath))
             {
@@ -167,6 +167,12 @@ namespace NzbDrone.Common.Disk
             }
 
             return result;
+        }
+
+        private bool ContainsSkippedFile(string folder, Func<string, bool> skipFile)
+        {
+            return _diskProvider.GetFileInfos(folder).Any(f => skipFile(f.FullName)) ||
+                   _diskProvider.GetDirectoryInfos(folder).Any(d => ContainsSkippedFile(d.FullName, skipFile));
         }
 
         public int MirrorFolder(string sourcePath, string targetPath)
