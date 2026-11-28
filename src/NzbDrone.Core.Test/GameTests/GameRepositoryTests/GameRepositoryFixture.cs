@@ -4,7 +4,9 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.CustomFormats;
@@ -180,6 +182,120 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
             mainGames.Should().HaveCount(2);
             mainGames.Select(g => g.GameMetadata.Value.Title).Should().Contain("Main Game", "Remaster Game");
             mainGames.Select(g => g.GameMetadata.Value.Title).Should().NotContain("DLC Game");
+        }
+
+        private int _igdb = 5000;
+
+        // Inserts a game (with the given file rows) whose primary pointer is the
+        // file at pointerIndex, or unset when pointerIndex is -1.
+        private Game AddGameWithFiles(QualityProfile profile, int pointerIndex, params (string Path, Quality Quality)[] files)
+        {
+            var meta = _metadataRepository.Insert(new GameMetadata { IgdbId = _igdb++, Title = "G" + _igdb, CleanTitle = "g" + _igdb, Year = 2020, GameType = GameType.MainGame });
+            var game = Builder<Game>.CreateNew().BuildNew();
+            game.QualityProfileId = profile.Id;
+            game.GameMetadataId = meta.Id;
+            game.GameFileId = 0;
+            Subject.Insert(game);
+
+            var fileRepo = Mocker.Resolve<MediaFileRepository>();
+            var ids = new List<int>();
+
+            foreach (var (path, quality) in files)
+            {
+                var file = fileRepo.Insert(new GameFile
+                {
+                    GameId = game.Id,
+                    RelativePath = path,
+                    Path = "/g/" + path,
+                    Quality = new QualityModel(quality),
+                    DateAdded = System.DateTime.UtcNow,
+                    Languages = new List<NzbDrone.Core.Languages.Language>()
+                });
+                ids.Add(file.Id);
+            }
+
+            if (pointerIndex >= 0)
+            {
+                game.GameFileId = ids[pointerIndex];
+                Subject.Update(game);
+            }
+
+            return game;
+        }
+
+        private static PagingSpec<Game> Paging() =>
+            new PagingSpec<Game> { Page = 1, PageSize = 50, SortKey = "Id", SortDirection = SortDirection.Ascending };
+
+        [Test]
+        public void should_resolve_game_file_through_primary_pointer_on_every_path()
+        {
+            var profile = CreateTestProfile();
+            var game = AddGameWithFiles(profile, 1, ("Game.exe", Quality.GOG), ("Updates/v2/up.exe", Quality.Scene), ("DLC/Extra/dlc.exe", Quality.Uplay));
+
+            var viaAll = Subject.All().Single(g => g.Id == game.Id);
+            var viaGet = Subject.Get(game.Id);
+            var viaTitle = Subject.FindByTitles(new List<string> { "g" + _igdb });
+
+            viaAll.GameFile.RelativePath.Should().Be("Updates/v2/up.exe");
+            viaGet.GameFile.RelativePath.Should().Be("Updates/v2/up.exe");
+            viaTitle.Should().ContainSingle().Which.GameFile.RelativePath.Should().Be("Updates/v2/up.exe");
+        }
+
+        [Test]
+        public void missing_should_include_game_with_only_component_files_and_pointer_on_update()
+        {
+            var profile = CreateTestProfile();
+            var game = AddGameWithFiles(profile, 0, ("Updates/v2/up.exe", Quality.Scene), ("DLC/Extra/dlc.exe", Quality.Uplay));
+
+            Subject.GamesWithoutFiles(Paging()).Records.Select(g => g.Id).Should().Contain(game.Id);
+        }
+
+        [Test]
+        public void missing_should_exclude_game_with_base_file_even_when_pointer_unset()
+        {
+            var profile = CreateTestProfile();
+            var game = AddGameWithFiles(profile, -1, ("Game.exe", Quality.GOG), ("Updates/v2/up.exe", Quality.Scene));
+
+            Subject.GamesWithoutFiles(Paging()).Records.Select(g => g.Id).Should().NotContain(game.Id);
+        }
+
+        [Test]
+        public void missing_should_include_game_without_any_file()
+        {
+            var profile = CreateTestProfile();
+            var game = AddGameWithFiles(profile, -1);
+
+            Subject.GamesWithoutFiles(Paging()).Records.Select(g => g.Id).Should().Contain(game.Id);
+        }
+
+        [Test]
+        public void cutoff_unmet_should_judge_base_file_not_primary_component()
+        {
+            var profile = CreateTestProfile();
+
+            // Base meets cutoff, but the primary pointer sits on a low-quality update.
+            var metBase = AddGameWithFiles(profile, 1, ("Game.exe", Quality.GOG), ("Updates/v2/up.exe", Quality.Uplay));
+
+            // Base is below cutoff while the primary is a high-quality DLC.
+            var unmetBase = AddGameWithFiles(profile, 1, ("Game.exe", Quality.Uplay), ("DLC/Extra/dlc.exe", Quality.GOG));
+
+            var result = Subject.GamesWhereCutoffUnmet(Paging(), new List<QualitiesBelowCutoff> { new QualitiesBelowCutoff(profile.Id, new[] { Quality.Uplay.Id, Quality.Scene.Id }) });
+
+            var ids = result.Records.Select(g => g.Id).ToList();
+            ids.Should().Contain(unmetBase.Id);
+            ids.Should().NotContain(metBase.Id);
+            result.TotalRecords.Should().Be(1);
+        }
+
+        [Test]
+        public void cutoff_unmet_should_ignore_game_without_base_file()
+        {
+            var profile = CreateTestProfile();
+            var game = AddGameWithFiles(profile, 0, ("Updates/v2/up.exe", Quality.Uplay));
+
+            var result = Subject.GamesWhereCutoffUnmet(Paging(), new List<QualitiesBelowCutoff> { new QualitiesBelowCutoff(profile.Id, new[] { Quality.Uplay.Id }) });
+
+            result.Records.Select(g => g.Id).Should().NotContain(game.Id);
         }
     }
 }

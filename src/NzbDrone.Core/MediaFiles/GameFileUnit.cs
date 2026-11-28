@@ -45,6 +45,19 @@ namespace NzbDrone.Core.MediaFiles
             return files?.Any(IsBase) == true;
         }
 
+        /// <summary>
+        /// SQL twin of <see cref="IsBase"/> for a GameFiles row aliased
+        /// <paramref name="alias"/>: not under "Updates/" or "DLC/", with an
+        /// empty or NULL RelativePath (folder-granularity release) still base.
+        /// Keep in step with the C# classification above.
+        /// </summary>
+        public static string BaseFileSqlPredicate(string alias)
+        {
+            var path = $"COALESCE(REPLACE(\"{alias}\".\"RelativePath\", '\\', '/'), '')";
+
+            return $"({path} NOT LIKE 'Updates/%' AND {path} NOT LIKE 'DLC/%')";
+        }
+
         private static bool HasPrefix(GameFile file, string prefix)
         {
             return file?.RelativePath.IsNotNullOrWhiteSpace() == true &&

@@ -49,6 +49,15 @@ namespace NzbDrone.Core.Games
         List<Game> GetMainGamesOnly();
     }
 
+    internal static class GameQueryJoins
+    {
+        // Game.GameFile is the primary file (Games.GameFileId), as in Radarr.
+        // Every query path joins it through here: joining GameFiles on GameId
+        // instead yields one row per file and Map keeps an arbitrary one.
+        public static SqlBuilder JoinPrimaryFile(this SqlBuilder builder) =>
+            builder.LeftJoin<Game, GameFile>((m, f) => m.GameFileId == f.Id);
+    }
+
     public class GameRepository : BasicRepository<Game>, IGameRepository
     {
         private readonly IQualityProfileRepository _profileRepository;
@@ -74,7 +83,7 @@ namespace NzbDrone.Core.Games
         protected override SqlBuilder Builder() => new SqlBuilder(_database.DatabaseType)
             .Join<Game, QualityProfile>((m, p) => m.QualityProfileId == p.Id)
             .Join<Game, GameMetadata>((m, p) => m.GameMetadataId == p.Id)
-            .LeftJoin<Game, GameFile>((m, f) => m.Id == f.GameId)
+            .JoinPrimaryFile()
             .LeftJoin<GameMetadata, AlternativeTitle>((mm, t) => mm.Id == t.GameMetadataId);
 
         private Game Map(Dictionary<int, Game> dict, Game game, GameMetadata metadata, QualityProfile qualityProfile, GameFile gameFile, AlternativeTitle altTitle = null, GameTranslation translation = null)
@@ -118,7 +127,7 @@ namespace NzbDrone.Core.Games
             // to avoid repeatedly deserializing the same profile / game
             var builder = new SqlBuilder(_database.DatabaseType)
                 .LeftJoin<Game, GameMetadata>((m, f) => m.GameMetadataId == f.Id)
-                .LeftJoin<Game, GameFile>((m, f) => m.GameFileId == f.Id);
+                .JoinPrimaryFile();
 
             var qualityProfiles = _profileRepository.All().ToDictionary(x => x.Id);
             var alternativeTitles = _alternativeTitleRepository.All()
@@ -169,7 +178,7 @@ namespace NzbDrone.Core.Games
             var builder = new SqlBuilder(_database.DatabaseType)
                 .Join<Game, QualityProfile>((m, p) => m.QualityProfileId == p.Id)
                 .Join<Game, GameMetadata>((m, p) => m.GameMetadataId == p.Id)
-                .LeftJoin<Game, GameFile>((m, f) => m.Id == f.GameId)
+                .JoinPrimaryFile()
                 .Where<GameMetadata>(x => titles.Contains(x.CleanTitle) || titles.Contains(x.CleanOriginalTitle));
 
             _ = _database.QueryJoined<Game, GameMetadata, QualityProfile, GameFile>(
@@ -187,7 +196,7 @@ namespace NzbDrone.Core.Games
                 .Join<AlternativeTitle, GameMetadata>((t, mm) => t.GameMetadataId == mm.Id)
                 .Join<GameMetadata, Game>((mm, m) => mm.Id == m.GameMetadataId)
                 .Join<Game, QualityProfile>((m, p) => m.QualityProfileId == p.Id)
-                .LeftJoin<Game, GameFile>((m, f) => m.Id == f.GameId)
+                .JoinPrimaryFile()
                 .Where<AlternativeTitle>(x => titles.Contains(x.CleanTitle));
 
             _ = _database.QueryJoined<AlternativeTitle, QualityProfile, Game, GameMetadata, GameFile>(
@@ -209,7 +218,7 @@ namespace NzbDrone.Core.Games
                 .Join<GameTranslation, GameMetadata>((t, mm) => t.GameMetadataId == mm.Id)
                 .Join<GameMetadata, Game>((mm, m) => mm.Id == m.GameMetadataId)
                 .Join<Game, QualityProfile>((m, p) => m.QualityProfileId == p.Id)
-                .LeftJoin<Game, GameFile>((m, f) => m.Id == f.GameId)
+                .JoinPrimaryFile()
                 .Where<GameTranslation>(x => titles.Contains(x.CleanTitle));
 
             _ = _database.QueryJoined<GameTranslation, QualityProfile, Game, GameMetadata, GameFile>(
@@ -301,8 +310,11 @@ namespace NzbDrone.Core.Games
             return Query(builder);
         }
 
+        // Missing means no BASE game file on disk. Games.GameFileId is only the
+        // primary pointer: it can be 0 while a base row exists, or point at an
+        // update/DLC while no base does (#216, #221).
         public SqlBuilder GamesWithoutFilesBuilder() => Builder()
-            .Where<Game>(x => x.GameFileId == 0)
+            .Where($"NOT EXISTS (SELECT 1 FROM \"GameFiles\" \"bf\" WHERE \"bf\".\"GameId\" = \"{_table}\".\"Id\" AND {GameFileUnit.BaseFileSqlPredicate("bf")})")
             .Where<Game>(m => m.GameMetadata.Value.Year > 0)
             .GroupBy<Game>(m => m.Id)
             .GroupBy<GameMetadata>(m => m.Id);
@@ -315,8 +327,10 @@ namespace NzbDrone.Core.Games
             return pagingSpec;
         }
 
+        // Cutoff is judged on the base game's file, never on whichever update/DLC
+        // happens to be the primary file: a game is unmet when it has a base file
+        // below cutoff and no base file that meets it.
         public SqlBuilder GamesWhereCutoffUnmetBuilder(List<QualitiesBelowCutoff> qualitiesBelowCutoff) => Builder()
-            .Where<Game>(x => x.GameFileId != 0)
             .Where(BuildQualityCutoffWhereClause(qualitiesBelowCutoff))
             .GroupBy<Game>(m => m.Id)
             .GroupBy<GameMetadata>(m => m.Id);
@@ -331,17 +345,25 @@ namespace NzbDrone.Core.Games
 
         private string BuildQualityCutoffWhereClause(List<QualitiesBelowCutoff> qualitiesBelowCutoff)
         {
-            var clauses = new List<string>();
-
-            foreach (var profile in qualitiesBelowCutoff)
+            string BelowCutoff(string alias)
             {
-                foreach (var belowCutoff in profile.QualityIds)
+                var clauses = new List<string>();
+
+                foreach (var profile in qualitiesBelowCutoff)
                 {
-                    clauses.Add(string.Format($"(\"{_table}\".\"QualityProfileId\" = {profile.ProfileId} AND \"GameFiles\".\"Quality\" LIKE '%_quality_: {belowCutoff},%')"));
+                    foreach (var belowCutoff in profile.QualityIds)
+                    {
+                        clauses.Add($"(\"{_table}\".\"QualityProfileId\" = {profile.ProfileId} AND \"{alias}\".\"Quality\" LIKE '%_quality_: {belowCutoff},%')");
+                    }
                 }
+
+                return clauses.Any() ? $"({string.Join(" OR ", clauses)})" : "(1 = 0)";
             }
 
-            return string.Format("({0})", string.Join(" OR ", clauses));
+            string BaseFile(string alias, string extra) =>
+                $"SELECT 1 FROM \"GameFiles\" \"{alias}\" WHERE \"{alias}\".\"GameId\" = \"{_table}\".\"Id\" AND {GameFileUnit.BaseFileSqlPredicate(alias)} AND {extra}";
+
+            return $"(EXISTS ({BaseFile("bf", BelowCutoff("bf"))}) AND NOT EXISTS ({BaseFile("bm", $"NOT {BelowCutoff("bm")}")}))";
         }
 
         public Game FindByPath(string path)
