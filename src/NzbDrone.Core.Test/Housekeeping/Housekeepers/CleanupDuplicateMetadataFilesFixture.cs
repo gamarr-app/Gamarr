@@ -46,6 +46,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
                                              .All()
                                              .With(m => m.Type = MetadataType.GameMetadata)
                                              .With(m => m.GameId = 1)
+                                             .With(m => m.GameFileId = 0)
                                              .With(m => m.Consumer = "XbmcMetadata")
                                              .BuildListOfNew();
 
@@ -156,6 +157,21 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
             Db.Insert(file);
             Subject.Clean();
             AllStoredModels.Count.Should().Be(1);
+        }
+
+        [Test]
+        public void should_not_delete_metadata_of_different_game_files_of_the_same_game()
+        {
+            var files = Builder<MetadataFile>.CreateListOfSize(2)
+                                             .All()
+                                             .With(m => m.Type = MetadataType.GameMetadata)
+                                             .With(m => m.GameId = 1)
+                                             .With(m => m.Consumer = "XbmcMetadata")
+                                             .BuildListOfNew();
+
+            Db.InsertMany(files);
+            Subject.Clean();
+            AllStoredModels.Count.Should().Be(files.Count);
         }
     }
 }

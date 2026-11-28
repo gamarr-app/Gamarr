@@ -18,6 +18,10 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
             DeleteDuplicateGameFileMetadata();
         }
 
+        // Game-level duplicates only. Metadata is written per GameFile, so a game with
+        // an update or DLC legitimately has one GameMetadata row per unit; grouping
+        // those by GameId alone deleted a real unit's row on every run. Rows that name
+        // a file are covered by DeleteDuplicateGameFileMetadata.
         private void DeleteDuplicateGameMetadata()
         {
             using var mapper = _database.OpenConnection();
@@ -25,6 +29,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              WHERE ""Id"" IN (
                                  SELECT MIN(""Id"") FROM ""MetadataFiles""
                                  WHERE ""Type"" = 1
+                                 AND COALESCE(""GameFileId"", 0) = 0
                                  GROUP BY ""GameId"", ""Consumer""
                                  HAVING COUNT(""GameId"") > 1
                              )");
@@ -37,6 +42,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              WHERE ""Id"" IN (
                                  SELECT MIN(""Id"") FROM ""MetadataFiles""
                                  WHERE ""Type"" = 1
+                                 AND COALESCE(""GameFileId"", 0) > 0
                                  GROUP BY ""GameFileId"", ""Consumer""
                                  HAVING COUNT(""GameFileId"") > 1
                              )");

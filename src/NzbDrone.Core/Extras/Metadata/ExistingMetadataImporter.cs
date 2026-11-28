@@ -5,6 +5,7 @@ using NLog;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.Extras.Metadata
@@ -12,17 +13,20 @@ namespace NzbDrone.Core.Extras.Metadata
     public class ExistingMetadataImporter : ImportExistingExtraFilesBase<MetadataFile>
     {
         private readonly IExtraFileService<MetadataFile> _metadataFileService;
+        private readonly IMediaFileService _mediaFileService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
         private readonly List<IMetadata> _consumers;
 
         public ExistingMetadataImporter(IExtraFileService<MetadataFile> metadataFileService,
                                         IEnumerable<IMetadata> consumers,
+                                        IMediaFileService mediaFileService,
                                         IParsingService parsingService,
                                         Logger logger)
         : base(metadataFileService)
         {
             _metadataFileService = metadataFileService;
+            _mediaFileService = mediaFileService;
             _parsingService = parsingService;
             _logger = logger;
             _consumers = consumers.ToList();
@@ -35,6 +39,7 @@ namespace NzbDrone.Core.Extras.Metadata
             _logger.Debug("Looking for existing metadata in {0}", game.Path);
 
             var metadataFiles = new List<MetadataFile>();
+            var gameFiles = _mediaFileService.GetFilesByGame(game.Id);
             var filterResult = FilterAndClean(game, filesOnDisk, importedFiles, fileNameBeforeRename is not null);
 
             foreach (var possibleMetadataFile in filterResult.FilesOnDisk)
@@ -59,7 +64,7 @@ namespace NzbDrone.Core.Extras.Metadata
                             continue;
                         }
 
-                        metadata.GameFileId = game.GameFileId;
+                        metadata.GameFileId = ExtraFileOwner.FindOwnerId(game, gameFiles, metadata.RelativePath);
                     }
 
                     metadata.Extension = Path.GetExtension(possibleMetadataFile);
