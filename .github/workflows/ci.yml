@@ -62,6 +62,12 @@ jobs:
       - name: Check Dockerfile and s6 scripts agree with the app's defaults
         run: ./scripts/check-container-topology.sh
 
+      # The image smoke test only runs in the Release workflow (the image is
+      # assembled from the release tarball), so catch a broken script here
+      # instead of at nightly-release time.
+      - name: Syntax-check the Docker smoke test
+        run: bash -n scripts/docker-smoke-test.sh
+
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-24.04

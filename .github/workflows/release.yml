@@ -523,8 +523,8 @@ jobs:
       # src/Directory.Build.props) can build a perfectly valid-looking image
       # that exits immediately on boot with "You must install .NET to run
       # this application." Build a single-arch image locally (no push yet),
-      # run it, and require /ping to answer before anything reaches the
-      # registry.
+      # run it, and require the smoke test below to pass before anything reaches
+      # the registry.
       - name: Build amd64 image for boot test (no push)
         uses: docker/build-push-action@v7
         with:
@@ -540,46 +540,13 @@ jobs:
             VERSION=${{ steps.version.outputs.version }}
             GAMARR_RELEASE=${{ steps.version.outputs.version }}
 
-      - name: Start boot-test container
-        run: |
-          docker run -d --name gamarr-boot-test -p 6767:6767 gamarr-boot-test:${{ steps.version.outputs.version }}
-
-      - name: Wait for /ping to answer
-        run: |
-          echo "Polling http://localhost:6767/ping for up to 90s..."
-          for i in $(seq 1 45); do
-            if curl -fsS http://localhost:6767/ping 2>/dev/null | grep -q '"status"[[:space:]]*:[[:space:]]*"OK"'; then
-              echo "gamarr answered healthy after ~$((i * 2))s"
-              exit 0
-            fi
-            if ! docker ps --filter name=gamarr-boot-test --filter status=running -q | grep -q .; then
-              echo "::error::gamarr-boot-test container exited before answering /ping"
-              exit 1
-            fi
-            # The check above only catches a container that actually dies. s6
-            # restarts the app in place when it exits, so a fatal startup failure
-            # (e.g. no runtime matching <RuntimeFrameworkVersion>) leaves the
-            # container "running" forever while nothing ever listens — that is how
-            # 1.1.0.420/.421 shipped broken while reporting Up. Bail on the shape
-            # that failure actually has instead: the hostfxr banner repeating,
-            # which means we are in a restart loop rather than merely slow to boot.
-            if [ "$(docker logs gamarr-boot-test 2>&1 | grep -c 'The framework .* was not found')" -ge 2 ]; then
-              echo "::error::gamarr-boot-test is in a restart loop: no .NET runtime in the image satisfies the pinned version"
-              docker logs gamarr-boot-test 2>&1 | grep -A4 'The framework .* was not found' | head -20
-              exit 1
-            fi
-            sleep 2
-          done
-          echo "::error::gamarr-boot-test never answered http://localhost:6767/ping within 90s"
-          exit 1
-
-      - name: Dump container logs on failure
-        if: failure()
-        run: docker logs gamarr-boot-test || true
-
-      - name: Stop boot-test container
-        if: always()
-        run: docker rm -f gamarr-boot-test || true
+      # Boots the image like a real NAS install (PUID/PGID, mapped /config),
+      # waits for /ping, calls /api/v3/system/status with the API key from
+      # config.xml, then destroys and recreates the container on the same
+      # volume and requires InstallId, API key, DB and settings to persist.
+      # See scripts/docker-smoke-test.sh.
+      - name: Smoke-test image (boot, API, config persistence)
+        run: ./scripts/docker-smoke-test.sh gamarr-boot-test:${{ steps.version.outputs.version }}
 
       # Only reached if the boot test above passed. Same tags/labels/build-args
       # as before; now also multi-arch and actually pushed.

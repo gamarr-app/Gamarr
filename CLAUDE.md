@@ -34,6 +34,8 @@ rule has the full reasoning — read it before you decide a case is an exception
 
 ## Docker is the primary platform
 
+**Docker/NAS is the primary platform: a Docker-path bug (musl, `/config` volume, remote path mappings) outranks a Windows-only one.**
+
 **Essentially every install is the Docker image on a NAS.** Weekly installs sit
 in the low dozens, almost all of them `ghcr.io` pulls, and a large share are
 running a release months behind. Three consequences for triage:
